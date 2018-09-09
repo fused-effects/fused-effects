@@ -32,6 +32,10 @@ data (f :+: g) (m :: * -> *) a
   | R (g m a)
   deriving (Eq, Ord, Show)
 
+instance (HFunctor l, HFunctor r) => HFunctor (l :+: r) where
+  hmap f (L l) = L (hmap f l)
+  hmap f (R r) = R (hmap f r)
+
 
 pattern Other :: r (Eff (l :+: r)) a -> Eff (l :+: r) a
 pattern Other s = Eff (R s)
