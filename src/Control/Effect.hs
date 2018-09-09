@@ -211,12 +211,12 @@ runExc (Other op)    = Eff (handle (Right ()) (either (pure . Left) runExc) op)
 
 
 data Resumable exc m a
-  = forall b . Resumable (exc b) (b -> m a)
+  = forall b . Resumable' (exc b) (b -> m a)
 
 instance Effect (Resumable exc) where
-  emap f (Resumable exc k) = Resumable exc (f . k)
+  emap f (Resumable' exc k) = Resumable' exc (f . k)
 
-  handle state handler (Resumable exc k) = Resumable exc (handler . (<$ state) . k)
+  handle state handler (Resumable' exc k) = Resumable' exc (handler . (<$ state) . k)
 
 
 class (Effect sub, Effect sup) => Subset sub sup where
