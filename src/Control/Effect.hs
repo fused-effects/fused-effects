@@ -13,6 +13,9 @@ class Effect sig where
 
   handle :: (Monad m, Monad n, Functor c) => c () -> (forall x . c (m x) -> n (c x)) -> (sig m a -> sig n (c a))
 
+inject :: Subset effect sig => effect (Eff sig) a -> Eff sig a
+inject = Eff . inj
+
 
 data Void m a
 
