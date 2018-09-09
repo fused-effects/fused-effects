@@ -112,6 +112,13 @@ data State s m a
   = Get' (s -> m a)
   | Put' s (m a)
 
+instance Effect (State s) where
+  emap f (Get' k) = Get' (f . k)
+  emap f (Put' s k) = Put' s (f k)
+
+  handle state handler (Get' k) = Get' (handler . (<$ state) . k)
+  handle state handler (Put' s k) = Put' s (handler (k <$ state))
+
 pattern Get :: Subset (State s) effects => (s -> Eff effects a) -> Eff effects s
 pattern Get k <- (project -> Just (Get' k))
 
