@@ -1,6 +1,8 @@
 {-# LANGUAGE EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect where
 
+import Control.Monad (ap, liftM)
+
 data Eff effects a
   = Return a
   | Eff (effects (Eff effects) a)
@@ -93,6 +95,13 @@ instance Subset sub sup => Subset sub (sub' :+: sup) where
   prj _     = Nothing
 
 
-instance Functor (effects (Eff effects)) => Functor (Eff effects) where
-  fmap f (Return a) = Return (f a)
-  fmap f (Eff sub)  = Eff (fmap f sub)
+instance Effect sig => Functor (Eff sig) where
+  fmap = liftM
+
+instance Effect sig => Applicative (Eff sig) where
+  pure = Return
+  (<*>) = ap
+
+instance Effect sig => Monad (Eff sig) where
+  Return v >>= k = k v
+  Eff op >>= k = Eff (emap (>>= k) op)
