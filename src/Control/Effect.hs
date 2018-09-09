@@ -79,6 +79,8 @@ pattern Empty <- (project -> Just Empty')
 pattern Choose :: Subset NonDet effects => (Bool -> Eff effects a) -> Eff effects a
 pattern Choose k <- (project -> Just (Choose' k))
 
+{-# COMPLETE Return, Empty, Choose, Other #-}
+
 instance Subset NonDet sig => Alternative (Eff sig) where
   empty = inject Empty'
   l <|> r = inject (Choose' (\ c -> if c then l else r))
@@ -100,6 +102,8 @@ pattern Ask k <- (project -> Just (Ask' k))
 
 pattern Local :: Subset (Reader r) effects => (r -> r) -> Eff effects b -> (b -> Eff effects a) -> Eff effects a
 pattern Local f m k <- (project -> Just (Local' f m k))
+
+{-# COMPLETE Return, Ask, Local, Other #-}
 
 ask :: Subset (Reader r) sig => Eff sig r
 ask = inject (Ask' pure)
@@ -125,6 +129,8 @@ pattern Get k <- (project -> Just (Get' k))
 pattern Put :: Subset (State s) effects => s -> Eff effects a -> Eff effects ()
 pattern Put s k <- (project -> Just (Put' s k))
 
+{-# COMPLETE Return, Get, Put, Other #-}
+
 get :: Subset (State s) sig => Eff sig s
 get = inject (Get' pure)
 
@@ -141,6 +147,8 @@ instance Effect Fail where
 
 pattern Fail :: Subset Fail effects => String -> Eff effects a
 pattern Fail s <- (project -> Just (Fail' s))
+
+{-# COMPLETE Return, Fail, Other #-}
 
 instance Subset Fail sig => MonadFail (Eff sig) where
   fail = inject . Fail'
