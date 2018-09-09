@@ -22,6 +22,10 @@ data NonDet m a
   | Choose (m a) (m a)
   deriving (Eq, Ord, Show)
 
+data Reader r m a
+  = Ask' (r -> m a)
+  | forall b . Local' (r -> r) (m b) (b -> m a)
+
 
 class Subset sub sup where
   inj :: sub m a -> sup m a
