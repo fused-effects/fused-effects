@@ -210,6 +210,10 @@ runExc (Catch m h k) = runExc m >>= either (either (pure . Left) (runExc . k) <=
 runExc (Other op)    = Eff (handle (Right ()) (either (pure . Left) runExc) op)
 
 
+data Resumable exc m a
+  = forall b . Resumable (exc b) (b -> m a)
+
+
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
   prj :: sup m a -> Maybe (sub m a)
