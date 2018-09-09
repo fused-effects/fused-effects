@@ -88,6 +88,13 @@ data Reader r m a
   = Ask' (r -> m a)
   | forall b . Local' (r -> r) (m b) (b -> m a)
 
+instance Effect (Reader r) where
+  emap f (Ask' k) = Ask' (f . k)
+  emap f (Local' g m k) = Local' g m (f . k)
+
+  handle state handler (Ask' k) = Ask' (handler . (<$ state) . k)
+  handle state handler (Local' f m k) = Local' f (handler (m <$ state)) (handler . fmap k)
+
 pattern Ask :: Subset (Reader r) effects => (r -> Eff effects a) -> Eff effects r
 pattern Ask k <- (project -> Just (Ask' k))
 
