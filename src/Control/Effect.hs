@@ -9,3 +9,8 @@ data (f :+: g) (m :: * -> *) a
   = L (f m a)
   | R (g m a)
   deriving (Eq, Ord, Show)
+
+data NonDet m a
+  = Empty
+  | Choose (m a) (m a)
+  deriving (Eq, Ord, Show)
