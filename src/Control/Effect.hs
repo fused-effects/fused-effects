@@ -240,6 +240,9 @@ pattern Symbol sat k <- (project -> Just (Symbol' sat k))
 
 {-# COMPLETE Return, Symbol, Other #-}
 
+satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
+satisfy sat = inject (Symbol' sat pure)
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
