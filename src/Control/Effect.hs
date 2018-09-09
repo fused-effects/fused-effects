@@ -2,6 +2,7 @@
 module Control.Effect where
 
 import Control.Monad (ap, liftM)
+import Control.Monad.Fail
 
 data Eff effects a
   = Return a
@@ -82,6 +83,9 @@ data Fail m a = Fail' String
 
 pattern Fail :: Subset Fail effects => String -> Eff effects a
 pattern Fail s <- (project -> Just (Fail' s))
+
+instance (Effect sig, Subset Fail sig) => MonadFail (Eff sig) where
+  fail = inject . Fail'
 
 
 class Subset sub sup where
