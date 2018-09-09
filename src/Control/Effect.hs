@@ -139,7 +139,7 @@ instance Effect (State s) where
 pattern Get :: Subset (State s) effects => (s -> Eff effects a) -> Eff effects a
 pattern Get k <- (project -> Just (Get' k))
 
-pattern Put :: Subset (State s) effects => s -> Eff effects a -> Eff effects ()
+pattern Put :: Subset (State s) effects => s -> Eff effects a -> Eff effects a
 pattern Put s k <- (project -> Just (Put' s k))
 
 {-# COMPLETE Return, Get, Put, Other #-}
