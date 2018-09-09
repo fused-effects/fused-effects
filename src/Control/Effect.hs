@@ -256,9 +256,8 @@ satisfy sat = inject (Symbol' sat pure)
 char :: Subset Symbol sig => Char -> Eff sig Char
 char c = satisfy (== c)
 
-digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
-digit = foldr (<|>) empty (zipWith f [0..9] ['0'..'9'])
-  where f i c = i <$ char c
+digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Char
+digit = foldr ((<|>) . char) empty ['0'..'9']
 
 runSymbol :: Subset NonDet sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
 runSymbol ""     (Return a)               = pure a
