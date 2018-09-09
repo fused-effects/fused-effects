@@ -150,6 +150,12 @@ get = inject (Get' pure)
 put :: Subset (State s) sig => s -> Eff sig ()
 put s = inject (Put' s (pure ()))
 
+runState :: Effect sig => s -> Eff (State s :+: sig) a -> Eff sig (s, a)
+runState s (Return a) = pure (s, a)
+runState s (Get k)    = runState s (k s)
+runState _ (Put s k)  = runState s k
+runState s (Other op) = Eff (handle (s, ()) (uncurry runState) op)
+
 
 data Fail m a = Fail' String
 
