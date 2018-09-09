@@ -246,6 +246,8 @@ instance Effect Cut where
 pattern Cut :: Subset Cut sig => Eff sig a
 pattern Cut <- (project -> Just Cut')
 
+{-# COMPLETE Return, Cut, Other #-}
+
 
 data Symbol m a
   = Symbol' (Char -> Bool) (Char -> m a)
