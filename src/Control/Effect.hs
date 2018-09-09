@@ -238,6 +238,8 @@ data Symbol m a
 pattern Symbol :: Subset Symbol sig => (Char -> Bool) -> (Char -> Eff sig a) -> Eff sig a
 pattern Symbol sat k <- (project -> Just (Symbol' sat k))
 
+{-# COMPLETE Return, Symbol, Other #-}
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
