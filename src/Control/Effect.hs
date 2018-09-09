@@ -195,6 +195,8 @@ pattern Throw exc <- (project -> Just (Throw' exc))
 pattern Catch :: Subset (Exc exc) effects => Eff effects b -> (exc -> Eff effects b) -> (b -> Eff effects a) -> Eff effects a
 pattern Catch m h k <- (project -> Just (Catch' m h k))
 
+{-# COMPLETE Return, Throw, Catch, Other #-}
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
