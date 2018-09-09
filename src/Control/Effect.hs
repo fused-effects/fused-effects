@@ -3,7 +3,7 @@ module Control.Effect where
 
 data Eff effects a
   = Return a
-  | Eff (effects (Eff effects) (Eff effects a))
+  | Eff (effects (Eff effects) a)
 
 data Void m a
 
