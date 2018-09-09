@@ -154,12 +154,12 @@ instance Effect sub => Subset sub sub where
   inj = id
   prj = Just
 
-instance (Effect sub, Effect sup) => Subset sub (sub :+: sup) where
+instance {-# OVERLAPPABLE #-} (Effect sub, Effect sup) => Subset sub (sub :+: sup) where
   inj = L . inj
   prj (L f) = Just f
   prj _     = Nothing
 
-instance (Effect sub', Subset sub sup) => Subset sub (sub' :+: sup) where
+instance {-# OVERLAPPABLE #-} (Effect sub', Subset sub sup) => Subset sub (sub' :+: sup) where
   inj = R . inj
   prj (R g) = prj g
   prj _     = Nothing
