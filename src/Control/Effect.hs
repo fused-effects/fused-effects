@@ -6,6 +6,12 @@ data Eff effects a
   | Eff (effects (Eff effects) a)
 
 
+type f ~> g = forall x . f x -> g x
+
+class HFunctor sig where
+  hmap :: (Functor f, Functor g) => (f ~> g) -> (sig f ~> sig g)
+
+
 class Effect sig where
   handle :: Monad m => (m a -> m b) -> sig m a -> sig m b
   handleState :: (Monad m, Monad n, Functor c) => c () -> (forall x . c (m x) -> n (c x)) -> sig m a -> sig n (c a)
