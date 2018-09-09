@@ -291,17 +291,17 @@ char c = satisfy (== c)
 digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Char
 digit = foldr ((<|>) . char) empty ['0'..'9']
 
-expr :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+expr :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
 expr = do
   i <- term
-  (i +) <$ char '+' <*> expr <|> pure i
+  call ((i +) <$ char '+' <* cut <*> expr) <|> pure i
 
-term :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+term :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
 term = do
   i <- factor
-  (i *) <$ char '*' <*> term <|> pure i
+  call ((i *) <$ char '*' <* cut <*> term) <|> pure i
 
-factor :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+factor :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
 factor = read <$> some digit
      <|> char '(' *> expr <* char ')'
 
