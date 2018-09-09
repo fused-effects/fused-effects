@@ -260,12 +260,12 @@ digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
 digit = foldr (<|>) empty (zipWith f [0..9] ['0'..'9'])
   where f i c = i <$ char c
 
-runSymbol :: Subset Fail sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
+runSymbol :: Subset NonDet sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
 runSymbol ""     (Return a)               = pure a
-runSymbol cs     (Return _)               = fail $ "unexpected input: " <> cs
-runSymbol ""     (Symbol _ _)             = fail $ "unexpected end of input"
+runSymbol _      (Return _)               = empty
+runSymbol ""     (Symbol _ _)             = empty
 runSymbol (c:cs) (Symbol p k) | p c       = runSymbol cs (k c)
-                              | otherwise = fail $ "unexpected token: " <> show c
+                              | otherwise = empty
 runSymbol cs     (Other op)               = runIdentity <$> Eff (handle (Identity ()) (fmap Identity . runSymbol cs . runIdentity) op)
 
 
