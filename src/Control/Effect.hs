@@ -2,7 +2,7 @@
 module Control.Effect where
 
 import Control.Applicative (Alternative(..))
-import Control.Monad (ap, join, liftM)
+import Control.Monad ((<=<), ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Functor.Identity
@@ -206,15 +206,7 @@ catch m h = inject (Catch' m h pure)
 runExc :: Effect sig => Eff (Exc exc :+: sig) a -> Eff sig (Either exc a)
 runExc (Return a)    = pure (Right a)
 runExc (Throw e)     = pure (Left e)
-runExc (Catch m h k) = do
-  m' <- runExc m
-  case m' of
-    Left e  -> do
-      r <- runExc (h e)
-      case r of
-        Left e  -> pure (Left e)
-        Right a -> runExc (k a)
-    Right a -> runExc (k a)
+runExc (Catch m h k) = runExc m >>= either (either (pure . Left) (runExc . k) <=< runExc . h) (runExc . k)
 runExc (Other op)    = Eff (handle (Right ()) (either (pure . Left) runExc) op)
 
 
