@@ -12,8 +12,11 @@ data Eff effects a
   = Return a
   | Eff (effects (Eff effects) a)
 
+type f ~> g = forall x . f x -> g x
 
 class Effect sig where
+  hfmap :: (Functor f, Functor g) => (f ~> g) -> (sig f ~> sig g)
+
   emap :: Monad m => (m a -> m b) -> (sig m a -> sig m b)
 
   handle :: (Monad m, Monad n, Functor c) => c () -> (forall x . c (m x) -> n (c x)) -> (sig m a -> sig n (c a))
@@ -29,6 +32,7 @@ project _        = Nothing
 data Void m a
 
 instance Effect Void where
+  hfmap _ v = case v of {}
   emap _ v = case v of {}
   handle _ _ v = case v of {}
 
@@ -40,6 +44,7 @@ run (Eff v) = case v of {}
 newtype Lift sig m a = Lift { unLift :: sig (m a) }
 
 instance Functor sig => Effect (Lift sig) where
+  hfmap f (Lift op) = Lift (fmap f op)
   emap f (Lift op) = Lift (fmap f op)
   handle state handler (Lift op) = Lift (fmap (\ p -> handler (p <$ state)) op)
 
@@ -57,6 +62,9 @@ data (f :+: g) (m :: * -> *) a
   deriving (Eq, Ord, Show)
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
+  hfmap f (L l) = L (hfmap f l)
+  hfmap f (R r) = R (hfmap f r)
+
   emap f (L l) = L (emap f l)
   emap f (R r) = R (emap f r)
 
@@ -73,6 +81,9 @@ data NonDet m a
   | Choose' (Bool -> m a)
 
 instance Effect NonDet where
+  hfmap _ Empty' = Empty'
+  hfmap f (Choose' k) = Choose' (f . k)
+
   emap _ Empty' = Empty'
   emap f (Choose' k) = Choose' (f . k)
 
@@ -103,6 +114,9 @@ data Reader r m a
   | forall b . Local' (r -> r) (m b) (b -> m a)
 
 instance Effect (Reader r) where
+  hfmap f (Ask' k) = Ask' (f . k)
+  hfmap f (Local' g m k) = Local' g (f m) (f . k)
+
   emap f (Ask' k) = Ask' (f . k)
   emap f (Local' g m k) = Local' g m (f . k)
 
@@ -135,6 +149,9 @@ data State s m a
   | Put' s (m a)
 
 instance Effect (State s) where
+  hfmap f (Get' k) = Get' (f . k)
+  hfmap f (Put' s k) = Put' s (f k)
+
   emap f (Get' k) = Get' (f . k)
   emap f (Put' s k) = Put' s (f k)
 
@@ -165,6 +182,8 @@ runState s (Other op) = Eff (handle (s, ()) (uncurry runState) op)
 data Fail m a = Fail' String
 
 instance Effect Fail where
+  hfmap _ (Fail' s) = Fail' s
+
   emap _ (Fail' s) = Fail' s
 
   handle _ _ (Fail' s) = Fail' s
@@ -188,6 +207,9 @@ data Exc exc m a
   | forall b . Catch' (m b) (exc -> m b) (b -> m a)
 
 instance Effect (Exc exc) where
+  hfmap _ (Throw' exc) = Throw' exc
+  hfmap f (Catch' m h k) = Catch' (f m) (f . h) (f . k)
+
   emap _ (Throw' exc) = Throw' exc
   emap f (Catch' m h k) = Catch' m h (f . k)
 
@@ -219,6 +241,8 @@ data Resumable exc m a
   = forall b . Resumable' (exc b) (b -> m a)
 
 instance Effect (Resumable exc) where
+  hfmap f (Resumable' exc k) = Resumable' exc (f . k)
+
   emap f (Resumable' exc k) = Resumable' exc (f . k)
 
   handle state handler (Resumable' exc k) = Resumable' exc (handler . (<$ state) . k)
@@ -242,6 +266,9 @@ data Cut m a
   | forall b . Call' (m b) (b -> m a)
 
 instance Effect Cut where
+  hfmap _ Cut' = Cut'
+  hfmap f (Call' m k) = Call' (f m) (f . k)
+
   emap _ Cut' = Cut'
   emap f (Call' m k) = Call' m (f . k)
 
@@ -273,6 +300,8 @@ data Symbol m a
   = Symbol' (Char -> Bool) (Char -> m a)
 
 instance Effect Symbol where
+  hfmap f (Symbol' sat k) = Symbol' sat (f . k)
+
   emap f (Symbol' sat k) = Symbol' sat (f . k)
 
   handle state handler (Symbol' sat k) = Symbol' sat (handler . (<$ state) . k)
