@@ -57,7 +57,7 @@ pattern Empty <- (project -> Just Empty')
 pattern Choose :: Subset NonDet effects => (Bool -> Eff effects a) -> Eff effects a
 pattern Choose k <- (project -> Just (Choose' k))
 
-instance (Effect sig, Subset NonDet sig) => Alternative (Eff sig) where
+instance Subset NonDet sig => Alternative (Eff sig) where
   empty = inject Empty'
   l <|> r = inject (Choose' (\ c -> if c then l else r))
 
@@ -89,7 +89,7 @@ data Fail m a = Fail' String
 pattern Fail :: Subset Fail effects => String -> Eff effects a
 pattern Fail s <- (project -> Just (Fail' s))
 
-instance (Effect sig, Subset Fail sig) => MonadFail (Eff sig) where
+instance Subset Fail sig => MonadFail (Eff sig) where
   fail = inject . Fail'
 
 
