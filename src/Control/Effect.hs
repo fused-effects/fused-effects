@@ -235,6 +235,11 @@ runResumable f (Other op)        = runIdentity <$> Eff (handle (Identity ()) (fm
 data Symbol m a
   = Symbol' (Char -> Bool) (Char -> m a)
 
+instance Effect Symbol where
+  emap f (Symbol' sat k) = Symbol' sat (f . k)
+
+  handle state handler (Symbol' sat k) = Symbol' sat (handler . (<$ state) . k)
+
 pattern Symbol :: Subset Symbol sig => (Char -> Bool) -> (Char -> Eff sig a) -> Eff sig a
 pattern Symbol sat k <- (project -> Just (Symbol' sat k))
 
