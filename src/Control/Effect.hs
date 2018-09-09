@@ -93,20 +93,20 @@ instance (Effect sig, Subset Fail sig) => MonadFail (Eff sig) where
   fail = inject . Fail'
 
 
-class Subset sub sup where
+class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
   prj :: sup m a -> Maybe (sub m a)
 
-instance Subset sub sub where
+instance Effect sub => Subset sub sub where
   inj = id
   prj = Just
 
-instance Subset sub (sub :+: sup) where
+instance (Effect sub, Effect sup) => Subset sub (sub :+: sup) where
   inj = L . inj
   prj (L f) = Just f
   prj _     = Nothing
 
-instance Subset sub sup => Subset sub (sub' :+: sup) where
+instance (Effect sub', Subset sub sup) => Subset sub (sub' :+: sup) where
   inj = R . inj
   prj (R g) = prj g
   prj _     = Nothing
