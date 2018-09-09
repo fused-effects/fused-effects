@@ -218,6 +218,9 @@ instance Effect (Resumable exc) where
 
   handle state handler (Resumable' exc k) = Resumable' exc (handler . (<$ state) . k)
 
+pattern Resumable :: Subset (Resumable exc) effects => exc b -> (b -> Eff effects a) -> Eff effects a
+pattern Resumable exc k <- (project -> Just (Resumable' exc k))
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
