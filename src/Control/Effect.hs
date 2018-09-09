@@ -182,6 +182,13 @@ data Exc exc m a
   = Throw' exc
   | forall b . Catch' (m b) (exc -> m b) (b -> m a)
 
+instance Effect (Exc exc) where
+  emap _ (Throw' exc) = Throw' exc
+  emap f (Catch' m h k) = Catch' m h (f . k)
+
+  handle _ _ (Throw' exc) = Throw' exc
+  handle state handler (Catch' m h k) = Catch' (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
