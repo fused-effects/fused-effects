@@ -237,19 +237,30 @@ runResumable f (Resumable exc k) = f exc >>= runResumable f . k
 runResumable f (Other op)        = runIdentity <$> Eff (handle (Identity ()) (fmap Identity . runResumable f . runIdentity) op)
 
 
-data Cut m a = Cut'
+data Cut m a
+  = Cut'
+  | forall b . Call' (m b) (b -> m a)
 
 instance Effect Cut where
   emap _ Cut' = Cut'
+  emap f (Call' m k) = Call' m (f . k)
+
   handle _ _ Cut' = Cut'
+  handle state handler (Call' m k) = Call' (handler (m <$ state)) (handler . fmap k)
 
 pattern Cut :: Subset Cut sig => Eff sig a
 pattern Cut <- (project -> Just Cut')
 
-{-# COMPLETE Return, Cut, Other #-}
+pattern Call :: Subset Cut sig => Eff sig b -> (b -> Eff sig a) -> Eff sig a
+pattern Call m k <- (project -> Just (Call' m k))
+
+{-# COMPLETE Return, Cut, Call, Other #-}
 
 cutfail :: Subset Cut sig => Eff sig a
 cutfail = inject Cut'
+
+call :: Subset Cut sig => Eff sig a -> Eff sig a
+call m = inject (Call' m pure)
 
 cut :: (Subset NonDet sig, Subset Cut sig) => Eff sig ()
 cut = skip <|> cutfail
