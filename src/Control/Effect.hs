@@ -260,12 +260,14 @@ digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Char
 digit = foldr ((<|>) . char) empty ['0'..'9']
 
 expr :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
-expr = (+) <$> term <* char '+' <*> expr
-   <|> term
+expr = do
+  i <- term
+  (i +) <$ char '+' <*> expr <|> pure i
 
 term :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
-term = (*) <$> factor <* char '*' <*> term
-   <|> factor
+term = do
+  i <- factor
+  (i *) <$ char '*' <*> term <|> pure i
 
 factor :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
 factor = read <$> some digit
