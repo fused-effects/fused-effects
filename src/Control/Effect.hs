@@ -259,6 +259,18 @@ char c = satisfy (== c)
 digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Char
 digit = foldr ((<|>) . char) empty ['0'..'9']
 
+expr :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+expr = (+) <$> term <* char '+' <*> expr
+   <|> term
+
+term :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+term = (*) <$> factor <* char '*' <*> term
+   <|> factor
+
+factor :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+factor = read <$> some digit
+     <|> char '(' *> expr <* char ')'
+
 runSymbol :: Subset NonDet sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
 runSymbol ""     (Return a)               = pure a
 runSymbol _      (Return _)               = empty
