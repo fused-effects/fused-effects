@@ -4,6 +4,7 @@ module Control.Effect where
 import Control.Applicative (Alternative(..))
 import Control.Monad (ap, liftM)
 import Control.Monad.Fail
+import Control.Monad.IO.Class
 
 data Eff effects a
   = Return a
@@ -35,6 +36,9 @@ newtype Lift sig m a = Lift { unLift :: sig (m a) }
 instance Functor sig => Effect (Lift sig) where
   emap f (Lift op) = Lift (fmap f op)
   handle state handler (Lift op) = Lift (fmap (\ p -> handler (p <$ state)) op)
+
+instance Subset (Lift IO) sig => MonadIO (Eff sig) where
+  liftIO = inject . Lift . fmap pure
 
 
 data (f :+: g) (m :: * -> *) a
