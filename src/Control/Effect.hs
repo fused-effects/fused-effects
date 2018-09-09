@@ -89,6 +89,12 @@ pattern Get k <- (project -> Just (Get' k))
 pattern Put :: Subset (State s) effects => s -> Eff effects a -> Eff effects ()
 pattern Put s k <- (project -> Just (Put' s k))
 
+get :: Subset (State s) sig => Eff sig s
+get = inject (Get' pure)
+
+put :: Subset (State s) sig => s -> Eff sig ()
+put s = inject (Put' s (pure ()))
+
 
 data Fail m a = Fail' String
 
