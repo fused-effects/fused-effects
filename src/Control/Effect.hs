@@ -203,6 +203,20 @@ throw = inject . Throw'
 catch :: Subset (Exc exc) sig => Eff sig a -> (exc -> Eff sig a) -> Eff sig a
 catch m h = inject (Catch' m h pure)
 
+runExc :: Effect sig => Eff (Exc exc :+: sig) a -> Eff sig (Either exc a)
+runExc (Return a)    = pure (Right a)
+runExc (Throw e)     = pure (Left e)
+runExc (Catch m h k) = do
+  m' <- runExc m
+  case m' of
+    Left e  -> do
+      r <- runExc (h e)
+      case r of
+        Left e  -> pure (Left e)
+        Right a -> runExc (k a)
+    Right a -> runExc (k a)
+runExc (Other op)    = Eff (handle (Right ()) (either (pure . Left) runExc) op)
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
