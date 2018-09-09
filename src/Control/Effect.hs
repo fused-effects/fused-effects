@@ -30,6 +30,8 @@ data State s m a
   = Get' (s -> m a)
   | Put' s (m a)
 
+data Fail m a = Fail' String
+
 
 class Subset sub sup where
   inj :: sub m a -> sup m a
