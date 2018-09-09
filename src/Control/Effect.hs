@@ -17,6 +17,11 @@ data (f :+: g) (m :: * -> *) a
   | R (g m a)
   deriving (Eq, Ord, Show)
 
+
+pattern Other :: r (Eff (l :+: r)) a -> Eff (l :+: r) a
+pattern Other s = Eff (R s)
+
+
 data NonDet m a
   = Empty'
   | Choose' (Bool -> m a)
