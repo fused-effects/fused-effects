@@ -1,4 +1,4 @@
-{-# LANGUAGE EmptyCase, ExistentialQuantification, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators #-}
+{-# LANGUAGE EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, TypeOperators, ViewPatterns #-}
 module Control.Effect where
 
 data Eff effects a
@@ -31,6 +31,9 @@ data State s m a
   | Put' s (m a)
 
 data Fail m a = Fail' String
+
+pattern Fail :: Subset Fail effects => String -> Eff effects a
+pattern Fail s <- Eff (prj -> Just (Fail' s))
 
 
 class Subset sub sup where
