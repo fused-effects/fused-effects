@@ -1,4 +1,4 @@
-{-# LANGUAGE PolyKinds, TypeOperators #-}
+{-# LANGUAGE EmptyCase, ExistentialQuantification, PolyKinds, TypeOperators #-}
 module Control.Effect where
 
 data Eff effects a
@@ -6,6 +6,10 @@ data Eff effects a
   | Eff (effects (Eff effects) (Eff effects a))
 
 data Void m a
+
+run :: Eff Void a -> a
+run (Return a) = a
+run (Eff v) = case v of {}
 
 
 data (f :+: g) (m :: * -> *) a
