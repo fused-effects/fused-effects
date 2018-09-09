@@ -13,8 +13,9 @@ class HFunctor sig where
 
 
 class Effect sig where
-  handle :: Monad m => (m a -> m b) -> sig m a -> sig m b
-  handleState :: (Monad m, Monad n, Functor c) => c () -> (forall x . c (m x) -> n (c x)) -> sig m a -> sig n (c a)
+  emap :: Monad m => (m a -> m b) -> (sig m a -> sig m b)
+
+  handle :: (Monad m, Monad n, Functor c) => c () -> (forall x . c (m x) -> n (c x)) -> (sig m a -> sig n (c a))
 
 
 data Void m a
