@@ -18,9 +18,15 @@ data (f :+: g) (m :: * -> *) a
   deriving (Eq, Ord, Show)
 
 data NonDet m a
-  = Empty
-  | Choose (m a) (m a)
-  deriving (Eq, Ord, Show)
+  = Empty'
+  | Choose' (Bool -> m a)
+
+pattern Empty :: Subset NonDet effects => Eff effects a
+pattern Empty <- Eff (prj -> Just Empty')
+
+pattern Choose :: Subset NonDet effects => (Bool -> Eff effects a) -> Eff effects a
+pattern Choose k <- Eff (prj -> Just (Choose' k))
+
 
 data Reader r m a
   = Ask' (r -> m a)
