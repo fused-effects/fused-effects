@@ -26,6 +26,13 @@ data (f :+: g) (m :: * -> *) a
   | R (g m a)
   deriving (Eq, Ord, Show)
 
+instance (Effect l, Effect r) => Effect (l :+: r) where
+  emap f (L l) = L (emap f l)
+  emap f (R r) = R (emap f r)
+
+  handle state handler (L l) = L (handle state handler l)
+  handle state handler (R r) = R (handle state handler r)
+
 
 pattern Other :: r (Eff (l :+: r)) a -> Eff (l :+: r) a
 pattern Other s = Eff (R s)
