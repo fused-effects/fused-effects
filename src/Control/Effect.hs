@@ -235,6 +235,9 @@ runResumable f (Other op)        = runIdentity <$> Eff (handle (Identity ()) (fm
 data Symbol m a
   = Symbol' (Char -> Bool) (Char -> m a)
 
+pattern Symbol :: Subset Symbol sig => (Char -> Bool) -> (Char -> Eff sig a) -> Eff sig a
+pattern Symbol sat k <- (project -> Just (Symbol' sat k))
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
