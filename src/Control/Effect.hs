@@ -226,6 +226,11 @@ pattern Resumable exc k <- (project -> Just (Resumable' exc k))
 throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
 throwResumable exc = inject (Resumable' exc pure)
 
+runResumable :: Effect sig => (forall resume . exc resume -> Eff sig resume) -> Eff (Resumable exc :+: sig) a -> Eff sig a
+runResumable _ (Return a)        = pure a
+runResumable f (Resumable exc k) = f exc >>= runResumable f . k
+runResumable f (Other op)        = runIdentity <$> Eff (handle (Identity ()) (fmap Identity . runResumable f . runIdentity) op)
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
