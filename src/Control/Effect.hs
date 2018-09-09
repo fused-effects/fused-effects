@@ -221,6 +221,8 @@ instance Effect (Resumable exc) where
 pattern Resumable :: Subset (Resumable exc) effects => exc b -> (b -> Eff effects a) -> Eff effects a
 pattern Resumable exc k <- (project -> Just (Resumable' exc k))
 
+{-# COMPLETE Return, Resumable, Other #-}
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
