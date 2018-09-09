@@ -129,7 +129,7 @@ instance Effect (State s) where
   handle state handler (Get' k) = Get' (handler . (<$ state) . k)
   handle state handler (Put' s k) = Put' s (handler (k <$ state))
 
-pattern Get :: Subset (State s) effects => (s -> Eff effects a) -> Eff effects s
+pattern Get :: Subset (State s) effects => (s -> Eff effects a) -> Eff effects a
 pattern Get k <- (project -> Just (Get' k))
 
 pattern Put :: Subset (State s) effects => s -> Eff effects a -> Eff effects ()
