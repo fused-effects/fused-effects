@@ -72,6 +72,11 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
   handle state handler (R r) = R (handle state handler r)
 
 
+upcast :: (Effect eff, Effect sig) => Eff sig a -> Eff (eff :+: sig) a
+upcast (Return a) = pure a
+upcast (Eff op)   = Eff (R (hfmap upcast op))
+
+
 pattern Other :: r (Eff (l :+: r)) a -> Eff (l :+: r) a
 pattern Other s = Eff (R s)
 
