@@ -239,6 +239,10 @@ runResumable f (Other op)        = runIdentity <$> Eff (handle (Identity ()) (fm
 
 data Cut m a = Cut'
 
+instance Effect Cut where
+  emap _ Cut' = Cut'
+  handle _ _ Cut' = Cut'
+
 
 data Symbol m a
   = Symbol' (Char -> Bool) (Char -> m a)
