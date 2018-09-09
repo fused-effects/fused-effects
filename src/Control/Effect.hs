@@ -8,13 +8,7 @@ data Eff effects a
   | Eff (effects (Eff effects) a)
 
 
-type f ~> g = forall x . f x -> g x
-
-class HFunctor sig where
-  hmap :: (Functor f, Functor g) => (f ~> g) -> (sig f ~> sig g)
-
-
-class HFunctor sig => Effect sig where
+class Effect sig where
   emap :: Monad m => (m a -> m b) -> (sig m a -> sig m b)
 
   handle :: (Monad m, Monad n, Functor c) => c () -> (forall x . c (m x) -> n (c x)) -> (sig m a -> sig n (c a))
@@ -31,10 +25,6 @@ data (f :+: g) (m :: * -> *) a
   = L (f m a)
   | R (g m a)
   deriving (Eq, Ord, Show)
-
-instance (HFunctor l, HFunctor r) => HFunctor (l :+: r) where
-  hmap f (L l) = L (hmap f l)
-  hmap f (R r) = R (hmap f r)
 
 
 pattern Other :: r (Eff (l :+: r)) a -> Eff (l :+: r) a
