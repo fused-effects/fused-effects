@@ -30,6 +30,13 @@ data State s m a
   = Get' (s -> m a)
   | Put' s (m a)
 
+pattern Get :: Subset (State s) effects => (s -> Eff effects a) -> Eff effects s
+pattern Get k <- Eff (prj -> Just (Get' k))
+
+pattern Put :: Subset (State s) effects => s -> Eff effects a -> Eff effects ()
+pattern Put s k <- Eff (prj -> Just (Put' s k))
+
+
 data Fail m a = Fail' String
 
 pattern Fail :: Subset Fail effects => String -> Eff effects a
