@@ -251,6 +251,9 @@ pattern Cut <- (project -> Just Cut')
 cutfail :: Subset Cut sig => Eff sig a
 cutfail = inject Cut'
 
+cut :: (Subset NonDet sig, Subset Cut sig) => Eff sig ()
+cut = skip <|> cutfail
+
 skip :: Applicative m => m ()
 skip = pure ()
 
