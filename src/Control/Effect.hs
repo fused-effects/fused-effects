@@ -178,6 +178,11 @@ runFail (Fail s)   = pure (Left s)
 runFail (Other op) = Eff (handle (Right ()) (either (pure . Left) runFail) op)
 
 
+data Exc exc m a
+  = Throw' exc
+  | forall b . Catch' (m b) (exc -> m b) (b -> m a)
+
+
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
   prj :: sup m a -> Maybe (sub m a)
