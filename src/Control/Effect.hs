@@ -66,6 +66,13 @@ data NonDet m a
   = Empty'
   | Choose' (Bool -> m a)
 
+instance Effect NonDet where
+  emap _ Empty' = Empty'
+  emap f (Choose' k) = Choose' (f . k)
+
+  handle _ _ Empty' = Empty'
+  handle state handler (Choose' k) = Choose' (handler . (<$ state) . k)
+
 pattern Empty :: Subset NonDet effects => Eff effects a
 pattern Empty <- (project -> Just Empty')
 
