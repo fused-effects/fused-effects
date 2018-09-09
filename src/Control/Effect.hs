@@ -243,6 +243,9 @@ pattern Symbol sat k <- (project -> Just (Symbol' sat k))
 satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
 satisfy sat = inject (Symbol' sat pure)
 
+char :: Subset Symbol sig => Char -> Eff sig Char
+char c = satisfy (== c)
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
