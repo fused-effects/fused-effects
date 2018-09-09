@@ -5,6 +5,9 @@ data Eff effects a
   = Return a
   | Eff (effects (Eff effects) (Eff effects a))
 
+data Void m a
+
+
 data (f :+: g) (m :: * -> *) a
   = L (f m a)
   | R (g m a)
