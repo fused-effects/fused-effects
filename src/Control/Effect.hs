@@ -28,6 +28,10 @@ project _        = Nothing
 
 data Void m a
 
+instance Effect Void where
+  emap _ v = case v of {}
+  handle _ _ v = case v of {}
+
 run :: Eff Void a -> a
 run (Return a) = a
 run (Eff v) = case v of {}
