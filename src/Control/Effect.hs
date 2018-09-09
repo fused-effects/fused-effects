@@ -103,7 +103,7 @@ instance Effect (Reader r) where
   handle state handler (Ask' k) = Ask' (handler . (<$ state) . k)
   handle state handler (Local' f m k) = Local' f (handler (m <$ state)) (handler . fmap k)
 
-pattern Ask :: Subset (Reader r) effects => (r -> Eff effects a) -> Eff effects r
+pattern Ask :: Subset (Reader r) effects => (r -> Eff effects a) -> Eff effects a
 pattern Ask k <- (project -> Just (Ask' k))
 
 pattern Local :: Subset (Reader r) effects => (r -> r) -> Eff effects b -> (b -> Eff effects a) -> Eff effects a
