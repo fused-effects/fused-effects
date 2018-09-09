@@ -12,7 +12,7 @@ class HFunctor sig where
   hmap :: (Functor f, Functor g) => (f ~> g) -> (sig f ~> sig g)
 
 
-class Effect sig where
+class HFunctor sig => Effect sig where
   emap :: Monad m => (m a -> m b) -> (sig m a -> sig m b)
 
   handle :: (Monad m, Monad n, Functor c) => c () -> (forall x . c (m x) -> n (c x)) -> (sig m a -> sig n (c a))
