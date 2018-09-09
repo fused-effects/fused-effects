@@ -197,6 +197,12 @@ pattern Catch m h k <- (project -> Just (Catch' m h k))
 
 {-# COMPLETE Return, Throw, Catch, Other #-}
 
+throw :: Subset (Exc exc) sig => exc -> Eff sig a
+throw = inject . Throw'
+
+catch :: Subset (Exc exc) sig => Eff sig a -> (exc -> Eff sig a) -> Eff sig a
+catch m h = inject (Catch' m h pure)
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
