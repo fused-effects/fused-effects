@@ -2,7 +2,7 @@
 module Control.Effect where
 
 import Control.Applicative (Alternative(..))
-import Control.Monad (ap, liftM)
+import Control.Monad (ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 
@@ -84,6 +84,12 @@ pattern Choose k <- (project -> Just (Choose' k))
 instance Subset NonDet sig => Alternative (Eff sig) where
   empty = inject Empty'
   l <|> r = inject (Choose' (\ c -> if c then l else r))
+
+runNonDet :: Effect sig => Eff (NonDet :+: sig) a -> Eff sig [a]
+runNonDet (Return a) = pure [a]
+runNonDet Empty      = pure []
+runNonDet (Choose k) = (++) <$> runNonDet (k True) <*> runNonDet (k False)
+runNonDet (Other op) = Eff (handle [()] (fmap join . traverse runNonDet) op)
 
 
 data Reader r m a
