@@ -223,6 +223,9 @@ pattern Resumable exc k <- (project -> Just (Resumable' exc k))
 
 {-# COMPLETE Return, Resumable, Other #-}
 
+throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
+throwResumable exc = inject (Resumable' exc pure)
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
