@@ -5,6 +5,7 @@ import Control.Applicative (Alternative(..))
 import Control.Monad (ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Data.Functor.Identity
 
 data Eff effects a
   = Return a
@@ -116,6 +117,12 @@ ask = inject (Ask' pure)
 
 local :: Subset (Reader r) sig => (r -> r) -> Eff sig a -> Eff sig a
 local f m = inject (Local' f m pure)
+
+runReader :: Effect sig => r -> Eff (Reader r :+: sig) a -> Eff sig a
+runReader _ (Return a)    = pure a
+runReader r (Ask k)       = runReader r (k r)
+runReader r (Local f m k) = runReader (f r) m >>= runReader r . k
+runReader r (Other op)    = runIdentity <$> Eff (handle (Identity ()) (fmap Identity . runReader r . runIdentity) op)
 
 
 data State s m a
