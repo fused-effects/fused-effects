@@ -26,6 +26,13 @@ data Reader r m a
   = Ask' (r -> m a)
   | forall b . Local' (r -> r) (m b) (b -> m a)
 
+pattern Ask :: Subset (Reader r) effects => (r -> Eff effects a) -> Eff effects r
+pattern Ask k <- Eff (prj -> Just (Ask' k))
+
+pattern Local :: Subset (Reader r) effects => (r -> r) -> Eff effects b -> (b -> Eff effects a) -> Eff effects a
+pattern Local f m k <- Eff (prj -> Just (Local' f m k))
+
+
 data State s m a
   = Get' (s -> m a)
   | Put' s (m a)
