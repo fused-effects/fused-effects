@@ -232,6 +232,10 @@ runResumable f (Resumable exc k) = f exc >>= runResumable f . k
 runResumable f (Other op)        = runIdentity <$> Eff (handle (Identity ()) (fmap Identity . runResumable f . runIdentity) op)
 
 
+data Symbol m a
+  = Symbol' (Char -> Bool) (Char -> m a)
+
+
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
   prj :: sup m a -> Maybe (sub m a)
