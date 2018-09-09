@@ -246,6 +246,10 @@ satisfy sat = inject (Symbol' sat pure)
 char :: Subset Symbol sig => Char -> Eff sig Char
 char c = satisfy (== c)
 
+digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+digit = foldr (<|>) empty (zipWith f [0..9] ['0'..'9'])
+  where f i c = i <$ char c
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
