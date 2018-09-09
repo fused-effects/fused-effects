@@ -1,9 +1,15 @@
-{-# LANGUAGE EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect where
 
 data Eff effects a
   = Return a
   | Eff (effects (Eff effects) a)
+
+
+class Effect sig where
+  handle :: Monad m => (m a -> m b) -> sig m a -> sig m b
+  handleState :: (Monad m, Monad n, Functor c) => c () -> (forall x . c (m x) -> n (c x)) -> sig m a -> sig n (c a)
+
 
 data Void m a
 
