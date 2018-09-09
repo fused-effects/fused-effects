@@ -189,6 +189,12 @@ instance Effect (Exc exc) where
   handle _ _ (Throw' exc) = Throw' exc
   handle state handler (Catch' m h k) = Catch' (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
+pattern Throw :: Subset (Exc exc) effects => exc -> Eff effects a
+pattern Throw exc <- (project -> Just (Throw' exc))
+
+pattern Catch :: Subset (Exc exc) effects => Eff effects b -> (exc -> Eff effects b) -> (b -> Eff effects a) -> Eff effects a
+pattern Catch m h k <- (project -> Just (Catch' m h k))
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
