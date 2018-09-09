@@ -172,6 +172,11 @@ pattern Fail s <- (project -> Just (Fail' s))
 instance Subset Fail sig => MonadFail (Eff sig) where
   fail = inject . Fail'
 
+runFail :: Effect sig => Eff (Fail :+: sig) a -> Eff sig (Either String a)
+runFail (Return a) = pure (Right a)
+runFail (Fail s)   = pure (Left s)
+runFail (Other op) = Eff (handle (Right ()) (either (pure . Left) runFail) op)
+
 
 class (Effect sub, Effect sup) => Subset sub sup where
   inj :: sub m a -> sup m a
