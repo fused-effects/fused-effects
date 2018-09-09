@@ -72,6 +72,12 @@ pattern Ask k <- (project -> Just (Ask' k))
 pattern Local :: Subset (Reader r) effects => (r -> r) -> Eff effects b -> (b -> Eff effects a) -> Eff effects a
 pattern Local f m k <- (project -> Just (Local' f m k))
 
+ask :: Subset (Reader r) sig => Eff sig r
+ask = inject (Ask' pure)
+
+local :: Subset (Reader r) sig => (r -> r) -> Eff sig a -> Eff sig a
+local f m = inject (Local' f m pure)
+
 
 data State s m a
   = Get' (s -> m a)
