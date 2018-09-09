@@ -134,6 +134,11 @@ put s = inject (Put' s (pure ()))
 
 data Fail m a = Fail' String
 
+instance Effect Fail where
+  emap _ (Fail' s) = Fail' s
+
+  handle _ _ (Fail' s) = Fail' s
+
 pattern Fail :: Subset Fail effects => String -> Eff effects a
 pattern Fail s <- (project -> Just (Fail' s))
 
