@@ -237,6 +237,9 @@ runResumable f (Resumable exc k) = f exc >>= runResumable f . k
 runResumable f (Other op)        = runIdentity <$> Eff (handle (Identity ()) (fmap Identity . runResumable f . runIdentity) op)
 
 
+data Cut m a = Cut'
+
+
 data Symbol m a
   = Symbol' (Char -> Bool) (Char -> m a)
 
