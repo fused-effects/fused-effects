@@ -1,4 +1,4 @@
-{-# LANGUAGE EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, TypeOperators, ViewPatterns #-}
+{-# LANGUAGE EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect where
 
 data Eff effects a
@@ -78,3 +78,8 @@ instance Subset sub sup => Subset sub (sub' :+: sup) where
   inj = R . inj
   prj (R g) = prj g
   prj _     = Nothing
+
+
+instance Functor (effects (Eff effects)) => Functor (Eff effects) where
+  fmap f (Return a) = Return (f a)
+  fmap f (Eff sub)  = Eff (fmap f sub)
