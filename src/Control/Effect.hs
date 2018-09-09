@@ -6,6 +6,7 @@ import Control.Monad ((<=<), ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Functor.Identity
+import Prelude hiding (fail)
 
 data Eff effects a
   = Return a
@@ -254,6 +255,14 @@ char c = satisfy (== c)
 digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Int
 digit = foldr (<|>) empty (zipWith f [0..9] ['0'..'9'])
   where f i c = i <$ char c
+
+runSymbol :: Subset Fail sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
+runSymbol ""     (Return a)               = pure a
+runSymbol cs     (Return _)               = fail $ "unexpected input: " <> cs
+runSymbol ""     (Symbol _ _)             = fail $ "unexpected end of input"
+runSymbol (c:cs) (Symbol p k) | p c       = runSymbol cs (k c)
+                              | otherwise = fail $ "unexpected token: " <> show c
+runSymbol cs     (Other op)               = runIdentity <$> Eff (handle (Identity ()) (fmap Identity . runSymbol cs . runIdentity) op)
 
 
 class (Effect sub, Effect sup) => Subset sub sup where
