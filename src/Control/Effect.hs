@@ -1,4 +1,4 @@
-{-# LANGUAGE KindSignatures, TypeOperators #-}
+{-# LANGUAGE PolyKinds, TypeOperators #-}
 module Control.Effect where
 
 data (f :+: g) (m :: * -> *) a
