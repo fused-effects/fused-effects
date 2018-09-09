@@ -243,6 +243,9 @@ instance Effect Cut where
   emap _ Cut' = Cut'
   handle _ _ Cut' = Cut'
 
+pattern Cut :: Subset Cut sig => Eff sig a
+pattern Cut <- (project -> Just Cut')
+
 
 data Symbol m a
   = Symbol' (Char -> Bool) (Char -> m a)
