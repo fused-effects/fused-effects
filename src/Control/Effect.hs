@@ -30,6 +30,13 @@ run (Return a) = a
 run (Eff v) = case v of {}
 
 
+newtype Lift sig m a = Lift { unLift :: sig (m a) }
+
+instance Functor sig => Effect (Lift sig) where
+  emap f (Lift op) = Lift (fmap f op)
+  handle state handler (Lift op) = Lift (fmap (\ p -> handler (p <$ state)) op)
+
+
 data (f :+: g) (m :: * -> *) a
   = L (f m a)
   | R (g m a)
