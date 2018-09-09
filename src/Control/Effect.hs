@@ -248,8 +248,8 @@ pattern Cut <- (project -> Just Cut')
 
 {-# COMPLETE Return, Cut, Other #-}
 
-cut :: Subset Cut sig => Eff sig a
-cut = inject Cut'
+cutfail :: Subset Cut sig => Eff sig a
+cutfail = inject Cut'
 
 
 data Symbol m a
