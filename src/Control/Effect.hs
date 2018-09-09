@@ -1,6 +1,7 @@
 {-# LANGUAGE EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect where
 
+import Control.Applicative (Alternative(..))
 import Control.Monad (ap, liftM)
 import Control.Monad.Fail
 
@@ -55,6 +56,10 @@ pattern Empty <- (project -> Just Empty')
 
 pattern Choose :: Subset NonDet effects => (Bool -> Eff effects a) -> Eff effects a
 pattern Choose k <- (project -> Just (Choose' k))
+
+instance (Effect sig, Subset NonDet sig) => Alternative (Eff sig) where
+  empty = inject Empty'
+  l <|> r = inject (Choose' (\ c -> if c then l else r))
 
 
 data Reader r m a
