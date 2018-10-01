@@ -1,4 +1,4 @@
-{-# LANGUAGE EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect where
 
 import Control.Applicative (Alternative(..))
@@ -30,6 +30,7 @@ project _        = Nothing
 
 
 data Void m a
+  deriving (Functor)
 
 instance Effect Void where
   hfmap _ v = case v of {}
@@ -42,6 +43,7 @@ run (Eff v) = case v of {}
 
 
 newtype Lift sig m a = Lift { unLift :: sig (m a) }
+  deriving (Functor)
 
 instance Functor sig => Effect (Lift sig) where
   hfmap f (Lift op) = Lift (fmap f op)
@@ -59,7 +61,7 @@ runM (Eff (Lift op)) = op >>= runM
 data (f :+: g) (m :: * -> *) a
   = L (f m a)
   | R (g m a)
-  deriving (Eq, Ord, Show)
+  deriving (Eq, Functor, Ord, Show)
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
   hfmap f (L l) = L (hfmap f l)
@@ -84,6 +86,7 @@ pattern Other s = Eff (R s)
 data NonDet m a
   = Empty'
   | Choose' (Bool -> m a)
+  deriving (Functor)
 
 instance Effect NonDet where
   hfmap _ Empty' = Empty'
@@ -117,6 +120,8 @@ runNonDet (Other op) = Eff (handle [()] (fmap join . traverse runNonDet) op)
 data Reader r m a
   = Ask' (r -> m a)
   | forall b . Local' (r -> r) (m b) (b -> m a)
+
+deriving instance Functor m => Functor (Reader r m)
 
 instance Effect (Reader r) where
   hfmap f (Ask' k) = Ask' (f . k)
@@ -152,6 +157,7 @@ runReader r (Other op)    = runIdentity <$> Eff (handle (Identity ()) (fmap Iden
 data State s m a
   = Get' (s -> m a)
   | Put' s (m a)
+  deriving (Functor)
 
 instance Effect (State s) where
   hfmap f (Get' k) = Get' (f . k)
@@ -185,6 +191,7 @@ runState s (Other op) = Eff (handle (s, ()) (uncurry runState) op)
 
 
 data Fail m a = Fail' String
+  deriving (Functor)
 
 instance Effect Fail where
   hfmap _ (Fail' s) = Fail' s
@@ -210,6 +217,8 @@ runFail (Other op) = Eff (handle (Right ()) (either (pure . Left) runFail) op)
 data Exc exc m a
   = Throw' exc
   | forall b . Catch' (m b) (exc -> m b) (b -> m a)
+
+deriving instance Functor m => Functor (Exc exc m)
 
 instance Effect (Exc exc) where
   hfmap _ (Throw' exc) = Throw' exc
@@ -245,6 +254,8 @@ runExc (Other op)    = Eff (handle (Right ()) (either (pure . Left) runExc) op)
 data Resumable exc m a
   = forall b . Resumable' (exc b) (b -> m a)
 
+deriving instance Functor m => Functor (Resumable exc m)
+
 instance Effect (Resumable exc) where
   hfmap f (Resumable' exc k) = Resumable' exc (f . k)
 
@@ -269,6 +280,8 @@ runResumable f (Other op)        = runIdentity <$> Eff (handle (Identity ()) (fm
 data Cut m a
   = Cut'
   | forall b . Call' (m b) (b -> m a)
+
+deriving instance Functor m => Functor (Cut m)
 
 instance Effect Cut where
   hfmap _ Cut' = Cut'
@@ -313,6 +326,7 @@ runCut = go empty
 
 data Symbol m a
   = Symbol' (Char -> Bool) (Char -> m a)
+  deriving (Functor)
 
 instance Effect Symbol where
   hfmap f (Symbol' sat k) = Symbol' sat (f . k)
