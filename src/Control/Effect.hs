@@ -40,7 +40,7 @@ class Carrier (c :: (* -> *) -> * -> *) where
   -- @
   joinl :: Monad m => m (c m a) -> c m a
 
-  gen :: Monad m => a -> c m a
+  gen :: Applicative m => a -> c m a
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
 
