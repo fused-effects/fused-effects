@@ -205,8 +205,7 @@ instance Effect Void where
   handle _ v = case v of {}
 
 run :: Eff Void a -> a
-run (Return a) = a
-run (Eff v) = case v of {}
+run = fold id (\ v -> case v of {})
 
 
 newtype Lift sig m a = Lift { unLift :: sig (m a) }
