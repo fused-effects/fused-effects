@@ -42,6 +42,14 @@ class Carrier (c :: (* -> *) -> * -> *) where
 
   gen :: Monad m => a -> c m a
 
+newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
+
+instance Carrier (StateH s) where
+  joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
+
+  gen a = StateH (\ s -> pure (s, a))
+
+
 data Void m a
   deriving (Functor)
 
