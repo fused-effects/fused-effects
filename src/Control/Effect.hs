@@ -1,5 +1,47 @@
 {-# LANGUAGE DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
-module Control.Effect where
+module Control.Effect
+( Eff
+, inject
+, fold
+, liftAlg
+, relay
+, Effect(..)
+, Carrier(..)
+, Void
+, run
+, Lift(..)
+, runM
+, NonDet(..)
+, runNonDet
+, Reader(..)
+, ask
+, local
+, runReader
+, State(..)
+, get
+, put
+, runState
+, Fail(..)
+, runFail
+, Exc(..)
+, throw
+, catch
+, runExc
+, Resumable(..)
+, throwResumable
+, runResumable
+, Cut(..)
+, cutfail
+, call
+, cut
+, Symbol(..)
+, satisfy
+, char
+, digit
+, expr
+, term
+, factor
+) where
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Monad ((<=<), ap, join, liftM)
