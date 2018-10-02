@@ -119,6 +119,11 @@ instance Applicative m => Applicative (MaybeH m) where
 
   MaybeH f <*> MaybeH a = MaybeH (liftA2 (<*>) f a)
 
+instance Monad m => Monad (MaybeH m) where
+  return = pure
+
+  MaybeH a >>= f = MaybeH (a >>= maybe (pure Nothing) (runMaybeH . f))
+
 instance Carrier MaybeH where
   joinl mf = MaybeH (mf >>= runMaybeH)
 
