@@ -66,6 +66,14 @@ instance Monoid w => Carrier (WriterH w) where
   gen a = WriterH (pure (mempty, a))
 
 
+newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
+
+instance Carrier MaybeH where
+  joinl mf = MaybeH (mf >>= runMaybeH)
+
+  gen a = MaybeH (pure (Just a))
+
+
 data Void m a
   deriving (Functor)
 
