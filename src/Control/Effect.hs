@@ -138,6 +138,11 @@ instance Applicative m => Applicative (EitherH e m) where
 
   EitherH f <*> EitherH a = EitherH (liftA2 (<*>) f a)
 
+instance Monad m => Monad (EitherH e m) where
+  return = pure
+
+  EitherH a >>= f = EitherH (a >>= either (pure . Left) (runEitherH . f))
+
 instance Carrier (EitherH e) where
   joinl mf = EitherH (mf >>= runEitherH)
 
