@@ -42,6 +42,7 @@ class Carrier (c :: (* -> *) -> * -> *) where
 
   gen :: Applicative m => a -> c m a
 
+
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
   deriving (Functor)
 
