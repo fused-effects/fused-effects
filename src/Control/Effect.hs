@@ -23,10 +23,6 @@ class Effect sig where
 inject :: Subset effect sig => effect (Eff sig) a -> Eff sig a
 inject = Eff . inj
 
-project :: Subset effect sig => Eff sig a -> Maybe (effect (Eff sig) a)
-project (Eff op) = prj op
-project _        = Nothing
-
 
 fold :: Effect sig
      => (a -> b)
