@@ -43,6 +43,11 @@ liftAlg :: (Effect sig1, Effect sig2, Carrier c1, Monad (c1 (Eff sig2)))
 liftAlg alg1 = alg1 \/ alg2
   where alg2 op = join (joinl (Eff (handle (pure . (fold gen (liftAlg alg1) =<<)) op)))
 
+relay :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
+      => (forall a . eff (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
+      -> (Eff (eff :+: sig) a -> c (Eff sig) a)
+relay alg = fold gen (liftAlg alg)
+
 
 class Carrier (c :: (* -> *) -> * -> *) where
   -- | (Left-)join a 'Monad' of 'Carrier's into a 'Carrier'.
