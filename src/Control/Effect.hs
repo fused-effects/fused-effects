@@ -36,9 +36,9 @@ fold gen alg = go
   where go (Return x) = gen x
         go (Eff op)   = alg (emap (pure . fold gen alg) op)
 
-liftAlg :: (Effect sig1, Effect sig2, Carrier c1, Monad (c1 (Eff sig2)))
-        => (forall a .  sig1           (Eff (sig1 :+: sig2)) (c1 (Eff sig2) a) -> c1 (Eff sig2) a)
-        -> (forall a . (sig1 :+: sig2) (Eff (sig1 :+: sig2)) (c1 (Eff sig2) a) -> c1 (Eff sig2) a)
+liftAlg :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
+        => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
+        -> (forall a . (eff :+: sig) (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
 liftAlg alg1 = alg1 \/ alg2
   where alg2 op = join (joinl (Eff (handle (pure . (fold gen (liftAlg alg1) =<<)) op)))
 
