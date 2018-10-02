@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect where
 
 import Control.Applicative (Alternative(..), liftA2)
@@ -44,7 +44,7 @@ class Carrier (c :: (* -> *) -> * -> *) where
 
 
 newtype IdH m a = IdH { runIdH :: m a }
-  deriving (Functor)
+  deriving (Applicative, Functor, Monad)
 
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
