@@ -50,6 +50,14 @@ instance Carrier (StateH s) where
   gen a = StateH (\ s -> pure (s, a))
 
 
+newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
+
+instance Carrier (ReaderH r) where
+  joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
+
+  gen a = ReaderH (\ _ -> pure a)
+
+
 data Void m a
   deriving (Functor)
 
