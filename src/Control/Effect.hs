@@ -61,7 +61,7 @@ class Effect sig where
   handle :: (Carrier c, Monad (c n), Monad m, Monad n)
          => (forall x . c n (m x) -> n (c n x))
          -> sig m (c n a)
-         -> sig n (n (c n a))
+         -> sig n (c n a)
 
 
 inject :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
@@ -80,7 +80,7 @@ liftAlg :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
         => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
         -> (forall a . (eff :+: sig) (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
 liftAlg alg1 = alg1 \/ alg2
-  where alg2 op = joinl (Eff (handle (pure . (fold gen (liftAlg alg1) =<<)) op))
+  where alg2 op = joinl (Eff (fmap' pure (handle (pure . (fold gen (liftAlg alg1) =<<)) op)))
 
 relay :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
       => (forall a . eff (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
@@ -252,7 +252,7 @@ newtype Lift sig m k = Lift { unLift :: sig k }
   deriving (Functor)
 
 instance Functor sig => Effect (Lift sig) where
-  handle handler (Lift op) = Lift (fmap (handler . fmap pure) op)
+  handle _ (Lift op) = Lift op
 
 instance Subset (Lift IO) sig => MonadIO (Eff sig) where
   liftIO = inject . Lift . fmap pure
@@ -287,8 +287,8 @@ data NonDet m k
   deriving (Functor)
 
 instance Effect NonDet where
-  handle _       Empty      = Empty
-  handle handler (Choose k) = Choose (handler . fmap pure . k)
+  handle _ Empty      = Empty
+  handle _ (Choose k) = Choose k
 
 instance Subset NonDet sig => Alternative (Eff sig) where
   empty = inject Empty
@@ -307,8 +307,8 @@ data Reader r m k
 deriving instance Functor (Reader r m)
 
 instance Effect (Reader r) where
-  handle handler (Ask k)       = Ask (handler . fmap pure . k)
-  handle handler (Local f m k) = Local f (handler (gen m)) (handler . fmap pure . (k =<<))
+  handle _       (Ask k)       = Ask k
+  handle handler (Local f m k) = Local f (handler (gen m)) (k =<<)
 
 ask :: Subset (Reader r) sig => Eff sig r
 ask = inject (Ask pure)
@@ -329,8 +329,8 @@ data State s m k
   deriving (Functor)
 
 instance Effect (State s) where
-  handle handler (Get k)   = Get   (handler . fmap pure . k)
-  handle handler (Put s k) = Put s (handler  (fmap pure   k))
+  handle _ (Get k)   = Get   k
+  handle _ (Put s k) = Put s k
 
 get :: Subset (State s) sig => Eff sig s
 get = inject (Get pure)
@@ -366,7 +366,7 @@ deriving instance Functor (Exc exc m)
 
 instance Effect (Exc exc) where
   handle _       (Throw exc)   = Throw exc
-  handle handler (Catch m h k) = Catch (handler (gen m)) (handler . gen . h) (handler . fmap pure . (k =<<))
+  handle handler (Catch m h k) = Catch (handler (gen m)) (handler . gen . h) (k =<<)
 
 throw :: Subset (Exc exc) sig => exc -> Eff sig a
 throw = inject . Throw
@@ -387,7 +387,7 @@ data Resumable exc m k
 deriving instance Functor (Resumable exc m)
 
 instance Effect (Resumable exc) where
-  handle handler (Resumable exc k) = Resumable exc (handler . fmap pure . k)
+  handle _ (Resumable exc k) = Resumable exc k
 
 throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
 throwResumable exc = inject (Resumable exc pure)
@@ -404,8 +404,8 @@ data Cut m k
 deriving instance Functor (Cut m)
 
 instance Effect Cut where
-  handle _ Cut = Cut
-  handle handler (Call m k) = Call (handler (gen m)) (handler . fmap pure . (k =<<))
+  handle _       Cut        = Cut
+  handle handler (Call m k) = Call (handler (gen m)) (k =<<)
 
 cutfail :: Subset Cut sig => Eff sig a
 cutfail = inject Cut
@@ -435,7 +435,7 @@ data Symbol m k
   deriving (Functor)
 
 instance Effect Symbol where
-  handle handler (Symbol sat k) = Symbol sat (handler . fmap pure . k)
+  handle _ (Symbol sat k) = Symbol sat k
 
 satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
 satisfy sat = inject (Symbol sat pure)
