@@ -11,8 +11,6 @@ data Eff effects a
   = Return a
   | Eff (effects (Eff effects) a)
 
-type f ~> g = forall x . f x -> g x
-
 class Effect sig where
   emap :: Monad m => (m a -> m b) -> (sig m a -> sig m b)
 
