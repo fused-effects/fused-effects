@@ -45,6 +45,14 @@ class Carrier (c :: (* -> *) -> * -> *) where
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
   deriving (Functor)
 
+instance Monad m => Applicative (StateH s m) where
+  pure = gen
+
+  StateH f <*> StateH a = StateH $ \ s -> do
+    (s',  f') <- f s
+    (s'', a') <- a s'
+    pure (s'', f' a')
+
 instance Carrier (StateH s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
 
