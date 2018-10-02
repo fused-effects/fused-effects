@@ -43,6 +43,7 @@ class Carrier (c :: (* -> *) -> * -> *) where
   gen :: Applicative m => a -> c m a
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
+  deriving (Functor)
 
 instance Carrier (StateH s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
@@ -51,6 +52,7 @@ instance Carrier (StateH s) where
 
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
+  deriving (Functor)
 
 instance Carrier (ReaderH r) where
   joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
@@ -59,6 +61,7 @@ instance Carrier (ReaderH r) where
 
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
+  deriving (Functor)
 
 instance Monoid w => Carrier (WriterH w) where
   joinl mf = WriterH (mf >>= runWriterH)
@@ -67,6 +70,7 @@ instance Monoid w => Carrier (WriterH w) where
 
 
 newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
+  deriving (Functor)
 
 instance Carrier MaybeH where
   joinl mf = MaybeH (mf >>= runMaybeH)
@@ -75,6 +79,7 @@ instance Carrier MaybeH where
 
 
 newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
+  deriving (Functor)
 
 instance Carrier (EitherH e) where
   joinl mf = EitherH (mf >>= runEitherH)
@@ -83,6 +88,7 @@ instance Carrier (EitherH e) where
 
 
 newtype ListH m a = ListH { runListH :: m [a] }
+  deriving (Functor)
 
 instance Carrier ListH where
   joinl mf = ListH (mf >>= runListH)
