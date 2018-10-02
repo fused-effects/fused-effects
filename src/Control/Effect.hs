@@ -82,6 +82,12 @@ upcast (Eff op)   = Eff (R (hfmap upcast op))
 pattern Other :: r (Eff (l :+: r)) a -> Eff (l :+: r) a
 pattern Other s = Eff (R s)
 
+(\/) :: ( sig1           m a -> b)
+     -> (          sig2  m a -> b)
+     -> ((sig1 :+: sig2) m a -> b)
+(alg1 \/ _   ) (L op) = alg1 op
+(_    \/ alg2) (R op) = alg2 op
+
 
 data NonDet m a
   = Empty'
