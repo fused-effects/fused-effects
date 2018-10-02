@@ -40,6 +40,8 @@ class Carrier (c :: (* -> *) -> * -> *) where
   -- @
   joinl :: Monad m => m (c m a) -> c m a
 
+  gen :: Monad m => a -> c m a
+
 data Void m a
   deriving (Functor)
 
