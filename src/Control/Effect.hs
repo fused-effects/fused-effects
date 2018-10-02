@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect
 ( Eff
 , inject
@@ -51,18 +51,20 @@ import Prelude hiding (fail)
 
 data Eff effects a
   = Return a
-  | Eff (effects (Eff effects) a)
+  | Eff (effects (Eff effects) (Eff effects a))
 
 class Effect sig where
-  emap :: Monad m => (m a -> m b) -> (sig m a -> sig m b)
+  fmap' :: Functor m => (a -> b) -> (sig m a -> sig m b)
+  default fmap' :: Functor (sig m) => (a -> b) -> (sig m a -> sig m b)
+  fmap' = fmap
 
-  handle :: (Carrier c, Functor (c n), Monad m, Monad n)
+  handle :: (Carrier c, Monad (c n), Monad m, Monad n)
          => (forall x . c n (m x) -> n (c n x))
-         -> sig m a
-         -> sig n (c n a)
+         -> sig m (c n a)
+         -> sig n (n (c n a))
 
 
-inject :: Subset effect sig => effect (Eff sig) a -> Eff sig a
+inject :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
 inject = Eff . inj
 
 
@@ -72,13 +74,13 @@ fold :: Effect sig
      -> (Eff sig a -> b)
 fold gen alg = go
   where go (Return x) = gen x
-        go (Eff op)   = alg (emap (pure . fold gen alg) op)
+        go (Eff op)   = alg (fmap' (fold gen alg) op)
 
 liftAlg :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
         => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
         -> (forall a . (eff :+: sig) (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
 liftAlg alg1 = alg1 \/ alg2
-  where alg2 op = join (joinl (Eff (handle (pure . (fold gen (liftAlg alg1) =<<)) op)))
+  where alg2 op = joinl (Eff (handle (pure . (fold gen (liftAlg alg1) =<<)) op))
 
 relay :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
       => (forall a . eff (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
@@ -236,23 +238,21 @@ instance Carrier ListH where
   gen a = ListH (pure [a])
 
 
-data Void m a
+data Void m k
   deriving (Functor)
 
 instance Effect Void where
-  emap _ v = case v of {}
   handle _ v = case v of {}
 
 run :: Eff Void a -> a
 run = fold id (\ v -> case v of {})
 
 
-newtype Lift sig m a = Lift { unLift :: sig (m a) }
+newtype Lift sig m k = Lift { unLift :: sig k }
   deriving (Functor)
 
 instance Functor sig => Effect (Lift sig) where
-  emap f (Lift op) = Lift (fmap f op)
-  handle handler (Lift op) = Lift (fmap (handler . gen) op)
+  handle handler (Lift op) = Lift (fmap (handler . fmap pure) op)
 
 instance Subset (Lift IO) sig => MonadIO (Eff sig) where
   liftIO = inject . Lift . fmap pure
@@ -262,14 +262,14 @@ runM (Return a)      = pure a
 runM (Eff (Lift op)) = op >>= runM
 
 
-data (f :+: g) (m :: * -> *) a
-  = L (f m a)
-  | R (g m a)
+data (f :+: g) (m :: * -> *) k
+  = L (f m k)
+  | R (g m k)
   deriving (Eq, Functor, Ord, Show)
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
-  emap f (L l) = L (emap f l)
-  emap f (R r) = R (emap f r)
+  fmap' f (L l) = L (fmap' f l)
+  fmap' f (R r) = R (fmap' f r)
 
   handle handler (L l) = L (handle handler l)
   handle handler (R r) = R (handle handler r)
@@ -281,16 +281,14 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
 (_    \/ alg2) (R op) = alg2 op
 
 
-data NonDet m a
+data NonDet m k
   = Empty
-  | Choose (Bool -> m a)
+  | Choose (Bool -> k)
   deriving (Functor)
 
 instance Effect NonDet where
-  emap _ Empty      = Empty
-  emap f (Choose k) = Choose (f . k)
   handle _       Empty      = Empty
-  handle handler (Choose k) = Choose (handler . gen . k)
+  handle handler (Choose k) = Choose (handler . fmap pure . k)
 
 instance Subset NonDet sig => Alternative (Eff sig) where
   empty = inject Empty
@@ -299,21 +297,18 @@ instance Subset NonDet sig => Alternative (Eff sig) where
 runNonDet :: Effect sig => Eff (NonDet :+: sig) a -> Eff sig [a]
 runNonDet = runListH . relay alg
   where alg Empty      = ListH (pure [])
-        alg (Choose k) = join (ListH (liftA2 (++) (runNonDet (k True)) (runNonDet (k False))))
+        alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
 
 
-data Reader r m a
-  = Ask (r -> m a)
-  | forall b . Local (r -> r) (m b) (b -> m a)
+data Reader r m k
+  = Ask (r -> k)
+  | forall b . Local (r -> r) (m b) (b -> k)
 
-deriving instance Functor m => Functor (Reader r m)
+deriving instance Functor (Reader r m)
 
 instance Effect (Reader r) where
-  emap f (Ask k) = Ask (f . k)
-  emap f (Local g m k) = Local g m (f . k)
-
-  handle handler (Ask k)       = Ask (handler . gen . k)
-  handle handler (Local f m k) = Local f (handler (gen m)) (handler . fmap k)
+  handle handler (Ask k)       = Ask (handler . fmap pure . k)
+  handle handler (Local f m k) = Local f (handler (gen m)) (handler . fmap pure . (k =<<))
 
 ask :: Subset (Reader r) sig => Eff sig r
 ask = inject (Ask pure)
@@ -324,21 +319,18 @@ local f m = inject (Local f m pure)
 
 runReader :: Effect sig => r -> Eff (Reader r :+: sig) a -> Eff sig a
 runReader r m = runReaderH (relay alg m) r
-  where alg (Ask k)       = join (ReaderH (\ r -> runReader r (k r)))
-        alg (Local f m k) = join (ReaderH (\ r -> let fr = f r in fr `seq` runReader fr m >>= runReader r . k))
+  where alg (Ask k)       = ReaderH (\ r -> runReaderH (k r) r)
+        alg (Local f m k) = ReaderH (\ r -> let fr = f r in fr `seq` runReader fr m >>= flip runReaderH r . k)
 
 
-data State s m a
-  = Get (s -> m a)
-  | Put s (m a)
+data State s m k
+  = Get (s -> k)
+  | Put s k
   deriving (Functor)
 
 instance Effect (State s) where
-  emap f (Get k) = Get (f . k)
-  emap f (Put s k) = Put s (f k)
-
-  handle handler (Get k)   = Get   (handler . gen . k)
-  handle handler (Put s k) = Put s (handler  (gen   k))
+  handle handler (Get k)   = Get   (handler . fmap pure . k)
+  handle handler (Put s k) = Put s (handler  (fmap pure   k))
 
 get :: Subset (State s) sig => Eff sig s
 get = inject (Get pure)
@@ -348,15 +340,14 @@ put s = inject (Put s (pure ()))
 
 runState :: Effect sig => s -> Eff (State s :+: sig) a -> Eff sig (s, a)
 runState s m = runStateH (relay alg m) s
-  where alg (Get k)   = join (StateH (\ s -> runState s (k s)))
-        alg (Put s k) = join (StateH (\ _ -> runState s  k   ))
+  where alg (Get k)   = StateH (\ s -> runStateH (k s) s)
+        alg (Put s k) = StateH (\ _ -> runStateH  k    s)
 
 
-newtype Fail m a = Fail String
+newtype Fail m k = Fail String
   deriving (Functor)
 
 instance Effect Fail where
-  emap _ (Fail s) = Fail s
   handle _ (Fail s) = Fail s
 
 instance Subset Fail sig => MonadFail (Eff sig) where
@@ -367,18 +358,15 @@ runFail = runEitherH . relay alg
   where alg (Fail s) = EitherH (pure (Left s))
 
 
-data Exc exc m a
+data Exc exc m k
   = Throw exc
-  | forall b . Catch (m b) (exc -> m b) (b -> m a)
+  | forall b . Catch (m b) (exc -> m b) (b -> k)
 
-deriving instance Functor m => Functor (Exc exc m)
+deriving instance Functor (Exc exc m)
 
 instance Effect (Exc exc) where
-  emap _ (Throw exc)   = Throw exc
-  emap f (Catch m h k) = Catch m h (f . k)
-
   handle _       (Throw exc)   = Throw exc
-  handle handler (Catch m h k) = Catch (handler (gen m)) (handler . gen . h) (handler . fmap k)
+  handle handler (Catch m h k) = Catch (handler (gen m)) (handler . gen . h) (handler . fmap pure . (k =<<))
 
 throw :: Subset (Exc exc) sig => exc -> Eff sig a
 throw = inject . Throw
@@ -390,39 +378,34 @@ runExc :: Effect sig => Eff (Exc exc :+: sig) a -> Eff sig (Either exc a)
 runExc = runEitherH . relay alg
   where alg :: Effect sig => Exc exc (Eff (Exc exc :+: sig)) (EitherH exc (Eff sig) a) -> EitherH exc (Eff sig) a
         alg (Throw e)     = EitherH (pure (Left e))
-        alg (Catch m h k) = join (EitherH (runExc m >>= runExc . either (k <=< h) k))
+        alg (Catch m h k) = EitherH (runExc m >>= either (runEitherH . (k <=< EitherH . runExc . h)) (runEitherH . k))
 
 
-data Resumable exc m a
-  = forall b . Resumable (exc b) (b -> m a)
+data Resumable exc m k
+  = forall b . Resumable (exc b) (b -> k)
 
-deriving instance Functor m => Functor (Resumable exc m)
+deriving instance Functor (Resumable exc m)
 
 instance Effect (Resumable exc) where
-  emap f (Resumable exc k) = Resumable exc (f . k)
-
-  handle handler (Resumable exc k) = Resumable exc (handler . gen . k)
+  handle handler (Resumable exc k) = Resumable exc (handler . fmap pure . k)
 
 throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
 throwResumable exc = inject (Resumable exc pure)
 
 runResumable :: Effect sig => (forall resume . exc resume -> Eff sig resume) -> Eff (Resumable exc :+: sig) a -> Eff sig a
 runResumable f = runIdH . relay alg
-  where alg (Resumable exc k) = join (IdH (f exc >>= runResumable f . k))
+  where alg (Resumable exc k) = IdH (f exc >>= runIdH . k)
 
 
-data Cut m a
+data Cut m k
   = Cut
-  | forall b . Call (m b) (b -> m a)
+  | forall b . Call (m b) (b -> k)
 
-deriving instance Functor m => Functor (Cut m)
+deriving instance Functor (Cut m)
 
 instance Effect Cut where
-  emap _ Cut = Cut
-  emap f (Call m k) = Call m (f . k)
-
   handle _ Cut = Cut
-  handle handler (Call m k) = Call (handler (gen m)) (handler . fmap k)
+  handle handler (Call m k) = Call (handler (gen m)) (handler . fmap pure . (k =<<))
 
 cutfail :: Subset Cut sig => Eff sig a
 cutfail = inject Cut
@@ -447,14 +430,12 @@ skip = pure ()
 --         go q (Other op) = Eff (hfmap (go empty) op) <|> q
 
 
-data Symbol m a
-  = Symbol (Char -> Bool) (Char -> m a)
+data Symbol m k
+  = Symbol (Char -> Bool) (Char -> k)
   deriving (Functor)
 
 instance Effect Symbol where
-  emap f (Symbol sat k) = Symbol sat (f . k)
-
-  handle handler (Symbol sat k) = Symbol sat (handler . gen . k)
+  handle handler (Symbol sat k) = Symbol sat (handler . fmap pure . k)
 
 satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
 satisfy sat = inject (Symbol sat pure)
@@ -515,5 +496,4 @@ instance Effect sig => Applicative (Eff sig) where
   (<*>) = ap
 
 instance Effect sig => Monad (Eff sig) where
-  Return v >>= k = k v
-  Eff op >>= k = Eff (emap (>>= k) op)
+  m >>= k = fold k Eff m
