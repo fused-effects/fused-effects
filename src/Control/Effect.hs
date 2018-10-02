@@ -84,6 +84,7 @@ relay :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
       => (forall a . eff (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
       -> (Eff (eff :+: sig) a -> c (Eff sig) a)
 relay alg = fold gen (liftAlg alg)
+{-# INLINE relay #-}
 
 
 class Carrier (c :: (* -> *) -> * -> *) where
