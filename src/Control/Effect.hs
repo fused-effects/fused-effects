@@ -114,6 +114,11 @@ instance Monoid w => Carrier (WriterH w) where
 newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
   deriving (Functor)
 
+instance Applicative m => Applicative (MaybeH m) where
+  pure = gen
+
+  MaybeH f <*> MaybeH a = MaybeH (liftA2 (<*>) f a)
+
 instance Carrier MaybeH where
   joinl mf = MaybeH (mf >>= runMaybeH)
 
