@@ -58,6 +58,14 @@ instance Carrier (ReaderH r) where
   gen a = ReaderH (\ _ -> pure a)
 
 
+newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
+
+instance Monoid w => Carrier (WriterH w) where
+  joinl mf = WriterH (mf >>= runWriterH)
+
+  gen a = WriterH (pure (mempty, a))
+
+
 data Void m a
   deriving (Functor)
 
