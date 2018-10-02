@@ -219,7 +219,7 @@ instance Subset (Lift IO) sig => MonadIO (Eff sig) where
   liftIO = inject . Lift . fmap pure
 
 runM :: Monad m => Eff (Lift m) a -> m a
-runM (Return a) = return a
+runM (Return a)      = pure a
 runM (Eff (Lift op)) = op >>= runM
 
 
