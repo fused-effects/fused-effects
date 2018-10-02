@@ -30,6 +30,14 @@ project _        = Nothing
 
 
 class Carrier (c :: (* -> *) -> * -> *) where
+  -- | (Left-)join a 'Monad' of 'Carrier's into a 'Carrier'.
+  -- @
+  -- joinl . pure = id
+  -- @
+  --
+  -- @
+  -- joinl . join = joinl . fmap joinl
+  -- @
   joinl :: Monad m => m (c m a) -> c m a
 
 data Void m a
