@@ -483,15 +483,15 @@ cut = skip <|> cutfail
 skip :: Applicative m => m ()
 skip = pure ()
 
-runCut :: Subset NonDet sig => Eff (Cut :+: sig) a -> Eff sig a
-runCut = go empty
-  where go :: Subset NonDet sig => Eff sig a -> Eff (Cut :+: sig) a -> Eff sig a
-        go q (Return a) = pure a <|> q
-        go q Empty      = q
-        go _ Cut        = empty
-        go q (Choose k) = go (go q (k False)) (k True)
-        go q (Call m k) = go empty m >>= go q . k
-        go q (Other op) = Eff (hfmap (go empty) op) <|> q
+-- runCut :: Subset NonDet sig => Eff (Cut :+: sig) a -> Eff sig a
+-- runCut = go empty
+--   where go :: Subset NonDet sig => Eff sig a -> Eff (Cut :+: sig) a -> Eff sig a
+--         go q (Return a) = pure a <|> q
+--         go q Empty      = q
+--         go _ Cut        = empty
+--         go q (Choose k) = go (go q (k False)) (k True)
+--         go q (Call m k) = go empty m >>= go q . k
+--         go q (Other op) = Eff (hfmap (go empty) op) <|> q
 
 
 data Symbol m a
