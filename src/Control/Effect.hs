@@ -133,6 +133,11 @@ instance Carrier MaybeH where
 newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
   deriving (Functor)
 
+instance Applicative m => Applicative (EitherH e m) where
+  pure = gen
+
+  EitherH f <*> EitherH a = EitherH (liftA2 (<*>) f a)
+
 instance Carrier (EitherH e) where
   joinl mf = EitherH (mf >>= runEitherH)
 
