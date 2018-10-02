@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect where
 
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Monad ((<=<), ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -89,6 +89,11 @@ instance Carrier (ReaderH r) where
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
   deriving (Functor)
+
+instance (Monoid w, Applicative m) => Applicative (WriterH w m) where
+  pure = gen
+
+  WriterH f <*> WriterH a = WriterH (liftA2 (<*>) f a)
 
 instance Monoid w => Carrier (WriterH w) where
   joinl mf = WriterH (mf >>= runWriterH)
