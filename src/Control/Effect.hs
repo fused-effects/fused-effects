@@ -71,6 +71,11 @@ instance Carrier (StateH s) where
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
   deriving (Functor)
 
+instance Applicative m => Applicative (ReaderH r m) where
+  pure = gen
+
+  ReaderH f <*> ReaderH a = ReaderH (\ r -> f r <*> a r)
+
 instance Carrier (ReaderH r) where
   joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
 
