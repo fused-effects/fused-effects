@@ -29,6 +29,9 @@ project (Eff op) = prj op
 project _        = Nothing
 
 
+class Carrier (c :: (* -> *) -> * -> *) where
+  joinl :: Monad m => m (c m a) -> c m a
+
 data Void m a
   deriving (Functor)
 
