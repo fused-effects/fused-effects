@@ -29,6 +29,15 @@ project (Eff op) = prj op
 project _        = Nothing
 
 
+fold :: Effect sig
+     => (a -> b)
+     -> (sig (Eff sig) b -> b)
+     -> (Eff sig a -> b)
+fold gen alg = go
+  where go (Return x) = gen x
+        go (Eff op)   = alg (emap (pure . fold gen alg) op)
+
+
 class Carrier (c :: (* -> *) -> * -> *) where
   -- | (Left-)join a 'Monad' of 'Carrier's into a 'Carrier'.
   -- @
