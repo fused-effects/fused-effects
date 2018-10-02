@@ -152,6 +152,11 @@ instance Carrier (EitherH e) where
 newtype ListH m a = ListH { runListH :: m [a] }
   deriving (Functor)
 
+instance Applicative m => Applicative (ListH m) where
+  pure = gen
+
+  ListH f <*> ListH a = ListH (liftA2 (<*>) f a)
+
 instance Carrier ListH where
   joinl mf = ListH (mf >>= runListH)
 
