@@ -82,6 +82,14 @@ instance Carrier (EitherH e) where
   gen a = EitherH (pure (Right a))
 
 
+newtype ListH m a = ListH { runListH :: m [a] }
+
+instance Carrier ListH where
+  joinl mf = ListH (mf >>= runListH)
+
+  gen a = ListH (pure [a])
+
+
 data Void m a
   deriving (Functor)
 
