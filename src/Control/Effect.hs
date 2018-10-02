@@ -95,6 +95,16 @@ instance (Monoid w, Applicative m) => Applicative (WriterH w m) where
 
   WriterH f <*> WriterH a = WriterH (liftA2 (<*>) f a)
 
+instance (Monoid w, Monad m) => Monad (WriterH w m) where
+  return = pure
+
+  WriterH a >>= f = WriterH (do
+    (w1, a') <- a
+    let fa = f a'
+    (w2, a'') <- fa `seq` runWriterH fa
+    let w = w1 <> w2
+    w `seq` pure (w, a''))
+
 instance Monoid w => Carrier (WriterH w) where
   joinl mf = WriterH (mf >>= runWriterH)
 
