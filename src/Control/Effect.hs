@@ -74,6 +74,14 @@ instance Carrier MaybeH where
   gen a = MaybeH (pure (Just a))
 
 
+newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
+
+instance Carrier (EitherH e) where
+  joinl mf = EitherH (mf >>= runEitherH)
+
+  gen a = EitherH (pure (Right a))
+
+
 data Void m a
   deriving (Functor)
 
