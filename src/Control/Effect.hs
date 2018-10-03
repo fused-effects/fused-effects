@@ -1,7 +1,7 @@
 {-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect
 ( Eff
-, inject
+, send
 , fold
 , liftAlg
 , relay
@@ -64,8 +64,8 @@ class Effect sig where
          -> sig n (c a)
 
 
-inject :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
-inject = Eff . inj
+send :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
+send = Eff . inj
 
 
 fold :: Effect sig
@@ -255,7 +255,7 @@ instance Functor sig => Effect (Lift sig) where
   handle _ (Lift op) = Lift op
 
 instance Subset (Lift IO) sig => MonadIO (Eff sig) where
-  liftIO = inject . Lift . fmap pure
+  liftIO = send . Lift . fmap pure
 
 runM :: Monad m => Eff (Lift m) a -> m a
 runM (Return a)      = pure a
@@ -291,8 +291,8 @@ instance Effect NonDet where
   handle _ (Choose k) = Choose k
 
 instance Subset NonDet sig => Alternative (Eff sig) where
-  empty = inject Empty
-  l <|> r = inject (Choose (\ c -> if c then l else r))
+  empty = send Empty
+  l <|> r = send (Choose (\ c -> if c then l else r))
 
 runNonDet :: Effect sig => Eff (NonDet :+: sig) a -> Eff sig [a]
 runNonDet = runListH . relay alg
@@ -311,10 +311,10 @@ instance Effect (Reader r) where
   handle handler (Local f m k) = Local f (handler (pure m)) (k =<<)
 
 ask :: Subset (Reader r) sig => Eff sig r
-ask = inject (Ask pure)
+ask = send (Ask pure)
 
 local :: Subset (Reader r) sig => (r -> r) -> Eff sig a -> Eff sig a
-local f m = inject (Local f m pure)
+local f m = send (Local f m pure)
 
 
 runReader :: Effect sig => r -> Eff (Reader r :+: sig) a -> Eff sig a
@@ -333,10 +333,10 @@ instance Effect (State s) where
   handle _ (Put s k) = Put s k
 
 get :: Subset (State s) sig => Eff sig s
-get = inject (Get pure)
+get = send (Get pure)
 
 put :: Subset (State s) sig => s -> Eff sig ()
-put s = inject (Put s (pure ()))
+put s = send (Put s (pure ()))
 
 runState :: Effect sig => s -> Eff (State s :+: sig) a -> Eff sig (s, a)
 runState s m = runStateH (relay alg m) s
@@ -351,7 +351,7 @@ instance Effect Fail where
   handle _ (Fail s) = Fail s
 
 instance Subset Fail sig => MonadFail (Eff sig) where
-  fail = inject . Fail
+  fail = send . Fail
 
 runFail :: Effect sig => Eff (Fail :+: sig) a -> Eff sig (Either String a)
 runFail = runEitherH . relay alg
@@ -369,10 +369,10 @@ instance Effect (Exc exc) where
   handle handler (Catch m h k) = Catch (handler (pure m)) (handler . pure . h) (k =<<)
 
 throw :: Subset (Exc exc) sig => exc -> Eff sig a
-throw = inject . Throw
+throw = send . Throw
 
 catch :: Subset (Exc exc) sig => Eff sig a -> (exc -> Eff sig a) -> Eff sig a
-catch m h = inject (Catch m h pure)
+catch m h = send (Catch m h pure)
 
 runExc :: Effect sig => Eff (Exc exc :+: sig) a -> Eff sig (Either exc a)
 runExc = runEitherH . relay alg
@@ -390,7 +390,7 @@ instance Effect (Resumable exc) where
   handle _ (Resumable exc k) = Resumable exc k
 
 throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
-throwResumable exc = inject (Resumable exc pure)
+throwResumable exc = send (Resumable exc pure)
 
 runResumable :: Effect sig => (forall resume . exc resume -> Eff sig resume) -> Eff (Resumable exc :+: sig) a -> Eff sig a
 runResumable f = runIdH . relay alg
@@ -408,10 +408,10 @@ instance Effect Cut where
   handle handler (Call m k) = Call (handler (pure m)) (k =<<)
 
 cutfail :: Subset Cut sig => Eff sig a
-cutfail = inject Cut
+cutfail = send Cut
 
 call :: Subset Cut sig => Eff sig a -> Eff sig a
-call m = inject (Call m pure)
+call m = send (Call m pure)
 
 cut :: (Subset NonDet sig, Subset Cut sig) => Eff sig ()
 cut = skip <|> cutfail
@@ -438,7 +438,7 @@ instance Effect Symbol where
   handle _ (Symbol sat k) = Symbol sat k
 
 satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
-satisfy sat = inject (Symbol sat pure)
+satisfy sat = send (Symbol sat pure)
 
 char :: Subset Symbol sig => Char -> Eff sig Char
 char c = satisfy (== c)
