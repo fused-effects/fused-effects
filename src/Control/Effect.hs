@@ -74,7 +74,7 @@ fold :: Effect sig
      -> (Eff sig a -> b)
 fold gen alg = go
   where go (Return x) = gen x
-        go (Eff op)   = alg (fmap' (fold gen alg) op)
+        go (Eff op)   = alg (fmap' go op)
 
 liftAlg :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
         => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
