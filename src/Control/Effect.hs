@@ -44,7 +44,7 @@ module Control.Effect
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Monad ((<=<), ap, join, liftM)
+import Control.Monad ((<=<), ap, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
@@ -230,7 +230,7 @@ instance Applicative m => Applicative (ListH m) where
 instance Monad m => Monad (ListH m) where
   return = pure
 
-  ListH a >>= f = ListH (a >>= fmap join . traverse (runListH . f))
+  ListH a >>= f = ListH (a >>= fmap concat . traverse (runListH . f))
 
 instance Carrier ListH where
   joinl mf = ListH (mf >>= runListH)
