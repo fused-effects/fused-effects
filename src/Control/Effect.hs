@@ -58,10 +58,10 @@ class Effect sig where
   default fmap' :: Functor (sig m) => (a -> b) -> (sig m a -> sig m b)
   fmap' = fmap
 
-  handle :: (Carrier c, Monad (c n), Monad m, Monad n)
-         => (forall x . c n (m x) -> n (c n x))
-         -> sig m (c n a)
-         -> sig n (c n a)
+  handle :: (Monad c, Monad m, Monad n)
+         => (forall x . c (m x) -> n (c x))
+         -> sig m (c a)
+         -> sig n (c a)
 
 
 inject :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
@@ -308,7 +308,7 @@ deriving instance Functor (Reader r m)
 
 instance Effect (Reader r) where
   handle _       (Ask k)       = Ask k
-  handle handler (Local f m k) = Local f (handler (gen m)) (k =<<)
+  handle handler (Local f m k) = Local f (handler (pure m)) (k =<<)
 
 ask :: Subset (Reader r) sig => Eff sig r
 ask = inject (Ask pure)
@@ -366,7 +366,7 @@ deriving instance Functor (Exc exc m)
 
 instance Effect (Exc exc) where
   handle _       (Throw exc)   = Throw exc
-  handle handler (Catch m h k) = Catch (handler (gen m)) (handler . gen . h) (k =<<)
+  handle handler (Catch m h k) = Catch (handler (pure m)) (handler . pure . h) (k =<<)
 
 throw :: Subset (Exc exc) sig => exc -> Eff sig a
 throw = inject . Throw
@@ -405,7 +405,7 @@ deriving instance Functor (Cut m)
 
 instance Effect Cut where
   handle _       Cut        = Cut
-  handle handler (Call m k) = Call (handler (gen m)) (k =<<)
+  handle handler (Call m k) = Call (handler (pure m)) (k =<<)
 
 cutfail :: Subset Cut sig => Eff sig a
 cutfail = inject Cut
