@@ -54,7 +54,7 @@ data Eff effects a
   | Eff (effects (Eff effects) (Eff effects a))
 
 class Effect sig where
-  fmap' :: Functor m => (a -> b) -> (sig m a -> sig m b)
+  fmap' :: (a -> b) -> (sig m a -> sig m b)
   default fmap' :: Functor (sig m) => (a -> b) -> (sig m a -> sig m b)
   fmap' = fmap
 
