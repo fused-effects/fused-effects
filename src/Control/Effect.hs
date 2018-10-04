@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect
 ( Eff
 , send
@@ -76,20 +76,20 @@ fold gen alg = go
   where go (Return x) = gen x
         go (Eff op)   = alg (fmap' go op)
 
-liftAlg :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
+liftAlg :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
         => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
         -> (forall a . (eff :+: sig) (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
 liftAlg alg1 = alg1 \/ alg2
   where alg2 op = joinl (Eff (fmap' pure (handle (pure . fold gen (liftAlg alg1)) op)))
 
-relay :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
+relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       => (forall a . eff (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
       -> (Eff (eff :+: sig) a -> c (Eff sig) a)
 relay alg = fold gen (liftAlg alg)
 {-# INLINE relay #-}
 
 
-class Carrier (c :: (* -> *) -> * -> *) where
+class Functor f => Carrier c f | c -> f where
   -- | (Left-)join a 'Monad' of 'Carrier's into a 'Carrier'.
   -- @
   -- joinl . pure = id
@@ -106,7 +106,7 @@ class Carrier (c :: (* -> *) -> * -> *) where
 newtype IdH m a = IdH { runIdH :: m a }
   deriving (Applicative, Functor, Monad)
 
-instance Carrier IdH where
+instance Carrier IdH Identity where
   joinl mf = IdH (mf >>= runIdH)
 
   gen = IdH . pure
@@ -132,7 +132,7 @@ instance Monad m => Monad (StateH s m) where
     let fa = f a'
     fa `seq` runStateH fa s'
 
-instance Carrier (StateH s) where
+instance Carrier (StateH s) ((,) s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
 
   gen a = StateH (\ s -> pure (s, a))
@@ -151,7 +151,7 @@ instance Monad m => Monad (ReaderH r m) where
 
   ReaderH a >>= f = ReaderH (\ r -> a r >>= \ a' -> runReaderH (f a') r)
 
-instance Carrier (ReaderH r) where
+instance Carrier (ReaderH r) Identity where
   joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
 
   gen a = ReaderH (\ _ -> pure a)
@@ -175,7 +175,7 @@ instance (Monoid w, Monad m) => Monad (WriterH w m) where
     let w = w1 <> w2
     w `seq` pure (w, a''))
 
-instance Monoid w => Carrier (WriterH w) where
+instance Monoid w => Carrier (WriterH w) ((,) w) where
   joinl mf = WriterH (mf >>= runWriterH)
 
   gen a = WriterH (pure (mempty, a))
@@ -194,7 +194,7 @@ instance Monad m => Monad (MaybeH m) where
 
   MaybeH a >>= f = MaybeH (a >>= maybe (pure Nothing) (runMaybeH . f))
 
-instance Carrier MaybeH where
+instance Carrier MaybeH Maybe where
   joinl mf = MaybeH (mf >>= runMaybeH)
 
   gen a = MaybeH (pure (Just a))
@@ -213,7 +213,7 @@ instance Monad m => Monad (EitherH e m) where
 
   EitherH a >>= f = EitherH (a >>= either (pure . Left) (runEitherH . f))
 
-instance Carrier (EitherH e) where
+instance Carrier (EitherH e) (Either e) where
   joinl mf = EitherH (mf >>= runEitherH)
 
   gen a = EitherH (pure (Right a))
@@ -232,7 +232,7 @@ instance Monad m => Monad (ListH m) where
 
   ListH a >>= f = ListH (a >>= fmap concat . traverse (runListH . f))
 
-instance Carrier ListH where
+instance Carrier ListH [] where
   joinl mf = ListH (mf >>= runListH)
 
   gen a = ListH (pure [a])
