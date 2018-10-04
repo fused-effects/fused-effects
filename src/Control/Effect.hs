@@ -59,7 +59,7 @@ class Effect sig where
   fmap' = fmap
 
   handle :: (Monad c, Monad m, Monad n)
-         => (forall x . c (m x) -> n (c x))
+         => (forall x . m x -> n (c x))
          -> sig m (c a)
          -> sig n (c a)
 
@@ -80,7 +80,7 @@ liftAlg :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
         => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
         -> (forall a . (eff :+: sig) (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
 liftAlg alg1 = alg1 \/ alg2
-  where alg2 op = joinl (Eff (fmap' pure (handle (pure . (fold gen (liftAlg alg1) =<<)) op)))
+  where alg2 op = joinl (Eff (fmap' pure (handle (pure . fold gen (liftAlg alg1)) op)))
 
 relay :: (Effect eff, Effect sig, Carrier c, Monad (c (Eff sig)))
       => (forall a . eff (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
@@ -308,7 +308,7 @@ deriving instance Functor (Reader r m)
 
 instance Effect (Reader r) where
   handle _       (Ask k)       = Ask k
-  handle handler (Local f m k) = Local f (handler (pure m)) (k =<<)
+  handle handler (Local f m k) = Local f (handler m) (k =<<)
 
 ask :: Subset (Reader r) sig => Eff sig r
 ask = send (Ask pure)
@@ -366,7 +366,7 @@ deriving instance Functor (Exc exc m)
 
 instance Effect (Exc exc) where
   handle _       (Throw exc)   = Throw exc
-  handle handler (Catch m h k) = Catch (handler (pure m)) (handler . pure . h) (k =<<)
+  handle handler (Catch m h k) = Catch (handler m) (handler . h) (k =<<)
 
 throw :: Subset (Exc exc) sig => exc -> Eff sig a
 throw = send . Throw
@@ -405,7 +405,7 @@ deriving instance Functor (Cut m)
 
 instance Effect Cut where
   handle _       Cut        = Cut
-  handle handler (Call m k) = Call (handler (pure m)) (k =<<)
+  handle handler (Call m k) = Call (handler m) (k =<<)
 
 cutfail :: Subset Cut sig => Eff sig a
 cutfail = send Cut
