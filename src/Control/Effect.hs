@@ -47,6 +47,7 @@ import Control.Applicative (Alternative(..), liftA2)
 import Control.Monad ((<=<), ap, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Data.Functor.Identity
 import Prelude hiding (fail)
 
 data Eff effects a
