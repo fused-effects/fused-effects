@@ -45,7 +45,7 @@ module Control.Effect
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Monad ((<=<), ap, liftM)
+import Control.Monad ((<=<), ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Bifunctor (first)
@@ -308,8 +308,7 @@ instance Subset (Lift IO) sig => MonadIO (Eff sig) where
   liftIO = send . Lift . fmap pure
 
 runM :: Monad m => Eff (Lift m) a -> m a
-runM (Return a)      = pure a
-runM (Eff (Lift op)) = op >>= runM
+runM = foldA (join . unLift)
 
 
 data (f :+: g) (m :: * -> *) k
