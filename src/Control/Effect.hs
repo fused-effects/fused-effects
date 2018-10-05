@@ -47,6 +47,7 @@ import Control.Applicative (Alternative(..), liftA2)
 import Control.Monad ((<=<), ap, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Data.Bifunctor (first)
 import Data.Functor.Identity
 import Prelude hiding (fail)
 
@@ -101,12 +102,24 @@ class Functor f => Carrier c f | c -> f where
   -- @
   joinl :: Monad m => m (c m a) -> c m a
 
+  suspend :: Monad m => c m (f ())
+
+  resume :: Monad m => f (c m a) -> m (f a)
+
+  wrap :: Monad m => m (f a) -> c m a
+
 
 newtype IdH m a = IdH { runIdH :: m a }
   deriving (Applicative, Functor, Monad)
 
 instance Carrier IdH Identity where
   joinl mf = IdH (mf >>= runIdH)
+
+  suspend = IdH (pure (Identity ()))
+
+  resume = fmap Identity . runIdH . runIdentity
+
+  wrap = IdH . fmap runIdentity
 
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
@@ -132,6 +145,12 @@ instance Monad m => Monad (StateH s m) where
 instance Carrier (StateH s) ((,) s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
 
+  suspend = StateH (\ s -> pure (s, (s, ())))
+
+  resume (s, m) = runStateH m s
+
+  wrap = StateH . const
+
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
   deriving (Functor)
@@ -146,8 +165,14 @@ instance Monad m => Monad (ReaderH r m) where
 
   ReaderH a >>= f = ReaderH (\ r -> a r >>= \ a' -> runReaderH (f a') r)
 
-instance Carrier (ReaderH r) Identity where
+instance Carrier (ReaderH r) ((,) r) where
   joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
+
+  suspend = ReaderH (\ r -> pure (r, ()))
+
+  resume (r, m) = (,) r <$> runReaderH m r
+
+  wrap = ReaderH . const . fmap snd
 
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
@@ -168,8 +193,14 @@ instance (Monoid w, Monad m) => Monad (WriterH w m) where
     let w = w1 <> w2
     w `seq` pure (w, a''))
 
-instance Carrier (WriterH w) ((,) w) where
+instance Monoid w => Carrier (WriterH w) ((,) w) where
   joinl mf = WriterH (mf >>= runWriterH)
+
+  suspend = WriterH (pure (mempty, (mempty, ())))
+
+  resume (w, m) = first (w <>) <$> runWriterH m
+
+  wrap = WriterH
 
 
 newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
@@ -188,6 +219,12 @@ instance Monad m => Monad (MaybeH m) where
 instance Carrier MaybeH Maybe where
   joinl mf = MaybeH (mf >>= runMaybeH)
 
+  suspend = MaybeH (pure (Just (Just ())))
+
+  resume = maybe (pure Nothing) runMaybeH
+
+  wrap = MaybeH
+
 
 newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
   deriving (Functor)
@@ -205,6 +242,12 @@ instance Monad m => Monad (EitherH e m) where
 instance Carrier (EitherH e) (Either e) where
   joinl mf = EitherH (mf >>= runEitherH)
 
+  suspend = EitherH (pure (Right (Right ())))
+
+  resume = either (pure . Left) runEitherH
+
+  wrap = EitherH
+
 
 newtype ListH m a = ListH { runListH :: m [a] }
   deriving (Functor)
@@ -221,6 +264,12 @@ instance Monad m => Monad (ListH m) where
 
 instance Carrier ListH [] where
   joinl mf = ListH (mf >>= runListH)
+
+  suspend = ListH (pure [[()]])
+
+  resume = fmap concat . traverse runListH
+
+  wrap = ListH
 
 
 data Void m k
