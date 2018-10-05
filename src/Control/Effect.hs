@@ -91,16 +91,16 @@ foldA alg = go
         go (Return x) = pure x
         go (Eff op)   = alg (hfmap go (fmap' go op))
 
-liftAlg :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
-        => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
-        -> (forall a . (eff :+: sig) (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
+liftAlg :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
+        => (forall a .  eff          (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
+        -> (forall a . (eff :+: sig) (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
 liftAlg alg1 = alg1 \/ alg2
-  where alg2 op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state (resume . fmap (fold pure (liftAlg alg1))) op)))
+  where alg2 op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state resume op)))
 
 relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
-      => (forall a . eff (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
-      -> (Eff (eff :+: sig) a -> c (Eff sig) a)
-relay alg = fold pure (liftAlg alg)
+      => (forall a . eff (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
+      -> (forall a . Eff (eff :+: sig) a -> c (Eff sig) a)
+relay alg = foldA (liftAlg alg)
 {-# INLINE relay #-}
 
 
@@ -379,7 +379,7 @@ local f m = send (Local f m pure)
 runReader :: Effect sig => r -> Eff (Reader r :+: sig) a -> Eff sig a
 runReader r m = runReaderH (relay alg m) r
   where alg (Ask k)       = ReaderH (\ r -> runReaderH (k r) r)
-        alg (Local f m k) = ReaderH (\ r -> runReader (f r) m >>= flip runReaderH r . k)
+        alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
 
 
 data State s m k
@@ -444,7 +444,7 @@ catch m h = send (Catch m h pure)
 runExc :: Effect sig => Eff (Exc exc :+: sig) a -> Eff sig (Either exc a)
 runExc = runEitherH . relay alg
   where alg (Throw e)     = EitherH (pure (Left e))
-        alg (Catch m h k) = EitherH (runExc m >>= runEitherH . either (k <=< EitherH . runExc . h) k)
+        alg (Catch m h k) = EitherH (runEitherH m >>= runEitherH . either (k <=< h) k)
 
 
 data Resumable exc m k
