@@ -60,10 +60,11 @@ class Effect sig where
   default fmap' :: Functor (sig m) => (a -> b) -> (sig m a -> sig m b)
   fmap' = fmap
 
-  handle :: (Monad c, Monad m, Monad n)
-         => (forall x . m x -> n (c x))
-         -> sig m (c a)
-         -> sig n (c a)
+  handle :: (Carrier c f, Monad m, Monad n, Applicative (c n))
+         => f ()
+         -> (forall x . f (m x) -> n (f x))
+         -> sig m (c n a)
+         -> sig n (c n a)
 
 
 send :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
@@ -82,7 +83,7 @@ liftAlg :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
         => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
         -> (forall a . (eff :+: sig) (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
 liftAlg alg1 = alg1 \/ alg2
-  where alg2 op = joinl (Eff (fmap' pure (handle (pure . fold pure (liftAlg alg1)) op)))
+  where alg2 op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state (resume . fmap (fold pure (liftAlg alg1))) op)))
 
 relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       => (forall a . eff (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
@@ -276,7 +277,7 @@ data Void m k
   deriving (Functor)
 
 instance Effect Void where
-  handle _ v = case v of {}
+  handle _ _ v = case v of {}
 
 run :: Eff Void a -> a
 run = fold id (\ v -> case v of {})
@@ -286,7 +287,7 @@ newtype Lift sig m k = Lift { unLift :: sig k }
   deriving (Functor)
 
 instance Functor sig => Effect (Lift sig) where
-  handle _ (Lift op) = Lift op
+  handle _ _ (Lift op) = Lift op
 
 instance Subset (Lift IO) sig => MonadIO (Eff sig) where
   liftIO = send . Lift . fmap pure
@@ -305,8 +306,8 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
   fmap' f (L l) = L (fmap' f l)
   fmap' f (R r) = R (fmap' f r)
 
-  handle handler (L l) = L (handle handler l)
-  handle handler (R r) = R (handle handler r)
+  handle state handler (L l) = L (handle state handler l)
+  handle state handler (R r) = R (handle state handler r)
 
 (\/) :: ( sig1           m a -> b)
      -> (          sig2  m a -> b)
@@ -321,8 +322,8 @@ data NonDet m k
   deriving (Functor)
 
 instance Effect NonDet where
-  handle _ Empty      = Empty
-  handle _ (Choose k) = Choose k
+  handle _ _ Empty      = Empty
+  handle _ _ (Choose k) = Choose k
 
 instance Subset NonDet sig => Alternative (Eff sig) where
   empty = send Empty
@@ -341,8 +342,8 @@ data Reader r m k
 deriving instance Functor (Reader r m)
 
 instance Effect (Reader r) where
-  handle _       (Ask k)       = Ask k
-  handle handler (Local f m k) = Local f (handler m) (k =<<)
+  handle _     _       (Ask k)       = Ask k
+  handle state handler (Local f m k) = Local f (handler (m <$ state)) (wrap . resume . fmap k)
 
 ask :: Subset (Reader r) sig => Eff sig r
 ask = send (Ask pure)
@@ -363,8 +364,8 @@ data State s m k
   deriving (Functor)
 
 instance Effect (State s) where
-  handle _ (Get k)   = Get   k
-  handle _ (Put s k) = Put s k
+  handle _ _ (Get k)   = Get   k
+  handle _ _ (Put s k) = Put s k
 
 get :: Subset (State s) sig => Eff sig s
 get = send (Get pure)
@@ -382,7 +383,7 @@ newtype Fail m k = Fail String
   deriving (Functor)
 
 instance Effect Fail where
-  handle _ (Fail s) = Fail s
+  handle _ _ (Fail s) = Fail s
 
 instance Subset Fail sig => MonadFail (Eff sig) where
   fail = send . Fail
@@ -399,8 +400,8 @@ data Exc exc m k
 deriving instance Functor (Exc exc m)
 
 instance Effect (Exc exc) where
-  handle _       (Throw exc)   = Throw exc
-  handle handler (Catch m h k) = Catch (handler m) (handler . h) (k =<<)
+  handle _     _       (Throw exc)   = Throw exc
+  handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (wrap . resume . fmap k)
 
 throw :: Subset (Exc exc) sig => exc -> Eff sig a
 throw = send . Throw
@@ -421,7 +422,7 @@ data Resumable exc m k
 deriving instance Functor (Resumable exc m)
 
 instance Effect (Resumable exc) where
-  handle _ (Resumable exc k) = Resumable exc k
+  handle _ _ (Resumable exc k) = Resumable exc k
 
 throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
 throwResumable exc = send (Resumable exc pure)
@@ -438,8 +439,8 @@ data Cut m k
 deriving instance Functor (Cut m)
 
 instance Effect Cut where
-  handle _       Cut        = Cut
-  handle handler (Call m k) = Call (handler m) (k =<<)
+  handle _     _       Cut        = Cut
+  handle state handler (Call m k) = Call (handler (m <$ state)) (wrap . resume . fmap k)
 
 cutfail :: Subset Cut sig => Eff sig a
 cutfail = send Cut
@@ -469,7 +470,7 @@ data Symbol m k
   deriving (Functor)
 
 instance Effect Symbol where
-  handle _ (Symbol sat k) = Symbol sat k
+  handle _ _ (Symbol sat k) = Symbol sat k
 
 satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
 satisfy sat = send (Symbol sat pure)
@@ -531,3 +532,17 @@ instance Effect sig => Applicative (Eff sig) where
 
 instance Effect sig => Monad (Eff sig) where
   m >>= k = fold k Eff m
+
+--
+test1 :: String
+test1
+  = run
+  ( runReader "world"
+  ( snd <$> runState 'a'
+  ( local ("hello, " ++) ((:) <$> get <*> ask))))
+
+test2 :: String
+test2
+  = run
+  ( runReader "world"
+  ( local ("hello, " ++) ((:) <$> pure 'a' <*> ask)))
