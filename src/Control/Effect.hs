@@ -63,7 +63,7 @@ class Effect sig where
 
   hfmap :: (forall x . m x -> n x) -> sig m a -> sig n a
 
-  handle :: (Carrier c f, Monad n, Applicative (c n))
+  handle :: (Carrier c f, Monad n)
          => f ()
          -> sig (c n) (c n a)
          -> sig n (c n a)
