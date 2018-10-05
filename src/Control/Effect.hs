@@ -531,17 +531,3 @@ instance Effect sig => Applicative (Eff sig) where
 
 instance Effect sig => Monad (Eff sig) where
   m >>= k = fold k Eff m
-
---
-test1 :: String
-test1
-  = run
-  ( runReader "world"
-  ( snd <$> runState 'a'
-  ( local ("hello, " ++) ((:) <$> get <*> ask))))
-
-test2 :: String
-test2
-  = run
-  ( runReader "world"
-  ( local ("hello, " ++) ((:) <$> pure 'a' <*> ask)))
