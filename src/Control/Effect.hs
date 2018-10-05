@@ -355,7 +355,7 @@ local f m = send (Local f m pure)
 runReader :: Effect sig => r -> Eff (Reader r :+: sig) a -> Eff sig a
 runReader r m = runReaderH (relay alg m) r
   where alg (Ask k)       = ReaderH (\ r -> runReaderH (k r) r)
-        alg (Local f m k) = ReaderH (\ r -> let fr = f r in fr `seq` runReader fr m >>= flip runReaderH r . k)
+        alg (Local f m k) = ReaderH (\ r -> runReader (f r) m >>= flip runReaderH r . k)
 
 
 data State s m k
