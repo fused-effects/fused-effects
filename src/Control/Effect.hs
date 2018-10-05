@@ -65,7 +65,6 @@ class Effect sig where
 
   handle :: (Carrier c f, Monad n, Applicative (c n))
          => f ()
-         -> (forall x . f (c n x) -> n (f x))
          -> sig (c n) (c n a)
          -> sig n (c n a)
 
@@ -95,7 +94,7 @@ liftAlg :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
         => (forall a .  eff          (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
         -> (forall a . (eff :+: sig) (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
 liftAlg alg1 = alg1 \/ alg2
-  where alg2 op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state resume op)))
+  where alg2 op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
 
 relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       => (forall a . eff (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
@@ -290,7 +289,7 @@ data Void m k
 
 instance Effect Void where
   hfmap _ v = case v of {}
-  handle _ _ v = case v of {}
+  handle _ v = case v of {}
 
 run :: Eff Void a -> a
 run = fold id (\ v -> case v of {})
@@ -302,7 +301,7 @@ newtype Lift sig m k = Lift { unLift :: sig k }
 instance Functor sig => Effect (Lift sig) where
   hfmap _ (Lift op) = Lift op
 
-  handle _ _ (Lift op) = Lift op
+  handle _ (Lift op) = Lift op
 
 instance Subset (Lift IO) sig => MonadIO (Eff sig) where
   liftIO = send . Lift . fmap pure
@@ -323,8 +322,8 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
   fmap' f (L l) = L (fmap' f l)
   fmap' f (R r) = R (fmap' f r)
 
-  handle state handler (L l) = L (handle state handler l)
-  handle state handler (R r) = R (handle state handler r)
+  handle state (L l) = L (handle state l)
+  handle state (R r) = R (handle state r)
 
 (\/) :: ( sig1           m a -> b)
      -> (          sig2  m a -> b)
@@ -342,8 +341,8 @@ instance Effect NonDet where
   hfmap _ Empty      = Empty
   hfmap _ (Choose k) = Choose k
 
-  handle _ _ Empty      = Empty
-  handle _ _ (Choose k) = Choose k
+  handle _ Empty      = Empty
+  handle _ (Choose k) = Choose k
 
 instance Subset NonDet sig => Alternative (Eff sig) where
   empty = send Empty
@@ -365,8 +364,8 @@ instance Effect (Reader r) where
   hfmap _ (Ask k)       = Ask k
   hfmap f (Local g m k) = Local g (f m) k
 
-  handle _     _       (Ask k)       = Ask k
-  handle state handler (Local f m k) = Local f (handler (m <$ state)) (wrap . resume . fmap k)
+  handle _     (Ask k)       = Ask k
+  handle state (Local f m k) = Local f (resume (m <$ state)) (wrap . resume . fmap k)
 
 ask :: Subset (Reader r) sig => Eff sig r
 ask = send (Ask pure)
@@ -390,8 +389,8 @@ instance Effect (State s) where
   hfmap _ (Get k)   = Get   k
   hfmap _ (Put s k) = Put s k
 
-  handle _ _ (Get k)   = Get   k
-  handle _ _ (Put s k) = Put s k
+  handle _ (Get k)   = Get   k
+  handle _ (Put s k) = Put s k
 
 get :: Subset (State s) sig => Eff sig s
 get = send (Get pure)
@@ -411,7 +410,7 @@ newtype Fail m k = Fail String
 instance Effect Fail where
   hfmap _ (Fail s) = Fail s
 
-  handle _ _ (Fail s) = Fail s
+  handle _ (Fail s) = Fail s
 
 instance Subset Fail sig => MonadFail (Eff sig) where
   fail = send . Fail
@@ -431,8 +430,8 @@ instance Effect (Exc exc) where
   hfmap _ (Throw exc)   = Throw exc
   hfmap f (Catch m h k) = Catch (f m) (f . h) k
 
-  handle _     _       (Throw exc)   = Throw exc
-  handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (wrap . resume . fmap k)
+  handle _     (Throw exc)   = Throw exc
+  handle state (Catch m h k) = Catch (resume (m <$ state)) (resume . (<$ state) . h) (wrap . resume . fmap k)
 
 throw :: Subset (Exc exc) sig => exc -> Eff sig a
 throw = send . Throw
@@ -454,7 +453,7 @@ deriving instance Functor (Resumable exc m)
 instance Effect (Resumable exc) where
   hfmap _ (Resumable exc k) = Resumable exc k
 
-  handle _ _ (Resumable exc k) = Resumable exc k
+  handle _ (Resumable exc k) = Resumable exc k
 
 throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
 throwResumable exc = send (Resumable exc pure)
@@ -474,8 +473,8 @@ instance Effect Cut where
   hfmap _ Cut        = Cut
   hfmap f (Call m k) = Call (f m) k
 
-  handle _     _       Cut        = Cut
-  handle state handler (Call m k) = Call (handler (m <$ state)) (wrap . resume . fmap k)
+  handle _     Cut        = Cut
+  handle state (Call m k) = Call (resume (m <$ state)) (wrap . resume . fmap k)
 
 cutfail :: Subset Cut sig => Eff sig a
 cutfail = send Cut
@@ -507,7 +506,7 @@ data Symbol m k
 instance Effect Symbol where
   hfmap _ (Symbol sat k) = Symbol sat k
 
-  handle _ _ (Symbol sat k) = Symbol sat k
+  handle _ (Symbol sat k) = Symbol sat k
 
 satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
 satisfy sat = send (Symbol sat pure)
