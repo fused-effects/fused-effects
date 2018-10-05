@@ -60,6 +60,8 @@ class Effect sig where
   default fmap' :: Functor (sig m) => (a -> b) -> (sig m a -> sig m b)
   fmap' = fmap
 
+  hfmap :: (forall x . m x -> n x) -> sig m a -> sig n a
+
   handle :: (Carrier c f, Monad m, Monad n, Applicative (c n))
          => f ()
          -> (forall x . f (m x) -> n (f x))
@@ -277,6 +279,7 @@ data Void m k
   deriving (Functor)
 
 instance Effect Void where
+  hfmap _ v = case v of {}
   handle _ _ v = case v of {}
 
 run :: Eff Void a -> a
@@ -287,6 +290,8 @@ newtype Lift sig m k = Lift { unLift :: sig k }
   deriving (Functor)
 
 instance Functor sig => Effect (Lift sig) where
+  hfmap _ (Lift op) = Lift op
+
   handle _ _ (Lift op) = Lift op
 
 instance Subset (Lift IO) sig => MonadIO (Eff sig) where
@@ -303,6 +308,9 @@ data (f :+: g) (m :: * -> *) k
   deriving (Eq, Functor, Ord, Show)
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
+  hfmap f (L l) = L (hfmap f l)
+  hfmap f (R r) = R (hfmap f r)
+
   fmap' f (L l) = L (fmap' f l)
   fmap' f (R r) = R (fmap' f r)
 
@@ -322,6 +330,9 @@ data NonDet m k
   deriving (Functor)
 
 instance Effect NonDet where
+  hfmap _ Empty      = Empty
+  hfmap _ (Choose k) = Choose k
+
   handle _ _ Empty      = Empty
   handle _ _ (Choose k) = Choose k
 
@@ -342,6 +353,9 @@ data Reader r m k
 deriving instance Functor (Reader r m)
 
 instance Effect (Reader r) where
+  hfmap _ (Ask k)       = Ask k
+  hfmap f (Local g m k) = Local g (f m) k
+
   handle _     _       (Ask k)       = Ask k
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (wrap . resume . fmap k)
 
@@ -364,6 +378,9 @@ data State s m k
   deriving (Functor)
 
 instance Effect (State s) where
+  hfmap _ (Get k)   = Get   k
+  hfmap _ (Put s k) = Put s k
+
   handle _ _ (Get k)   = Get   k
   handle _ _ (Put s k) = Put s k
 
@@ -383,6 +400,8 @@ newtype Fail m k = Fail String
   deriving (Functor)
 
 instance Effect Fail where
+  hfmap _ (Fail s) = Fail s
+
   handle _ _ (Fail s) = Fail s
 
 instance Subset Fail sig => MonadFail (Eff sig) where
@@ -400,6 +419,9 @@ data Exc exc m k
 deriving instance Functor (Exc exc m)
 
 instance Effect (Exc exc) where
+  hfmap _ (Throw exc)   = Throw exc
+  hfmap f (Catch m h k) = Catch (f m) (f . h) k
+
   handle _     _       (Throw exc)   = Throw exc
   handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (wrap . resume . fmap k)
 
@@ -421,6 +443,8 @@ data Resumable exc m k
 deriving instance Functor (Resumable exc m)
 
 instance Effect (Resumable exc) where
+  hfmap _ (Resumable exc k) = Resumable exc k
+
   handle _ _ (Resumable exc k) = Resumable exc k
 
 throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
@@ -438,6 +462,9 @@ data Cut m k
 deriving instance Functor (Cut m)
 
 instance Effect Cut where
+  hfmap _ Cut        = Cut
+  hfmap f (Call m k) = Call (f m) k
+
   handle _     _       Cut        = Cut
   handle state handler (Call m k) = Call (handler (m <$ state)) (wrap . resume . fmap k)
 
@@ -469,6 +496,8 @@ data Symbol m k
   deriving (Functor)
 
 instance Effect Symbol where
+  hfmap _ (Symbol sat k) = Symbol sat k
+
   handle _ _ (Symbol sat k) = Symbol sat k
 
 satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
