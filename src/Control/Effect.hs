@@ -411,8 +411,7 @@ catch m h = send (Catch m h pure)
 
 runExc :: Effect sig => Eff (Exc exc :+: sig) a -> Eff sig (Either exc a)
 runExc = runEitherH . relay alg
-  where alg :: Effect sig => Exc exc (Eff (Exc exc :+: sig)) (EitherH exc (Eff sig) a) -> EitherH exc (Eff sig) a
-        alg (Throw e)     = EitherH (pure (Left e))
+  where alg (Throw e)     = EitherH (pure (Left e))
         alg (Catch m h k) = EitherH (runExc m >>= either (runEitherH . (k <=< EitherH . runExc . h)) (runEitherH . k))
 
 
