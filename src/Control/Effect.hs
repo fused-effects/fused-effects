@@ -42,6 +42,7 @@ module Control.Effect
 , expr
 , term
 , factor
+, parse
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
@@ -531,13 +532,11 @@ factor :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
 factor = read <$> some digit
      <|> char '(' *> expr <* char ')'
 
--- parse :: Subset NonDet sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
--- parse ""     (Return a)               = pure a
--- parse _      (Return _)               = empty
--- parse ""     (Symbol _ _)             = empty
--- parse (c:cs) (Symbol p k) | p c       = parse cs (k c)
---                           | otherwise = empty
--- parse cs     (Other op)               = runIdentity <$> Eff (handle (Identity ()) (fmap Identity . parse cs . runIdentity) op)
+parse :: Subset NonDet sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
+parse input = fmap snd . flip runStateH input . relay alg
+  where alg (Symbol p k) = StateH (\ s -> case s of
+          c:cs | p c -> runStateH (k c) cs
+          _          -> empty)
 
 
 class (Effect sub, Effect sup) => Subset sub sup where
