@@ -1,8 +1,9 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Control.Effect
 ( Eff
 , send
 , fold
+, foldA
 , liftAlg
 , relay
 , Effect(..)
@@ -80,6 +81,15 @@ fold :: Effect sig
 fold gen alg = go
   where go (Return x) = gen x
         go (Eff op)   = alg (fmap' go op)
+
+foldA :: forall sig f
+      .  (Effect sig, Applicative f)
+      => (forall a . sig f (f a) -> f a)
+      -> (forall a . Eff sig a -> f a)
+foldA alg = go
+  where go :: Eff sig a -> f a
+        go (Return x) = pure x
+        go (Eff op)   = alg (hfmap go (fmap' go op))
 
 liftAlg :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
         => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
