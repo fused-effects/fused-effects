@@ -81,12 +81,12 @@ liftAlg :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
         => (forall a .  eff          (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
         -> (forall a . (eff :+: sig) (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
 liftAlg alg1 = alg1 \/ alg2
-  where alg2 op = joinl (Eff (fmap' pure (handle (pure . fold gen (liftAlg alg1)) op)))
+  where alg2 op = joinl (Eff (fmap' pure (handle (pure . fold pure (liftAlg alg1)) op)))
 
 relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       => (forall a . eff (Eff (eff :+: sig)) (c (Eff sig) a) -> c (Eff sig) a)
       -> (Eff (eff :+: sig) a -> c (Eff sig) a)
-relay alg = fold gen (liftAlg alg)
+relay alg = fold pure (liftAlg alg)
 {-# INLINE relay #-}
 
 
@@ -101,8 +101,6 @@ class Functor f => Carrier c f | c -> f where
   -- @
   joinl :: Monad m => m (c m a) -> c m a
 
-  gen :: Applicative m => a -> c m a
-
 
 newtype IdH m a = IdH { runIdH :: m a }
   deriving (Applicative, Functor, Monad)
@@ -110,14 +108,12 @@ newtype IdH m a = IdH { runIdH :: m a }
 instance Carrier IdH Identity where
   joinl mf = IdH (mf >>= runIdH)
 
-  gen = IdH . pure
-
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
   deriving (Functor)
 
 instance Monad m => Applicative (StateH s m) where
-  pure = gen
+  pure a = StateH (\ s -> pure (s, a))
 
   StateH f <*> StateH a = StateH $ \ s -> do
     (s',  f') <- f s
@@ -136,14 +132,12 @@ instance Monad m => Monad (StateH s m) where
 instance Carrier (StateH s) ((,) s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
 
-  gen a = StateH (\ s -> pure (s, a))
-
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
   deriving (Functor)
 
 instance Applicative m => Applicative (ReaderH r m) where
-  pure = gen
+  pure a = ReaderH (\ _ -> pure a)
 
   ReaderH f <*> ReaderH a = ReaderH (\ r -> f r <*> a r)
 
@@ -155,14 +149,12 @@ instance Monad m => Monad (ReaderH r m) where
 instance Carrier (ReaderH r) Identity where
   joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
 
-  gen a = ReaderH (\ _ -> pure a)
-
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
   deriving (Functor)
 
 instance (Monoid w, Applicative m) => Applicative (WriterH w m) where
-  pure = gen
+  pure a = WriterH (pure (mempty, a))
 
   WriterH f <*> WriterH a = WriterH (liftA2 (<*>) f a)
 
@@ -176,17 +168,15 @@ instance (Monoid w, Monad m) => Monad (WriterH w m) where
     let w = w1 <> w2
     w `seq` pure (w, a''))
 
-instance Monoid w => Carrier (WriterH w) ((,) w) where
+instance Carrier (WriterH w) ((,) w) where
   joinl mf = WriterH (mf >>= runWriterH)
-
-  gen a = WriterH (pure (mempty, a))
 
 
 newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
   deriving (Functor)
 
 instance Applicative m => Applicative (MaybeH m) where
-  pure = gen
+  pure a = MaybeH (pure (Just a))
 
   MaybeH f <*> MaybeH a = MaybeH (liftA2 (<*>) f a)
 
@@ -198,14 +188,12 @@ instance Monad m => Monad (MaybeH m) where
 instance Carrier MaybeH Maybe where
   joinl mf = MaybeH (mf >>= runMaybeH)
 
-  gen a = MaybeH (pure (Just a))
-
 
 newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
   deriving (Functor)
 
 instance Applicative m => Applicative (EitherH e m) where
-  pure = gen
+  pure a = EitherH (pure (Right a))
 
   EitherH f <*> EitherH a = EitherH (liftA2 (<*>) f a)
 
@@ -217,14 +205,12 @@ instance Monad m => Monad (EitherH e m) where
 instance Carrier (EitherH e) (Either e) where
   joinl mf = EitherH (mf >>= runEitherH)
 
-  gen a = EitherH (pure (Right a))
-
 
 newtype ListH m a = ListH { runListH :: m [a] }
   deriving (Functor)
 
 instance Applicative m => Applicative (ListH m) where
-  pure = gen
+  pure a = ListH (pure [a])
 
   ListH f <*> ListH a = ListH (liftA2 (<*>) f a)
 
@@ -235,8 +221,6 @@ instance Monad m => Monad (ListH m) where
 
 instance Carrier ListH [] where
   joinl mf = ListH (mf >>= runListH)
-
-  gen a = ListH (pure [a])
 
 
 data Void m k
