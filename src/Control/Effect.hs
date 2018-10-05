@@ -412,7 +412,7 @@ catch m h = send (Catch m h pure)
 runExc :: Effect sig => Eff (Exc exc :+: sig) a -> Eff sig (Either exc a)
 runExc = runEitherH . relay alg
   where alg (Throw e)     = EitherH (pure (Left e))
-        alg (Catch m h k) = EitherH (runExc m >>= either (runEitherH . (k <=< EitherH . runExc . h)) (runEitherH . k))
+        alg (Catch m h k) = EitherH (runExc m >>= runEitherH . either (k <=< EitherH . runExc . h) k)
 
 
 data Resumable exc m k
