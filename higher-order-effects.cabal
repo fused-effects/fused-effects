@@ -28,6 +28,7 @@ library
                      , Control.Effect.Reader
                      , Control.Effect.Resumable
                      , Control.Effect.State
+                     , Control.Effect.Symbol
                      , Control.Effect.Writer
   -- other-modules:
   -- other-extensions:
