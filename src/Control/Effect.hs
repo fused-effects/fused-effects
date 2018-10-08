@@ -30,6 +30,7 @@ module Control.Effect
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Monad (ap, liftM)
+import Control.Monad.Codensity
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
@@ -68,6 +69,10 @@ class Effect f => TermAlgebra h f | h -> f where
 instance Effect sig => TermAlgebra (Eff sig) sig where
   var = Return
   con = Eff
+
+instance TermAlgebra h sig => TermAlgebra (Codensity h) sig where
+  var = pure
+  con op = Codensity (\ k -> con (hfmap (\ m -> runCodensity m var) (fmap' (\ m -> runCodensity m k) op)))
 
 
 class (Monad m, TermAlgebra m f) => TermMonad m f | m -> f
