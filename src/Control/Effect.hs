@@ -69,6 +69,7 @@ foldA alg = go
         go (Return x) = pure x
         go (Eff op)   = alg (hfmap go (fmap' go op))
 
+-- | Interpret an 'Effect'’s requests into a 'Carrier' using the passed algebra.
 interpret :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
           => (forall a . eff (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
           -> (forall a . Eff (eff :+: sig) a -> c (Eff sig) a)
