@@ -18,6 +18,7 @@ library
                      , Control.Carrier.Identity
                      , Control.Carrier.List
                      , Control.Carrier.Maybe
+                     , Control.Carrier.Split
                      , Control.Effect
                      , Control.Effect.Error
                      , Control.Effect.Fail
