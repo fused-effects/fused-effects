@@ -25,7 +25,7 @@ catch :: Subset (Error exc) sig => Eff sig a -> (exc -> Eff sig a) -> Eff sig a
 catch m h = send (Catch m h pure)
 
 
-runExc :: Effect sig => Eff (Error exc :+: sig) a -> Eff sig (Either exc a)
-runExc = runEitherH . relay alg
+runError :: Effect sig => Eff (Error exc :+: sig) a -> Eff sig (Either exc a)
+runError = runEitherH . relay alg
   where alg (Throw e)     = EitherH (pure (Left e))
         alg (Catch m h k) = EitherH (runEitherH m >>= runEitherH . either (k <=< h) k)
