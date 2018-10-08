@@ -292,6 +292,9 @@ newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
 joinSplitH :: Monad m => SplitH m a -> m [a]
 joinSplitH = (>>= maybe (pure []) (\ (a, q) -> (a :) <$> joinSplitH q)) . runSplitH
 
+altSplitH :: (Alternative m, Monad m) => SplitH m a -> m a
+altSplitH = (>>= maybe empty (\ (a, q) -> pure a <|> altSplitH q)) . runSplitH
+
 instance Applicative m => Applicative (SplitH m) where
   pure a = SplitH (pure (Just (a, SplitH (pure Nothing))))
 
