@@ -76,6 +76,7 @@ interpret :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
 interpret alg = foldA (alg \/ interpretRest)
 {-# INLINE interpret #-}
 
+-- | Interpret two 'Effect's’ requests into a 'Carrier' using the passed algebras.
 interpret2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff sig)))
            => (forall a . eff1 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
            -> (forall a . eff2 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
