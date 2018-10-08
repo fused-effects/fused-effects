@@ -16,6 +16,7 @@ library
   exposed-modules:     Control.Effect
                      , Control.Effect.Reader
                      , Control.Effect.State
+                     , Control.Effect.Writer
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.11 && <4.12
