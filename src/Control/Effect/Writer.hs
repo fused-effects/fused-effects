@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFunctor, MultiParamTypeClasses, PolyKinds #-}
 module Control.Effect.Writer where
 
 import Control.Applicative (liftA2)
