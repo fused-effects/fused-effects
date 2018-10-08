@@ -21,6 +21,7 @@ library
                      , Control.Carrier.Reader
                      , Control.Carrier.Split
                      , Control.Carrier.State
+                     , Control.Carrier.Writer
                      , Control.Effect
                      , Control.Effect.Cut
                      , Control.Effect.Error
