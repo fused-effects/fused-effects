@@ -8,6 +8,7 @@ module Control.Effect
 , interpret2
 , interpretRest
 , reinterpret
+, reinterpret2
 , reinterpretRest
 , Effect(..)
 , Carrier(..)
@@ -89,6 +90,13 @@ reinterpret :: (Effect eff, Effect sig, Effect new, Carrier c f, Monad (c (Eff (
             -> (forall a . Eff (eff :+: sig) a -> c (Eff (new :+: sig)) a)
 reinterpret alg = foldA (alg \/ reinterpretRest)
 {-# INLINE reinterpret #-}
+
+reinterpret2 :: (Effect eff1, Effect eff2, Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
+             => (forall a . eff1 (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
+             -> (forall a . eff2 (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
+             -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c (Eff (new :+: sig)) a)
+reinterpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ reinterpretRest)
+{-# INLINE reinterpret2 #-}
 
 reinterpretRest :: (Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
                 => sig (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a)
