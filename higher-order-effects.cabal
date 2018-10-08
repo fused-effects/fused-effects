@@ -18,6 +18,7 @@ library
                      , Control.Effect
                      , Control.Effect.Error
                      , Control.Effect.Fail
+                     , Control.Effect.NonDet
                      , Control.Effect.Reader
                      , Control.Effect.State
                      , Control.Effect.Writer
