@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving, TypeOperators #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, PolyKinds, StandaloneDeriving, TypeOperators #-}
 module Control.Effect.Cut where
 
 import Control.Applicative (Alternative(..))
@@ -30,10 +30,12 @@ cut = skip <|> cutfail
 skip :: Applicative m => m ()
 skip = pure ()
 
-runCut :: Subset NonDet sig => Eff (Cut :+: sig) a -> Eff sig a
-runCut = altSplitH . relay alg
-  where alg Cut        = empty
-        alg (Call m k) = m >>= k
+runCut :: Effect sig => Eff (Cut :+: NonDet :+: sig) a -> Eff sig [a]
+runCut = joinSplitH . relay2 alg1 alg2
+  where alg1 Cut        = empty
+        alg1 (Call m k) = m >>= k
+        alg2 Empty      = empty
+        alg2 (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <|> k False))))
 
 -- runCut :: Subset NonDet sig => Eff (Cut :+: sig) a -> Eff sig a
 -- runCut = go empty
