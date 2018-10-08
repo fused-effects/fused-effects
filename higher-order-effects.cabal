@@ -23,6 +23,7 @@ library
                      , Control.Effect.Cut
                      , Control.Effect.Error
                      , Control.Effect.Fail
+                     , Control.Effect.Lift
                      , Control.Effect.NonDet
                      , Control.Effect.Reader
                      , Control.Effect.Resumable
