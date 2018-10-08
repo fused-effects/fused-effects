@@ -123,9 +123,9 @@ interpretRest op = suspend >>= \ state -> joinl (con (fmap' pure (handle state o
 
 
 -- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of a new 'Effect' using the passed algebra.
-reinterpret :: (Effect eff, Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
-            => (forall a . eff (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
-            -> (forall a . Eff (eff :+: sig) a -> c (Eff (new :+: sig)) a)
+reinterpret :: (Effect eff, Effect sig, Carrier c f, Monad (c m), TermMonad m (new :+: sig))
+            => (forall a . eff (c m) (c m a) -> c m a)
+            -> (forall a . Eff (eff :+: sig) a -> c m a)
 reinterpret alg = foldA (alg \/ reinterpretRest)
 {-# INLINE reinterpret #-}
 
