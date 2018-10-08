@@ -15,7 +15,6 @@ module Control.Effect
 , Lift(..)
 , runM
 , NonDet(..)
-, runNonDet
 , Fail(..)
 , Resumable(..)
 , throwResumable
@@ -230,11 +229,6 @@ instance Effect NonDet where
 instance Subset NonDet sig => Alternative (Eff sig) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
-
-runNonDet :: Effect sig => Eff (NonDet :+: sig) a -> Eff sig [a]
-runNonDet = runListH . relay alg
-  where alg Empty      = ListH (pure [])
-        alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
 
 
 newtype Fail m k = Fail String
