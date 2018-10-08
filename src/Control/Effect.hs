@@ -44,7 +44,6 @@ import Control.Arrow ((***))
 import Control.Monad ((<=<), ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Data.Bifunctor (first)
 import Data.Functor.Identity
 import Prelude hiding (fail)
 
