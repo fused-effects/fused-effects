@@ -33,6 +33,7 @@ library
                      , Control.Effect.State
                      , Control.Effect.Symbol
                      , Control.Effect.Writer
+                     , Control.Monad.Codensity
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.11 && <4.12
