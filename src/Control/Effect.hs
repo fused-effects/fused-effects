@@ -116,10 +116,10 @@ interpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ interpretRest)
 -- | Interpret any requests in higher-order positions in the remaining effects.
 --
 --   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
-interpretRest :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
-              => sig (c (Eff sig)) (c (Eff sig) a)
-              -> c (Eff sig) a
-interpretRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
+interpretRest :: (Carrier c f, Monad (c m), TermMonad m sig)
+              => sig (c m) (c m a)
+              -> c m a
+interpretRest op = suspend >>= \ state -> joinl (con (fmap' pure (handle state op)))
 
 
 -- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of a new 'Effect' using the passed algebra.
