@@ -84,6 +84,9 @@ interpret2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff 
 interpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ interpretRest)
 {-# INLINE interpret2 #-}
 
+-- | Interpret any requests in higher-order positions in the remaining effects.
+--
+--   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras.
 interpretRest :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
               => sig (c (Eff sig)) (c (Eff sig) a)
               -> c (Eff sig) a
