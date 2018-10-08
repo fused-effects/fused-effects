@@ -13,3 +13,5 @@ instance Effect sig => TermAlgebra (Eff sig) sig where
 
 
 class (Monad m, TermAlgebra m f) => TermMonad m f | m -> f
+
+instance Effect sig => TermMonad (Eff sig) sig
