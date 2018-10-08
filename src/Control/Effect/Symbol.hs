@@ -40,7 +40,7 @@ factor = read <$> some digit
 
 
 parse :: Subset NonDet sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
-parse input = fmap snd . flip runStateH input . relay alg
+parse input = fmap snd . flip runStateH input . interpret alg
   where alg (Symbol p k) = StateH (\ s -> case s of
           c:cs | p c -> runStateH (k c) cs
           _          -> empty)

@@ -18,5 +18,5 @@ tell w = send (Tell w (pure ()))
 
 
 runWriter :: (Effect sig, Monoid w) => Eff (Writer w :+: sig) a -> Eff sig (w, a)
-runWriter m = runWriterH (relay alg m)
+runWriter m = runWriterH (interpret alg m)
   where alg (Tell w k) = WriterH (first (w <>) <$> runWriterH k)

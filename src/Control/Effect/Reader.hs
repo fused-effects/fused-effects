@@ -25,6 +25,6 @@ local f m = send (Local f m pure)
 
 
 runReader :: Effect sig => r -> Eff (Reader r :+: sig) a -> Eff sig a
-runReader r m = runReaderH (relay alg m) r
+runReader r m = runReaderH (interpret alg m) r
   where alg (Ask k)       = ReaderH (\ r -> runReaderH (k r) r)
         alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)

@@ -19,5 +19,5 @@ throwResumable exc = send (Resumable exc pure)
 
 
 runResumable :: Effect sig => (forall resume . exc resume -> Eff sig resume) -> Eff (Resumable exc :+: sig) a -> Eff sig a
-runResumable f = runIdentityH . relay alg
+runResumable f = runIdentityH . interpret alg
   where alg (Resumable exc k) = IdentityH (f exc >>= runIdentityH . k)

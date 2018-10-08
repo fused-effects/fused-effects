@@ -14,16 +14,16 @@ import Control.Carrier.Split
 import Control.Effect
 
 runNonDet :: Effect sig => Eff (NonDet :+: sig) a -> Eff sig [a]
-runNonDet = runListH . relay alg
+runNonDet = runListH . interpret alg
   where alg Empty      = ListH (pure [])
         alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
 
 runNonDetOnce :: Effect sig => Eff (NonDet :+: sig) a -> Eff sig (Maybe a)
-runNonDetOnce = runMaybeH . relay alg
+runNonDetOnce = runMaybeH . interpret alg
   where alg Empty      = MaybeH (pure Nothing)
         alg (Choose k) = MaybeH (liftA2 (<|>) (runMaybeH (k True)) (runMaybeH (k False)))
 
 runNonDetSplit :: Effect sig => Eff (NonDet :+: sig) a -> Eff sig [a]
-runNonDetSplit = joinSplitH . relay alg
+runNonDetSplit = joinSplitH . interpret alg
   where alg Empty      = empty
         alg (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <|> k False))))

@@ -4,8 +4,8 @@ module Control.Effect
 , send
 , fold
 , foldA
-, relay
-, relay2
+, interpret
+, interpret2
 , runRest
 , Effect(..)
 , Carrier(..)
@@ -63,18 +63,18 @@ foldA alg = go
         go (Return x) = pure x
         go (Eff op)   = alg (hfmap go (fmap' go op))
 
-relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
+interpret :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       => (forall a . eff (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
       -> (forall a . Eff (eff :+: sig) a -> c (Eff sig) a)
-relay alg = foldA (alg \/ runRest)
-{-# INLINE relay #-}
+interpret alg = foldA (alg \/ runRest)
+{-# INLINE interpret #-}
 
-relay2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff sig)))
+interpret2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff sig)))
        => (forall a . eff1 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
        -> (forall a . eff2 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
        -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c (Eff sig) a)
-relay2 alg1 alg2 = foldA (alg1 \/ alg2 \/ runRest)
-{-# INLINE relay2 #-}
+interpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ runRest)
+{-# INLINE interpret2 #-}
 
 runRest :: (Effect sig, Carrier c f, Monad (c (Eff sig))) => sig (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a
 runRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
