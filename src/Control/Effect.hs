@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
 module Control.Effect
 ( Eff(..)
 , send
@@ -13,6 +13,8 @@ module Control.Effect
 , reinterpret2_2
 , reinterpretRest
 , Effect(..)
+, TermAlgebra(..)
+, TermMonad
 , Carrier(..)
 , Void
 , run
@@ -57,6 +59,19 @@ class Effect sig where
          => f ()
          -> sig (c n) (c n a)
          -> sig n (c n a)
+
+class Effect f => TermAlgebra h f | h -> f where
+  var :: a -> h a
+  con :: f h (h a) -> h a
+
+instance Effect sig => TermAlgebra (Eff sig) sig where
+  var = Return
+  con = Eff
+
+
+class (Monad m, TermAlgebra m f) => TermMonad m f | m -> f
+
+instance Effect sig => TermMonad (Eff sig) sig
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.

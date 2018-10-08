@@ -13,8 +13,7 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Control.Algebra
-                     , Control.Carrier
+  exposed-modules:     Control.Carrier
                      , Control.Carrier.Either
                      , Control.Carrier.Identity
                      , Control.Carrier.List
