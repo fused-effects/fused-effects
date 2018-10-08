@@ -164,6 +164,7 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
 (alg1 \/ _   ) (L op) = alg1 op
 (_    \/ alg2) (R op) = alg2 op
 
+infixl 4 \/
 
 data NonDet m k
   = Empty
