@@ -16,9 +16,6 @@ module Control.Effect
 , runM
 , NonDet(..)
 , Fail(..)
-, Resumable(..)
-, throwResumable
-, runResumable
 , Cut(..)
 , cutfail
 , call
@@ -36,7 +33,6 @@ module Control.Effect
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Arrow ((***))
 import Control.Carrier
-import Control.Carrier.Identity
 import Control.Monad (ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -228,24 +224,6 @@ instance Effect Fail where
 
 instance Subset Fail sig => MonadFail (Eff sig) where
   fail = send . Fail
-
-
-data Resumable exc m k
-  = forall b . Resumable (exc b) (b -> k)
-
-deriving instance Functor (Resumable exc m)
-
-instance Effect (Resumable exc) where
-  hfmap _ (Resumable exc k) = Resumable exc k
-
-  handle _ (Resumable exc k) = Resumable exc k
-
-throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
-throwResumable exc = send (Resumable exc pure)
-
-runResumable :: Effect sig => (forall resume . exc resume -> Eff sig resume) -> Eff (Resumable exc :+: sig) a -> Eff sig a
-runResumable f = runIdentityH . relay alg
-  where alg (Resumable exc k) = IdentityH (f exc >>= runIdentityH . k)
 
 
 data Cut m k
