@@ -20,6 +20,7 @@ library
                      , Control.Carrier.Maybe
                      , Control.Carrier.Split
                      , Control.Effect
+                     , Control.Effect.Cut
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.NonDet
