@@ -64,6 +64,7 @@ send :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
 send = Eff . inj
 
 
+-- | Fold a generator and first-order algebra over an 'Eff' to obtain some final result value.
 fold :: Effect sig
      => (a -> b)
      -> (sig (Eff sig) b -> b)
