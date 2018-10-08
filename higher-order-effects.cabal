@@ -17,6 +17,7 @@ library
                      , Control.Carrier.Either
                      , Control.Carrier.Identity
                      , Control.Carrier.List
+                     , Control.Carrier.Maybe
                      , Control.Effect
                      , Control.Effect.Error
                      , Control.Effect.Fail

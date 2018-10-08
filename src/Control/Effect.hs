@@ -89,29 +89,6 @@ relay alg = foldA (liftAlg alg)
 {-# INLINE relay #-}
 
 
-newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
-  deriving (Functor)
-
-instance Applicative m => Applicative (MaybeH m) where
-  pure a = MaybeH (pure (Just a))
-
-  MaybeH f <*> MaybeH a = MaybeH (liftA2 (<*>) f a)
-
-instance Monad m => Monad (MaybeH m) where
-  return = pure
-
-  MaybeH a >>= f = MaybeH (a >>= maybe (pure Nothing) (runMaybeH . f))
-
-instance Carrier MaybeH Maybe where
-  joinl mf = MaybeH (mf >>= runMaybeH)
-
-  suspend = MaybeH (pure (Just (Just ())))
-
-  resume = maybe (pure Nothing) runMaybeH
-
-  wrap = MaybeH
-
-
 newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
   deriving (Functor)
 
