@@ -73,6 +73,7 @@ fold gen alg = go
   where go (Return x) = gen x
         go (Eff op)   = alg (fmap' go op)
 
+-- | Fold a higher-order algebra over an 'Eff' to obtain some final result value in an 'Applicative' context.
 foldA :: forall sig f
       .  (Effect sig, Applicative f)
       => (forall a . sig f (f a) -> f a)
