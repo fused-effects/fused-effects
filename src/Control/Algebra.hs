@@ -3,10 +3,10 @@ module Control.Algebra where
 
 import Control.Effect
 
-class TermAlgebra h f | h -> f where
+class Effect f => TermAlgebra h f | h -> f where
   var :: a -> h a
   con :: f h (h a) -> h a
 
-instance TermAlgebra (Eff sig) sig where
+instance Effect sig => TermAlgebra (Eff sig) sig where
   var = Return
   con = Eff
