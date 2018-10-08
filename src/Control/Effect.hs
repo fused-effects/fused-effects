@@ -86,7 +86,7 @@ interpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ interpretRest)
 
 -- | Interpret any requests in higher-order positions in the remaining effects.
 --
---   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras.
+--   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
 interpretRest :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
               => sig (c (Eff sig)) (c (Eff sig) a)
               -> c (Eff sig) a
