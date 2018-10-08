@@ -13,7 +13,6 @@ module Control.Effect
 , (:+:)(..)
 , Subset(..)
 , Lift(..)
-, runM
 , NonDet(..)
 , Fail(..)
 , Symbol(..)
@@ -28,7 +27,7 @@ module Control.Effect
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Monad (ap, join, liftM)
+import Control.Monad (ap, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
@@ -105,9 +104,6 @@ instance Functor sig => Effect (Lift sig) where
 
 instance Subset (Lift IO) sig => MonadIO (Eff sig) where
   liftIO = send . Lift . fmap pure
-
-runM :: Monad m => Eff (Lift m) a -> m a
-runM = foldA (join . unLift)
 
 
 data (f :+: g) (m :: * -> *) k
