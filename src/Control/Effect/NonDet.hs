@@ -1,7 +1,11 @@
 {-# LANGUAGE PolyKinds, TypeOperators #-}
-module Control.Effect.NonDet where
+module Control.Effect.NonDet
+( NonDet(..)
+, Alternative(..)
+, runNonDet
+) where
 
-import Control.Applicative (liftA2)
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Carrier.List
 import Control.Effect
 
