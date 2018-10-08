@@ -48,6 +48,11 @@ class Effect sig where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   hfmap :: (forall x . m x -> n x) -> sig m a -> sig n a
 
+  -- | Handle any effects in higher-order positions by threading the 'Carrier'’s state all the way through to the continuation.
+  --
+  --   For first-order effects (which don’t contain higher-order positions), this will simply involve repackaging the effect’s arguments at the new type.
+  --
+  --   For higher-order effects (which do contain higher-order positions), the 'Carrier' actions @c n@ must be 'resume'd to obtain the necessary @n@ action, and the state passed along to the continuation via 'resume' and 'wrap'.
   handle :: (Carrier c f, Monad n)
          => f ()
          -> sig (c n) (c n a)
