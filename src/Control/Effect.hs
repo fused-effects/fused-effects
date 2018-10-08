@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
 module Control.Effect
 ( Eff
 , send
