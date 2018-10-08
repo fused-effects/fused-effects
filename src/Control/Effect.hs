@@ -48,6 +48,7 @@ class Effect sig where
          -> sig n (c n a)
 
 
+-- | Construct a request for an effect to be interpreted by some handler later on.
 send :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
 send = Eff . inj
 
