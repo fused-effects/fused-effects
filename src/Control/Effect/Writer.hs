@@ -8,6 +8,12 @@ import Data.Bifunctor (first)
 data Writer w m k = Tell w k
   deriving (Functor)
 
+instance Effect (Writer w) where
+  hfmap _ (Tell w k) = Tell w k
+
+  handle _ (Tell w k) = Tell w k
+
+
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
   deriving (Functor)
 
