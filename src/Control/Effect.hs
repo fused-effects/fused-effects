@@ -18,10 +18,6 @@ module Control.Effect
 , runNonDet
 , Fail(..)
 , runFail
-, Exc(..)
-, throw
-, catch
-, runExc
 , Resumable(..)
 , throwResumable
 , runResumable
@@ -37,11 +33,12 @@ module Control.Effect
 , term
 , factor
 -- , parse
+, EitherH(..)
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Arrow ((***))
-import Control.Monad ((<=<), ap, join, liftM)
+import Control.Monad (ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Functor.Identity
@@ -319,31 +316,6 @@ instance Subset Fail sig => MonadFail (Eff sig) where
 runFail :: Effect sig => Eff (Fail :+: sig) a -> Eff sig (Either String a)
 runFail = runEitherH . relay alg
   where alg (Fail s) = EitherH (pure (Left s))
-
-
-data Exc exc m k
-  = Throw exc
-  | forall b . Catch (m b) (exc -> m b) (b -> k)
-
-deriving instance Functor (Exc exc m)
-
-instance Effect (Exc exc) where
-  hfmap _ (Throw exc)   = Throw exc
-  hfmap f (Catch m h k) = Catch (f m) (f . h) k
-
-  handle _     (Throw exc)   = Throw exc
-  handle state (Catch m h k) = Catch (resume (m <$ state)) (resume . (<$ state) . h) (wrap . resume . fmap k)
-
-throw :: Subset (Exc exc) sig => exc -> Eff sig a
-throw = send . Throw
-
-catch :: Subset (Exc exc) sig => Eff sig a -> (exc -> Eff sig a) -> Eff sig a
-catch m h = send (Catch m h pure)
-
-runExc :: Effect sig => Eff (Exc exc :+: sig) a -> Eff sig (Either exc a)
-runExc = runEitherH . relay alg
-  where alg (Throw e)     = EitherH (pure (Left e))
-        alg (Catch m h k) = EitherH (runEitherH m >>= runEitherH . either (k <=< h) k)
 
 
 data Resumable exc m k
