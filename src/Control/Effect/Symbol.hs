@@ -2,9 +2,9 @@
 module Control.Effect.Symbol where
 
 import Control.Applicative (Alternative(..))
+import Control.Carrier.State
 import Control.Effect
 import Control.Effect.Cut
-import Control.Effect.State
 
 data Symbol m k
   = Symbol (Char -> Bool) (Char -> k)
