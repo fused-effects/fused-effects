@@ -4,9 +4,7 @@ module Control.Effect
 , send
 , fold
 , foldA
-, liftAlg
 , relay
-, liftAlg2
 , relay2
 , runRest
 , Effect(..)
@@ -65,28 +63,17 @@ foldA alg = go
         go (Return x) = pure x
         go (Eff op)   = alg (hfmap go (fmap' go op))
 
-liftAlg :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
-        => (forall a .  eff          (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-        -> (forall a . (eff :+: sig) (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-liftAlg alg1 = alg1 \/ runRest
-
 relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       => (forall a . eff (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
       -> (forall a . Eff (eff :+: sig) a -> c (Eff sig) a)
-relay alg = foldA (liftAlg alg)
+relay alg = foldA (alg \/ runRest)
 {-# INLINE relay #-}
-
-liftAlg2 :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
-         => (forall a .  eff1                   (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-         -> (forall a .  eff2                   (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-         -> (forall a . (eff1 :+: eff2 :+: sig) (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-liftAlg2 alg1 alg2 = alg1 \/ alg2 \/ runRest
 
 relay2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff sig)))
        => (forall a . eff1 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
        -> (forall a . eff2 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
        -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c (Eff sig) a)
-relay2 alg1 alg2 = foldA (liftAlg2 alg1 alg2)
+relay2 alg1 alg2 = foldA (alg1 \/ alg2 \/ runRest)
 {-# INLINE relay2 #-}
 
 runRest :: (Effect sig, Carrier c f, Monad (c (Eff sig))) => sig (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a
