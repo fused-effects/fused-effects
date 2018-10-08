@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving, TypeOperators #-}
 module Control.Effect.Error where
 
+import Control.Carrier.Either
 import Control.Effect
 import Control.Monad ((<=<))
 

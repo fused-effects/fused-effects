@@ -33,12 +33,12 @@ module Control.Effect
 , term
 , factor
 -- , parse
-, EitherH(..)
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Arrow ((***))
 import Control.Carrier
+import Control.Carrier.Either
 import Control.Monad (ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -130,29 +130,6 @@ instance Carrier MaybeH Maybe where
   resume = maybe (pure Nothing) runMaybeH
 
   wrap = MaybeH
-
-
-newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
-  deriving (Functor)
-
-instance Applicative m => Applicative (EitherH e m) where
-  pure a = EitherH (pure (Right a))
-
-  EitherH f <*> EitherH a = EitherH (liftA2 (<*>) f a)
-
-instance Monad m => Monad (EitherH e m) where
-  return = pure
-
-  EitherH a >>= f = EitherH (a >>= either (pure . Left) (runEitherH . f))
-
-instance Carrier (EitherH e) (Either e) where
-  joinl mf = EitherH (mf >>= runEitherH)
-
-  suspend = EitherH (pure (Right (Right ())))
-
-  resume = either (pure . Left) runEitherH
-
-  wrap = EitherH
 
 
 newtype ListH m a = ListH { runListH :: m [a] }
