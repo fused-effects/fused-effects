@@ -6,6 +6,8 @@ module Control.Effect
 , foldA
 , liftAlg
 , relay
+, liftAlg2
+, relay2
 , Effect(..)
 , Carrier(..)
 , Void
@@ -73,6 +75,20 @@ relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       -> (forall a . Eff (eff :+: sig) a -> c (Eff sig) a)
 relay alg = foldA (liftAlg alg)
 {-# INLINE relay #-}
+
+liftAlg2 :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
+         => (forall a .  eff1                   (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
+         -> (forall a .  eff2                   (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
+         -> (forall a . (eff1 :+: eff2 :+: sig) (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
+liftAlg2 alg1 alg2 = alg1 \/ alg2 \/ alg3
+  where alg3 op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
+
+relay2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff sig)))
+       => (forall a . eff1 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
+       -> (forall a . eff2 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
+       -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c (Eff sig) a)
+relay2 alg1 alg2 = foldA (liftAlg2 alg1 alg2)
+{-# INLINE relay2 #-}
 
 
 data Void m k
