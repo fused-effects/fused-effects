@@ -123,6 +123,9 @@ reinterpret2_2 :: (Effect eff1, Effect eff2, Effect sig, Effect new1, Effect new
 reinterpret2_2 alg1 alg2 = foldA (alg1 \/ alg2 \/ reinterpretRest)
 {-# INLINE reinterpret2_2 #-}
 
+-- | Reinterpret any requests in higher-order positions in the remaining effects.
+--
+--   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled and how many new effects are being added.
 reinterpretRest :: (Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
                 => sig (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a)
                 -> c (Eff (new :+: sig)) a
