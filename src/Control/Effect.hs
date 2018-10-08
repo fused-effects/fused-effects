@@ -103,7 +103,7 @@ instance Subset (Lift IO) sig => MonadIO (Eff sig) where
   liftIO = send . Lift . fmap pure
 
 
-data (f :+: g) (m :: * -> *) k
+data (f :+: g) m k
   = L (f m k)
   | R (g m k)
   deriving (Eq, Functor, Ord, Show)
