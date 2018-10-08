@@ -5,6 +5,9 @@ import Control.Applicative (liftA2)
 import Control.Effect
 import Data.Bifunctor (first)
 
+data Writer w m k = Tell w k
+  deriving (Functor)
+
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
   deriving (Functor)
 
