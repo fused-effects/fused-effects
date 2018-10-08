@@ -100,6 +100,7 @@ reinterpret :: (Effect eff, Effect sig, Effect new, Carrier c f, Monad (c (Eff (
 reinterpret alg = foldA (alg \/ reinterpretRest)
 {-# INLINE reinterpret #-}
 
+-- | Reinterpret two 'Effect's’ requests into a 'Carrier' and requests of a new 'Effect' using the passed algebras.
 reinterpret2 :: (Effect eff1, Effect eff2, Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
              => (forall a . eff1 (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
              -> (forall a . eff2 (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
