@@ -10,3 +10,6 @@ class Effect f => TermAlgebra h f | h -> f where
 instance Effect sig => TermAlgebra (Eff sig) sig where
   var = Return
   con = Eff
+
+
+class (Monad m, TermAlgebra m f) => TermMonad m f | m -> f
