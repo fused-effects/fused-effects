@@ -40,6 +40,7 @@ data Eff effects a
 --   1. Be functorial in their last two arguments, and
 --   2. Support threading effects in higher-order positions through using the 'Carrier'’s 'suspend'ed state.
 class Effect sig where
+  -- | Functor map. This is required to be 'fmap'.
   fmap' :: (a -> b) -> (sig m a -> sig m b)
   default fmap' :: Functor (sig m) => (a -> b) -> (sig m a -> sig m b)
   fmap' = fmap
