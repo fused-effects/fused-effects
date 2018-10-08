@@ -17,7 +17,6 @@ module Control.Effect
 , NonDet(..)
 , runNonDet
 , Fail(..)
-, runFail
 , Resumable(..)
 , throwResumable
 , runResumable
@@ -38,7 +37,6 @@ module Control.Effect
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Arrow ((***))
 import Control.Carrier
-import Control.Carrier.Either
 import Control.Monad (ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -272,10 +270,6 @@ instance Effect Fail where
 
 instance Subset Fail sig => MonadFail (Eff sig) where
   fail = send . Fail
-
-runFail :: Effect sig => Eff (Fail :+: sig) a -> Eff sig (Either String a)
-runFail = runEitherH . relay alg
-  where alg (Fail s) = EitherH (pure (Left s))
 
 
 data Resumable exc m k
