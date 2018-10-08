@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
 module Control.Effect
 ( Eff(..)
 , send
@@ -155,10 +155,10 @@ reinterpret2_2 alg1 alg2 = foldA (alg1 \/ alg2 \/ reinterpretRest)
 -- | Reinterpret any requests in higher-order positions in the remaining effects.
 --
 --   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled and how many new effects are being added.
-reinterpretRest :: (Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
-                => sig (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a)
-                -> c (Eff (new :+: sig)) a
-reinterpretRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (R (handle state op))))
+reinterpretRest :: (Effect sig, Carrier c f, Monad (c m), TermMonad m (new :+: sig))
+                => sig (c m) (c m a)
+                -> c m a
+reinterpretRest op = suspend >>= \ state -> joinl (con (fmap' pure (R (handle state op))))
 
 
 data Void m k
