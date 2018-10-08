@@ -17,6 +17,7 @@ module Control.Effect
 , Void
 , run
 , (:+:)(..)
+, (\/)
 , Subset(..)
 , Lift(..)
 , NonDet(..)
