@@ -173,6 +173,7 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
   handle state (L l) = L (handle state l)
   handle state (R r) = R (handle state r)
 
+-- | Lift algebras for either side of a sum into a single algebra on sums.
 (\/) :: ( sig1           m a -> b)
      -> (          sig2  m a -> b)
      -> ((sig1 :+: sig2) m a -> b)
