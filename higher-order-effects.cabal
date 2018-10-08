@@ -21,6 +21,7 @@ library
                      , Control.Effect.Fail
                      , Control.Effect.NonDet
                      , Control.Effect.Reader
+                     , Control.Effect.Resumable
                      , Control.Effect.State
                      , Control.Effect.Writer
   -- other-modules:
