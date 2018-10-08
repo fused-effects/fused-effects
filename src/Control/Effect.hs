@@ -8,6 +8,7 @@ module Control.Effect
 , relay
 , liftAlg2
 , relay2
+, runRest
 , Effect(..)
 , Carrier(..)
 , Void
@@ -67,8 +68,7 @@ foldA alg = go
 liftAlg :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
         => (forall a .  eff          (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
         -> (forall a . (eff :+: sig) (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-liftAlg alg1 = alg1 \/ alg2
-  where alg2 op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
+liftAlg alg1 = alg1 \/ runRest
 
 relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       => (forall a . eff (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
@@ -80,8 +80,7 @@ liftAlg2 :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
          => (forall a .  eff1                   (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
          -> (forall a .  eff2                   (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
          -> (forall a . (eff1 :+: eff2 :+: sig) (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-liftAlg2 alg1 alg2 = alg1 \/ alg2 \/ alg3
-  where alg3 op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
+liftAlg2 alg1 alg2 = alg1 \/ alg2 \/ runRest
 
 relay2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff sig)))
        => (forall a . eff1 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
@@ -89,6 +88,9 @@ relay2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff sig)
        -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c (Eff sig) a)
 relay2 alg1 alg2 = foldA (liftAlg2 alg1 alg2)
 {-# INLINE relay2 #-}
+
+runRest :: (Effect sig, Carrier c f, Monad (c (Eff sig))) => sig (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a
+runRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
 
 
 data Void m k
