@@ -36,10 +36,10 @@ module Control.Effect
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Arrow ((***))
 import Control.Carrier
+import Control.Carrier.Identity
 import Control.Monad (ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Data.Functor.Identity
 import Prelude hiding (fail)
 
 data Eff effects a
@@ -91,19 +91,6 @@ relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       -> (forall a . Eff (eff :+: sig) a -> c (Eff sig) a)
 relay alg = foldA (liftAlg alg)
 {-# INLINE relay #-}
-
-
-newtype IdH m a = IdH { runIdH :: m a }
-  deriving (Applicative, Functor, Monad)
-
-instance Carrier IdH Identity where
-  joinl mf = IdH (mf >>= runIdH)
-
-  suspend = IdH (pure (Identity ()))
-
-  resume = fmap Identity . runIdH . runIdentity
-
-  wrap = IdH . fmap runIdentity
 
 
 newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
@@ -257,8 +244,8 @@ throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
 throwResumable exc = send (Resumable exc pure)
 
 runResumable :: Effect sig => (forall resume . exc resume -> Eff sig resume) -> Eff (Resumable exc :+: sig) a -> Eff sig a
-runResumable f = runIdH . relay alg
-  where alg (Resumable exc k) = IdH (f exc >>= runIdH . k)
+runResumable f = runIdentityH . relay alg
+  where alg (Resumable exc k) = IdentityH (f exc >>= runIdentityH . k)
 
 
 data Cut m k
