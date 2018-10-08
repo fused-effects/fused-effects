@@ -6,7 +6,7 @@ module Control.Effect
 , foldA
 , interpret
 , interpret2
-, runRest
+, interpretRest
 , Effect(..)
 , Carrier(..)
 , Void
@@ -66,18 +66,20 @@ foldA alg = go
 interpret :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
           => (forall a . eff (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
           -> (forall a . Eff (eff :+: sig) a -> c (Eff sig) a)
-interpret alg = foldA (alg \/ runRest)
+interpret alg = foldA (alg \/ interpretRest)
 {-# INLINE interpret #-}
 
 interpret2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff sig)))
            => (forall a . eff1 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
            -> (forall a . eff2 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
            -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c (Eff sig) a)
-interpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ runRest)
+interpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ interpretRest)
 {-# INLINE interpret2 #-}
 
-runRest :: (Effect sig, Carrier c f, Monad (c (Eff sig))) => sig (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a
-runRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
+interpretRest :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
+              => sig (c (Eff sig)) (c (Eff sig) a)
+              -> c (Eff sig) a
+interpretRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
 
 
 data Void m k
