@@ -14,6 +14,7 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Control.Effect
+                     , Control.Effect.Reader
   -- other-modules:
   -- other-extensions:
   build-depends:       base >=4.11 && <4.12
