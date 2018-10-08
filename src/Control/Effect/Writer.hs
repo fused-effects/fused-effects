@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, MultiParamTypeClasses, PolyKinds, TypeOperators #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, PolyKinds, TypeOperators #-}
 module Control.Effect.Writer where
 
 import Control.Carrier.Writer
