@@ -289,6 +289,9 @@ instance Carrier ListH [] where
 newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
   deriving (Functor)
 
+joinSplitH :: Monad m => SplitH m a -> m [a]
+joinSplitH = (>>= maybe (pure []) (\ (a, q) -> (a :) <$> joinSplitH q)) . runSplitH
+
 instance Applicative m => Applicative (SplitH m) where
   pure a = SplitH (pure (Just (a, SplitH (pure Nothing))))
 
