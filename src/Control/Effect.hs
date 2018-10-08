@@ -140,6 +140,7 @@ instance Effect Void where
   hfmap _ v = case v of {}
   handle _ v = case v of {}
 
+-- | Run an 'Eff' exhausted of effects to produce its final result value.
 run :: Eff Void a -> a
 run = fold id (\ v -> case v of {})
 
