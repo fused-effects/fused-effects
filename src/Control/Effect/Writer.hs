@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, MultiParamTypeClasses, PolyKinds #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, MultiParamTypeClasses, PolyKinds, TypeOperators #-}
 module Control.Effect.Writer where
 
 import Control.Applicative (liftA2)
@@ -15,6 +15,10 @@ instance Effect (Writer w) where
 
 tell :: Subset (Writer w) sig => w -> Eff sig ()
 tell w = send (Tell w (pure ()))
+
+runWriter :: (Effect sig, Monoid w) => Eff (Writer w :+: sig) a -> Eff sig (w, a)
+runWriter m = runWriterH (relay alg m)
+  where alg (Tell w k) = WriterH (first (w <>) <$> runWriterH k)
 
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
