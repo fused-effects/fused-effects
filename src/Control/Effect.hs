@@ -45,6 +45,7 @@ class Effect sig where
   default fmap' :: Functor (sig m) => (a -> b) -> (sig m a -> sig m b)
   fmap' = fmap
 
+  -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   hfmap :: (forall x . m x -> n x) -> sig m a -> sig n a
 
   handle :: (Carrier c f, Monad n)
