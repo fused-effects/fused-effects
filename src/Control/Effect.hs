@@ -79,6 +79,8 @@ class (Monad m, TermAlgebra m f) => TermMonad m f | m -> f
 
 instance Effect sig => TermMonad (Eff sig) sig
 
+instance TermAlgebra h sig => TermMonad (Codensity h) sig
+
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
 send :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
