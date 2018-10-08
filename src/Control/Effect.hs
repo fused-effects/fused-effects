@@ -7,6 +7,8 @@ module Control.Effect
 , interpret
 , interpret2
 , interpretRest
+, reinterpret
+, reinterpretRest
 , Effect(..)
 , Carrier(..)
 , Void
@@ -80,6 +82,18 @@ interpretRest :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
               => sig (c (Eff sig)) (c (Eff sig) a)
               -> c (Eff sig) a
 interpretRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
+
+
+reinterpret :: (Effect eff, Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
+            => (forall a . eff (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
+            -> (forall a . Eff (eff :+: sig) a -> c (Eff (new :+: sig)) a)
+reinterpret alg = foldA (alg \/ reinterpretRest)
+{-# INLINE reinterpret #-}
+
+reinterpretRest :: (Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
+                => sig (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a)
+                -> c (Eff (new :+: sig)) a
+reinterpretRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (R (handle state op))))
 
 
 data Void m k
