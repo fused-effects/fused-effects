@@ -38,6 +38,7 @@ module Control.Effect
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Arrow ((***))
+import Control.Carrier
 import Control.Monad (ap, join, liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -93,24 +94,6 @@ relay :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
       -> (forall a . Eff (eff :+: sig) a -> c (Eff sig) a)
 relay alg = foldA (liftAlg alg)
 {-# INLINE relay #-}
-
-
-class Functor f => Carrier c f | c -> f where
-  -- | (Left-)join a 'Monad' of 'Carrier's into a 'Carrier'.
-  -- @
-  -- joinl . pure = id
-  -- @
-  --
-  -- @
-  -- joinl . join = joinl . fmap joinl
-  -- @
-  joinl :: Monad m => m (c m a) -> c m a
-
-  suspend :: Monad m => c m (f ())
-
-  resume :: Monad m => f (c m a) -> m (f a)
-
-  wrap :: Monad m => m (f a) -> c m a
 
 
 newtype IdH m a = IdH { runIdH :: m a }

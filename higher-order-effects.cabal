@@ -13,7 +13,8 @@ extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 library
-  exposed-modules:     Control.Carrier.Either
+  exposed-modules:     Control.Carrier
+                     , Control.Carrier.Either
                      , Control.Effect
                      , Control.Effect.Error
                      , Control.Effect.Reader
