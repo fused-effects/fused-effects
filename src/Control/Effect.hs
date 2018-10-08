@@ -130,29 +130,6 @@ instance Carrier MaybeH Maybe where
   wrap = MaybeH
 
 
-newtype ListH m a = ListH { runListH :: m [a] }
-  deriving (Functor)
-
-instance Applicative m => Applicative (ListH m) where
-  pure a = ListH (pure [a])
-
-  ListH f <*> ListH a = ListH (liftA2 (<*>) f a)
-
-instance Monad m => Monad (ListH m) where
-  return = pure
-
-  ListH a >>= f = ListH (a >>= fmap concat . traverse (runListH . f))
-
-instance Carrier ListH [] where
-  joinl mf = ListH (mf >>= runListH)
-
-  suspend = ListH (pure [[()]])
-
-  resume = fmap concat . traverse runListH
-
-  wrap = ListH
-
-
 newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
   deriving (Functor)
 
