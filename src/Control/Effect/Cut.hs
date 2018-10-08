@@ -2,6 +2,7 @@
 module Control.Effect.Cut where
 
 import Control.Applicative (Alternative(..))
+import Control.Carrier.Split
 import Control.Effect
 
 data Cut m k
@@ -28,6 +29,11 @@ cut = skip <|> cutfail
 
 skip :: Applicative m => m ()
 skip = pure ()
+
+runCut :: Subset NonDet sig => Eff (Cut :+: sig) a -> Eff sig a
+runCut = altSplitH . relay alg
+  where alg Cut        = empty
+        alg (Call m k) = m >>= k
 
 -- runCut :: Subset NonDet sig => Eff (Cut :+: sig) a -> Eff sig a
 -- runCut = go empty
