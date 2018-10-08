@@ -19,6 +19,7 @@ library
                      , Control.Carrier.List
                      , Control.Carrier.Maybe
                      , Control.Carrier.Split
+                     , Control.Carrier.State
                      , Control.Effect
                      , Control.Effect.Cut
                      , Control.Effect.Error
