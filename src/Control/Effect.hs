@@ -1,6 +1,6 @@
 {-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
 module Control.Effect
-( Eff
+( Eff(..)
 , send
 , fold
 , foldA
