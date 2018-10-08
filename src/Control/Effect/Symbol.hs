@@ -38,6 +38,7 @@ factor :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
 factor = read <$> some digit
      <|> char '(' *> expr <* char ')'
 
+
 parse :: Subset NonDet sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
 parse input = fmap snd . flip runStateH input . relay alg
   where alg (Symbol p k) = StateH (\ s -> case s of

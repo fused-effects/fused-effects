@@ -22,6 +22,7 @@ get = send (Get pure)
 put :: Subset (State s) sig => s -> Eff sig ()
 put s = send (Put s (pure ()))
 
+
 runState :: Effect sig => s -> Eff (State s :+: sig) a -> Eff sig (s, a)
 runState s m = runStateH (relay alg m) s
   where alg (Get k)   = StateH (\ s -> runStateH (k s) s)

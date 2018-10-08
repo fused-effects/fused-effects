@@ -30,6 +30,7 @@ cut = skip <|> cutfail
 skip :: Applicative m => m ()
 skip = pure ()
 
+
 runCut :: Effect sig => Eff (Cut :+: NonDet :+: sig) a -> Eff sig [a]
 runCut = joinSplitH . relay2 alg1 alg2
   where alg1 Cut        = empty
