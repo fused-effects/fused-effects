@@ -93,6 +93,7 @@ interpretRest :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
 interpretRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
 
 
+-- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of a new 'Effect' using the passed algebra.
 reinterpret :: (Effect eff, Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
             => (forall a . eff (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
             -> (forall a . Eff (eff :+: sig) a -> c (Eff (new :+: sig)) a)
