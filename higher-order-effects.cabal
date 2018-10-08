@@ -18,6 +18,7 @@ library
                      , Control.Carrier.Identity
                      , Control.Carrier.List
                      , Control.Carrier.Maybe
+                     , Control.Carrier.Reader
                      , Control.Carrier.Split
                      , Control.Carrier.State
                      , Control.Effect
