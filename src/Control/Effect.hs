@@ -148,6 +148,8 @@ data (f :+: g) m k
   | R (g m k)
   deriving (Eq, Functor, Ord, Show)
 
+infixl 4 :+:
+
 instance (Effect l, Effect r) => Effect (l :+: r) where
   hfmap f (L l) = L (hfmap f l)
   hfmap f (R r) = R (hfmap f r)
