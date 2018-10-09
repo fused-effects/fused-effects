@@ -14,14 +14,6 @@ cabal-version:       >=1.10
 
 library
   exposed-modules:     Control.Carrier
-                     , Control.Carrier.Either
-                     , Control.Carrier.Identity
-                     , Control.Carrier.List
-                     , Control.Carrier.Maybe
-                     , Control.Carrier.Reader
-                     , Control.Carrier.Split
-                     , Control.Carrier.State
-                     , Control.Carrier.Writer
                      , Control.Effect
                      , Control.Effect.Cut
                      , Control.Effect.Error
