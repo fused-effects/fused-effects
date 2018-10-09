@@ -13,7 +13,7 @@ instance Effect (Writer w) where
 
   handle _ (Tell w k) = Tell w k
 
-tell :: Subset (Writer w) sig => w -> Eff sig ()
+tell :: (Subset (Writer w) sig, TermMonad m sig) => w -> m ()
 tell w = send (Tell w (pure ()))
 
 runWriter :: (TermMonad m sig, Monoid w) => Codensity (WriterH w m) a -> m (w, a)
