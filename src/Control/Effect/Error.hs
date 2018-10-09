@@ -51,6 +51,8 @@ instance Carrier (Either e) (ErrorH e) where
 
   wrap = ErrorH
 
+  gen a = ErrorH (pure (Right a))
+
 instance TermMonad m sig => TermAlgebra (ErrorH e m) (Error e :+: sig) where
   var = gen
   con = alg \/ interpretRest
