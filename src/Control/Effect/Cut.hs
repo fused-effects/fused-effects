@@ -18,13 +18,13 @@ instance Effect Cut where
   handle _     Cut        = Cut
   handle state (Call m k) = Call (resume (m <$ state)) (wrap . resume . fmap k)
 
-cutfail :: Subset Cut sig => Eff sig a
+cutfail :: (Subset Cut sig, TermMonad m sig) => m a
 cutfail = send Cut
 
-call :: Subset Cut sig => Eff sig a -> Eff sig a
+call :: (Subset Cut sig, TermMonad m sig) => m a -> m a
 call m = send (Call m pure)
 
-cut :: (Subset NonDet sig, Subset Cut sig) => Eff sig ()
+cut :: (Alternative m, Subset Cut sig, TermMonad m sig) => m ()
 cut = skip <|> cutfail
 
 skip :: Applicative m => m ()
