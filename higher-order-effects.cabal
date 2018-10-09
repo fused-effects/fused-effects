@@ -29,7 +29,6 @@ library
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
                      , Control.Effect.Reader
-                     , Control.Effect.Resumable
                      , Control.Effect.State
                      , Control.Effect.Symbol
                      , Control.Effect.Writer
