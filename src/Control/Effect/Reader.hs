@@ -29,7 +29,6 @@ runReader r m = runReaderH (runCodensity var m) r
 
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
-  deriving (Functor)
 
 instance Carrier ((,) r) (ReaderH r) where
   joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
