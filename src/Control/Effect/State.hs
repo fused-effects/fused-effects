@@ -27,7 +27,6 @@ runState :: TermMonad m sig => s -> Codensity (StateH s m) a -> m (s, a)
 runState s m = runStateH (runCodensity var m) s
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
-  deriving (Functor)
 
 instance Carrier ((,) s) (StateH s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
