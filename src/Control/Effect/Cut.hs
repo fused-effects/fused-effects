@@ -31,7 +31,7 @@ skip :: Applicative m => m ()
 skip = pure ()
 
 
-runCut :: Effect sig => Eff (Cut :+: NonDet :+: sig) a -> Eff sig [a]
+runCut :: TermMonad m sig => Eff (Cut :+: NonDet :+: sig) a -> m [a]
 runCut = joinSplitH . interpret2 alg1 alg2
   where alg1 Cut        = empty
         alg1 (Call m k) = m >>= k
