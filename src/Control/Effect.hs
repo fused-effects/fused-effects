@@ -3,6 +3,7 @@ module Control.Effect
 ( Eff(..)
 , send
 , fold
+, foldH
 , foldA
 , interpret
 , interpret2
@@ -100,6 +101,17 @@ fold :: Effect sig
 fold gen alg = go
   where go (Return x) = gen x
         go (Eff op)   = alg (fmap' go op)
+
+-- | Fold a higher-order algebra over an 'Eff' to obtain some final result value.
+foldH :: forall sig f
+      .  Effect sig
+      => (forall a . a -> f a)
+      -> (forall a . sig f (f a) -> f a)
+      -> (forall a . Eff sig a -> f a)
+foldH gen alg = go
+  where go :: Eff sig a -> f a
+        go (Return x) = gen x
+        go (Eff op)   = alg (hfmap go (fmap' go op))
 
 -- | Fold a higher-order algebra over an 'Eff' to obtain some final result value in an 'Applicative' context.
 foldA :: forall sig f
