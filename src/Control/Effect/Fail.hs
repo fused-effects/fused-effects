@@ -7,6 +7,6 @@ module Control.Effect.Fail
 import Control.Carrier.Either
 import Control.Effect
 
-runFail :: Effect sig => Eff (Fail :+: sig) a -> Eff sig (Either String a)
+runFail :: TermMonad m sig => Eff (Fail :+: sig) a -> m (Either String a)
 runFail = runEitherH . interpret alg
   where alg (Fail s) = EitherH (pure (Left s))
