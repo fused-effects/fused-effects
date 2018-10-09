@@ -18,6 +18,6 @@ throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
 throwResumable exc = send (Resumable exc pure)
 
 
-runResumable :: Effect sig => (forall resume . exc resume -> Eff sig resume) -> Eff (Resumable exc :+: sig) a -> Eff sig a
+runResumable :: TermMonad m sig => (forall resume . exc resume -> m resume) -> Eff (Resumable exc :+: sig) a -> m a
 runResumable f = runIdentityH . interpret alg
   where alg (Resumable exc k) = IdentityH (f exc >>= runIdentityH . k)
