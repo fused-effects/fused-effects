@@ -7,23 +7,23 @@ module Control.Effect.Fail
 import Control.Effect
 import Control.Monad.Codensity
 
-runFail :: TermMonad m sig => Codensity (EitherH String m) a -> m (Either String a)
-runFail = runEitherH . runCodensity var
+runFail :: TermMonad m sig => Codensity (FailH m) a -> m (Either String a)
+runFail = runFailH . runCodensity var
 
-newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
+newtype FailH m a = FailH { runFailH :: m (Either String a) }
 
-instance Carrier (Either e) (EitherH e) where
-  joinl mf = EitherH (mf >>= runEitherH)
+instance Carrier (Either String) FailH where
+  joinl mf = FailH (mf >>= runFailH)
 
   suspend f = f (Right ())
 
-  resume = either (pure . Left) runEitherH
+  resume = either (pure . Left) runFailH
 
-  wrap = EitherH
+  wrap = FailH
 
-  gen a = EitherH (pure (Right a))
+  gen a = FailH (pure (Right a))
 
-instance TermMonad m sig => TermAlgebra (EitherH String m) (Fail :+: sig) where
+instance TermMonad m sig => TermAlgebra (FailH m) (Fail :+: sig) where
   var = gen
   con = alg \/ interpretRest
-    where alg (Fail s) = EitherH (pure (Left s))
+    where alg (Fail s) = FailH (pure (Left s))
