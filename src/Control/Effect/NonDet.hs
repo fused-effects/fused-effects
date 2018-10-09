@@ -8,7 +8,6 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier.Split
 import Control.Effect
 import Control.Monad.Codensity
 
@@ -56,7 +55,36 @@ instance TermMonad m sig => TermAlgebra (MaybeH m) (NonDet :+: sig) where
     where alg Empty      = MaybeH (pure Nothing)
           alg (Choose k) = MaybeH (liftA2 (<|>) (runMaybeH (k True)) (runMaybeH (k False)))
 
-runNonDetSplit :: TermMonad m sig => Eff (NonDet :+: sig) a -> m [a]
-runNonDetSplit = joinSplitH . interpret alg
-  where alg Empty      = empty
-        alg (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <|> k False))))
+runNonDetSplit :: TermMonad m sig => Codensity (SplitH m) a -> m [a]
+runNonDetSplit = joinSplitH . runCodensity var
+
+newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
+
+joinSplitH :: Monad m => SplitH m a -> m [a]
+joinSplitH = (>>= maybe (pure []) (\ (a, q) -> (a :) <$> joinSplitH q)) . runSplitH
+
+instance Monad m => Semigroup (SplitH m a) where
+  a <> b = SplitH (runSplitH a >>= maybe (runSplitH b) (\ (a', q) -> pure (Just (a', q <> b))))
+
+instance Monad m => Monoid (SplitH m a) where
+  mempty = SplitH (pure Nothing)
+
+instance Carrier [] SplitH where
+  joinl a = SplitH (a >>= runSplitH)
+
+  suspend f = f [()]
+
+  resume []     = pure []
+  resume (a:as) = runSplitH a >>= maybe (resume as) (\ (a', q) -> (a' :) <$> resume (q : as))
+
+  wrap a = SplitH (a >>= \ a' -> case a' of
+    []     -> pure Nothing
+    a'':as -> pure (Just (a'', wrap (pure as))))
+
+  gen a = SplitH (pure (Just (a, SplitH (pure Nothing))))
+
+instance TermMonad m sig => TermAlgebra (SplitH m) (NonDet :+: sig) where
+  var = gen
+  con = alg \/ interpretRest
+    where alg Empty      = SplitH (pure Nothing)
+          alg (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <> k False))))
