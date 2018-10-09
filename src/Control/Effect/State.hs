@@ -16,10 +16,10 @@ instance Effect (State s) where
   handle _ (Get k)   = Get   k
   handle _ (Put s k) = Put s k
 
-get :: Subset (State s) sig => Eff sig s
+get :: (Subset (State s) sig, TermMonad m sig) => m s
 get = send (Get pure)
 
-put :: Subset (State s) sig => s -> Eff sig ()
+put :: (Subset (State s) sig, TermMonad m sig) => s -> m ()
 put s = send (Put s (pure ()))
 
 
