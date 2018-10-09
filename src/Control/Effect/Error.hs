@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error where
 
-import Control.Applicative (liftA2)
 import Control.Effect
 import Control.Monad ((<=<))
 import Control.Monad.Codensity
@@ -31,11 +30,6 @@ runError = runErrorH . runCodensity var
 
 newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
   deriving (Functor)
-
-instance Applicative m => Applicative (ErrorH e m) where
-  pure a = ErrorH (pure (Right a))
-
-  ErrorH f <*> ErrorH a = ErrorH (liftA2 (<*>) f a)
 
 instance Carrier (Either e) (ErrorH e) where
   joinl mf = ErrorH (mf >>= runErrorH)
