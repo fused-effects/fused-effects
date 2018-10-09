@@ -23,7 +23,7 @@ put :: Subset (State s) sig => s -> Eff sig ()
 put s = send (Put s (pure ()))
 
 
-runState :: Effect sig => s -> Eff (State s :+: sig) a -> Eff sig (s, a)
+runState :: TermMonad m sig => s -> Eff (State s :+: sig) a -> m (s, a)
 runState s m = runStateH (interpret alg m) s
   where alg (Get k)   = StateH (\ s -> runStateH (k s) s)
         alg (Put s k) = StateH (\ _ -> runStateH  k    s)
