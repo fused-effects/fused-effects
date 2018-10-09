@@ -21,7 +21,6 @@ module Control.Effect
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier
 import Control.Monad (liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -67,6 +66,29 @@ class Effect sig where
          => f ()
          -> sig (c n) (c n a)
          -> sig n (c n a)
+
+
+class Functor f => Carrier f c | c -> f where
+  -- | (Left-)join a 'Monad' of 'Carrier's into a 'Carrier'.
+  -- @
+  -- joinl . pure = id
+  -- @
+  --
+  -- @
+  -- joinl . join = joinl . fmap joinl
+  -- @
+  joinl :: Monad m => m (c m a) -> c m a
+
+  suspend :: Monad m => (f () -> c m a) -> c m a
+
+  resume :: Monad m => f (c m a) -> m (f a)
+
+  wrap :: Monad m => m (f a) -> c m a
+
+  gen :: Monad m => a -> c m a
+  default gen :: Applicative (c m) => a -> c m a
+  gen = pure
+
 
 class Effect sig => TermAlgebra h sig | h -> sig where
   var :: a -> h a
