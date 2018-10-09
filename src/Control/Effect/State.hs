@@ -22,8 +22,8 @@ put :: (Subset (State s) sig, TermMonad m sig) => s -> m ()
 put s = send (Put s (pure ()))
 
 
-runState :: TermMonad m sig => s -> Codensity (StateH s m) a -> m (s, a)
-runState s m = runStateH (runCodensity var m) s
+runState :: TermMonad m sig => s -> Eff (StateH s m) a -> m (s, a)
+runState s m = runStateH (runEff var m) s
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
 

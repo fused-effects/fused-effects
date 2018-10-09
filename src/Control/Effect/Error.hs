@@ -24,8 +24,8 @@ catch :: (Subset (Error exc) sig, TermMonad m sig) => m a -> (exc -> m a) -> m a
 catch m h = send (Catch m h pure)
 
 
-runError :: TermMonad m sig => Codensity (ErrorH exc m) a -> m (Either exc a)
-runError = runErrorH . runCodensity var
+runError :: TermMonad m sig => Eff (ErrorH exc m) a -> m (Either exc a)
+runError = runErrorH . runEff var
 
 newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
 

@@ -38,8 +38,8 @@ factor = read <$> some digit
      <|> char '(' *> expr <* char ')'
 
 
-parse :: (Alternative m, TermMonad m sig) => String -> Codensity (SymbolH m) a -> m a
-parse input = fmap snd . flip runSymbolH input . runCodensity var
+parse :: (Alternative m, TermMonad m sig) => String -> Eff (SymbolH m) a -> m a
+parse input = fmap snd . flip runSymbolH input . runEff var
 
 newtype SymbolH m a = SymbolH { runSymbolH :: String -> m (String, a) }
 

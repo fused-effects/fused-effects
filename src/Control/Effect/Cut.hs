@@ -30,8 +30,8 @@ skip :: Applicative m => m ()
 skip = pure ()
 
 
-runCut :: TermMonad m sig => Codensity (SplitH m) a -> m [a]
-runCut = joinSplitH . runCodensity var
+runCut :: TermMonad m sig => Eff (SplitH m) a -> m [a]
+runCut = joinSplitH . runEff var
 
 newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
 

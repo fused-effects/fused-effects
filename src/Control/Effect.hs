@@ -1,7 +1,7 @@
 {-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
 module Control.Effect
-( Codensity(..)
-, runCodensity
+( Eff(..)
+, runEff
 , send
 , interpretRest
 , reinterpretRest
@@ -26,23 +26,23 @@ import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
 
-newtype Codensity h a = Codensity { unCodensity :: forall x . (a -> h x) -> h x }
+newtype Eff h a = Eff { unEff :: forall x . (a -> h x) -> h x }
 
-runCodensity :: (a -> f x) -> Codensity f a -> f x
-runCodensity = flip unCodensity
+runEff :: (a -> f x) -> Eff f a -> f x
+runEff = flip unEff
 
-instance Functor (Codensity h) where
+instance Functor (Eff h) where
   fmap = liftM
 
-instance Applicative (Codensity h) where
-  pure a = Codensity ($ a)
+instance Applicative (Eff h) where
+  pure a = Eff ($ a)
 
   (<*>) = ap
 
-instance Monad (Codensity h) where
+instance Monad (Eff h) where
   return = pure
 
-  Codensity m >>= f = Codensity (\ k -> m (runCodensity k . f))
+  Eff m >>= f = Eff (\ k -> m (runEff k . f))
 
 -- | The class of effect types, which must:
 --
@@ -94,19 +94,19 @@ class Effect sig => TermAlgebra h sig | h -> sig where
   var :: a -> h a
   con :: sig h (h a) -> h a
 
-instance TermAlgebra h sig => TermAlgebra (Codensity h) sig where
+instance TermAlgebra h sig => TermAlgebra (Eff h) sig where
   var = pure
   con = algCod con
 
 algCod :: TermAlgebra h sig
        => (forall a . sig h (h a) -> h a)
-       -> (forall a . sig (Codensity h) (Codensity h a) -> Codensity h a)
-algCod alg op = Codensity (\ k -> alg (hfmap (runCodensity var) (fmap' (runCodensity k) op)))
+       -> (forall a . sig (Eff h) (Eff h a) -> Eff h a)
+algCod alg op = Eff (\ k -> alg (hfmap (runEff var) (fmap' (runEff k) op)))
 
 
 class (Monad m, TermAlgebra m sig) => TermMonad m sig | m -> sig
 
-instance TermAlgebra h sig => TermMonad (Codensity h) sig
+instance TermAlgebra h sig => TermMonad (Eff h) sig
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
@@ -147,8 +147,8 @@ instance Effect Void where
   handle _ v = case v of {}
 
 -- | Run an 'Eff' exhausted of effects to produce its final result value.
-run :: Codensity VoidH a -> a
-run = runVoidH . runCodensity VoidH
+run :: Eff VoidH a -> a
+run = runVoidH . runEff VoidH
 
 
 newtype VoidH a = VoidH { runVoidH :: a }
@@ -166,7 +166,7 @@ instance Functor sig => Effect (Lift sig) where
 
   handle _ (Lift op) = Lift op
 
-instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Codensity m) where
+instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Eff m) where
   liftIO = send . Lift . fmap pure
 
 
@@ -208,7 +208,7 @@ instance Effect NonDet where
   handle _ Empty      = Empty
   handle _ (Choose k) = Choose k
 
-instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Codensity m) where
+instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Eff m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
@@ -221,7 +221,7 @@ instance Effect Fail where
 
   handle _ (Fail s) = Fail s
 
-instance (Subset Fail sig, TermAlgebra m sig) => MonadFail (Codensity m) where
+instance (Subset Fail sig, TermAlgebra m sig) => MonadFail (Eff m) where
   fail = send . Fail
 
 

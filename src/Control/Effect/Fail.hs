@@ -6,8 +6,8 @@ module Control.Effect.Fail
 
 import Control.Effect
 
-runFail :: TermMonad m sig => Codensity (FailH m) a -> m (Either String a)
-runFail = runFailH . runCodensity var
+runFail :: TermMonad m sig => Eff (FailH m) a -> m (Either String a)
+runFail = runFailH . runEff var
 
 newtype FailH m a = FailH { runFailH :: m (Either String a) }
 

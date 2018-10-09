@@ -23,8 +23,8 @@ local :: (Subset (Reader r) sig, TermMonad m sig) => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
 
 
-runReader :: TermMonad m sig => r -> Codensity (ReaderH r m) a -> m a
-runReader r m = runReaderH (runCodensity var m) r
+runReader :: TermMonad m sig => r -> Eff (ReaderH r m) a -> m a
+runReader r m = runReaderH (runEff var m) r
 
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }

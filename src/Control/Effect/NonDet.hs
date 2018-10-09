@@ -10,8 +10,8 @@ module Control.Effect.NonDet
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect
 
-runNonDet :: TermMonad m sig => Codensity (ListH m) a -> m [a]
-runNonDet = runListH . runCodensity var
+runNonDet :: TermMonad m sig => Eff (ListH m) a -> m [a]
+runNonDet = runListH . runEff var
 
 newtype ListH m a = ListH { runListH :: m [a] }
 
@@ -32,8 +32,8 @@ instance TermMonad m sig => TermAlgebra (ListH m) (NonDet :+: sig) where
     where alg Empty = ListH (pure [])
           alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
 
-runNonDetOnce :: TermMonad m sig => Codensity (MaybeH m) a -> m (Maybe a)
-runNonDetOnce = runMaybeH . runCodensity var
+runNonDetOnce :: TermMonad m sig => Eff (MaybeH m) a -> m (Maybe a)
+runNonDetOnce = runMaybeH . runEff var
 
 newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
 
@@ -54,8 +54,8 @@ instance TermMonad m sig => TermAlgebra (MaybeH m) (NonDet :+: sig) where
     where alg Empty      = MaybeH (pure Nothing)
           alg (Choose k) = MaybeH (liftA2 (<|>) (runMaybeH (k True)) (runMaybeH (k False)))
 
-runNonDetSplit :: TermMonad m sig => Codensity (SplitH m) a -> m [a]
-runNonDetSplit = joinSplitH . runCodensity var
+runNonDetSplit :: TermMonad m sig => Eff (SplitH m) a -> m [a]
+runNonDetSplit = joinSplitH . runEff var
 
 newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
 

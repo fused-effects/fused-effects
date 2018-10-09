@@ -6,8 +6,8 @@ module Control.Effect.Lift
 
 import Control.Effect
 
-runM :: Monad m => Codensity (LiftH m) a -> m a
-runM = runLiftH . runCodensity var
+runM :: Monad m => Eff (LiftH m) a -> m a
+runM = runLiftH . runEff var
 
 newtype LiftH m a = LiftH { runLiftH :: m a }
 
