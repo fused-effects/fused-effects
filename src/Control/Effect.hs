@@ -1,17 +1,8 @@
 {-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
 module Control.Effect
-( Eff(..)
-, send
-, fold
-, foldH
-, interpret
-, interpret2
+( send
 , interpretRest
-, reinterpret
-, reinterpret2
 , reinterpretRest
-, reinterpret_2
-, reinterpret2_2
 , reinterpretRest_2
 , Effect(..)
 , TermAlgebra(..)
@@ -29,15 +20,10 @@ module Control.Effect
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Monad (ap, liftM)
 import Control.Monad.Codensity
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
-
-data Eff effects a
-  = Return a
-  | Eff (effects (Eff effects) (Eff effects a))
 
 -- | The class of effect types, which must:
 --
@@ -66,10 +52,6 @@ class Effect sig => TermAlgebra h sig | h -> sig where
   var :: a -> h a
   con :: sig h (h a) -> h a
 
-instance Effect sig => TermAlgebra (Eff sig) sig where
-  var = Return
-  con = Eff
-
 instance TermAlgebra h sig => TermAlgebra (Codensity h) sig where
   var = pure
   con = algCod con
@@ -82,8 +64,6 @@ algCod alg op = Codensity (\ k -> alg (hfmap (runCodensity var) (fmap' (runCoden
 
 class (Monad m, TermAlgebra m sig) => TermMonad m sig | m -> sig
 
-instance Effect sig => TermMonad (Eff sig) sig
-
 instance TermAlgebra h sig => TermMonad (Codensity h) sig
 
 
@@ -91,42 +71,6 @@ instance TermAlgebra h sig => TermMonad (Codensity h) sig
 send :: (Subset effect sig, TermAlgebra m sig) => effect m (m a) -> m a
 send = con . inj
 
-
--- | Fold a generator and first-order algebra over an 'Eff' to obtain some final result value.
-fold :: Effect sig
-     => (a -> b)
-     -> (sig (Eff sig) b -> b)
-     -> (Eff sig a -> b)
-fold gen alg = go
-  where go (Return x) = gen x
-        go (Eff op)   = alg (fmap' go op)
-
--- | Fold a higher-order algebra over an 'Eff' to obtain some final result value.
-foldH :: forall sig f
-      .  Effect sig
-      => (forall a . a -> f a)
-      -> (forall a . sig f (f a) -> f a)
-      -> (forall a . Eff sig a -> f a)
-foldH gen alg = go
-  where go :: Eff sig a -> f a
-        go (Return x) = gen x
-        go (Eff op)   = alg (hfmap go (fmap' go op))
-
-
--- | Interpret an 'Effect'’s requests into a 'Carrier' using the passed algebra.
-interpret :: (Effect eff, Carrier f c, TermMonad m sig)
-          => (forall a . eff (c m) (c m a) -> c m a)
-          -> (forall a . Eff (eff :+: sig) a -> c m a)
-interpret alg = foldH gen (alg \/ interpretRest)
-{-# INLINE interpret #-}
-
--- | Interpret two 'Effect's’ requests into a 'Carrier' using the passed algebras.
-interpret2 :: (Effect eff1, Effect eff2, Carrier f c, TermMonad m sig)
-           => (forall a . eff1 (c m) (c m a) -> c m a)
-           -> (forall a . eff2 (c m) (c m a) -> c m a)
-           -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c m a)
-interpret2 alg1 alg2 = foldH gen (alg1 \/ alg2 \/ interpretRest)
-{-# INLINE interpret2 #-}
 
 -- | Interpret any requests in higher-order positions in the remaining effects.
 --
@@ -136,22 +80,6 @@ interpretRest :: (Carrier f c, TermMonad m sig)
               -> c m a
 interpretRest op = suspend (\ state -> joinl (con (fmap' var (handle state op))))
 
-
--- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of a new 'Effect' using the passed algebra.
-reinterpret :: (Effect eff, Effect sig, Carrier f c, TermMonad m (new :+: sig))
-            => (forall a . eff (c m) (c m a) -> c m a)
-            -> (forall a . Eff (eff :+: sig) a -> c m a)
-reinterpret alg = foldH gen (alg \/ reinterpretRest)
-{-# INLINE reinterpret #-}
-
--- | Reinterpret two 'Effect's’ requests into a 'Carrier' and requests of a new 'Effect' using the passed algebras.
-reinterpret2 :: (Effect eff1, Effect eff2, Effect sig, Carrier f c, TermMonad m (new :+: sig))
-             => (forall a . eff1 (c m) (c m a) -> c m a)
-             -> (forall a . eff2 (c m) (c m a) -> c m a)
-             -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c m a)
-reinterpret2 alg1 alg2 = foldH gen (alg1 \/ alg2 \/ reinterpretRest)
-{-# INLINE reinterpret2 #-}
-
 -- | Reinterpret any requests in higher-order positions in the remaining effects.
 --
 --   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
@@ -159,21 +87,6 @@ reinterpretRest :: (Effect sig, Carrier f c, TermMonad m (new :+: sig))
                 => sig (c m) (c m a)
                 -> c m a
 reinterpretRest op = suspend (\ state -> joinl (con (fmap' var (R (handle state op)))))
-
--- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of two new 'Effect's using the passed algebra.
-reinterpret_2 :: (Effect eff, Effect sig, Carrier f c, TermMonad m (new1 :+: new2 :+: sig))
-             => (forall a . eff (c m) (c m a) -> c m a)
-             -> (forall a . Eff (eff :+: sig) a -> c m a)
-reinterpret_2 alg = foldH gen (alg \/ reinterpretRest_2)
-{-# INLINE reinterpret_2 #-}
-
--- | Reinterpret two 'Effect's’ requests into a 'Carrier' and requests of two new 'Effect's using the passed algebras.
-reinterpret2_2 :: (Effect eff1, Effect eff2, Effect sig, Carrier f c, TermMonad m (new1 :+: new2 :+: sig))
-             => (forall a . eff1 (c m) (c m a) -> c m a)
-             -> (forall a . eff2 (c m) (c m a) -> c m a)
-             -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c m a)
-reinterpret2_2 alg1 alg2 = foldH gen (alg1 \/ alg2 \/ reinterpretRest_2)
-{-# INLINE reinterpret2_2 #-}
 
 -- | Reinterpret any requests in higher-order positions in the remaining effects.
 --
@@ -211,7 +124,7 @@ instance Functor sig => Effect (Lift sig) where
 
   handle _ (Lift op) = Lift op
 
-instance Subset (Lift IO) sig => MonadIO (Eff sig) where
+instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Codensity m) where
   liftIO = send . Lift . fmap pure
 
 
@@ -253,7 +166,7 @@ instance Effect NonDet where
   handle _ Empty      = Empty
   handle _ (Choose k) = Choose k
 
-instance Subset NonDet sig => Alternative (Eff sig) where
+instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Codensity m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
@@ -266,7 +179,7 @@ instance Effect Fail where
 
   handle _ (Fail s) = Fail s
 
-instance Subset Fail sig => MonadFail (Eff sig) where
+instance (Subset Fail sig, TermAlgebra m sig) => MonadFail (Codensity m) where
   fail = send . Fail
 
 
@@ -287,14 +200,3 @@ instance {-# OVERLAPPABLE #-} (Effect sub', Subset sub sup) => Subset sub (sub' 
   inj = R . inj
   prj (R g) = prj g
   prj _     = Nothing
-
-
-instance Effect sig => Functor (Eff sig) where
-  fmap = liftM
-
-instance Effect sig => Applicative (Eff sig) where
-  pure = Return
-  (<*>) = ap
-
-instance Effect sig => Monad (Eff sig) where
-  m >>= k = fold k Eff m
