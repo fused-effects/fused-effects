@@ -80,7 +80,7 @@ algCod :: TermAlgebra h sig
 algCod alg op = Codensity (\ k -> alg (hfmap (runCodensity var) (fmap' (runCodensity k) op)))
 
 
-class (Monad m, TermAlgebra m f) => TermMonad m f | m -> f
+class (Monad m, TermAlgebra m sig) => TermMonad m sig | m -> sig
 
 instance Effect sig => TermMonad (Eff sig) sig
 
