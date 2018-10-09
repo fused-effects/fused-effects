@@ -15,26 +15,26 @@ instance Effect Symbol where
 
   handle _ (Symbol sat k) = Symbol sat k
 
-satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
+satisfy :: (Subset Symbol sig, TermMonad m sig) => (Char -> Bool) -> m Char
 satisfy sat = send (Symbol sat pure)
 
-char :: Subset Symbol sig => Char -> Eff sig Char
+char :: (Subset Symbol sig, TermMonad m sig) => Char -> m Char
 char c = satisfy (== c)
 
-digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Char
+digit :: (Alternative m, Subset Symbol sig, TermMonad m sig) => m Char
 digit = foldr ((<|>) . char) empty ['0'..'9']
 
-expr :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+expr :: (Alternative m, Subset Cut sig, Subset Symbol sig, TermMonad m sig) => m Int
 expr = do
   i <- term
   call ((i +) <$ char '+' <* cut <*> expr) <|> pure i
 
-term :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+term :: (Alternative m, Subset Cut sig, Subset Symbol sig, TermMonad m sig) => m Int
 term = do
   i <- factor
   call ((i *) <$ char '*' <* cut <*> term) <|> pure i
 
-factor :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+factor :: (Alternative m, Subset Cut sig, Subset Symbol sig, TermMonad m sig) => m Int
 factor = read <$> some digit
      <|> char '(' *> expr <* char ')'
 
