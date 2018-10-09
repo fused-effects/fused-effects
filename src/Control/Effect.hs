@@ -62,9 +62,9 @@ class Effect sig where
          -> sig (c n) (c n a)
          -> sig n (c n a)
 
-class Effect f => TermAlgebra h f | h -> f where
+class Effect sig => TermAlgebra h sig | h -> sig where
   var :: a -> h a
-  con :: f h (h a) -> h a
+  con :: sig h (h a) -> h a
 
 instance Effect sig => TermAlgebra (Eff sig) sig where
   var = Return
