@@ -24,7 +24,7 @@ local :: Subset (Reader r) sig => (r -> r) -> Eff sig a -> Eff sig a
 local f m = send (Local f m pure)
 
 
-runReader :: Effect sig => r -> Eff (Reader r :+: sig) a -> Eff sig a
+runReader :: TermMonad m sig => r -> Eff (Reader r :+: sig) a -> m a
 runReader r m = runReaderH (interpret alg m) r
   where alg (Ask k)       = ReaderH (\ r -> runReaderH (k r) r)
         alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
