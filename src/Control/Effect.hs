@@ -77,7 +77,7 @@ instance TermAlgebra h sig => TermAlgebra (Codensity h) sig where
 algCod :: TermAlgebra h sig
        => (forall a . sig h (h a) -> h a)
        -> (forall a . sig (Codensity h) (Codensity h a) -> Codensity h a)
-algCod alg op = Codensity (\ k -> alg (hfmap (\ m -> runCodensity m var) (fmap' (\ m -> runCodensity m k) op)))
+algCod alg op = Codensity (\ k -> alg (hfmap (runCodensity var) (fmap' (runCodensity k) op)))
 
 
 class (Monad m, TermAlgebra m f) => TermMonad m f | m -> f
