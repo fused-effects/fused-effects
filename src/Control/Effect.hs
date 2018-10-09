@@ -30,6 +30,7 @@ newtype Eff h a = Eff { unEff :: forall x . (a -> h x) -> h x }
 
 runEff :: (a -> f x) -> Eff f a -> f x
 runEff = flip unEff
+{-# INLINE runEff #-}
 
 instance Functor (Eff h) where
   fmap = liftM
