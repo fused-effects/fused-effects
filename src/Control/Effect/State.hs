@@ -38,14 +38,6 @@ instance Monad m => Applicative (StateH s m) where
     let fa = f' a'
     fa `seq` pure (s'', fa)
 
-instance Monad m => Monad (StateH s m) where
-  return = pure
-
-  StateH a >>= f = StateH $ \ s -> do
-    (s', a') <- a s
-    let fa = f a'
-    fa `seq` runStateH fa s'
-
 instance Carrier ((,) s) (StateH s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
 
