@@ -26,33 +26,33 @@ catch :: Subset (Error exc) sig => Eff sig a -> (exc -> Eff sig a) -> Eff sig a
 catch m h = send (Catch m h pure)
 
 
-runError :: TermMonad m sig => Codensity (EitherH exc m) a -> m (Either exc a)
-runError = runEitherH . runCodensity var
+runError :: TermMonad m sig => Codensity (ErrorH exc m) a -> m (Either exc a)
+runError = runErrorH . runCodensity var
 
-newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
+newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
   deriving (Functor)
 
-instance Applicative m => Applicative (EitherH e m) where
-  pure a = EitherH (pure (Right a))
+instance Applicative m => Applicative (ErrorH e m) where
+  pure a = ErrorH (pure (Right a))
 
-  EitherH f <*> EitherH a = EitherH (liftA2 (<*>) f a)
+  ErrorH f <*> ErrorH a = ErrorH (liftA2 (<*>) f a)
 
-instance Monad m => Monad (EitherH e m) where
+instance Monad m => Monad (ErrorH e m) where
   return = pure
 
-  EitherH a >>= f = EitherH (a >>= either (pure . Left) (runEitherH . f))
+  ErrorH a >>= f = ErrorH (a >>= either (pure . Left) (runErrorH . f))
 
-instance Carrier (Either e) (EitherH e) where
-  joinl mf = EitherH (mf >>= runEitherH)
+instance Carrier (Either e) (ErrorH e) where
+  joinl mf = ErrorH (mf >>= runErrorH)
 
   suspend f = f (Right ())
 
-  resume = either (pure . Left) runEitherH
+  resume = either (pure . Left) runErrorH
 
-  wrap = EitherH
+  wrap = ErrorH
 
-instance TermMonad m sig => TermAlgebra (EitherH e m) (Error e :+: sig) where
+instance TermMonad m sig => TermAlgebra (ErrorH e m) (Error e :+: sig) where
   var = gen
   con = alg \/ interpretRest
-    where alg (Throw e)     = EitherH (pure (Left e))
-          alg (Catch m h k) = EitherH (runEitherH m >>= runEitherH . either (k <=< h) k)
+    where alg (Throw e)     = ErrorH (pure (Left e))
+          alg (Catch m h k) = ErrorH (runErrorH m >>= runErrorH . either (k <=< h) k)
