@@ -1,10 +1,10 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, PolyKinds, TypeOperators #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Symbol where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.State
 import Control.Effect
 import Control.Effect.Cut
+import Control.Monad.Codensity
 
 data Symbol m k
   = Symbol (Char -> Bool) (Char -> k)
@@ -39,8 +39,26 @@ factor = read <$> some digit
      <|> char '(' *> expr <* char ')'
 
 
-parse :: (Alternative m, TermMonad m sig) => String -> Eff (Symbol :+: sig) a -> m a
-parse input = fmap snd . flip runStateH input . interpret alg
-  where alg (Symbol p k) = StateH (\ s -> case s of
-          c:cs | p c -> runStateH (k c) cs
-          _          -> empty)
+parse :: (Alternative m, TermMonad m sig) => String -> Codensity (SymbolH m) a -> m a
+parse input = fmap snd . flip runSymbolH input . runCodensity var
+
+newtype SymbolH m a = SymbolH { runSymbolH :: String -> m (String, a) }
+
+instance Carrier ((,) String) SymbolH where
+  joinl mf = SymbolH (\ s -> mf >>= \ f -> runSymbolH f s)
+
+  suspend f = SymbolH (\ s -> runSymbolH (f (s, ())) s)
+
+  resume (s, m) = runSymbolH m s
+
+  wrap = SymbolH . const
+
+  gen a = SymbolH (\ s -> pure (s, a))
+
+instance (Alternative m, TermMonad m sig) => TermAlgebra (SymbolH m) (Symbol :+: sig) where
+  var = gen
+
+  con = alg \/ interpretRest
+    where alg (Symbol p k) = SymbolH (\ s -> case s of
+            c:cs | p c -> runSymbolH (k c) cs
+            _          -> empty)
