@@ -97,12 +97,7 @@ class Effect sig => TermAlgebra h sig | h -> sig where
 
 instance TermAlgebra h sig => TermAlgebra (Eff h) sig where
   var = pure
-  con = algCod con
-
-algCod :: TermAlgebra h sig
-       => (forall a . sig h (h a) -> h a)
-       -> (forall a . sig (Eff h) (Eff h a) -> Eff h a)
-algCod alg op = Eff (\ k -> alg (hfmap (runEff var) (fmap' (runEff k) op)))
+  con op = Eff (\ k -> con (hfmap (runEff var) (fmap' (runEff k) op)))
 
 
 class (Monad m, TermAlgebra m sig) => TermMonad m sig | m -> sig
