@@ -2,7 +2,6 @@
 module Control.Effect.Reader where
 
 import Control.Effect
-import Control.Monad.Codensity
 
 data Reader r m k
   = Ask (r -> k)

@@ -2,7 +2,6 @@
 module Control.Effect.State where
 
 import Control.Effect
-import Control.Monad.Codensity
 
 data State s m k
   = Get (s -> k)

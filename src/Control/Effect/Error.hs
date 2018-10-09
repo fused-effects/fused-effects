@@ -3,7 +3,6 @@ module Control.Effect.Error where
 
 import Control.Effect
 import Control.Monad ((<=<))
-import Control.Monad.Codensity
 
 data Error exc m k
   = Throw exc

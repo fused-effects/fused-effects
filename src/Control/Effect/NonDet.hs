@@ -9,7 +9,6 @@ module Control.Effect.NonDet
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect
-import Control.Monad.Codensity
 
 runNonDet :: TermMonad m sig => Codensity (ListH m) a -> m [a]
 runNonDet = runListH . runCodensity var

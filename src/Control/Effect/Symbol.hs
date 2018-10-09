@@ -4,7 +4,6 @@ module Control.Effect.Symbol where
 import Control.Applicative (Alternative(..))
 import Control.Effect
 import Control.Effect.Cut
-import Control.Monad.Codensity
 
 data Symbol m k
   = Symbol (Char -> Bool) (Char -> k)

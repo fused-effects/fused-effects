@@ -1,6 +1,8 @@
 {-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
 module Control.Effect
-( send
+( Codensity(..)
+, runCodensity
+, send
 , interpretRest
 , reinterpretRest
 , reinterpretRest_2
@@ -20,10 +22,28 @@ module Control.Effect
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Monad.Codensity
+import Control.Monad (liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
+
+newtype Codensity h a = Codensity { unCodensity :: forall x . (a -> h x) -> h x }
+
+runCodensity :: (a -> f x) -> Codensity f a -> f x
+runCodensity = flip unCodensity
+
+instance Functor (Codensity h) where
+  fmap = liftM
+
+instance Applicative (Codensity h) where
+  pure a = Codensity ($ a)
+
+  (<*>) = ap
+
+instance Monad (Codensity h) where
+  return = pure
+
+  Codensity m >>= f = Codensity (\ k -> m (runCodensity k . f))
 
 -- | The class of effect types, which must:
 --

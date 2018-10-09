@@ -2,7 +2,6 @@
 module Control.Effect.Writer where
 
 import Control.Effect
-import Control.Monad.Codensity
 import Data.Bifunctor (first)
 
 data Writer w m k = Tell w k

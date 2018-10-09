@@ -5,7 +5,6 @@ module Control.Effect.Lift
 ) where
 
 import Control.Effect
-import Control.Monad.Codensity
 
 runM :: Monad m => Codensity (LiftH m) a -> m a
 runM = runLiftH . runCodensity var

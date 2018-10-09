@@ -5,7 +5,6 @@ module Control.Effect.Fail
 ) where
 
 import Control.Effect
-import Control.Monad.Codensity
 
 runFail :: TermMonad m sig => Codensity (FailH m) a -> m (Either String a)
 runFail = runFailH . runCodensity var

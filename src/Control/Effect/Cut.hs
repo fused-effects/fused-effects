@@ -3,7 +3,6 @@ module Control.Effect.Cut where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect
-import Control.Monad.Codensity
 
 data Cut m k
   = Cut
