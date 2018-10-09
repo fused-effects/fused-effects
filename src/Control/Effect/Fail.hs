@@ -4,7 +4,6 @@ module Control.Effect.Fail
 , runFail
 ) where
 
-import Control.Applicative (liftA2)
 import Control.Effect
 import Control.Monad.Codensity
 
@@ -14,11 +13,6 @@ runFail = runEitherH . runCodensity var
 newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
   deriving (Functor)
 
-instance Applicative m => Applicative (EitherH e m) where
-  pure a = EitherH (pure (Right a))
-
-  EitherH f <*> EitherH a = EitherH (liftA2 (<*>) f a)
-
 instance Carrier (Either e) (EitherH e) where
   joinl mf = EitherH (mf >>= runEitherH)
 
@@ -27,6 +21,8 @@ instance Carrier (Either e) (EitherH e) where
   resume = either (pure . Left) runEitherH
 
   wrap = EitherH
+
+  gen a = EitherH (pure (Right a))
 
 instance TermMonad m sig => TermAlgebra (EitherH String m) (Fail :+: sig) where
   var = gen
