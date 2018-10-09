@@ -26,7 +26,7 @@ instance Carrier [] ListH where
 
 instance TermMonad m sig => TermAlgebra (ListH m) (NonDet :+: sig) where
   var a = ListH (pure [a])
-  con = alg \/ algRest
+  con = alg \/ (ListH . con . handle [()] (fmap concat . traverse runListH))
     where alg Empty = ListH (pure [])
           alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
 
@@ -46,7 +46,7 @@ instance Carrier Maybe MaybeH where
 
 instance TermMonad m sig => TermAlgebra (MaybeH m) (NonDet :+: sig) where
   var a = MaybeH (pure (Just a))
-  con = alg \/ algRest
+  con = alg \/ (MaybeH . con . handle (Just ()) (maybe (pure Nothing) runMaybeH))
     where alg Empty      = MaybeH (pure Nothing)
           alg (Choose k) = MaybeH (liftA2 (<|>) (runMaybeH (k True)) (runMaybeH (k False)))
 
@@ -57,6 +57,11 @@ newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
 
 joinSplitH :: Monad m => SplitH m a -> m [a]
 joinSplitH = (>>= maybe (pure []) (\ (a, q) -> (a :) <$> joinSplitH q)) . runSplitH
+
+-- wrapSplitH :: Monad m => m [a] -> SplitH m a
+-- wrapSplitH a = SplitH (a >>= \ a' -> case a' of
+--   []     -> pure Nothing
+--   a'':as -> pure (Just (a'', wrap (pure as))))
 
 instance Monad m => Semigroup (SplitH m a) where
   a <> b = SplitH (runSplitH a >>= maybe (runSplitH b) (\ (a', q) -> pure (Just (a', q <> b))))
@@ -78,6 +83,6 @@ instance Carrier [] SplitH where
 
 instance TermMonad m sig => TermAlgebra (SplitH m) (NonDet :+: sig) where
   var a = SplitH (pure (Just (a, SplitH (pure Nothing))))
-  con = alg \/ algRest
+  con = alg \/ (wrap . con . handle [()] (fmap concat . traverse joinSplitH))
     where alg Empty      = SplitH (pure Nothing)
           alg (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <> k False))))

@@ -12,8 +12,8 @@ instance Effect (State s) where
   hfmap _ (Get k)   = Get   k
   hfmap _ (Put s k) = Put s k
 
-  handle _ (Get k)   = Get   k
-  handle _ (Put s k) = Put s k
+  handle state handler (Get k)   = Get   (handler . (<$ state) . k)
+  handle state handler (Put s k) = Put s (handler . (<$ state) $ k)
 
 get :: (Subset (State s) sig, TermMonad m sig) => m s
 get = send (Get pure)
@@ -38,6 +38,7 @@ instance Carrier ((,) s) (StateH s) where
 
 instance TermMonad m sig => TermAlgebra (StateH s m) (State s :+: sig) where
   var a = StateH (\ s -> pure (s, a))
-  con = alg \/ algRest
+  con = alg \/ algOther
     where alg (Get   k) = StateH (\ s -> runStateH (k s) s)
           alg (Put s k) = StateH (\ _ -> runStateH  k    s)
+          algOther op = StateH (\ s -> con (handle (s, ()) (uncurry (flip runStateH)) op))

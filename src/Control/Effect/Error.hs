@@ -14,8 +14,8 @@ instance Effect (Error exc) where
   hfmap _ (Throw exc)   = Throw exc
   hfmap f (Catch m h k) = Catch (f m) (f . h) k
 
-  handle _     (Throw exc)   = Throw exc
-  handle state (Catch m h k) = Catch (resume (m <$ state)) (resume . (<$ state) . h) (wrap . resume . fmap k)
+  handle _     _       (Throw exc)   = Throw exc
+  handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
 throw :: (Subset (Error exc) sig, TermMonad m sig) => exc -> m a
 throw = send . Throw
@@ -40,6 +40,6 @@ instance Carrier (Either e) (ErrorH e) where
 
 instance TermMonad m sig => TermAlgebra (ErrorH e m) (Error e :+: sig) where
   var a = ErrorH (pure (Right a))
-  con = alg \/ algRest
+  con = alg \/ (ErrorH . con . handle (Right ()) (either (pure . Left) runErrorH))
     where alg (Throw e)     = ErrorH (pure (Left e))
           alg (Catch m h k) = ErrorH (runErrorH m >>= either (either (pure . Left) (runErrorH . k) <=< runErrorH . h) (runErrorH . k))

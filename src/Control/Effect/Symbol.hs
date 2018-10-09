@@ -12,7 +12,7 @@ data Symbol m k
 instance Effect Symbol where
   hfmap _ (Symbol sat k) = Symbol sat k
 
-  handle _ (Symbol sat k) = Symbol sat k
+  handle state handler (Symbol sat k) = Symbol sat (handler . (<$ state) . k)
 
 satisfy :: (Subset Symbol sig, TermMonad m sig) => (Char -> Bool) -> m Char
 satisfy sat = send (Symbol sat pure)
@@ -54,7 +54,8 @@ instance Carrier ((,) String) SymbolH where
 
 instance (Alternative m, TermMonad m sig) => TermAlgebra (SymbolH m) (Symbol :+: sig) where
   var a = SymbolH (\ s -> pure (s, a))
-  con = alg \/ algRest
+  con = alg \/ algOther
     where alg (Symbol p k) = SymbolH (\ s -> case s of
             c:cs | p c -> runSymbolH (k c) cs
             _          -> empty)
+          algOther op = SymbolH (\ s -> con (handle (s, ()) (uncurry (flip runSymbolH)) op))

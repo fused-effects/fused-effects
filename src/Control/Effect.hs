@@ -3,9 +3,6 @@ module Control.Effect
 ( Eff(..)
 , runEff
 , send
-, algRest
-, algRest1
-, algRest2
 , Effect(..)
 , TermAlgebra(..)
 , TermMonad
@@ -63,10 +60,11 @@ class Effect sig where
   --   For first-order effects (which don’t contain higher-order positions), this will simply involve repackaging the effect’s arguments at the new type.
   --
   --   For higher-order effects (which do contain higher-order positions), the 'Carrier' actions @c n@ must be 'resume'd to obtain the necessary @n@ action, and the state passed along to the continuation via 'resume' and 'wrap'.
-  handle :: (Carrier f c, Monad n)
+  handle :: (Functor f, Monad n)
          => f ()
-         -> sig (c n) (c n a)
-         -> sig n (c n a)
+         -> (forall x . f (m x) -> n (f x))
+         -> sig m (m a)
+         -> sig n (n (f a))
 
 
 class Functor f => Carrier f c | c -> f where
@@ -106,37 +104,12 @@ send :: (Subset effect sig, TermAlgebra m sig) => effect m (m a) -> m a
 send = con . inj
 
 
--- | Interpret any requests in higher-order positions in the remaining effects.
---
---   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
-algRest :: (Carrier f c, TermMonad m sig)
-        => sig (c m) (c m a)
-        -> c m a
-algRest op = suspend (\ state -> joinl (con (fmap' var (handle state op))))
-
--- | Reinterpret any requests in higher-order positions in the remaining effects.
---
---   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
-algRest1 :: (Effect sig, Carrier f c, TermMonad m (new :+: sig))
-         => sig (c m) (c m a)
-         -> c m a
-algRest1 op = suspend (\ state -> joinl (con (R (fmap' var (handle state op)))))
-
--- | Reinterpret any requests in higher-order positions in the remaining effects.
---
---   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
-algRest2 :: (Effect sig, Carrier f c, TermMonad m (new1 :+: new2 :+: sig))
-         => sig (c m) (c m a)
-         -> c m a
-algRest2 op = suspend (\ state -> joinl (con (R (R (fmap' var (handle state op))))))
-
-
 data Void m k
   deriving (Functor)
 
 instance Effect Void where
   hfmap _ v = case v of {}
-  handle _ v = case v of {}
+  handle _ _ v = case v of {}
 
 -- | Run an 'Eff' exhausted of effects to produce its final result value.
 run :: Eff VoidH a -> a
@@ -156,7 +129,7 @@ newtype Lift sig m k = Lift { unLift :: sig k }
 instance Functor sig => Effect (Lift sig) where
   hfmap _ (Lift op) = Lift op
 
-  handle _ (Lift op) = Lift op
+  handle state handler (Lift op) = Lift (fmap (handler . (<$ state)) op)
 
 instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Eff m) where
   liftIO = send . Lift . fmap pure
@@ -176,8 +149,8 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
   fmap' f (L l) = L (fmap' f l)
   fmap' f (R r) = R (fmap' f r)
 
-  handle state (L l) = L (handle state l)
-  handle state (R r) = R (handle state r)
+  handle state handler (L l) = L (handle state handler l)
+  handle state handler (R r) = R (handle state handler r)
 
 -- | Lift algebras for either side of a sum into a single algebra on sums.
 (\/) :: ( sig1           m a -> b)
@@ -197,8 +170,8 @@ instance Effect NonDet where
   hfmap _ Empty      = Empty
   hfmap _ (Choose k) = Choose k
 
-  handle _ Empty      = Empty
-  handle _ (Choose k) = Choose k
+  handle _     _       Empty      = Empty
+  handle state handler (Choose k) = Choose (handler . (<$ state) . k)
 
 instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Eff m) where
   empty = send Empty
@@ -211,7 +184,7 @@ newtype Fail m k = Fail String
 instance Effect Fail where
   hfmap _ (Fail s) = Fail s
 
-  handle _ (Fail s) = Fail s
+  handle _ _ (Fail s) = Fail s
 
 instance (Subset Fail sig, TermAlgebra m sig) => MonadFail (Eff m) where
   fail = send . Fail

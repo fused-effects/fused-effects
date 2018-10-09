@@ -14,8 +14,8 @@ instance Effect Cut where
   hfmap _ Cut        = Cut
   hfmap f (Call m k) = Call (f m) k
 
-  handle _     Cut        = Cut
-  handle state (Call m k) = Call (resume (m <$ state)) (wrap . resume . fmap k)
+  handle _     _       Cut        = Cut
+  handle state handler (Call m k) = Call (handler (m <$ state)) (handler . fmap k)
 
 cutfail :: (Subset Cut sig, TermMonad m sig) => m a
 cutfail = send Cut
@@ -58,7 +58,7 @@ instance Carrier [] SplitH where
 
 instance TermMonad m sig => TermAlgebra (SplitH m) (Cut :+: NonDet :+: sig) where
   var a = SplitH (pure (Just (a, SplitH (pure Nothing))))
-  con = alg1 \/ alg2 \/ algRest
+  con = alg1 \/ alg2 \/ (wrap . con . handle [()] (fmap concat . traverse joinSplitH))
     where alg1 Cut        = mempty
           alg1 (Call m k) = m `bind` k
             where m `bind` k = SplitH (runSplitH m >>= runSplitH . maybe mempty (\ (a', q) -> k a' <> (q `bind` k)))
