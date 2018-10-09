@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
@@ -17,7 +17,6 @@ runNonDet :: TermMonad m sig => Codensity (ListH m) a -> m [a]
 runNonDet = runListH . runCodensity var
 
 newtype ListH m a = ListH { runListH :: m [a] }
-  deriving (Functor)
 
 instance Carrier [] ListH where
   joinl mf = ListH (mf >>= runListH)
