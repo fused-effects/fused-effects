@@ -29,7 +29,7 @@ instance Monad m => Monad (SplitH m) where
 
   a >>= k = SplitH (runSplitH a >>= runSplitH . maybe empty (\ (a', q) -> k a' <|> (q >>= k)))
 
-instance Carrier SplitH [] where
+instance Carrier [] SplitH where
   joinl a = SplitH (a >>= runSplitH)
 
   suspend = SplitH (pure (Just ([()], empty)))

@@ -23,7 +23,7 @@ instance Monad m => Monad (StateH s m) where
     let fa = f a'
     fa `seq` runStateH fa s'
 
-instance Carrier (StateH s) ((,) s) where
+instance Carrier ((,) s) (StateH s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
 
   suspend = StateH (\ s -> pure (s, (s, ())))

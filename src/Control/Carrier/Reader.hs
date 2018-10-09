@@ -16,7 +16,7 @@ instance Monad m => Monad (ReaderH r m) where
 
   ReaderH a >>= f = ReaderH (\ r -> a r >>= \ a' -> runReaderH (f a') r)
 
-instance Carrier (ReaderH r) ((,) r) where
+instance Carrier ((,) r) (ReaderH r) where
   joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
 
   suspend = ReaderH (\ r -> pure (r, ()))

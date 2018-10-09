@@ -17,7 +17,7 @@ instance Monad m => Monad (MaybeH m) where
 
   MaybeH a >>= f = MaybeH (a >>= maybe (pure Nothing) (runMaybeH . f))
 
-instance Carrier MaybeH Maybe where
+instance Carrier Maybe MaybeH where
   joinl mf = MaybeH (mf >>= runMaybeH)
 
   suspend = MaybeH (pure (Just (Just ())))

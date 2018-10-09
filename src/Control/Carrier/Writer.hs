@@ -23,7 +23,7 @@ instance (Monoid w, Monad m) => Monad (WriterH w m) where
     let w = w1 <> w2
     w `seq` pure (w, a''))
 
-instance Monoid w => Carrier (WriterH w) ((,) w) where
+instance Monoid w => Carrier ((,) w) (WriterH w) where
   joinl mf = WriterH (mf >>= runWriterH)
 
   suspend = WriterH (pure (mempty, (mempty, ())))

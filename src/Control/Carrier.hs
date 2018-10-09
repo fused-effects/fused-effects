@@ -1,7 +1,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 module Control.Carrier where
 
-class Functor f => Carrier c f | c -> f where
+class Functor f => Carrier f c | c -> f where
   -- | (Left-)join a 'Monad' of 'Carrier's into a 'Carrier'.
   -- @
   -- joinl . pure = id

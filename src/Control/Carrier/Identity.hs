@@ -7,7 +7,7 @@ import Data.Functor.Identity
 newtype IdentityH m a = IdentityH { runIdentityH :: m a }
   deriving (Applicative, Functor, Monad)
 
-instance Carrier IdentityH Identity where
+instance Carrier Identity IdentityH where
   joinl mf = IdentityH (mf >>= runIdentityH)
 
   suspend = IdentityH (pure (Identity ()))

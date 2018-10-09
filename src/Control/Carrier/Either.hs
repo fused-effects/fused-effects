@@ -17,7 +17,7 @@ instance Monad m => Monad (EitherH e m) where
 
   EitherH a >>= f = EitherH (a >>= either (pure . Left) (runEitherH . f))
 
-instance Carrier (EitherH e) (Either e) where
+instance Carrier (Either e) (EitherH e) where
   joinl mf = EitherH (mf >>= runEitherH)
 
   suspend = EitherH (pure (Right (Right ())))
