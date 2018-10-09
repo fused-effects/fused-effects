@@ -24,11 +24,6 @@ instance Applicative m => Applicative (ListH m) where
 
   ListH f <*> ListH a = ListH (liftA2 (<*>) f a)
 
-instance Monad m => Monad (ListH m) where
-  return = pure
-
-  ListH a >>= f = ListH (a >>= fmap concat . traverse (runListH . f))
-
 instance Carrier [] ListH where
   joinl mf = ListH (mf >>= runListH)
 
