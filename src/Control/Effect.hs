@@ -192,8 +192,15 @@ instance Effect Void where
   handle _ v = case v of {}
 
 -- | Run an 'Eff' exhausted of effects to produce its final result value.
-run :: Eff Void a -> a
-run = fold id (\ v -> case v of {})
+run :: Codensity VoidH a -> a
+run = runVoidH . runCodensity VoidH
+
+
+newtype VoidH a = VoidH { runVoidH :: a }
+
+instance TermAlgebra VoidH Void where
+  var = VoidH
+  con v = case v of {}
 
 
 newtype Lift sig m k = Lift { unLift :: sig k }
