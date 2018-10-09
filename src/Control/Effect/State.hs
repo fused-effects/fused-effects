@@ -36,10 +36,8 @@ instance Carrier ((,) s) (StateH s) where
 
   wrap = StateH . const
 
-  gen a = StateH (\ s -> pure (s, a))
-
 instance TermMonad m sig => TermAlgebra (StateH s m) (State s :+: sig) where
-  var = gen
+  var a = StateH (\ s -> pure (s, a))
   con = alg \/ interpretRest
     where alg (Get   k) = StateH (\ s -> runStateH (k s) s)
           alg (Put s k) = StateH (\ _ -> runStateH  k    s)

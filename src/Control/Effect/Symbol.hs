@@ -52,11 +52,8 @@ instance Carrier ((,) String) SymbolH where
 
   wrap = SymbolH . const
 
-  gen a = SymbolH (\ s -> pure (s, a))
-
 instance (Alternative m, TermMonad m sig) => TermAlgebra (SymbolH m) (Symbol :+: sig) where
-  var = gen
-
+  var a = SymbolH (\ s -> pure (s, a))
   con = alg \/ interpretRest
     where alg (Symbol p k) = SymbolH (\ s -> case s of
             c:cs | p c -> runSymbolH (k c) cs

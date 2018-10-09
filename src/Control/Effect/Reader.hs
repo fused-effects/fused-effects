@@ -38,10 +38,8 @@ instance Carrier ((,) r) (ReaderH r) where
 
   wrap = ReaderH . const . fmap snd
 
-  gen a = ReaderH (\ _ -> pure a)
-
 instance TermMonad m sig => TermAlgebra (ReaderH r m) (Reader r :+: sig) where
-  var = gen
+  var a = ReaderH (\ _ -> pure a)
   con = alg \/ interpretRest
     where alg (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
           alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)

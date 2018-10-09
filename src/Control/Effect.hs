@@ -86,10 +86,6 @@ class Functor f => Carrier f c | c -> f where
 
   wrap :: Monad m => m (f a) -> c m a
 
-  gen :: Monad m => a -> c m a
-  default gen :: Applicative (c m) => a -> c m a
-  gen = pure
-
 
 class Effect sig => TermAlgebra h sig | h -> sig where
   var :: a -> h a

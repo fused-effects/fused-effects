@@ -56,10 +56,8 @@ instance Carrier [] SplitH where
     []     -> pure Nothing
     a'':as -> pure (Just (a'', wrap (pure as))))
 
-  gen a = SplitH (pure (Just (a, SplitH (pure Nothing))))
-
 instance TermMonad m sig => TermAlgebra (SplitH m) (Cut :+: NonDet :+: sig) where
-  var = gen
+  var a = SplitH (pure (Just (a, SplitH (pure Nothing))))
   con = alg1 \/ alg2 \/ interpretRest
     where alg1 Cut        = mempty
           alg1 (Call m k) = m `bind` k

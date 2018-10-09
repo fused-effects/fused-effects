@@ -20,9 +20,7 @@ instance Carrier (Either String) FailH where
 
   wrap = FailH
 
-  gen a = FailH (pure (Right a))
-
 instance TermMonad m sig => TermAlgebra (FailH m) (Fail :+: sig) where
-  var = gen
+  var a = FailH (pure (Right a))
   con = alg \/ interpretRest
     where alg (Fail s) = FailH (pure (Left s))
