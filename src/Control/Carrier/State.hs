@@ -26,7 +26,7 @@ instance Monad m => Monad (StateH s m) where
 instance Carrier ((,) s) (StateH s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
 
-  suspend = StateH (\ s -> pure (s, (s, ())))
+  suspend f = StateH (\ s -> runStateH (f (s, ())) s)
 
   resume (s, m) = runStateH m s
 

@@ -20,7 +20,7 @@ instance Monad m => Monad (ListH m) where
 instance Carrier [] ListH where
   joinl mf = ListH (mf >>= runListH)
 
-  suspend = ListH (pure [[()]])
+  suspend f = f [()]
 
   resume = fmap concat . traverse runListH
 

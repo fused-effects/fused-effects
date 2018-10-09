@@ -26,7 +26,7 @@ instance (Monoid w, Monad m) => Monad (WriterH w m) where
 instance Monoid w => Carrier ((,) w) (WriterH w) where
   joinl mf = WriterH (mf >>= runWriterH)
 
-  suspend = WriterH (pure (mempty, (mempty, ())))
+  suspend f = f (mempty, ())
 
   resume (w, m) = first (w <>) <$> runWriterH m
 

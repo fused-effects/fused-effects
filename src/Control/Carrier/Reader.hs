@@ -19,7 +19,7 @@ instance Monad m => Monad (ReaderH r m) where
 instance Carrier ((,) r) (ReaderH r) where
   joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
 
-  suspend = ReaderH (\ r -> pure (r, ()))
+  suspend f = ReaderH (\ r -> runReaderH (f (r, ())) r)
 
   resume (r, m) = (,) r <$> runReaderH m r
 

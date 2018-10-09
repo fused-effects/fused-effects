@@ -12,7 +12,7 @@ class Functor f => Carrier f c | c -> f where
   -- @
   joinl :: Monad m => m (c m a) -> c m a
 
-  suspend :: Monad m => c m (f ())
+  suspend :: Monad m => (f () -> c m a) -> c m a
 
   resume :: Monad m => f (c m a) -> m (f a)
 

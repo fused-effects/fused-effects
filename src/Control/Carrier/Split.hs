@@ -32,7 +32,7 @@ instance Monad m => Monad (SplitH m) where
 instance Carrier [] SplitH where
   joinl a = SplitH (a >>= runSplitH)
 
-  suspend = SplitH (pure (Just ([()], empty)))
+  suspend f = f [()]
 
   resume []     = pure []
   resume (a:as) = runSplitH a >>= maybe (resume as) (\ (a', q) -> (a' :) <$> resume (q : as))

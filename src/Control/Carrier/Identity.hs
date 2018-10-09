@@ -10,7 +10,7 @@ newtype IdentityH m a = IdentityH { runIdentityH :: m a }
 instance Carrier Identity IdentityH where
   joinl mf = IdentityH (mf >>= runIdentityH)
 
-  suspend = IdentityH (pure (Identity ()))
+  suspend f = f (Identity ())
 
   resume = fmap Identity . runIdentityH . runIdentity
 
