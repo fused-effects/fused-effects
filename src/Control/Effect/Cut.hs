@@ -1,9 +1,9 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, PolyKinds, StandaloneDeriving, TypeOperators #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cut where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Split
 import Control.Effect
+import Control.Monad.Codensity
 
 data Cut m k
   = Cut
@@ -31,12 +31,42 @@ skip :: Applicative m => m ()
 skip = pure ()
 
 
-runCut :: TermMonad m sig => Eff (Cut :+: NonDet :+: sig) a -> m [a]
-runCut = joinSplitH . interpret2 alg1 alg2
-  where alg1 Cut        = empty
-        alg1 (Call m k) = m >>= k
-        alg2 Empty      = empty
-        alg2 (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <|> k False))))
+runCut :: TermMonad m sig => Codensity (SplitH m) a -> m [a]
+runCut = joinSplitH . runCodensity var
+
+newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
+
+joinSplitH :: Monad m => SplitH m a -> m [a]
+joinSplitH = (>>= maybe (pure []) (\ (a, q) -> (a :) <$> joinSplitH q)) . runSplitH
+
+instance Monad m => Semigroup (SplitH m a) where
+  a <> b = SplitH (runSplitH a >>= maybe (runSplitH b) (\ (a', q) -> pure (Just (a', q <> b))))
+
+instance Monad m => Monoid (SplitH m a) where
+  mempty = SplitH (pure Nothing)
+
+instance Carrier [] SplitH where
+  joinl a = SplitH (a >>= runSplitH)
+
+  suspend f = f [()]
+
+  resume []     = pure []
+  resume (a:as) = runSplitH a >>= maybe (resume as) (\ (a', q) -> (a' :) <$> resume (q : as))
+
+  wrap a = SplitH (a >>= \ a' -> case a' of
+    []     -> pure Nothing
+    a'':as -> pure (Just (a'', wrap (pure as))))
+
+  gen a = SplitH (pure (Just (a, SplitH (pure Nothing))))
+
+instance TermMonad m sig => TermAlgebra (SplitH m) (Cut :+: NonDet :+: sig) where
+  var = gen
+  con = alg1 \/ alg2 \/ interpretRest
+    where alg1 Cut        = mempty
+          alg1 (Call m k) = m `bind` k
+            where m `bind` k = SplitH (runSplitH m >>= runSplitH . maybe mempty (\ (a', q) -> k a' <> (q `bind` k)))
+          alg2 Empty      = mempty
+          alg2 (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <> k False))))
 
 -- runCut :: Subset NonDet sig => Eff (Cut :+: sig) a -> Eff sig a
 -- runCut = go empty
