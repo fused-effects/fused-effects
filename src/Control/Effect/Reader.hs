@@ -1,8 +1,8 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving, TypeOperators #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Reader where
 
-import Control.Carrier.Reader
 import Control.Effect
+import Control.Monad.Codensity
 
 data Reader r m k
   = Ask (r -> k)
@@ -24,7 +24,34 @@ local :: (Subset (Reader r) sig, TermMonad m sig) => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
 
 
-runReader :: TermMonad m sig => r -> Eff (Reader r :+: sig) a -> m a
-runReader r m = runReaderH (interpret alg m) r
-  where alg (Ask k)       = ReaderH (\ r -> runReaderH (k r) r)
-        alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
+runReader :: TermMonad m sig => r -> Codensity (ReaderH r m) a -> m a
+runReader r m = runReaderH (runCodensity var m) r
+
+
+newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
+  deriving (Functor)
+
+instance Applicative m => Applicative (ReaderH r m) where
+  pure a = ReaderH (\ _ -> pure a)
+
+  ReaderH f <*> ReaderH a = ReaderH (\ r -> f r <*> a r)
+
+instance Monad m => Monad (ReaderH r m) where
+  return = pure
+
+  ReaderH a >>= f = ReaderH (\ r -> a r >>= \ a' -> runReaderH (f a') r)
+
+instance Carrier ((,) r) (ReaderH r) where
+  joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
+
+  suspend f = ReaderH (\ r -> runReaderH (f (r, ())) r)
+
+  resume (r, m) = (,) r <$> runReaderH m r
+
+  wrap = ReaderH . const . fmap snd
+
+instance TermMonad m sig => TermAlgebra (ReaderH r m) (Reader r :+: sig) where
+  var = pure
+  con = alg \/ interpretRest
+    where alg (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
+          alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
