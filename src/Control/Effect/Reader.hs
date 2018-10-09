@@ -17,10 +17,10 @@ instance Effect (Reader r) where
   handle _     (Ask k)       = Ask k
   handle state (Local f m k) = Local f (resume (m <$ state)) (wrap . resume . fmap k)
 
-ask :: Subset (Reader r) sig => Eff sig r
+ask :: (Subset (Reader r) sig, TermMonad m sig) => m r
 ask = send (Ask pure)
 
-local :: Subset (Reader r) sig => (r -> r) -> Eff sig a -> Eff sig a
+local :: (Subset (Reader r) sig, TermMonad m sig) => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
 
 
