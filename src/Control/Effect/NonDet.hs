@@ -1,4 +1,4 @@
-{-# LANGUAGE PolyKinds, TypeOperators #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
@@ -8,15 +8,41 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier.List
 import Control.Carrier.Maybe
 import Control.Carrier.Split
 import Control.Effect
+import Control.Monad.Codensity
 
-runNonDet :: TermMonad m sig => Eff (NonDet :+: sig) a -> m [a]
-runNonDet = runListH . interpret alg
-  where alg Empty      = ListH (pure [])
-        alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
+runNonDet :: TermMonad m sig => Codensity (ListH m) a -> m [a]
+runNonDet = runListH . runCodensity var
+
+newtype ListH m a = ListH { runListH :: m [a] }
+  deriving (Functor)
+
+instance Applicative m => Applicative (ListH m) where
+  pure a = ListH (pure [a])
+
+  ListH f <*> ListH a = ListH (liftA2 (<*>) f a)
+
+instance Monad m => Monad (ListH m) where
+  return = pure
+
+  ListH a >>= f = ListH (a >>= fmap concat . traverse (runListH . f))
+
+instance Carrier [] ListH where
+  joinl mf = ListH (mf >>= runListH)
+
+  suspend f = f [()]
+
+  resume = fmap concat . traverse runListH
+
+  wrap = ListH
+
+instance TermMonad m sig => TermAlgebra (ListH m) (NonDet :+: sig) where
+  var = gen
+  con = alg \/ interpretRest
+    where alg Empty = ListH (pure [])
+          alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
 
 runNonDetOnce :: TermMonad m sig => Eff (NonDet :+: sig) a -> m (Maybe a)
 runNonDetOnce = runMaybeH . interpret alg
