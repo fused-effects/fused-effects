@@ -19,11 +19,6 @@ runNonDet = runListH . runCodensity var
 newtype ListH m a = ListH { runListH :: m [a] }
   deriving (Functor)
 
-instance Applicative m => Applicative (ListH m) where
-  pure a = ListH (pure [a])
-
-  ListH f <*> ListH a = ListH (liftA2 (<*>) f a)
-
 instance Carrier [] ListH where
   joinl mf = ListH (mf >>= runListH)
 
@@ -32,6 +27,8 @@ instance Carrier [] ListH where
   resume = fmap concat . traverse runListH
 
   wrap = ListH
+
+  gen a = ListH (pure [a])
 
 instance TermMonad m sig => TermAlgebra (ListH m) (NonDet :+: sig) where
   var = gen
