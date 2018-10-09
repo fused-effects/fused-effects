@@ -88,8 +88,8 @@ instance TermAlgebra h sig => TermMonad (Codensity h) sig
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
-send :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
-send = Eff . inj
+send :: (Subset effect sig, TermAlgebra m sig) => effect m (m a) -> m a
+send = con . inj
 
 
 -- | Fold a generator and first-order algebra over an 'Eff' to obtain some final result value.
