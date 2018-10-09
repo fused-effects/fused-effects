@@ -4,8 +4,8 @@ module Control.Effect
 , runEff
 , send
 , algRest
-, reinterpretRest
-, reinterpretRest_2
+, algRest1
+, algRest2
 , Effect(..)
 , TermAlgebra(..)
 , TermMonad
@@ -117,18 +117,18 @@ algRest op = suspend (\ state -> joinl (con (fmap' var (handle state op))))
 -- | Reinterpret any requests in higher-order positions in the remaining effects.
 --
 --   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
-reinterpretRest :: (Effect sig, Carrier f c, TermMonad m (new :+: sig))
-                => sig (c m) (c m a)
-                -> c m a
-reinterpretRest op = suspend (\ state -> joinl (con (fmap' var (R (handle state op)))))
+algRest1 :: (Effect sig, Carrier f c, TermMonad m (new :+: sig))
+         => sig (c m) (c m a)
+         -> c m a
+algRest1 op = suspend (\ state -> joinl (con (R (fmap' var (handle state op)))))
 
 -- | Reinterpret any requests in higher-order positions in the remaining effects.
 --
 --   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
-reinterpretRest_2 :: (Effect sig, Carrier f c, TermMonad m (new1 :+: new2 :+: sig))
-                => sig (c m) (c m a)
-                -> c m a
-reinterpretRest_2 op = suspend (\ state -> joinl (con (fmap' var (R (R (handle state op))))))
+algRest2 :: (Effect sig, Carrier f c, TermMonad m (new1 :+: new2 :+: sig))
+         => sig (c m) (c m a)
+         -> c m a
+algRest2 op = suspend (\ state -> joinl (con (R (R (fmap' var (handle state op))))))
 
 
 data Void m k
