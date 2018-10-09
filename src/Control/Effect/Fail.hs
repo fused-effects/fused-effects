@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fail
 ( Fail(..)
 , runFail
@@ -11,7 +11,6 @@ runFail :: TermMonad m sig => Codensity (EitherH String m) a -> m (Either String
 runFail = runEitherH . runCodensity var
 
 newtype EitherH e m a = EitherH { runEitherH :: m (Either e a) }
-  deriving (Functor)
 
 instance Carrier (Either e) (EitherH e) where
   joinl mf = EitherH (mf >>= runEitherH)
