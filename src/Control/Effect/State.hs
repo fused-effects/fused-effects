@@ -29,15 +29,6 @@ runState s m = runStateH (runCodensity var m) s
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
   deriving (Functor)
 
-instance Monad m => Applicative (StateH s m) where
-  pure a = StateH (\ s -> pure (s, a))
-
-  StateH f <*> StateH a = StateH $ \ s -> do
-    (s',  f') <- f s
-    (s'', a') <- a s'
-    let fa = f' a'
-    fa `seq` pure (s'', fa)
-
 instance Carrier ((,) s) (StateH s) where
   joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
 
@@ -47,8 +38,10 @@ instance Carrier ((,) s) (StateH s) where
 
   wrap = StateH . const
 
+  gen a = StateH (\ s -> pure (s, a))
+
 instance TermMonad m sig => TermAlgebra (StateH s m) (State s :+: sig) where
-  var = pure
+  var = gen
   con = alg \/ interpretRest
     where alg (Get   k) = StateH (\ s -> runStateH (k s) s)
           alg (Put s k) = StateH (\ _ -> runStateH  k    s)
