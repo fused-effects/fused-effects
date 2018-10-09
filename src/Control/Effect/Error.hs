@@ -29,7 +29,6 @@ runError :: TermMonad m sig => Codensity (ErrorH exc m) a -> m (Either exc a)
 runError = runErrorH . runCodensity var
 
 newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
-  deriving (Functor)
 
 instance Carrier (Either e) (ErrorH e) where
   joinl mf = ErrorH (mf >>= runErrorH)
