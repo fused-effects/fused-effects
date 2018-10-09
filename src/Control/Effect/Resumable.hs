@@ -14,7 +14,7 @@ instance Effect (Resumable exc) where
 
   handle _ (Resumable exc k) = Resumable exc k
 
-throwResumable :: Subset (Resumable exc) sig => exc a -> Eff sig a
+throwResumable :: (Subset (Resumable exc) sig, TermMonad m sig) => exc a -> m a
 throwResumable exc = send (Resumable exc pure)
 
 
