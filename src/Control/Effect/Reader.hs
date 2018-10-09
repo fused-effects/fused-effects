@@ -31,11 +31,6 @@ runReader r m = runReaderH (runCodensity var m) r
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
   deriving (Functor)
 
-instance Applicative m => Applicative (ReaderH r m) where
-  pure a = ReaderH (\ _ -> pure a)
-
-  ReaderH f <*> ReaderH a = ReaderH (\ r -> f r <*> a r)
-
 instance Carrier ((,) r) (ReaderH r) where
   joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
 
@@ -45,8 +40,10 @@ instance Carrier ((,) r) (ReaderH r) where
 
   wrap = ReaderH . const . fmap snd
 
+  gen a = ReaderH (\ _ -> pure a)
+
 instance TermMonad m sig => TermAlgebra (ReaderH r m) (Reader r :+: sig) where
-  var = pure
+  var = gen
   con = alg \/ interpretRest
     where alg (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
           alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
