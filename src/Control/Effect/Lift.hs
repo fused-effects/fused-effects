@@ -7,4 +7,4 @@ import Control.Effect
 import Control.Monad (join)
 
 runM :: Monad m => Eff (Lift m) a -> m a
-runM = foldA (join . unLift)
+runM = foldH pure (join . unLift)

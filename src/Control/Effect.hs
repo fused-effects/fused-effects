@@ -4,7 +4,6 @@ module Control.Effect
 , send
 , fold
 , foldH
-, foldA
 , interpret
 , interpret2
 , interpretRest
@@ -113,35 +112,25 @@ foldH gen alg = go
         go (Return x) = gen x
         go (Eff op)   = alg (hfmap go (fmap' go op))
 
--- | Fold a higher-order algebra over an 'Eff' to obtain some final result value in an 'Applicative' context.
-foldA :: forall sig f
-      .  (Effect sig, Applicative f)
-      => (forall a . sig f (f a) -> f a)
-      -> (forall a . Eff sig a -> f a)
-foldA alg = go
-  where go :: Eff sig a -> f a
-        go (Return x) = pure x
-        go (Eff op)   = alg (hfmap go (fmap' go op))
-
 
 -- | Interpret an 'Effect'’s requests into a 'Carrier' using the passed algebra.
-interpret :: (Effect eff, Carrier f c, Applicative (c m), TermMonad m sig)
+interpret :: (Effect eff, Carrier f c, TermMonad m sig)
           => (forall a . eff (c m) (c m a) -> c m a)
           -> (forall a . Eff (eff :+: sig) a -> c m a)
-interpret alg = foldA (alg \/ interpretRest)
+interpret alg = foldH gen (alg \/ interpretRest)
 {-# INLINE interpret #-}
 
 -- | Interpret two 'Effect's’ requests into a 'Carrier' using the passed algebras.
-interpret2 :: (Effect eff1, Effect eff2, Carrier f c, Applicative (c m), TermMonad m sig)
+interpret2 :: (Effect eff1, Effect eff2, Carrier f c, TermMonad m sig)
            => (forall a . eff1 (c m) (c m a) -> c m a)
            -> (forall a . eff2 (c m) (c m a) -> c m a)
            -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c m a)
-interpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ interpretRest)
+interpret2 alg1 alg2 = foldH gen (alg1 \/ alg2 \/ interpretRest)
 {-# INLINE interpret2 #-}
 
 -- | Interpret any requests in higher-order positions in the remaining effects.
 --
---   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
+--   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
 interpretRest :: (Carrier f c, TermMonad m sig)
               => sig (c m) (c m a)
               -> c m a
@@ -149,46 +138,46 @@ interpretRest op = suspend (\ state -> joinl (con (fmap' var (handle state op)))
 
 
 -- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of a new 'Effect' using the passed algebra.
-reinterpret :: (Effect eff, Effect sig, Carrier f c, Applicative (c m), TermMonad m (new :+: sig))
+reinterpret :: (Effect eff, Effect sig, Carrier f c, TermMonad m (new :+: sig))
             => (forall a . eff (c m) (c m a) -> c m a)
             -> (forall a . Eff (eff :+: sig) a -> c m a)
-reinterpret alg = foldA (alg \/ reinterpretRest)
+reinterpret alg = foldH gen (alg \/ reinterpretRest)
 {-# INLINE reinterpret #-}
 
 -- | Reinterpret two 'Effect's’ requests into a 'Carrier' and requests of a new 'Effect' using the passed algebras.
-reinterpret2 :: (Effect eff1, Effect eff2, Effect sig, Carrier f c, Applicative (c m), TermMonad m (new :+: sig))
+reinterpret2 :: (Effect eff1, Effect eff2, Effect sig, Carrier f c, TermMonad m (new :+: sig))
              => (forall a . eff1 (c m) (c m a) -> c m a)
              -> (forall a . eff2 (c m) (c m a) -> c m a)
              -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c m a)
-reinterpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ reinterpretRest)
+reinterpret2 alg1 alg2 = foldH gen (alg1 \/ alg2 \/ reinterpretRest)
 {-# INLINE reinterpret2 #-}
 
 -- | Reinterpret any requests in higher-order positions in the remaining effects.
 --
---   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
+--   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
 reinterpretRest :: (Effect sig, Carrier f c, TermMonad m (new :+: sig))
                 => sig (c m) (c m a)
                 -> c m a
 reinterpretRest op = suspend (\ state -> joinl (con (fmap' var (R (handle state op)))))
 
 -- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of two new 'Effect's using the passed algebra.
-reinterpret_2 :: (Effect eff, Effect sig, Carrier f c, Applicative (c m), TermMonad m (new1 :+: new2 :+: sig))
+reinterpret_2 :: (Effect eff, Effect sig, Carrier f c, TermMonad m (new1 :+: new2 :+: sig))
              => (forall a . eff (c m) (c m a) -> c m a)
              -> (forall a . Eff (eff :+: sig) a -> c m a)
-reinterpret_2 alg = foldA (alg \/ reinterpretRest_2)
+reinterpret_2 alg = foldH gen (alg \/ reinterpretRest_2)
 {-# INLINE reinterpret_2 #-}
 
 -- | Reinterpret two 'Effect's’ requests into a 'Carrier' and requests of two new 'Effect's using the passed algebras.
-reinterpret2_2 :: (Effect eff1, Effect eff2, Effect sig, Carrier f c, Applicative (c m), TermMonad m (new1 :+: new2 :+: sig))
+reinterpret2_2 :: (Effect eff1, Effect eff2, Effect sig, Carrier f c, TermMonad m (new1 :+: new2 :+: sig))
              => (forall a . eff1 (c m) (c m a) -> c m a)
              -> (forall a . eff2 (c m) (c m a) -> c m a)
              -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c m a)
-reinterpret2_2 alg1 alg2 = foldA (alg1 \/ alg2 \/ reinterpretRest_2)
+reinterpret2_2 alg1 alg2 = foldH gen (alg1 \/ alg2 \/ reinterpretRest_2)
 {-# INLINE reinterpret2_2 #-}
 
 -- | Reinterpret any requests in higher-order positions in the remaining effects.
 --
---   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
+--   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
 reinterpretRest_2 :: (Effect sig, Carrier f c, TermMonad m (new1 :+: new2 :+: sig))
                 => sig (c m) (c m a)
                 -> c m a
