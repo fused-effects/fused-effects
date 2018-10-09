@@ -18,10 +18,10 @@ instance Effect (Error exc) where
   handle _     (Throw exc)   = Throw exc
   handle state (Catch m h k) = Catch (resume (m <$ state)) (resume . (<$ state) . h) (wrap . resume . fmap k)
 
-throw :: Subset (Error exc) sig => exc -> Eff sig a
+throw :: (Subset (Error exc) sig, TermMonad m sig) => exc -> m a
 throw = send . Throw
 
-catch :: Subset (Error exc) sig => Eff sig a -> (exc -> Eff sig a) -> Eff sig a
+catch :: (Subset (Error exc) sig, TermMonad m sig) => m a -> (exc -> m a) -> m a
 catch m h = send (Catch m h pure)
 
 
