@@ -20,7 +20,6 @@ runWriter :: (TermMonad m sig, Monoid w) => Codensity (WriterH w m) a -> m (w, a
 runWriter m = runWriterH (runCodensity var m)
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
-  deriving (Functor)
 
 instance Monoid w => Carrier ((,) w) (WriterH w) where
   joinl mf = WriterH (mf >>= runWriterH)
