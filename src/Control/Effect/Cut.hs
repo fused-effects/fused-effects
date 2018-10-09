@@ -44,18 +44,6 @@ instance Monad m => Semigroup (SplitH m a) where
 instance Monad m => Monoid (SplitH m a) where
   mempty = SplitH (pure Nothing)
 
-instance Carrier [] SplitH where
-  joinl a = SplitH (a >>= runSplitH)
-
-  suspend f = f [()]
-
-  resume []     = pure []
-  resume (a:as) = runSplitH a >>= maybe (resume as) (\ (a', q) -> (a' :) <$> resume (q : as))
-
-  wrap a = SplitH (a >>= \ a' -> case a' of
-    []     -> pure Nothing
-    a'':as -> pure (Just (a'', wrap (pure as))))
-
 instance TermMonad m sig => TermAlgebra (SplitH m) (Cut :+: NonDet :+: sig) where
   var a = SplitH (pure (Just (a, SplitH (pure Nothing))))
   con = alg1 \/ alg2 \/ (wrap . con . handle [()] (fmap concat . traverse joinSplitH))
@@ -64,6 +52,10 @@ instance TermMonad m sig => TermAlgebra (SplitH m) (Cut :+: NonDet :+: sig) wher
             where m `bind` k = SplitH (runSplitH m >>= runSplitH . maybe mempty (\ (a', q) -> k a' <> (q `bind` k)))
           alg2 Empty      = mempty
           alg2 (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <> k False))))
+
+          wrap a = SplitH (a >>= \ a' -> case a' of
+            []     -> pure Nothing
+            a'':as -> pure (Just (a'', wrap (pure as))))
 
 -- runCut :: Subset NonDet sig => Eff (Cut :+: sig) a -> Eff sig a
 -- runCut = go empty

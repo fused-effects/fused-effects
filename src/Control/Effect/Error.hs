@@ -29,15 +29,6 @@ runError = runErrorH . runEff var
 
 newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
 
-instance Carrier (Either e) (ErrorH e) where
-  joinl mf = ErrorH (mf >>= runErrorH)
-
-  suspend f = f (Right ())
-
-  resume = either (pure . Left) runErrorH
-
-  wrap = ErrorH
-
 instance TermMonad m sig => TermAlgebra (ErrorH e m) (Error e :+: sig) where
   var a = ErrorH (pure (Right a))
   con = alg \/ (ErrorH . con . handle (Right ()) (either (pure . Left) runErrorH))

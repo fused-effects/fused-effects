@@ -27,15 +27,6 @@ runState s m = runStateH (runEff var m) s
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
 
-instance Carrier ((,) s) (StateH s) where
-  joinl mf = StateH (\ s -> mf >>= \ f -> runStateH f s)
-
-  suspend f = StateH (\ s -> runStateH (f (s, ())) s)
-
-  resume (s, m) = runStateH m s
-
-  wrap = StateH . const
-
 instance TermMonad m sig => TermAlgebra (StateH s m) (State s :+: sig) where
   var a = StateH (\ s -> pure (s, a))
   con = alg \/ algOther

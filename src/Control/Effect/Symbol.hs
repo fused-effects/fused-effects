@@ -43,15 +43,6 @@ parse input = fmap snd . flip runSymbolH input . runEff var
 
 newtype SymbolH m a = SymbolH { runSymbolH :: String -> m (String, a) }
 
-instance Carrier ((,) String) SymbolH where
-  joinl mf = SymbolH (\ s -> mf >>= \ f -> runSymbolH f s)
-
-  suspend f = SymbolH (\ s -> runSymbolH (f (s, ())) s)
-
-  resume (s, m) = runSymbolH m s
-
-  wrap = SymbolH . const
-
 instance (Alternative m, TermMonad m sig) => TermAlgebra (SymbolH m) (Symbol :+: sig) where
   var a = SymbolH (\ s -> pure (s, a))
   con = alg \/ algOther

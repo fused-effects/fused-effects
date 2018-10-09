@@ -30,15 +30,6 @@ runReader r m = runReaderH (runEff var m) r
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
 
-instance Carrier ((,) r) (ReaderH r) where
-  joinl mf = ReaderH (\ r -> mf >>= \ f -> runReaderH f r)
-
-  suspend f = ReaderH (\ r -> runReaderH (f (r, ())) r)
-
-  resume (r, m) = (,) r <$> runReaderH m r
-
-  wrap = ReaderH . const . fmap snd
-
 instance TermMonad m sig => TermAlgebra (ReaderH r m) (Reader r :+: sig) where
   var a = ReaderH (\ _ -> pure a)
   con = alg \/ algOther

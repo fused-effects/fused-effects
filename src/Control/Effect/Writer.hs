@@ -20,15 +20,6 @@ runWriter m = runWriterH (runEff var m)
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
 
-instance Monoid w => Carrier ((,) w) (WriterH w) where
-  joinl mf = WriterH (mf >>= runWriterH)
-
-  suspend f = f (mempty, ())
-
-  resume (w, m) = first (w <>) <$> runWriterH m
-
-  wrap = WriterH
-
 instance (Monoid w, TermMonad m sig) => TermAlgebra (WriterH w m) (Writer w :+: sig) where
   var a = WriterH (pure (mempty, a))
   con = alg \/ (WriterH . con . handle (mempty, ()) (uncurry runWriter'))
