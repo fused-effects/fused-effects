@@ -37,11 +37,6 @@ instance Applicative m => Applicative (ErrorH e m) where
 
   ErrorH f <*> ErrorH a = ErrorH (liftA2 (<*>) f a)
 
-instance Monad m => Monad (ErrorH e m) where
-  return = pure
-
-  ErrorH a >>= f = ErrorH (a >>= either (pure . Left) (runErrorH . f))
-
 instance Carrier (Either e) (ErrorH e) where
   joinl mf = ErrorH (mf >>= runErrorH)
 
@@ -57,4 +52,4 @@ instance TermMonad m sig => TermAlgebra (ErrorH e m) (Error e :+: sig) where
   var = gen
   con = alg \/ interpretRest
     where alg (Throw e)     = ErrorH (pure (Left e))
-          alg (Catch m h k) = ErrorH (runErrorH m >>= runErrorH . either (k <=< h) k)
+          alg (Catch m h k) = ErrorH (runErrorH m >>= either (either (pure . Left) (runErrorH . k) <=< runErrorH . h) (runErrorH . k))
