@@ -17,6 +17,6 @@ tell :: Subset (Writer w) sig => w -> Eff sig ()
 tell w = send (Tell w (pure ()))
 
 
-runWriter :: (Effect sig, Monoid w) => Eff (Writer w :+: sig) a -> Eff sig (w, a)
+runWriter :: (TermMonad m sig, Monoid w) => Eff (Writer w :+: sig) a -> m (w, a)
 runWriter m = runWriterH (interpret alg m)
   where alg (Tell w k) = WriterH (first (w <>) <$> runWriterH k)
