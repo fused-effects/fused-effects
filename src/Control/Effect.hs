@@ -3,7 +3,7 @@ module Control.Effect
 ( Eff(..)
 , runEff
 , send
-, interpretRest
+, algRest
 , reinterpretRest
 , reinterpretRest_2
 , Effect(..)
@@ -109,10 +109,10 @@ send = con . inj
 -- | Interpret any requests in higher-order positions in the remaining effects.
 --
 --   This is typically passed to 'foldH' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
-interpretRest :: (Carrier f c, TermMonad m sig)
-              => sig (c m) (c m a)
-              -> c m a
-interpretRest op = suspend (\ state -> joinl (con (fmap' var (handle state op))))
+algRest :: (Carrier f c, TermMonad m sig)
+        => sig (c m) (c m a)
+        -> c m a
+algRest op = suspend (\ state -> joinl (con (fmap' var (handle state op))))
 
 -- | Reinterpret any requests in higher-order positions in the remaining effects.
 --

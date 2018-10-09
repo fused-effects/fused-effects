@@ -38,6 +38,6 @@ instance Carrier ((,) s) (StateH s) where
 
 instance TermMonad m sig => TermAlgebra (StateH s m) (State s :+: sig) where
   var a = StateH (\ s -> pure (s, a))
-  con = alg \/ interpretRest
+  con = alg \/ algRest
     where alg (Get   k) = StateH (\ s -> runStateH (k s) s)
           alg (Put s k) = StateH (\ _ -> runStateH  k    s)

@@ -40,6 +40,6 @@ instance Carrier (Either e) (ErrorH e) where
 
 instance TermMonad m sig => TermAlgebra (ErrorH e m) (Error e :+: sig) where
   var a = ErrorH (pure (Right a))
-  con = alg \/ interpretRest
+  con = alg \/ algRest
     where alg (Throw e)     = ErrorH (pure (Left e))
           alg (Catch m h k) = ErrorH (runErrorH m >>= either (either (pure . Left) (runErrorH . k) <=< runErrorH . h) (runErrorH . k))

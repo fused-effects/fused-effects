@@ -26,7 +26,7 @@ instance Carrier [] ListH where
 
 instance TermMonad m sig => TermAlgebra (ListH m) (NonDet :+: sig) where
   var a = ListH (pure [a])
-  con = alg \/ interpretRest
+  con = alg \/ algRest
     where alg Empty = ListH (pure [])
           alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
 
@@ -46,7 +46,7 @@ instance Carrier Maybe MaybeH where
 
 instance TermMonad m sig => TermAlgebra (MaybeH m) (NonDet :+: sig) where
   var a = MaybeH (pure (Just a))
-  con = alg \/ interpretRest
+  con = alg \/ algRest
     where alg Empty      = MaybeH (pure Nothing)
           alg (Choose k) = MaybeH (liftA2 (<|>) (runMaybeH (k True)) (runMaybeH (k False)))
 
@@ -78,6 +78,6 @@ instance Carrier [] SplitH where
 
 instance TermMonad m sig => TermAlgebra (SplitH m) (NonDet :+: sig) where
   var a = SplitH (pure (Just (a, SplitH (pure Nothing))))
-  con = alg \/ interpretRest
+  con = alg \/ algRest
     where alg Empty      = SplitH (pure Nothing)
           alg (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <> k False))))

@@ -22,5 +22,5 @@ instance Carrier (Either String) FailH where
 
 instance TermMonad m sig => TermAlgebra (FailH m) (Fail :+: sig) where
   var a = FailH (pure (Right a))
-  con = alg \/ interpretRest
+  con = alg \/ algRest
     where alg (Fail s) = FailH (pure (Left s))

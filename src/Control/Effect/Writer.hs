@@ -31,5 +31,5 @@ instance Monoid w => Carrier ((,) w) (WriterH w) where
 
 instance (Monoid w, TermMonad m sig) => TermAlgebra (WriterH w m) (Writer w :+: sig) where
   var a = WriterH (pure (mempty, a))
-  con = alg \/ interpretRest
+  con = alg \/ algRest
     where alg (Tell w k) = WriterH (first (w <>) <$> runWriterH k)
