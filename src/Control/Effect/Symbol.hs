@@ -39,7 +39,7 @@ factor = read <$> some digit
      <|> char '(' *> expr <* char ')'
 
 
-parse :: Subset NonDet sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
+parse :: (Alternative m, TermMonad m sig) => String -> Eff (Symbol :+: sig) a -> m a
 parse input = fmap snd . flip runStateH input . interpret alg
   where alg (Symbol p k) = StateH (\ s -> case s of
           c:cs | p c -> runStateH (k c) cs
