@@ -133,7 +133,7 @@ interpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ interpretRest)
 interpretRest :: (Carrier f c, Monad (c m), TermMonad m sig)
               => sig (c m) (c m a)
               -> c m a
-interpretRest op = suspend >>= \ state -> joinl (con (fmap' pure (handle state op)))
+interpretRest op = suspend >>= \ state -> joinl (con (fmap' var (handle state op)))
 
 
 -- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of a new 'Effect' using the passed algebra.
@@ -157,7 +157,7 @@ reinterpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ reinterpretRest)
 reinterpretRest :: (Effect sig, Carrier f c, Monad (c m), TermMonad m (new :+: sig))
                 => sig (c m) (c m a)
                 -> c m a
-reinterpretRest op = suspend >>= \ state -> joinl (con (fmap' pure (R (handle state op))))
+reinterpretRest op = suspend >>= \ state -> joinl (con (fmap' var (R (handle state op))))
 
 -- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of two new 'Effect's using the passed algebra.
 reinterpret_2 :: (Effect eff, Effect sig, Carrier f c, Monad (c m), TermMonad m (new1 :+: new2 :+: sig))
@@ -180,7 +180,7 @@ reinterpret2_2 alg1 alg2 = foldA (alg1 \/ alg2 \/ reinterpretRest_2)
 reinterpretRest_2 :: (Effect sig, Carrier f c, Monad (c m), TermMonad m (new1 :+: new2 :+: sig))
                 => sig (c m) (c m a)
                 -> c m a
-reinterpretRest_2 op = suspend >>= \ state -> joinl (con (fmap' pure (R (R (handle state op)))))
+reinterpretRest_2 op = suspend >>= \ state -> joinl (con (fmap' var (R (R (handle state op)))))
 
 
 data Void m k
