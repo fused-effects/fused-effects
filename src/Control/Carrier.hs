@@ -1,4 +1,4 @@
-{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE DefaultSignatures, FunctionalDependencies #-}
 module Control.Carrier where
 
 class Functor f => Carrier f c | c -> f where
@@ -17,3 +17,7 @@ class Functor f => Carrier f c | c -> f where
   resume :: Monad m => f (c m a) -> m (f a)
 
   wrap :: Monad m => m (f a) -> c m a
+
+  gen :: Monad m => a -> c m a
+  default gen :: Applicative (c m) => a -> c m a
+  gen = pure
