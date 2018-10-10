@@ -14,5 +14,5 @@ runM = runLiftH . interpret
 newtype LiftH m a = LiftH { runLiftH :: m a }
 
 instance Monad m => TermAlgebra (LiftH m) (Lift m) where
-  var = LiftH . pure
+  gen = LiftH . pure
   con = LiftH . (>>= runLiftH) . unLift

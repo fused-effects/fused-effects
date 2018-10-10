@@ -29,7 +29,7 @@ runState s m = runStateH (interpret m) s
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
 
 instance TermMonad m sig => TermAlgebra (StateH s m) (State s :+: sig) where
-  var a = StateH (\ s -> pure (s, a))
+  gen a = StateH (\ s -> pure (s, a))
   con = alg \/ algOther
     where alg (Get   k) = StateH (\ s -> runStateH (k s) s)
           alg (Put s k) = StateH (\ _ -> runStateH  k    s)

@@ -12,7 +12,7 @@ deriving instance Functor (Reader r m)
 
 instance HFunctor (Reader r) where
   hfmap _ (Ask k)       = Ask k
-  hfmap f (Local g m k) = Local g (f m) k  
+  hfmap f (Local g m k) = Local g (f m) k
 
 instance Effect (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
@@ -32,7 +32,7 @@ runReader r m = runReaderH (interpret m) r
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
 
 instance TermMonad m sig => TermAlgebra (ReaderH r m) (Reader r :+: sig) where
-  var a = ReaderH (\ _ -> pure a)
+  gen a = ReaderH (\ _ -> pure a)
   con = alg \/ algOther
     where alg (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
           alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)

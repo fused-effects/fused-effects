@@ -23,7 +23,7 @@ runEff = flip unEff
 {-# INLINE runEff #-}
 
 interpret :: TermAlgebra carrier sig => Eff carrier a -> carrier a
-interpret = runEff var
+interpret = runEff gen
 {-# INLINE interpret #-}
 
 instance Functor (Eff h) where
@@ -51,7 +51,7 @@ instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Eff m) where
 
 
 instance TermAlgebra h sig => TermAlgebra (Eff h) sig where
-  var = pure
-  con op = Eff (\ k -> con (hfmap (runEff var) (fmap' (runEff k) op)))
+  gen = pure
+  con op = Eff (\ k -> con (hfmap (runEff gen) (fmap' (runEff k) op)))
 
 instance TermAlgebra h sig => TermMonad (Eff h) sig

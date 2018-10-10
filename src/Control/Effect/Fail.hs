@@ -15,6 +15,6 @@ runFail = runFailH . interpret
 newtype FailH m a = FailH { runFailH :: m (Either String a) }
 
 instance TermMonad m sig => TermAlgebra (FailH m) (Fail :+: sig) where
-  var a = FailH (pure (Right a))
+  gen a = FailH (pure (Right a))
   con = alg \/ (FailH . con . handle (Right ()) (either (pure . Left) runFailH))
     where alg (Fail s) = FailH (pure (Left s))
