@@ -30,7 +30,7 @@ newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
 
 instance Effectful sig m => Carrier (State s :+: sig) (StateH s m) where
   gen a = StateH (\ s -> pure (s, a))
-  con = alg \/ algOther
-    where alg (Get   k) = StateH (\ s -> runStateH (k s) s)
-          alg (Put s k) = StateH (\ _ -> runStateH  k    s)
-          algOther op = StateH (\ s -> con (handle (s, ()) (uncurry (flip runStateH)) op))
+  alg = algS \/ algOther
+    where algS (Get   k) = StateH (\ s -> runStateH (k s) s)
+          algS (Put s k) = StateH (\ _ -> runStateH  k    s)
+          algOther op = StateH (\ s -> alg (handle (s, ()) (uncurry (flip runStateH)) op))

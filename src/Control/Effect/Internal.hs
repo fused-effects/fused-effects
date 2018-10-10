@@ -52,6 +52,6 @@ instance (Subset (Lift IO) sig, Carrier sig m) => MonadIO (Eff m) where
 
 instance Carrier sig h => Carrier sig (Eff h) where
   gen = pure
-  con op = Eff (\ k -> con (hfmap (runEff gen) (fmap' (runEff k) op)))
+  alg op = Eff (\ k -> alg (hfmap (runEff gen) (fmap' (runEff k) op)))
 
 instance (Carrier sig h, Effect sig) => Effectful sig (Eff h)

@@ -17,4 +17,4 @@ newtype VoidH a = VoidH { runVoidH :: a }
 
 instance Carrier Void VoidH where
   gen = VoidH
-  con v = case v of {}
+  alg v = case v of {}

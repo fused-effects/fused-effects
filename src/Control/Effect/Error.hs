@@ -37,6 +37,6 @@ newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
 
 instance Effectful sig m => Carrier (Error e :+: sig) (ErrorH e m) where
   gen a = ErrorH (pure (Right a))
-  con = alg \/ (ErrorH . con . handle (Right ()) (either (pure . Left) runErrorH))
-    where alg (Throw e)     = ErrorH (pure (Left e))
-          alg (Catch m h k) = ErrorH (runErrorH m >>= either (either (pure . Left) (runErrorH . k) <=< runErrorH . h) (runErrorH . k))
+  alg = algE \/ (ErrorH . alg . handle (Right ()) (either (pure . Left) runErrorH))
+    where algE (Throw e)     = ErrorH (pure (Left e))
+          algE (Catch m h k) = ErrorH (runErrorH m >>= either (either (pure . Left) (runErrorH . k) <=< runErrorH . h) (runErrorH . k))

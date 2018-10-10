@@ -32,7 +32,7 @@ newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderH r m) where
   gen a = ReaderH (\ _ -> pure a)
-  con = alg \/ algOther
-    where alg (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
-          alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
-          algOther op = ReaderH (\ r -> con (handlePure (flip runReaderH r) op))
+  alg = algR \/ algOther
+    where algR (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
+          algR (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
+          algOther op = ReaderH (\ r -> alg (handlePure (flip runReaderH r) op))

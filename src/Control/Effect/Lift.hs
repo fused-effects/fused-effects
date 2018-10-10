@@ -15,4 +15,4 @@ newtype LiftH m a = LiftH { runLiftH :: m a }
 
 instance Monad m => Carrier (Lift m) (LiftH m) where
   gen = LiftH . pure
-  con = LiftH . (>>= runLiftH) . unLift
+  alg = LiftH . (>>= runLiftH) . unLift

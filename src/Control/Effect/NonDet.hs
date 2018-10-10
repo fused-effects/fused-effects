@@ -20,9 +20,9 @@ newtype ListH m a = ListH { runListH :: m [a] }
 
 instance Effectful sig m => Carrier (NonDet :+: sig) (ListH m) where
   gen a = ListH (pure [a])
-  con = alg \/ (ListH . con . handle [()] (fmap concat . traverse runListH))
-    where alg Empty = ListH (pure [])
-          alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
+  alg = algND \/ (ListH . alg . handle [()] (fmap concat . traverse runListH))
+    where algND Empty = ListH (pure [])
+          algND (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
 
 
 runNonDetOnce :: Effectful sig m => Eff (MaybeH m) a -> m (Maybe a)
@@ -32,9 +32,9 @@ newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
 
 instance Effectful sig m => Carrier (NonDet :+: sig) (MaybeH m) where
   gen a = MaybeH (pure (Just a))
-  con = alg \/ (MaybeH . con . handle (Just ()) (maybe (pure Nothing) runMaybeH))
-    where alg Empty      = MaybeH (pure Nothing)
-          alg (Choose k) = MaybeH (liftA2 (<|>) (runMaybeH (k True)) (runMaybeH (k False)))
+  alg = algND \/ (MaybeH . alg . handle (Just ()) (maybe (pure Nothing) runMaybeH))
+    where algND Empty      = MaybeH (pure Nothing)
+          algND (Choose k) = MaybeH (liftA2 (<|>) (runMaybeH (k True)) (runMaybeH (k False)))
 
 
 runNonDetSplit :: Effectful sig m => Eff (SplitH m) a -> m [a]
@@ -53,9 +53,9 @@ instance Monad m => Monoid (SplitH m a) where
 
 instance Effectful sig m => Carrier (NonDet :+: sig) (SplitH m) where
   gen a = SplitH (pure (Just (a, SplitH (pure Nothing))))
-  con = alg \/ (wrap . con . handle [()] (fmap concat . traverse joinSplitH))
-    where alg Empty      = SplitH (pure Nothing)
-          alg (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <> k False))))
+  alg = algND \/ (wrap . alg . handle [()] (fmap concat . traverse joinSplitH))
+    where algND Empty      = SplitH (pure Nothing)
+          algND (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <> k False))))
 
           wrap a = SplitH (a >>= \ a' -> case a' of
             []     -> pure Nothing

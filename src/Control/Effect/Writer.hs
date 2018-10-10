@@ -24,6 +24,6 @@ newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
 
 instance (Monoid w, Effectful sig m) => Carrier (Writer w :+: sig) (WriterH w m) where
   gen a = WriterH (pure (mempty, a))
-  con = alg \/ (WriterH . con . handle (mempty, ()) (uncurry runWriter'))
-    where alg (Tell w k) = WriterH (first (w <>) <$> runWriterH k)
+  alg = algW \/ (WriterH . alg . handle (mempty, ()) (uncurry runWriter'))
+    where algW (Tell w k) = WriterH (first (w <>) <$> runWriterH k)
           runWriter' w = fmap (first (w <>)) . runWriterH
