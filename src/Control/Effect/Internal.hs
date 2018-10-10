@@ -2,8 +2,6 @@
 module Control.Effect.Internal
 ( Eff(..)
 , runEff
-, send
-, Subset(..)
 ) where
 
 import Control.Applicative (Alternative(..))
