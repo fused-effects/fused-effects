@@ -10,7 +10,7 @@ class HFunctor h where
   fmap' = fmap
 
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
-  hfmap :: (forall x . m x -> n x) -> h m a -> h n a
+  hfmap :: (forall x . m x -> n x) -> (h m a -> h n a)
 
 
 -- | The class of effect types, which must:
