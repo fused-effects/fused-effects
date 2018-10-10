@@ -24,7 +24,7 @@ local :: (Subset (Reader r) sig, Effectful sig m) => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
 
 
-runReader :: Effectful sig m => r -> Eff (ReaderH r m) a -> m a
+runReader :: (Carrier sig m, Monad m) => r -> Eff (ReaderH r m) a -> m a
 runReader r m = runReaderH (interpret m) r
 
 
