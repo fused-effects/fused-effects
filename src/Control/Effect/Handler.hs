@@ -3,6 +3,8 @@ module Control.Effect.Handler where
 
 class HFunctor h where
   -- | Functor map. This is required to be 'fmap'.
+  --
+  --   This can go away once we have quantified constraints.
   fmap' :: (a -> b) -> (h m a -> h m b)
   default fmap' :: Functor (h m) => (a -> b) -> (h m a -> h m b)
   fmap' = fmap
