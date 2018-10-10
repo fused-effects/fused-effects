@@ -1,5 +1,10 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
-module Control.Effect.Error where
+module Control.Effect.Error
+( Error(..)
+, throw
+, catch
+, runError
+) where
 
 import Control.Effect
 import Control.Monad ((<=<))
