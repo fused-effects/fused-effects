@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveFunctor, PolyKinds #-}
-module Control.Effect.NonDet.Internal where
+module Control.Effect.NonDet.Internal
+( NonDet(..)
+) where
 
 import Control.Effect.Handler
 
