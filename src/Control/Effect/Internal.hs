@@ -11,12 +11,12 @@ module Control.Effect.Internal
 , (:+:)(..)
 , (\/)
 , Subset(..)
-, Lift(..)
 , NonDet(..)
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Fail.Internal
+import Control.Effect.Lift.Internal
 import Control.Monad (liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -99,9 +99,6 @@ instance TermAlgebra VoidH Void where
   var = VoidH
   con v = case v of {}
 
-
-newtype Lift sig m k = Lift { unLift :: sig k }
-  deriving (Functor)
 
 instance Functor sig => Effect (Lift sig) where
   hfmap _ (Lift op) = Lift op

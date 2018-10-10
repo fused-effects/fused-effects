@@ -4,7 +4,8 @@ module Control.Effect.Lift
 , runM
 ) where
 
-import Control.Effect
+import Control.Effect.Internal
+import Control.Effect.Lift.Internal
 
 runM :: Monad m => Eff (LiftH m) a -> m a
 runM = runLiftH . runEff var

@@ -19,6 +19,7 @@ library
                      , Control.Effect.Fail.Internal
                      , Control.Effect.Internal
                      , Control.Effect.Lift
+                     , Control.Effect.Lift.Internal
                      , Control.Effect.NonDet
                      , Control.Effect.Reader
                      , Control.Effect.State
