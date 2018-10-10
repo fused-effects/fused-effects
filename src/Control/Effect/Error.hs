@@ -23,19 +23,19 @@ instance Effect (Error exc) where
   handle _     _       (Throw exc)   = Throw exc
   handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
-throw :: (Subset (Error exc) sig, TermMonad m sig) => exc -> m a
+throw :: (Subset (Error exc) sig, TermMonad sig m) => exc -> m a
 throw = send . Throw
 
-catch :: (Subset (Error exc) sig, TermMonad m sig) => m a -> (exc -> m a) -> m a
+catch :: (Subset (Error exc) sig, TermMonad sig m) => m a -> (exc -> m a) -> m a
 catch m h = send (Catch m h pure)
 
 
-runError :: TermMonad m sig => Eff (ErrorH exc m) a -> m (Either exc a)
+runError :: TermMonad sig m => Eff (ErrorH exc m) a -> m (Either exc a)
 runError = runErrorH . interpret
 
 newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
 
-instance TermMonad m sig => Carrier (ErrorH e m) (Error e :+: sig) where
+instance TermMonad sig m => Carrier (Error e :+: sig) (ErrorH e m) where
   gen a = ErrorH (pure (Right a))
   con = alg \/ (ErrorH . con . handle (Right ()) (either (pure . Left) runErrorH))
     where alg (Throw e)     = ErrorH (pure (Left e))
