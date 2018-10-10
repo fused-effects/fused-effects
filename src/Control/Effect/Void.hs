@@ -1,5 +1,8 @@
 {-# LANGUAGE EmptyCase, MultiParamTypeClasses #-}
-module Control.Effect.Void where
+module Control.Effect.Void
+( Void
+, run
+) where
 
 import Control.Effect.Internal
 import Control.Effect.Void.Internal
