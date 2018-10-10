@@ -18,7 +18,7 @@ import Prelude hiding (fail)
 
 newtype Eff carrier a = Eff { unEff :: forall x . (a -> carrier x) -> carrier x }
 
-runEff :: (a -> f x) -> Eff f a -> f x
+runEff :: (a -> carrier b) -> Eff carrier a -> carrier b
 runEff = flip unEff
 {-# INLINE runEff #-}
 
