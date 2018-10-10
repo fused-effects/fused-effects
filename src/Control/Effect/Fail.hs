@@ -6,6 +6,7 @@ module Control.Effect.Fail
 
 import Control.Effect.Fail.Internal
 import Control.Effect.Internal
+import Control.Effect.Sum
 
 runFail :: TermMonad m sig => Eff (FailH m) a -> m (Either String a)
 runFail = runFailH . runEff var

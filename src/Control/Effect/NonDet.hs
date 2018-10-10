@@ -10,6 +10,7 @@ module Control.Effect.NonDet
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
+import Control.Effect.Sum
 
 runNonDet :: TermMonad m sig => Eff (ListH m) a -> m [a]
 runNonDet = runListH . runEff var

@@ -3,3 +3,4 @@ module Control.Effect
 ) where
 
 import Control.Effect.Internal as X
+import Control.Effect.Sum as X

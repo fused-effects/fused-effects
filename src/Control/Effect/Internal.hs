@@ -6,8 +6,6 @@ module Control.Effect.Internal
 , Effect(..)
 , TermAlgebra(..)
 , TermMonad
-, (:+:)(..)
-, (\/)
 , Subset(..)
 ) where
 
@@ -15,6 +13,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Fail.Internal
 import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal
+import Control.Effect.Sum.Internal
 import Control.Effect.Void.Internal
 import Control.Monad (liftM, ap)
 import Control.Monad.Fail
@@ -94,12 +93,6 @@ instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Eff m) where
   liftIO = send . Lift . fmap pure
 
 
-data (f :+: g) m k
-  = L (f m k)
-  | R (g m k)
-  deriving (Eq, Functor, Ord, Show)
-
-infixr 4 :+:
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
   hfmap f (L l) = L (hfmap f l)
@@ -111,14 +104,6 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
   handle state handler (L l) = L (handle state handler l)
   handle state handler (R r) = R (handle state handler r)
 
--- | Lift algebras for either side of a sum into a single algebra on sums.
-(\/) :: ( sig1           m a -> b)
-     -> (          sig2  m a -> b)
-     -> ((sig1 :+: sig2) m a -> b)
-(alg1 \/ _   ) (L op) = alg1 op
-(_    \/ alg2) (R op) = alg2 op
-
-infixr 4 \/
 
 instance Effect NonDet where
   hfmap _ Empty      = Empty
