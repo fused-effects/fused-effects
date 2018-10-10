@@ -26,8 +26,8 @@ class HFunctor sig => Effect sig where
          -> sig n (n (f a))
 
 
-class Effect sig => Carrier sig h | h -> sig where
+class HFunctor sig => Carrier sig h | h -> sig where
   gen :: a -> h a
   con :: sig h (h a) -> h a
 
-class (Monad m, Carrier sig m) => Effectful sig m | m -> sig
+class (Monad m, Carrier sig m, Effect sig) => Effectful sig m | m -> sig
