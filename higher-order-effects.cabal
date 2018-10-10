@@ -25,6 +25,7 @@ library
                      , Control.Effect.Reader
                      , Control.Effect.State
                      , Control.Effect.Void
+                     , Control.Effect.Void.Internal
                      , Control.Effect.Writer
   -- other-modules:
   -- other-extensions:

@@ -17,6 +17,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Fail.Internal
 import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal
+import Control.Effect.Void.Internal
 import Control.Monad (liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -80,9 +81,6 @@ instance TermAlgebra h sig => TermMonad (Eff h) sig
 send :: (Subset effect sig, TermAlgebra m sig) => effect m (m a) -> m a
 send = con . inj
 
-
-data Void m k
-  deriving (Functor)
 
 instance Effect Void where
   hfmap _ v = case v of {}
