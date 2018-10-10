@@ -4,12 +4,14 @@ module Control.Effect.Trace
 , trace
 , runPrintingTrace
 , runIgnoringTrace
+, runReturningTrace
 ) where
 
 import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.Sum
 import Control.Monad.IO.Class
+import Data.Bifunctor (first)
 import System.IO
 
 data Trace m k = Trace String k
@@ -45,3 +47,15 @@ instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringH m) where
   gen = IgnoringH . gen
   alg = algT \/ (IgnoringH . alg . handlePure runIgnoringH)
     where algT (Trace _ k) = k
+
+
+runReturningTrace :: Effectful sig m => Eff (ReturningH m) a -> m ([String], a)
+runReturningTrace = fmap (first reverse) . flip runReturningH [] . interpret
+
+newtype ReturningH m a = ReturningH { runReturningH :: [String] -> m ([String], a) }
+
+instance Effectful sig m => Carrier (Trace :+: sig) (ReturningH m) where
+  gen a = ReturningH (\ s -> pure (s, a))
+  alg = algT \/ algOther
+    where algT (Trace m k) = ReturningH (runReturningH k . (m :))
+          algOther op = ReturningH (\ s -> alg (handle (s, ()) (uncurry (flip runReturningH)) op))
