@@ -31,3 +31,8 @@ class HFunctor sig => Carrier sig h | h -> sig where
   con :: sig h (h a) -> h a
 
 class (Monad m, Carrier sig m, Effect sig) => Effectful sig m | m -> sig
+
+
+handlePure :: HFunctor sig => (forall x . f x -> g x) -> sig f (f a) -> sig g (g a)
+handlePure handler = hfmap handler . fmap' handler
+{-# INLINE handlePure #-}

@@ -35,4 +35,4 @@ instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderH r m) wh
   con = alg \/ algOther
     where alg (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
           alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
-          algOther op = ReaderH (\ r -> con (hfmap (flip runReaderH r) (fmap' (flip runReaderH r) op)))
+          algOther op = ReaderH (\ r -> con (handlePure (flip runReaderH r) op))
