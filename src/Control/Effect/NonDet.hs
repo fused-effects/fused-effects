@@ -21,6 +21,7 @@ instance TermMonad m sig => TermAlgebra (ListH m) (NonDet :+: sig) where
     where alg Empty = ListH (pure [])
           alg (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
 
+
 runNonDetOnce :: TermMonad m sig => Eff (MaybeH m) a -> m (Maybe a)
 runNonDetOnce = runMaybeH . runEff var
 
@@ -31,6 +32,7 @@ instance TermMonad m sig => TermAlgebra (MaybeH m) (NonDet :+: sig) where
   con = alg \/ (MaybeH . con . handle (Just ()) (maybe (pure Nothing) runMaybeH))
     where alg Empty      = MaybeH (pure Nothing)
           alg (Choose k) = MaybeH (liftA2 (<|>) (runMaybeH (k True)) (runMaybeH (k False)))
+
 
 runNonDetSplit :: TermMonad m sig => Eff (SplitH m) a -> m [a]
 runNonDetSplit = joinSplitH . runEff var

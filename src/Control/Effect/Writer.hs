@@ -15,6 +15,7 @@ instance Effect (Writer w) where
 tell :: (Subset (Writer w) sig, TermMonad m sig) => w -> m ()
 tell w = send (Tell w (pure ()))
 
+
 runWriter :: (TermMonad m sig, Monoid w) => Eff (WriterH w m) a -> m (w, a)
 runWriter m = runWriterH (runEff var m)
 
