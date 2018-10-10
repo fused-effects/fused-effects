@@ -21,7 +21,6 @@ library
                      , Control.Effect.NonDet
                      , Control.Effect.Reader
                      , Control.Effect.State
-                     , Control.Effect.Symbol
                      , Control.Effect.Writer
   -- other-modules:
   -- other-extensions:
