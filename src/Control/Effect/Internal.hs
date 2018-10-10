@@ -11,7 +11,7 @@ import Control.Effect.Handler
 import Control.Effect.Fail.Internal
 import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal
-import Control.Effect.Sum.Internal
+import Control.Effect.Sum
 import Control.Monad (liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -59,22 +59,3 @@ instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Eff m) where
 
 instance (Subset Fail sig, TermAlgebra m sig) => MonadFail (Eff m) where
   fail = send . Fail
-
-
-class (Effect sub, Effect sup) => Subset sub sup where
-  inj :: sub m a -> sup m a
-  prj :: sup m a -> Maybe (sub m a)
-
-instance Effect sub => Subset sub sub where
-  inj = id
-  prj = Just
-
-instance {-# OVERLAPPABLE #-} (Effect sub, Effect sup) => Subset sub (sub :+: sup) where
-  inj = L . inj
-  prj (L f) = Just f
-  prj _     = Nothing
-
-instance {-# OVERLAPPABLE #-} (Effect sub', Subset sub sup) => Subset sub (sub' :+: sup) where
-  inj = R . inj
-  prj (R g) = prj g
-  prj _     = Nothing
