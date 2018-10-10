@@ -1,6 +1,6 @@
 name:                higher-order-effects
 version:             0.1.0.0
--- synopsis:
+synopsis:            Higher-order algebraic effects, à la Effect Handlers in Scope, Monad Transformers and Modular Algebraic Effects: What Binds Them Together, and Fusion for Free—Efficient Algebraic Effect Handlers.
 -- description:
 license:             BSD3
 license-file:        LICENSE
