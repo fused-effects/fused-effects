@@ -1,5 +1,10 @@
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
-module Control.Effect.State where
+module Control.Effect.State
+( State(..)
+, get
+, put
+, runState
+) where
 
 import Control.Effect
 
