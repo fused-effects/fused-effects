@@ -4,7 +4,8 @@ module Control.Effect.Fail
 , runFail
 ) where
 
-import Control.Effect
+import Control.Effect.Fail.Internal
+import Control.Effect.Internal
 
 runFail :: TermMonad m sig => Eff (FailH m) a -> m (Either String a)
 runFail = runFailH . runEff var

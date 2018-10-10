@@ -13,10 +13,10 @@ module Control.Effect.Internal
 , Subset(..)
 , Lift(..)
 , NonDet(..)
-, Fail(..)
 ) where
 
 import Control.Applicative (Alternative(..))
+import Control.Effect.Fail.Internal
 import Control.Monad (liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -154,9 +154,6 @@ instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Eff m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
-
-newtype Fail m k = Fail String
-  deriving (Functor)
 
 instance Effect Fail where
   hfmap _ (Fail s) = Fail s
