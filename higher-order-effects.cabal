@@ -16,6 +16,7 @@ library
   exposed-modules:     Control.Effect
                      , Control.Effect.Error
                      , Control.Effect.Fail
+                     , Control.Effect.Internal
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
                      , Control.Effect.Reader
