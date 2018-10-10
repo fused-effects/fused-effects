@@ -31,10 +31,20 @@ instance Applicative (Eff h) where
 
   (<*>) = ap
 
+instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Eff m) where
+  empty = send Empty
+  l <|> r = send (Choose (\ c -> if c then l else r))
+
 instance Monad (Eff h) where
   return = pure
 
   Eff m >>= f = Eff (\ k -> m (runEff k . f))
+
+instance (Subset Fail sig, TermAlgebra m sig) => MonadFail (Eff m) where
+  fail = send . Fail
+
+instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Eff m) where
+  liftIO = send . Lift . fmap pure
 
 
 instance TermAlgebra h sig => TermAlgebra (Eff h) sig where
@@ -42,16 +52,3 @@ instance TermAlgebra h sig => TermAlgebra (Eff h) sig where
   con op = Eff (\ k -> con (hfmap (runEff var) (fmap' (runEff k) op)))
 
 instance TermAlgebra h sig => TermMonad (Eff h) sig
-
-
-instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Eff m) where
-  liftIO = send . Lift . fmap pure
-
-
-instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Eff m) where
-  empty = send Empty
-  l <|> r = send (Choose (\ c -> if c then l else r))
-
-
-instance (Subset Fail sig, TermAlgebra m sig) => MonadFail (Eff m) where
-  fail = send . Fail
