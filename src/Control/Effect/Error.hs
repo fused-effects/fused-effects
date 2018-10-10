@@ -6,7 +6,9 @@ module Control.Effect.Error
 , runError
 ) where
 
-import Control.Effect
+import Control.Effect.Handler
+import Control.Effect.Sum
+import Control.Effect.Internal
 import Control.Monad ((<=<))
 
 data Error exc m k

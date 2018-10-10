@@ -6,7 +6,9 @@ module Control.Effect.Reader
 , runReader
 ) where
 
-import Control.Effect
+import Control.Effect.Handler
+import Control.Effect.Sum
+import Control.Effect.Internal
 
 data Reader r m k
   = Ask (r -> k)

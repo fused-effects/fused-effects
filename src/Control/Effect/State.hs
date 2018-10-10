@@ -6,7 +6,9 @@ module Control.Effect.State
 , runState
 ) where
 
-import Control.Effect
+import Control.Effect.Handler
+import Control.Effect.Sum
+import Control.Effect.Internal
 
 data State s m k
   = Get (s -> k)

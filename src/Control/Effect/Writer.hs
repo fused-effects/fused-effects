@@ -5,7 +5,9 @@ module Control.Effect.Writer
 , runWriter
 ) where
 
-import Control.Effect
+import Control.Effect.Handler
+import Control.Effect.Sum
+import Control.Effect.Internal
 import Data.Bifunctor (first)
 
 data Writer w m k = Tell w k
