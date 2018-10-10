@@ -1,4 +1,4 @@
-{-# LANGUAGE EmptyCase, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFunctor, EmptyCase, MultiParamTypeClasses, PolyKinds #-}
 module Control.Effect.Void
 ( Void
 , run
@@ -6,7 +6,16 @@ module Control.Effect.Void
 
 import Control.Effect.Handler
 import Control.Effect.Internal
-import Control.Effect.Void.Internal
+
+data Void m k
+  deriving (Functor)
+
+instance HFunctor Void where
+  hfmap _ v = case v of {}
+
+instance Effect Void where
+  handle _ _ v = case v of {}
+
 
 -- | Run an 'Eff' exhausted of effects to produce its final result value.
 run :: Eff VoidH a -> a

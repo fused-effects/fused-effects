@@ -28,7 +28,6 @@ library
                      , Control.Effect.Sum
                      , Control.Effect.Sum.Internal
                      , Control.Effect.Void
-                     , Control.Effect.Void.Internal
                      , Control.Effect.Writer
   -- other-modules:
   -- other-extensions:
