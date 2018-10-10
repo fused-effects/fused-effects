@@ -8,10 +8,11 @@ data State s m k
   | Put s k
   deriving (Functor)
 
-instance Effect (State s) where
+instance HFunctor (State s) where
   hfmap _ (Get k)   = Get   k
   hfmap _ (Put s k) = Put s k
 
+instance Effect (State s) where
   handle state handler (Get k)   = Get   (handler . (<$ state) . k)
   handle state handler (Put s k) = Put s (handler . (<$ state) $ k)
 

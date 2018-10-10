@@ -6,7 +6,8 @@ import Control.Effect.Handler
 newtype Fail m k = Fail String
   deriving (Functor)
 
-instance Effect Fail where
+instance HFunctor Fail where
   hfmap _ (Fail s) = Fail s
 
+instance Effect Fail where
   handle _ _ (Fail s) = Fail s

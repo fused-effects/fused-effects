@@ -6,6 +6,8 @@ import Control.Effect.Handler
 data Void m k
   deriving (Functor)
 
-instance Effect Void where
+instance HFunctor Void where
   hfmap _ v = case v of {}
+
+instance Effect Void where
   handle _ _ v = case v of {}

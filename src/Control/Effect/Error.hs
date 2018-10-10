@@ -15,10 +15,11 @@ data Error exc m k
 
 deriving instance Functor (Error exc m)
 
-instance Effect (Error exc) where
+instance HFunctor (Error exc) where
   hfmap _ (Throw exc)   = Throw exc
   hfmap f (Catch m h k) = Catch (f m) (f . h) k
 
+instance Effect (Error exc) where
   handle _     _       (Throw exc)   = Throw exc
   handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 

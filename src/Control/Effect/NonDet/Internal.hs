@@ -8,9 +8,10 @@ data NonDet m k
   | Choose (Bool -> k)
   deriving (Functor)
 
-instance Effect NonDet where
+instance HFunctor NonDet where
   hfmap _ Empty      = Empty
   hfmap _ (Choose k) = Choose k
 
+instance Effect NonDet where
   handle _     _       Empty      = Empty
   handle state handler (Choose k) = Choose (handler . (<$ state) . k)

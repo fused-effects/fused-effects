@@ -7,9 +7,10 @@ import Data.Bifunctor (first)
 data Writer w m k = Tell w k
   deriving (Functor)
 
-instance Effect (Writer w) where
+instance HFunctor (Writer w) where
   hfmap _ (Tell w k) = Tell w k
 
+instance Effect (Writer w) where
   handle state handler (Tell w k) = Tell w (handler (k <$ state))
 
 tell :: (Subset (Writer w) sig, TermMonad m sig) => w -> m ()
