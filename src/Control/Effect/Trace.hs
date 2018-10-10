@@ -1,5 +1,8 @@
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, PolyKinds #-}
-module Control.Effect.Trace where
+module Control.Effect.Trace
+( Trace(..)
+, trace
+) where
 
 import Control.Effect.Handler
 import Control.Effect.Sum
