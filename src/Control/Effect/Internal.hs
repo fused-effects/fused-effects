@@ -37,10 +37,6 @@ instance Monad (Eff h) where
   Eff m >>= f = Eff (\ k -> m (runEff k . f))
 
 
--- | Construct a request for an effect to be interpreted by some handler later on.
-send :: (Subset effect sig, TermAlgebra m sig) => effect m (m a) -> m a
-send = con . inj
-
 instance TermAlgebra h sig => TermAlgebra (Eff h) sig where
   var = pure
   con op = Eff (\ k -> con (hfmap (runEff var) (fmap' (runEff k) op)))
