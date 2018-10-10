@@ -4,9 +4,9 @@ module Control.Effect.Void
 , run
 ) where
 
+import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.Void.Internal
-
 
 -- | Run an 'Eff' exhausted of effects to produce its final result value.
 run :: Eff VoidH a -> a

@@ -5,6 +5,7 @@ module Control.Effect.Fail
 ) where
 
 import Control.Effect.Fail.Internal
+import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.Sum
 

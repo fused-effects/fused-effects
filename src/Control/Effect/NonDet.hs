@@ -8,6 +8,7 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
+import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum

@@ -4,6 +4,7 @@ module Control.Effect.Lift
 , runM
 ) where
 
+import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.Lift.Internal
 
