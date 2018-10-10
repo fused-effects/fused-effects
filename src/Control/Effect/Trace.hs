@@ -3,6 +3,7 @@ module Control.Effect.Trace
 ( Trace(..)
 , trace
 , runPrintingTrace
+, runIgnoringTrace
 ) where
 
 import Control.Effect.Handler
@@ -33,3 +34,14 @@ instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingH m) whe
   gen = PrintingH . gen
   alg = algT \/ (PrintingH . alg . handlePure runPrintingH)
     where algT (Trace s k) = PrintingH (liftIO (hPutStrLn stderr s) *> runPrintingH k)
+
+
+runIgnoringTrace :: Carrier sig m => Eff (IgnoringH m) a -> m a
+runIgnoringTrace = runIgnoringH . interpret
+
+newtype IgnoringH m a = IgnoringH { runIgnoringH :: m a }
+
+instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringH m) where
+  gen = IgnoringH . gen
+  alg = algT \/ (IgnoringH . alg . handlePure runIgnoringH)
+    where algT (Trace _ k) = k
