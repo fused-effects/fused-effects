@@ -1,5 +1,9 @@
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
-module Control.Effect.Writer where
+module Control.Effect.Writer
+( Writer(..)
+, tell
+, runWriter
+) where
 
 import Control.Effect
 import Data.Bifunctor (first)
