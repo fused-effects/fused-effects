@@ -35,7 +35,7 @@ runError = runErrorH . interpret
 
 newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
 
-instance TermMonad m sig => TermAlgebra (ErrorH e m) (Error e :+: sig) where
+instance TermMonad m sig => Carrier (ErrorH e m) (Error e :+: sig) where
   gen a = ErrorH (pure (Right a))
   con = alg \/ (ErrorH . con . handle (Right ()) (either (pure . Left) runErrorH))
     where alg (Throw e)     = ErrorH (pure (Left e))

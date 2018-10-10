@@ -18,7 +18,7 @@ runNonDet = runListH . interpret
 
 newtype ListH m a = ListH { runListH :: m [a] }
 
-instance TermMonad m sig => TermAlgebra (ListH m) (NonDet :+: sig) where
+instance TermMonad m sig => Carrier (ListH m) (NonDet :+: sig) where
   gen a = ListH (pure [a])
   con = alg \/ (ListH . con . handle [()] (fmap concat . traverse runListH))
     where alg Empty = ListH (pure [])
@@ -30,7 +30,7 @@ runNonDetOnce = runMaybeH . interpret
 
 newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
 
-instance TermMonad m sig => TermAlgebra (MaybeH m) (NonDet :+: sig) where
+instance TermMonad m sig => Carrier (MaybeH m) (NonDet :+: sig) where
   gen a = MaybeH (pure (Just a))
   con = alg \/ (MaybeH . con . handle (Just ()) (maybe (pure Nothing) runMaybeH))
     where alg Empty      = MaybeH (pure Nothing)
@@ -51,7 +51,7 @@ instance Monad m => Semigroup (SplitH m a) where
 instance Monad m => Monoid (SplitH m a) where
   mempty = SplitH (pure Nothing)
 
-instance TermMonad m sig => TermAlgebra (SplitH m) (NonDet :+: sig) where
+instance TermMonad m sig => Carrier (SplitH m) (NonDet :+: sig) where
   gen a = SplitH (pure (Just (a, SplitH (pure Nothing))))
   con = alg \/ (wrap . con . handle [()] (fmap concat . traverse joinSplitH))
     where alg Empty      = SplitH (pure Nothing)

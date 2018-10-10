@@ -31,7 +31,7 @@ runReader r m = runReaderH (interpret m) r
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
 
-instance TermMonad m sig => TermAlgebra (ReaderH r m) (Reader r :+: sig) where
+instance TermMonad m sig => Carrier (ReaderH r m) (Reader r :+: sig) where
   gen a = ReaderH (\ _ -> pure a)
   con = alg \/ algOther
     where alg (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)

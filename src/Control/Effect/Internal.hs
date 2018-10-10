@@ -22,7 +22,7 @@ runEff :: (a -> f x) -> Eff f a -> f x
 runEff = flip unEff
 {-# INLINE runEff #-}
 
-interpret :: TermAlgebra carrier sig => Eff carrier a -> carrier a
+interpret :: Carrier carrier sig => Eff carrier a -> carrier a
 interpret = runEff gen
 {-# INLINE interpret #-}
 
@@ -34,7 +34,7 @@ instance Applicative (Eff h) where
 
   (<*>) = ap
 
-instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Eff m) where
+instance (Subset NonDet sig, Carrier m sig) => Alternative (Eff m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
@@ -43,15 +43,15 @@ instance Monad (Eff h) where
 
   Eff m >>= f = Eff (\ k -> m (runEff k . f))
 
-instance (Subset Fail sig, TermAlgebra m sig) => MonadFail (Eff m) where
+instance (Subset Fail sig, Carrier m sig) => MonadFail (Eff m) where
   fail = send . Fail
 
-instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Eff m) where
+instance (Subset (Lift IO) sig, Carrier m sig) => MonadIO (Eff m) where
   liftIO = send . Lift . fmap pure
 
 
-instance TermAlgebra h sig => TermAlgebra (Eff h) sig where
+instance Carrier h sig => Carrier (Eff h) sig where
   gen = pure
   con op = Eff (\ k -> con (hfmap (runEff gen) (fmap' (runEff k) op)))
 
-instance TermAlgebra h sig => TermMonad (Eff h) sig
+instance Carrier h sig => TermMonad (Eff h) sig

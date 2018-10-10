@@ -22,7 +22,7 @@ runWriter m = runWriterH (interpret m)
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
 
-instance (Monoid w, TermMonad m sig) => TermAlgebra (WriterH w m) (Writer w :+: sig) where
+instance (Monoid w, TermMonad m sig) => Carrier (WriterH w m) (Writer w :+: sig) where
   gen a = WriterH (pure (mempty, a))
   con = alg \/ (WriterH . con . handle (mempty, ()) (uncurry runWriter'))
     where alg (Tell w k) = WriterH (first (w <>) <$> runWriterH k)

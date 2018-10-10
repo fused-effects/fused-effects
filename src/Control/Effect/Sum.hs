@@ -39,5 +39,5 @@ instance {-# OVERLAPPABLE #-} (Effect sub', Subset sub sup) => Subset sub (sub' 
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
-send :: (Subset effect sig, TermAlgebra m sig) => effect m (m a) -> m a
+send :: (Subset effect sig, Carrier m sig) => effect m (m a) -> m a
 send = con . inj

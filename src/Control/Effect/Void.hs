@@ -15,6 +15,6 @@ run = runVoidH . interpret
 
 newtype VoidH a = VoidH { runVoidH :: a }
 
-instance TermAlgebra VoidH Void where
+instance Carrier VoidH Void where
   gen = VoidH
   con v = case v of {}
