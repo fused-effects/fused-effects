@@ -16,7 +16,7 @@ import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
 
-newtype Eff h a = Eff { unEff :: forall x . (a -> h x) -> h x }
+newtype Eff carrier a = Eff { unEff :: forall x . (a -> carrier x) -> carrier x }
 
 runEff :: (a -> f x) -> Eff f a -> f x
 runEff = flip unEff
@@ -26,32 +26,32 @@ interpret :: Carrier sig carrier => Eff carrier a -> carrier a
 interpret = runEff gen
 {-# INLINE interpret #-}
 
-instance Functor (Eff h) where
+instance Functor (Eff carrier) where
   fmap = liftM
 
-instance Applicative (Eff h) where
+instance Applicative (Eff carrier) where
   pure a = Eff ($ a)
 
   (<*>) = ap
 
-instance (Subset NonDet sig, Carrier sig m) => Alternative (Eff m) where
+instance (Subset NonDet sig, Carrier sig carrier) => Alternative (Eff carrier) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
-instance Monad (Eff h) where
+instance Monad (Eff carrier) where
   return = pure
 
   Eff m >>= f = Eff (\ k -> m (runEff k . f))
 
-instance (Subset Fail sig, Carrier sig m) => MonadFail (Eff m) where
+instance (Subset Fail sig, Carrier sig carrier) => MonadFail (Eff carrier) where
   fail = send . Fail
 
-instance (Subset (Lift IO) sig, Carrier sig m) => MonadIO (Eff m) where
+instance (Subset (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) where
   liftIO = send . Lift . fmap pure
 
 
-instance Carrier sig h => Carrier sig (Eff h) where
+instance Carrier sig carrier => Carrier sig (Eff carrier) where
   gen = pure
   alg op = Eff (\ k -> alg (hfmap (runEff gen) (fmap' (runEff k) op)))
 
-instance (Carrier sig h, Effect sig) => Effectful sig (Eff h)
+instance (Carrier sig carrier, Effect sig) => Effectful sig (Eff carrier)
