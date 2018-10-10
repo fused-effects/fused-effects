@@ -10,7 +10,7 @@ import Control.Effect.Void.Internal
 
 -- | Run an 'Eff' exhausted of effects to produce its final result value.
 run :: Eff VoidH a -> a
-run = runVoidH . runEff VoidH
+run = runVoidH . interpret
 
 
 newtype VoidH a = VoidH { runVoidH :: a }

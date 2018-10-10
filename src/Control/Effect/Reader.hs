@@ -25,7 +25,7 @@ local f m = send (Local f m pure)
 
 
 runReader :: TermMonad m sig => r -> Eff (ReaderH r m) a -> m a
-runReader r m = runReaderH (runEff var m) r
+runReader r m = runReaderH (interpret m) r
 
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }

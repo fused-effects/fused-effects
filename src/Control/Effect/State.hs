@@ -23,7 +23,7 @@ put s = send (Put s (pure ()))
 
 
 runState :: TermMonad m sig => s -> Eff (StateH s m) a -> m (s, a)
-runState s m = runStateH (runEff var m) s
+runState s m = runStateH (interpret m) s
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
 

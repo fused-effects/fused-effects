@@ -14,7 +14,7 @@ import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 
 runNonDet :: TermMonad m sig => Eff (ListH m) a -> m [a]
-runNonDet = runListH . runEff var
+runNonDet = runListH . interpret
 
 newtype ListH m a = ListH { runListH :: m [a] }
 
@@ -26,7 +26,7 @@ instance TermMonad m sig => TermAlgebra (ListH m) (NonDet :+: sig) where
 
 
 runNonDetOnce :: TermMonad m sig => Eff (MaybeH m) a -> m (Maybe a)
-runNonDetOnce = runMaybeH . runEff var
+runNonDetOnce = runMaybeH . interpret
 
 newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
 
@@ -38,7 +38,7 @@ instance TermMonad m sig => TermAlgebra (MaybeH m) (NonDet :+: sig) where
 
 
 runNonDetSplit :: TermMonad m sig => Eff (SplitH m) a -> m [a]
-runNonDetSplit = joinSplitH . runEff var
+runNonDetSplit = joinSplitH . interpret
 
 newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
 

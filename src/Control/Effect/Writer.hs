@@ -17,7 +17,7 @@ tell w = send (Tell w (pure ()))
 
 
 runWriter :: (TermMonad m sig, Monoid w) => Eff (WriterH w m) a -> m (w, a)
-runWriter m = runWriterH (runEff var m)
+runWriter m = runWriterH (interpret m)
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
 

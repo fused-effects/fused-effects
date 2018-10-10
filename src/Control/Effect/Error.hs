@@ -30,7 +30,7 @@ catch m h = send (Catch m h pure)
 
 
 runError :: TermMonad m sig => Eff (ErrorH exc m) a -> m (Either exc a)
-runError = runErrorH . runEff var
+runError = runErrorH . interpret
 
 newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
 

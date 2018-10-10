@@ -9,7 +9,7 @@ import Control.Effect.Internal
 import Control.Effect.Lift.Internal
 
 runM :: Monad m => Eff (LiftH m) a -> m a
-runM = runLiftH . runEff var
+runM = runLiftH . interpret
 
 newtype LiftH m a = LiftH { runLiftH :: m a }
 

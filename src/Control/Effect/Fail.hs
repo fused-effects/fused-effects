@@ -10,7 +10,7 @@ import Control.Effect.Internal
 import Control.Effect.Sum
 
 runFail :: TermMonad m sig => Eff (FailH m) a -> m (Either String a)
-runFail = runFailH . runEff var
+runFail = runFailH . interpret
 
 newtype FailH m a = FailH { runFailH :: m (Either String a) }
 
