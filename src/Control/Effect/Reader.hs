@@ -1,5 +1,10 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
-module Control.Effect.Reader where
+module Control.Effect.Reader
+( Reader(..)
+, ask
+, local
+, runReader
+) where
 
 import Control.Effect
 
