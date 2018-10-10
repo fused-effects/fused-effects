@@ -11,5 +11,6 @@ import Control.Effect.NonDet   as X
 import Control.Effect.Reader   as X
 import Control.Effect.State    as X
 import Control.Effect.Sum      as X
+import Control.Effect.Trace    as X
 import Control.Effect.Void     as X
 import Control.Effect.Writer   as X
