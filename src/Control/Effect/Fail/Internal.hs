@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveFunctor, PolyKinds #-}
-module Control.Effect.Fail.Internal where
+module Control.Effect.Fail.Internal
+( Fail(..)
+) where
 
 import Control.Effect.Handler
 
