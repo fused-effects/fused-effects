@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveFunctor, PolyKinds #-}
-module Control.Effect.Lift.Internal where
+module Control.Effect.Lift.Internal
+( Lift(..)
+) where
 
 import Control.Effect.Handler
 
