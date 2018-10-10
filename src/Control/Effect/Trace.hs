@@ -24,7 +24,7 @@ trace :: (Subset Trace sig, Effectful sig m) => String -> m ()
 trace message = send (Trace message (pure ()))
 
 
-runPrintingTrace :: (MonadIO m, Effectful sig m) => Eff (PrintingH m) a -> m a
+runPrintingTrace :: (MonadIO m, Carrier sig m) => Eff (PrintingH m) a -> m a
 runPrintingTrace = runPrintingH . interpret
 
 newtype PrintingH m a = PrintingH { runPrintingH :: m a }
