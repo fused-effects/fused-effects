@@ -2,7 +2,6 @@
 module Control.Effect.Reader where
 
 import Control.Effect
-import Data.Functor.Identity
 
 data Reader r m k
   = Ask (r -> k)
@@ -31,9 +30,9 @@ runReader r m = runReaderH (interpret m) r
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
 
-instance Effectful sig m => Carrier (Reader r :+: sig) (ReaderH r m) where
+instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderH r m) where
   gen a = ReaderH (\ _ -> pure a)
   con = alg \/ algOther
     where alg (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
           alg (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
-          algOther op = ReaderH (\ r -> runIdentity <$> con (handle (Identity ()) (fmap Identity . flip runReaderH r . runIdentity) op))
+          algOther op = ReaderH (\ r -> con (hfmap (flip runReaderH r) (fmap' (flip runReaderH r) op)))
