@@ -8,7 +8,8 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Effect
+import Control.Effect.Internal
+import Control.Effect.NonDet.Internal
 
 runNonDet :: TermMonad m sig => Eff (ListH m) a -> m [a]
 runNonDet = runListH . runEff var

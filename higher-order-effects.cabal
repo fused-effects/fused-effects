@@ -21,6 +21,7 @@ library
                      , Control.Effect.Lift
                      , Control.Effect.Lift.Internal
                      , Control.Effect.NonDet
+                     , Control.Effect.NonDet.Internal
                      , Control.Effect.Reader
                      , Control.Effect.State
                      , Control.Effect.Void

@@ -11,12 +11,12 @@ module Control.Effect.Internal
 , (:+:)(..)
 , (\/)
 , Subset(..)
-, NonDet(..)
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Fail.Internal
 import Control.Effect.Lift.Internal
+import Control.Effect.NonDet.Internal
 import Control.Monad (liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -134,11 +134,6 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
 (_    \/ alg2) (R op) = alg2 op
 
 infixr 4 \/
-
-data NonDet m k
-  = Empty
-  | Choose (Bool -> k)
-  deriving (Functor)
 
 instance Effect NonDet where
   hfmap _ Empty      = Empty
