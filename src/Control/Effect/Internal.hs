@@ -6,8 +6,6 @@ module Control.Effect.Internal
 , Effect(..)
 , TermAlgebra(..)
 , TermMonad
-, Void
-, run
 , (:+:)(..)
 , (\/)
 , Subset(..)
@@ -85,17 +83,6 @@ send = con . inj
 instance Effect Void where
   hfmap _ v = case v of {}
   handle _ _ v = case v of {}
-
--- | Run an 'Eff' exhausted of effects to produce its final result value.
-run :: Eff VoidH a -> a
-run = runVoidH . runEff VoidH
-
-
-newtype VoidH a = VoidH { runVoidH :: a }
-
-instance TermAlgebra VoidH Void where
-  var = VoidH
-  con v = case v of {}
 
 
 instance Functor sig => Effect (Lift sig) where
