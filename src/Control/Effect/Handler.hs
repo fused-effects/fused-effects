@@ -1,5 +1,11 @@
 {-# LANGUAGE DefaultSignatures, FunctionalDependencies, RankNTypes #-}
-module Control.Effect.Handler where
+module Control.Effect.Handler
+( HFunctor(..)
+, Effect(..)
+, Carrier(..)
+, Effectful
+, handlePure
+) where
 
 class HFunctor h where
   -- | Functor map. This is required to be 'fmap'.
