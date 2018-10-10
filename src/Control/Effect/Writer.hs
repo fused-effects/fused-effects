@@ -13,16 +13,16 @@ instance HFunctor (Writer w) where
 instance Effect (Writer w) where
   handle state handler (Tell w k) = Tell w (handler (k <$ state))
 
-tell :: (Subset (Writer w) sig, TermMonad sig m) => w -> m ()
+tell :: (Subset (Writer w) sig, Effectful sig m) => w -> m ()
 tell w = send (Tell w (pure ()))
 
 
-runWriter :: (TermMonad sig m, Monoid w) => Eff (WriterH w m) a -> m (w, a)
+runWriter :: (Effectful sig m, Monoid w) => Eff (WriterH w m) a -> m (w, a)
 runWriter m = runWriterH (interpret m)
 
 newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
 
-instance (Monoid w, TermMonad sig m) => Carrier (Writer w :+: sig) (WriterH w m) where
+instance (Monoid w, Effectful sig m) => Carrier (Writer w :+: sig) (WriterH w m) where
   gen a = WriterH (pure (mempty, a))
   con = alg \/ (WriterH . con . handle (mempty, ()) (uncurry runWriter'))
     where alg (Tell w k) = WriterH (first (w <>) <$> runWriterH k)

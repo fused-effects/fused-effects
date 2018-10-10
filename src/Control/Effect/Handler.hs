@@ -30,4 +30,4 @@ class Effect sig => Carrier sig h | h -> sig where
   gen :: a -> h a
   con :: sig h (h a) -> h a
 
-class (Monad m, Carrier sig m) => TermMonad sig m | m -> sig
+class (Monad m, Carrier sig m) => Effectful sig m | m -> sig

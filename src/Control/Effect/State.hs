@@ -16,19 +16,19 @@ instance Effect (State s) where
   handle state handler (Get k)   = Get   (handler . (<$ state) . k)
   handle state handler (Put s k) = Put s (handler . (<$ state) $ k)
 
-get :: (Subset (State s) sig, TermMonad sig m) => m s
+get :: (Subset (State s) sig, Effectful sig m) => m s
 get = send (Get pure)
 
-put :: (Subset (State s) sig, TermMonad sig m) => s -> m ()
+put :: (Subset (State s) sig, Effectful sig m) => s -> m ()
 put s = send (Put s (pure ()))
 
 
-runState :: TermMonad sig m => s -> Eff (StateH s m) a -> m (s, a)
+runState :: Effectful sig m => s -> Eff (StateH s m) a -> m (s, a)
 runState s m = runStateH (interpret m) s
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
 
-instance TermMonad sig m => Carrier (State s :+: sig) (StateH s m) where
+instance Effectful sig m => Carrier (State s :+: sig) (StateH s m) where
   gen a = StateH (\ s -> pure (s, a))
   con = alg \/ algOther
     where alg (Get   k) = StateH (\ s -> runStateH (k s) s)

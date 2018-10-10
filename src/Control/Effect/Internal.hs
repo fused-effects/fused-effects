@@ -54,4 +54,4 @@ instance Carrier sig h => Carrier sig (Eff h) where
   gen = pure
   con op = Eff (\ k -> con (hfmap (runEff gen) (fmap' (runEff k) op)))
 
-instance Carrier sig h => TermMonad sig (Eff h)
+instance Carrier sig h => Effectful sig (Eff h)

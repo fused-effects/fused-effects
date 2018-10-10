@@ -18,20 +18,20 @@ instance Effect (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
 
-ask :: (Subset (Reader r) sig, TermMonad sig m) => m r
+ask :: (Subset (Reader r) sig, Effectful sig m) => m r
 ask = send (Ask pure)
 
-local :: (Subset (Reader r) sig, TermMonad sig m) => (r -> r) -> m a -> m a
+local :: (Subset (Reader r) sig, Effectful sig m) => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
 
 
-runReader :: TermMonad sig m => r -> Eff (ReaderH r m) a -> m a
+runReader :: Effectful sig m => r -> Eff (ReaderH r m) a -> m a
 runReader r m = runReaderH (interpret m) r
 
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
 
-instance TermMonad sig m => Carrier (Reader r :+: sig) (ReaderH r m) where
+instance Effectful sig m => Carrier (Reader r :+: sig) (ReaderH r m) where
   gen a = ReaderH (\ _ -> pure a)
   con = alg \/ algOther
     where alg (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
