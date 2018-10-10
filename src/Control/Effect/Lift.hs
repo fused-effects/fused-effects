@@ -1,10 +1,16 @@
+{-# LANGUAGE MultiParamTypeClasses #-}
 module Control.Effect.Lift
 ( Lift(..)
 , runM
 ) where
 
 import Control.Effect
-import Control.Monad (join)
 
-runM :: Monad m => Eff (Lift m) a -> m a
-runM = foldA (join . unLift)
+runM :: Monad m => Eff (LiftH m) a -> m a
+runM = runLiftH . runEff var
+
+newtype LiftH m a = LiftH { runLiftH :: m a }
+
+instance Monad m => TermAlgebra (LiftH m) (Lift m) where
+  var = LiftH . pure
+  con = LiftH . (>>= runLiftH) . unLift

@@ -1,8 +1,7 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, PolyKinds, TypeOperators #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Symbol where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.State
 import Control.Effect
 import Control.Effect.Cut
 
@@ -13,34 +12,41 @@ data Symbol m k
 instance Effect Symbol where
   hfmap _ (Symbol sat k) = Symbol sat k
 
-  handle _ (Symbol sat k) = Symbol sat k
+  handle state handler (Symbol sat k) = Symbol sat (handler . (<$ state) . k)
 
-satisfy :: Subset Symbol sig => (Char -> Bool) -> Eff sig Char
+satisfy :: (Subset Symbol sig, TermMonad m sig) => (Char -> Bool) -> m Char
 satisfy sat = send (Symbol sat pure)
 
-char :: Subset Symbol sig => Char -> Eff sig Char
+char :: (Subset Symbol sig, TermMonad m sig) => Char -> m Char
 char c = satisfy (== c)
 
-digit :: (Subset NonDet sig, Subset Symbol sig) => Eff sig Char
+digit :: (Alternative m, Subset Symbol sig, TermMonad m sig) => m Char
 digit = foldr ((<|>) . char) empty ['0'..'9']
 
-expr :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+expr :: (Alternative m, Subset Cut sig, Subset Symbol sig, TermMonad m sig) => m Int
 expr = do
   i <- term
   call ((i +) <$ char '+' <* cut <*> expr) <|> pure i
 
-term :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+term :: (Alternative m, Subset Cut sig, Subset Symbol sig, TermMonad m sig) => m Int
 term = do
   i <- factor
   call ((i *) <$ char '*' <* cut <*> term) <|> pure i
 
-factor :: (Subset Cut sig, Subset NonDet sig, Subset Symbol sig) => Eff sig Int
+factor :: (Alternative m, Subset Cut sig, Subset Symbol sig, TermMonad m sig) => m Int
 factor = read <$> some digit
      <|> char '(' *> expr <* char ')'
 
 
-parse :: Subset NonDet sig => String -> Eff (Symbol :+: sig) a -> Eff sig a
-parse input = fmap snd . flip runStateH input . interpret alg
-  where alg (Symbol p k) = StateH (\ s -> case s of
-          c:cs | p c -> runStateH (k c) cs
-          _          -> empty)
+parse :: (Alternative m, TermMonad m sig) => String -> Eff (SymbolH m) a -> m a
+parse input = fmap snd . flip runSymbolH input . runEff var
+
+newtype SymbolH m a = SymbolH { runSymbolH :: String -> m (String, a) }
+
+instance (Alternative m, TermMonad m sig) => TermAlgebra (SymbolH m) (Symbol :+: sig) where
+  var a = SymbolH (\ s -> pure (s, a))
+  con = alg \/ algOther
+    where alg (Symbol p k) = SymbolH (\ s -> case s of
+            c:cs | p c -> runSymbolH (k c) cs
+            _          -> empty)
+          algOther op = SymbolH (\ s -> con (handle (s, ()) (uncurry (flip runSymbolH)) op))

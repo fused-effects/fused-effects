@@ -1,19 +1,11 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, PolyKinds, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect
-( Eff
+( Eff(..)
+, runEff
 , send
-, fold
-, foldA
-, interpret
-, interpret2
-, interpretRest
-, reinterpret
-, reinterpret2
-, reinterpret_2
-, reinterpret2_2
-, reinterpretRest
 , Effect(..)
-, Carrier(..)
+, TermAlgebra(..)
+, TermMonad
 , Void
 , run
 , (:+:)(..)
@@ -25,20 +17,34 @@ module Control.Effect
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier
-import Control.Monad (ap, liftM)
+import Control.Monad (liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
 
-data Eff effects a
-  = Return a
-  | Eff (effects (Eff effects) (Eff effects a))
+newtype Eff h a = Eff { unEff :: forall x . (a -> h x) -> h x }
+
+runEff :: (a -> f x) -> Eff f a -> f x
+runEff = flip unEff
+{-# INLINE runEff #-}
+
+instance Functor (Eff h) where
+  fmap = liftM
+
+instance Applicative (Eff h) where
+  pure a = Eff ($ a)
+
+  (<*>) = ap
+
+instance Monad (Eff h) where
+  return = pure
+
+  Eff m >>= f = Eff (\ k -> m (runEff k . f))
 
 -- | The class of effect types, which must:
 --
 --   1. Be functorial in their last two arguments, and
---   2. Support threading effects in higher-order positions through using the 'Carrier'’s 'suspend'ed state.
+--   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
 class Effect sig where
   -- | Functor map. This is required to be 'fmap'.
   fmap' :: (a -> b) -> (sig m a -> sig m b)
@@ -48,102 +54,31 @@ class Effect sig where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   hfmap :: (forall x . m x -> n x) -> sig m a -> sig n a
 
-  -- | Handle any effects in higher-order positions by threading the 'Carrier'’s state all the way through to the continuation.
-  --
-  --   For first-order effects (which don’t contain higher-order positions), this will simply involve repackaging the effect’s arguments at the new type.
-  --
-  --   For higher-order effects (which do contain higher-order positions), the 'Carrier' actions @c n@ must be 'resume'd to obtain the necessary @n@ action, and the state passed along to the continuation via 'resume' and 'wrap'.
-  handle :: (Carrier c f, Monad n)
+  -- | Handle any effects in higher-order positions by threading the carrier’s state all the way through to the continuation.
+  handle :: (Functor f, Monad n)
          => f ()
-         -> sig (c n) (c n a)
-         -> sig n (c n a)
+         -> (forall x . f (m x) -> n (f x))
+         -> sig m (m a)
+         -> sig n (n (f a))
+
+
+class Effect sig => TermAlgebra h sig | h -> sig where
+  var :: a -> h a
+  con :: sig h (h a) -> h a
+
+instance TermAlgebra h sig => TermAlgebra (Eff h) sig where
+  var = pure
+  con op = Eff (\ k -> con (hfmap (runEff var) (fmap' (runEff k) op)))
+
+
+class (Monad m, TermAlgebra m sig) => TermMonad m sig | m -> sig
+
+instance TermAlgebra h sig => TermMonad (Eff h) sig
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
-send :: Subset effect sig => effect (Eff sig) (Eff sig a) -> Eff sig a
-send = Eff . inj
-
-
--- | Fold a generator and first-order algebra over an 'Eff' to obtain some final result value.
-fold :: Effect sig
-     => (a -> b)
-     -> (sig (Eff sig) b -> b)
-     -> (Eff sig a -> b)
-fold gen alg = go
-  where go (Return x) = gen x
-        go (Eff op)   = alg (fmap' go op)
-
--- | Fold a higher-order algebra over an 'Eff' to obtain some final result value in an 'Applicative' context.
-foldA :: forall sig f
-      .  (Effect sig, Applicative f)
-      => (forall a . sig f (f a) -> f a)
-      -> (forall a . Eff sig a -> f a)
-foldA alg = go
-  where go :: Eff sig a -> f a
-        go (Return x) = pure x
-        go (Eff op)   = alg (hfmap go (fmap' go op))
-
--- | Interpret an 'Effect'’s requests into a 'Carrier' using the passed algebra.
-interpret :: (Effect eff, Effect sig, Carrier c f, Monad (c (Eff sig)))
-          => (forall a . eff (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-          -> (forall a . Eff (eff :+: sig) a -> c (Eff sig) a)
-interpret alg = foldA (alg \/ interpretRest)
-{-# INLINE interpret #-}
-
--- | Interpret two 'Effect's’ requests into a 'Carrier' using the passed algebras.
-interpret2 :: (Effect eff1, Effect eff2, Effect sig, Carrier c f, Monad (c (Eff sig)))
-           => (forall a . eff1 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-           -> (forall a . eff2 (c (Eff sig)) (c (Eff sig) a) -> c (Eff sig) a)
-           -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c (Eff sig) a)
-interpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ interpretRest)
-{-# INLINE interpret2 #-}
-
--- | Interpret any requests in higher-order positions in the remaining effects.
---
---   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled.
-interpretRest :: (Effect sig, Carrier c f, Monad (c (Eff sig)))
-              => sig (c (Eff sig)) (c (Eff sig) a)
-              -> c (Eff sig) a
-interpretRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (handle state op)))
-
-
--- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of a new 'Effect' using the passed algebra.
-reinterpret :: (Effect eff, Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
-            => (forall a . eff (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
-            -> (forall a . Eff (eff :+: sig) a -> c (Eff (new :+: sig)) a)
-reinterpret alg = foldA (alg \/ reinterpretRest)
-{-# INLINE reinterpret #-}
-
--- | Reinterpret two 'Effect's’ requests into a 'Carrier' and requests of a new 'Effect' using the passed algebras.
-reinterpret2 :: (Effect eff1, Effect eff2, Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
-             => (forall a . eff1 (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
-             -> (forall a . eff2 (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a) -> c (Eff (new :+: sig)) a)
-             -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c (Eff (new :+: sig)) a)
-reinterpret2 alg1 alg2 = foldA (alg1 \/ alg2 \/ reinterpretRest)
-{-# INLINE reinterpret2 #-}
-
--- | Reinterpret an 'Effect'’s requests into a 'Carrier' and requests of two new 'Effect's using the passed algebra.
-reinterpret_2 :: (Effect eff, Effect sig, Effect new1, Effect new2, Carrier c f, Monad (c (Eff (new1 :+: new2 :+: sig))))
-             => (forall a . eff (c (Eff (new1 :+: new2 :+: sig))) (c (Eff (new1 :+: new2 :+: sig)) a) -> c (Eff (new1 :+: new2 :+: sig)) a)
-             -> (forall a . Eff (eff :+: sig) a -> c (Eff (new1 :+: new2 :+: sig)) a)
-reinterpret_2 alg = foldA (alg \/ reinterpretRest)
-{-# INLINE reinterpret_2 #-}
-
--- | Reinterpret two 'Effect's’ requests into a 'Carrier' and requests of two new 'Effect's using the passed algebras.
-reinterpret2_2 :: (Effect eff1, Effect eff2, Effect sig, Effect new1, Effect new2, Carrier c f, Monad (c (Eff (new1 :+: new2 :+: sig))))
-             => (forall a . eff1 (c (Eff (new1 :+: new2 :+: sig))) (c (Eff (new1 :+: new2 :+: sig)) a) -> c (Eff (new1 :+: new2 :+: sig)) a)
-             -> (forall a . eff2 (c (Eff (new1 :+: new2 :+: sig))) (c (Eff (new1 :+: new2 :+: sig)) a) -> c (Eff (new1 :+: new2 :+: sig)) a)
-             -> (forall a . Eff (eff1 :+: eff2 :+: sig) a -> c (Eff (new1 :+: new2 :+: sig)) a)
-reinterpret2_2 alg1 alg2 = foldA (alg1 \/ alg2 \/ reinterpretRest)
-{-# INLINE reinterpret2_2 #-}
-
--- | Reinterpret any requests in higher-order positions in the remaining effects.
---
---   This is typically passed to 'foldA' as the last of a '\/'-chain of algebras, and can be used uniformly regardless of how many effects are being handled and how many new effects are being added.
-reinterpretRest :: (Effect sig, Effect new, Carrier c f, Monad (c (Eff (new :+: sig))))
-                => sig (c (Eff (new :+: sig))) (c (Eff (new :+: sig)) a)
-                -> c (Eff (new :+: sig)) a
-reinterpretRest op = suspend >>= \ state -> joinl (Eff (fmap' pure (R (handle state op))))
+send :: (Subset effect sig, TermAlgebra m sig) => effect m (m a) -> m a
+send = con . inj
 
 
 data Void m k
@@ -151,11 +86,18 @@ data Void m k
 
 instance Effect Void where
   hfmap _ v = case v of {}
-  handle _ v = case v of {}
+  handle _ _ v = case v of {}
 
 -- | Run an 'Eff' exhausted of effects to produce its final result value.
-run :: Eff Void a -> a
-run = fold id (\ v -> case v of {})
+run :: Eff VoidH a -> a
+run = runVoidH . runEff VoidH
+
+
+newtype VoidH a = VoidH { runVoidH :: a }
+
+instance TermAlgebra VoidH Void where
+  var = VoidH
+  con v = case v of {}
 
 
 newtype Lift sig m k = Lift { unLift :: sig k }
@@ -164,9 +106,9 @@ newtype Lift sig m k = Lift { unLift :: sig k }
 instance Functor sig => Effect (Lift sig) where
   hfmap _ (Lift op) = Lift op
 
-  handle _ (Lift op) = Lift op
+  handle state handler (Lift op) = Lift (fmap (handler . (<$ state)) op)
 
-instance Subset (Lift IO) sig => MonadIO (Eff sig) where
+instance (Subset (Lift IO) sig, TermAlgebra m sig) => MonadIO (Eff m) where
   liftIO = send . Lift . fmap pure
 
 
@@ -175,7 +117,7 @@ data (f :+: g) m k
   | R (g m k)
   deriving (Eq, Functor, Ord, Show)
 
-infixl 4 :+:
+infixr 4 :+:
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
   hfmap f (L l) = L (hfmap f l)
@@ -184,8 +126,8 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
   fmap' f (L l) = L (fmap' f l)
   fmap' f (R r) = R (fmap' f r)
 
-  handle state (L l) = L (handle state l)
-  handle state (R r) = R (handle state r)
+  handle state handler (L l) = L (handle state handler l)
+  handle state handler (R r) = R (handle state handler r)
 
 -- | Lift algebras for either side of a sum into a single algebra on sums.
 (\/) :: ( sig1           m a -> b)
@@ -194,7 +136,7 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
 (alg1 \/ _   ) (L op) = alg1 op
 (_    \/ alg2) (R op) = alg2 op
 
-infixl 4 \/
+infixr 4 \/
 
 data NonDet m k
   = Empty
@@ -205,10 +147,10 @@ instance Effect NonDet where
   hfmap _ Empty      = Empty
   hfmap _ (Choose k) = Choose k
 
-  handle _ Empty      = Empty
-  handle _ (Choose k) = Choose k
+  handle _     _       Empty      = Empty
+  handle state handler (Choose k) = Choose (handler . (<$ state) . k)
 
-instance Subset NonDet sig => Alternative (Eff sig) where
+instance (Subset NonDet sig, TermAlgebra m sig) => Alternative (Eff m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
@@ -219,9 +161,9 @@ newtype Fail m k = Fail String
 instance Effect Fail where
   hfmap _ (Fail s) = Fail s
 
-  handle _ (Fail s) = Fail s
+  handle _ _ (Fail s) = Fail s
 
-instance Subset Fail sig => MonadFail (Eff sig) where
+instance (Subset Fail sig, TermAlgebra m sig) => MonadFail (Eff m) where
   fail = send . Fail
 
 
@@ -242,14 +184,3 @@ instance {-# OVERLAPPABLE #-} (Effect sub', Subset sub sup) => Subset sub (sub' 
   inj = R . inj
   prj (R g) = prj g
   prj _     = Nothing
-
-
-instance Effect sig => Functor (Eff sig) where
-  fmap = liftM
-
-instance Effect sig => Applicative (Eff sig) where
-  pure = Return
-  (<*>) = ap
-
-instance Effect sig => Monad (Eff sig) where
-  m >>= k = fold k Eff m

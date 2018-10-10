@@ -1,7 +1,6 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving, TypeOperators #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error where
 
-import Control.Carrier.Either
 import Control.Effect
 import Control.Monad ((<=<))
 
@@ -15,17 +14,23 @@ instance Effect (Error exc) where
   hfmap _ (Throw exc)   = Throw exc
   hfmap f (Catch m h k) = Catch (f m) (f . h) k
 
-  handle _     (Throw exc)   = Throw exc
-  handle state (Catch m h k) = Catch (resume (m <$ state)) (resume . (<$ state) . h) (wrap . resume . fmap k)
+  handle _     _       (Throw exc)   = Throw exc
+  handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
-throw :: Subset (Error exc) sig => exc -> Eff sig a
+throw :: (Subset (Error exc) sig, TermMonad m sig) => exc -> m a
 throw = send . Throw
 
-catch :: Subset (Error exc) sig => Eff sig a -> (exc -> Eff sig a) -> Eff sig a
+catch :: (Subset (Error exc) sig, TermMonad m sig) => m a -> (exc -> m a) -> m a
 catch m h = send (Catch m h pure)
 
 
-runError :: Effect sig => Eff (Error exc :+: sig) a -> Eff sig (Either exc a)
-runError = runEitherH . interpret alg
-  where alg (Throw e)     = EitherH (pure (Left e))
-        alg (Catch m h k) = EitherH (runEitherH m >>= runEitherH . either (k <=< h) k)
+runError :: TermMonad m sig => Eff (ErrorH exc m) a -> m (Either exc a)
+runError = runErrorH . runEff var
+
+newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
+
+instance TermMonad m sig => TermAlgebra (ErrorH e m) (Error e :+: sig) where
+  var a = ErrorH (pure (Right a))
+  con = alg \/ (ErrorH . con . handle (Right ()) (either (pure . Left) runErrorH))
+    where alg (Throw e)     = ErrorH (pure (Left e))
+          alg (Catch m h k) = ErrorH (runErrorH m >>= either (either (pure . Left) (runErrorH . k) <=< runErrorH . h) (runErrorH . k))

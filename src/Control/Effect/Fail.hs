@@ -1,12 +1,17 @@
-{-# LANGUAGE PolyKinds, TypeOperators #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fail
 ( Fail(..)
 , runFail
 ) where
 
-import Control.Carrier.Either
 import Control.Effect
 
-runFail :: Effect sig => Eff (Fail :+: sig) a -> Eff sig (Either String a)
-runFail = runEitherH . interpret alg
-  where alg (Fail s) = EitherH (pure (Left s))
+runFail :: TermMonad m sig => Eff (FailH m) a -> m (Either String a)
+runFail = runFailH . runEff var
+
+newtype FailH m a = FailH { runFailH :: m (Either String a) }
+
+instance TermMonad m sig => TermAlgebra (FailH m) (Fail :+: sig) where
+  var a = FailH (pure (Right a))
+  con = alg \/ (FailH . con . handle (Right ()) (either (pure . Left) runFailH))
+    where alg (Fail s) = FailH (pure (Left s))
