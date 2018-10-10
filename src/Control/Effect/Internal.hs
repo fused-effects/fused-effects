@@ -2,6 +2,7 @@
 module Control.Effect.Internal
 ( Eff(..)
 , runEff
+, interpret
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -20,6 +21,10 @@ newtype Eff h a = Eff { unEff :: forall x . (a -> h x) -> h x }
 runEff :: (a -> f x) -> Eff f a -> f x
 runEff = flip unEff
 {-# INLINE runEff #-}
+
+interpret :: TermAlgebra carrier sig => Eff carrier a -> carrier a
+interpret = runEff var
+{-# INLINE interpret #-}
 
 instance Functor (Eff h) where
   fmap = liftM
