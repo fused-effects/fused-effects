@@ -37,13 +37,13 @@ modify f = do
   put (f a)
 
 
-runState :: Effectful sig m => s -> Eff (StateH s m) a -> m (s, a)
+runState :: (Carrier sig m, Effect sig) => s -> Eff (StateH s m) a -> m (s, a)
 runState s m = runStateH (interpret m) s
 
 newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
 
-instance Effectful sig m => Carrier (State s :+: sig) (StateH s m) where
-  gen a = StateH (\ s -> pure (s, a))
+instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateH s m) where
+  gen a = StateH (\ s -> gen (s, a))
   alg = algS \/ algOther
     where algS (Get   k) = StateH (\ s -> runStateH (k s) s)
           algS (Put s k) = StateH (\ _ -> runStateH  k    s)
