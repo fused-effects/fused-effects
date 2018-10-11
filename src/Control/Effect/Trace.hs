@@ -26,6 +26,7 @@ instance HFunctor Trace where
 instance Effect Trace where
   handle state handler (Trace s k) = Trace s (handler (k <$ state))
 
+-- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()
 trace message = send (Trace message (gen ()))
 
