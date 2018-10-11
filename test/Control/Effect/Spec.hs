@@ -2,6 +2,8 @@
 module Control.Effect.Spec where
 
 import Control.Effect
+import Control.Monad.Fail
+import Prelude hiding (fail)
 import Test.Hspec
 
 spec :: Spec
@@ -13,6 +15,8 @@ spec = do
     it "can reinterpret effects into other effects" $
       run (runState "a" ((++) <$> reinterpretReader (local ('b':) ask) <*> get)) `shouldBe` ("a", "baa")
 
+    it "can interpose handlers without changing the available effects" $
+      run (runFail (interposeFail (fail "world"))) `shouldBe` (Left "hello, world" :: Either String Int)
 
 askEnv :: (Member (Reader env) sig, Carrier sig m) => HasEnv env m env
 askEnv = ask
@@ -46,3 +50,15 @@ instance (Effectful (State r :+: sig) m, Effect sig) => Carrier (Reader r :+: si
             v <- runReinterpretReaderH m
             put a
             runReinterpretReaderH (k v)
+
+
+interposeFail :: (Member Fail sig, Carrier sig m) => Eff (InterposeH m) a -> m a
+interposeFail = runInterposeH . interpret
+
+newtype InterposeH m a = InterposeH { runInterposeH :: m a }
+
+instance (Member Fail sig, Carrier sig m) => Carrier sig (InterposeH m) where
+  gen = InterposeH . gen
+  alg op
+    | Just (Fail s) <- prj op = InterposeH (send (Fail ("hello, " ++ s)))
+    | otherwise               = InterposeH (alg (handlePure runInterposeH op))
