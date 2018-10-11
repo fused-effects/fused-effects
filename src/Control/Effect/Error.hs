@@ -28,13 +28,17 @@ instance Effect (Error exc) where
 
 -- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
 --
---   prop> run (runError (throwError a)) == (Left a :: Either String String)
+--   prop> run (runError (throwError a)) == Left @Int @Int a
 throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
 throwError = send . Throw
 
 -- | Run a computation which can throw errors with a handler to run on error.
 --
 --   Errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
+--
+--   prop> run (runError (pure a `catchError` pure)) == Right a
+--   prop> run (runError (throwError a `catchError` pure)) == Right @Int @Int a
+--   prop> run (runError (throwError a `catchError` (throwError @Int))) == Left @Int @Int a
 catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h gen)
 
@@ -53,5 +57,6 @@ instance Effectful sig m => Carrier (Error e :+: sig) (ErrorH e m) where
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
