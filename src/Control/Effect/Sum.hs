@@ -37,20 +37,20 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
 infixr 4 \/
 
 
-class (Effect sub, Effect sup) => Member sub sup where
+class (HFunctor sub, HFunctor sup) => Member sub sup where
   inj :: sub m a -> sup m a
   prj :: sup m a -> Maybe (sub m a)
 
-instance Effect sub => Member sub sub where
+instance HFunctor sub => Member sub sub where
   inj = id
   prj = Just
 
-instance {-# OVERLAPPABLE #-} (Effect sub, Effect sup) => Member sub (sub :+: sup) where
+instance {-# OVERLAPPABLE #-} (HFunctor sub, HFunctor sup) => Member sub (sub :+: sup) where
   inj = L . inj
   prj (L f) = Just f
   prj _     = Nothing
 
-instance {-# OVERLAPPABLE #-} (Effect sub', Member sub sup) => Member sub (sub' :+: sup) where
+instance {-# OVERLAPPABLE #-} (HFunctor sub', Member sub sup) => Member sub (sub' :+: sup) where
   inj = R . inj
   prj (R g) = prj g
   prj _     = Nothing
