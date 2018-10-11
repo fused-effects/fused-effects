@@ -3,6 +3,7 @@ module Control.Effect.State
 ( State(..)
 , get
 , put
+, modify
 , runState
 , StateH(..)
 ) where
@@ -29,6 +30,11 @@ get = send (Get gen)
 
 put :: (Member (State s) sig, Carrier sig m) => s -> m ()
 put s = send (Put s (gen ()))
+
+modify :: (Member (State s) sig, Carrier sig m, Monad m) => (s -> s) -> m ()
+modify f = do
+  a <- get
+  put (f a)
 
 
 runState :: Effectful sig m => s -> Eff (StateH s m) a -> m (s, a)
