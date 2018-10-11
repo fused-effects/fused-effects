@@ -39,6 +39,7 @@ test-suite test
   main-is:             Spec.hs
   -- other-modules:
   build-depends:       base >=4.11 && <4.12
+                     , higher-order-effects
                      , hspec >= 2.4.1
   hs-source-dirs:      test
   default-language:    Haskell2010
