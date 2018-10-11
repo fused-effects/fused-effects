@@ -56,6 +56,8 @@ instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringH m) where
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.
+--
+--   prop> run (runReturningTrace (trace a *> trace b *> pure c)) == ([a, b], c)
 runReturningTrace :: Effectful sig m => Eff (ReturningH m) a -> m ([String], a)
 runReturningTrace = fmap (first reverse) . flip runReturningH [] . interpret
 
