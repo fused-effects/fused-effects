@@ -30,3 +30,6 @@ spec = do
 
     it "collapses results of effects run after it" $
       run (runState 'a' (runNonDet (pure 'z' <|> put 'b' *> get <|> get))) `shouldBe` ('b', "zbb")
+
+    it "runs in higher-order positions" $
+      run (runError (runNonDet ((pure 'z' <|> throwError 'a') `catchError` pure))) `shouldBe` (Right "a" :: Either Char String)
