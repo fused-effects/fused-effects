@@ -3,6 +3,7 @@ module Control.Effect.Writer
 ( Writer(..)
 , tell
 , runWriter
+, WriterH(..)
 ) where
 
 import Control.Effect.Handler

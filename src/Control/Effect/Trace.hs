@@ -3,8 +3,11 @@ module Control.Effect.Trace
 ( Trace(..)
 , trace
 , runPrintingTrace
+, PrintingH(..)
 , runIgnoringTrace
+, IgnoringH(..)
 , runReturningTrace
+, ReturningH(..)
 ) where
 
 import Control.Effect.Handler

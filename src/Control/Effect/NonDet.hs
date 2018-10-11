@@ -3,8 +3,11 @@ module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
 , runNonDet
+, ListH(..)
 , runNonDetOnce
+, MaybeH(..)
 , runNonDetSplit
+, SplitH(..)
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)

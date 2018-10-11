@@ -2,6 +2,7 @@
 module Control.Effect.Lift
 ( Lift(..)
 , runM
+, LiftH(..)
 ) where
 
 import Control.Effect.Handler

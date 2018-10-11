@@ -4,6 +4,7 @@ module Control.Effect.State
 , get
 , put
 , runState
+, StateH(..)
 ) where
 
 import Control.Effect.Handler

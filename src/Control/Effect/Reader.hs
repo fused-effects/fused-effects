@@ -4,6 +4,7 @@ module Control.Effect.Reader
 , ask
 , local
 , runReader
+, ReaderH(..)
 ) where
 
 import Control.Effect.Handler

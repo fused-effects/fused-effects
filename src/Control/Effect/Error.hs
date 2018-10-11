@@ -4,6 +4,7 @@ module Control.Effect.Error
 , throw
 , catch
 , runError
+, ErrorH(..)
 ) where
 
 import Control.Effect.Handler

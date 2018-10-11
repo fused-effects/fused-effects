@@ -2,6 +2,7 @@
 module Control.Effect.Fail
 ( Fail(..)
 , runFail
+, FailH(..)
 ) where
 
 import Control.Effect.Fail.Internal

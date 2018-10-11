@@ -4,6 +4,7 @@ module Control.Effect.Fresh
 , fresh
 , resetFresh
 , runFresh
+, FreshH(..)
 ) where
 
 import Control.Effect.Handler
