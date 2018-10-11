@@ -27,7 +27,7 @@ instance Effect Fresh where
 
 -- | Produce a fresh (i.e. unique) 'Int'.
 --
---   prop> run (runFresh i (replicateM n fresh)) == nub (run (runFresh i (replicateM n fresh)))
+--   prop> run (runFresh (replicateM n fresh)) == nub (run (runFresh (replicateM n fresh)))
 fresh :: (Member Fresh sig, Carrier sig m) => m Int
 fresh = send (Fresh gen)
 
@@ -36,8 +36,8 @@ resetFresh :: (Member Fresh sig, Carrier sig m) => m a -> m a
 resetFresh m = send (Reset m gen)
 
 
-runFresh :: Effectful sig m => Int -> Eff (FreshH m) a -> m a
-runFresh i = fmap snd . flip runFreshH i . interpret
+runFresh :: Effectful sig m => Eff (FreshH m) a -> m a
+runFresh = fmap snd . flip runFreshH 0 . interpret
 
 newtype FreshH m a = FreshH { runFreshH :: Int -> m (Int, a) }
 
