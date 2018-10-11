@@ -37,7 +37,7 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
 infixr 4 \/
 
 
-class Member sub sup where
+class Member (sub :: (k -> *) -> (k -> *)) sup where
   inj :: sub m a -> sup m a
   prj :: sup m a -> Maybe (sub m a)
 
