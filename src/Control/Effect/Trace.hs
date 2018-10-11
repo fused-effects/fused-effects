@@ -30,6 +30,7 @@ trace :: (Member Trace sig, Carrier sig m) => String -> m ()
 trace message = send (Trace message (gen ()))
 
 
+-- | Run a 'Trace' effect, printing traces to 'stderr'.
 runPrintingTrace :: (MonadIO m, Carrier sig m) => Eff (PrintingH m) a -> m a
 runPrintingTrace = runPrintingH . interpret
 
