@@ -30,6 +30,9 @@ instance Effect (Error exc) where
 throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
 throwError = send . Throw
 
+-- | Run a computation which can throw errors with a handler to run on error.
+--
+--   Errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
 catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h gen)
 
