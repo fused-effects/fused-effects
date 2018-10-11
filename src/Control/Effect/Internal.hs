@@ -34,6 +34,11 @@ instance Applicative (Eff carrier) where
 
   (<*>) = ap
 
+-- $
+-- Associativity:
+--
+-- prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: [Integer])
+-- prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: Maybe Integer)
 instance (Member NonDet sig, Carrier sig carrier) => Alternative (Eff carrier) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
@@ -55,3 +60,10 @@ instance Carrier sig carrier => Carrier sig (Eff carrier) where
   alg op = Eff (\ k -> alg (hfmap (runEff gen) (fmap' (runEff k) op)))
 
 instance (Carrier sig carrier, Effect sig) => Effectful sig (Eff carrier)
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
+-- >>> import Control.Effect.NonDet
