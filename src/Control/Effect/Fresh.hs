@@ -25,6 +25,7 @@ instance Effect Fresh where
   handle state handler (Fresh     k) = Fresh (handler . (<$ state) . k)
   handle state handler (Reset i m k) = Reset i (handler (m <$ state)) (handler . fmap k)
 
+-- | Produce a fresh (i.e. unique) 'Int'.
 fresh :: (Member Fresh sig, Carrier sig m) => m Int
 fresh = send (Fresh gen)
 
