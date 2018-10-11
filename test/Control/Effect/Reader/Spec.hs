@@ -12,3 +12,6 @@ spec = do
   describe "local" $ do
     it "modifies the environment with a function" $
       run (runReader (0 :: Int) (local (succ :: Int -> Int) ask)) `shouldBe` (1 :: Int)
+
+    it "does not modify following actions" $
+      run (runReader (0 :: Int) ((+) <$> local (succ :: Int -> Int) ask <*> ask)) `shouldBe` (1 :: Int)
