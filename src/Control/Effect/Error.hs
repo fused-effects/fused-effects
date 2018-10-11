@@ -26,6 +26,7 @@ instance Effect (Error exc) where
   handle _     _       (Throw exc)   = Throw exc
   handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
+-- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
 throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
 throwError = send . Throw
 
