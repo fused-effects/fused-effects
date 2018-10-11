@@ -39,6 +39,8 @@ local f m = send (Local f m gen)
 
 
 -- | Run a 'Reader' effect with the passed environment value.
+--
+--   prop> run (runReader a (pure b)) == b
 runReader :: (Carrier sig m, Monad m) => r -> Eff (ReaderH r m) a -> m a
 runReader r m = runReaderH (interpret m) r
 
