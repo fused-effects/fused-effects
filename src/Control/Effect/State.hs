@@ -25,6 +25,8 @@ instance Effect (State s) where
   handle state handler (Get k)   = Get   (handler . (<$ state) . k)
   handle state handler (Put s k) = Put s (handler . (<$ state) $ k)
 
+-- |
+-- prop> snd (run (runState a get)) == a
 get :: (Member (State s) sig, Carrier sig m) => m s
 get = send (Get gen)
 
@@ -48,3 +50,9 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateH s m) w
     where algS (Get   k) = StateH (\ s -> runStateH (k s) s)
           algS (Put s k) = StateH (\ _ -> runStateH  k    s)
           algOther op = StateH (\ s -> alg (handle (s, ()) (uncurry (flip runStateH)) op))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
