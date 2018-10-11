@@ -48,6 +48,7 @@ modify f = do
   put (f a)
 
 
+-- | Run a 'State' effect starting from the passed value.
 runState :: (Carrier sig m, Effect sig) => s -> Eff (StateH s m) a -> m (s, a)
 runState s m = runStateH (interpret m) s
 
