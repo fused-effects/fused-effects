@@ -34,6 +34,7 @@ ask = send (Ask gen)
 -- | Run a computation with an environment value locally modified by the passed function.
 --
 --   prop> run (runReader a (local (applyFun f) ask)) == applyFun f a
+--   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) == (a, applyFun f a, a)
 local :: (Member (Reader r) sig, Carrier sig m) => (r -> r) -> m a -> m a
 local f m = send (Local f m gen)
 
