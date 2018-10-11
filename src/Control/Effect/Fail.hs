@@ -15,7 +15,7 @@ runFail = runFailH . interpret
 
 newtype FailH m a = FailH { runFailH :: m (Either String a) }
 
-instance Effectful sig m => Carrier (Fail :+: sig) (FailH m) where
-  gen a = FailH (pure (Right a))
-  alg = algF \/ (FailH . alg . handle (Right ()) (either (pure . Left) runFailH))
-    where algF (Fail s) = FailH (pure (Left s))
+instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailH m) where
+  gen a = FailH (gen (Right a))
+  alg = algF \/ (FailH . alg . handle (Right ()) (either (gen . Left) runFailH))
+    where algF (Fail s) = FailH (gen (Left s))
