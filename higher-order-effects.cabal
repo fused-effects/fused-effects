@@ -17,6 +17,7 @@ library
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.Fail.Internal
+                     , Control.Effect.Fresh
                      , Control.Effect.Handler
                      , Control.Effect.Internal
                      , Control.Effect.Lift
