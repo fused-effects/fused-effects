@@ -34,7 +34,6 @@ local f m = send (Local f m pure)
 runReader :: (Carrier sig m, Monad m) => r -> Eff (ReaderH r m) a -> m a
 runReader r m = runReaderH (interpret m) r
 
-
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderH r m) where
