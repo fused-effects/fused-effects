@@ -26,6 +26,7 @@ library
                      , Control.Effect.Reader
                      , Control.Effect.State
                      , Control.Effect.Sum
+                     , Control.Effect.Trace
                      , Control.Effect.Void
                      , Control.Effect.Writer
   -- other-modules:
