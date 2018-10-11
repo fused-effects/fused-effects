@@ -4,6 +4,7 @@ module Control.Effect
 
 import Control.Effect.Error    as X
 import Control.Effect.Fail     as X
+import Control.Effect.Fresh    as X
 import Control.Effect.Handler  as X
 import Control.Effect.Internal as X
 import Control.Effect.Lift     as X
