@@ -25,11 +25,11 @@ instance Effect (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
 
-ask :: (Member (Reader r) sig, Effectful sig m) => m r
-ask = send (Ask pure)
+ask :: (Member (Reader r) sig, Carrier sig m) => m r
+ask = send (Ask gen)
 
-local :: (Member (Reader r) sig, Effectful sig m) => (r -> r) -> m a -> m a
-local f m = send (Local f m pure)
+local :: (Member (Reader r) sig, Carrier sig m) => (r -> r) -> m a -> m a
+local f m = send (Local f m gen)
 
 
 runReader :: (Carrier sig m, Monad m) => r -> Eff (ReaderH r m) a -> m a
