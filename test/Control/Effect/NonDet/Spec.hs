@@ -23,3 +23,7 @@ spec = do
 
     prop "right-identity" $
       \ a -> run (runNonDet (pure a <|> empty)) `shouldBe` [a :: Char]
+
+  describe "interactions" $ do
+    it "collects results of effects run before it" $
+      run (runNonDet (runState 'a' (pure 'z' <|> get <|> put 'b' *> get))) `shouldBe` [('a', 'z'), ('a', 'a'), ('b', 'b')]
