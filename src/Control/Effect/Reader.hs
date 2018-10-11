@@ -25,6 +25,7 @@ instance Effect (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
 
+-- | Retrieve the environment value.
 ask :: (Member (Reader r) sig, Carrier sig m) => m r
 ask = send (Ask gen)
 
