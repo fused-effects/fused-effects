@@ -14,6 +14,7 @@ spec = do
     it "produces each branch’s result nondeterministically" $
       run (runNonDet (pure 'a' <|> pure 'b')) `shouldBe` "ab"
 
+  describe "laws" $ do
     prop "associativity" $
       \ a b c -> run (runNonDet ((pure a <|> pure b) <|> pure c)) `shouldBe` run (runNonDet (pure a <|> (pure b <|> pure (c :: Char))))
 
