@@ -3,7 +3,7 @@ module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
 , runNonDet
-, ListH(..)
+, AltH(..)
 , runNonDetOnce
 , MaybeH(..)
 , runNonDetSplit
@@ -16,16 +16,16 @@ import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 
-runNonDet :: Effectful sig m => Eff (ListH m) a -> m [a]
-runNonDet = runListH . interpret
+runNonDet :: Effectful sig m => Eff (AltH m) a -> m [a]
+runNonDet = runAltH . interpret
 
-newtype ListH m a = ListH { runListH :: m [a] }
+newtype AltH m a = AltH { runAltH :: m [a] }
 
-instance Effectful sig m => Carrier (NonDet :+: sig) (ListH m) where
-  gen a = ListH (pure (pure a))
-  alg = algND \/ (ListH . alg . handle (pure ()) (fmap concat . traverse runListH))
-    where algND Empty = ListH (pure empty)
-          algND (Choose k) = ListH (liftA2 (<|>) (runListH (k True)) (runListH (k False)))
+instance Effectful sig m => Carrier (NonDet :+: sig) (AltH m) where
+  gen a = AltH (pure (pure a))
+  alg = algND \/ (AltH . alg . handle (pure ()) (fmap concat . traverse runAltH))
+    where algND Empty = AltH (pure empty)
+          algND (Choose k) = AltH (liftA2 (<|>) (runAltH (k True)) (runAltH (k False)))
 
 
 runNonDetOnce :: Effectful sig m => Eff (MaybeH m) a -> m (Maybe a)
