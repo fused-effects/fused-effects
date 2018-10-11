@@ -39,6 +39,16 @@ instance Applicative (Eff carrier) where
 --
 -- prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: [Integer])
 -- prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: Maybe Integer)
+--
+-- Left-identity:
+--
+-- prop> run (runNonDet (empty <|> pure b)) == (run (runNonDet (pure b)) :: [Integer])
+-- prop> run (runNonDet (empty <|> pure b)) == (run (runNonDet (pure b)) :: Maybe Integer)
+--
+-- Right-identity:
+--
+-- prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: [Integer])
+-- prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: Maybe Integer)
 instance (Member NonDet sig, Carrier sig carrier) => Alternative (Eff carrier) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
