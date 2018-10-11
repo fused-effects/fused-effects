@@ -19,3 +19,6 @@ spec = do
 
     prop "left-identity" $
       \ b -> run (runNonDet (empty <|> pure b)) `shouldBe` [b :: Char]
+
+    prop "right-identity" $
+      \ a -> run (runNonDet (pure a <|> empty)) `shouldBe` [a :: Char]
