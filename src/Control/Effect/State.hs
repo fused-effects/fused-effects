@@ -32,6 +32,8 @@ get = send (Get gen)
 
 -- |
 -- prop> fst (run (runState a (put b))) == b
+-- prop> snd (run (runState a (get <* put b))) == a
+-- prop> snd (run (runState a (put b *> get))) == b
 put :: (Member (State s) sig, Carrier sig m) => s -> m ()
 put s = send (Put s (gen ()))
 
