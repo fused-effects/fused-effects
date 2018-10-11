@@ -30,6 +30,8 @@ instance Effect (State s) where
 get :: (Member (State s) sig, Carrier sig m) => m s
 get = send (Get gen)
 
+-- |
+-- prop> fst (run (runState a (put b))) == b
 put :: (Member (State s) sig, Carrier sig m) => s -> m ()
 put s = send (Put s (gen ()))
 
