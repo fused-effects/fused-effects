@@ -8,19 +8,15 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-  describe "Eff" $ do
-    it "can be wrapped for better type inference" $
-      run (runHasEnv (runEnv "i" ((++) <$> askEnv <*> askEnv))) `shouldBe` "ii"
+  inferenceSpec
+  reinterpretSpec
+  interposeSpec
 
-    it "can reinterpret effects into other effects" $
-      run (runState "a" ((++) <$> reinterpretReader (local ('b':) ask) <*> get)) `shouldBe` ("a", "baa")
 
-    it "can interpose handlers without changing the available effects" $
-      run (runFail (interposeFail (fail "world"))) `shouldBe` (Left "hello, world" :: Either String Int)
-
-    it "interposition only intercepts effects in its scope" $ do
-      run (runFail (fail "world" *> interposeFail (pure (0 :: Int)))) `shouldBe` Left "world"
-      run (runFail (interposeFail (pure (0 :: Int)) <* fail "world")) `shouldBe` Left "world"
+inferenceSpec :: Spec
+inferenceSpec = describe "inference" $ do
+  it "can be wrapped for better type inference" $
+    run (runHasEnv (runEnv "i" ((++) <$> askEnv <*> askEnv))) `shouldBe` "ii"
 
 askEnv :: (Member (Reader env) sig, Carrier sig m) => HasEnv env m env
 askEnv = ask
@@ -39,6 +35,11 @@ instance Carrier sig carrier => Carrier sig (HasEnv env carrier) where
 instance (Carrier sig carrier, Effect sig) => Effectful sig (HasEnv env carrier)
 
 
+reinterpretSpec :: Spec
+reinterpretSpec = describe "reinterpretation" $ do
+  it "can reinterpret effects into other effects" $
+    run (runState "a" ((++) <$> reinterpretReader (local ('b':) ask) <*> get)) `shouldBe` ("a", "baa")
+
 reinterpretReader :: (Effectful (State r :+: sig) m, Effect sig) => Eff (ReinterpretReaderH r m) a -> m a
 reinterpretReader = runReinterpretReaderH . interpret
 
@@ -55,6 +56,15 @@ instance (Effectful (State r :+: sig) m, Effect sig) => Carrier (Reader r :+: si
             put a
             runReinterpretReaderH (k v)
 
+
+interposeSpec :: Spec
+interposeSpec = describe "interposition" $ do
+  it "can interpose handlers without changing the available effects" $
+    run (runFail (interposeFail (fail "world"))) `shouldBe` (Left "hello, world" :: Either String Int)
+
+  it "interposition only intercepts effects in its scope" $ do
+    run (runFail (fail "world" *> interposeFail (pure (0 :: Int)))) `shouldBe` Left "world"
+    run (runFail (interposeFail (pure (0 :: Int)) <* fail "world")) `shouldBe` Left "world"
 
 interposeFail :: (Member Fail sig, Carrier sig m) => Eff (InterposeH m) a -> m a
 interposeFail = runInterposeH . interpret
