@@ -15,6 +15,9 @@ import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 import Control.Monad (join)
 
+-- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
+--
+--   Using '[]' as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first.
 runNonDet :: (Alternative f, Monad f, Traversable f, Effectful sig m) => Eff (AltH f m) a -> m (f a)
 runNonDet = runAltH . interpret
 
