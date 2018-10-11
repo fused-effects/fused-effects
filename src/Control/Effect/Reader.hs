@@ -4,6 +4,7 @@ module Control.Effect.Reader
 , ask
 , local
 , runReader
+, ReaderH(..)
 ) where
 
 import Control.Effect.Handler
@@ -24,21 +25,37 @@ instance Effect (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
 
-ask :: (Member (Reader r) sig, Effectful sig m) => m r
-ask = send (Ask pure)
+-- | Retrieve the environment value.
+--
+--   prop> run (runReader a ask) == a
+ask :: (Member (Reader r) sig, Carrier sig m) => m r
+ask = send (Ask gen)
 
-local :: (Member (Reader r) sig, Effectful sig m) => (r -> r) -> m a -> m a
-local f m = send (Local f m pure)
+-- | Run a computation with an environment value locally modified by the passed function.
+--
+--   prop> run (runReader a (local (applyFun f) ask)) == applyFun f a
+--   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) == (a, applyFun f a, a)
+local :: (Member (Reader r) sig, Carrier sig m) => (r -> r) -> m a -> m a
+local f m = send (Local f m gen)
 
 
+-- | Run a 'Reader' effect with the passed environment value.
+--
+--   prop> run (runReader a (pure b)) == b
 runReader :: (Carrier sig m, Monad m) => r -> Eff (ReaderH r m) a -> m a
 runReader r m = runReaderH (interpret m) r
 
 newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderH r m) where
-  gen a = ReaderH (\ _ -> pure a)
+  gen a = ReaderH (const (gen a))
   alg = algR \/ algOther
     where algR (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
           algR (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
           algOther op = ReaderH (\ r -> alg (handlePure (flip runReaderH r) op))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void

@@ -34,8 +34,31 @@ instance Applicative (Eff carrier) where
 
   (<*>) = ap
 
+-- | Run computations nondeterministically.
+--
+--   prop> run (runNonDet empty) == []
+--   prop> run (runNonDet empty) == Nothing
+--
+--   prop> run (runNonDet (pure a <|> pure b)) == [a, b]
+--   prop> run (runNonDet (pure a <|> pure b)) == Just a
+--
+--   Associativity:
+--
+--   prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: [Integer])
+--   prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: Maybe Integer)
+--
+--   Left-identity:
+--
+--   prop> run (runNonDet (empty <|> pure b)) == (run (runNonDet (pure b)) :: [Integer])
+--   prop> run (runNonDet (empty <|> pure b)) == (run (runNonDet (pure b)) :: Maybe Integer)
+--
+--   Right-identity:
+--
+--   prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: [Integer])
+--   prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: Maybe Integer)
 instance (Member NonDet sig, Carrier sig carrier) => Alternative (Eff carrier) where
   empty = send Empty
+
   l <|> r = send (Choose (\ c -> if c then l else r))
 
 instance Monad (Eff carrier) where
@@ -55,3 +78,10 @@ instance Carrier sig carrier => Carrier sig (Eff carrier) where
   alg op = Eff (\ k -> alg (hfmap (runEff gen) (fmap' (runEff k) op)))
 
 instance (Carrier sig carrier, Effect sig) => Effectful sig (Eff carrier)
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
+-- >>> import Control.Effect.NonDet

@@ -2,6 +2,7 @@
 module Control.Effect.Void
 ( Void
 , run
+, VoidH(..)
 ) where
 
 import Control.Effect.Handler

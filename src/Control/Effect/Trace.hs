@@ -3,8 +3,11 @@ module Control.Effect.Trace
 ( Trace(..)
 , trace
 , runPrintingTrace
+, PrintingH(..)
 , runIgnoringTrace
+, IgnoringH(..)
 , runReturningTrace
+, ReturningH(..)
 ) where
 
 import Control.Effect.Handler
@@ -23,10 +26,12 @@ instance HFunctor Trace where
 instance Effect Trace where
   handle state handler (Trace s k) = Trace s (handler (k <$ state))
 
-trace :: (Member Trace sig, Effectful sig m) => String -> m ()
-trace message = send (Trace message (pure ()))
+-- | Append a message to the trace log.
+trace :: (Member Trace sig, Carrier sig m) => String -> m ()
+trace message = send (Trace message (gen ()))
 
 
+-- | Run a 'Trace' effect, printing traces to 'stderr'.
 runPrintingTrace :: (MonadIO m, Carrier sig m) => Eff (PrintingH m) a -> m a
 runPrintingTrace = runPrintingH . interpret
 
@@ -38,6 +43,9 @@ instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingH m) whe
     where algT (Trace s k) = PrintingH (liftIO (hPutStrLn stderr s) *> runPrintingH k)
 
 
+-- | Run a 'Trace' effect, ignoring all traces.
+--
+--   prop> run (runIgnoringTrace (trace a *> pure b)) == b
 runIgnoringTrace :: Carrier sig m => Eff (IgnoringH m) a -> m a
 runIgnoringTrace = runIgnoringH . interpret
 
@@ -49,13 +57,22 @@ instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringH m) where
     where algT (Trace _ k) = k
 
 
+-- | Run a 'Trace' effect, returning all traces as a list.
+--
+--   prop> run (runReturningTrace (trace a *> trace b *> pure c)) == ([a, b], c)
 runReturningTrace :: Effectful sig m => Eff (ReturningH m) a -> m ([String], a)
 runReturningTrace = fmap (first reverse) . flip runReturningH [] . interpret
 
 newtype ReturningH m a = ReturningH { runReturningH :: [String] -> m ([String], a) }
 
-instance Effectful sig m => Carrier (Trace :+: sig) (ReturningH m) where
-  gen a = ReturningH (\ s -> pure (s, a))
+instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningH m) where
+  gen a = ReturningH (\ s -> gen (s, a))
   alg = algT \/ algOther
     where algT (Trace m k) = ReturningH (runReturningH k . (m :))
           algOther op = ReturningH (\ s -> alg (handle (s, ()) (uncurry (flip runReturningH)) op))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void

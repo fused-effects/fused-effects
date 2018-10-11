@@ -1,9 +1,10 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error
 ( Error(..)
-, throw
-, catch
+, throwError
+, catchError
 , runError
+, ErrorH(..)
 ) where
 
 import Control.Effect.Handler
@@ -25,13 +26,26 @@ instance Effect (Error exc) where
   handle _     _       (Throw exc)   = Throw exc
   handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
-throw :: (Member (Error exc) sig, Effectful sig m) => exc -> m a
-throw = send . Throw
+-- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
+--
+--   prop> run (runError (throwError a)) == Left @Int @Int a
+throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
+throwError = send . Throw
 
-catch :: (Member (Error exc) sig, Effectful sig m) => m a -> (exc -> m a) -> m a
-catch m h = send (Catch m h pure)
+-- | Run a computation which can throw errors with a handler to run on error.
+--
+--   Errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
+--
+--   prop> run (runError (pure a `catchError` pure)) == Right a
+--   prop> run (runError (throwError a `catchError` pure)) == Right @Int @Int a
+--   prop> run (runError (throwError a `catchError` (throwError @Int))) == Left @Int @Int a
+catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
+catchError m h = send (Catch m h gen)
 
 
+-- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
+--
+--   prop> run (runError (pure a)) == Right @Int @Int a
 runError :: Effectful sig m => Eff (ErrorH exc m) a -> m (Either exc a)
 runError = runErrorH . interpret
 
@@ -42,3 +56,10 @@ instance Effectful sig m => Carrier (Error e :+: sig) (ErrorH e m) where
   alg = algE \/ (ErrorH . alg . handle (Right ()) (either (pure . Left) runErrorH))
     where algE (Throw e)     = ErrorH (pure (Left e))
           algE (Catch m h k) = ErrorH (runErrorH m >>= either (either (pure . Left) (runErrorH . k) <=< runErrorH . h) (runErrorH . k))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
