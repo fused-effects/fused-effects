@@ -28,6 +28,8 @@ tell w = send (Tell w (gen ()))
 
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
+--
+--   prop> run (runWriter (tell (Sum a) *> pure b)) == (Sum a, b)
 runWriter :: (Effectful sig m, Monoid w) => Eff (WriterH w m) a -> m (w, a)
 runWriter m = runWriterH (interpret m)
 
