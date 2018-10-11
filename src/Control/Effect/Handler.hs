@@ -25,7 +25,7 @@ class HFunctor h where
 --   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
 class HFunctor sig => Effect sig where
   -- | Handle any effects in higher-order positions by threading the carrier’s state all the way through to the continuation.
-  handle :: (Functor f, Monad n)
+  handle :: Functor f
          => f ()
          -> (forall x . f (m x) -> n (f x))
          -> sig m (m a)
