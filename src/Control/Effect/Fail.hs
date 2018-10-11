@@ -13,6 +13,8 @@ import Control.Effect.Sum
 import Control.Monad.Fail
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
+--
+--   prop> run (runFail (pure a)) == Right a
 runFail :: (Carrier sig m, Effect sig) => Eff (FailH m) a -> m (Either String a)
 runFail = runFailH . interpret
 
@@ -22,3 +24,9 @@ instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailH m) where
   gen a = FailH (gen (Right a))
   alg = algF \/ (FailH . alg . handle (Right ()) (either (gen . Left) runFailH))
     where algF (Fail s) = FailH (gen (Left s))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
