@@ -22,10 +22,10 @@ runNonDet = runListH . interpret
 newtype ListH m a = ListH { runListH :: m [a] }
 
 instance Effectful sig m => Carrier (NonDet :+: sig) (ListH m) where
-  gen a = ListH (pure [a])
-  alg = algND \/ (ListH . alg . handle [()] (fmap concat . traverse runListH))
-    where algND Empty = ListH (pure [])
-          algND (Choose k) = ListH (liftA2 (++) (runListH (k True)) (runListH (k False)))
+  gen a = ListH (pure (pure a))
+  alg = algND \/ (ListH . alg . handle (pure ()) (fmap concat . traverse runListH))
+    where algND Empty = ListH (pure empty)
+          algND (Choose k) = ListH (liftA2 (<|>) (runListH (k True)) (runListH (k False)))
 
 
 runNonDetOnce :: Effectful sig m => Eff (MaybeH m) a -> m (Maybe a)
