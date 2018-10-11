@@ -18,8 +18,9 @@ spec = do
     it "can interpose handlers without changing the available effects" $
       run (runFail (interposeFail (fail "world"))) `shouldBe` (Left "hello, world" :: Either String Int)
 
-    it "interposition only intercepts effects in its scope" $
+    it "interposition only intercepts effects in its scope" $ do
       run (runFail (fail "world" *> interposeFail (pure (0 :: Int)))) `shouldBe` Left "world"
+      run (runFail (interposeFail (pure (0 :: Int)) <* fail "world")) `shouldBe` Left "world"
 
 askEnv :: (Member (Reader env) sig, Carrier sig m) => HasEnv env m env
 askEnv = ask
