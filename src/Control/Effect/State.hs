@@ -40,6 +40,8 @@ put :: (Member (State s) sig, Carrier sig m) => s -> m ()
 put s = send (Put s (gen ()))
 
 -- | Replace the state value with the result of applying a function to the current state value.
+--
+--   prop> fst (run (runState a (modify (+1)))) == (1 + a :: Integer)
 modify :: (Member (State s) sig, Carrier sig m, Monad m) => (s -> s) -> m ()
 modify f = do
   a <- get
