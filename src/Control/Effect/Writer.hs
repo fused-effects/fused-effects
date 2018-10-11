@@ -20,8 +20,8 @@ instance HFunctor (Writer w) where
 instance Effect (Writer w) where
   handle state handler (Tell w k) = Tell w (handler (k <$ state))
 
-tell :: (Member (Writer w) sig, Effectful sig m) => w -> m ()
-tell w = send (Tell w (pure ()))
+tell :: (Member (Writer w) sig, Carrier sig m) => w -> m ()
+tell w = send (Tell w (gen ()))
 
 
 runWriter :: (Effectful sig m, Monoid w) => Eff (WriterH w m) a -> m (w, a)
