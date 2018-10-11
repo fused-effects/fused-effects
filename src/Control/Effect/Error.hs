@@ -44,6 +44,8 @@ catchError m h = send (Catch m h gen)
 
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
+--
+--   prop> run (runError (pure a)) == Right @Int @Int a
 runError :: Effectful sig m => Eff (ErrorH exc m) a -> m (Either exc a)
 runError = runErrorH . interpret
 
