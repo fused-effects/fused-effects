@@ -10,7 +10,7 @@ import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.Sum
 
-runFail :: Effectful sig m => Eff (FailH m) a -> m (Either String a)
+runFail :: (Carrier sig m, Effect sig) => Eff (FailH m) a -> m (Either String a)
 runFail = runFailH . interpret
 
 newtype FailH m a = FailH { runFailH :: m (Either String a) }
