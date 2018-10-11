@@ -36,6 +36,9 @@ instance Applicative (Eff carrier) where
 
 -- | Run computations nondeterministically.
 --
+-- prop> run (runNonDet empty) == []
+-- prop> run (runNonDet empty) == Nothing
+--
 -- prop> run (runNonDet (pure a <|> pure b)) == [a, b]
 -- prop> run (runNonDet (pure a <|> pure b)) == Just a
 --
