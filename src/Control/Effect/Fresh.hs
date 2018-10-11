@@ -1,9 +1,11 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, PolyKinds, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, PolyKinds, StandaloneDeriving #-}
 module Control.Effect.Fresh
 ( Fresh(..)
+, fresh
 ) where
 
 import Control.Effect.Handler
+import Control.Effect.Sum
 
 data Fresh m k
   = Fresh (Int -> k)
@@ -18,3 +20,6 @@ instance HFunctor Fresh where
 instance Effect Fresh where
   handle state handler (Fresh     k) = Fresh (handler . (<$ state) . k)
   handle state handler (Reset i m k) = Reset i (handler (m <$ state)) (handler . fmap k)
+
+fresh :: (Subset Fresh sig, Effectful sig m) => m Int
+fresh = send (Fresh pure)
