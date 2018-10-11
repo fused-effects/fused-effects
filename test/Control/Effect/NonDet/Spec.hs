@@ -26,4 +26,4 @@ spec = do
 
   describe "interactions" $ do
     it "collects results of effects run before it" $
-      run (runNonDet (runState 'a' (pure 'z' <|> get <|> put 'b' *> get))) `shouldBe` [('a', 'z'), ('a', 'a'), ('b', 'b')]
+      run (runNonDet (runState 'a' (pure 'z' <|> put 'b' *> get <|> get))) `shouldBe` [('a', 'z'), ('b', 'b'), ('a', 'a')]
