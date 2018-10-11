@@ -34,7 +34,11 @@ instance Applicative (Eff carrier) where
 
   (<*>) = ap
 
--- $
+-- | Run computations nondeterministically.
+--
+-- prop> run (runNonDet (pure a <|> pure b)) == [a, b]
+-- prop> run (runNonDet (pure a <|> pure b)) == Just a
+--
 -- Associativity:
 --
 -- prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: [Integer])
