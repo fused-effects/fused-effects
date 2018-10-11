@@ -27,6 +27,8 @@ instance Effect (Error exc) where
   handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
 -- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
+--
+--   prop> run (runError (throwError a)) == (Left a :: Either String String)
 throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
 throwError = send . Throw
 
@@ -47,3 +49,9 @@ instance Effectful sig m => Carrier (Error e :+: sig) (ErrorH e m) where
   alg = algE \/ (ErrorH . alg . handle (Right ()) (either (pure . Left) runErrorH))
     where algE (Throw e)     = ErrorH (pure (Left e))
           algE (Catch m h k) = ErrorH (runErrorH m >>= either (either (pure . Left) (runErrorH . k) <=< runErrorH . h) (runErrorH . k))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
