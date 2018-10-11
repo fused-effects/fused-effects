@@ -1,8 +1,8 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error
 ( Error(..)
-, throw
-, catch
+, throwError
+, catchError
 , runError
 , ErrorH(..)
 ) where
@@ -26,11 +26,11 @@ instance Effect (Error exc) where
   handle _     _       (Throw exc)   = Throw exc
   handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
-throw :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
-throw = send . Throw
+throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
+throwError = send . Throw
 
-catch :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
-catch m h = send (Catch m h gen)
+catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
+catchError m h = send (Catch m h gen)
 
 
 runError :: Effectful sig m => Eff (ErrorH exc m) a -> m (Either exc a)
