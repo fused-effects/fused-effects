@@ -42,6 +42,8 @@ instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingH m) whe
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
+--
+--   prop> run (runIgnoringTrace (trace a *> pure b)) == b
 runIgnoringTrace :: Carrier sig m => Eff (IgnoringH m) a -> m a
 runIgnoringTrace = runIgnoringH . interpret
 
@@ -63,3 +65,9 @@ instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningH m) w
   alg = algT \/ algOther
     where algT (Trace m k) = ReturningH (runReturningH k . (m :))
           algOther op = ReturningH (\ s -> alg (handle (s, ()) (uncurry (flip runReturningH)) op))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
