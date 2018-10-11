@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fail
 ( Fail(..)
+, MonadFail(..)
 , runFail
 , FailH(..)
 ) where
@@ -9,6 +10,7 @@ import Control.Effect.Fail.Internal
 import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.Sum
+import Control.Monad.Fail
 
 runFail :: (Carrier sig m, Effect sig) => Eff (FailH m) a -> m (Either String a)
 runFail = runFailH . interpret
