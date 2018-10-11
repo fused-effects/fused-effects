@@ -15,15 +15,16 @@ import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
+import Control.Monad (join)
 
-runNonDet :: Effectful sig m => Eff (AltH m) a -> m [a]
+runNonDet :: (Alternative f, Monad f, Traversable f, Effectful sig m) => Eff (AltH f m) a -> m (f a)
 runNonDet = runAltH . interpret
 
-newtype AltH m a = AltH { runAltH :: m [a] }
+newtype AltH f m a = AltH { runAltH :: m (f a) }
 
-instance Effectful sig m => Carrier (NonDet :+: sig) (AltH m) where
+instance (Alternative f, Monad f, Traversable f, Effectful sig m) => Carrier (NonDet :+: sig) (AltH f m) where
   gen a = AltH (pure (pure a))
-  alg = algND \/ (AltH . alg . handle (pure ()) (fmap concat . traverse runAltH))
+  alg = algND \/ (AltH . alg . handle (pure ()) (fmap join . traverse runAltH))
     where algND Empty = AltH (pure empty)
           algND (Choose k) = AltH (liftA2 (<|>) (runAltH (k True)) (runAltH (k False)))
 
