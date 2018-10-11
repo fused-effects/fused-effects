@@ -19,7 +19,8 @@ import Control.Monad (join)
 --
 --   Using '[]' as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first.
 --
---   prop> run (runNonDet empty) == empty
+--   prop> run (runNonDet (pure a)) == [a]
+--   prop> run (runNonDet (pure a)) == Just a
 runNonDet :: (Alternative f, Monad f, Traversable f, Effectful sig m) => Eff (AltH f m) a -> m (f a)
 runNonDet = runAltH . interpret
 
