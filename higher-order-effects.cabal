@@ -39,7 +39,6 @@ test-suite test
   main-is:             Spec.hs
   other-modules:       Control.Effect.Spec
                      , Control.Effect.NonDet.Spec
-                     , Control.Effect.Reader.Spec
   build-depends:       base >=4.11 && <4.12
                      , higher-order-effects
                      , hspec >= 2.4.1
