@@ -57,8 +57,8 @@ runReturningTrace = fmap (first reverse) . flip runReturningH [] . interpret
 
 newtype ReturningH m a = ReturningH { runReturningH :: [String] -> m ([String], a) }
 
-instance Effectful sig m => Carrier (Trace :+: sig) (ReturningH m) where
-  gen a = ReturningH (\ s -> pure (s, a))
+instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningH m) where
+  gen a = ReturningH (\ s -> gen (s, a))
   alg = algT \/ algOther
     where algT (Trace m k) = ReturningH (runReturningH k . (m :))
           algOther op = ReturningH (\ s -> alg (handle (s, ()) (uncurry (flip runReturningH)) op))
