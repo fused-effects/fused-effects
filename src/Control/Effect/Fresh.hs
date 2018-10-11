@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, PolyKinds, StandaloneDeriving #-}
-module Control.Effect.Fresh where
+module Control.Effect.Fresh
+( Fresh(..)
+) where
 
 import Control.Effect.Handler
 
