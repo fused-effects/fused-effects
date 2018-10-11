@@ -24,11 +24,11 @@ instance Effect (State s) where
   handle state handler (Get k)   = Get   (handler . (<$ state) . k)
   handle state handler (Put s k) = Put s (handler . (<$ state) $ k)
 
-get :: (Member (State s) sig, Carrier sig m, Applicative m) => m s
-get = send (Get pure)
+get :: (Member (State s) sig, Carrier sig m) => m s
+get = send (Get gen)
 
-put :: (Member (State s) sig, Carrier sig m, Applicative m) => s -> m ()
-put s = send (Put s (pure ()))
+put :: (Member (State s) sig, Carrier sig m) => s -> m ()
+put s = send (Put s (gen ()))
 
 
 runState :: Effectful sig m => s -> Eff (StateH s m) a -> m (s, a)
