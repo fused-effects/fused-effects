@@ -43,6 +43,7 @@ catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> 
 catchError m h = send (Catch m h gen)
 
 
+-- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 runError :: Effectful sig m => Eff (ErrorH exc m) a -> m (Either exc a)
 runError = runErrorH . interpret
 
