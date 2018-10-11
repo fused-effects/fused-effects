@@ -2,7 +2,6 @@
 module Control.Effect.Spec where
 
 import Control.Effect
-import Control.Monad.Fail
 import Prelude hiding (fail)
 import Test.Hspec
 
