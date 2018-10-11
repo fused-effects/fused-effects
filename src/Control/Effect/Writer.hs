@@ -22,7 +22,7 @@ instance Effect (Writer w) where
 
 -- | Write a value to the log.
 --
---   prop> fst (run (runWriter (replicateM (abs n) (tell (Sum w))))) == stimes (abs n) (Sum w)
+--   prop> fst (run (runWriter (mapM_ (tell . Sum) (0 : ws)))) == foldMap Sum ws
 tell :: (Member (Writer w) sig, Carrier sig m) => w -> m ()
 tell w = send (Tell w (gen ()))
 
@@ -43,6 +43,4 @@ instance (Monoid w, Effectful sig m) => Carrier (Writer w :+: sig) (WriterH w m)
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
--- >>> import Control.Monad (replicateM)
 -- >>> import Data.Monoid (Sum(..))
--- >>> import Data.Semigroup (stimes)
