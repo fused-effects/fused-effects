@@ -34,7 +34,7 @@ instance Applicative (Eff carrier) where
 
   (<*>) = ap
 
-instance (Subset NonDet sig, Carrier sig carrier) => Alternative (Eff carrier) where
+instance (Member NonDet sig, Carrier sig carrier) => Alternative (Eff carrier) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
@@ -43,10 +43,10 @@ instance Monad (Eff carrier) where
 
   Eff m >>= f = Eff (\ k -> m (runEff k . f))
 
-instance (Subset Fail sig, Carrier sig carrier) => MonadFail (Eff carrier) where
+instance (Member Fail sig, Carrier sig carrier) => MonadFail (Eff carrier) where
   fail = send . Fail
 
-instance (Subset (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) where
+instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) where
   liftIO = send . Lift . fmap pure
 
 

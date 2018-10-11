@@ -19,7 +19,7 @@ instance HFunctor (Writer w) where
 instance Effect (Writer w) where
   handle state handler (Tell w k) = Tell w (handler (k <$ state))
 
-tell :: (Subset (Writer w) sig, Effectful sig m) => w -> m ()
+tell :: (Member (Writer w) sig, Effectful sig m) => w -> m ()
 tell w = send (Tell w (pure ()))
 
 

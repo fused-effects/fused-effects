@@ -24,10 +24,10 @@ instance Effect (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
 
-ask :: (Subset (Reader r) sig, Effectful sig m) => m r
+ask :: (Member (Reader r) sig, Effectful sig m) => m r
 ask = send (Ask pure)
 
-local :: (Subset (Reader r) sig, Effectful sig m) => (r -> r) -> m a -> m a
+local :: (Member (Reader r) sig, Effectful sig m) => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
 
 

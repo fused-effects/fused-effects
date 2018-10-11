@@ -2,7 +2,7 @@
 module Control.Effect.Sum
 ( (:+:)(..)
 , (\/)
-, Subset(..)
+, Member(..)
 , send
 ) where
 
@@ -37,25 +37,25 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
 infixr 4 \/
 
 
-class (Effect sub, Effect sup) => Subset sub sup where
+class (Effect sub, Effect sup) => Member sub sup where
   inj :: sub m a -> sup m a
   prj :: sup m a -> Maybe (sub m a)
 
-instance Effect sub => Subset sub sub where
+instance Effect sub => Member sub sub where
   inj = id
   prj = Just
 
-instance {-# OVERLAPPABLE #-} (Effect sub, Effect sup) => Subset sub (sub :+: sup) where
+instance {-# OVERLAPPABLE #-} (Effect sub, Effect sup) => Member sub (sub :+: sup) where
   inj = L . inj
   prj (L f) = Just f
   prj _     = Nothing
 
-instance {-# OVERLAPPABLE #-} (Effect sub', Subset sub sup) => Subset sub (sub' :+: sup) where
+instance {-# OVERLAPPABLE #-} (Effect sub', Member sub sup) => Member sub (sub' :+: sup) where
   inj = R . inj
   prj (R g) = prj g
   prj _     = Nothing
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
-send :: (Subset effect sig, Carrier sig m) => effect m (m a) -> m a
+send :: (Member effect sig, Carrier sig m) => effect m (m a) -> m a
 send = alg . inj

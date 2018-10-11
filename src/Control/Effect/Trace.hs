@@ -23,7 +23,7 @@ instance HFunctor Trace where
 instance Effect Trace where
   handle state handler (Trace s k) = Trace s (handler (k <$ state))
 
-trace :: (Subset Trace sig, Effectful sig m) => String -> m ()
+trace :: (Member Trace sig, Effectful sig m) => String -> m ()
 trace message = send (Trace message (pure ()))
 
 

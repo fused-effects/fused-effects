@@ -25,10 +25,10 @@ instance Effect (Error exc) where
   handle _     _       (Throw exc)   = Throw exc
   handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
-throw :: (Subset (Error exc) sig, Effectful sig m) => exc -> m a
+throw :: (Member (Error exc) sig, Effectful sig m) => exc -> m a
 throw = send . Throw
 
-catch :: (Subset (Error exc) sig, Effectful sig m) => m a -> (exc -> m a) -> m a
+catch :: (Member (Error exc) sig, Effectful sig m) => m a -> (exc -> m a) -> m a
 catch m h = send (Catch m h pure)
 
 

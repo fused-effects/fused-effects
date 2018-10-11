@@ -23,10 +23,10 @@ instance Effect (State s) where
   handle state handler (Get k)   = Get   (handler . (<$ state) . k)
   handle state handler (Put s k) = Put s (handler . (<$ state) $ k)
 
-get :: (Subset (State s) sig, Effectful sig m) => m s
+get :: (Member (State s) sig, Effectful sig m) => m s
 get = send (Get pure)
 
-put :: (Subset (State s) sig, Effectful sig m) => s -> m ()
+put :: (Member (State s) sig, Effectful sig m) => s -> m ()
 put s = send (Put s (pure ()))
 
 
