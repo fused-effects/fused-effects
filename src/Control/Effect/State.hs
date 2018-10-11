@@ -33,6 +33,8 @@ get :: (Member (State s) sig, Carrier sig m) => m s
 get = send (Get gen)
 
 -- | Project a function out of the current state value.
+--
+--   prop> snd (run (runState a (gets (applyFun f)))) == applyFun f a
 gets :: (Member (State s) sig, Carrier sig m, Functor m) => (s -> a) -> m a
 gets f = fmap f get
 
