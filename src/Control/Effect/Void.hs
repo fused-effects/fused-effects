@@ -21,7 +21,6 @@ instance Effect Void where
 run :: Eff VoidH a -> a
 run = runVoidH . interpret
 
-
 newtype VoidH a = VoidH { runVoidH :: a }
 
 instance Carrier Void VoidH where
