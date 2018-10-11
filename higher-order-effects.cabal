@@ -38,6 +38,7 @@ test-suite test
   type:                exitcode-stdio-1.0
   main-is:             Spec.hs
   other-modules:       Control.Effect.Spec
+                     , Control.Effect.NonDet.Spec
                      , Control.Effect.Reader.Spec
   build-depends:       base >=4.11 && <4.12
                      , higher-order-effects
