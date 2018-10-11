@@ -2,7 +2,6 @@ module Control.Effect.NonDet.Spec where
 
 import Control.Effect
 import Test.Hspec
-import Test.Hspec.QuickCheck
 
 spec :: Spec
 spec = do
