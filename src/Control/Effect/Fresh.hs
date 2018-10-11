@@ -2,6 +2,7 @@
 module Control.Effect.Fresh
 ( Fresh(..)
 , fresh
+, resetFresh
 ) where
 
 import Control.Effect.Handler
@@ -23,3 +24,6 @@ instance Effect Fresh where
 
 fresh :: (Subset Fresh sig, Effectful sig m) => m Int
 fresh = send (Fresh pure)
+
+resetFresh :: (Subset Fresh sig, Effectful sig m) => Int -> m a -> m a
+resetFresh i m = send (Reset i m pure)
