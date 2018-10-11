@@ -20,6 +20,7 @@ instance HFunctor (Writer w) where
 instance Effect (Writer w) where
   handle state handler (Tell w k) = Tell w (handler (k <$ state))
 
+-- | Write a value to the log.
 tell :: (Member (Writer w) sig, Carrier sig m) => w -> m ()
 tell w = send (Tell w (gen ()))
 
