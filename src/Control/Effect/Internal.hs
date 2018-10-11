@@ -36,26 +36,26 @@ instance Applicative (Eff carrier) where
 
 -- | Run computations nondeterministically.
 --
--- prop> run (runNonDet empty) == []
--- prop> run (runNonDet empty) == Nothing
+--   prop> run (runNonDet empty) == []
+--   prop> run (runNonDet empty) == Nothing
 --
--- prop> run (runNonDet (pure a <|> pure b)) == [a, b]
--- prop> run (runNonDet (pure a <|> pure b)) == Just a
+--   prop> run (runNonDet (pure a <|> pure b)) == [a, b]
+--   prop> run (runNonDet (pure a <|> pure b)) == Just a
 --
--- Associativity:
+--   Associativity:
 --
--- prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: [Integer])
--- prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: Maybe Integer)
+--   prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: [Integer])
+--   prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) == (run (runNonDet (pure a <|> (pure b <|> pure c))) :: Maybe Integer)
 --
--- Left-identity:
+--   Left-identity:
 --
--- prop> run (runNonDet (empty <|> pure b)) == (run (runNonDet (pure b)) :: [Integer])
--- prop> run (runNonDet (empty <|> pure b)) == (run (runNonDet (pure b)) :: Maybe Integer)
+--   prop> run (runNonDet (empty <|> pure b)) == (run (runNonDet (pure b)) :: [Integer])
+--   prop> run (runNonDet (empty <|> pure b)) == (run (runNonDet (pure b)) :: Maybe Integer)
 --
--- Right-identity:
+--   Right-identity:
 --
--- prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: [Integer])
--- prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: Maybe Integer)
+--   prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: [Integer])
+--   prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: Maybe Integer)
 instance (Member NonDet sig, Carrier sig carrier) => Alternative (Eff carrier) where
   empty = send Empty
 
