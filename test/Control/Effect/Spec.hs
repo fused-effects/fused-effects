@@ -8,7 +8,7 @@ spec :: Spec
 spec = do
   describe "Eff" $ do
     it "can be wrapped for better type inference" $
-      run (runHasEnv (runEnv "i" askEnv)) `shouldBe` "i"
+      run (runHasEnv (runEnv "i" ((++) <$> askEnv <*> askEnv))) `shouldBe` "ii"
 
 
 askEnv :: (Member (Reader env) sig, Carrier sig m) => HasEnv env m env
