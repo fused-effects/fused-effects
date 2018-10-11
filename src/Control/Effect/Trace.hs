@@ -41,6 +41,7 @@ instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingH m) whe
     where algT (Trace s k) = PrintingH (liftIO (hPutStrLn stderr s) *> runPrintingH k)
 
 
+-- | Run a 'Trace' effect, ignoring all traces.
 runIgnoringTrace :: Carrier sig m => Eff (IgnoringH m) a -> m a
 runIgnoringTrace = runIgnoringH . interpret
 
