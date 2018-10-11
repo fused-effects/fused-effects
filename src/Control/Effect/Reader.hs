@@ -31,6 +31,7 @@ instance Effect (Reader r) where
 ask :: (Member (Reader r) sig, Carrier sig m) => m r
 ask = send (Ask gen)
 
+-- | Run a computation with an environment value locally modified by the passed function.
 local :: (Member (Reader r) sig, Carrier sig m) => (r -> r) -> m a -> m a
 local f m = send (Local f m gen)
 
