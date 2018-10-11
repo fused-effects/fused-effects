@@ -40,6 +40,7 @@ resetFresh m = send (Reset m gen)
 
 -- | Run a 'Fresh' effect counting up from 0.
 --
+--   prop> run (runFresh (replicateM n fresh)) == [0..pred n]
 --   prop> run (runFresh (replicateM n fresh *> pure b)) == b
 runFresh :: Effectful sig m => Eff (FreshH m) a -> m a
 runFresh = fmap snd . flip runFreshH 0 . interpret
