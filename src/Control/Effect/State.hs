@@ -49,6 +49,8 @@ modify f = do
 
 
 -- | Run a 'State' effect starting from the passed value.
+--
+--   prop> run (runState a (pure b)) == (a, b)
 runState :: (Carrier sig m, Effect sig) => s -> Eff (StateH s m) a -> m (s, a)
 runState s m = runStateH (interpret m) s
 
