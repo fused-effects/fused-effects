@@ -38,6 +38,7 @@ local :: (Member (Reader r) sig, Carrier sig m) => (r -> r) -> m a -> m a
 local f m = send (Local f m gen)
 
 
+-- | Run a 'Reader' effect with the passed environment value.
 runReader :: (Carrier sig m, Monad m) => r -> Eff (ReaderH r m) a -> m a
 runReader r m = runReaderH (interpret m) r
 
