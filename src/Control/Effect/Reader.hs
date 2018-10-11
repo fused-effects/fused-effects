@@ -26,6 +26,8 @@ instance Effect (Reader r) where
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
 
 -- | Retrieve the environment value.
+--
+--   prop> run (runReader a ask) == a
 ask :: (Member (Reader r) sig, Carrier sig m) => m r
 ask = send (Ask gen)
 
@@ -44,3 +46,9 @@ instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderH r m) wh
     where algR (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
           algR (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
           algOther op = ReaderH (\ r -> alg (handlePure (flip runReaderH r) op))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
