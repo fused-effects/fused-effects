@@ -32,6 +32,8 @@ fresh :: (Member Fresh sig, Carrier sig m) => m Int
 fresh = send (Fresh gen)
 
 -- | Reset the fresh counter after running a computation.
+--
+--   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) == run (runFresh (replicateM n fresh))
 resetFresh :: (Member Fresh sig, Carrier sig m) => m a -> m a
 resetFresh m = send (Reset m gen)
 
