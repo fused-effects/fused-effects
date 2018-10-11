@@ -29,7 +29,7 @@ newtype AltH f m a = AltH { runAltH :: m (f a) }
 instance (Alternative f, Monad f, Traversable f, Effectful sig m) => Carrier (NonDet :+: sig) (AltH f m) where
   gen a = AltH (pure (pure a))
   alg = algND \/ (AltH . alg . handle (pure ()) (fmap join . traverse runAltH))
-    where algND Empty = AltH (pure empty)
+    where algND Empty      = AltH (pure empty)
           algND (Choose k) = AltH (liftA2 (<|>) (runAltH (k True)) (runAltH (k False)))
 
 
