@@ -38,6 +38,7 @@ resetFresh :: (Member Fresh sig, Carrier sig m) => m a -> m a
 resetFresh m = send (Reset m gen)
 
 
+-- | Run a 'Fresh' effect counting up from 0.
 runFresh :: Effectful sig m => Eff (FreshH m) a -> m a
 runFresh = fmap snd . flip runFreshH 0 . interpret
 
