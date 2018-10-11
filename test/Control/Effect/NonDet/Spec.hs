@@ -16,3 +16,6 @@ spec = do
 
     prop "associativity" $
       \ a b c -> run (runNonDet ((pure a <|> pure b) <|> pure c)) `shouldBe` run (runNonDet (pure a <|> (pure b <|> pure (c :: Char))))
+
+    prop "left-identity" $
+      \ b -> run (runNonDet (empty <|> pure b)) `shouldBe` [b :: Char]
