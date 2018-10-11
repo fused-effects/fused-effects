@@ -18,6 +18,8 @@ import Control.Monad (join)
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
 --   Using '[]' as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first.
+--
+--   prop> run (runNonDet empty) == empty
 runNonDet :: (Alternative f, Monad f, Traversable f, Effectful sig m) => Eff (AltH f m) a -> m (f a)
 runNonDet = runAltH . interpret
 
@@ -53,3 +55,9 @@ instance Effectful sig m => Carrier (NonDet :+: sig) (SplitH m) where
           wrap a = SplitH (a >>= \ a' -> case a' of
             []     -> pure Nothing
             a'':as -> pure (Just (a'', wrap (pure as))))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
