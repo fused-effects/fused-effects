@@ -37,6 +37,7 @@ class HFunctor sig => Carrier sig h | h -> sig where
   gen :: a -> h a
   alg :: sig h (h a) -> h a
 
+-- | The class of 'Monad'ic computations handling 'Effect's.
 class (Monad m, Carrier sig m, Effect sig) => Effectful sig m | m -> sig
 
 
