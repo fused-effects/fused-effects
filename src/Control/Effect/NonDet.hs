@@ -4,8 +4,6 @@ module Control.Effect.NonDet
 , Alternative(..)
 , runNonDet
 , AltH(..)
-, runNonDetOnce
-, MaybeH(..)
 , runNonDetSplit
 , SplitH(..)
 ) where
@@ -27,18 +25,6 @@ instance (Alternative f, Monad f, Traversable f, Effectful sig m) => Carrier (No
   alg = algND \/ (AltH . alg . handle (pure ()) (fmap join . traverse runAltH))
     where algND Empty = AltH (pure empty)
           algND (Choose k) = AltH (liftA2 (<|>) (runAltH (k True)) (runAltH (k False)))
-
-
-runNonDetOnce :: Effectful sig m => Eff (MaybeH m) a -> m (Maybe a)
-runNonDetOnce = runMaybeH . interpret
-
-newtype MaybeH m a = MaybeH { runMaybeH :: m (Maybe a) }
-
-instance Effectful sig m => Carrier (NonDet :+: sig) (MaybeH m) where
-  gen a = MaybeH (pure (Just a))
-  alg = algND \/ (MaybeH . alg . handle (Just ()) (maybe (pure Nothing) runMaybeH))
-    where algND Empty      = MaybeH (pure Nothing)
-          algND (Choose k) = MaybeH (liftA2 (<|>) (runMaybeH (k True)) (runMaybeH (k False)))
 
 
 runNonDetSplit :: Effectful sig m => Eff (SplitH m) a -> m [a]
