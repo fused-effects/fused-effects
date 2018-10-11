@@ -12,6 +12,7 @@ import Control.Effect.Internal
 import Control.Effect.Sum
 import Control.Monad.Fail
 
+-- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 runFail :: (Carrier sig m, Effect sig) => Eff (FailH m) a -> m (Either String a)
 runFail = runFailH . interpret
 
