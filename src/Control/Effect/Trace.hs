@@ -26,8 +26,8 @@ instance HFunctor Trace where
 instance Effect Trace where
   handle state handler (Trace s k) = Trace s (handler (k <$ state))
 
-trace :: (Member Trace sig, Effectful sig m) => String -> m ()
-trace message = send (Trace message (pure ()))
+trace :: (Member Trace sig, Carrier sig m) => String -> m ()
+trace message = send (Trace message (gen ()))
 
 
 runPrintingTrace :: (MonadIO m, Carrier sig m) => Eff (PrintingH m) a -> m a
