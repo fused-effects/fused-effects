@@ -25,11 +25,11 @@ instance Effect Fresh where
   handle state handler (Fresh     k) = Fresh (handler . (<$ state) . k)
   handle state handler (Reset i m k) = Reset i (handler (m <$ state)) (handler . fmap k)
 
-fresh :: (Member Fresh sig, Effectful sig m) => m Int
-fresh = send (Fresh pure)
+fresh :: (Member Fresh sig, Carrier sig m) => m Int
+fresh = send (Fresh gen)
 
-resetFresh :: (Member Fresh sig, Effectful sig m) => Int -> m a -> m a
-resetFresh i m = send (Reset i m pure)
+resetFresh :: (Member Fresh sig, Carrier sig m) => Int -> m a -> m a
+resetFresh i m = send (Reset i m gen)
 
 
 runFresh :: Effectful sig m => Int -> Eff (FreshH m) a -> m a
