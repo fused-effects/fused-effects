@@ -2,6 +2,7 @@
 module Control.Effect.State
 ( State(..)
 , get
+, gets
 , put
 , modify
 , runState
@@ -30,6 +31,10 @@ instance Effect (State s) where
 --   prop> snd (run (runState a get)) == a
 get :: (Member (State s) sig, Carrier sig m) => m s
 get = send (Get gen)
+
+-- | Project a function out of the current state value
+gets :: (Member (State s) sig, Carrier sig m, Functor m) => (s -> a) -> m a
+gets f = fmap f get
 
 -- | Replace the state value with a new value.
 --
