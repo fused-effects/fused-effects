@@ -51,6 +51,7 @@ instance Applicative (Eff carrier) where
 -- prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: Maybe Integer)
 instance (Member NonDet sig, Carrier sig carrier) => Alternative (Eff carrier) where
   empty = send Empty
+
   l <|> r = send (Choose (\ c -> if c then l else r))
 
 instance Monad (Eff carrier) where
