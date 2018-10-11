@@ -8,13 +8,13 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-  inferenceSpec
-  reinterpretSpec
-  interposeSpec
+  inference
+  reinterpretation
+  interposition
 
 
-inferenceSpec :: Spec
-inferenceSpec = describe "inference" $ do
+inference :: Spec
+inference = describe "inference" $ do
   it "can be wrapped for better type inference" $
     run (runHasEnv (runEnv "i" ((++) <$> askEnv <*> askEnv))) `shouldBe` "ii"
 
@@ -35,8 +35,8 @@ instance Carrier sig carrier => Carrier sig (HasEnv env carrier) where
 instance (Carrier sig carrier, Effect sig) => Effectful sig (HasEnv env carrier)
 
 
-reinterpretSpec :: Spec
-reinterpretSpec = describe "reinterpretation" $ do
+reinterpretation :: Spec
+reinterpretation = describe "reinterpretation" $ do
   it "can reinterpret effects into other effects" $
     run (runState "a" ((++) <$> reinterpretReader (local ('b':) ask) <*> get)) `shouldBe` ("a", "baa")
 
@@ -57,8 +57,8 @@ instance (Effectful (State r :+: sig) m, Effect sig) => Carrier (Reader r :+: si
             runReinterpretReaderH (k v)
 
 
-interposeSpec :: Spec
-interposeSpec = describe "interposition" $ do
+interposition :: Spec
+interposition = describe "interposition" $ do
   it "can interpose handlers without changing the available effects" $
     run (runFail (interposeFail (fail "world"))) `shouldBe` (Left "hello, world" :: Either String Int)
 
