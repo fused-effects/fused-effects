@@ -4,8 +4,6 @@ module Control.Effect.NonDet
 , Alternative(..)
 , runNonDet
 , AltH(..)
-, runNonDetSplit
-, SplitH(..)
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
@@ -31,31 +29,6 @@ instance (Alternative f, Monad f, Traversable f, Effectful sig m) => Carrier (No
   alg = algND \/ (AltH . alg . handle (pure ()) (fmap join . traverse runAltH))
     where algND Empty      = AltH (pure empty)
           algND (Choose k) = AltH (liftA2 (<|>) (runAltH (k True)) (runAltH (k False)))
-
-
-runNonDetSplit :: Effectful sig m => Eff (SplitH m) a -> m [a]
-runNonDetSplit = joinSplitH . interpret
-
-newtype SplitH m a = SplitH { runSplitH :: m (Maybe (a, SplitH m a)) }
-
-joinSplitH :: Monad m => SplitH m a -> m [a]
-joinSplitH = (>>= maybe (pure []) (\ (a, q) -> (a :) <$> joinSplitH q)) . runSplitH
-
-instance Monad m => Semigroup (SplitH m a) where
-  a <> b = SplitH (runSplitH a >>= maybe (runSplitH b) (\ (a', q) -> pure (Just (a', q <> b))))
-
-instance Monad m => Monoid (SplitH m a) where
-  mempty = SplitH (pure Nothing)
-
-instance Effectful sig m => Carrier (NonDet :+: sig) (SplitH m) where
-  gen a = SplitH (pure (Just (a, SplitH (pure Nothing))))
-  alg = algND \/ (wrap . alg . handle [()] (fmap concat . traverse joinSplitH))
-    where algND Empty      = SplitH (pure Nothing)
-          algND (Choose k) = SplitH (runSplitH (k True) >>= maybe (runSplitH (k False)) (\ (a, q) -> pure (Just (a, q <> k False))))
-
-          wrap a = SplitH (a >>= \ a' -> case a' of
-            []     -> pure Nothing
-            a'':as -> pure (Just (a'', wrap (pure as))))
 
 
 -- $setup
