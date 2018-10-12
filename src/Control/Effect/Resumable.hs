@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
@@ -6,6 +6,7 @@ module Control.Effect.Resumable
 , runResumable
 , ResumableH(..)
 , runResumableWith
+, ResumableWithH(..)
 ) where
 
 import Control.Effect.Handler
@@ -78,17 +79,25 @@ instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableH err m) w
     where algE (Resumable err _) = ResumableH (gen (Left (SomeError err)))
 
 
--- | Run a 'Resumable' effect, resuming uncaught errors with a given 'Carrier' instance.
+-- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
 --
---   The passed function should be the eliminator for the carrier type, e.g. the record selector for a @newtype@. While this is less convenient than simply passing in a higher-order function with which to resume errors, defining a carrier @newtype@ has two major advantages:
---
---   1. It works, and
---   2. Carrier algebras are subject to fusion, making them vastly more efficient than would otherwise be possible.
-runResumableWith :: Carrier (Resumable err :+: sig) (carrier m)
-                 => (carrier m a -> m a)
-                 -> Eff (carrier m) a
+--   Note that this may be less efficient than defining a specialized carrier type and instance specifying the handler’s behaviour directly. Performance-critical code may wish to do that to maximize the opportunities for fusion and inlining.
+runResumableWith :: (Carrier sig m, Monad m)
+                 => (forall x . err x -> m x)
+                 -> Eff (ResumableWithH err m) a
                  -> m a
-runResumableWith with = with . interpret
+runResumableWith with = runResumableWithH with . interpret
+
+newtype ResumableWithH err m a = ResumableWithH ((forall x . err x -> m x) -> m a)
+
+runResumableWithH :: (forall x . err x -> m x) -> ResumableWithH err m a -> m a
+runResumableWithH f (ResumableWithH m) = m f
+
+instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithH err m) where
+  gen a = ResumableWithH (\ _ -> gen a)
+  alg = algR \/ algOther
+    where algR (Resumable err k) = ResumableWithH (\ f -> f err >>= runResumableWithH f . k)
+          algOther op = ResumableWithH (\ f -> alg (handlePure (runResumableWithH f) op))
 
 
 -- $setup
