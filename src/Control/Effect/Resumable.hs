@@ -1,11 +1,14 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, PolyKinds, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
 , SomeExc(..)
+, runResumable
+, ResumableH(..)
 ) where
 
 import Control.Effect.Handler
+import Control.Effect.Internal
 import Control.Effect.Sum
 
 data Resumable exc m k
@@ -25,3 +28,14 @@ throwResumable exc = send (Resumable exc gen)
 
 data SomeExc (exc :: * -> *)
   = forall a . SomeExc (exc a)
+
+
+runResumable :: Effectful sig m => Eff (ResumableH exc m) a -> m (Either (SomeExc exc) a)
+runResumable = runResumableH . interpret
+
+newtype ResumableH exc m a = ResumableH { runResumableH :: m (Either (SomeExc exc) a) }
+
+instance Effectful sig m => Carrier (Resumable exc :+: sig) (ResumableH exc m) where
+  gen a = ResumableH (gen (Right a))
+  alg = algE \/ (ResumableH . alg . handle (Right ()) (either (gen . Left) runResumableH))
+    where algE (Resumable exc _) = ResumableH (gen (Left (SomeExc exc)))
