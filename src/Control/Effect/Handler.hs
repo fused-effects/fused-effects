@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, FunctionalDependencies, RankNTypes #-}
+{-# LANGUAGE ConstraintKinds, DefaultSignatures, FunctionalDependencies, RankNTypes #-}
 module Control.Effect.Handler
 ( HFunctor(..)
 , Effect(..)
@@ -38,7 +38,7 @@ class HFunctor sig => Carrier sig h | h -> sig where
   alg :: sig h (h a) -> h a
 
 -- | The class of 'Monad'ic computations handling 'Effect's.
-class (Monad m, Carrier sig m, Effect sig) => Effectful sig m | m -> sig
+type Effectful sig m = (Monad m, Carrier sig m, Effect sig)
 
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.

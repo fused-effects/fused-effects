@@ -31,20 +31,18 @@ instance Carrier sig carrier => Carrier sig (HasEnv env carrier) where
   gen = pure
   alg op = HasEnv (alg (handlePure runHasEnv op))
 
-instance (Carrier sig carrier, Effect sig) => Effectful sig (HasEnv env carrier)
-
 
 reinterpretation :: Spec
 reinterpretation = describe "reinterpretation" $ do
   it "can reinterpret effects into other effects" $
     run (runState "a" ((++) <$> reinterpretReader (local ('b':) ask) <*> get)) `shouldBe` ("a", "baa")
 
-reinterpretReader :: (Effectful (State r :+: sig) m, Effect sig) => Eff (ReinterpretReaderC r m) a -> m a
+reinterpretReader :: (Carrier (State r :+: sig) m, Effect sig, Monad m) => Eff (ReinterpretReaderC r m) a -> m a
 reinterpretReader = runReinterpretReaderC . interpret
 
 newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC :: m a }
 
-instance (Effectful (State r :+: sig) m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
+instance (Carrier (State r :+: sig) m, Effect sig, Monad m) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
   gen = ReinterpretReaderC . gen
   alg = algR \/ (ReinterpretReaderC . alg . R . handlePure runReinterpretReaderC)
     where algR (Ask       k) = ReinterpretReaderC (get >>= runReinterpretReaderC . k)

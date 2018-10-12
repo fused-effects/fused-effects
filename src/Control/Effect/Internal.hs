@@ -77,8 +77,6 @@ instance Carrier sig carrier => Carrier sig (Eff carrier) where
   gen = pure
   alg op = Eff (\ k -> alg (hfmap (runEff gen) (fmap' (runEff k) op)))
 
-instance (Carrier sig carrier, Effect sig) => Effectful sig (Eff carrier)
-
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
