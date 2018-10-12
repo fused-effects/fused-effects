@@ -25,6 +25,7 @@ library
                      , Control.Effect.NonDet
                      , Control.Effect.NonDet.Internal
                      , Control.Effect.Reader
+                     , Control.Effect.Resumable
                      , Control.Effect.State
                      , Control.Effect.Sum
                      , Control.Effect.Trace
