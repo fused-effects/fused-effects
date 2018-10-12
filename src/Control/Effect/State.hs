@@ -22,6 +22,7 @@ data State s m k
 
 instance HFunctor (State s) where
   hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Effect (State s) where
   handle state handler (Get k)   = Get   (handler . (<$ state) . k)
