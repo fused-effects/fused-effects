@@ -41,6 +41,10 @@ data SomeError (err :: * -> *)
 instance Eq1 err => Eq (SomeError err) where
   SomeError exc1 == SomeError exc2 = liftEq (const (const True)) exc1 exc2
 
+-- | Ordering for 'SomeError' is determined by an 'Ord1' instance for the error type.
+--
+--   prop> (SomeError (Identity a) `compare` SomeError (Identity b)) == EQ
+--   prop> (SomeError (Const a) `compare` SomeError (Const b)) == (a `compare` b)
 instance Ord1 err => Ord (SomeError err) where
   SomeError exc1 `compare` SomeError exc2 = liftCompare (const (const EQ)) exc1 exc2
 
