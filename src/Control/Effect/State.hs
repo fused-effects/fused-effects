@@ -13,6 +13,7 @@ module Control.Effect.State
 import Control.Effect.Handler
 import Control.Effect.Sum
 import Control.Effect.Internal
+import Data.Coerce
 
 data State s m k
   = Get (s -> k)
@@ -20,8 +21,7 @@ data State s m k
   deriving (Functor)
 
 instance HFunctor (State s) where
-  hmap _ (Get k)   = Get   k
-  hmap _ (Put s k) = Put s k
+  hmap _ = coerce
 
 instance Effect (State s) where
   handle state handler (Get k)   = Get   (handler . (<$ state) . k)

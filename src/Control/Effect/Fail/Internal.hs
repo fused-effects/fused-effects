@@ -4,12 +4,13 @@ module Control.Effect.Fail.Internal
 ) where
 
 import Control.Effect.Handler
+import Data.Coerce
 
 newtype Fail m k = Fail String
   deriving (Functor)
 
 instance HFunctor Fail where
-  hmap _ (Fail s) = Fail s
+  hmap _ = coerce
 
 instance Effect Fail where
-  handle _ _ (Fail s) = Fail s
+  handle _ _ = coerce

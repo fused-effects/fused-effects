@@ -4,6 +4,7 @@ module Control.Effect.NonDet.Internal
 ) where
 
 import Control.Effect.Handler
+import Data.Coerce
 
 data NonDet m k
   = Empty
@@ -11,8 +12,7 @@ data NonDet m k
   deriving (Functor)
 
 instance HFunctor NonDet where
-  hmap _ Empty      = Empty
-  hmap _ (Choose k) = Choose k
+  hmap _ = coerce
 
 instance Effect NonDet where
   handle _     _       Empty      = Empty
