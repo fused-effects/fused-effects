@@ -2,7 +2,7 @@
 module Control.Effect.Lift
 ( Lift(..)
 , runM
-, LiftH(..)
+, LiftC(..)
 ) where
 
 import Control.Effect.Handler
@@ -10,11 +10,11 @@ import Control.Effect.Internal
 import Control.Effect.Lift.Internal
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
-runM :: Monad m => Eff (LiftH m) a -> m a
-runM = runLiftH . interpret
+runM :: Monad m => Eff (LiftC m) a -> m a
+runM = runLiftC . interpret
 
-newtype LiftH m a = LiftH { runLiftH :: m a }
+newtype LiftC m a = LiftC { runLiftC :: m a }
 
-instance Monad m => Carrier (Lift m) (LiftH m) where
-  gen = LiftH . pure
-  alg = LiftH . (>>= runLiftH) . unLift
+instance Monad m => Carrier (Lift m) (LiftC m) where
+  gen = LiftC . pure
+  alg = LiftC . (>>= runLiftC) . unLift

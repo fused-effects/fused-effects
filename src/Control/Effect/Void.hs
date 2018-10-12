@@ -2,7 +2,7 @@
 module Control.Effect.Void
 ( Void
 , run
-, VoidH(..)
+, VoidC(..)
 ) where
 
 import Control.Effect.Handler
@@ -19,11 +19,11 @@ instance Effect Void where
 
 
 -- | Run an 'Eff' exhausted of effects to produce its final result value.
-run :: Eff VoidH a -> a
-run = runVoidH . interpret
+run :: Eff VoidC a -> a
+run = runVoidC . interpret
 
-newtype VoidH a = VoidH { runVoidH :: a }
+newtype VoidC a = VoidC { runVoidC :: a }
 
-instance Carrier Void VoidH where
-  gen = VoidH
+instance Carrier Void VoidC where
+  gen = VoidC
   alg v = case v of {}

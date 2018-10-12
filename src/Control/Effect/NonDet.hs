@@ -3,7 +3,7 @@ module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
 , runNonDet
-, AltH(..)
+, AltC(..)
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
@@ -19,16 +19,16 @@ import Control.Monad (join)
 --
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
-runNonDet :: (Alternative f, Monad f, Traversable f, Effectful sig m) => Eff (AltH f m) a -> m (f a)
-runNonDet = runAltH . interpret
+runNonDet :: (Alternative f, Monad f, Traversable f, Effectful sig m) => Eff (AltC f m) a -> m (f a)
+runNonDet = runAltC . interpret
 
-newtype AltH f m a = AltH { runAltH :: m (f a) }
+newtype AltC f m a = AltC { runAltC :: m (f a) }
 
-instance (Alternative f, Monad f, Traversable f, Effectful sig m) => Carrier (NonDet :+: sig) (AltH f m) where
-  gen a = AltH (pure (pure a))
-  alg = algND \/ (AltH . alg . handle (pure ()) (fmap join . traverse runAltH))
-    where algND Empty      = AltH (pure empty)
-          algND (Choose k) = AltH (liftA2 (<|>) (runAltH (k True)) (runAltH (k False)))
+instance (Alternative f, Monad f, Traversable f, Effectful sig m) => Carrier (NonDet :+: sig) (AltC f m) where
+  gen a = AltC (pure (pure a))
+  alg = algND \/ (AltC . alg . handle (pure ()) (fmap join . traverse runAltC))
+    where algND Empty      = AltC (pure empty)
+          algND (Choose k) = AltC (liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
 
 
 -- $setup

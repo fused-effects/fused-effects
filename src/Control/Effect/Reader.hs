@@ -5,7 +5,7 @@ module Control.Effect.Reader
 , asks
 , local
 , runReader
-, ReaderH(..)
+, ReaderC(..)
 ) where
 
 import Control.Effect.Handler
@@ -49,17 +49,17 @@ local f m = send (Local f m gen)
 -- | Run a 'Reader' effect with the passed environment value.
 --
 --   prop> run (runReader a (pure b)) == b
-runReader :: (Carrier sig m, Monad m) => r -> Eff (ReaderH r m) a -> m a
-runReader r m = runReaderH (interpret m) r
+runReader :: (Carrier sig m, Monad m) => r -> Eff (ReaderC r m) a -> m a
+runReader r m = runReaderC (interpret m) r
 
-newtype ReaderH r m a = ReaderH { runReaderH :: r -> m a }
+newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
 
-instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderH r m) where
-  gen a = ReaderH (const (gen a))
+instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
+  gen a = ReaderC (const (gen a))
   alg = algR \/ algOther
-    where algR (Ask       k) = ReaderH (\ r -> runReaderH (k r) r)
-          algR (Local f m k) = ReaderH (\ r -> runReaderH m (f r) >>= flip runReaderH r . k)
-          algOther op = ReaderH (\ r -> alg (handlePure (flip runReaderH r) op))
+    where algR (Ask       k) = ReaderC (\ r -> runReaderC (k r) r)
+          algR (Local f m k) = ReaderC (\ r -> runReaderC m (f r) >>= flip runReaderC r . k)
+          algOther op = ReaderC (\ r -> alg (handlePure (flip runReaderC r) op))
 
 
 -- $setup

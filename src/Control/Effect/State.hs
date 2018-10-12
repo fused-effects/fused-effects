@@ -6,7 +6,7 @@ module Control.Effect.State
 , put
 , modify
 , runState
-, StateH(..)
+, StateC(..)
 ) where
 
 import Control.Effect.Handler
@@ -58,17 +58,17 @@ modify f = do
 -- | Run a 'State' effect starting from the passed value.
 --
 --   prop> run (runState a (pure b)) == (a, b)
-runState :: (Carrier sig m, Effect sig) => s -> Eff (StateH s m) a -> m (s, a)
-runState s m = runStateH (interpret m) s
+runState :: (Carrier sig m, Effect sig) => s -> Eff (StateC s m) a -> m (s, a)
+runState s m = runStateC (interpret m) s
 
-newtype StateH s m a = StateH { runStateH :: s -> m (s, a) }
+newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
-instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateH s m) where
-  gen a = StateH (\ s -> gen (s, a))
+instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
+  gen a = StateC (\ s -> gen (s, a))
   alg = algS \/ algOther
-    where algS (Get   k) = StateH (\ s -> runStateH (k s) s)
-          algS (Put s k) = StateH (\ _ -> runStateH  k    s)
-          algOther op = StateH (\ s -> alg (handle (s, ()) (uncurry (flip runStateH)) op))
+    where algS (Get   k) = StateC (\ s -> runStateC (k s) s)
+          algS (Put s k) = StateC (\ _ -> runStateC  k    s)
+          algOther op = StateC (\ s -> alg (handle (s, ()) (uncurry (flip runStateC)) op))
 
 
 -- $setup

@@ -3,11 +3,11 @@ module Control.Effect.Trace
 ( Trace(..)
 , trace
 , runPrintingTrace
-, PrintingH(..)
+, PrintingC(..)
 , runIgnoringTrace
-, IgnoringH(..)
+, IgnoringC(..)
 , runReturningTrace
-, ReturningH(..)
+, ReturningC(..)
 ) where
 
 import Control.Effect.Handler
@@ -32,44 +32,44 @@ trace message = send (Trace message (gen ()))
 
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
-runPrintingTrace :: (MonadIO m, Carrier sig m) => Eff (PrintingH m) a -> m a
-runPrintingTrace = runPrintingH . interpret
+runPrintingTrace :: (MonadIO m, Carrier sig m) => Eff (PrintingC m) a -> m a
+runPrintingTrace = runPrintingC . interpret
 
-newtype PrintingH m a = PrintingH { runPrintingH :: m a }
+newtype PrintingC m a = PrintingC { runPrintingC :: m a }
 
-instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingH m) where
-  gen = PrintingH . gen
-  alg = algT \/ (PrintingH . alg . handlePure runPrintingH)
-    where algT (Trace s k) = PrintingH (liftIO (hPutStrLn stderr s) *> runPrintingH k)
+instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingC m) where
+  gen = PrintingC . gen
+  alg = algT \/ (PrintingC . alg . handlePure runPrintingC)
+    where algT (Trace s k) = PrintingC (liftIO (hPutStrLn stderr s) *> runPrintingC k)
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
 --
 --   prop> run (runIgnoringTrace (trace a *> pure b)) == b
-runIgnoringTrace :: Carrier sig m => Eff (IgnoringH m) a -> m a
-runIgnoringTrace = runIgnoringH . interpret
+runIgnoringTrace :: Carrier sig m => Eff (IgnoringC m) a -> m a
+runIgnoringTrace = runIgnoringC . interpret
 
-newtype IgnoringH m a = IgnoringH { runIgnoringH :: m a }
+newtype IgnoringC m a = IgnoringC { runIgnoringC :: m a }
 
-instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringH m) where
-  gen = IgnoringH . gen
-  alg = algT \/ (IgnoringH . alg . handlePure runIgnoringH)
+instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringC m) where
+  gen = IgnoringC . gen
+  alg = algT \/ (IgnoringC . alg . handlePure runIgnoringC)
     where algT (Trace _ k) = k
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
 --   prop> run (runReturningTrace (trace a *> trace b *> pure c)) == ([a, b], c)
-runReturningTrace :: Effectful sig m => Eff (ReturningH m) a -> m ([String], a)
-runReturningTrace = fmap (first reverse) . flip runReturningH [] . interpret
+runReturningTrace :: Effectful sig m => Eff (ReturningC m) a -> m ([String], a)
+runReturningTrace = fmap (first reverse) . flip runReturningC [] . interpret
 
-newtype ReturningH m a = ReturningH { runReturningH :: [String] -> m ([String], a) }
+newtype ReturningC m a = ReturningC { runReturningC :: [String] -> m ([String], a) }
 
-instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningH m) where
-  gen a = ReturningH (\ s -> gen (s, a))
+instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningC m) where
+  gen a = ReturningC (\ s -> gen (s, a))
   alg = algT \/ algOther
-    where algT (Trace m k) = ReturningH (runReturningH k . (m :))
-          algOther op = ReturningH (\ s -> alg (handle (s, ()) (uncurry (flip runReturningH)) op))
+    where algT (Trace m k) = ReturningC (runReturningC k . (m :))
+          algOther op = ReturningC (\ s -> alg (handle (s, ()) (uncurry (flip runReturningC)) op))
 
 
 -- $setup

@@ -4,7 +4,7 @@ module Control.Effect.Error
 , throwError
 , catchError
 , runError
-, ErrorH(..)
+, ErrorC(..)
 ) where
 
 import Control.Effect.Handler
@@ -46,16 +46,16 @@ catchError m h = send (Catch m h gen)
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runError (pure a)) == Right @Int @Int a
-runError :: Effectful sig m => Eff (ErrorH exc m) a -> m (Either exc a)
-runError = runErrorH . interpret
+runError :: Effectful sig m => Eff (ErrorC exc m) a -> m (Either exc a)
+runError = runErrorC . interpret
 
-newtype ErrorH e m a = ErrorH { runErrorH :: m (Either e a) }
+newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
 
-instance Effectful sig m => Carrier (Error e :+: sig) (ErrorH e m) where
-  gen a = ErrorH (pure (Right a))
-  alg = algE \/ (ErrorH . alg . handle (Right ()) (either (pure . Left) runErrorH))
-    where algE (Throw e)     = ErrorH (pure (Left e))
-          algE (Catch m h k) = ErrorH (runErrorH m >>= either (either (pure . Left) (runErrorH . k) <=< runErrorH . h) (runErrorH . k))
+instance Effectful sig m => Carrier (Error e :+: sig) (ErrorC e m) where
+  gen a = ErrorC (pure (Right a))
+  alg = algE \/ (ErrorC . alg . handle (Right ()) (either (pure . Left) runErrorC))
+    where algE (Throw e)     = ErrorC (pure (Left e))
+          algE (Catch m h k) = ErrorC (runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k))
 
 
 -- $setup

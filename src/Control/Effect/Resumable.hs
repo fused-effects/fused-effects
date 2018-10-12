@@ -4,9 +4,9 @@ module Control.Effect.Resumable
 , throwResumable
 , SomeError(..)
 , runResumable
-, ResumableH(..)
+, ResumableC(..)
 , runResumableWith
-, ResumableWithH(..)
+, ResumableWithC(..)
 ) where
 
 import Control.Effect.Handler
@@ -68,15 +68,15 @@ instance (Show1 err) => Show (SomeError err) where
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runResumable (pure a)) == Right @(SomeError Identity) @Int a
-runResumable :: Effectful sig m => Eff (ResumableH err m) a -> m (Either (SomeError err) a)
-runResumable = runResumableH . interpret
+runResumable :: Effectful sig m => Eff (ResumableC err m) a -> m (Either (SomeError err) a)
+runResumable = runResumableC . interpret
 
-newtype ResumableH err m a = ResumableH { runResumableH :: m (Either (SomeError err) a) }
+newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError err) a) }
 
-instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableH err m) where
-  gen a = ResumableH (gen (Right a))
-  alg = algE \/ (ResumableH . alg . handle (Right ()) (either (gen . Left) runResumableH))
-    where algE (Resumable err _) = ResumableH (gen (Left (SomeError err)))
+instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableC err m) where
+  gen a = ResumableC (gen (Right a))
+  alg = algE \/ (ResumableC . alg . handle (Right ()) (either (gen . Left) runResumableC))
+    where algE (Resumable err _) = ResumableC (gen (Left (SomeError err)))
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
@@ -89,20 +89,20 @@ instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableH err m) w
 --   prop> run (runResumableWith (\ (Err b) -> pure (1 + b)) (throwResumable (Err a))) == 1 + a
 runResumableWith :: (Carrier sig m, Monad m)
                  => (forall x . err x -> m x)
-                 -> Eff (ResumableWithH err m) a
+                 -> Eff (ResumableWithC err m) a
                  -> m a
-runResumableWith with = runResumableWithH with . interpret
+runResumableWith with = runResumableWithC with . interpret
 
-newtype ResumableWithH err m a = ResumableWithH ((forall x . err x -> m x) -> m a)
+newtype ResumableWithC err m a = ResumableWithC ((forall x . err x -> m x) -> m a)
 
-runResumableWithH :: (forall x . err x -> m x) -> ResumableWithH err m a -> m a
-runResumableWithH f (ResumableWithH m) = m f
+runResumableWithC :: (forall x . err x -> m x) -> ResumableWithC err m a -> m a
+runResumableWithC f (ResumableWithC m) = m f
 
-instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithH err m) where
-  gen a = ResumableWithH (\ _ -> gen a)
+instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
+  gen a = ResumableWithC (\ _ -> gen a)
   alg = algR \/ algOther
-    where algR (Resumable err k) = ResumableWithH (\ f -> f err >>= runResumableWithH f . k)
-          algOther op = ResumableWithH (\ f -> alg (handlePure (runResumableWithH f) op))
+    where algR (Resumable err k) = ResumableWithC (\ f -> f err >>= runResumableWithC f . k)
+          algOther op = ResumableWithC (\ f -> alg (handlePure (runResumableWithC f) op))
 
 
 -- $setup

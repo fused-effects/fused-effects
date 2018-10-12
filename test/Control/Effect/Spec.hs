@@ -20,7 +20,7 @@ inference = describe "inference" $ do
 askEnv :: (Member (Reader env) sig, Carrier sig m) => HasEnv env m env
 askEnv = ask
 
-runEnv :: Carrier sig m => env -> HasEnv env (ReaderH env (HasEnv env m)) a -> HasEnv env m a
+runEnv :: Carrier sig m => env -> HasEnv env (ReaderC env (HasEnv env m)) a -> HasEnv env m a
 runEnv r = runReader r . runHasEnv
 
 
@@ -39,21 +39,21 @@ reinterpretation = describe "reinterpretation" $ do
   it "can reinterpret effects into other effects" $
     run (runState "a" ((++) <$> reinterpretReader (local ('b':) ask) <*> get)) `shouldBe` ("a", "baa")
 
-reinterpretReader :: (Effectful (State r :+: sig) m, Effect sig) => Eff (ReinterpretReaderH r m) a -> m a
-reinterpretReader = runReinterpretReaderH . interpret
+reinterpretReader :: (Effectful (State r :+: sig) m, Effect sig) => Eff (ReinterpretReaderC r m) a -> m a
+reinterpretReader = runReinterpretReaderC . interpret
 
-newtype ReinterpretReaderH r m a = ReinterpretReaderH { runReinterpretReaderH :: m a }
+newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC :: m a }
 
-instance (Effectful (State r :+: sig) m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretReaderH r m) where
-  gen = ReinterpretReaderH . gen
-  alg = algR \/ (ReinterpretReaderH . alg . R . handlePure runReinterpretReaderH)
-    where algR (Ask       k) = ReinterpretReaderH (get >>= runReinterpretReaderH . k)
-          algR (Local f m k) = ReinterpretReaderH $ do
+instance (Effectful (State r :+: sig) m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
+  gen = ReinterpretReaderC . gen
+  alg = algR \/ (ReinterpretReaderC . alg . R . handlePure runReinterpretReaderC)
+    where algR (Ask       k) = ReinterpretReaderC (get >>= runReinterpretReaderC . k)
+          algR (Local f m k) = ReinterpretReaderC $ do
             a <- get
             put (f a)
-            v <- runReinterpretReaderH m
+            v <- runReinterpretReaderC m
             put a
-            runReinterpretReaderH (k v)
+            runReinterpretReaderC (k v)
 
 
 interposition :: Spec
@@ -65,13 +65,13 @@ interposition = describe "interposition" $ do
     run (runFail (fail "world" *> interposeFail (pure (0 :: Int)))) `shouldBe` Left "world"
     run (runFail (interposeFail (pure (0 :: Int)) <* fail "world")) `shouldBe` Left "world"
 
-interposeFail :: (Member Fail sig, Carrier sig m) => Eff (InterposeH m) a -> m a
-interposeFail = runInterposeH . interpret
+interposeFail :: (Member Fail sig, Carrier sig m) => Eff (InterposeC m) a -> m a
+interposeFail = runInterposeC . interpret
 
-newtype InterposeH m a = InterposeH { runInterposeH :: m a }
+newtype InterposeC m a = InterposeC { runInterposeC :: m a }
 
-instance (Member Fail sig, Carrier sig m) => Carrier sig (InterposeH m) where
-  gen = InterposeH . gen
+instance (Member Fail sig, Carrier sig m) => Carrier sig (InterposeC m) where
+  gen = InterposeC . gen
   alg op
-    | Just (Fail s) <- prj op = InterposeH (send (Fail ("hello, " ++ s)))
-    | otherwise               = InterposeH (alg (handlePure runInterposeH op))
+    | Just (Fail s) <- prj op = InterposeC (send (Fail ("hello, " ++ s)))
+    | otherwise               = InterposeC (alg (handlePure runInterposeC op))

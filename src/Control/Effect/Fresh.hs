@@ -4,7 +4,7 @@ module Control.Effect.Fresh
 , fresh
 , resetFresh
 , runFresh
-, FreshH(..)
+, FreshC(..)
 ) where
 
 import Control.Effect.Handler
@@ -42,17 +42,17 @@ resetFresh m = send (Reset m gen)
 --
 --   prop> run (runFresh (replicateM n fresh)) == [0..pred n]
 --   prop> run (runFresh (replicateM n fresh *> pure b)) == b
-runFresh :: Effectful sig m => Eff (FreshH m) a -> m a
-runFresh = fmap snd . flip runFreshH 0 . interpret
+runFresh :: Effectful sig m => Eff (FreshC m) a -> m a
+runFresh = fmap snd . flip runFreshC 0 . interpret
 
-newtype FreshH m a = FreshH { runFreshH :: Int -> m (Int, a) }
+newtype FreshC m a = FreshC { runFreshC :: Int -> m (Int, a) }
 
-instance Effectful sig m => Carrier (Fresh :+: sig) (FreshH m) where
-  gen a = FreshH (\ i -> pure (i, a))
+instance Effectful sig m => Carrier (Fresh :+: sig) (FreshC m) where
+  gen a = FreshC (\ i -> pure (i, a))
   alg = algF \/ algOther
-    where algF (Fresh   k) = FreshH (\ i -> runFreshH (k i) (succ i))
-          algF (Reset m k) = FreshH (\ i -> runFreshH m i >>= \ (_, a) -> runFreshH (k a) i)
-          algOther op = FreshH (\ i -> alg (handle (i, ()) (uncurry (flip runFreshH)) op))
+    where algF (Fresh   k) = FreshC (\ i -> runFreshC (k i) (succ i))
+          algF (Reset m k) = FreshC (\ i -> runFreshC m i >>= \ (_, a) -> runFreshC (k a) i)
+          algOther op = FreshC (\ i -> alg (handle (i, ()) (uncurry (flip runFreshC)) op))
 
 
 -- $setup

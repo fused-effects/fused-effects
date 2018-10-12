@@ -3,7 +3,7 @@ module Control.Effect.Writer
 ( Writer(..)
 , tell
 , runWriter
-, WriterH(..)
+, WriterC(..)
 ) where
 
 import Control.Effect.Handler
@@ -30,16 +30,16 @@ tell w = send (Tell w (gen ()))
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --
 --   prop> run (runWriter (tell (Sum a) *> pure b)) == (Sum a, b)
-runWriter :: (Effectful sig m, Monoid w) => Eff (WriterH w m) a -> m (w, a)
-runWriter m = runWriterH (interpret m)
+runWriter :: (Effectful sig m, Monoid w) => Eff (WriterC w m) a -> m (w, a)
+runWriter m = runWriterC (interpret m)
 
-newtype WriterH w m a = WriterH { runWriterH :: m (w, a) }
+newtype WriterC w m a = WriterC { runWriterC :: m (w, a) }
 
-instance (Monoid w, Effectful sig m) => Carrier (Writer w :+: sig) (WriterH w m) where
-  gen a = WriterH (pure (mempty, a))
-  alg = algW \/ (WriterH . alg . handle (mempty, ()) (uncurry runWriter'))
-    where algW (Tell w k) = WriterH (first (w <>) <$> runWriterH k)
-          runWriter' w = fmap (first (w <>)) . runWriterH
+instance (Monoid w, Effectful sig m) => Carrier (Writer w :+: sig) (WriterC w m) where
+  gen a = WriterC (pure (mempty, a))
+  alg = algW \/ (WriterC . alg . handle (mempty, ()) (uncurry runWriter'))
+    where algW (Tell w k) = WriterC (first (w <>) <$> runWriterC k)
+          runWriter' w = fmap (first (w <>)) . runWriterC
 
 
 -- $setup
