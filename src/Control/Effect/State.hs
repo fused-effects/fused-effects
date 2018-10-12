@@ -5,6 +5,7 @@ module Control.Effect.State
 , gets
 , put
 , modify
+, modify'
 , runState
 , StateC(..)
 ) where
@@ -51,6 +52,14 @@ put s = send (Put s (gen ()))
 --   prop> fst (run (runState a (modify (+1)))) == (1 + a :: Integer)
 modify :: (Member (State s) sig, Carrier sig m, Monad m) => (s -> s) -> m ()
 modify f = get >>= put . f
+
+-- | Like 'modify', but strict in the new state.
+--
+--   prop> fst (run (runState a (modify' (+1)))) == (1 + a :: Integer)
+modify' :: (Member (State s) sig, Carrier sig m, Monad m) => (s -> s) -> m ()
+modify' f = do
+  a <- get
+  put $! f a
 
 
 -- | Run a 'State' effect starting from the passed value.
