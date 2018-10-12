@@ -30,6 +30,7 @@ throwResumable :: (Member (Resumable err) sig, Carrier sig m) => err a -> m a
 throwResumable err = send (Resumable err gen)
 
 
+-- | An error at some existentially-quantified type index.
 data SomeError (err :: * -> *)
   = forall a . SomeError (err a)
 
