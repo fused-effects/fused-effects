@@ -36,6 +36,8 @@ data SomeError (err :: * -> *)
 
 -- | Equality for 'SomeError' is determined by an 'Eq1' instance for the error type.
 --
+--   Note that since we can’t tell whether the type indices are equal, let alone what 'Eq' instance to use for them, the comparator passed to 'liftEq' always returns 'True'. Thus, 'SomeError' is best used with type-indexed GADTs for the error type.
+--
 --   prop> SomeError (Identity a) == SomeError (Identity b)
 --   prop> (SomeError (Const a) == SomeError (Const b)) == (a == b)
 instance Eq1 err => Eq (SomeError err) where
@@ -43,12 +45,16 @@ instance Eq1 err => Eq (SomeError err) where
 
 -- | Ordering for 'SomeError' is determined by an 'Ord1' instance for the error type.
 --
+--   Note that since we can’t tell whether the type indices are equal, let alone what 'Ord' instance to use for them, the comparator passed to 'liftCompare' always returns 'EQ'. Thus, 'SomeError' is best used with type-indexed GADTs for the error type.
+--
 --   prop> (SomeError (Identity a) `compare` SomeError (Identity b)) == EQ
 --   prop> (SomeError (Const a) `compare` SomeError (Const b)) == (a `compare` b)
 instance Ord1 err => Ord (SomeError err) where
   SomeError exc1 `compare` SomeError exc2 = liftCompare (const (const EQ)) exc1 exc2
 
 -- | Showing for 'SomeError' is determined by a 'Show1' instance for the error type.
+--
+--   Note that since we can’t tell what 'Show' instance to use for the type index, the functions passed to 'liftShowsPrec' always return the empty 'ShowS'. Thus, 'SomeError' is best used with type-indexed GADTs for the error type.
 --
 --   prop> show (SomeError (Identity a)) == "SomeError (Identity )"
 --   prop> show (SomeError (Const a)) == ("SomeError (Const " ++ showsPrec 11 a ")")
