@@ -34,6 +34,9 @@ data SomeExc (exc :: * -> *)
 instance Eq1 exc => Eq (SomeExc exc) where
   SomeExc exc1 == SomeExc exc2 = liftEq (const (const True)) exc1 exc2
 
+instance (Show1 exc) => Show (SomeExc exc) where
+  showsPrec num (SomeExc exc) = liftShowsPrec (const (const id)) (const id) num exc
+
 
 runResumable :: Effectful sig m => Eff (ResumableH exc m) a -> m (Either (SomeExc exc) a)
 runResumable = runResumableH . interpret
