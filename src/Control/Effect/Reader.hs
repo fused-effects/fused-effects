@@ -2,6 +2,7 @@
 module Control.Effect.Reader
 ( Reader(..)
 , ask
+, asks
 , local
 , runReader
 , ReaderH(..)
@@ -30,6 +31,12 @@ instance Effect (Reader r) where
 --   prop> run (runReader a ask) == a
 ask :: (Member (Reader r) sig, Carrier sig m) => m r
 ask = send (Ask gen)
+
+-- | Project a function out of the current environment value.
+--
+--   prop> snd (run (runReader a (asks (applyFun f)))) == applyFun f a
+asks :: (Member (Reader r) sig, Carrier sig m, Functor m) => (r -> a) -> m a
+asks f = fmap f ask
 
 -- | Run a computation with an environment value locally modified by the passed function.
 --
