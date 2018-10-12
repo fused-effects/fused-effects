@@ -49,7 +49,7 @@ instance Ord1 err => Ord (SomeError err) where
   SomeError exc1 `compare` SomeError exc2 = liftCompare (const (const EQ)) exc1 exc2
 
 instance (Show1 err) => Show (SomeError err) where
-  showsPrec num (SomeError err) = liftShowsPrec (const (const id)) (const id) num err
+  showsPrec d (SomeError err) = showsUnaryWith (liftShowsPrec (const (const id)) (const id)) "SomeError" d err
 
 
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
