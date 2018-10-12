@@ -10,12 +10,14 @@ import Control.Effect.Handler
 import Control.Effect.Sum
 import Control.Effect.Internal
 import Data.Bifunctor (first)
+import Data.Coerce
 
 data Writer w m k = Tell w k
   deriving (Functor)
 
 instance HFunctor (Writer w) where
-  hmap _ (Tell w k) = Tell w k
+  hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Effect (Writer w) where
   handle state handler (Tell w k) = Tell w (handler (k <$ state))

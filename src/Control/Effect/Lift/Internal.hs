@@ -4,12 +4,14 @@ module Control.Effect.Lift.Internal
 ) where
 
 import Control.Effect.Handler
+import Data.Coerce
 
 newtype Lift sig m k = Lift { unLift :: sig k }
   deriving (Functor)
 
 instance Functor sig => HFunctor (Lift sig) where
-  hmap _ (Lift op) = Lift op
+  hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Functor sig => Effect (Lift sig) where
   handle state handler (Lift op) = Lift (fmap (handler . (<$ state)) op)

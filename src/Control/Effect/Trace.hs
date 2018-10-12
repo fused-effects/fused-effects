@@ -15,13 +15,15 @@ import Control.Effect.Internal
 import Control.Effect.Sum
 import Control.Monad.IO.Class
 import Data.Bifunctor (first)
+import Data.Coerce
 import System.IO
 
 data Trace m k = Trace String k
   deriving (Functor)
 
 instance HFunctor Trace where
-  hmap _ (Trace s k) = Trace s k
+  hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Effect Trace where
   handle state handler (Trace s k) = Trace s (handler (k <$ state))
