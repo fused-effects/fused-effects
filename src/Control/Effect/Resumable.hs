@@ -12,3 +12,6 @@ deriving instance Functor (Resumable exc m)
 
 instance HFunctor (Resumable exc) where
   hfmap _ (Resumable exc k) = Resumable exc k
+
+instance Effect (Resumable exc) where
+  handle state handler (Resumable exc k) = Resumable exc (handler . (<$ state) . k)
