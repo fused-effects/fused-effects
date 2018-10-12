@@ -1,9 +1,11 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, PolyKinds, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, PolyKinds, StandaloneDeriving #-}
 module Control.Effect.Resumable
 ( Resumable(..)
+, throwResumable
 ) where
 
 import Control.Effect.Handler
+import Control.Effect.Sum
 
 data Resumable exc m k
   = forall a . Resumable (exc a) (a -> k)
@@ -15,3 +17,6 @@ instance HFunctor (Resumable exc) where
 
 instance Effect (Resumable exc) where
   handle state handler (Resumable exc k) = Resumable exc (handler . (<$ state) . k)
+
+throwResumable :: (Member (Resumable exc) sig, Carrier sig m) => exc a -> m a
+throwResumable exc = send (Resumable exc gen)
