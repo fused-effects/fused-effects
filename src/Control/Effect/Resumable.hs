@@ -24,6 +24,8 @@ instance Effect (Resumable exc) where
   handle state handler (Resumable exc k) = Resumable exc (handler . (<$ state) . k)
 
 -- | Throw an exception which can be resumed with a value of its result type.
+--
+--   prop> run (runResumable (throwResumable (Identity a))) == Left (SomeExc (Identity a))
 throwResumable :: (Member (Resumable exc) sig, Carrier sig m) => exc a -> m a
 throwResumable exc = send (Resumable exc gen)
 
@@ -47,3 +49,10 @@ instance Effectful sig m => Carrier (Resumable exc :+: sig) (ResumableH exc m) w
   gen a = ResumableH (gen (Right a))
   alg = algE \/ (ResumableH . alg . handle (Right ()) (either (gen . Left) runResumableH))
     where algE (Resumable exc _) = ResumableH (gen (Left (SomeExc exc)))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
+-- >>> import Data.Functor.Identity
