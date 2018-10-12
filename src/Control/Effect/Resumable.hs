@@ -2,7 +2,7 @@
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
-, SomeExc(..)
+, SomeError(..)
 , runResumable
 , ResumableH(..)
 ) where
@@ -25,33 +25,33 @@ instance Effect (Resumable exc) where
 
 -- | Throw an exception which can be resumed with a value of its result type.
 --
---   prop> run (runResumable (throwResumable (Identity a))) == Left (SomeExc (Identity a))
+--   prop> run (runResumable (throwResumable (Identity a))) == Left (SomeError (Identity a))
 throwResumable :: (Member (Resumable exc) sig, Carrier sig m) => exc a -> m a
 throwResumable exc = send (Resumable exc gen)
 
 
-data SomeExc (exc :: * -> *)
-  = forall a . SomeExc (exc a)
+data SomeError (exc :: * -> *)
+  = forall a . SomeError (exc a)
 
-instance Eq1 exc => Eq (SomeExc exc) where
-  SomeExc exc1 == SomeExc exc2 = liftEq (const (const True)) exc1 exc2
+instance Eq1 exc => Eq (SomeError exc) where
+  SomeError exc1 == SomeError exc2 = liftEq (const (const True)) exc1 exc2
 
-instance Ord1 exc => Ord (SomeExc exc) where
-  SomeExc exc1 `compare` SomeExc exc2 = liftCompare (const (const EQ)) exc1 exc2
+instance Ord1 exc => Ord (SomeError exc) where
+  SomeError exc1 `compare` SomeError exc2 = liftCompare (const (const EQ)) exc1 exc2
 
-instance (Show1 exc) => Show (SomeExc exc) where
-  showsPrec num (SomeExc exc) = liftShowsPrec (const (const id)) (const id) num exc
+instance (Show1 exc) => Show (SomeError exc) where
+  showsPrec num (SomeError exc) = liftShowsPrec (const (const id)) (const id) num exc
 
 
-runResumable :: Effectful sig m => Eff (ResumableH exc m) a -> m (Either (SomeExc exc) a)
+runResumable :: Effectful sig m => Eff (ResumableH exc m) a -> m (Either (SomeError exc) a)
 runResumable = runResumableH . interpret
 
-newtype ResumableH exc m a = ResumableH { runResumableH :: m (Either (SomeExc exc) a) }
+newtype ResumableH exc m a = ResumableH { runResumableH :: m (Either (SomeError exc) a) }
 
 instance Effectful sig m => Carrier (Resumable exc :+: sig) (ResumableH exc m) where
   gen a = ResumableH (gen (Right a))
   alg = algE \/ (ResumableH . alg . handle (Right ()) (either (gen . Left) runResumableH))
-    where algE (Resumable exc _) = ResumableH (gen (Left (SomeExc exc)))
+    where algE (Resumable exc _) = ResumableH (gen (Left (SomeError exc)))
 
 
 -- $setup
