@@ -44,6 +44,8 @@ instance (Show1 err) => Show (SomeError err) where
 
 
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
+--
+--   prop> run (runResumable (pure a)) == Right @(SomeError Identity) @Int a
 runResumable :: Effectful sig m => Eff (ResumableH err m) a -> m (Either (SomeError err) a)
 runResumable = runResumableH . interpret
 
@@ -57,6 +59,7 @@ instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableH err m) w
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
 -- >>> import Data.Functor.Identity
