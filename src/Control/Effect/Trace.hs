@@ -21,7 +21,7 @@ data Trace m k = Trace String k
   deriving (Functor)
 
 instance HFunctor Trace where
-  hfmap _ (Trace s k) = Trace s k
+  hmap _ (Trace s k) = Trace s k
 
 instance Effect Trace where
   handle state handler (Trace s k) = Trace s (handler (k <$ state))

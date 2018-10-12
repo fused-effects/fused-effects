@@ -19,8 +19,8 @@ data Reader r m k
 deriving instance Functor (Reader r m)
 
 instance HFunctor (Reader r) where
-  hfmap _ (Ask k)       = Ask k
-  hfmap f (Local g m k) = Local g (f m) k
+  hmap _ (Ask k)       = Ask k
+  hmap f (Local g m k) = Local g (f m) k
 
 instance Effect (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)

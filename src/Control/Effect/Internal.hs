@@ -75,7 +75,7 @@ instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) wh
 
 instance Carrier sig carrier => Carrier sig (Eff carrier) where
   gen = pure
-  alg op = Eff (\ k -> alg (hfmap (runEff gen) (fmap' (runEff k) op)))
+  alg op = Eff (\ k -> alg (hmap (runEff gen) (fmap' (runEff k) op)))
 
 
 -- $setup

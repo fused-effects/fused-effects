@@ -20,8 +20,8 @@ data State s m k
   deriving (Functor)
 
 instance HFunctor (State s) where
-  hfmap _ (Get k)   = Get   k
-  hfmap _ (Put s k) = Put s k
+  hmap _ (Get k)   = Get   k
+  hmap _ (Put s k) = Put s k
 
 instance Effect (State s) where
   handle state handler (Get k)   = Get   (handler . (<$ state) . k)

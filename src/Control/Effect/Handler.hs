@@ -15,7 +15,7 @@ class HFunctor h where
   fmap' = fmap
 
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
-  hfmap :: (forall x . m x -> n x) -> (h m a -> h n a)
+  hmap :: (forall x . m x -> n x) -> (h m a -> h n a)
 
 
 -- | The class of effect types, which must:
@@ -39,5 +39,5 @@ class HFunctor sig => Carrier sig h | h -> sig where
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
 handlePure :: HFunctor sig => (forall x . f x -> g x) -> sig f (f a) -> sig g (g a)
-handlePure handler = hfmap handler . fmap' handler
+handlePure handler = hmap handler . fmap' handler
 {-# INLINE handlePure #-}

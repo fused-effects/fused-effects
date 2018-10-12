@@ -21,7 +21,7 @@ data Resumable err m k
 deriving instance Functor (Resumable err m)
 
 instance HFunctor (Resumable err) where
-  hfmap _ (Resumable err k) = Resumable err k
+  hmap _ (Resumable err k) = Resumable err k
 
 instance Effect (Resumable err) where
   handle state handler (Resumable err k) = Resumable err (handler . (<$ state) . k)

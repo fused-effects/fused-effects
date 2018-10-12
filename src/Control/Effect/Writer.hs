@@ -15,7 +15,7 @@ data Writer w m k = Tell w k
   deriving (Functor)
 
 instance HFunctor (Writer w) where
-  hfmap _ (Tell w k) = Tell w k
+  hmap _ (Tell w k) = Tell w k
 
 instance Effect (Writer w) where
   handle state handler (Tell w k) = Tell w (handler (k <$ state))

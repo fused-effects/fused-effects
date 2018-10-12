@@ -18,8 +18,8 @@ data Fresh m k
 deriving instance Functor (Fresh m)
 
 instance HFunctor Fresh where
-  hfmap _ (Fresh   k) = Fresh k
-  hfmap f (Reset m k) = Reset (f m) k
+  hmap _ (Fresh   k) = Fresh k
+  hmap f (Reset m k) = Reset (f m) k
 
 instance Effect Fresh where
   handle state handler (Fresh   k) = Fresh (handler . (<$ state) . k)

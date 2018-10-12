@@ -9,7 +9,7 @@ newtype Fail m k = Fail String
   deriving (Functor)
 
 instance HFunctor Fail where
-  hfmap _ (Fail s) = Fail s
+  hmap _ (Fail s) = Fail s
 
 instance Effect Fail where
   handle _ _ (Fail s) = Fail s

@@ -19,8 +19,8 @@ data Error exc m k
 deriving instance Functor (Error exc m)
 
 instance HFunctor (Error exc) where
-  hfmap _ (Throw exc)   = Throw exc
-  hfmap f (Catch m h k) = Catch (f m) (f . h) k
+  hmap _ (Throw exc)   = Throw exc
+  hmap f (Catch m h k) = Catch (f m) (f . h) k
 
 instance Effect (Error exc) where
   handle _     _       (Throw exc)   = Throw exc

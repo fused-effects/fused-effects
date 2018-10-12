@@ -16,8 +16,8 @@ data (f :+: g) m k
 infixr 4 :+:
 
 instance (HFunctor l, HFunctor r) => HFunctor (l :+: r) where
-  hfmap f (L l) = L (hfmap f l)
-  hfmap f (R r) = R (hfmap f r)
+  hmap f (L l) = L (hmap f l)
+  hmap f (R r) = R (hmap f r)
 
   fmap' f (L l) = L (fmap' f l)
   fmap' f (R r) = R (fmap' f r)

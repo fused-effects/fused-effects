@@ -11,8 +11,8 @@ data NonDet m k
   deriving (Functor)
 
 instance HFunctor NonDet where
-  hfmap _ Empty      = Empty
-  hfmap _ (Choose k) = Choose k
+  hmap _ Empty      = Empty
+  hmap _ (Choose k) = Choose k
 
 instance Effect NonDet where
   handle _     _       Empty      = Empty
