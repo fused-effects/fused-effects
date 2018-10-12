@@ -15,3 +15,4 @@ instance HFunctor Fail where
 
 instance Effect Fail where
   handle _ _ = coerce
+  {-# INLINE handle #-}
