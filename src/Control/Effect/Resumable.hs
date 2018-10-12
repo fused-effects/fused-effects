@@ -34,6 +34,10 @@ throwResumable err = send (Resumable err gen)
 data SomeError (err :: * -> *)
   = forall a . SomeError (err a)
 
+-- | Equality for 'SomeError' is determined by an 'Eq1' instance for the error type.
+--
+--   prop> SomeError (Identity a) == SomeError (Identity b)
+--   prop> (SomeError (Const a) == SomeError (Const b)) == (a == b)
 instance Eq1 err => Eq (SomeError err) where
   SomeError exc1 == SomeError exc2 = liftEq (const (const True)) exc1 exc2
 
@@ -63,4 +67,5 @@ instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableH err m) w
 -- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
+-- >>> import Data.Functor.Const
 -- >>> import Data.Functor.Identity
