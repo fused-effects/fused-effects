@@ -43,6 +43,7 @@ instance (Show1 err) => Show (SomeError err) where
   showsPrec num (SomeError err) = liftShowsPrec (const (const id)) (const id) num err
 
 
+-- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 runResumable :: Effectful sig m => Eff (ResumableH err m) a -> m (Either (SomeError err) a)
 runResumable = runResumableH . interpret
 
