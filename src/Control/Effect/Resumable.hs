@@ -23,5 +23,5 @@ throwResumable :: (Member (Resumable exc) sig, Carrier sig m) => exc a -> m a
 throwResumable exc = send (Resumable exc gen)
 
 
-data SomeExc exc
+data SomeExc (exc :: * -> *)
   = forall a . SomeExc (exc a)
