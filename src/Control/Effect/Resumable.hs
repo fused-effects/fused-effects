@@ -5,6 +5,7 @@ module Control.Effect.Resumable
 , SomeError(..)
 , runResumable
 , ResumableH(..)
+, runResumableWith
 ) where
 
 import Control.Effect.Handler
@@ -75,6 +76,13 @@ instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableH err m) w
   gen a = ResumableH (gen (Right a))
   alg = algE \/ (ResumableH . alg . handle (Right ()) (either (gen . Left) runResumableH))
     where algE (Resumable err _) = ResumableH (gen (Left (SomeError err)))
+
+
+runResumableWith :: Carrier (Resumable err :+: sig) (carrier m)
+                 => (carrier m a -> m a)
+                 -> Eff (carrier m) a
+                 -> m a
+runResumableWith with = with . interpret
 
 
 -- $setup
