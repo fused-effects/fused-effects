@@ -48,6 +48,10 @@ instance Eq1 err => Eq (SomeError err) where
 instance Ord1 err => Ord (SomeError err) where
   SomeError exc1 `compare` SomeError exc2 = liftCompare (const (const EQ)) exc1 exc2
 
+-- | Showing for 'SomeError' is determined by a 'Show1' instance for the error type.
+--
+--   prop> show (SomeError (Identity a)) == "SomeError (Identity )"
+--   prop> show (SomeError (Const a)) == ("SomeError (Const " ++ showsPrec 11 a ")")
 instance (Show1 err) => Show (SomeError err) where
   showsPrec d (SomeError err) = showsUnaryWith (liftShowsPrec (const (const id)) (const id)) "SomeError" d err
 
