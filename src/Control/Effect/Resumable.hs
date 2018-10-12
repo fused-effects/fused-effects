@@ -23,7 +23,7 @@ instance HFunctor (Resumable err) where
 instance Effect (Resumable err) where
   handle state handler (Resumable err k) = Resumable err (handler . (<$ state) . k)
 
--- | Throw an exception which can be resumed with a value of its result type.
+-- | Throw an error which can be resumed with a value of its result type.
 --
 --   prop> run (runResumable (throwResumable (Identity a))) == Left (SomeError (Identity a))
 throwResumable :: (Member (Resumable err) sig, Carrier sig m) => err a -> m a
