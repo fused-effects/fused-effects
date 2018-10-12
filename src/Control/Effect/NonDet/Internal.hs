@@ -13,6 +13,7 @@ data NonDet m k
 
 instance HFunctor NonDet where
   hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Effect NonDet where
   handle _     _       Empty      = Empty

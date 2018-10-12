@@ -23,6 +23,7 @@ data Trace m k = Trace String k
 
 instance HFunctor Trace where
   hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Effect Trace where
   handle state handler (Trace s k) = Trace s (handler (k <$ state))

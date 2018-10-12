@@ -11,6 +11,7 @@ newtype Fail m k = Fail String
 
 instance HFunctor Fail where
   hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Effect Fail where
   handle _ _ = coerce

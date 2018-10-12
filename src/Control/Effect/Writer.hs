@@ -17,6 +17,7 @@ data Writer w m k = Tell w k
 
 instance HFunctor (Writer w) where
   hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Effect (Writer w) where
   handle state handler (Tell w k) = Tell w (handler (k <$ state))
