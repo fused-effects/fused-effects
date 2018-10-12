@@ -79,6 +79,11 @@ instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableH err m) w
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given 'Carrier' instance.
+--
+--   The passed function should be the eliminator for the carrier type, e.g. the record selector for a @newtype@. While this is less convenient than simply passing in a higher-order function with which to resume errors, defining a carrier @newtype@ has two major advantages:
+--
+--   1. It works, and
+--   2. Carrier algebras are subject to fusion, making them vastly more efficient than would otherwise be possible.
 runResumableWith :: Carrier (Resumable err :+: sig) (carrier m)
                  => (carrier m a -> m a)
                  -> Eff (carrier m) a
