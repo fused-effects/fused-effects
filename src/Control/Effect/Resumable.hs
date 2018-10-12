@@ -82,6 +82,11 @@ instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableH err m) w
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
 --
 --   Note that this may be less efficient than defining a specialized carrier type and instance specifying the handler’s behaviour directly. Performance-critical code may wish to do that to maximize the opportunities for fusion and inlining.
+--
+--   >>> data Err a where Err :: Int -> Err Int
+--
+--   prop> run (runResumableWith (\ (Err b) -> pure (1 + b)) (pure a)) == a
+--   prop> run (runResumableWith (\ (Err b) -> pure (1 + b)) (throwResumable (Err a))) == 1 + a
 runResumableWith :: (Carrier sig m, Monad m)
                  => (forall x . err x -> m x)
                  -> Eff (ResumableWithH err m) a
@@ -102,6 +107,7 @@ instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableW
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XGADTs
 -- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
