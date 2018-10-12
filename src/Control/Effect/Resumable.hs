@@ -78,6 +78,7 @@ instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableH err m) w
     where algE (Resumable err _) = ResumableH (gen (Left (SomeError err)))
 
 
+-- | Run a 'Resumable' effect, resuming uncaught errors with a given 'Carrier' instance.
 runResumableWith :: Carrier (Resumable err :+: sig) (carrier m)
                  => (carrier m a -> m a)
                  -> Eff (carrier m) a
