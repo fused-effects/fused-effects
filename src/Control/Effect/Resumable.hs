@@ -10,6 +10,7 @@ module Control.Effect.Resumable
 import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.Sum
+import Data.Functor.Classes
 
 data Resumable exc m k
   = forall a . Resumable (exc a) (a -> k)
@@ -29,6 +30,9 @@ throwResumable exc = send (Resumable exc gen)
 
 data SomeExc (exc :: * -> *)
   = forall a . SomeExc (exc a)
+
+instance Eq1 exc => Eq (SomeExc exc) where
+  SomeExc exc1 == SomeExc exc2 = liftEq (const (const True)) exc1 exc2
 
 
 runResumable :: Effectful sig m => Eff (ResumableH exc m) a -> m (Either (SomeExc exc) a)
