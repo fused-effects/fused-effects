@@ -3,7 +3,7 @@ module Control.Effect.Resumable
 ( Resumable(..)
 ) where
 
-data Resumable exc k
+data Resumable exc m k
   = forall a . Resumable (exc a) (a -> k)
 
-deriving instance Functor (Resumable exc)
+deriving instance Functor (Resumable exc m)
