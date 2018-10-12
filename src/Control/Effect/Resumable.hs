@@ -68,12 +68,12 @@ instance (Show1 err) => Show (SomeError err) where
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runResumable (pure a)) == Right @(SomeError Identity) @Int a
-runResumable :: Effectful sig m => Eff (ResumableC err m) a -> m (Either (SomeError err) a)
+runResumable :: (Carrier sig m, Effect sig) => Eff (ResumableC err m) a -> m (Either (SomeError err) a)
 runResumable = runResumableC . interpret
 
 newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError err) a) }
 
-instance Effectful sig m => Carrier (Resumable err :+: sig) (ResumableC err m) where
+instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   gen a = ResumableC (gen (Right a))
   alg = algE \/ (ResumableC . alg . handle (Right ()) (either (gen . Left) runResumableC))
     where algE (Resumable err _) = ResumableC (gen (Left (SomeError err)))

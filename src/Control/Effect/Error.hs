@@ -46,12 +46,12 @@ catchError m h = send (Catch m h gen)
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runError (pure a)) == Right @Int @Int a
-runError :: Effectful sig m => Eff (ErrorC exc m) a -> m (Either exc a)
+runError :: (Carrier sig m, Effect sig, Monad m) => Eff (ErrorC exc m) a -> m (Either exc a)
 runError = runErrorC . interpret
 
 newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
 
-instance Effectful sig m => Carrier (Error e :+: sig) (ErrorC e m) where
+instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
   gen a = ErrorC (pure (Right a))
   alg = algE \/ (ErrorC . alg . handle (Right ()) (either (pure . Left) runErrorC))
     where algE (Throw e)     = ErrorC (pure (Left e))

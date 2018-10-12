@@ -30,13 +30,13 @@ tell w = send (Tell w (gen ()))
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --
 --   prop> run (runWriter (tell (Sum a) *> pure b)) == (Sum a, b)
-runWriter :: (Effectful sig m, Monoid w) => Eff (WriterC w m) a -> m (w, a)
+runWriter :: (Carrier sig m, Effect sig, Functor m, Monoid w) => Eff (WriterC w m) a -> m (w, a)
 runWriter m = runWriterC (interpret m)
 
 newtype WriterC w m a = WriterC { runWriterC :: m (w, a) }
 
-instance (Monoid w, Effectful sig m) => Carrier (Writer w :+: sig) (WriterC w m) where
-  gen a = WriterC (pure (mempty, a))
+instance (Monoid w, Carrier sig m, Effect sig, Functor m) => Carrier (Writer w :+: sig) (WriterC w m) where
+  gen a = WriterC (gen (mempty, a))
   alg = algW \/ (WriterC . alg . handle (mempty, ()) (uncurry runWriter'))
     where algW (Tell w k) = WriterC (first (w <>) <$> runWriterC k)
           runWriter' w = fmap (first (w <>)) . runWriterC

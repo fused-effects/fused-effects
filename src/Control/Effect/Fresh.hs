@@ -42,13 +42,13 @@ resetFresh m = send (Reset m gen)
 --
 --   prop> run (runFresh (replicateM n fresh)) == [0..pred n]
 --   prop> run (runFresh (replicateM n fresh *> pure b)) == b
-runFresh :: Effectful sig m => Eff (FreshC m) a -> m a
+runFresh :: (Carrier sig m, Effect sig, Monad m) => Eff (FreshC m) a -> m a
 runFresh = fmap snd . flip runFreshC 0 . interpret
 
 newtype FreshC m a = FreshC { runFreshC :: Int -> m (Int, a) }
 
-instance Effectful sig m => Carrier (Fresh :+: sig) (FreshC m) where
-  gen a = FreshC (\ i -> pure (i, a))
+instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fresh :+: sig) (FreshC m) where
+  gen a = FreshC (\ i -> gen (i, a))
   alg = algF \/ algOther
     where algF (Fresh   k) = FreshC (\ i -> runFreshC (k i) (succ i))
           algF (Reset m k) = FreshC (\ i -> runFreshC m i >>= \ (_, a) -> runFreshC (k a) i)

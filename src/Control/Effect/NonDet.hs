@@ -19,15 +19,15 @@ import Control.Monad (join)
 --
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
-runNonDet :: (Alternative f, Monad f, Traversable f, Effectful sig m) => Eff (AltC f m) a -> m (f a)
+runNonDet :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Eff (AltC f m) a -> m (f a)
 runNonDet = runAltC . interpret
 
 newtype AltC f m a = AltC { runAltC :: m (f a) }
 
-instance (Alternative f, Monad f, Traversable f, Effectful sig m) => Carrier (NonDet :+: sig) (AltC f m) where
-  gen a = AltC (pure (pure a))
+instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
+  gen a = AltC (gen (pure a))
   alg = algND \/ (AltC . alg . handle (pure ()) (fmap join . traverse runAltC))
-    where algND Empty      = AltC (pure empty)
+    where algND Empty      = AltC (gen empty)
           algND (Choose k) = AltC (liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
 
 
