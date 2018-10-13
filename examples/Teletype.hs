@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures,
   MultiParamTypeClasses, TypeOperators, UndecidableInstances, TypeApplications,
   TypeFamilyDependencies, DataKinds, LambdaCase, ScopedTypeVariables, PolyKinds,
-  RankNTypes, DefaultSignatures, AllowAmbiguousTypes #-}
+  RankNTypes, DefaultSignatures #-}
 
 module Teletype where
 
@@ -10,7 +10,6 @@ import Prelude hiding (read)
 import Control.Effect
 import Control.Monad.IO.Class
 import Data.Coerce
-import GHC.TypeLits
 import Test.Hspec
 import Test.Hspec.QuickCheck
 
