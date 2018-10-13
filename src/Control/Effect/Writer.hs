@@ -36,7 +36,7 @@ runWriter m = runWriterC (interpret m)
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
 --
---   prop> run (runWriter (tell (Sum a) *> pure b)) == Sum a
+--   prop> run (execWriter (tell (Sum a) *> pure b)) == Sum a
 execWriter :: (Carrier sig m, Effect sig, Functor m, Monoid w) => Eff (WriterC w m) a -> m w
 execWriter m = fmap fst (runWriterC (interpret m))
 
