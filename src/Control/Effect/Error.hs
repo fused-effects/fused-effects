@@ -8,8 +8,8 @@ module Control.Effect.Error
 ) where
 
 import Control.Effect.Handler
-import Control.Effect.Sum
 import Control.Effect.Internal
+import Control.Effect.Sum
 import Control.Monad ((<=<))
 
 data Error exc m k
