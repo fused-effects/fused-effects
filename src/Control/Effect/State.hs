@@ -6,6 +6,8 @@ module Control.Effect.State
 , put
 , modify
 , runState
+, evalState
+, execState
 , StateC(..)
 ) where
 
@@ -61,6 +63,19 @@ modify f = do
 --   prop> run (runState a (pure b)) == (a, b)
 runState :: (Carrier sig m, Effect sig) => s -> Eff (StateC s m) a -> m (s, a)
 runState s m = runStateC (interpret m) s
+
+-- | Run a 'State' effect, yielding the result value and discarding the final state.
+--
+--   prop> run (evalState a (pure b)) == b
+evalState :: (Carrier sig m, Effect sig, Functor m) => s -> Eff (StateC s m) a -> m a
+evalState s m = fmap snd (runStateC (interpret m) s)
+
+-- | Run a 'State' effect, yielding the final state and discarding the return value.
+--
+--   prop> run (execState a (pure b)) == a
+execState :: (Carrier sig m, Effect sig, Functor m) => s -> Eff (StateC s m) a -> m s
+execState s m = fmap fst (runStateC (interpret m) s)
+
 
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
