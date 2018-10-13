@@ -28,7 +28,7 @@ rethrowing m = liftIO (Exc.try m) >>= either (throwError . Exc.toException @Exc.
 --
 --   * Exceptions in @before@ and @after@ are thrown in IO.
 --   * @after@ is called on IO exceptions in @handler@, and then rethrown in IO.
---   * If @handler@ completes successfully, @after@ is called
+--   * If @handler@ completes successfully, @after@ is called.
 --
 --   Call 'catchIO' at the call site if you want to recover.
 bracket :: ( Member (Lift IO) sig
