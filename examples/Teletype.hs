@@ -37,34 +37,34 @@ write :: (Member Teletype sig, Carrier sig m) => String -> m ()
 write s = send (Write s (gen ()))
 
 
-runTeletypeIO :: (MonadIO m, Carrier sig m) => Eff (TeletypeIOH m) a -> m a
-runTeletypeIO = runTeletypeIOH . interpret
+runTeletypeIO :: (MonadIO m, Carrier sig m) => Eff (TeletypeIOC m) a -> m a
+runTeletypeIO = runTeletypeIOC . interpret
 
-newtype TeletypeIOH m a = TeletypeIOH { runTeletypeIOH :: m a }
+newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 
-instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOH m) where
-  gen = TeletypeIOH . gen
+instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
+  gen = TeletypeIOC . gen
   alg = algT \/ algOther
-    where algT (Read    k) = TeletypeIOH (liftIO getLine >>= runTeletypeIOH . k)
-          algT (Write s k) = TeletypeIOH (liftIO (putStrLn s) >> runTeletypeIOH k)
-          algOther op = TeletypeIOH (alg (handlePure runTeletypeIOH op))
+    where algT (Read    k) = TeletypeIOC (liftIO getLine >>= runTeletypeIOC . k)
+          algT (Write s k) = TeletypeIOC (liftIO (putStrLn s) >> runTeletypeIOC k)
+          algOther op = TeletypeIOC (alg (handlePure runTeletypeIOC op))
 
 
-runTeletypeRet :: (Carrier sig m, Effect sig, Monad m) => [String] -> Eff (TeletypeRetH m) a -> m (([String], [String]), a)
-runTeletypeRet s m = runTeletypeRetH (interpret m) s
+runTeletypeRet :: (Carrier sig m, Effect sig, Monad m) => [String] -> Eff (TeletypeRetC m) a -> m (([String], [String]), a)
+runTeletypeRet s m = runTeletypeRetC (interpret m) s
 
-newtype TeletypeRetH m a = TeletypeRetH { runTeletypeRetH :: [String] -> m (([String], [String]), a) }
+newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: [String] -> m (([String], [String]), a) }
 
-instance (Monad m, Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetH m) where
-  gen a = TeletypeRetH (\ i -> gen ((i, []), a))
+instance (Monad m, Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
+  gen a = TeletypeRetC (\ i -> gen ((i, []), a))
   alg = algT \/ algOther
-    where algT (Read    k) = TeletypeRetH (\ i -> case i of
-            []  -> runTeletypeRetH (k "") []
-            h:t -> runTeletypeRetH (k h)  t)
-          algT (Write s k) = TeletypeRetH (\ i -> do
-            ((i, out), a) <- runTeletypeRetH k i
+    where algT (Read    k) = TeletypeRetC (\ i -> case i of
+            []  -> runTeletypeRetC (k "") []
+            h:t -> runTeletypeRetC (k h)  t)
+          algT (Write s k) = TeletypeRetC (\ i -> do
+            ((i, out), a) <- runTeletypeRetC k i
             pure ((i, s:out), a))
-          algOther op = TeletypeRetH (\ i -> alg (handle ((i, []), ()) mergeResults op))
+          algOther op = TeletypeRetC (\ i -> alg (handle ((i, []), ()) mergeResults op))
           mergeResults ((i, o), m) = do
-            ((i', o'), a) <- runTeletypeRetH m i
+            ((i', o'), a) <- runTeletypeRetC m i
             pure ((i', o ++ o'), a)
