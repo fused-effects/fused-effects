@@ -20,6 +20,7 @@ library
                      , Control.Effect.Fresh
                      , Control.Effect.Handler
                      , Control.Effect.Internal
+                     , Control.Effect.IO
                      , Control.Effect.Lift
                      , Control.Effect.Lift.Internal
                      , Control.Effect.NonDet
