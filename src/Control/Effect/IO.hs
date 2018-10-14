@@ -2,6 +2,7 @@
 module Control.Effect.IO
 ( catchIO
 , bracket
+, BracketC(..)
 ) where
 
 import Control.Effect.Handler
