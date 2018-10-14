@@ -1,4 +1,4 @@
-{-# LANGUAGE GADTs, ScopedTypeVariables, TypeOperators #-}
+{-# LANGUAGE GADTs, ScopedTypeVariables, TypeApplications, TypeOperators #-}
 module Control.Effect.IO.Spec where
 
 import Control.Effect
@@ -11,7 +11,7 @@ spec :: Spec
 spec = do
   describe "rethrowing" $ do
     it "bridges exceptions into Error effects" $ do
-      exc <- runM (runError (rethrowing (error "error") *> pure ()))
+      exc <- runM (runError ((error "error" `catchIO` (throwError . Exc.toException @Exc.SomeException)) *> pure ()))
       first extract exc `shouldBe` Left (Just "error")
 
 

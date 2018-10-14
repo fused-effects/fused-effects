@@ -1,10 +1,9 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeApplications, UndecidableInstances #-}
 module Control.Effect.IO
-( rethrowing
+( catchIO
 , bracket
 ) where
 
-import Control.Effect.Error
 import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.Lift
@@ -12,16 +11,14 @@ import Control.Effect.Sum
 import qualified Control.Exception as Exc
 import Control.Monad.IO.Class
 
--- | Lift an 'IO' action into a carrier, catching and rethrowing any exceptions it throws into an 'Error' effect.
---
---   If you need more granular control over the types of exceptions caught, use 'catchIO' and rethrow in the handler.
-rethrowing :: ( Member (Error Exc.SomeException) sig
-              , MonadIO m
-              , Carrier sig m
-              )
-           => IO a
-           -> m a
-rethrowing m = liftIO (Exc.try m) >>= either (throwError . Exc.toException @Exc.SomeException) pure
+-- | Generalize 'Exc.catch' to other 'MonadIO' contexts for the handler and result.
+catchIO :: ( Exc.Exception exc
+           , MonadIO m
+           )
+        => IO a
+        -> (exc -> m a)
+        -> m a
+catchIO m handler = liftIO (Exc.try m) >>= either handler pure
 
 
 -- | The semantics of @bracket before after handler@ are as follows:
