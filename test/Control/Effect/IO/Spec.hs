@@ -9,7 +9,7 @@ import Test.Hspec
 
 spec :: Spec
 spec = do
-  describe "rethrowing" $ do
+  describe "catchIO" $ do
     it "bridges exceptions into Error effects" $ do
       exc <- runM (runError ((error "error" `catchIO` (throwError . Exc.toException @Exc.SomeException)) *> pure ()))
       first extract exc `shouldBe` Left (Just "error")
