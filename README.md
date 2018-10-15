@@ -18,14 +18,14 @@ data Teletype m k
   | Write String k
   deriving (Functor)
 
-newtype TeletypeIOH m a = TeletypeIOH { runTeletypeIOH :: m a }
+newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 ```
 
 Declaring a `Carrier` instance will fail:
 
 ```haskell
 instance (Monad m, Carrier sig m, Effect sig)
-    => Carrier (Teletype :+: sig) (TeletypeRetH m) where…
+    => Carrier (Teletype :+: sig) (TeletypeIOC m) where…
 ```
 
 ```
@@ -33,7 +33,7 @@ instance (Monad m, Carrier sig m, Effect sig)
     but ‘Teletype :+: sig’ has kind ‘* -> * -> *’
 • In the first argument of ‘Carrier’, namely ‘(Teletype :+: sig)’
   In the instance declaration for
-    ‘Carrier (Teletype :+: sig) (TeletypeIOH m)
+    ‘Carrier (Teletype :+: sig) (TeletypeIOC m)
 ```
 
 This is because the `m` parameter to `Teletype` is inferred to be of kind `*`:
