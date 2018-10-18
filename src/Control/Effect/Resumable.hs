@@ -70,7 +70,7 @@ instance (Show1 err) => Show (SomeError err) where
 --
 --   prop> pure (rnf (SomeError (Identity (error "error"))) :: SomeError Identity) `shouldThrow` errorCall "error"
 instance NFData1 err => NFData (SomeError err) where
-   rnf (SomeError err) = liftRnf (\a -> seq a ()) err
+  rnf (SomeError err) = liftRnf (\a -> seq a ()) err
 
 
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
