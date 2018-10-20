@@ -15,6 +15,9 @@
 
 ## Overview
 
+`higher-order-effects` is an effect system for Haskell emphasizing expressivity and efficiency. The former is achieved by encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, while the latter is the result of [fusing](#fusion) effect handlers all the way through computations.
+
+
 ### Algebraic effects
 
 ### Higher-order effects
