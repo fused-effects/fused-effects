@@ -6,8 +6,8 @@ module Control.Effect.Fail
 , FailC(..)
 ) where
 
+import Control.Effect.Carrier
 import Control.Effect.Fail.Internal
-import Control.Effect.Handler
 import Control.Effect.Internal
 import Control.Effect.Sum
 import Control.Monad.Fail
@@ -21,9 +21,9 @@ runFail = runFailC . interpret
 newtype FailC m a = FailC { runFailC :: m (Either String a) }
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
-  gen a = FailC (gen (Right a))
-  alg = algF \/ (FailC . alg . handle (Right ()) (either (gen . Left) runFailC))
-    where algF (Fail s) = FailC (gen (Left s))
+  ret a = FailC (ret (Right a))
+  eff = FailC . (alg \/ eff . handle (Right ()) (either (ret . Left) runFailC))
+    where alg (Fail s) = ret (Left s)
 
 
 -- $setup

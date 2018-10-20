@@ -5,7 +5,7 @@ module Control.Effect.Lift
 , LiftC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Lift.Internal
 
@@ -16,5 +16,5 @@ runM = runLiftC . interpret
 newtype LiftC m a = LiftC { runLiftC :: m a }
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
-  gen = LiftC . pure
-  alg = LiftC . (>>= runLiftC) . unLift
+  ret = LiftC . pure
+  eff = LiftC . (>>= runLiftC) . unLift

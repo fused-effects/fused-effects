@@ -3,7 +3,7 @@ module Control.Effect.Lift.Internal
 ( Lift(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Data.Coerce
 
 newtype Lift sig m k = Lift { unLift :: sig k }

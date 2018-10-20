@@ -8,7 +8,7 @@ module Control.Effect.Reader
 , ReaderC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 
@@ -30,7 +30,7 @@ instance Effect (Reader r) where
 --
 --   prop> run (runReader a ask) == a
 ask :: (Member (Reader r) sig, Carrier sig m) => m r
-ask = send (Ask gen)
+ask = send (Ask ret)
 
 -- | Project a function out of the current environment value.
 --
@@ -43,7 +43,7 @@ asks f = fmap f ask
 --   prop> run (runReader a (local (applyFun f) ask)) == applyFun f a
 --   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) == (a, applyFun f a, a)
 local :: (Member (Reader r) sig, Carrier sig m) => (r -> r) -> m a -> m a
-local f m = send (Local f m gen)
+local f m = send (Local f m ret)
 
 
 -- | Run a 'Reader' effect with the passed environment value.
@@ -55,11 +55,10 @@ runReader r m = runReaderC (interpret m) r
 newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
-  gen a = ReaderC (const (gen a))
-  alg = algR \/ algOther
-    where algR (Ask       k) = ReaderC (\ r -> runReaderC (k r) r)
-          algR (Local f m k) = ReaderC (\ r -> runReaderC m (f r) >>= flip runReaderC r . k)
-          algOther op = ReaderC (\ r -> alg (handlePure (flip runReaderC r) op))
+  ret a = ReaderC (const (ret a))
+  eff op = ReaderC (\ r -> (alg r \/ eff . handlePure (flip runReaderC r)) op)
+    where alg r (Ask       k) = runReaderC (k r) r
+          alg r (Local f m k) = runReaderC m (f r) >>= flip runReaderC r . k
 
 
 -- $setup

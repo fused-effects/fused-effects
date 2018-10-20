@@ -3,7 +3,7 @@ module Control.Effect.Fail.Internal
 ( Fail(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Data.Coerce
 
 newtype Fail m k = Fail String

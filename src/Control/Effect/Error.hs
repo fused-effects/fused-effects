@@ -7,7 +7,7 @@ module Control.Effect.Error
 , ErrorC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 import Control.Monad ((<=<))
@@ -40,7 +40,7 @@ throwError = send . Throw
 --   prop> run (runError (throwError a `catchError` pure)) == Right @Int @Int a
 --   prop> run (runError (throwError a `catchError` (throwError @Int))) == Left @Int @Int a
 catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
-catchError m h = send (Catch m h gen)
+catchError m h = send (Catch m h ret)
 
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
@@ -52,10 +52,10 @@ runError = runErrorC . interpret
 newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
-  gen a = ErrorC (pure (Right a))
-  alg = algE \/ (ErrorC . alg . handle (Right ()) (either (pure . Left) runErrorC))
-    where algE (Throw e)     = ErrorC (pure (Left e))
-          algE (Catch m h k) = ErrorC (runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k))
+  ret a = ErrorC (pure (Right a))
+  eff = ErrorC . (alg \/ eff . handle (Right ()) (either (pure . Left) runErrorC))
+    where alg (Throw e)     = pure (Left e)
+          alg (Catch m h k) = runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k)
 
 
 -- $setup
