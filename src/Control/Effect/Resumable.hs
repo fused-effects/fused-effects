@@ -30,7 +30,7 @@ instance Effect (Resumable err) where
 --
 --   prop> run (runResumable (throwResumable (Identity a))) == Left (SomeError (Identity a))
 throwResumable :: (Member (Resumable err) sig, Carrier sig m) => err a -> m a
-throwResumable err = send (Resumable err gen)
+throwResumable err = send (Resumable err handleReturn)
 
 
 -- | An error at some existentially-quantified type index.
@@ -74,9 +74,9 @@ runResumable = runResumableC . interpret
 newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError err) a) }
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
-  gen a = ResumableC (gen (Right a))
-  alg = algE \/ (ResumableC . alg . handle (Right ()) (either (gen . Left) runResumableC))
-    where algE (Resumable err _) = ResumableC (gen (Left (SomeError err)))
+  handleReturn a = ResumableC (handleReturn (Right a))
+  alg = algE \/ (ResumableC . alg . handle (Right ()) (either (handleReturn . Left) runResumableC))
+    where algE (Resumable err _) = ResumableC (handleReturn (Left (SomeError err)))
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
@@ -99,7 +99,7 @@ runResumableWithC :: (forall x . err x -> m x) -> ResumableWithC err m a -> m a
 runResumableWithC f (ResumableWithC m) = m f
 
 instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
-  gen a = ResumableWithC (\ _ -> gen a)
+  handleReturn a = ResumableWithC (\ _ -> handleReturn a)
   alg = algR \/ algOther
     where algR (Resumable err k) = ResumableWithC (\ f -> f err >>= runResumableWithC f . k)
           algOther op = ResumableWithC (\ f -> alg (handlePure (runResumableWithC f) op))

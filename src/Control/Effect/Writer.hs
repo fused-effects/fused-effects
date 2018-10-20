@@ -27,7 +27,7 @@ instance Effect (Writer w) where
 --
 --   prop> fst (run (runWriter (mapM_ (tell . Sum) (0 : ws)))) == foldMap Sum ws
 tell :: (Member (Writer w) sig, Carrier sig m) => w -> m ()
-tell w = send (Tell w (gen ()))
+tell w = send (Tell w (handleReturn ()))
 
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
@@ -46,7 +46,7 @@ execWriter m = fmap fst (runWriterC (interpret m))
 newtype WriterC w m a = WriterC { runWriterC :: m (w, a) }
 
 instance (Monoid w, Carrier sig m, Effect sig, Functor m) => Carrier (Writer w :+: sig) (WriterC w m) where
-  gen a = WriterC (gen (mempty, a))
+  handleReturn a = WriterC (handleReturn (mempty, a))
   alg = algW \/ (WriterC . alg . handle (mempty, ()) (uncurry runWriter'))
     where algW (Tell w k) = WriterC (first (w <>) <$> runWriterC k)
           runWriter' w = fmap (first (w <>)) . runWriterC

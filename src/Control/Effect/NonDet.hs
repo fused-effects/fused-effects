@@ -25,9 +25,9 @@ runNonDet = runAltC . interpret
 newtype AltC f m a = AltC { runAltC :: m (f a) }
 
 instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
-  gen a = AltC (gen (pure a))
+  handleReturn a = AltC (handleReturn (pure a))
   alg = algND \/ (AltC . alg . handle (pure ()) (fmap join . traverse runAltC))
-    where algND Empty      = AltC (gen empty)
+    where algND Empty      = AltC (handleReturn empty)
           algND (Choose k) = AltC (liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
 
 
