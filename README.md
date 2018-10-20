@@ -22,6 +22,11 @@ Readers already familiar with effect systems may wish to start with the [usage](
 
 ### Algebraic effects
 
+In `higher-order-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them. Thus, a program written using the syntax of an effect can be given different meanings by using different effect handlers.
+
+These roles are performed by the effect and carrier types, respectively. Effects are datatypes with one constructor for each action. Carriers are generally `newtype`s, with a `Carrier` instance specifying how an effect’s constructors should be interpreted. Each carrier handles one effect, but multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax.
+
+
 ### Higher-order effects
 
 ### Fusion
