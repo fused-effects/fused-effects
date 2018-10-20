@@ -44,9 +44,9 @@ newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC ::
 
 instance (Carrier (State r :+: sig) m, Effect sig, Monad m) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
   ret = ReinterpretReaderC . ret
-  eff = ReinterpretReaderC . (algR \/ eff . R . handlePure runReinterpretReaderC)
-    where algR (Ask       k) = get >>= runReinterpretReaderC . k
-          algR (Local f m k) = do
+  eff = ReinterpretReaderC . (alg \/ eff . R . handlePure runReinterpretReaderC)
+    where alg (Ask       k) = get >>= runReinterpretReaderC . k
+          alg (Local f m k) = do
             a <- get
             put (f a)
             v <- runReinterpretReaderC m

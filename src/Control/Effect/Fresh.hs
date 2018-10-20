@@ -49,9 +49,9 @@ newtype FreshC m a = FreshC { runFreshC :: Int -> m (Int, a) }
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fresh :+: sig) (FreshC m) where
   ret a = FreshC (\ i -> ret (i, a))
-  eff op = FreshC (\ i -> (algF i \/ eff . handle (i, ()) (uncurry (flip runFreshC))) op)
-    where algF i (Fresh   k) = runFreshC (k i) (succ i)
-          algF i (Reset m k) = runFreshC m i >>= \ (_, a) -> runFreshC (k a) i
+  eff op = FreshC (\ i -> (alg i \/ eff . handle (i, ()) (uncurry (flip runFreshC))) op)
+    where alg i (Fresh   k) = runFreshC (k i) (succ i)
+          alg i (Reset m k) = runFreshC m i >>= \ (_, a) -> runFreshC (k a) i
 
 
 -- $setup

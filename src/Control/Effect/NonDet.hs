@@ -26,9 +26,9 @@ newtype AltC f m a = AltC { runAltC :: m (f a) }
 
 instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
   ret a = AltC (ret (pure a))
-  eff = AltC . (algND \/ eff . handle (pure ()) (fmap join . traverse runAltC))
-    where algND Empty      = ret empty
-          algND (Choose k) = liftA2 (<|>) (runAltC (k True)) (runAltC (k False))
+  eff = AltC . (alg \/ eff . handle (pure ()) (fmap join . traverse runAltC))
+    where alg Empty      = ret empty
+          alg (Choose k) = liftA2 (<|>) (runAltC (k True)) (runAltC (k False))
 
 
 -- $setup
