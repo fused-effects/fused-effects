@@ -1,6 +1,9 @@
 # A fast, flexible effect system for Haskell
 
 - [Overview](#overview)
+  - [Algebraic effects](#algebraic-effects)
+  - [Higher-order effects](#higher-order-effects)
+  - [Fusion](#fusion)
 - [Usage](#usage)
   - [Using built-in effects](#using-built-in-effects)
   - [Running effects](#running-effects)
@@ -17,6 +20,13 @@
 [Effect Handlers in Scope]: http://www.cs.ox.ac.uk/people/nicolas.wu/papers/Scope.pdf
 [Monad Transformers and Modular Algebraic Effects: What Binds Them Together]: http://www.cs.kuleuven.be/publicaties/rapporten/cw/CW699.pdf
 [Fusion for Free—Efficient Algebraic Effect Handlers]: https://people.cs.kuleuven.be/~tom.schrijvers/Research/papers/mpc2015.pdf
+
+
+### Algebraic effects
+
+### Higher-order effects
+
+### Fusion
 
 
 ## Usage
