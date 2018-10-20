@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators #-}
+{-# LANGUAGE ConstraintKinds, DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators #-}
 module Control.Effect.Sum
 ( (:+:)(..)
 , (\/)

@@ -22,6 +22,15 @@ An encoding of higher-order algebraic effects following the recipes in _[Effect 
 
 ### Using built-in effects
 
+Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `higher-order-effects`, this is done by means of a `Member` constraint to require the effect’s presence in a _signature_, and a `Carrier` constraint to relate the signature to the `Monad`. For example, to use a `State` effect managing a `String`, one would write:
+
+```haskell
+action :: (Member (State String) sig, Carrier sig m) => m ()
+```
+
+(Additional constraints may be necessary depending on the precise operations required, e.g. to make the `Monad` methods available.)
+
+
 ### Defining new effects
 
 
