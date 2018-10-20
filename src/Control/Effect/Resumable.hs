@@ -99,7 +99,7 @@ runResumableWithC :: (forall x . err x -> m x) -> ResumableWithC err m a -> m a
 runResumableWithC f (ResumableWithC m) = m f
 
 instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
-  handleReturn a = ResumableWithC (\ _ -> handleReturn a)
+  handleReturn a = ResumableWithC (const (handleReturn a))
   alg = algR \/ algOther
     where algR (Resumable err k) = ResumableWithC (\ f -> f err >>= runResumableWithC f . k)
           algOther op = ResumableWithC (\ f -> alg (handlePure (runResumableWithC f) op))
