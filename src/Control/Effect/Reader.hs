@@ -8,7 +8,7 @@ module Control.Effect.Reader
 , ReaderC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 

@@ -5,7 +5,7 @@ module Control.Effect.Lift
 , LiftC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Lift.Internal
 

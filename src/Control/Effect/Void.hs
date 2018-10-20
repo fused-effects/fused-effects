@@ -5,7 +5,7 @@ module Control.Effect.Void
 , VoidC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Internal
 
 data Void m k

@@ -22,7 +22,7 @@ library
                      , Control.Effect.Fail
                      , Control.Effect.Fail.Internal
                      , Control.Effect.Fresh
-                     , Control.Effect.Handler
+                     , Control.Effect.Carrier
                      , Control.Effect.Internal
                      , Control.Effect.Lift
                      , Control.Effect.Lift.Internal

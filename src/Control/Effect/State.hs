@@ -11,7 +11,7 @@ module Control.Effect.State
 , StateC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 import Data.Coerce

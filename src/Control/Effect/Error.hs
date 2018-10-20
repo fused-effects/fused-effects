@@ -7,7 +7,7 @@ module Control.Effect.Error
 , ErrorC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 import Control.Monad ((<=<))

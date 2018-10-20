@@ -6,7 +6,7 @@ module Control.Effect.Internal
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Fail.Internal
 import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal

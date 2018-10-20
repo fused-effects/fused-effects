@@ -9,7 +9,7 @@ module Control.Effect.Resumable
 , ResumableWithC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Sum
 import Data.Functor.Classes

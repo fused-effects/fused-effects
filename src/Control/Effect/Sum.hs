@@ -6,7 +6,7 @@ module Control.Effect.Sum
 , send
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 
 data (f :+: g) m k
   = L (f m k)

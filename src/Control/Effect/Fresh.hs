@@ -7,7 +7,7 @@ module Control.Effect.Fresh
 , FreshC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Sum
 

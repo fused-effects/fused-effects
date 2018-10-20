@@ -10,7 +10,7 @@ module Control.Effect.Trace
 , ReturningC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Sum
 import Control.Monad.IO.Class

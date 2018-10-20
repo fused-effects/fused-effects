@@ -1,5 +1,5 @@
 {-# LANGUAGE DefaultSignatures, FunctionalDependencies, RankNTypes #-}
-module Control.Effect.Handler
+module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
 , Carrier(..)
