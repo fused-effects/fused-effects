@@ -36,6 +36,8 @@ Multiple effects can be required simply by adding their corresponding `Member` c
 action :: (Member (State String) sig, Member (Reader Int) sig, Carrier sig m) => m ()
 ```
 
+Different effects make different operations available; see the documentation for individual effects for more information about their operations.
+
 
 ### Defining new effects
 
