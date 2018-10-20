@@ -1,13 +1,13 @@
 # A fast, flexible effect system for Haskell
 
-- [Overview][#overview]
-- [Usage][#usage]
-  - [Using built-in effects][#using-built-in-effects]
-  - [Running effects][#running-effects]
-  - [Defining new effects][#defining-new-effects]
-- [Related work][#related-work]
-  - [Comparison to `mtl`][#comparison-to--mtl-]
-  - [Comparison to `freer-simple`][#comparison-to--freer-simple-]
+- [Overview](#overview)
+- [Usage](#usage)
+  - [Using built-in effects](#using-built-in-effects)
+  - [Running effects](#running-effects)
+  - [Defining new effects](#defining-new-effects)
+- [Related work](#related-work)
+  - [Comparison to `mtl`](#comparison-to--mtl-)
+  - [Comparison to `freer-simple`](#comparison-to--freer-simple-)
 
 
 ## Overview
