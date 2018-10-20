@@ -81,10 +81,10 @@ newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   handleReturn a = StateC (\ s -> handleReturn (s, a))
-  alg = algS \/ algOther
+  handleEffect = algS \/ algOther
     where algS (Get   k) = StateC (\ s -> runStateC (k s) s)
           algS (Put s k) = StateC (\ _ -> runStateC  k    s)
-          algOther op = StateC (\ s -> alg (handle (s, ()) (uncurry (flip runStateC)) op))
+          algOther op = StateC (\ s -> handleEffect (handle (s, ()) (uncurry (flip runStateC)) op))
 
 
 -- $setup

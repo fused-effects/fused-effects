@@ -17,4 +17,4 @@ newtype LiftC m a = LiftC { runLiftC :: m a }
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
   handleReturn = LiftC . pure
-  alg = LiftC . (>>= runLiftC) . unLift
+  handleEffect = LiftC . (>>= runLiftC) . unLift

@@ -47,7 +47,7 @@ newtype WriterC w m a = WriterC { runWriterC :: m (w, a) }
 
 instance (Monoid w, Carrier sig m, Effect sig, Functor m) => Carrier (Writer w :+: sig) (WriterC w m) where
   handleReturn a = WriterC (handleReturn (mempty, a))
-  alg = algW \/ (WriterC . alg . handle (mempty, ()) (uncurry runWriter'))
+  handleEffect = algW \/ (WriterC . handleEffect . handle (mempty, ()) (uncurry runWriter'))
     where algW (Tell w k) = WriterC (first (w <>) <$> runWriterC k)
           runWriter' w = fmap (first (w <>)) . runWriterC
 

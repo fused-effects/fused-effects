@@ -41,7 +41,7 @@ newtype PrintingC m a = PrintingC { runPrintingC :: m a }
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingC m) where
   handleReturn = PrintingC . handleReturn
-  alg = algT \/ (PrintingC . alg . handlePure runPrintingC)
+  handleEffect = algT \/ (PrintingC . handleEffect . handlePure runPrintingC)
     where algT (Trace s k) = PrintingC (liftIO (hPutStrLn stderr s) *> runPrintingC k)
 
 
@@ -55,7 +55,7 @@ newtype IgnoringC m a = IgnoringC { runIgnoringC :: m a }
 
 instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringC m) where
   handleReturn = IgnoringC . handleReturn
-  alg = algT \/ (IgnoringC . alg . handlePure runIgnoringC)
+  handleEffect = algT \/ (IgnoringC . handleEffect . handlePure runIgnoringC)
     where algT (Trace _ k) = k
 
 
@@ -69,9 +69,9 @@ newtype ReturningC m a = ReturningC { runReturningC :: [String] -> m ([String], 
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningC m) where
   handleReturn a = ReturningC (\ s -> handleReturn (s, a))
-  alg = algT \/ algOther
+  handleEffect = algT \/ algOther
     where algT (Trace m k) = ReturningC (runReturningC k . (m :))
-          algOther op = ReturningC (\ s -> alg (handle (s, ()) (uncurry (flip runReturningC)) op))
+          algOther op = ReturningC (\ s -> handleEffect (handle (s, ()) (uncurry (flip runReturningC)) op))
 
 
 -- $setup

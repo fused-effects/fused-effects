@@ -26,4 +26,4 @@ newtype VoidC a = VoidC { runVoidC :: a }
 
 instance Carrier Void VoidC where
   handleReturn = VoidC
-  alg v = case v of {}
+  handleEffect v = case v of {}

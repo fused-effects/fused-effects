@@ -22,7 +22,7 @@ newtype FailC m a = FailC { runFailC :: m (Either String a) }
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
   handleReturn a = FailC (handleReturn (Right a))
-  alg = algF \/ (FailC . alg . handle (Right ()) (either (handleReturn . Left) runFailC))
+  handleEffect = algF \/ (FailC . handleEffect . handle (Right ()) (either (handleReturn . Left) runFailC))
     where algF (Fail s) = FailC (handleReturn (Left s))
 
 

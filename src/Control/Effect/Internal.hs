@@ -75,7 +75,7 @@ instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) wh
 
 instance Carrier sig carrier => Carrier sig (Eff carrier) where
   handleReturn = pure
-  alg op = Eff (\ k -> alg (hmap (runEff handleReturn) (fmap' (runEff k) op)))
+  handleEffect op = Eff (\ k -> handleEffect (hmap (runEff handleReturn) (fmap' (runEff k) op)))
 
 
 -- $setup

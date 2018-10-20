@@ -49,10 +49,10 @@ newtype FreshC m a = FreshC { runFreshC :: Int -> m (Int, a) }
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fresh :+: sig) (FreshC m) where
   handleReturn a = FreshC (\ i -> handleReturn (i, a))
-  alg = algF \/ algOther
+  handleEffect = algF \/ algOther
     where algF (Fresh   k) = FreshC (\ i -> runFreshC (k i) (succ i))
           algF (Reset m k) = FreshC (\ i -> runFreshC m i >>= \ (_, a) -> runFreshC (k a) i)
-          algOther op = FreshC (\ i -> alg (handle (i, ()) (uncurry (flip runFreshC)) op))
+          algOther op = FreshC (\ i -> handleEffect (handle (i, ()) (uncurry (flip runFreshC)) op))
 
 
 -- $setup
