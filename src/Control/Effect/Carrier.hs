@@ -36,6 +36,7 @@ class HFunctor sig => Carrier sig h | h -> sig where
   -- | Wrap a return value.
   ret :: a -> h a
 
+  -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   eff :: sig h (h a) -> h a
 
 
