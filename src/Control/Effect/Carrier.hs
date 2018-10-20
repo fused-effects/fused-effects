@@ -23,7 +23,7 @@ class HFunctor h where
 --   1. Be functorial in their last two arguments, and
 --   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
 class HFunctor sig => Effect sig where
-  -- | Handle any effects in higher-order positions by threading the carrier’s state all the way through to the continuation.
+  -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
   handle :: Functor f
          => f ()
          -> (forall x . f (m x) -> n (f x))
