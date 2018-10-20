@@ -8,6 +8,7 @@
   - [Using built-in effects](#using-built-in-effects)
   - [Running effects](#running-effects)
   - [Defining new effects](#defining-new-effects)
+  - [Defining effect handlers](#defining-effect-handlers)
 - [Related work](#related-work)
   - [Comparison to `mtl`](#comparison-to--mtl-)
   - [Comparison to `freer-simple`](#comparison-to--freer-simple-)
@@ -67,6 +68,8 @@ Different effects make different operations available; see the documentation for
 ### Running effects
 
 ### Defining new effects
+
+### Defining effect handlers
 
 
 ## Related work
