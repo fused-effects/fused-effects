@@ -30,6 +30,12 @@ action :: (Member (State String) sig, Carrier sig m) => m ()
 
 (Additional constraints may be necessary depending on the precise operations required, e.g. to make the `Monad` methods available.)
 
+Multiple effects can be required simply by adding their corresponding `Member` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
+
+```haskell
+action :: (Member (State String) sig, Member (Reader Int) sig, Carrier sig m) => m ()
+```
+
 
 ### Defining new effects
 
