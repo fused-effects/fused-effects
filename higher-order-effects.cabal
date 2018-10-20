@@ -18,11 +18,11 @@ flag build-examples
 
 library
   exposed-modules:     Control.Effect
+                     , Control.Effect.Carrier
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.Fail.Internal
                      , Control.Effect.Fresh
-                     , Control.Effect.Carrier
                      , Control.Effect.Internal
                      , Control.Effect.Lift
                      , Control.Effect.Lift.Internal
