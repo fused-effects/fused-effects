@@ -41,8 +41,8 @@ newtype PrintingC m a = PrintingC { runPrintingC :: m a }
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingC m) where
   ret = PrintingC . ret
-  eff = algT \/ (PrintingC . eff . handlePure runPrintingC)
-    where algT (Trace s k) = PrintingC (liftIO (hPutStrLn stderr s) *> runPrintingC k)
+  eff = PrintingC . (algT \/ eff . handlePure runPrintingC)
+    where algT (Trace s k) = liftIO (hPutStrLn stderr s) *> runPrintingC k
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
