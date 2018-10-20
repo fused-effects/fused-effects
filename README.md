@@ -32,7 +32,7 @@ These roles are performed by the effect and carrier types, respectively. Effects
 
 Unlike most other effect systems, `higher-order-effects` offers _higher-order_ (or _scoped_) effects in addition to first-order algebraic effects. In a strictly first-order algebraic effect system, operations (like `local` or `catchError`) which specify some action limited to a given scope must be implemented as interpreters, hard-coding their meaning in precisely the manner algebraic effects were designed to avoid. By specifying effects as higher-order functors, these operations are likewise able to be given a variety of interpretations.
 
-As Nicolas Wu et al showed in [_Effect Handlers in Scope_][], this has implications for the expressiveness of effect systems. It also has the benefit of making effect handling more consistent, since scoped operations are just syntax which can be interpreted like any other, and are thus simpler to reason about.
+As Nicolas Wu et al showed in _[Effect Handlers in Scope][]_, this has implications for the expressiveness of effect systems. It also has the benefit of making effect handling more consistent, since scoped operations are just syntax which can be interpreted like any other, and are thus simpler to reason about.
 
 
 ### Fusion
