@@ -53,9 +53,9 @@ newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
   ret a = ErrorC (pure (Right a))
-  eff = algE \/ (ErrorC . eff . handle (Right ()) (either (pure . Left) runErrorC))
-    where algE (Throw e)     = ErrorC (pure (Left e))
-          algE (Catch m h k) = ErrorC (runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k))
+  eff = ErrorC . (algE \/ eff . handle (Right ()) (either (pure . Left) runErrorC))
+    where algE (Throw e)     = pure (Left e)
+          algE (Catch m h k) = runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k)
 
 
 -- $setup
