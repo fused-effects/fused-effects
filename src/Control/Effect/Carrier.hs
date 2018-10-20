@@ -34,6 +34,7 @@ class HFunctor sig => Effect sig where
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'ret' and 'eff' methods.
 class HFunctor sig => Carrier sig h | h -> sig where
   ret :: a -> h a
+
   eff :: sig h (h a) -> h a
 
 
