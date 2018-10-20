@@ -6,8 +6,8 @@ module Control.Effect.Fail
 , FailC(..)
 ) where
 
-import Control.Effect.Fail.Internal
 import Control.Effect.Carrier
+import Control.Effect.Fail.Internal
 import Control.Effect.Internal
 import Control.Effect.Sum
 import Control.Monad.Fail
