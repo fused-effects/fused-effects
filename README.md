@@ -36,6 +36,12 @@ As Nicolas Wu et al showed in [_Effect Handlers in Scope_][], this has implicati
 
 ### Fusion
 
+In order to maximize efficiency, `higher-order-effects` applies _fusion laws_, avoiding the construction of intermediate representations of effectful computations between effect handlers. In fact, this is applied as far as the initial construction as well: there is no representation of the computation as a free monad parameterized by some syntax type.
+
+Instead, computations are performed in a monad named `Eff`, parameterized by the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t specified until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier once their effects are interpreted.
+
+Carriers needn’t be `Functor`s (let alone `Monad`s), allowing a great deal of freedom in the interpretation of effects. And since the interpretation is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: on par with, or even slightly better than `mtl`.
+
 
 ## Usage
 
