@@ -69,9 +69,8 @@ newtype ReturningC m a = ReturningC { runReturningC :: [String] -> m ([String], 
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningC m) where
   ret a = ReturningC (\ s -> ret (s, a))
-  eff = algT \/ algOther
-    where algT (Trace m k) = ReturningC (runReturningC k . (m :))
-          algOther op = ReturningC (\ s -> eff (handle (s, ()) (uncurry (flip runReturningC)) op))
+  eff op = ReturningC (\ s -> (algT s \/ eff . handle (s, ()) (uncurry (flip runReturningC))) op)
+    where algT s (Trace m k) = runReturningC k (m : s)
 
 
 -- $setup
