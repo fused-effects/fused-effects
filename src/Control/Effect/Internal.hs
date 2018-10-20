@@ -12,7 +12,7 @@ import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Random.Internal
 import Control.Effect.Sum
-import Control.Monad (liftM, ap)
+import Control.Monad (MonadPlus(..), liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Random.Class
@@ -70,6 +70,8 @@ instance Monad (Eff carrier) where
 
 instance (Member Fail sig, Carrier sig carrier) => MonadFail (Eff carrier) where
   fail = send . Fail
+
+instance (Member NonDet sig, Carrier sig carrier) => MonadPlus (Eff carrier)
 
 instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) where
   liftIO = send . Lift . fmap pure
