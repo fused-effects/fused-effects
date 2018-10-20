@@ -13,7 +13,7 @@ build-type:          Simple
 cabal-version:       >=1.10
 
 flag build-examples
-  description: Build with optimizations on (for CI or deployment builds)
+  description: Build the examples
   default:     False
 
 library
