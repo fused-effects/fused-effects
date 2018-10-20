@@ -7,7 +7,7 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
@@ -25,10 +25,10 @@ runNonDet = runAltC . interpret
 newtype AltC f m a = AltC { runAltC :: m (f a) }
 
 instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
-  gen a = AltC (gen (pure a))
-  alg = algND \/ (AltC . alg . handle (pure ()) (fmap join . traverse runAltC))
-    where algND Empty      = AltC (gen empty)
-          algND (Choose k) = AltC (liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
+  ret a = AltC (ret (pure a))
+  eff = AltC . (alg \/ eff . handle (pure ()) (fmap join . traverse runAltC))
+    where alg Empty      = ret empty
+          alg (Choose k) = liftA2 (<|>) (runAltC (k True)) (runAltC (k False))
 
 
 -- $setup

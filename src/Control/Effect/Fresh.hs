@@ -7,7 +7,7 @@ module Control.Effect.Fresh
 , FreshC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Sum
 
@@ -29,13 +29,13 @@ instance Effect Fresh where
 --
 --   prop> run (runFresh (replicateM n fresh)) == nub (run (runFresh (replicateM n fresh)))
 fresh :: (Member Fresh sig, Carrier sig m) => m Int
-fresh = send (Fresh gen)
+fresh = send (Fresh ret)
 
 -- | Reset the fresh counter after running a computation.
 --
 --   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) == run (runFresh (replicateM n fresh))
 resetFresh :: (Member Fresh sig, Carrier sig m) => m a -> m a
-resetFresh m = send (Reset m gen)
+resetFresh m = send (Reset m ret)
 
 
 -- | Run a 'Fresh' effect counting up from 0.
@@ -48,11 +48,10 @@ runFresh = fmap snd . flip runFreshC 0 . interpret
 newtype FreshC m a = FreshC { runFreshC :: Int -> m (Int, a) }
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fresh :+: sig) (FreshC m) where
-  gen a = FreshC (\ i -> gen (i, a))
-  alg = algF \/ algOther
-    where algF (Fresh   k) = FreshC (\ i -> runFreshC (k i) (succ i))
-          algF (Reset m k) = FreshC (\ i -> runFreshC m i >>= \ (_, a) -> runFreshC (k a) i)
-          algOther op = FreshC (\ i -> alg (handle (i, ()) (uncurry (flip runFreshC)) op))
+  ret a = FreshC (\ i -> ret (i, a))
+  eff op = FreshC (\ i -> (alg i \/ eff . handle (i, ()) (uncurry (flip runFreshC))) op)
+    where alg i (Fresh   k) = runFreshC (k i) (succ i)
+          alg i (Reset m k) = runFreshC m i >>= \ (_, a) -> runFreshC (k a) i
 
 
 -- $setup

@@ -3,7 +3,7 @@ module Control.Effect.NonDet.Internal
 ( NonDet(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Data.Coerce
 
 data NonDet m k

@@ -5,7 +5,7 @@ module Control.Effect.Void
 , VoidC(..)
 ) where
 
-import Control.Effect.Handler
+import Control.Effect.Carrier
 import Control.Effect.Internal
 
 data Void m k
@@ -25,5 +25,5 @@ run = runVoidC . interpret
 newtype VoidC a = VoidC { runVoidC :: a }
 
 instance Carrier Void VoidC where
-  gen = VoidC
-  alg v = case v of {}
+  ret = VoidC
+  eff v = case v of {}
