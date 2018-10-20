@@ -2,6 +2,11 @@
 module Control.Effect.Spec where
 
 import Control.Effect
+import Control.Effect.Carrier
+import Control.Effect.Fail
+import Control.Effect.Reader
+import Control.Effect.State
+import Control.Effect.Sum
 import Prelude hiding (fail)
 import Test.Hspec
 
