@@ -22,8 +22,8 @@ newtype FailC m a = FailC { runFailC :: m (Either String a) }
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
   ret a = FailC (ret (Right a))
-  eff = algF \/ (FailC . eff . handle (Right ()) (either (ret . Left) runFailC))
-    where algF (Fail s) = FailC (ret (Left s))
+  eff = FailC . (algF \/ eff . handle (Right ()) (either (ret . Left) runFailC))
+    where algF (Fail s) = ret (Left s)
 
 
 -- $setup
