@@ -44,10 +44,9 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
   ret = TeletypeIOC . ret
-  eff = alg \/ algOther
-    where alg (Read    k) = TeletypeIOC (liftIO getLine >>= runTeletypeIOC . k)
-          alg (Write s k) = TeletypeIOC (liftIO (putStrLn s) >> runTeletypeIOC k)
-          algOther op = TeletypeIOC (eff (handlePure runTeletypeIOC op))
+  eff = TeletypeIOC . (alg \/ eff . handlePure runTeletypeIOC)
+    where alg (Read    k) = liftIO getLine >>= runTeletypeIOC . k
+          alg (Write s k) = liftIO (putStrLn s) >> runTeletypeIOC k
 
 
 runTeletypeRet :: (Carrier sig m, Effect sig, Monad m) => [String] -> Eff (TeletypeRetC m) a -> m (([String], [String]), a)
