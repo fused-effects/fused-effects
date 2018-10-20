@@ -3,6 +3,7 @@
 - [Overview][#overview]
 - [Usage][#usage]
   - [Using built-in effects][#using-built-in-effects]
+  - [Running effects][#running-effects]
   - [Defining new effects][#defining-new-effects]
 - [Related work][#related-work]
   - [Comparison to `mtl`][#comparison-to--mtl-]
@@ -38,6 +39,8 @@ action :: (Member (State String) sig, Member (Reader Int) sig, Carrier sig m) =>
 
 Different effects make different operations available; see the documentation for individual effects for more information about their operations.
 
+
+### Running effects
 
 ### Defining new effects
 
