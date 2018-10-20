@@ -33,7 +33,7 @@ instance Effect (State s) where
 --
 --   prop> snd (run (runState a get)) == a
 get :: (Member (State s) sig, Carrier sig m) => m s
-get = send (Get handleReturn)
+get = send (Get ret)
 
 -- | Project a function out of the current state value.
 --
@@ -47,7 +47,7 @@ gets f = fmap f get
 --   prop> snd (run (runState a (get <* put b))) == a
 --   prop> snd (run (runState a (put b *> get))) == b
 put :: (Member (State s) sig, Carrier sig m) => s -> m ()
-put s = send (Put s (handleReturn ()))
+put s = send (Put s (ret ()))
 
 -- | Replace the state value with the result of applying a function to the current state value.
 --   This is strict in the new state; if you need laziness, use @get >>= put . f@.
@@ -80,11 +80,11 @@ execState s m = fmap fst (runStateC (interpret m) s)
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
-  handleReturn a = StateC (\ s -> handleReturn (s, a))
-  handleEffect = algS \/ algOther
+  ret a = StateC (\ s -> ret (s, a))
+  eff = algS \/ algOther
     where algS (Get   k) = StateC (\ s -> runStateC (k s) s)
           algS (Put s k) = StateC (\ _ -> runStateC  k    s)
-          algOther op = StateC (\ s -> handleEffect (handle (s, ()) (uncurry (flip runStateC)) op))
+          algOther op = StateC (\ s -> eff (handle (s, ()) (uncurry (flip runStateC)) op))
 
 
 -- $setup

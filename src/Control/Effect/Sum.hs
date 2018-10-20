@@ -58,4 +58,4 @@ instance {-# OVERLAPPABLE #-} Member sub sup => Member sub (sub' :+: sup) where
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
 send :: (Member effect sig, Carrier sig m) => effect m (m a) -> m a
-send = handleEffect . inj
+send = eff . inj

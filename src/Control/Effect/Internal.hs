@@ -23,7 +23,7 @@ runEff = flip unEff
 {-# INLINE runEff #-}
 
 interpret :: Carrier sig carrier => Eff carrier a -> carrier a
-interpret = runEff handleReturn
+interpret = runEff ret
 {-# INLINE interpret #-}
 
 instance Functor (Eff carrier) where
@@ -74,8 +74,8 @@ instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) wh
 
 
 instance Carrier sig carrier => Carrier sig (Eff carrier) where
-  handleReturn = pure
-  handleEffect op = Eff (\ k -> handleEffect (hmap (runEff handleReturn) (fmap' (runEff k) op)))
+  ret = pure
+  eff op = Eff (\ k -> eff (hmap (runEff ret) (fmap' (runEff k) op)))
 
 
 -- $setup

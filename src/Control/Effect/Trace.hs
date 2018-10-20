@@ -30,7 +30,7 @@ instance Effect Trace where
 
 -- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()
-trace message = send (Trace message (handleReturn ()))
+trace message = send (Trace message (ret ()))
 
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
@@ -40,8 +40,8 @@ runPrintingTrace = runPrintingC . interpret
 newtype PrintingC m a = PrintingC { runPrintingC :: m a }
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingC m) where
-  handleReturn = PrintingC . handleReturn
-  handleEffect = algT \/ (PrintingC . handleEffect . handlePure runPrintingC)
+  ret = PrintingC . ret
+  eff = algT \/ (PrintingC . eff . handlePure runPrintingC)
     where algT (Trace s k) = PrintingC (liftIO (hPutStrLn stderr s) *> runPrintingC k)
 
 
@@ -54,8 +54,8 @@ runIgnoringTrace = runIgnoringC . interpret
 newtype IgnoringC m a = IgnoringC { runIgnoringC :: m a }
 
 instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringC m) where
-  handleReturn = IgnoringC . handleReturn
-  handleEffect = algT \/ (IgnoringC . handleEffect . handlePure runIgnoringC)
+  ret = IgnoringC . ret
+  eff = algT \/ (IgnoringC . eff . handlePure runIgnoringC)
     where algT (Trace _ k) = k
 
 
@@ -68,10 +68,10 @@ runReturningTrace = fmap (first reverse) . flip runReturningC [] . interpret
 newtype ReturningC m a = ReturningC { runReturningC :: [String] -> m ([String], a) }
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningC m) where
-  handleReturn a = ReturningC (\ s -> handleReturn (s, a))
-  handleEffect = algT \/ algOther
+  ret a = ReturningC (\ s -> ret (s, a))
+  eff = algT \/ algOther
     where algT (Trace m k) = ReturningC (runReturningC k . (m :))
-          algOther op = ReturningC (\ s -> handleEffect (handle (s, ()) (uncurry (flip runReturningC)) op))
+          algOther op = ReturningC (\ s -> eff (handle (s, ()) (uncurry (flip runReturningC)) op))
 
 
 -- $setup

@@ -29,13 +29,13 @@ instance Effect Fresh where
 --
 --   prop> run (runFresh (replicateM n fresh)) == nub (run (runFresh (replicateM n fresh)))
 fresh :: (Member Fresh sig, Carrier sig m) => m Int
-fresh = send (Fresh handleReturn)
+fresh = send (Fresh ret)
 
 -- | Reset the fresh counter after running a computation.
 --
 --   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) == run (runFresh (replicateM n fresh))
 resetFresh :: (Member Fresh sig, Carrier sig m) => m a -> m a
-resetFresh m = send (Reset m handleReturn)
+resetFresh m = send (Reset m ret)
 
 
 -- | Run a 'Fresh' effect counting up from 0.
@@ -48,11 +48,11 @@ runFresh = fmap snd . flip runFreshC 0 . interpret
 newtype FreshC m a = FreshC { runFreshC :: Int -> m (Int, a) }
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fresh :+: sig) (FreshC m) where
-  handleReturn a = FreshC (\ i -> handleReturn (i, a))
-  handleEffect = algF \/ algOther
+  ret a = FreshC (\ i -> ret (i, a))
+  eff = algF \/ algOther
     where algF (Fresh   k) = FreshC (\ i -> runFreshC (k i) (succ i))
           algF (Reset m k) = FreshC (\ i -> runFreshC m i >>= \ (_, a) -> runFreshC (k a) i)
-          algOther op = FreshC (\ i -> handleEffect (handle (i, ()) (uncurry (flip runFreshC)) op))
+          algOther op = FreshC (\ i -> eff (handle (i, ()) (uncurry (flip runFreshC)) op))
 
 
 -- $setup

@@ -30,7 +30,7 @@ instance Effect (Reader r) where
 --
 --   prop> run (runReader a ask) == a
 ask :: (Member (Reader r) sig, Carrier sig m) => m r
-ask = send (Ask handleReturn)
+ask = send (Ask ret)
 
 -- | Project a function out of the current environment value.
 --
@@ -43,7 +43,7 @@ asks f = fmap f ask
 --   prop> run (runReader a (local (applyFun f) ask)) == applyFun f a
 --   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) == (a, applyFun f a, a)
 local :: (Member (Reader r) sig, Carrier sig m) => (r -> r) -> m a -> m a
-local f m = send (Local f m handleReturn)
+local f m = send (Local f m ret)
 
 
 -- | Run a 'Reader' effect with the passed environment value.
@@ -55,11 +55,11 @@ runReader r m = runReaderC (interpret m) r
 newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
-  handleReturn a = ReaderC (const (handleReturn a))
-  handleEffect = algR \/ algOther
+  ret a = ReaderC (const (ret a))
+  eff = algR \/ algOther
     where algR (Ask       k) = ReaderC (\ r -> runReaderC (k r) r)
           algR (Local f m k) = ReaderC (\ r -> runReaderC m (f r) >>= flip runReaderC r . k)
-          algOther op = ReaderC (\ r -> handleEffect (handlePure (flip runReaderC r) op))
+          algOther op = ReaderC (\ r -> eff (handlePure (flip runReaderC r) op))
 
 
 -- $setup
