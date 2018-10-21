@@ -13,6 +13,7 @@ import Control.DeepSeq
 import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Sum
+import Data.Coerce
 import Data.Functor.Classes
 
 -- | Errors which can be resumed with values of some existentially-quantified type.
@@ -22,7 +23,8 @@ data Resumable err m k
 deriving instance Functor (Resumable err m)
 
 instance HFunctor (Resumable err) where
-  hmap _ (Resumable err k) = Resumable err k
+  hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Effect (Resumable err) where
   handle state handler (Resumable err k) = Resumable err (handler . (<$ state) . k)
