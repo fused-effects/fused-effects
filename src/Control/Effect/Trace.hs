@@ -2,8 +2,8 @@
 module Control.Effect.Trace
 ( Trace(..)
 , trace
-, runPrintingTrace
-, PrintingC(..)
+, runTraceByPrinting
+, TraceByPrintingC(..)
 , runIgnoringTrace
 , IgnoringC(..)
 , runReturningTrace
@@ -34,15 +34,15 @@ trace message = send (Trace message (ret ()))
 
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
-runPrintingTrace :: (MonadIO m, Carrier sig m) => Eff (PrintingC m) a -> m a
-runPrintingTrace = runPrintingC . interpret
+runTraceByPrinting :: (MonadIO m, Carrier sig m) => Eff (TraceByPrintingC m) a -> m a
+runTraceByPrinting = runTraceByPrintingC . interpret
 
-newtype PrintingC m a = PrintingC { runPrintingC :: m a }
+newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
 
-instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingC m) where
-  ret = PrintingC . ret
-  eff = PrintingC . (alg \/ eff . handlePure runPrintingC)
-    where alg (Trace s k) = liftIO (hPutStrLn stderr s) *> runPrintingC k
+instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
+  ret = TraceByPrintingC . ret
+  eff = TraceByPrintingC . (alg \/ eff . handlePure runTraceByPrintingC)
+    where alg (Trace s k) = liftIO (hPutStrLn stderr s) *> runTraceByPrintingC k
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
