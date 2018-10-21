@@ -1,6 +1,9 @@
 module Control.Effect.NonDet.Spec where
 
 import Control.Effect
+import Control.Effect.Error
+import Control.Effect.NonDet
+import Control.Effect.State
 import Test.Hspec
 
 spec :: Spec
