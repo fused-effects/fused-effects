@@ -4,8 +4,8 @@ module Control.Effect.Trace
 , trace
 , runTraceByPrinting
 , TraceByPrintingC(..)
-, runIgnoringTrace
-, IgnoringC(..)
+, runTraceByIgnoring
+, TraceByIgnoringC(..)
 , runReturningTrace
 , ReturningC(..)
 ) where
@@ -47,15 +47,15 @@ instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC
 
 -- | Run a 'Trace' effect, ignoring all traces.
 --
---   prop> run (runIgnoringTrace (trace a *> pure b)) == b
-runIgnoringTrace :: Carrier sig m => Eff (IgnoringC m) a -> m a
-runIgnoringTrace = runIgnoringC . interpret
+--   prop> run (runTraceByIgnoring (trace a *> pure b)) == b
+runTraceByIgnoring :: Carrier sig m => Eff (TraceByIgnoringC m) a -> m a
+runTraceByIgnoring = runTraceByIgnoringC . interpret
 
-newtype IgnoringC m a = IgnoringC { runIgnoringC :: m a }
+newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
 
-instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringC m) where
-  ret = IgnoringC . ret
-  eff = alg \/ (IgnoringC . eff . handlePure runIgnoringC)
+instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
+  ret = TraceByIgnoringC . ret
+  eff = alg \/ (TraceByIgnoringC . eff . handlePure runTraceByIgnoringC)
     where alg (Trace _ k) = k
 
 
