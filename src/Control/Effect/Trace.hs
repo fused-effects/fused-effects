@@ -6,8 +6,8 @@ module Control.Effect.Trace
 , TraceByPrintingC(..)
 , runTraceByIgnoring
 , TraceByIgnoringC(..)
-, runReturningTrace
-, ReturningC(..)
+, runTraceByReturning
+, TraceByReturningC(..)
 ) where
 
 import Control.Effect.Carrier
@@ -61,16 +61,16 @@ instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
---   prop> run (runReturningTrace (trace a *> trace b *> pure c)) == ([a, b], c)
-runReturningTrace :: (Carrier sig m, Effect sig, Functor m) => Eff (ReturningC m) a -> m ([String], a)
-runReturningTrace = fmap (first reverse) . flip runReturningC [] . interpret
+--   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) == ([a, b], c)
+runTraceByReturning :: (Carrier sig m, Effect sig, Functor m) => Eff (TraceByReturningC m) a -> m ([String], a)
+runTraceByReturning = fmap (first reverse) . flip runTraceByReturningC [] . interpret
 
-newtype ReturningC m a = ReturningC { runReturningC :: [String] -> m ([String], a) }
+newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: [String] -> m ([String], a) }
 
-instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningC m) where
-  ret a = ReturningC (\ s -> ret (s, a))
-  eff op = ReturningC (\ s -> (alg s \/ eff . handle (s, ()) (uncurry (flip runReturningC))) op)
-    where alg s (Trace m k) = runReturningC k (m : s)
+instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
+  ret a = TraceByReturningC (\ s -> ret (s, a))
+  eff op = TraceByReturningC (\ s -> (alg s \/ eff . handle (s, ()) (uncurry (flip runTraceByReturningC))) op)
+    where alg s (Trace m k) = runTraceByReturningC k (m : s)
 
 
 -- $setup
