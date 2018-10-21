@@ -9,6 +9,7 @@ module Control.Effect.Resumable
 , ResumableWithC(..)
 ) where
 
+import Control.DeepSeq
 import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Sum
@@ -63,6 +64,13 @@ instance Ord1 err => Ord (SomeError err) where
 --   prop> show (SomeError (Const a)) == ("SomeError (Const " ++ showsPrec 11 a ")")
 instance (Show1 err) => Show (SomeError err) where
   showsPrec d (SomeError err) = showsUnaryWith (liftShowsPrec (const (const id)) (const id)) "SomeError" d err
+
+
+-- | Evaluation of 'SomeError' to normal forms is determined by a 'NFData1' instance for the error type.
+--
+--   prop> pure (rnf (SomeError (Identity (error "error"))) :: SomeError Identity) `shouldThrow` errorCall "error"
+instance NFData1 err => NFData (SomeError err) where
+  rnf (SomeError err) = liftRnf (\a -> seq a ()) err
 
 
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
