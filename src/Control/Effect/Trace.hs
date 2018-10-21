@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Trace
 ( Trace(..)
 , trace
@@ -18,7 +18,7 @@ import Data.Bifunctor (first)
 import Data.Coerce
 import System.IO
 
-data Trace m k = Trace String k
+data Trace (m :: * -> *) k = Trace String k
   deriving (Functor)
 
 instance HFunctor Trace where

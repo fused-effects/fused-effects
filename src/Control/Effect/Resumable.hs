@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
@@ -17,7 +17,7 @@ import Data.Coerce
 import Data.Functor.Classes
 
 -- | Errors which can be resumed with values of some existentially-quantified type.
-data Resumable err m k
+data Resumable err (m :: * -> *) k
   = forall a . Resumable (err a) (a -> k)
 
 deriving instance Functor (Resumable err m)

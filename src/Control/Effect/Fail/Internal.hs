@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, PolyKinds #-}
+{-# LANGUAGE DeriveFunctor, KindSignatures #-}
 module Control.Effect.Fail.Internal
 ( Fail(..)
 ) where
@@ -6,7 +6,7 @@ module Control.Effect.Fail.Internal
 import Control.Effect.Carrier
 import Data.Coerce
 
-newtype Fail m k = Fail String
+newtype Fail (m :: * -> *) k = Fail String
   deriving (Functor)
 
 instance HFunctor Fail where

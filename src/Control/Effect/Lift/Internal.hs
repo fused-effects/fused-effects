@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, PolyKinds #-}
+{-# LANGUAGE DeriveFunctor, KindSignatures #-}
 module Control.Effect.Lift.Internal
 ( Lift(..)
 ) where
@@ -6,7 +6,7 @@ module Control.Effect.Lift.Internal
 import Control.Effect.Carrier
 import Data.Coerce
 
-newtype Lift sig m k = Lift { unLift :: sig k }
+newtype Lift sig (m :: * -> *) k = Lift { unLift :: sig k }
   deriving (Functor)
 
 instance Functor sig => HFunctor (Lift sig) where
