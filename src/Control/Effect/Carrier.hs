@@ -53,7 +53,9 @@ handlePure :: HFunctor sig => (forall x . f x -> g x) -> sig f (f a) -> sig g (g
 handlePure handler = hmap handler . fmap' handler
 {-# INLINE handlePure #-}
 
--- | Thread a @Reader@-like carrier through an 'HFunctor'.
+-- | Thread a 'Coercible' carrier through an 'HFunctor'.
+--
+--   This is applicable whenever @f@ is 'Coercible' to @g@, e.g. simple @newtype@s.
 handleCoercible :: (HFunctor sig, Coercible f g) => sig f (f a) -> sig g (g a)
 handleCoercible = handlePure coerce
 {-# INLINE handleCoercible #-}
