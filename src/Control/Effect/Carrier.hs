@@ -4,6 +4,7 @@ module Control.Effect.Carrier
 , Effect(..)
 , Carrier(..)
 , handlePure
+, handleCoercible
 , handleReader
 , handleState
 , handleEither
@@ -11,6 +12,7 @@ module Control.Effect.Carrier
 ) where
 
 import Control.Monad (join)
+import Data.Coerce
 
 class HFunctor h where
   -- | Functor map. This is required to be 'fmap'.
@@ -50,6 +52,11 @@ class HFunctor sig => Carrier sig h | h -> sig where
 handlePure :: HFunctor sig => (forall x . f x -> g x) -> sig f (f a) -> sig g (g a)
 handlePure handler = hmap handler . fmap' handler
 {-# INLINE handlePure #-}
+
+-- | Thread a @Reader@-like carrier through an 'HFunctor'.
+handleCoercible :: (HFunctor sig, Coercible f g) => sig f (f a) -> sig g (g a)
+handleCoercible = handlePure coerce
+{-# INLINE handleCoercible #-}
 
 -- | Thread a @Reader@-like carrier through an 'HFunctor'.
 handleReader :: HFunctor sig => r -> (forall x . f x -> r -> g x) -> sig f (f a) -> sig g (g a)
