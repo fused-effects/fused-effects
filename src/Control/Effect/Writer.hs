@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Writer
 ( Writer(..)
 , tell
@@ -13,7 +13,7 @@ import Control.Effect.Internal
 import Data.Bifunctor (first)
 import Data.Coerce
 
-data Writer w m k = Tell w k
+data Writer w (m :: * -> *) k = Tell w k
   deriving (Functor)
 
 instance HFunctor (Writer w) where

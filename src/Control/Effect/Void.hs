@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, EmptyCase, MultiParamTypeClasses, PolyKinds #-}
+{-# LANGUAGE DeriveFunctor, EmptyCase, KindSignatures, MultiParamTypeClasses #-}
 module Control.Effect.Void
 ( Void
 , run
@@ -8,7 +8,7 @@ module Control.Effect.Void
 import Control.Effect.Carrier
 import Control.Effect.Internal
 
-data Void m k
+data Void (m :: * -> *) k
   deriving (Functor)
 
 instance HFunctor Void where

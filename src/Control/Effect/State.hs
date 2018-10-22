@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State
 ( State(..)
 , get
@@ -16,7 +16,7 @@ import Control.Effect.Sum
 import Control.Effect.Internal
 import Data.Coerce
 
-data State s m k
+data State s (m :: * -> *) k
   = Get (s -> k)
   | Put s k
   deriving (Functor)
