@@ -77,4 +77,4 @@ instance (Member Fail sig, Carrier sig m) => Carrier sig (InterposeC m) where
   ret = InterposeC . ret
   eff op
     | Just (Fail s) <- prj op = InterposeC (send (Fail ("hello, " ++ s)))
-    | otherwise               = InterposeC (eff (handlePure runInterposeC op))
+    | otherwise               = InterposeC (eff (handleCoercible op))
