@@ -4,6 +4,7 @@ module Control.Effect.Carrier
 , Effect(..)
 , Carrier(..)
 , handlePure
+, handleReader
 ) where
 
 class HFunctor h where
@@ -44,3 +45,7 @@ class HFunctor sig => Carrier sig h | h -> sig where
 handlePure :: HFunctor sig => (forall x . f x -> g x) -> sig f (f a) -> sig g (g a)
 handlePure handler = hmap handler . fmap' handler
 {-# INLINE handlePure #-}
+
+handleReader :: HFunctor sig => r -> (forall x . f x -> r -> g x) -> sig f (f a) -> sig g (g a)
+handleReader r run = handlePure (flip run r)
+{-# INLINE handleReader #-}
