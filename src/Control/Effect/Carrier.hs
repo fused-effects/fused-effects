@@ -1,5 +1,5 @@
 {-# LANGUAGE DefaultSignatures, FunctionalDependencies, RankNTypes #-}
-module Control.Effect.Handler
+module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
 , Carrier(..)
@@ -23,7 +23,7 @@ class HFunctor h where
 --   1. Be functorial in their last two arguments, and
 --   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
 class HFunctor sig => Effect sig where
-  -- | Handle any effects in higher-order positions by threading the carrier’s state all the way through to the continuation.
+  -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
   handle :: Functor f
          => f ()
          -> (forall x . f (m x) -> n (f x))
@@ -31,10 +31,13 @@ class HFunctor sig => Effect sig where
          -> sig n (n (f a))
 
 
--- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'gen' and 'alg' methods.
+-- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'ret' and 'eff' methods.
 class HFunctor sig => Carrier sig h | h -> sig where
-  gen :: a -> h a
-  alg :: sig h (h a) -> h a
+  -- | Wrap a return value.
+  ret :: a -> h a
+
+  -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
+  eff :: sig h (h a) -> h a
 
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
