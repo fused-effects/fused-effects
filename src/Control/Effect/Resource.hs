@@ -23,10 +23,20 @@ instance HFunctor Resource where
 instance Effect Resource where
   handle state handler (Resource acquire release use k) = Resource (handler (acquire <$ state)) (handler . fmap release) (handler . fmap use) (handler . fmap k)
 
+-- | Provides a safe idiom to acquire and release resources safely.
+--
+-- When acquiring and operating on a resource (such as opening and
+-- reading file handle with 'openFile' or writing to a blob of memory
+-- with 'malloc'), any exception thrown during the operation may mean
+-- that the resource is not properly released. @bracket acquire release op@
+-- ensures that @release@ is run on the value returned from @acquire even
+-- if @op@ throws an exception.
+--
+-- 'bracket' is safe in the presence of asynchronous exceptions.
 bracket :: (Member Resource sig, Carrier sig m)
-        => m resource
-        -> (resource -> m any)
-        -> (resource -> m a)
+        => m resource           -- ^ computation to run first ("acquire resource")
+        -> (resource -> m any)  -- ^ computation to run last ("release resource")
+        -> (resource -> m a)    -- ^ computation to run in-between
         -> m a
 bracket acquire release use = send (Resource acquire release use ret)
 
