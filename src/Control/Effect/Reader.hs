@@ -56,7 +56,7 @@ newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
   ret a = ReaderC (const (ret a))
-  eff op = ReaderC (\ r -> (alg r \/ eff . handlePure (flip runReaderC r)) op)
+  eff op = ReaderC (\ r -> (alg r \/ eff . handleReader r runReaderC) op)
     where alg r (Ask       k) = runReaderC (k r) r
           alg r (Local f m k) = runReaderC m (f r) >>= flip runReaderC r . k
 
