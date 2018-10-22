@@ -6,6 +6,7 @@ module Control.Effect.Carrier
 , handlePure
 , handleReader
 , handleState
+, handleError
 ) where
 
 class HFunctor h where
@@ -54,3 +55,7 @@ handleReader r run = handlePure (flip run r)
 handleState :: Effect sig => s -> (forall x . f x -> s -> g (s, x)) -> sig f (f a) -> sig g (g (s, a))
 handleState s run = handle (s, ()) (uncurry (flip run))
 {-# INLINE handleState #-}
+
+handleError :: (Carrier sig g, Effect sig) => (forall x . f x -> g (Either e x)) -> sig f (f a) -> sig g (g (Either e a))
+handleError run = handle (Right ()) (either (ret . Left) run)
+{-# INLINE handleError #-}
