@@ -25,8 +25,8 @@ inference = describe "inference" $ do
 askEnv :: (Member (Reader env) sig, Carrier sig m) => HasEnv env m env
 askEnv = ask
 
-runEnv :: Carrier sig m => env -> HasEnv env (ReaderC env (HasEnv env m)) a -> HasEnv env m a
-runEnv r = runReader r . runHasEnv
+runEnv :: Carrier sig m => env -> HasEnv env (ReaderC env (Eff m)) a -> HasEnv env m a
+runEnv r = HasEnv . runReader r . runHasEnv
 
 
 newtype HasEnv env carrier a = HasEnv { runHasEnv :: Eff carrier a }
