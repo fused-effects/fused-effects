@@ -7,7 +7,7 @@ module Control.Effect.Carrier
 , handleReader
 , handleState
 , handleEither
-, handleTraversableMonad
+, handleTraversable
 ) where
 
 import Control.Monad (join)
@@ -63,6 +63,6 @@ handleEither :: (Carrier sig g, Effect sig) => (forall x . f x -> g (Either e x)
 handleEither run = handle (Right ()) (either (ret . Left) run)
 {-# INLINE handleEither #-}
 
-handleTraversableMonad :: (Effect sig, Applicative g, Monad m, Traversable m) => (forall x . f x -> g (m x)) -> sig f (f a) -> sig g (g (m a))
-handleTraversableMonad run = handle (pure ()) (fmap join . traverse run)
-{-# INLINE handleTraversableMonad #-}
+handleTraversable :: (Effect sig, Applicative g, Monad m, Traversable m) => (forall x . f x -> g (m x)) -> sig f (f a) -> sig g (g (m a))
+handleTraversable run = handle (pure ()) (fmap join . traverse run)
+{-# INLINE handleTraversable #-}
