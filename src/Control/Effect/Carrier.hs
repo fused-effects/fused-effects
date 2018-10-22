@@ -7,7 +7,10 @@ module Control.Effect.Carrier
 , handleReader
 , handleState
 , handleError
+, handleTraversableMonad
 ) where
+
+import Control.Monad (join)
 
 class HFunctor h where
   -- | Functor map. This is required to be 'fmap'.
@@ -59,3 +62,7 @@ handleState s run = handle (s, ()) (uncurry (flip run))
 handleError :: (Carrier sig g, Effect sig) => (forall x . f x -> g (Either e x)) -> sig f (f a) -> sig g (g (Either e a))
 handleError run = handle (Right ()) (either (ret . Left) run)
 {-# INLINE handleError #-}
+
+handleTraversableMonad :: (Effect sig, Applicative g, Monad m, Traversable m) => (forall x . f x -> g (m x)) -> sig f (f a) -> sig g (g (m a))
+handleTraversableMonad run = handle (pure ()) (fmap join . traverse run)
+{-# INLINE handleTraversableMonad #-}
