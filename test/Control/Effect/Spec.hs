@@ -34,7 +34,7 @@ newtype HasEnv env carrier a = HasEnv { runHasEnv :: Eff carrier a }
 
 instance Carrier sig carrier => Carrier sig (HasEnv env carrier) where
   ret = pure
-  eff op = HasEnv (eff (handlePure runHasEnv op))
+  eff op = HasEnv (eff (handleCoercible op))
 
 
 reinterpretation :: Spec
