@@ -85,7 +85,7 @@ newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError 
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   ret a = ResumableC (ret (Right a))
-  eff = ResumableC . (alg \/ eff . handle (Right ()) (either (ret . Left) runResumableC))
+  eff = ResumableC . (alg \/ eff . handleEither runResumableC)
     where alg (Resumable err _) = ret (Left (SomeError err))
 
 

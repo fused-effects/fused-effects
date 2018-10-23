@@ -34,7 +34,7 @@ newtype HasEnv env carrier a = HasEnv { runHasEnv :: Eff carrier a }
 
 instance Carrier sig carrier => Carrier sig (HasEnv env carrier) where
   ret = pure
-  eff op = HasEnv (eff (handlePure runHasEnv op))
+  eff op = HasEnv (eff (handleCoercible op))
 
 
 reinterpretation :: Spec
@@ -49,7 +49,7 @@ newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC ::
 
 instance (Carrier (State r :+: sig) m, Effect sig, Monad m) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
   ret = ReinterpretReaderC . ret
-  eff = ReinterpretReaderC . (alg \/ eff . R . handlePure runReinterpretReaderC)
+  eff = ReinterpretReaderC . (alg \/ eff . R . handleCoercible)
     where alg (Ask       k) = get >>= runReinterpretReaderC . k
           alg (Local f m k) = do
             a <- get
@@ -77,4 +77,4 @@ instance (Member Fail sig, Carrier sig m) => Carrier sig (InterposeC m) where
   ret = InterposeC . ret
   eff op
     | Just (Fail s) <- prj op = InterposeC (send (Fail ("hello, " ++ s)))
-    | otherwise               = InterposeC (eff (handlePure runInterposeC op))
+    | otherwise               = InterposeC (eff (handleCoercible op))
