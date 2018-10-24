@@ -42,12 +42,12 @@ reinterpretation = describe "reinterpretation" $ do
   it "can reinterpret effects into other effects" $
     run (runState "a" ((++) <$> reinterpretReader (local ('b':) ask) <*> get)) `shouldBe` ("a", "baa")
 
-reinterpretReader :: (Carrier (State r :+: sig) m, Effect sig, Monad m) => Eff (ReinterpretReaderC r m) a -> m a
+reinterpretReader :: (Carrier sig m, Effect sig) => Eff (ReinterpretReaderC r m) a -> Eff (StateC r m) a
 reinterpretReader = runReinterpretReaderC . interpret
 
-newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC :: m a }
+newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC :: Eff (StateC r m) a }
 
-instance (Carrier (State r :+: sig) m, Effect sig, Monad m) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
+instance (Carrier sig m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
   ret = ReinterpretReaderC . ret
   eff = ReinterpretReaderC . (alg \/ eff . R . handleCoercible)
     where alg (Ask       k) = get >>= runReinterpretReaderC . k
