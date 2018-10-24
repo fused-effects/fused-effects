@@ -10,7 +10,7 @@ maintainer:          rob.rix@me.com
 copyright:           2018 Rob Rix
 category:            Control
 build-type:          Simple
--- extra-source-files:  ChangeLog.md
+extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
 flag build-examples
