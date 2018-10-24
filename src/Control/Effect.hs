@@ -3,7 +3,7 @@ module Control.Effect
 ) where
 
 import Control.Effect.Carrier   as X (Carrier, Effect)
-import Control.Effect.Eavesdrop as X (Eavesdrop, EavesdropC)
+import Control.Effect.Eavesdrop as X (Eavesdrop, EavesdropC, Interpose, InterposeC)
 import Control.Effect.Error     as X (Error, ErrorC)
 import Control.Effect.Fail      as X (Fail, FailC)
 import Control.Effect.Fresh     as X (Fresh, FreshC)
