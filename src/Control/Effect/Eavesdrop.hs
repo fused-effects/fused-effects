@@ -7,6 +7,9 @@ module Control.Effect.Eavesdrop
 , Tap(..)
 , Interpose(..)
 , interpose
+, runInterpose
+, InterposeC(..)
+, Listener(..)
 ) where
 
 import Control.Effect.Carrier
@@ -59,3 +62,20 @@ interpose :: (Member (Interpose eff) sig, Carrier sig m)
           -> (forall n x . eff n (n x) -> m x)
           -> m a
 interpose m f = send (Interpose m f ret)
+
+
+runInterpose :: (Member eff sig, Carrier sig m, Monad m) => Eff (InterposeC eff m) a -> m a
+runInterpose = flip runInterposeC Nothing . interpret
+
+newtype InterposeC eff m a = InterposeC { runInterposeC :: Maybe (Listener eff m) -> m a }
+
+newtype Listener eff m = Listener { runListener :: forall n x . eff n (n x) -> m x }
+
+instance (Carrier sig m, Member eff sig, Monad m) => Carrier (Interpose eff :+: sig) (InterposeC eff m) where
+  ret a = InterposeC (const (ret a))
+  eff op = InterposeC (\ listener -> (alg listener \/ algOther listener) op)
+    where alg listener (Interpose m h k) = runInterposeC m (Just (Listener (flip runInterposeC listener . h))) >>= flip runInterposeC listener . k
+          algOther listener op
+            | Just listener <- listener
+            , Just eff <- prj op = runListener listener eff
+            | otherwise          = eff (handleReader listener runInterposeC op)
