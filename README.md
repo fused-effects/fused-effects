@@ -143,6 +143,16 @@ The `Read` operation returns a `String`, and hence its continuation is represent
 
 On the other hand, the `Write` operation returns `()`. Since a function `() -> k` is equivalent to a (non-strict) `k`, we can omit the function parameter.
 
+Now that we have our effect datatype, we can give definitions for `read` and `write`:
+
+```haskell
+read :: (Member Teletype sig, Carrier sig m) => m String
+read = send (Read ret)
+
+write :: (Member Teletype sig, Carrier sig m) => String -> m ()
+write s = send (Write s (ret ()))
+```
+
 
 ### Defining effect handlers
 
