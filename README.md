@@ -70,12 +70,13 @@ Different effects make different operations available; see the documentation for
 
 ### Running effects
 
-Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) invoking some specific `Carrier` instance. For example, we can run a `State` computation (which simply `put`s the `length` of some list) using `runState`:
+Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) invoking some specific `Carrier` instance. For example, we can run a `State` computation using `runState`:
 
 ```haskell
 example :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
 example list = runState 0 $ do
-  put (length list)
+  i <- get
+  put (i + length list)
 ```
 
 
