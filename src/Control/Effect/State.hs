@@ -12,8 +12,8 @@ module Control.Effect.State
 ) where
 
 import Control.Effect.Carrier
-import Control.Effect.Sum
 import Control.Effect.Internal
+import Control.Effect.Sum
 import Data.Coerce
 
 data State s (m :: * -> *) k
