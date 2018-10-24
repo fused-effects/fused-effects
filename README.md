@@ -170,6 +170,8 @@ write :: (Member Teletype sig, Carrier sig m) => String -> m ()
 write s = send (Write s (ret ()))
 ```
 
+This gives us enough to write computations using the `Teletype` effect. The next section discusses how to run `Teletype` computations.
+
 
 ### Defining effect handlers
 
