@@ -143,6 +143,13 @@ The `Read` operation returns a `String`, and hence its continuation is represent
 
 On the other hand, the `Write` operation returns `()`. Since a function `() -> k` is equivalent to a (non-strict) `k`, we can omit the function parameter.
 
+In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need two other instances: `HFunctor` and `Effect`. `HFunctor`, named for “higher-order functor,” has one non-default operation, `hmap`, which applies a function to any embedded computations inside an effect. Since `Teletype` is first-order (i.e. it doesn’t have any embedded computations), the definition of `hmap` can be given using `coerce`:
+
+```haskell
+instance HFunctor Teletype where
+  hmap _ = coerce
+```
+
 Now that we have our effect datatype, we can give definitions for `read` and `write`:
 
 ```haskell
