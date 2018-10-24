@@ -73,8 +73,8 @@ Different effects make different operations available; see the documentation for
 Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) invoking some specific `Carrier` instance. For example, we can run a `State` computation using `runState`:
 
 ```haskell
-example :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
-example list = runState 0 $ do
+example1 :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
+example1 list = runState 0 $ do
   i <- get
   put (i + length list)
 ```
@@ -84,8 +84,8 @@ example list = runState 0 $ do
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
 ```haskell
-example :: (Carrier sig m, Effect sig, Monad m) => m (Int, ())
-example = runReader "hello" . runState 0 $ do
+example2 :: (Carrier sig m, Effect sig, Monad m) => m (Int, ())
+example2 = runReader "hello" . runState 0 $ do
   list <- ask
   put (length (list :: String))
 ```
@@ -95,8 +95,8 @@ example = runReader "hello" . runState 0 $ do
 When all effects have been handled, a computation’s final value can be extracted with `run`:
 
 ```haskell
-example :: (Int, ())
-example = run . runReader "hello" . runState 0 $ do
+example3 :: (Int, ())
+example3 = run . runReader "hello" . runState 0 $ do
   list <- ask
   put (length (list :: String))
 ```
@@ -106,8 +106,8 @@ example = run . runReader "hello" . runState 0 $ do
 Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for `Eff` to lift `putStrLn` into the middle of our computation:
 
 ```haskell
-example :: IO (Int, ())
-example = runM . runReader "hello" . runState 0 $ do
+example4 :: IO (Int, ())
+example4 = runM . runReader "hello" . runState 0 $ do
   list <- ask
   liftIO (putStrLn list)
   put (length list)
