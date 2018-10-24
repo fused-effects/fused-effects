@@ -39,6 +39,6 @@ instance (Carrier sig m, HFunctor eff, Member eff sig, Monad m) => Carrier (Eave
   eff op = EavesdropC (\ taps -> (alg taps \/ algOther taps) op)
     where alg taps (Eavesdrop m h k) = runEavesdropC m (Tap (flip runEavesdropC taps . h) : taps) >>= flip runEavesdropC taps . k
           algOther taps op
-            | _:_ <- taps
+            | not (null taps)
             , Just eff <- prj op = traverse_ (flip runTap eff) taps *> send (handleReader taps runEavesdropC eff)
             | otherwise          = eff (handleReader taps runEavesdropC op)
