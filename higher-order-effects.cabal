@@ -7,7 +7,7 @@ license-file:        LICENSE
 author:              Rob Rix
 maintainer:          rob.rix@me.com
 copyright:           2018 Rob Rix
--- category:
+category:            Control
 build-type:          Simple
 -- extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
