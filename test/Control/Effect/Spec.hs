@@ -1,9 +1,10 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Spec where
 
 import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.Fail
+import Control.Effect.Interpose
 import Control.Effect.Reader
 import Control.Effect.State
 import Control.Effect.Sum
@@ -15,6 +16,7 @@ spec = do
   inference
   reinterpretation
   interception
+  interposition
 
 
 inference :: Spec
@@ -78,3 +80,16 @@ instance (Member Fail sig, Carrier sig m) => Carrier sig (InterceptC m) where
   eff op
     | Just (Fail s) <- prj op = InterceptC (send (Fail ("hello, " ++ s)))
     | otherwise               = InterceptC (eff (handleCoercible op))
+
+
+interposition :: Spec
+interposition = describe "interposition" $ do
+  it "can interpose handlers without changing the available effects" $
+    run (runFail (runInterpose @Fail (interposeFail (fail "world")))) `shouldBe` (Left "hello, world" :: Either String Int)
+
+  it "interposition only intercepts effects in its scope" $ do
+    run (runFail (runInterpose @Fail (fail "world" *> interposeFail (pure (0 :: Int))))) `shouldBe` Left "world"
+    run (runFail (runInterpose @Fail (interposeFail (pure (0 :: Int)) <* fail "world"))) `shouldBe` Left "world"
+
+interposeFail :: (Member Fail sig, Member (Interpose Fail) sig, Carrier sig m) => m a -> m a
+interposeFail m = interpose m $ \ (Fail s) -> send (Fail ("hello, " ++ s))
