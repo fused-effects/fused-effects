@@ -34,6 +34,9 @@ newtype EavesdropC eff m a = EavesdropC { runEavesdropC :: [Tap eff m] -> m a }
 
 newtype Tap eff m = Tap { runTap :: forall n x . eff n (n x) -> m () }
 
+instance Applicative m => Semigroup (Tap eff m) where
+  Tap t1 <> Tap t2 = Tap (\ eff -> t1 eff *> t2 eff)
+
 instance (Carrier sig m, HFunctor eff, Member eff sig, Monad m) => Carrier (Eavesdrop eff :+: sig) (EavesdropC eff m) where
   ret a = EavesdropC (const (ret a))
   eff op = EavesdropC (\ taps -> (alg taps \/ algOther taps) op)
