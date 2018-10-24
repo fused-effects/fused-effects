@@ -25,7 +25,6 @@ library
                      , Control.Effect.Fail
                      , Control.Effect.Fail.Internal
                      , Control.Effect.Fresh
-                     , Control.Effect.Intercept
                      , Control.Effect.Internal
                      , Control.Effect.Interpose
                      , Control.Effect.Lift
