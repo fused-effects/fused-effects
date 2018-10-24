@@ -79,6 +79,17 @@ example list = runState 0 $ do
   put (i + length list)
 ```
 
+Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
+
+```haskell
+example :: (Carrier sig m, Effect sig, Monad m) => m (Int, ())
+example = runReader "hello" . runState 0 $ do
+  list <- ask
+  put (length (list :: String))
+```
+
+(Note that the type annotation on `list` is necessary to disambiguate the requested value, since otherwise all the typechecker knows is that it’s an arbitrary `Foldable`. For more information, see the [comparison to `mtl`](#comparison-to--mtl-).)
+
 
 ### Defining new effects
 
