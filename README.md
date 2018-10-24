@@ -79,6 +79,8 @@ example list = runState 0 $ do
   put (i + length list)
 ```
 
+`runState` returns a tuple of both the computed value (the `()`) and the final state (the `Int`), visible in the result of the returned computation.
+
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
 ```haskell
