@@ -1,4 +1,4 @@
-# A fast, flexible effect system for Haskell
+# A fast, flexible, fused effect system for Haskell
 
 [![Build Status](https://travis-ci.com/robrix/higher-order-effects.svg?branch=master)](https://travis-ci.com/robrix/higher-order-effects)
 
