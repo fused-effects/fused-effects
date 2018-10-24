@@ -3,6 +3,7 @@ module Control.Effect.Spec where
 
 import Control.Effect
 import Control.Effect.Carrier
+import Control.Effect.Eavesdrop
 import Control.Effect.Fail
 import Control.Effect.Interpose
 import Control.Effect.Reader
@@ -17,6 +18,7 @@ spec = do
   reinterpretation
   interception
   interposition
+  eavesdropping
 
 
 inference :: Spec
@@ -93,3 +95,16 @@ interposition = describe "interposition" $ do
 
 interposeFail :: (Member Fail sig, Member (Interpose Fail) sig, Carrier sig m) => m a -> m a
 interposeFail m = interpose m $ \ (Fail s) -> send (Fail ("hello, " ++ s))
+
+
+eavesdropping :: Spec
+eavesdropping = describe "eavesdropping" $ do
+  it "can interpose handlers without changing the available effects" $
+    run (runState "" (runFail (runEavesdrop @Fail (eavesdropFail (fail "world"))))) `shouldBe` ("world", Left "world" :: Either String Int)
+
+  it "eavesdropping only intercepts effects in its scope" $ do
+    run (runState "" (runFail (runEavesdrop @Fail (fail "world" *> eavesdropFail (pure (0 :: Int)))))) `shouldBe` ("", Left "world")
+    run (runState "" (runFail (runEavesdrop @Fail (eavesdropFail (pure (0 :: Int)) <* fail "world")))) `shouldBe` ("", Left "world")
+
+eavesdropFail :: (Member (State String) sig, Member (Eavesdrop Fail) sig, Carrier sig m) => m a -> m a
+eavesdropFail m = eavesdrop m $ \ (Fail s) -> put s
