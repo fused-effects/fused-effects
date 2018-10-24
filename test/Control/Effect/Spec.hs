@@ -14,7 +14,7 @@ spec :: Spec
 spec = do
   inference
   reinterpretation
-  interposition
+  interception
 
 
 inference :: Spec
@@ -59,22 +59,22 @@ instance (Carrier sig m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretR
             runReinterpretReaderC (k v)
 
 
-interposition :: Spec
-interposition = describe "interposition" $ do
-  it "can interpose handlers without changing the available effects" $
-    run (runFail (interposeFail (fail "world"))) `shouldBe` (Left "hello, world" :: Either String Int)
+interception :: Spec
+interception = describe "interception" $ do
+  it "can intercept handlers without changing the available effects" $
+    run (runFail (interceptFail (fail "world"))) `shouldBe` (Left "hello, world" :: Either String Int)
 
-  it "interposition only intercepts effects in its scope" $ do
-    run (runFail (fail "world" *> interposeFail (pure (0 :: Int)))) `shouldBe` Left "world"
-    run (runFail (interposeFail (pure (0 :: Int)) <* fail "world")) `shouldBe` Left "world"
+  it "interception only intercepts effects in its scope" $ do
+    run (runFail (fail "world" *> interceptFail (pure (0 :: Int)))) `shouldBe` Left "world"
+    run (runFail (interceptFail (pure (0 :: Int)) <* fail "world")) `shouldBe` Left "world"
 
-interposeFail :: (Member Fail sig, Carrier sig m) => Eff (InterposeC m) a -> m a
-interposeFail = runInterposeC . interpret
+interceptFail :: (Member Fail sig, Carrier sig m) => Eff (InterceptC m) a -> m a
+interceptFail = runInterceptC . interpret
 
-newtype InterposeC m a = InterposeC { runInterposeC :: m a }
+newtype InterceptC m a = InterceptC { runInterceptC :: m a }
 
-instance (Member Fail sig, Carrier sig m) => Carrier sig (InterposeC m) where
-  ret = InterposeC . ret
+instance (Member Fail sig, Carrier sig m) => Carrier sig (InterceptC m) where
+  ret = InterceptC . ret
   eff op
-    | Just (Fail s) <- prj op = InterposeC (send (Fail ("hello, " ++ s)))
-    | otherwise               = InterposeC (eff (handleCoercible op))
+    | Just (Fail s) <- prj op = InterceptC (send (Fail ("hello, " ++ s)))
+    | otherwise               = InterceptC (eff (handleCoercible op))
