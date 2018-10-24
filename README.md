@@ -1,5 +1,7 @@
 # A fast, flexible effect system for Haskell
 
+[![Build Status](https://travis-ci.com/robrix/higher-order-effects.svg?branch=master)](https://travis-ci.com/robrix/higher-order-effects)
+
 - [Overview](#overview)
   - [Algebraic effects](#algebraic-effects)
   - [Higher-order effects](#higher-order-effects)
