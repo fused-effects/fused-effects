@@ -20,6 +20,7 @@ flag build-examples
 library
   exposed-modules:     Control.Effect
                      , Control.Effect.Carrier
+                     , Control.Effect.Eavesdrop
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.Fail.Internal
