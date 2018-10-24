@@ -101,6 +101,8 @@ example = run . runReader "hello" . runState 0 $ do
   put (length (list :: String))
 ```
 
+`run` is itself actually an effect handler for the `Void` effect, which has no operations and thus can only represent a final result value.
+
 
 ### Defining new effects
 
