@@ -150,6 +150,16 @@ instance HFunctor Teletype where
   hmap _ = coerce
 ```
 
+`Effect` plays a similar role to the combination of `Functor` (which operates on continuations) and `HFunctor` (which operates on embedded computations). It’s used by `Carrier` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `handle` takes an initial state parameter (encoded as some arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping state functors containing unhandled computations to handled computations producing the state functor alongside any results.
+
+Since `Teletype`’s operations don’t have any embedded computations, the `Effect` instance only has to operate on the continuations, by wrapping the computations in the state and applying the handler:
+
+```haskell
+instance Effect Teletype where
+  handle state handler (Read    k) = Read (handler . (<$ state) . k)
+  handle state handler (Write s k) = Write s (handler (k <$ state))
+```
+
 Now that we have our effect datatype, we can give definitions for `read` and `write`:
 
 ```haskell
