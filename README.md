@@ -103,6 +103,18 @@ example = run . runReader "hello" . runState 0 $ do
 
 `run` is itself actually an effect handler for the `Void` effect, which has no operations and thus can only represent a final result value.
 
+Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for `Eff` to lift `putStrLn` into the middle of our computation:
+
+```haskell
+example :: IO (Int, ())
+example = runM . runReader "hello" . runState 0 $ do
+  list <- ask
+  liftIO (putStrLn list)
+  put (length list)
+```
+
+(Note that we no longer need to give a type annotation for `list`, since `putStrLn` constrains the type for us.)
+
 
 ### Defining new effects
 
