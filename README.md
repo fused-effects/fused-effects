@@ -11,6 +11,7 @@
   - [Running effects](#running-effects)
   - [Defining new effects](#defining-new-effects)
   - [Defining effect handlers](#defining-effect-handlers)
+- [Benchmarks](#benchmarks)
 - [Related work](#related-work)
   - [Comparison to `mtl`](#comparison-to--mtl-)
   - [Comparison to `freer-simple`](#comparison-to--freer-simple-)
@@ -72,6 +73,11 @@ Different effects make different operations available; see the documentation for
 ### Defining new effects
 
 ### Defining effect handlers
+
+
+## Benchmarks
+
+`higher-order-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark).
 
 
 ## Related work
