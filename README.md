@@ -92,6 +92,15 @@ example = runReader "hello" . runState 0 $ do
 
 (Note that the type annotation on `list` is necessary to disambiguate the requested value, since otherwise all the typechecker knows is that it’s an arbitrary `Foldable`. For more information, see the [comparison to `mtl`](#comparison-to--mtl-).)
 
+When all effects have been handled, a computation’s final value can be extracted with `run`:
+
+```haskell
+example :: (Int, ())
+example = run . runReader "hello" . runState 0 $ do
+  list <- ask
+  put (length (list :: String))
+```
+
 
 ### Defining new effects
 
