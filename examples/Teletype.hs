@@ -30,6 +30,10 @@ instance HFunctor Teletype where
   hmap _ = coerce
   {-# INLINE hmap #-}
 
+instance Effect Teletype where
+  handle state handler (Read    k) = Read (handler . (<$ state) . k)
+  handle state handler (Write s k) = Write s (handler (k <$ state))
+
 read :: (Member Teletype sig, Carrier sig m) => m String
 read = send (Read ret)
 
