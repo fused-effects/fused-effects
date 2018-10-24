@@ -118,6 +118,32 @@ example4 = runM . runReader "hello" . runState 0 $ do
 
 ### Defining new effects
 
+Effects are a powerful mechanism for abstraction, and so defining new effects is a valuable tool for system architecture. Effects are modelled as (higher-order) functors, with an explicit continuation denoting the remainder of the computation after the effect.
+
+It’s often helpful to start by specifying the types of the desired operations. For our example, we’re going to define a `Teletype` effect, with `read` and `write` operations, which read a string from some input and write a string to some output, respectively:
+
+```haskell
+data Teletype (m :: * -> *) k
+read :: (Member Teletype sig, Carrier sig m) => m String
+write :: (Member Teletype sig, Carrier sig m) => String -> m ()
+```
+
+Effect types must have two type parameters: `m`, denoting any computations which the effect embeds, and `k`, denoting the rest of remainder of the computation after the effect. Note that since `Teletype` doesn’t use `m`, the compiler will infer it as being of kind `*` by default. The explicit kind annotation on `m` corrects that.
+
+Next, we can flesh out the definition of the `Teletype` effect by providing constructors for each primitive operation:
+
+```haskell
+data Teletype (m :: * -> *) k
+  = Read (String -> k)
+  | Write String k
+  deriving (Functor)
+```
+
+The `Read` operation returns a `String`, and hence its continuation is represented as a function _taking_ a `String`. Thus, to continue the computation, a handler will have to provide a `String`. But since the effect type doesn’t say anything about where that `String` should come from, handlers are free to read from `stdin`, use a constant value, etc.
+
+On the other hand, the `Write` operation returns `()`. Since a function `() -> k` is equivalent to a (non-strict) `k`, we can omit the function parameter.
+
+
 ### Defining effect handlers
 
 
