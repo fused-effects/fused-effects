@@ -10,7 +10,6 @@ module Control.Effect.Eavesdrop
 import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Sum
-import Data.Foldable (traverse_)
 
 data Eavesdrop eff m k
   = forall a . Eavesdrop (m a) (forall n x . eff n (n x) -> m ()) (a -> k)
@@ -28,9 +27,9 @@ eavesdrop m f = send (Eavesdrop m f ret)
 
 
 runEavesdrop :: (HFunctor eff, Carrier sig m, Monad m, Member eff sig) => Eff (EavesdropC eff m) a -> m a
-runEavesdrop = flip runEavesdropC [] . interpret
+runEavesdrop = flip runEavesdropC Nothing . interpret
 
-newtype EavesdropC eff m a = EavesdropC { runEavesdropC :: [Tap eff m] -> m a }
+newtype EavesdropC eff m a = EavesdropC { runEavesdropC :: Maybe (Tap eff m) -> m a }
 
 newtype Tap eff m = Tap { runTap :: forall n x . eff n (n x) -> m () }
 
@@ -39,9 +38,9 @@ instance Applicative m => Semigroup (Tap eff m) where
 
 instance (Carrier sig m, HFunctor eff, Member eff sig, Monad m) => Carrier (Eavesdrop eff :+: sig) (EavesdropC eff m) where
   ret a = EavesdropC (const (ret a))
-  eff op = EavesdropC (\ taps -> (alg taps \/ algOther taps) op)
-    where alg taps (Eavesdrop m h k) = runEavesdropC m (Tap (flip runEavesdropC taps . h) : taps) >>= flip runEavesdropC taps . k
-          algOther taps op
-            | not (null taps)
-            , Just eff <- prj op = traverse_ (flip runTap eff) taps *> send (handleReader taps runEavesdropC eff)
-            | otherwise          = eff (handleReader taps runEavesdropC op)
+  eff op = EavesdropC (\ tap -> (alg tap \/ algOther tap) op)
+    where alg tap (Eavesdrop m h k) = runEavesdropC m (Just (Tap (flip runEavesdropC tap . h)) <> tap) >>= flip runEavesdropC tap . k
+          algOther tap op
+            | Just tap <- tap
+            , Just eff <- prj op = runTap tap eff *> send (handleReader (Just tap) runEavesdropC eff)
+            | otherwise          = eff (handleReader tap runEavesdropC op)
