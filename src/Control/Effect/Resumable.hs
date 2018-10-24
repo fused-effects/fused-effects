@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
@@ -9,19 +9,22 @@ module Control.Effect.Resumable
 , ResumableWithC(..)
 ) where
 
+import Control.DeepSeq
 import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Sum
+import Data.Coerce
 import Data.Functor.Classes
 
 -- | Errors which can be resumed with values of some existentially-quantified type.
-data Resumable err m k
+data Resumable err (m :: * -> *) k
   = forall a . Resumable (err a) (a -> k)
 
 deriving instance Functor (Resumable err m)
 
 instance HFunctor (Resumable err) where
-  hmap _ (Resumable err k) = Resumable err k
+  hmap _ = coerce
+  {-# INLINE hmap #-}
 
 instance Effect (Resumable err) where
   handle state handler (Resumable err k) = Resumable err (handler . (<$ state) . k)
@@ -65,6 +68,13 @@ instance (Show1 err) => Show (SomeError err) where
   showsPrec d (SomeError err) = showsUnaryWith (liftShowsPrec (const (const id)) (const id)) "SomeError" d err
 
 
+-- | Evaluation of 'SomeError' to normal forms is determined by a 'NFData1' instance for the error type.
+--
+--   prop> pure (rnf (SomeError (Identity (error "error"))) :: SomeError Identity) `shouldThrow` errorCall "error"
+instance NFData1 err => NFData (SomeError err) where
+  rnf (SomeError err) = liftRnf (\a -> seq a ()) err
+
+
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runResumable (pure a)) == Right @(SomeError Identity) @Int a
@@ -75,7 +85,7 @@ newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError 
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   ret a = ResumableC (ret (Right a))
-  eff = ResumableC . (alg \/ eff . handle (Right ()) (either (ret . Left) runResumableC))
+  eff = ResumableC . (alg \/ eff . handleEither runResumableC)
     where alg (Resumable err _) = ret (Left (SomeError err))
 
 

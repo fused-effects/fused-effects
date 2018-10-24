@@ -2,6 +2,11 @@
 module Control.Effect.Spec where
 
 import Control.Effect
+import Control.Effect.Carrier
+import Control.Effect.Fail
+import Control.Effect.Reader
+import Control.Effect.State
+import Control.Effect.Sum
 import Prelude hiding (fail)
 import Test.Hspec
 
@@ -20,8 +25,8 @@ inference = describe "inference" $ do
 askEnv :: (Member (Reader env) sig, Carrier sig m) => HasEnv env m env
 askEnv = ask
 
-runEnv :: Carrier sig m => env -> HasEnv env (ReaderC env (HasEnv env m)) a -> HasEnv env m a
-runEnv r = runReader r . runHasEnv
+runEnv :: Carrier sig m => env -> HasEnv env (ReaderC env (Eff m)) a -> HasEnv env m a
+runEnv r = HasEnv . runReader r . runHasEnv
 
 
 newtype HasEnv env carrier a = HasEnv { runHasEnv :: Eff carrier a }
@@ -29,7 +34,7 @@ newtype HasEnv env carrier a = HasEnv { runHasEnv :: Eff carrier a }
 
 instance Carrier sig carrier => Carrier sig (HasEnv env carrier) where
   ret = pure
-  eff op = HasEnv (eff (handlePure runHasEnv op))
+  eff op = HasEnv (eff (handleCoercible op))
 
 
 reinterpretation :: Spec
@@ -44,7 +49,7 @@ newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC ::
 
 instance (Carrier (State r :+: sig) m, Effect sig, Monad m) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
   ret = ReinterpretReaderC . ret
-  eff = ReinterpretReaderC . (alg \/ eff . R . handlePure runReinterpretReaderC)
+  eff = ReinterpretReaderC . (alg \/ eff . R . handleCoercible)
     where alg (Ask       k) = get >>= runReinterpretReaderC . k
           alg (Local f m k) = do
             a <- get
@@ -72,4 +77,4 @@ instance (Member Fail sig, Carrier sig m) => Carrier sig (InterposeC m) where
   ret = InterposeC . ret
   eff op
     | Just (Fail s) <- prj op = InterposeC (send (Fail ("hello, " ++ s)))
-    | otherwise               = InterposeC (eff (handlePure runInterposeC op))
+    | otherwise               = InterposeC (eff (handleCoercible op))

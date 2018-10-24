@@ -1,13 +1,13 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Trace
 ( Trace(..)
 , trace
-, runPrintingTrace
-, PrintingC(..)
-, runIgnoringTrace
-, IgnoringC(..)
-, runReturningTrace
-, ReturningC(..)
+, runTraceByPrinting
+, TraceByPrintingC(..)
+, runTraceByIgnoring
+, TraceByIgnoringC(..)
+, runTraceByReturning
+, TraceByReturningC(..)
 ) where
 
 import Control.Effect.Carrier
@@ -18,7 +18,7 @@ import Data.Bifunctor (first)
 import Data.Coerce
 import System.IO
 
-data Trace m k = Trace String k
+data Trace (m :: * -> *) k = Trace String k
   deriving (Functor)
 
 instance HFunctor Trace where
@@ -34,43 +34,43 @@ trace message = send (Trace message (ret ()))
 
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
-runPrintingTrace :: (MonadIO m, Carrier sig m) => Eff (PrintingC m) a -> m a
-runPrintingTrace = runPrintingC . interpret
+runTraceByPrinting :: (MonadIO m, Carrier sig m) => Eff (TraceByPrintingC m) a -> m a
+runTraceByPrinting = runTraceByPrintingC . interpret
 
-newtype PrintingC m a = PrintingC { runPrintingC :: m a }
+newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
 
-instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (PrintingC m) where
-  ret = PrintingC . ret
-  eff = PrintingC . (alg \/ eff . handlePure runPrintingC)
-    where alg (Trace s k) = liftIO (hPutStrLn stderr s) *> runPrintingC k
+instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
+  ret = TraceByPrintingC . ret
+  eff = TraceByPrintingC . (alg \/ eff . handlePure runTraceByPrintingC)
+    where alg (Trace s k) = liftIO (hPutStrLn stderr s) *> runTraceByPrintingC k
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
 --
---   prop> run (runIgnoringTrace (trace a *> pure b)) == b
-runIgnoringTrace :: Carrier sig m => Eff (IgnoringC m) a -> m a
-runIgnoringTrace = runIgnoringC . interpret
+--   prop> run (runTraceByIgnoring (trace a *> pure b)) == b
+runTraceByIgnoring :: Carrier sig m => Eff (TraceByIgnoringC m) a -> m a
+runTraceByIgnoring = runTraceByIgnoringC . interpret
 
-newtype IgnoringC m a = IgnoringC { runIgnoringC :: m a }
+newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
 
-instance Carrier sig m => Carrier (Trace :+: sig) (IgnoringC m) where
-  ret = IgnoringC . ret
-  eff = alg \/ (IgnoringC . eff . handlePure runIgnoringC)
+instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
+  ret = TraceByIgnoringC . ret
+  eff = alg \/ (TraceByIgnoringC . eff . handlePure runTraceByIgnoringC)
     where alg (Trace _ k) = k
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
---   prop> run (runReturningTrace (trace a *> trace b *> pure c)) == ([a, b], c)
-runReturningTrace :: (Carrier sig m, Effect sig, Functor m) => Eff (ReturningC m) a -> m ([String], a)
-runReturningTrace = fmap (first reverse) . flip runReturningC [] . interpret
+--   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) == ([a, b], c)
+runTraceByReturning :: (Carrier sig m, Effect sig, Functor m) => Eff (TraceByReturningC m) a -> m ([String], a)
+runTraceByReturning = fmap (first reverse) . flip runTraceByReturningC [] . interpret
 
-newtype ReturningC m a = ReturningC { runReturningC :: [String] -> m ([String], a) }
+newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: [String] -> m ([String], a) }
 
-instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (ReturningC m) where
-  ret a = ReturningC (\ s -> ret (s, a))
-  eff op = ReturningC (\ s -> (alg s \/ eff . handle (s, ()) (uncurry (flip runReturningC))) op)
-    where alg s (Trace m k) = runReturningC k (m : s)
+instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
+  ret a = TraceByReturningC (\ s -> ret (s, a))
+  eff op = TraceByReturningC (\ s -> (alg s \/ eff . handleState s runTraceByReturningC) op)
+    where alg s (Trace m k) = runTraceByReturningC k (m : s)
 
 
 -- $setup

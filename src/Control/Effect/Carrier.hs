@@ -4,7 +4,15 @@ module Control.Effect.Carrier
 , Effect(..)
 , Carrier(..)
 , handlePure
+, handleCoercible
+, handleReader
+, handleState
+, handleEither
+, handleTraversable
 ) where
+
+import Control.Monad (join)
+import Data.Coerce
 
 class HFunctor h where
   -- | Functor map. This is required to be 'fmap'.
@@ -44,3 +52,30 @@ class HFunctor sig => Carrier sig h | h -> sig where
 handlePure :: HFunctor sig => (forall x . f x -> g x) -> sig f (f a) -> sig g (g a)
 handlePure handler = hmap handler . fmap' handler
 {-# INLINE handlePure #-}
+
+-- | Thread a 'Coercible' carrier through an 'HFunctor'.
+--
+--   This is applicable whenever @f@ is 'Coercible' to @g@, e.g. simple @newtype@s.
+handleCoercible :: (HFunctor sig, Coercible f g) => sig f (f a) -> sig g (g a)
+handleCoercible = handlePure coerce
+{-# INLINE handleCoercible #-}
+
+-- | Thread a @Reader@-like carrier through an 'HFunctor'.
+handleReader :: HFunctor sig => r -> (forall x . f x -> r -> g x) -> sig f (f a) -> sig g (g a)
+handleReader r run = handlePure (flip run r)
+{-# INLINE handleReader #-}
+
+-- | Thread a @State@-like carrier through an 'Effect'.
+handleState :: Effect sig => s -> (forall x . f x -> s -> g (s, x)) -> sig f (f a) -> sig g (g (s, a))
+handleState s run = handle (s, ()) (uncurry (flip run))
+{-# INLINE handleState #-}
+
+-- | Thread a carrier producing 'Either's through an 'Effect'.
+handleEither :: (Carrier sig g, Effect sig) => (forall x . f x -> g (Either e x)) -> sig f (f a) -> sig g (g (Either e a))
+handleEither run = handle (Right ()) (either (ret . Left) run)
+{-# INLINE handleEither #-}
+
+-- | Thread a carrier producing values in a 'Traversable' 'Monad' (e.g. '[]') through an 'Effect'.
+handleTraversable :: (Effect sig, Applicative g, Monad m, Traversable m) => (forall x . f x -> g (m x)) -> sig f (f a) -> sig g (g (m a))
+handleTraversable run = handle (pure ()) (fmap join . traverse run)
+{-# INLINE handleTraversable #-}

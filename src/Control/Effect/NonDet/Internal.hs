@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, PolyKinds #-}
+{-# LANGUAGE DeriveFunctor, KindSignatures #-}
 module Control.Effect.NonDet.Internal
 ( NonDet(..)
 ) where
@@ -6,7 +6,7 @@ module Control.Effect.NonDet.Internal
 import Control.Effect.Carrier
 import Data.Coerce
 
-data NonDet m k
+data NonDet (m :: * -> *) k
   = Empty
   | Choose (Bool -> k)
   deriving (Functor)

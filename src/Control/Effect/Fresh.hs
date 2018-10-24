@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fresh
 ( Fresh(..)
 , fresh
@@ -49,7 +49,7 @@ newtype FreshC m a = FreshC { runFreshC :: Int -> m (Int, a) }
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fresh :+: sig) (FreshC m) where
   ret a = FreshC (\ i -> ret (i, a))
-  eff op = FreshC (\ i -> (alg i \/ eff . handle (i, ()) (uncurry (flip runFreshC))) op)
+  eff op = FreshC (\ i -> (alg i \/ eff . handleState i runFreshC) op)
     where alg i (Fresh   k) = runFreshC (k i) (succ i)
           alg i (Reset m k) = runFreshC m i >>= \ (_, a) -> runFreshC (k a) i
 

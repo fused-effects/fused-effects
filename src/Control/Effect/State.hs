@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, PolyKinds, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State
 ( State(..)
 , get
@@ -16,7 +16,7 @@ import Control.Effect.Sum
 import Control.Effect.Internal
 import Data.Coerce
 
-data State s m k
+data State s (m :: * -> *) k
   = Get (s -> k)
   | Put s k
   deriving (Functor)
@@ -81,7 +81,7 @@ newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   ret a = StateC (\ s -> ret (s, a))
-  eff op = StateC (\ s -> (alg s \/ eff . handle (s, ()) (uncurry (flip runStateC))) op)
+  eff op = StateC (\ s -> (alg s \/ eff . handleState s runStateC) op)
     where alg s (Get   k) = runStateC (k s) s
           alg _ (Put s k) = runStateC  k    s
 
