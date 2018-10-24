@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, RankNTypes, StandaloneDeriving #-}
-module Control.Effect.Intercept where
+module Control.Effect.Intercept
+( Intercept(..)
+) where
 
 import Control.Effect.Carrier
 
