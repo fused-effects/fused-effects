@@ -5,6 +5,8 @@ module Control.Effect.Eavesdrop
 , runEavesdrop
 , EavesdropC(..)
 , Tap(..)
+, Interpose(..)
+, interpose
 ) where
 
 import Control.Effect.Carrier
@@ -42,3 +44,18 @@ instance (Carrier sig m, HFunctor eff, Member eff sig, Monad m) => Carrier (Eave
             | not (null taps)
             , Just eff <- prj op = traverse_ (flip runTap eff) taps *> send (handleReader taps runEavesdropC eff)
             | otherwise          = eff (handleReader taps runEavesdropC op)
+
+
+data Interpose eff m k
+  = forall a . Interpose (m a) (forall n x . eff n (n x) -> m x) (a -> k)
+
+deriving instance Functor (Interpose eff m)
+
+instance HFunctor (Interpose eff) where
+  hmap f (Interpose m h k) = Interpose (f m) (f . h) k
+
+interpose :: (Member (Interpose eff) sig, Carrier sig m)
+          => m a
+          -> (forall n x . eff n (n x) -> m x)
+          -> m a
+interpose m f = send (Interpose m f ret)
