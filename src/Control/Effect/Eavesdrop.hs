@@ -22,6 +22,8 @@ instance HFunctor (Eavesdrop eff) where
 -- | Listen in on requests for some specific effect with a handler.
 --
 --   The intercepted effects are re-sent after the handler in the surrounding context; thus, nested 'eavesdrop's listening for the same effect will apply innermost-first, and the effect’s own handler will still get the chance to service the request. This necessarily also means that the 'Eavesdrop' effect must be run inside the handler for the target effect.
+--
+--   Note that since 'Eavesdrop' lacks an 'Effect' instance, only “pure” effects, i.e. effects which can be handled inside other effects using 'hmap' alone, can be run within the 'runEavesdrop' scope. This includes @Reader@, but not e.g. @State@ or @Error@.
 eavesdrop :: (Member (Eavesdrop eff) sig, Carrier sig m)
           => m a
           -> (forall n x . eff n (n x) -> m ())
