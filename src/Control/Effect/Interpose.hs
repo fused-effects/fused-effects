@@ -19,6 +19,11 @@ deriving instance Functor (Interpose eff m)
 instance HFunctor (Interpose eff) where
   hmap f (Interpose m h k) = Interpose (f m) (f . h) k
 
+-- | Respond to requests for some specific effect with a handler.
+--
+--   The intercepted effects are not re-sent in the surrounding context; thus, the innermost nested 'interpose' listening for an effect will win, and the effect’s own handler will not get the chance to service the request.
+--
+--   Note that since 'Interpose' lacks an 'Effect' instance, only “pure” effects, i.e. effects which can be handled inside other effects using 'hmap' alone, can be run within the 'runInterpose' scope. This includes @Reader@, but not e.g. @State@ or @Error@.
 interpose :: (Member (Interpose eff) sig, Carrier sig m)
           => m a
           -> (forall n x . eff n (n x) -> m x)
