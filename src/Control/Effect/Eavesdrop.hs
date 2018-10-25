@@ -31,6 +31,7 @@ eavesdrop :: (Member (Eavesdrop eff) sig, Carrier sig m)
 eavesdrop m f = send (Eavesdrop m f ret)
 
 
+-- | Run an 'Eavesdrop' effect.
 runEavesdrop :: (HFunctor eff, Carrier sig m, Monad m, Member eff sig) => Eff (EavesdropC eff m) a -> m a
 runEavesdrop = flip runEavesdropC Nothing . interpret
 
