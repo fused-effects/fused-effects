@@ -19,6 +19,9 @@ deriving instance Functor (Eavesdrop eff m)
 instance HFunctor (Eavesdrop eff) where
   hmap f (Eavesdrop m h k) = Eavesdrop (f m) (f . h) k
 
+-- | Listen in on requests for some specific effect with a handler.
+--
+--   The intercepted effects are re-sent after the handler in the surrounding context; thus, nested 'eavesdrop's listening for the same effect will apply innermost-first, and the effect’s own handler will still get the chance to service the request.
 eavesdrop :: (Member (Eavesdrop eff) sig, Carrier sig m)
           => m a
           -> (forall n x . eff n (n x) -> m ())
