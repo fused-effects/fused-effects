@@ -31,6 +31,7 @@ interpose :: (Member (Interpose eff) sig, Carrier sig m)
 interpose m f = send (Interpose m f ret)
 
 
+-- | Run an 'Interpose' effect.
 runInterpose :: (Member eff sig, Carrier sig m, Monad m) => Eff (InterposeC eff m) a -> m a
 runInterpose = flip runInterposeC Nothing . interpret
 
