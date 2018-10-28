@@ -6,12 +6,15 @@ homepage:            https://github.com/robrix/higher-order-effects
 license:             BSD3
 license-file:        LICENSE
 author:              Rob Rix, Patrick Thomson
-maintainer:          rob.rix@me.com
+maintainer:          robrix@github.com
 copyright:           2018 Rob Rix, Patrick Thomson
 category:            Control
 build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
+
+tested-with:         GHC == 8.2.2
+                   , GHC == 8.4.4
 
 library
   exposed-modules:     Control.Effect
@@ -35,9 +38,9 @@ library
                      , Control.Effect.Trace
                      , Control.Effect.Void
                      , Control.Effect.Writer
-  build-depends:       base >=4.11 && <4.12
-                     , deepseq
-                     , MonadRandom
+  build-depends:       base >=4.9 && <4.12
+                     , deepseq >=1.4.3 && <1.5
+                     , MonadRandom >=0.5 && <0.6
                      , random
   hs-source-dirs:      src
   default-language:    Haskell2010
@@ -47,9 +50,9 @@ test-suite examples
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
   other-modules:       Teletype
-  build-depends:       base >= 4.11 && <4.12
+  build-depends:       base >=4.9 && <4.12
                      , higher-order-effects
-                     , hspec >= 2.4.1
+                     , hspec >=2.4.1
   hs-source-dirs:      examples
   default-language:    Haskell2010
 
@@ -58,17 +61,17 @@ test-suite test
   main-is:             Spec.hs
   other-modules:       Control.Effect.Spec
                      , Control.Effect.NonDet.Spec
-  build-depends:       base >=4.11 && <4.12
+  build-depends:       base >=4.9 && <4.12
                      , higher-order-effects
-                     , hspec >= 2.4.1
+                     , hspec >=2.4.1
   hs-source-dirs:      test
   default-language:    Haskell2010
 
 test-suite doctest
   type:                exitcode-stdio-1.0
   main-is:             Doctest.hs
-  build-depends:       base
-                     , doctest >= 0.7 && < 1.0
+  build-depends:       base >=4.9 && <4.12
+                     , doctest >=0.7 && <1.0
   hs-source-dirs:      test
   default-language:    Haskell2010
 

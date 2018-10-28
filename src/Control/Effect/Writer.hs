@@ -48,8 +48,8 @@ newtype WriterC w m a = WriterC { runWriterC :: m (w, a) }
 instance (Monoid w, Carrier sig m, Effect sig, Functor m) => Carrier (Writer w :+: sig) (WriterC w m) where
   ret a = WriterC (ret (mempty, a))
   eff = WriterC . (alg \/ eff . handle (mempty, ()) (uncurry runWriter'))
-    where alg (Tell w k) = first (w <>) <$> runWriterC k
-          runWriter' w = fmap (first (w <>)) . runWriterC
+    where alg (Tell w k) = first (mappend w) <$> runWriterC k
+          runWriter' w = fmap (first (mappend w)) . runWriterC
 
 
 -- $setup
