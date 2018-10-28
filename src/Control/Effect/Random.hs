@@ -21,12 +21,15 @@ import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGe
 runRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
 runRandom g = flip runRandomC g . interpret
 
+-- | Run a random computation starting from a given generator and discarding the final generator.
 evalRandom :: (Carrier sig m, Effect sig, Functor m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m a
 evalRandom g = fmap snd . runRandom g
 
+-- | Run a random computation starting from a given generator and discarding the final result.
 execRandom :: (Carrier sig m, Effect sig, Functor m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m g
 execRandom g = fmap fst . runRandom g
 
+-- | Run a random computation in 'IO', splitting the global standard generator to get a new one for the computation.
 evalRandomIO :: (Carrier sig m, Effect sig, MonadIO m) => Eff (RandomC R.StdGen m) a -> m a
 evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
