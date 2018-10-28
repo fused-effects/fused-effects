@@ -175,6 +175,21 @@ This gives us enough to write computations using the `Teletype` effect. The next
 
 ### Defining effect handlers
 
+Effects only specify actions, they don’t actually perform them. That task is left up to effect handlers, typically defined as functions calling `interpret` to apply a given `Carrier` instance.
+
+Following from the above section, we can define a carrier for the `Teletype` effect which runs the calls in an underlying `MonadIO` instance:
+
+```haskell
+newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
+
+instance (Carrier sig m, MonadIO m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
+  ret = TeletypeIOC . ret
+
+  eff = TeletypeIOC . (alg \/ eff . handleCoercible)
+    where alg (Read    k) = liftIO getLine      >>= runTeletypeIOC . k
+          alg (Write s k) = liftIO (putStrLn s) >>  runTeletypeIOC   k
+```
+
 
 ## Benchmarks
 
