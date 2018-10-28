@@ -13,10 +13,6 @@ build-type:          Simple
 extra-source-files:  ChangeLog.md
 cabal-version:       >=1.10
 
-flag build-examples
-  description: Build the examples
-  default:     False
-
 library
   exposed-modules:     Control.Effect
                      , Control.Effect.Carrier
@@ -47,21 +43,15 @@ library
   default-language:    Haskell2010
 
 
-executable examples
-  main-is:          Main.hs
-  other-modules:    Teletype
-  hs-source-dirs:   examples
-  build-depends:    base >= 4.11 && <4.12
-                  , higher-order-effects
-                  , hspec >= 2.4.1
-
-  if flag(build-examples)
-    buildable: True
-  else
-    buildable: False
-
-  default-language: Haskell2010
-
+test-suite examples
+  type:                exitcode-stdio-1.0
+  main-is:             Main.hs
+  other-modules:       Teletype
+  build-depends:       base >= 4.11 && <4.12
+                     , higher-order-effects
+                     , hspec >= 2.4.1
+  hs-source-dirs:      examples
+  default-language:    Haskell2010
 
 test-suite test
   type:                exitcode-stdio-1.0
