@@ -10,10 +10,12 @@ import Control.Effect.Carrier
 import Control.Effect.Fail.Internal
 import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal
+import Control.Effect.Rand.Internal
 import Control.Effect.Sum
 import Control.Monad (liftM, ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Random.Class
 import Prelude hiding (fail)
 
 newtype Eff carrier a = Eff { unEff :: forall x . (a -> carrier x) -> carrier x }
@@ -71,6 +73,12 @@ instance (Member Fail sig, Carrier sig carrier) => MonadFail (Eff carrier) where
 
 instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) where
   liftIO = send . Lift . fmap pure
+
+instance (Member Rand sig, Carrier sig carrier) => MonadRandom (Eff carrier) where
+  getRandom = send (Uniform ret)
+  getRandomR r = send (UniformR r ret)
+  getRandomRs interval = (:) <$> getRandomR interval <*> getRandomRs interval
+  getRandoms = (:) <$> getRandom <*> getRandoms
 
 
 instance Carrier sig carrier => Carrier sig (Eff carrier) where
