@@ -80,6 +80,9 @@ instance (Member Random sig, Carrier sig carrier) => MonadRandom (Eff carrier) w
   getRandomRs interval = (:) <$> getRandomR interval <*> getRandomRs interval
   getRandoms = (:) <$> getRandom <*> getRandoms
 
+instance (Member Random sig, Carrier sig carrier) => MonadInterleave (Eff carrier) where
+  interleave m = send (Interleave m ret)
+
 
 instance Carrier sig carrier => Carrier sig (Eff carrier) where
   ret = pure
