@@ -31,6 +31,8 @@ evalRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (R
 evalRandom g = fmap snd . runRandom g
 
 -- | Run a random computation starting from a given generator and discarding the final result.
+--
+--   prop> run (execRandom (PureGen a) (pure b)) == PureGen a
 execRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m g
 execRandom g = fmap fst . runRandom g
 
