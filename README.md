@@ -1,7 +1,297 @@
-# Higher-order effects
+# A fast, flexible, fused effect system for Haskell
 
-A higher-order encoding of algebraic effects following the recipes in _[Effect Handlers in Scope][]_ (Nicolas Wu, Tom Schrijvers, Ralf Hinze), _[Monad Transformers and Modular Algebraic Effects: What Binds Them Together][]_ (Tom Schrijvers, Maciej Piróg, Nicolas Wu, Mauro Jaskelioff), and _[Fusion for Free—Efficient Algebraic Effect Handlers][]_ (Nicolas Wu, Tom Schrijvers).
+[![Build Status](https://travis-ci.com/robrix/higher-order-effects.svg?branch=master)](https://travis-ci.com/robrix/higher-order-effects)
+
+- [Overview](#overview)
+  - [Algebraic effects](#algebraic-effects)
+  - [Higher-order effects](#higher-order-effects)
+  - [Fusion](#fusion)
+- [Usage](#usage)
+  - [Using built-in effects](#using-built-in-effects)
+  - [Running effects](#running-effects)
+  - [Defining new effects](#defining-new-effects)
+  - [Defining effect handlers](#defining-effect-handlers)
+- [Benchmarks](#benchmarks)
+- [Related work](#related-work)
+  - [Comparison to `mtl`](#comparison-to--mtl-)
+  - [Comparison to `freer-simple`](#comparison-to--freer-simple-)
+
+
+## Overview
+
+`higher-order-effects` is an effect system for Haskell emphasizing expressivity and efficiency. The former is achieved by encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, while the latter is the result of [fusing](#fusion) effect handlers all the way through computations.
+
+Readers already familiar with effect systems may wish to start with the [usage](#usage) instead.
+
+
+### Algebraic effects
+
+In `higher-order-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them. Thus, a program written using the syntax of an effect can be given different meanings by using different effect handlers.
+
+These roles are performed by the effect and carrier types, respectively. Effects are datatypes with one constructor for each action. Carriers are generally `newtype`s, with a `Carrier` instance specifying how an effect’s constructors should be interpreted. Each carrier handles one effect, but multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax.
+
+
+### Higher-order effects
+
+Unlike most other effect systems, `higher-order-effects` offers _higher-order_ (or _scoped_) effects in addition to first-order algebraic effects. In a strictly first-order algebraic effect system, operations (like `local` or `catchError`) which specify some action limited to a given scope must be implemented as interpreters, hard-coding their meaning in precisely the manner algebraic effects were designed to avoid. By specifying effects as higher-order functors, these operations are likewise able to be given a variety of interpretations. This means, for example, that you can introspect and redefine both the `local` and `ask` operations provided by the `Reader` effect, rather than solely `ask` (as is the case with certain formulations of algebraic effects).
+
+As Nicolas Wu et al showed in _[Effect Handlers in Scope][]_, this has implications for the expressiveness of effect systems. It also has the benefit of making effect handling more consistent, since scoped operations are just syntax which can be interpreted like any other, and are thus simpler to reason about.
+
+
+### Fusion
+
+In order to maximize efficiency, `higher-order-effects` applies _fusion laws_, avoiding the construction of intermediate representations of effectful computations between effect handlers. In fact, this is applied as far as the initial construction as well: there is no representation of the computation as a free monad parameterized by some syntax type. As such, `higher-order-effects` avoids the overhead associated with constructing and evaluating any underlying free or freer monad.
+
+Instead, computations are performed in a monad named `Eff`, parameterized by the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.
+
+Carriers needn’t be `Functor`s (let alone `Monad`s), allowing a great deal of freedom in the interpretation of effects. And since the interpretation is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
+
+Finally, since the fusion of carrier algebras occurs as a result of the selection of the carriers, it doesn’t depend on complex `RULES` pragmas, making it very easy to reason about and tune.
+
+
+## Usage
+
+### Using built-in effects
+
+Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `higher-order-effects`, this is done by means of a `Member` constraint to require the effect’s presence in a _signature_, and a `Carrier` constraint to relate the signature to the `Monad`. For example, to use a `State` effect managing a `String`, one would write:
+
+```haskell
+action :: (Member (State String) sig, Carrier sig m) => m ()
+```
+
+(Additional constraints may be necessary depending on the precise operations required, e.g. to make the `Monad` methods available.)
+
+Multiple effects can be required simply by adding their corresponding `Member` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
+
+```haskell
+action :: (Member (State String) sig, Member (Reader Int) sig, Carrier sig m) => m ()
+```
+
+Different effects make different operations available; see the documentation for individual effects for more information about their operations. Note that we generally don't program against an explicit list of effect components: we take the typeclass-oriented approach, adding new constraints to `sig` as new capabilities become necessary. If you want to name and share some predefined list of effects, it's best to use the `-XConstraintKinds` extension to GHC, capturing the elements of `sig` as a type synonym of kind `Constraint`:
+
+```haskell
+type Shared sig = ( Member (State String) sig
+                  , Member (Reader Int)   sig
+                  , Member (Writer Graph) sig
+                  )
+
+myFunction :: (Shared sig, Carrier sig m) => Int -> m ()
+```
+
+### Running effects
+
+Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) invoking some specific `Carrier` instance. For example, we can run a `State` computation using `runState`:
+
+```haskell
+example1 :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
+example1 list = runState 0 $ do
+  i <- get
+  put (i + length list)
+```
+
+`runState` returns a tuple of both the computed value (the `()`) and the final state (the `Int`), visible in the result of the returned computation.
+
+Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
+
+```haskell
+example2 :: (Carrier sig m, Effect sig, Monad m) => m (Int, ())
+example2 = runReader "hello" . runState 0 $ do
+  list <- ask
+  put (length (list :: String))
+```
+
+(Note that the type annotation on `list` is necessary to disambiguate the requested value, since otherwise all the typechecker knows is that it’s an arbitrary `Foldable`. For more information, see the [comparison to `mtl`](#comparison-to--mtl-).)
+
+When all effects have been handled, a computation’s final value can be extracted with `run`:
+
+```haskell
+example3 :: (Int, ())
+example3 = run . runReader "hello" . runState 0 $ do
+  list <- ask
+  put (length (list :: String))
+```
+
+`run` is itself actually an effect handler for the `Void` effect, which has no operations and thus can only represent a final result value.
+
+Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for `Eff` to lift `putStrLn` into the middle of our computation:
+
+```haskell
+example4 :: IO (Int, ())
+example4 = runM . runReader "hello" . runState 0 $ do
+  list <- ask
+  liftIO (putStrLn list)
+  put (length list)
+```
+
+(Note that we no longer need to give a type annotation for `list`, since `putStrLn` constrains the type for us.)
+
+
+### Defining new effects
+
+Effects are a powerful mechanism for abstraction, and so defining new effects is a valuable tool for system architecture. Effects are modelled as (higher-order) functors, with an explicit continuation denoting the remainder of the computation after the effect.
+
+It’s often helpful to start by specifying the types of the desired operations. For our example, we’re going to define a `Teletype` effect, with `read` and `write` operations, which read a string from some input and write a string to some output, respectively:
+
+```haskell
+data Teletype (m :: * -> *) k
+read :: (Member Teletype sig, Carrier sig m) => m String
+write :: (Member Teletype sig, Carrier sig m) => String -> m ()
+```
+
+Effect types must have two type parameters: `m`, denoting any computations which the effect embeds, and `k`, denoting the remainder of the computation after the effect. Note that since `Teletype` doesn’t use `m`, the compiler will infer it as being of kind `*` by default. The explicit kind annotation on `m` corrects that.
+
+Next, we can flesh out the definition of the `Teletype` effect by providing constructors for each primitive operation:
+
+```haskell
+data Teletype (m :: * -> *) k
+  = Read (String -> k)
+  | Write String k
+  deriving (Functor)
+```
+
+The `Read` operation returns a `String`, and hence its continuation is represented as a function _taking_ a `String`. Thus, to continue the computation, a handler will have to provide a `String`. But since the effect type doesn’t say anything about where that `String` should come from, handlers are free to read from `stdin`, use a constant value, etc.
+
+On the other hand, the `Write` operation returns `()`. Since a function `() -> k` is equivalent to a (non-strict) `k`, we can omit the function parameter.
+
+In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need two other instances: `HFunctor` and `Effect`. `HFunctor`, named for “higher-order functor,” has one non-default operation, `hmap`, which applies a function to any embedded computations inside an effect. Since `Teletype` is first-order (i.e. it doesn’t have any embedded computations), the definition of `hmap` can be given using `coerce`:
+
+```haskell
+instance HFunctor Teletype where
+  hmap _ = coerce
+```
+
+`Effect` plays a similar role to the combination of `Functor` (which operates on continuations) and `HFunctor` (which operates on embedded computations). It’s used by `Carrier` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `handle` takes an initial state parameter (encoded as some arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping state functors containing unhandled computations to handled computations producing the state functor alongside any results.
+
+Since `Teletype`’s operations don’t have any embedded computations, the `Effect` instance only has to operate on the continuations, by wrapping the computations in the state and applying the handler:
+
+```haskell
+instance Effect Teletype where
+  handle state handler (Read    k) = Read (handler . (<$ state) . k)
+  handle state handler (Write s k) = Write s (handler (k <$ state))
+```
+
+Now that we have our effect datatype, we can give definitions for `read` and `write`:
+
+```haskell
+read :: (Member Teletype sig, Carrier sig m) => m String
+read = send (Read ret)
+
+write :: (Member Teletype sig, Carrier sig m) => String -> m ()
+write s = send (Write s (ret ()))
+```
+
+This gives us enough to write computations using the `Teletype` effect. The next section discusses how to run `Teletype` computations.
+
+
+### Defining effect handlers
+
+Effects only specify actions, they don’t actually perform them. That task is left up to effect handlers, typically defined as functions calling `interpret` to apply a given `Carrier` instance.
+
+Following from the above section, we can define a carrier for the `Teletype` effect which runs the calls in an underlying `MonadIO` instance:
+
+```haskell
+newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
+
+instance (Carrier sig m, MonadIO m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
+  ret = TeletypeIOC . ret
+
+  eff = TeletypeIOC . (alg \/ eff . handleCoercible)
+    where alg (Read    k) = liftIO getLine      >>= runTeletypeIOC . k
+          alg (Write s k) = liftIO (putStrLn s) >>  runTeletypeIOC   k
+```
+
+Here, `ret` is responsible for wrapping pure values in the carrier, and `eff` is responsible for handling an effectful computations. Since the `Carrier` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `eff` has two parts: a handler for `Teletype` (`alg`), and a handler for teletype effects that might be embedded in other effects in the signature.
+
+In this case, since the `Teletype` carrier is just a thin wrapper around the underlying computation, we can use `handleCoercible` to handle any embedded `TeletypeIOC` carriers by simply mapping `coerce` over them.
+
+That leaves `alg`, which handles `Teletype` effects with one case per constructor. Since we’re assuming the existence of a `MonadIO` instance for the underlying computation, we can use `liftIO` to inject the `getLine` and `putStrLn` actions into it, and then proceed with the continuations, unwrapping them in the process.
+
+Users could use `interpret` directly to run the effect, but it’s more convenient to provide effect handler functions applying `interpret` and then unwrapping the carrier:
+
+```haskell
+runTeletypeIO :: (MonadIO m, Carrier sig m) => Eff (TeletypeIOC m) a -> m a
+runTeletypeIO = runTeletypeIOC . interpret
+```
+
+In general, carriers don’t have to be `Functor`s, let alone `Monad`s. However, sometimes—especially in cases where the carrier is a thin wrapper like this—they can be more convenient to write using (derived) `Monad` instances. In this case, by using `-XGeneralizedNewtypeDeriving`, we can derive `Functor`, `Applicative`, `Monad`, and `MonadIO` instances for `TeletypeIOC`:
+
+```haskell
+newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
+  deriving (Applicative, Functor, Monad, MonadIO)
+```
+
+This allows us to use `liftIO` directly on the carrier itself, instead of only in the underlying `m`; likewise with `>>=`, `>>`, and `pure`:
+
+```haskell
+instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
+  ret = pure
+  eff = alg \/ TeletypeIOC . eff . handleCoercible
+    where alg (Read    k) = liftIO getLine      >>= k
+          alg (Write s k) = liftIO (putStrLn s) >>  k
+```
+
+
+## Benchmarks
+
+`higher-order-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
+
+
+## Related work
+
+`higher-order-effects` is an encoding of higher-order algebraic effects following the recipes in _[Effect Handlers in Scope][]_ (Nicolas Wu, Tom Schrijvers, Ralf Hinze), _[Monad Transformers and Modular Algebraic Effects: What Binds Them Together][]_ (Tom Schrijvers, Maciej Piróg, Nicolas Wu, Mauro Jaskelioff), and _[Fusion for Free—Efficient Algebraic Effect Handlers][]_ (Nicolas Wu, Tom Schrijvers).
 
 [Effect Handlers in Scope]: http://www.cs.ox.ac.uk/people/nicolas.wu/papers/Scope.pdf
 [Monad Transformers and Modular Algebraic Effects: What Binds Them Together]: http://www.cs.kuleuven.be/publicaties/rapporten/cw/CW699.pdf
 [Fusion for Free—Efficient Algebraic Effect Handlers]: https://people.cs.kuleuven.be/~tom.schrijvers/Research/papers/mpc2015.pdf
+
+
+### Comparison to `mtl`
+
+Like [`mtl`][], `higher-order-effects` provides a library of monadic effects which can be given different interpretations. In `mtl` this is done by defining new instances of the typeclasses encoding the actions of the effect, e.g. `MonadState`. In `higher-order-effects`, this is done by defining new instances of the `Carrier` typeclass for the effect.
+
+Also like `mtl`, `higher-order-effects` allows scoped operations like `local` and `catchError` to be given different interpretations. As with first-order operations, `mtl` achieves this with a final tagless encoding via methods, whereas `higher-order-effects` achieves this with an initial algebra encoding via `Carrier` instances.
+
+Unlike `mtl`, effects are automatically available regardless of where they occur in the signature; in `mtl` this requires instances for all valid orderings of the transformers (O(n²) of them, in general).
+
+Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a signature. This is a tradeoff: `mtl` is able to provide excellent type inference for effectful operations like `get`, since the functional dependencies can resolve the state type from the monad type. On the other hand, this behaviour can be recovered in `higher-order-effects` using `newtype` wrappers with phantom type parameters and helper functions, e.g.:
+
+```haskell
+newtype Wrapper s m a = Wrapper { runWrapper :: Eff m a }
+  deriving (Applicative, Functor, Monad)
+
+instance Carrier sig m => Carrier sig (Wrapper s m) where …
+
+getState :: (Carrier sig m, Member (State s) m) => Wrapper m s
+getState = get
+```
+
+Indeed, `Wrapper` can now be made an instance of `MonadState`:
+
+```haskell
+instance (Carrier sig m, Member (State s) m) => MTL.MonadState s (Wrapper s m) where
+  get = get
+  put = put
+```
+
+Thus, the approaches aren’t mutually exclusive; consumers are free to decide which approach makes the most sense for their situation.
+
+Unlike `higher-order-effects`, `mtl` provides a `ContT` monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects. Further, `higher-order-effects` provides a relatively large palette of these, including resumable exceptions, tracing, resource management, and others, as well as tools to define your own.
+
+Finally, thanks to the fusion and inlining of carriers, `higher-order-effects` is approximately as fast as `mtl` (see [benchmarks](#benchmarks)).
+
+[`mtl`]: http://hackage.haskell.org/package/mtl
+
+
+### Comparison to `freer-simple`
+
+Like [`freer-simple`][], `higher-order-effects` uses an initial encoding of library- and user-defined effects as syntax which can then be given different interpretations. In `freer-simple`, this is done with a family of interpreter functions (which cover a variety of needs, and which can be extended for more bespoke needs), whereas in `higher-order-effects` this is done with `Carrier` instances for `newtype`s.
+
+(Technically, it is possible to define handlers like `freer-simple`’s `interpret` using `higher-order-effects`, but passing handlers in as higher-order functions defeats the fusion and inlining of `Carrier` instances which makes `higher-order-effects` so efficient.)
+
+Unlike `higher-order-effects`, in `freer-simple`, scoped operations like `catchError` and `local` are implemented as interpreters, and can therefore not be given new interpretations.
+
+Unlike `freer-simple`, `higher-order-effects` has relatively little attention paid to compiler error messaging, which can make common (compile-time) errors somewhat more confusing to diagnose. Similarly, `freer-simple`’s family of interpreter functions can make the job of defining new effect handlers somewhat easier than in `higher-order-effects`. Further, `freer-simple` provides many of the same effects as `higher-order-effects`, plus a coroutine effect, but minus resource management and random generation.
+
+Finally, `higher-order-effects` has been [benchmarked](#benchmarks) as faster than `freer-simple`.
+
+[`freer-simple`]: http://hackage.haskell.org/package/freer-simple
