@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error
 ( Error(..)
 , throwError
@@ -53,9 +53,9 @@ newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
   ret a = ErrorC (pure (Right a))
-  eff = ErrorC . (alg \/ eff . handleEither runErrorC)
-    where alg (Throw e)     = pure (Left e)
-          alg (Catch m h k) = runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k)
+  eff = ErrorC . handleSum (eff . handleEither runErrorC) (\case
+    Throw e     -> pure (Left e)
+    Catch m h k -> runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k))
 
 
 -- $setup
