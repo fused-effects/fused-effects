@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
@@ -25,9 +25,9 @@ newtype AltC f m a = AltC { runAltC :: m (f a) }
 
 instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
   ret a = AltC (ret (pure a))
-  eff = AltC . (alg \/ eff . handleTraversable runAltC)
-    where alg Empty      = ret empty
-          alg (Choose k) = liftA2 (<|>) (runAltC (k True)) (runAltC (k False))
+  eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
+    Empty    -> ret empty
+    Choose k -> liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
 
 
 -- $setup
