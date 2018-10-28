@@ -85,8 +85,9 @@ newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError 
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   ret a = ResumableC (ret (Right a))
-  eff = ResumableC . (alg \/ eff . handleEither runResumableC)
-    where alg (Resumable err _) = ret (Left (SomeError err))
+  eff = ResumableC . handleSum
+    (eff . handleEither runResumableC)
+    (\ (Resumable err _) -> ret (Left (SomeError err)))
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
