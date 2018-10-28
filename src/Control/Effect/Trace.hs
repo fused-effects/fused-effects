@@ -18,7 +18,10 @@ import Data.Bifunctor (first)
 import Data.Coerce
 import System.IO
 
-data Trace (m :: * -> *) k = Trace String k
+data Trace (m :: * -> *) k = Trace
+  { traceMessage :: String
+  , traceCont    :: k
+  }
   deriving (Functor)
 
 instance HFunctor Trace where
@@ -41,8 +44,9 @@ newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
   ret = TraceByPrintingC . ret
-  eff = TraceByPrintingC . (alg \/ eff . handlePure runTraceByPrintingC)
-    where alg (Trace s k) = liftIO (hPutStrLn stderr s) *> runTraceByPrintingC k
+  eff = TraceByPrintingC . handleSum
+    (eff . handlePure runTraceByPrintingC)
+    (\ (Trace s k) -> liftIO (hPutStrLn stderr s) *> runTraceByPrintingC k)
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
@@ -55,8 +59,7 @@ newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
   ret = TraceByIgnoringC . ret
-  eff = alg \/ (TraceByIgnoringC . eff . handlePure runTraceByIgnoringC)
-    where alg (Trace _ k) = k
+  eff = handleSum (TraceByIgnoringC . eff . handlePure runTraceByIgnoringC) traceCont
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.
@@ -69,8 +72,9 @@ newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: [Str
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
   ret a = TraceByReturningC (\ s -> ret (s, a))
-  eff op = TraceByReturningC (\ s -> (alg s \/ eff . handleState s runTraceByReturningC) op)
-    where alg s (Trace m k) = runTraceByReturningC k (m : s)
+  eff op = TraceByReturningC (\ s -> handleSum
+    (eff . handleState s runTraceByReturningC)
+    (\ (Trace m k) -> runTraceByReturningC k (m : s)) op)
 
 
 -- $setup

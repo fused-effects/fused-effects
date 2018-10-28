@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
 module Control.Effect.Sum
 ( (:+:)(..)
-, (\/)
+, handleSum
 , Member(..)
 , send
 ) where
@@ -28,13 +28,13 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
 
 
 -- | Lift algebras for either side of a sum into a single algebra on sums.
-(\/) :: ( sig1           m a -> b)
-     -> (          sig2  m a -> b)
-     -> ((sig1 :+: sig2) m a -> b)
-(alg1 \/ _   ) (L op) = alg1 op
-(_    \/ alg2) (R op) = alg2 op
-
-infixr 4 \/
+--
+--   Note that the order of the functions is the opposite of members of the sum. This is more convenient for defining effect handlers as lambdas (especially using @-XLambdaCase@) on the right, enabling better error messaging when using typed holes than would be the case with a binding in a where clause.
+handleSum :: (          sig2  m a -> b)
+          -> ( sig1           m a -> b)
+          -> ((sig1 :+: sig2) m a -> b)
+handleSum alg1 _    (R op) = alg1 op
+handleSum _    alg2 (L op) = alg2 op
 
 
 class Member (sub :: (* -> *) -> (* -> *)) sup where

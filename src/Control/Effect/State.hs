@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State
 ( State(..)
 , get
@@ -81,9 +81,9 @@ newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   ret a = StateC (\ s -> ret (s, a))
-  eff op = StateC (\ s -> (alg s \/ eff . handleState s runStateC) op)
-    where alg s (Get   k) = runStateC (k s) s
-          alg _ (Put s k) = runStateC  k    s
+  eff op = StateC (\ s -> handleSum (eff . handleState s runStateC) (\case
+    Get   k -> runStateC (k s) s
+    Put s k -> runStateC  k    s) op)
 
 
 -- $setup

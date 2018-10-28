@@ -54,10 +54,10 @@ runResourceC handler (ResourceC m) = m handler
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
   ret a = ResourceC (const (ret a))
-  eff op = ResourceC (\ handler -> (alg handler \/ eff . handlePure (runResourceC handler)) op)
-    where alg :: MonadIO m => (forall x . m x -> IO x) -> Resource (ResourceC m) (ResourceC m a) -> m a
-          alg handler (Resource acquire release use k) = liftIO (Exc.bracket
-            (handler (runResourceC handler acquire))
-            (handler . runResourceC handler . release)
-            (handler . runResourceC handler . use))
-            >>= runResourceC handler . k
+  eff op = ResourceC (\ handler -> handleSum
+    (eff . handlePure (runResourceC handler))
+    (\ (Resource acquire release use k) -> liftIO (Exc.bracket
+      (handler (runResourceC handler acquire))
+      (handler . runResourceC handler . release)
+      (handler . runResourceC handler . use))
+      >>= runResourceC handler . k) op)

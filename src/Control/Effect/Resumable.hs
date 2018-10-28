@@ -85,8 +85,9 @@ newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError 
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   ret a = ResumableC (ret (Right a))
-  eff = ResumableC . (alg \/ eff . handleEither runResumableC)
-    where alg (Resumable err _) = ret (Left (SomeError err))
+  eff = ResumableC . handleSum
+    (eff . handleEither runResumableC)
+    (\ (Resumable err _) -> ret (Left (SomeError err)))
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
@@ -110,9 +111,9 @@ runResumableWithC f (ResumableWithC m) = m f
 
 instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
   ret a = ResumableWithC (const (ret a))
-  eff op = ResumableWithC (\ handler -> (alg handler \/ eff . handlePure (runResumableWithC handler)) op)
-    where alg :: Monad m => (forall x . err x -> m x) -> Resumable err (ResumableWithC err m) (ResumableWithC err m a) -> m a
-          alg handler (Resumable err k) = handler err >>= runResumableWithC handler . k
+  eff op = ResumableWithC (\ handler -> handleSum
+    (eff . handlePure (runResumableWithC handler))
+    (\ (Resumable err k) -> handler err >>= runResumableWithC handler . k) op)
 
 
 -- $setup

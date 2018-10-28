@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Spec where
 
 import Control.Effect
@@ -49,14 +49,14 @@ newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC ::
 
 instance (Carrier sig m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
   ret = ReinterpretReaderC . ret
-  eff = ReinterpretReaderC . (alg \/ eff . R . handleCoercible)
-    where alg (Ask       k) = get >>= runReinterpretReaderC . k
-          alg (Local f m k) = do
-            a <- get
-            put (f a)
-            v <- runReinterpretReaderC m
-            put a
-            runReinterpretReaderC (k v)
+  eff = ReinterpretReaderC . handleSum (eff . R . handleCoercible) (\case
+    Ask       k -> get >>= runReinterpretReaderC . k
+    Local f m k -> do
+      a <- get
+      put (f a)
+      v <- runReinterpretReaderC m
+      put a
+      runReinterpretReaderC (k v))
 
 
 interposition :: Spec
