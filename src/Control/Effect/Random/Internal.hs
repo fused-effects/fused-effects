@@ -8,8 +8,8 @@ import Data.Coerce (coerce)
 import qualified System.Random as R (Random(..))
 
 data Random (m :: * -> *) k
-  = forall a . R.Random a => Uniform (a -> k)
-  | forall a . R.Random a => UniformR (a, a) (a -> k)
+  = forall a . R.Random a => Random (a -> k)
+  | forall a . R.Random a => RandomR (a, a) (a -> k)
 
 deriving instance Functor (Random m)
 
@@ -18,5 +18,5 @@ instance HFunctor Random where
   {-# INLINE hmap #-}
 
 instance Effect Random where
-  handle state handler (Uniform k) = Uniform (handler . (<$ state) . k)
-  handle state handler (UniformR r k) = UniformR r (handler . (<$ state) . k)
+  handle state handler (Random k) = Random (handler . (<$ state) . k)
+  handle state handler (RandomR r k) = RandomR r (handler . (<$ state) . k)

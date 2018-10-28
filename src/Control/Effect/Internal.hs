@@ -75,8 +75,8 @@ instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) wh
   liftIO = send . Lift . fmap pure
 
 instance (Member Random sig, Carrier sig carrier) => MonadRandom (Eff carrier) where
-  getRandom = send (Uniform ret)
-  getRandomR r = send (UniformR r ret)
+  getRandom = send (Random ret)
+  getRandomR r = send (RandomR r ret)
   getRandomRs interval = (:) <$> getRandomR interval <*> getRandomRs interval
   getRandoms = (:) <$> getRandom <*> getRandoms
 

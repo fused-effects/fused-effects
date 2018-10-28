@@ -38,5 +38,5 @@ newtype RandomC g m a = RandomC { runRandomC :: g -> m (g, a) }
 instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) (RandomC g m) where
   ret a = RandomC (\ g -> ret (g, a))
   eff op = RandomC (\ g -> (alg g \/ eff . handleState g runRandomC) op)
-    where alg g (Uniform    k) = let (a, g') = R.random    g in runRandomC (k a) g'
-          alg g (UniformR r k) = let (a, g') = R.randomR r g in runRandomC (k a) g'
+    where alg g (Random    k) = let (a, g') = R.random    g in runRandomC (k a) g'
+          alg g (RandomR r k) = let (a, g') = R.randomR r g in runRandomC (k a) g'
