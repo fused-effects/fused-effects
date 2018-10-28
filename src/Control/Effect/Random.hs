@@ -25,6 +25,8 @@ runRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (Ra
 runRandom g = flip runRandomC g . interpret
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
+--
+--   prop> run (evalRandom (PureGen a) (pure b)) == b
 evalRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m a
 evalRandom g = fmap snd . runRandom g
 
