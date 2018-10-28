@@ -63,13 +63,13 @@ newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: [String] -> m (([St
 
 instance (Monad m, Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
   ret a = TeletypeRetC (\ i -> ret ((i, []), a))
-  eff op = TeletypeRetC (\ i -> (alg i \/ eff . handle ((i, []), ()) mergeResults) op)
-    where alg i (Read    k) = case i of
-            []  -> runTeletypeRetC (k "") []
-            h:t -> runTeletypeRetC (k h)  t
-          alg i (Write s k) = do
-            ((i, out), a) <- runTeletypeRetC k i
-            pure ((i, s:out), a)
-          mergeResults ((i, o), m) = do
+  eff op = TeletypeRetC (\ i -> handleSum (eff . handle ((i, []), ()) mergeResults) (\case
+    Read k -> case i of
+      []  -> runTeletypeRetC (k "") []
+      h:t -> runTeletypeRetC (k h)  t
+    Write s k -> do
+      ((i, out), a) <- runTeletypeRetC k i
+      pure ((i, s:out), a)) op)
+    where mergeResults ((i, o), m) = do
             ((i', o'), a) <- runTeletypeRetC m i
             pure ((i', o ++ o'), a)
