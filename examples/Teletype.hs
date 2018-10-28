@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 module Teletype where
 
@@ -51,9 +51,9 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
   ret = pure
-  eff = alg \/ TeletypeIOC . eff . handleCoercible
-    where alg (Read    k) = liftIO getLine      >>= k
-          alg (Write s k) = liftIO (putStrLn s) >>  k
+  eff = handleSum (TeletypeIOC . eff . handleCoercible) (\case
+    Read    k -> liftIO getLine      >>= k
+    Write s k -> liftIO (putStrLn s) >>  k)
 
 
 runTeletypeRet :: (Carrier sig m, Effect sig, Monad m) => [String] -> Eff (TeletypeRetC m) a -> m (([String], [String]), a)
