@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Random
 ( Random(..)
 , runRandom
@@ -44,10 +44,10 @@ newtype RandomC g m a = RandomC { runRandomC :: g -> m (g, a) }
 
 instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => Carrier (Random :+: sig) (RandomC g m) where
   ret a = RandomC (\ g -> ret (g, a))
-  eff op = RandomC (\ g -> (alg g \/ eff . handleState g runRandomC) op)
-    where alg g (Random    k) = let (a, g') = R.random    g in runRandomC (k a) g'
-          alg g (RandomR r k) = let (a, g') = R.randomR r g in runRandomC (k a) g'
-          alg g (Interleave m k) = let (g', g'') = R.split g in runRandomC m g' >>= flip runRandomC g'' . k . snd
+  eff op = RandomC (\ g -> handleSum (eff . handleState g runRandomC) (\case
+    Random    k -> let (a, g') = R.random    g in runRandomC (k a) g'
+    RandomR r k -> let (a, g') = R.randomR r g in runRandomC (k a) g'
+    Interleave m k -> let (g1, g2) = R.split g in runRandomC m g1 >>= flip runRandomC g2 . k . snd) op)
 
 
 -- $setup
