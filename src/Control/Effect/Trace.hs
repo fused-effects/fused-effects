@@ -18,7 +18,10 @@ import Data.Bifunctor (first)
 import Data.Coerce
 import System.IO
 
-data Trace (m :: * -> *) k = Trace String k
+data Trace (m :: * -> *) k = Trace
+  { traceMessage :: String
+  , traceCont    :: k
+  }
   deriving (Functor)
 
 instance HFunctor Trace where
