@@ -29,7 +29,7 @@ instance Effect Resource where
 -- reading file handle with 'openFile' or writing to a blob of memory
 -- with 'malloc'), any exception thrown during the operation may mean
 -- that the resource is not properly released. @bracket acquire release op@
--- ensures that @release@ is run on the value returned from @acquire even
+-- ensures that @release@ is run on the value returned from @acquire@ even
 -- if @op@ throws an exception.
 --
 -- 'bracket' is safe in the presence of asynchronous exceptions.
