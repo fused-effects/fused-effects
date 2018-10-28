@@ -223,7 +223,7 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
 
 ## Benchmarks
 
-`higher-order-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark).
+`higher-order-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
 
 
 ## Related work
