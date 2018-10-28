@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Reader
 ( Reader(..)
 , ask
@@ -56,9 +56,9 @@ newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
   ret a = ReaderC (const (ret a))
-  eff op = ReaderC (\ r -> (alg r \/ eff . handleReader r runReaderC) op)
-    where alg r (Ask       k) = runReaderC (k r) r
-          alg r (Local f m k) = runReaderC m (f r) >>= flip runReaderC r . k
+  eff op = ReaderC (\ r -> handleSum (eff . handleReader r runReaderC) (\case
+    Ask       k -> runReaderC (k r) r
+    Local f m k -> runReaderC m (f r) >>= flip runReaderC r . k) op)
 
 
 -- $setup
