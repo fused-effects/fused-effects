@@ -61,18 +61,18 @@ install:
   - "sed -i.bak 's/^jobs:/-- jobs:/' ${HOME}/.cabal/config"
   - rm -fv cabal.project cabal.project.local
   - grep -Ev -- '^\s*--' ${HOME}/.cabal/config | grep -Ev '^\s*$'
-  - "printf 'packages: \"/Users/rob/Developer/Projects/higher-order-effects\"\\n' > cabal.project"
+  - "printf 'packages: \".\"\\n' > cabal.project"
   - touch cabal.project.local
   - "if ! $NOINSTALLEDCONSTRAINTS; then for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- higher-order-effects | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done; fi"
   - cat cabal.project || true
   - cat cabal.project.local || true
-  - if [ -f "/Users/rob/Developer/Projects/higher-order-effects/configure.ac" ]; then
-      (cd "/Users/rob/Developer/Projects/higher-order-effects" && autoreconf -i);
+  - if [ -f "./configure.ac" ]; then
+      (cd "." && autoreconf -i);
     fi
   - rm -f cabal.project.freeze
   - cabal new-build -w ${HC} ${TEST} ${BENCH} --project-file="cabal.project" --dep -j2 all
   - cabal new-build -w ${HC} --disable-tests --disable-benchmarks --project-file="cabal.project" --dep -j2 all
-  - rm -rf .ghc.environment.* "/Users/rob/Developer/Projects/higher-order-effects"/dist
+  - rm -rf .ghc.environment.* "."/dist
   - DISTDIR=$(mktemp -d /tmp/dist-test.XXXX)
 
 # Here starts the actual work to be performed for the package under test;
@@ -104,5 +104,5 @@ script:
   # Build without installed constraints for packages in global-db
   - if $UNCONSTRAINED; then rm -f cabal.project.local; echo cabal new-build -w ${HC} --disable-tests --disable-benchmarks all; else echo "Not building without installed constraints"; fi
 
-# REGENDATA ["/Users/rob/Developer/Projects/higher-order-effects/higher-order-effects.cabal"]
+# REGENDATA ["higher-order-effects.cabal"]
 # EOF
