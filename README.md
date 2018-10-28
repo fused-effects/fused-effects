@@ -33,16 +33,16 @@ These roles are performed by the effect and carrier types, respectively. Effects
 
 ### Higher-order effects
 
-Unlike most other effect systems, `higher-order-effects` offers _higher-order_ (or _scoped_) effects in addition to first-order algebraic effects. In a strictly first-order algebraic effect system, operations (like `local` or `catchError`) which specify some action limited to a given scope must be implemented as interpreters, hard-coding their meaning in precisely the manner algebraic effects were designed to avoid. By specifying effects as higher-order functors, these operations are likewise able to be given a variety of interpretations.
+Unlike most other effect systems, `higher-order-effects` offers _higher-order_ (or _scoped_) effects in addition to first-order algebraic effects. In a strictly first-order algebraic effect system, operations (like `local` or `catchError`) which specify some action limited to a given scope must be implemented as interpreters, hard-coding their meaning in precisely the manner algebraic effects were designed to avoid. By specifying effects as higher-order functors, these operations are likewise able to be given a variety of interpretations. This means, for example, that you can introspect and redefine both the `local` and `ask` operations provided by the `Reader` effect, rather than solely `ask` (as is the case with certain formulations of algebraic effects).
 
 As Nicolas Wu et al showed in _[Effect Handlers in Scope][]_, this has implications for the expressiveness of effect systems. It also has the benefit of making effect handling more consistent, since scoped operations are just syntax which can be interpreted like any other, and are thus simpler to reason about.
 
 
 ### Fusion
 
-In order to maximize efficiency, `higher-order-effects` applies _fusion laws_, avoiding the construction of intermediate representations of effectful computations between effect handlers. In fact, this is applied as far as the initial construction as well: there is no representation of the computation as a free monad parameterized by some syntax type.
+In order to maximize efficiency, `higher-order-effects` applies _fusion laws_, avoiding the construction of intermediate representations of effectful computations between effect handlers. In fact, this is applied as far as the initial construction as well: there is no representation of the computation as a free monad parameterized by some syntax type. As such, `higher-order-effects` avoids the overhead associated with constructing and evaluating any underlying free or freer monad.
 
-Instead, computations are performed in a monad named `Eff`, parameterized by the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t specified until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier once their effects are interpreted.
+Instead, computations are performed in a monad named `Eff`, parameterized by the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.
 
 Carriers needn’t be `Functor`s (let alone `Monad`s), allowing a great deal of freedom in the interpretation of effects. And since the interpretation is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: on par with, or even slightly better than `mtl`.
 
@@ -65,8 +65,16 @@ Multiple effects can be required simply by adding their corresponding `Member` c
 action :: (Member (State String) sig, Member (Reader Int) sig, Carrier sig m) => m ()
 ```
 
-Different effects make different operations available; see the documentation for individual effects for more information about their operations.
+Different effects make different operations available; see the documentation for individual effects for more information about their operations. Note that we generally don't program against an explicit list of effect components: we take the typeclass-oriented approach, adding new constraints to `sig` as new capabilities become necessary. If you want to name and share some predefined list of effects, it's best to use the `-XConstraintKinds` extension to GHC, capturing the elements of `sig` as a type synonym of kind `Constraint`:
 
+```haskell
+type Shared sig = ( Member (State String) sig
+                  , Member (Reader Int)   sig
+                  , Member (Writer Graph) sig
+                  )
+
+myFunction :: (Shared sig, Carrier sig m) => Int -> m ()
+```
 
 ### Running effects
 
@@ -128,7 +136,7 @@ read :: (Member Teletype sig, Carrier sig m) => m String
 write :: (Member Teletype sig, Carrier sig m) => String -> m ()
 ```
 
-Effect types must have two type parameters: `m`, denoting any computations which the effect embeds, and `k`, denoting the rest of remainder of the computation after the effect. Note that since `Teletype` doesn’t use `m`, the compiler will infer it as being of kind `*` by default. The explicit kind annotation on `m` corrects that.
+Effect types must have two type parameters: `m`, denoting any computations which the effect embeds, and `k`, denoting the remainder of the computation after the effect. Note that since `Teletype` doesn’t use `m`, the compiler will infer it as being of kind `*` by default. The explicit kind annotation on `m` corrects that.
 
 Next, we can flesh out the definition of the `Teletype` effect by providing constructors for each primitive operation:
 
