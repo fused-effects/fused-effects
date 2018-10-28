@@ -18,5 +18,5 @@ instance HFunctor Random where
   {-# INLINE hmap #-}
 
 instance Effect Random where
-  handle state handler (Random k) = Random (handler . (<$ state) . k)
+  handle state handler (Random    k) = Random    (handler . (<$ state) . k)
   handle state handler (RandomR r k) = RandomR r (handler . (<$ state) . k)
