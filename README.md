@@ -196,6 +196,13 @@ In this case, since the `Teletype` carrier is just a thin wrapper around the und
 
 That leaves `alg`, which handles `Teletype` effects with one case per constructor. Since we’re assuming the existence of a `MonadIO` instance for the underlying computation, we can use `liftIO` to inject the `getLine` and `putStrLn` actions into it, and then proceed with the continuations, unwrapping them in the process.
 
+Users could use `interpret` directly to run the effect, but it’s more convenient to provide effect handler functions applying `interpret` and then unwrapping the carrier:
+
+```haskell
+runTeletypeIO :: (MonadIO m, Carrier sig m) => Eff (TeletypeIOC m) a -> m a
+runTeletypeIO = runTeletypeIOC . interpret
+```
+
 In general, carriers don’t have to be `Functor`s, let alone `Monad`s. However, sometimes—especially in cases where the carrier is a thin wrapper like this—they can be more convenient to write using (derived) `Monad` instances. In this case, by using `-XGeneralizedNewtypeDeriving`, we can derive `Functor`, `Applicative`, `Monad`, and `MonadIO` instances for `TeletypeIOC`:
 
 ```haskell
