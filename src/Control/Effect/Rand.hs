@@ -3,6 +3,7 @@ module Control.Effect.Rand
 ( Rand(..)
 , runRand
 , evalRand
+, execRand
 , RandC(..)
 ) where
 
@@ -17,6 +18,9 @@ runRand g = flip runRandC g . interpret
 
 evalRand :: (Carrier sig m, Effect sig, Functor m, RandomGen g) => g -> Eff (RandC g m) a -> m a
 evalRand g = fmap snd . runRand g
+
+execRand :: (Carrier sig m, Effect sig, Functor m, RandomGen g) => g -> Eff (RandC g m) a -> m g
+execRand g = fmap fst . runRand g
 
 newtype RandC g m a = RandC { runRandC :: g -> m (g, a) }
 
