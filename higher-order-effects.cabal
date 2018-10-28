@@ -35,7 +35,7 @@ library
                      , Control.Effect.Trace
                      , Control.Effect.Void
                      , Control.Effect.Writer
-  build-depends:       base >=4.11 && <4.12
+  build-depends:       base >=4.9 && <4.12
                      , deepseq
                      , MonadRandom
                      , random
@@ -47,7 +47,7 @@ test-suite examples
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
   other-modules:       Teletype
-  build-depends:       base >=4.11 && <4.12
+  build-depends:       base >=4.9 && <4.12
                      , higher-order-effects
                      , hspec >=2.4.1
   hs-source-dirs:      examples
@@ -58,7 +58,7 @@ test-suite test
   main-is:             Spec.hs
   other-modules:       Control.Effect.Spec
                      , Control.Effect.NonDet.Spec
-  build-depends:       base >=4.11 && <4.12
+  build-depends:       base >=4.9 && <4.12
                      , higher-order-effects
                      , hspec >=2.4.1
   hs-source-dirs:      test
