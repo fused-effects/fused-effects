@@ -1,22 +1,22 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, KindSignatures, StandaloneDeriving #-}
-module Control.Effect.Rand.Internal
-( Rand(..)
+module Control.Effect.Random.Internal
+( Random(..)
 ) where
 
 import Control.Effect.Carrier
 import Data.Coerce (coerce)
-import System.Random (Random(..))
+import qualified System.Random as R (Random(..))
 
-data Rand (m :: * -> *) k
-  = forall a . Random a => Uniform (a -> k)
-  | forall a . Random a => UniformR (a, a) (a -> k)
+data Random (m :: * -> *) k
+  = forall a . R.Random a => Uniform (a -> k)
+  | forall a . R.Random a => UniformR (a, a) (a -> k)
 
-deriving instance Functor (Rand m)
+deriving instance Functor (Random m)
 
-instance HFunctor Rand where
+instance HFunctor Random where
   hmap _ = coerce
   {-# INLINE hmap #-}
 
-instance Effect Rand where
+instance Effect Random where
   handle state handler (Uniform k) = Uniform (handler . (<$ state) . k)
   handle state handler (UniformR r k) = UniformR r (handler . (<$ state) . k)

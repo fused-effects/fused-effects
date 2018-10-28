@@ -10,7 +10,7 @@ import Control.Effect.Carrier
 import Control.Effect.Fail.Internal
 import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal
-import Control.Effect.Rand.Internal
+import Control.Effect.Random.Internal
 import Control.Effect.Sum
 import Control.Monad (liftM, ap)
 import Control.Monad.Fail
@@ -74,7 +74,7 @@ instance (Member Fail sig, Carrier sig carrier) => MonadFail (Eff carrier) where
 instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) where
   liftIO = send . Lift . fmap pure
 
-instance (Member Rand sig, Carrier sig carrier) => MonadRandom (Eff carrier) where
+instance (Member Random sig, Carrier sig carrier) => MonadRandom (Eff carrier) where
   getRandom = send (Uniform ret)
   getRandomR r = send (UniformR r ret)
   getRandomRs interval = (:) <$> getRandomR interval <*> getRandomRs interval

@@ -29,8 +29,8 @@ library
                      , Control.Effect.Lift.Internal
                      , Control.Effect.NonDet
                      , Control.Effect.NonDet.Internal
-                     , Control.Effect.Rand
-                     , Control.Effect.Rand.Internal
+                     , Control.Effect.Random
+                     , Control.Effect.Random.Internal
                      , Control.Effect.Reader
                      , Control.Effect.Resource
                      , Control.Effect.Resumable
