@@ -237,4 +237,33 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
 
 ### Comparison to `mtl`
 
+Like `mtl`, `higher-order-effects` provides a library of monadic effects which can be given different interpretations. In `mtl` this is done by defining new instances of the typeclasses encoding the actions of the effect, e.g. `MonadState`. In `higher-order-effects`, this is done by defining new instances of the `Carrier` typeclass for the effect.
+
+Unlike `mtl`, effects are automatically available regardless of where they occur in the signature; in `mtl` this requires instances for all valid orderings of the transformers (O(n²) of them, in general).
+
+Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a signature. This is a tradeoff: `mtl` is able to provide excellent type inference for effectful operations like `get`, since the functional dependencies can resolve the state type from the monad type. On the other hand, this behaviour can be recovered in `higher-order-effects` using `newtype` wrappers with phantom type parameters and helper functions, e.g.:
+
+```haskell
+newtype Wrapper s m a = Wrapper { runWrapper :: Eff m a }
+  deriving (Applicative, Functor, Monad)
+
+instance Carrier sig m => Carrier sig (Wrapper s m) where …
+
+getState :: (Carrier sig m, Member (State s) m) => Wrapper m s
+getState = get
+```
+
+Indeed, `Wrapper` can now be made an instance of `MonadState`:
+
+```haskell
+instance (Carrier sig m, Member (State s) m) => MTL.MonadState s (Wrapper s m) where
+  get = get
+  put = put
+```
+
+Thus, the approaches aren’t mutually exclusive; consumers are free to decide which approach makes the most sense for their situation.
+
+Finally, like `mtl`, `higher-order-effects` allows scoped operations like `local` and `catchError` to be given different interpretations. As with first-order operations, `mtl` achieves this with a final tagless encoding via methods, whereas `higher-order-effects` achieves this with an initial algebra encoding via `Carrier` instances.
+
+
 ### Comparison to `freer-simple`
