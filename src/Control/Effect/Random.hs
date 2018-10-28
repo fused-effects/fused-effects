@@ -18,15 +18,15 @@ import Control.Monad.IO.Class (MonadIO(..))
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
 -- | Run a random computation starting from a given generator.
-runRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
+runRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
 runRandom g = flip runRandomC g . interpret
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
-evalRandom :: (Carrier sig m, Effect sig, Functor m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m a
+evalRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m a
 evalRandom g = fmap snd . runRandom g
 
 -- | Run a random computation starting from a given generator and discarding the final result.
-execRandom :: (Carrier sig m, Effect sig, Functor m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m g
+execRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m g
 execRandom g = fmap fst . runRandom g
 
 -- | Run a random computation in 'IO', splitting the global standard generator to get a new one for the computation.
@@ -35,8 +35,9 @@ evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: g -> m (g, a) }
 
-instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) (RandomC g m) where
+instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => Carrier (Random :+: sig) (RandomC g m) where
   ret a = RandomC (\ g -> ret (g, a))
   eff op = RandomC (\ g -> (alg g \/ eff . handleState g runRandomC) op)
     where alg g (Random    k) = let (a, g') = R.random    g in runRandomC (k a) g'
           alg g (RandomR r k) = let (a, g') = R.randomR r g in runRandomC (k a) g'
+          alg g (Interleave m k) = let (g', g'') = R.split g in runRandomC m g' >>= flip runRandomC g'' . k . snd
