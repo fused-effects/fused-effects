@@ -195,9 +195,9 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 instance (Carrier sig m, MonadIO m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
   ret = TeletypeIOC . ret
 
-  eff = TeletypeIOC . (alg \/ eff . handleCoercible)
-    where alg (Read    k) = liftIO getLine      >>= runTeletypeIOC . k
-          alg (Write s k) = liftIO (putStrLn s) >>  runTeletypeIOC   k
+  eff = TeletypeIOC . handleSum (eff . handleCoercible) (\ t -> case t of
+    Read    k -> liftIO getLine      >>= runTeletypeIOC . k
+    Write s k -> liftIO (putStrLn s) >>  runTeletypeIOC   k)
 ```
 
 Here, `ret` is responsible for wrapping pure values in the carrier, and `eff` is responsible for handling an effectful computations. Since the `Carrier` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `eff` has two parts: a handler for `Teletype` (`alg`), and a handler for teletype effects that might be embedded in other effects in the signature.
@@ -225,9 +225,9 @@ This allows us to use `liftIO` directly on the carrier itself, instead of only i
 ```haskell
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
   ret = pure
-  eff = alg \/ TeletypeIOC . eff . handleCoercible
-    where alg (Read    k) = liftIO getLine      >>= k
-          alg (Write s k) = liftIO (putStrLn s) >>  k
+  eff = handleSum (TeletypeIOC . eff . handleCoercible) (\ t -> case t of
+    Read    k -> liftIO getLine      >>= k
+    Write s k -> liftIO (putStrLn s) >>  k)
 ```
 
 
