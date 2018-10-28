@@ -5,12 +5,14 @@ module Control.Effect.Random
 , evalRandom
 , execRandom
 , RandomC(..)
+, MonadRandom(..)
 ) where
 
 import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Random.Internal
 import Control.Effect.Sum
+import Control.Monad.Random.Class (MonadRandom(..))
 import qualified System.Random as R (Random(..), RandomGen(..))
 
 runRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
