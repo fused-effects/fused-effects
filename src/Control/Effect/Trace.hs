@@ -72,8 +72,9 @@ newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: [Str
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
   ret a = TraceByReturningC (\ s -> ret (s, a))
-  eff op = TraceByReturningC (\ s -> (alg s \/ eff . handleState s runTraceByReturningC) op)
-    where alg s (Trace m k) = runTraceByReturningC k (m : s)
+  eff op = TraceByReturningC (\ s -> handleSum
+    (eff . handleState s runTraceByReturningC)
+    (\ (Trace m k) -> runTraceByReturningC k (m : s)) op)
 
 
 -- $setup
