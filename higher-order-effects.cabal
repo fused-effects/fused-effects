@@ -40,6 +40,7 @@ library
                      , Control.Effect.Writer
   build-depends:       base >=4.11 && <4.12
                      , deepseq
+                     , random
   hs-source-dirs:      src
   default-language:    Haskell2010
 
