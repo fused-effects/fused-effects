@@ -6,7 +6,7 @@ homepage:            https://github.com/robrix/higher-order-effects
 license:             BSD3
 license-file:        LICENSE
 author:              Rob Rix, Patrick Thomson
-maintainer:          rob.rix@me.com
+maintainer:          robrix@github.com
 copyright:           2018 Rob Rix, Patrick Thomson
 category:            Control
 build-type:          Simple
