@@ -265,6 +265,8 @@ instance (Carrier sig m, Member (State s) m) => MTL.MonadState s (Wrapper s m) w
 
 Thus, the approaches aren’t mutually exclusive; consumers are free to decide which approach makes the most sense for their situation.
 
+Unlike `higher-order-effects`, `mtl` provides a `ContT` monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects. Further, `higher-order-effects` provides a relatively large palette of these, including resumable exceptions, tracing, resource management, and others, as well as tools to define your own.
+
 Finally, thanks to the fusion and inlining of carriers, `higher-order-effects` is as fast as, or even slightly faster than `mtl` (see [benchmarks](#benchmarks)).
 
 [`mtl`]: http://hackage.haskell.org/package/mtl
