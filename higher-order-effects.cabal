@@ -30,6 +30,7 @@ library
                      , Control.Effect.NonDet
                      , Control.Effect.NonDet.Internal
                      , Control.Effect.Rand
+                     , Control.Effect.Rand.Internal
                      , Control.Effect.Reader
                      , Control.Effect.Resource
                      , Control.Effect.Resumable
