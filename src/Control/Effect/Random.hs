@@ -19,6 +19,8 @@ import Control.Monad.IO.Class (MonadIO(..))
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
 -- | Run a random computation starting from a given generator.
+--
+--   prop> run (runRandom (PureGen a) (pure b)) == (PureGen a, b)
 runRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
 runRandom g = flip runRandomC g . interpret
 
@@ -42,3 +44,13 @@ instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => Carrier (Random 
     where alg g (Random    k) = let (a, g') = R.random    g in runRandomC (k a) g'
           alg g (RandomR r k) = let (a, g') = R.randomR r g in runRandomC (k a) g'
           alg g (Interleave m k) = let (g', g'') = R.split g in runRandomC m g' >>= flip runRandomC g'' . k . snd
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import System.Random
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
+-- >>> import Control.Effect.NonDet
+-- >>> newtype PureGen = PureGen Int deriving (Eq, Show)
+-- >>> instance RandomGen PureGen where next (PureGen i) = (i, PureGen i) ; split g = (g, g)
