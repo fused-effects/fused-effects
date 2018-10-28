@@ -237,7 +237,7 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
 
 ### Comparison to `mtl`
 
-Like [`mtl`](), `higher-order-effects` provides a library of monadic effects which can be given different interpretations. In `mtl` this is done by defining new instances of the typeclasses encoding the actions of the effect, e.g. `MonadState`. In `higher-order-effects`, this is done by defining new instances of the `Carrier` typeclass for the effect.
+Like [`mtl`][], `higher-order-effects` provides a library of monadic effects which can be given different interpretations. In `mtl` this is done by defining new instances of the typeclasses encoding the actions of the effect, e.g. `MonadState`. In `higher-order-effects`, this is done by defining new instances of the `Carrier` typeclass for the effect.
 
 Also like `mtl`, `higher-order-effects` allows scoped operations like `local` and `catchError` to be given different interpretations. As with first-order operations, `mtl` achieves this with a final tagless encoding via methods, whereas `higher-order-effects` achieves this with an initial algebra encoding via `Carrier` instances.
 
