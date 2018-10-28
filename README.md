@@ -265,5 +265,7 @@ instance (Carrier sig m, Member (State s) m) => MTL.MonadState s (Wrapper s m) w
 
 Thus, the approaches aren’t mutually exclusive; consumers are free to decide which approach makes the most sense for their situation.
 
+Finally, thanks to the fusion and inlining of carriers, `higher-order-effects` is as fast as, or even slightly faster than `mtl` (see [benchmarks](#benchmarks)).
+
 
 ### Comparison to `freer-simple`
