@@ -273,3 +273,15 @@ Finally, thanks to the fusion and inlining of carriers, `higher-order-effects` i
 
 
 ### Comparison to `freer-simple`
+
+Like [`freer-simple`][], `higher-order-effects` uses an initial encoding of library- and user-defined effects as syntax which can then be given different interpretations. In `freer-simple`, this is done with a family of interpreter functions (which cover a variety of needs, and which can be extended for more bespoke needs), whereas in `higher-order-effects` this is done with `Carrier` instances for `newtype`s.
+
+(Technically, it is possible to define handlers like `freer-simple`’s `interpret` using `higher-order-effects`, but passing handlers in as higher-order functions defeats the fusion and inlining of `Carrier` instances which makes `higher-order-effects` so efficient.)
+
+Unlike `higher-order-effects`, in `freer-simple`, scoped operations like `catchError` and `local` are implemented as interpreters, and can therefore not be given new interpretations.
+
+Unlike `freer-simple`, `higher-order-effects` has relatively little attention paid to compiler error messaging, which can make common (compile-time) errors somewhat more confusing to diagnose. Similarly, `freer-simple`’s family of interpreter functions can make the job of defining new effect handlers somewhat easier than in `higher-order-effects`. Further, `freer-simple` provides many of the same effects as `higher-order-effects`, plus a coroutine effect, but minus resource management and random generation.
+
+Finally, `higher-order-effects` has been [benchmarked](#benchmarks) as faster than `freer-simple`.
+
+[`freer-simple`]: http://hackage.haskell.org/package/freer-simple
