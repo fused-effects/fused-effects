@@ -7,13 +7,14 @@ module Control.Effect.Random
 , evalRandomIO
 , RandomC(..)
 , MonadRandom(..)
+, MonadInterleave(..)
 ) where
 
 import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Random.Internal
 import Control.Effect.Sum
-import Control.Monad.Random.Class (MonadRandom(..))
+import Control.Monad.Random.Class (MonadInterleave(..), MonadRandom(..))
 import Control.Monad.IO.Class (MonadIO(..))
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
