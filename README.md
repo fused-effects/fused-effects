@@ -1,10 +1,10 @@
 # A fast, flexible, fused effect system for Haskell
 
-[![Build Status](https://travis-ci.com/robrix/higher-order-effects.svg?branch=master)](https://travis-ci.com/robrix/higher-order-effects)
+[![Build Status](https://travis-ci.com/robrix/fused-effects.svg?branch=master)](https://travis-ci.com/robrix/fused-effects)
 
 - [Overview](#overview)
   - [Algebraic effects](#algebraic-effects)
-  - [Higher-order effects](#higher-order-effects)
+  - [Higher-order effects](#fused-effects)
   - [Fusion](#fusion)
 - [Usage](#usage)
   - [Using built-in effects](#using-built-in-effects)
@@ -19,28 +19,28 @@
 
 ## Overview
 
-`higher-order-effects` is an effect system for Haskell emphasizing expressivity and efficiency. The former is achieved by encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, while the latter is the result of [fusing](#fusion) effect handlers all the way through computations.
+`fused-effects` is an effect system for Haskell emphasizing expressivity and efficiency. The former is achieved by encoding [algebraic](#algebraic-effects), [higher-order](#fused-effects) effects, while the latter is the result of [fusing](#fusion) effect handlers all the way through computations.
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead.
 
 
 ### Algebraic effects
 
-In `higher-order-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them. Thus, a program written using the syntax of an effect can be given different meanings by using different effect handlers.
+In `fused-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them. Thus, a program written using the syntax of an effect can be given different meanings by using different effect handlers.
 
 These roles are performed by the effect and carrier types, respectively. Effects are datatypes with one constructor for each action. Carriers are generally `newtype`s, with a `Carrier` instance specifying how an effect’s constructors should be interpreted. Each carrier handles one effect, but multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax.
 
 
 ### Higher-order effects
 
-Unlike most other effect systems, `higher-order-effects` offers _higher-order_ (or _scoped_) effects in addition to first-order algebraic effects. In a strictly first-order algebraic effect system, operations (like `local` or `catchError`) which specify some action limited to a given scope must be implemented as interpreters, hard-coding their meaning in precisely the manner algebraic effects were designed to avoid. By specifying effects as higher-order functors, these operations are likewise able to be given a variety of interpretations. This means, for example, that you can introspect and redefine both the `local` and `ask` operations provided by the `Reader` effect, rather than solely `ask` (as is the case with certain formulations of algebraic effects).
+Unlike most other effect systems, `fused-effects` offers _higher-order_ (or _scoped_) effects in addition to first-order algebraic effects. In a strictly first-order algebraic effect system, operations (like `local` or `catchError`) which specify some action limited to a given scope must be implemented as interpreters, hard-coding their meaning in precisely the manner algebraic effects were designed to avoid. By specifying effects as higher-order functors, these operations are likewise able to be given a variety of interpretations. This means, for example, that you can introspect and redefine both the `local` and `ask` operations provided by the `Reader` effect, rather than solely `ask` (as is the case with certain formulations of algebraic effects).
 
 As Nicolas Wu et al showed in _[Effect Handlers in Scope][]_, this has implications for the expressiveness of effect systems. It also has the benefit of making effect handling more consistent, since scoped operations are just syntax which can be interpreted like any other, and are thus simpler to reason about.
 
 
 ### Fusion
 
-In order to maximize efficiency, `higher-order-effects` applies _fusion laws_, avoiding the construction of intermediate representations of effectful computations between effect handlers. In fact, this is applied as far as the initial construction as well: there is no representation of the computation as a free monad parameterized by some syntax type. As such, `higher-order-effects` avoids the overhead associated with constructing and evaluating any underlying free or freer monad.
+In order to maximize efficiency, `fused-effects` applies _fusion laws_, avoiding the construction of intermediate representations of effectful computations between effect handlers. In fact, this is applied as far as the initial construction as well: there is no representation of the computation as a free monad parameterized by some syntax type. As such, `fused-effects` avoids the overhead associated with constructing and evaluating any underlying free or freer monad.
 
 Instead, computations are performed in a monad named `Eff`, parameterized by the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.
 
@@ -53,7 +53,7 @@ Finally, since the fusion of carrier algebras occurs as a result of the selectio
 
 ### Using built-in effects
 
-Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `higher-order-effects`, this is done by means of a `Member` constraint to require the effect’s presence in a _signature_, and a `Carrier` constraint to relate the signature to the `Monad`. For example, to use a `State` effect managing a `String`, one would write:
+Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `fused-effects`, this is done by means of a `Member` constraint to require the effect’s presence in a _signature_, and a `Carrier` constraint to relate the signature to the `Monad`. For example, to use a `State` effect managing a `String`, one would write:
 
 ```haskell
 action :: (Member (State String) sig, Carrier sig m) => m ()
@@ -233,12 +233,12 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
 
 ## Benchmarks
 
-`higher-order-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
+`fused-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
 
 
 ## Related work
 
-`higher-order-effects` is an encoding of higher-order algebraic effects following the recipes in _[Effect Handlers in Scope][]_ (Nicolas Wu, Tom Schrijvers, Ralf Hinze), _[Monad Transformers and Modular Algebraic Effects: What Binds Them Together][]_ (Tom Schrijvers, Maciej Piróg, Nicolas Wu, Mauro Jaskelioff), and _[Fusion for Free—Efficient Algebraic Effect Handlers][]_ (Nicolas Wu, Tom Schrijvers).
+`fused-effects` is an encoding of higher-order algebraic effects following the recipes in _[Effect Handlers in Scope][]_ (Nicolas Wu, Tom Schrijvers, Ralf Hinze), _[Monad Transformers and Modular Algebraic Effects: What Binds Them Together][]_ (Tom Schrijvers, Maciej Piróg, Nicolas Wu, Mauro Jaskelioff), and _[Fusion for Free—Efficient Algebraic Effect Handlers][]_ (Nicolas Wu, Tom Schrijvers).
 
 [Effect Handlers in Scope]: http://www.cs.ox.ac.uk/people/nicolas.wu/papers/Scope.pdf
 [Monad Transformers and Modular Algebraic Effects: What Binds Them Together]: http://www.cs.kuleuven.be/publicaties/rapporten/cw/CW699.pdf
@@ -247,13 +247,13 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
 
 ### Comparison to `mtl`
 
-Like [`mtl`][], `higher-order-effects` provides a library of monadic effects which can be given different interpretations. In `mtl` this is done by defining new instances of the typeclasses encoding the actions of the effect, e.g. `MonadState`. In `higher-order-effects`, this is done by defining new instances of the `Carrier` typeclass for the effect.
+Like [`mtl`][], `fused-effects` provides a library of monadic effects which can be given different interpretations. In `mtl` this is done by defining new instances of the typeclasses encoding the actions of the effect, e.g. `MonadState`. In `fused-effects`, this is done by defining new instances of the `Carrier` typeclass for the effect.
 
-Also like `mtl`, `higher-order-effects` allows scoped operations like `local` and `catchError` to be given different interpretations. As with first-order operations, `mtl` achieves this with a final tagless encoding via methods, whereas `higher-order-effects` achieves this with an initial algebra encoding via `Carrier` instances.
+Also like `mtl`, `fused-effects` allows scoped operations like `local` and `catchError` to be given different interpretations. As with first-order operations, `mtl` achieves this with a final tagless encoding via methods, whereas `fused-effects` achieves this with an initial algebra encoding via `Carrier` instances.
 
 Unlike `mtl`, effects are automatically available regardless of where they occur in the signature; in `mtl` this requires instances for all valid orderings of the transformers (O(n²) of them, in general).
 
-Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a signature. This is a tradeoff: `mtl` is able to provide excellent type inference for effectful operations like `get`, since the functional dependencies can resolve the state type from the monad type. On the other hand, this behaviour can be recovered in `higher-order-effects` using `newtype` wrappers with phantom type parameters and helper functions, e.g.:
+Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a signature. This is a tradeoff: `mtl` is able to provide excellent type inference for effectful operations like `get`, since the functional dependencies can resolve the state type from the monad type. On the other hand, this behaviour can be recovered in `fused-effects` using `newtype` wrappers with phantom type parameters and helper functions, e.g.:
 
 ```haskell
 newtype Wrapper s m a = Wrapper { runWrapper :: Eff m a }
@@ -275,23 +275,23 @@ instance (Carrier sig m, Member (State s) m) => MTL.MonadState s (Wrapper s m) w
 
 Thus, the approaches aren’t mutually exclusive; consumers are free to decide which approach makes the most sense for their situation.
 
-Unlike `higher-order-effects`, `mtl` provides a `ContT` monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects. Further, `higher-order-effects` provides a relatively large palette of these, including resumable exceptions, tracing, resource management, and others, as well as tools to define your own.
+Unlike `fused-effects`, `mtl` provides a `ContT` monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects. Further, `fused-effects` provides a relatively large palette of these, including resumable exceptions, tracing, resource management, and others, as well as tools to define your own.
 
-Finally, thanks to the fusion and inlining of carriers, `higher-order-effects` is approximately as fast as `mtl` (see [benchmarks](#benchmarks)).
+Finally, thanks to the fusion and inlining of carriers, `fused-effects` is approximately as fast as `mtl` (see [benchmarks](#benchmarks)).
 
 [`mtl`]: http://hackage.haskell.org/package/mtl
 
 
 ### Comparison to `freer-simple`
 
-Like [`freer-simple`][], `higher-order-effects` uses an initial encoding of library- and user-defined effects as syntax which can then be given different interpretations. In `freer-simple`, this is done with a family of interpreter functions (which cover a variety of needs, and which can be extended for more bespoke needs), whereas in `higher-order-effects` this is done with `Carrier` instances for `newtype`s.
+Like [`freer-simple`][], `fused-effects` uses an initial encoding of library- and user-defined effects as syntax which can then be given different interpretations. In `freer-simple`, this is done with a family of interpreter functions (which cover a variety of needs, and which can be extended for more bespoke needs), whereas in `fused-effects` this is done with `Carrier` instances for `newtype`s.
 
-(Technically, it is possible to define handlers like `freer-simple`’s `interpret` using `higher-order-effects`, but passing handlers in as higher-order functions defeats the fusion and inlining of `Carrier` instances which makes `higher-order-effects` so efficient.)
+(Technically, it is possible to define handlers like `freer-simple`’s `interpret` using `fused-effects`, but passing handlers in as higher-order functions defeats the fusion and inlining of `Carrier` instances which makes `fused-effects` so efficient.)
 
-Unlike `higher-order-effects`, in `freer-simple`, scoped operations like `catchError` and `local` are implemented as interpreters, and can therefore not be given new interpretations.
+Unlike `fused-effects`, in `freer-simple`, scoped operations like `catchError` and `local` are implemented as interpreters, and can therefore not be given new interpretations.
 
-Unlike `freer-simple`, `higher-order-effects` has relatively little attention paid to compiler error messaging, which can make common (compile-time) errors somewhat more confusing to diagnose. Similarly, `freer-simple`’s family of interpreter functions can make the job of defining new effect handlers somewhat easier than in `higher-order-effects`. Further, `freer-simple` provides many of the same effects as `higher-order-effects`, plus a coroutine effect, but minus resource management and random generation.
+Unlike `freer-simple`, `fused-effects` has relatively little attention paid to compiler error messaging, which can make common (compile-time) errors somewhat more confusing to diagnose. Similarly, `freer-simple`’s family of interpreter functions can make the job of defining new effect handlers somewhat easier than in `fused-effects`. Further, `freer-simple` provides many of the same effects as `fused-effects`, plus a coroutine effect, but minus resource management and random generation.
 
-Finally, `higher-order-effects` has been [benchmarked](#benchmarks) as faster than `freer-simple`.
+Finally, `fused-effects` has been [benchmarked](#benchmarks) as faster than `freer-simple`.
 
 [`freer-simple`]: http://hackage.haskell.org/package/freer-simple

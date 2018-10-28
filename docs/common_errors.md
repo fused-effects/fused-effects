@@ -1,6 +1,6 @@
 # Common Errors
 
-There are certain classes of errors when using `higher-order-effects`
+There are certain classes of errors when using `fused-effects`
 that GHC is not particularly good at explaining. This document
 is an attempt to enumerate and explicate the things that can go wrong
 when using or extending this library. (It is also very much a work in

@@ -1,8 +1,8 @@
-name:                higher-order-effects
+name:                fused-effects
 version:             0.1.0.0
 synopsis:            A fast, flexible, fused effect system.
 description:         A fast, flexible, fused effect system, à la Effect Handlers in Scope, Monad Transformers and Modular Algebraic Effects: What Binds Them Together, and Fusion for Free—Efficient Algebraic Effect Handlers.
-homepage:            https://github.com/robrix/higher-order-effects
+homepage:            https://github.com/robrix/fused-effects
 license:             BSD3
 license-file:        LICENSE
 author:              Rob Rix, Patrick Thomson
@@ -51,7 +51,7 @@ test-suite examples
   main-is:             Main.hs
   other-modules:       Teletype
   build-depends:       base >=4.9 && <4.12
-                     , higher-order-effects
+                     , fused-effects
                      , hspec >=2.4.1
   hs-source-dirs:      examples
   default-language:    Haskell2010
@@ -62,7 +62,7 @@ test-suite test
   other-modules:       Control.Effect.Spec
                      , Control.Effect.NonDet.Spec
   build-depends:       base >=4.9 && <4.12
-                     , higher-order-effects
+                     , fused-effects
                      , hspec >=2.4.1
   hs-source-dirs:      test
   default-language:    Haskell2010
@@ -77,4 +77,4 @@ test-suite doctest
 
 source-repository head
   type:     git
-  location: https://github.com/robrix/higher-order-effects
+  location: https://github.com/robrix/fused-effects
