@@ -55,8 +55,7 @@ newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
   ret = TraceByIgnoringC . ret
-  eff = alg \/ (TraceByIgnoringC . eff . handlePure runTraceByIgnoringC)
-    where alg (Trace _ k) = k
+  eff = handleSum (TraceByIgnoringC . eff . handlePure runTraceByIgnoringC) (\ (Trace _ k) -> k)
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.
