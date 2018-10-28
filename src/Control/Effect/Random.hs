@@ -15,6 +15,7 @@ import Control.Effect.Sum
 import Control.Monad.Random.Class (MonadRandom(..))
 import qualified System.Random as R (Random(..), RandomGen(..))
 
+-- | Run a random computation starting from a given generator.
 runRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
 runRandom g = flip runRandomC g . interpret
 
