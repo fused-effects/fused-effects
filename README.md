@@ -275,7 +275,7 @@ Thus, the approaches aren’t mutually exclusive; consumers are free to decide w
 
 Unlike `higher-order-effects`, `mtl` provides a `ContT` monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects. Further, `higher-order-effects` provides a relatively large palette of these, including resumable exceptions, tracing, resource management, and others, as well as tools to define your own.
 
-Finally, thanks to the fusion and inlining of carriers, `higher-order-effects` is as fast as, or even slightly faster than `mtl` (see [benchmarks](#benchmarks)).
+Finally, thanks to the fusion and inlining of carriers, `higher-order-effects` is approximately as fast as `mtl` (see [benchmarks](#benchmarks)).
 
 [`mtl`]: http://hackage.haskell.org/package/mtl
 
