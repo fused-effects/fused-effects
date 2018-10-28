@@ -4,6 +4,7 @@ module Control.Effect.Random
 , runRandom
 , evalRandom
 , execRandom
+, evalRandomIO
 , RandomC(..)
 , MonadRandom(..)
 ) where
@@ -13,7 +14,8 @@ import Control.Effect.Internal
 import Control.Effect.Random.Internal
 import Control.Effect.Sum
 import Control.Monad.Random.Class (MonadRandom(..))
-import qualified System.Random as R (Random(..), RandomGen(..))
+import Control.Monad.IO.Class (MonadIO(..))
+import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
 -- | Run a random computation starting from a given generator.
 runRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
@@ -24,6 +26,9 @@ evalRandom g = fmap snd . runRandom g
 
 execRandom :: (Carrier sig m, Effect sig, Functor m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m g
 execRandom g = fmap fst . runRandom g
+
+evalRandomIO :: (Carrier sig m, Effect sig, MonadIO m) => Eff (RandomC R.StdGen m) a -> m a
+evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: g -> m (g, a) }
 
