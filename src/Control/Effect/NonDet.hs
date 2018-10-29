@@ -4,6 +4,8 @@ module Control.Effect.NonDet
 , Alternative(..)
 , runNonDet
 , AltC(..)
+, runNonDetOnce
+, OnceC(..)
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
@@ -28,6 +30,23 @@ instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Appl
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
     Empty    -> ret empty
     Choose k -> liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
+
+
+runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
+runNonDetOnce = runOnceC . interpret
+
+newtype OnceC f m a = OnceC { runOnceC :: m (f a) }
+
+instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Carrier (NonDet :+: sig) (OnceC f m) where
+  ret a = OnceC (ret (pure a))
+  eff = OnceC . handleSum (eff . handleTraversable runOnceC) (\case
+    Empty    -> ret empty
+    Choose k -> do
+      l <- runOnceC (k True)
+      if null l then
+        runOnceC (k False)
+      else
+        pure l)
 
 
 -- $setup
