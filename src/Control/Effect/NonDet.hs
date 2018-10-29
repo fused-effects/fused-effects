@@ -34,6 +34,8 @@ instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Appl
 
 -- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
 --
+--   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
+--
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
 runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
