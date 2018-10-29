@@ -32,6 +32,10 @@ instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Appl
     Choose k -> liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
 
 
+-- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
+--
+--   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
+--   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
 runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
 runNonDetOnce = runOnceC . interpret
 
@@ -53,3 +57,4 @@ instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Mona
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
+-- >>> import Data.Foldable (asum)
