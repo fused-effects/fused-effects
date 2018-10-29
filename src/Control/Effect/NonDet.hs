@@ -16,7 +16,7 @@ import Control.Effect.Sum
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
---   Using '[]' as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first.
+--   Using '[]' as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unlike 'runNonDetOnce', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces when using 'Maybe'.
 --
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
