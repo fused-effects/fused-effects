@@ -4,7 +4,7 @@
 
 - [Overview](#overview)
   - [Algebraic effects](#algebraic-effects)
-  - [Higher-order effects](#fused-effects)
+  - [Higher-order effects](#higher-order-effects)
   - [Fusion](#fusion)
 - [Usage](#usage)
   - [Using built-in effects](#using-built-in-effects)
@@ -19,7 +19,7 @@
 
 ## Overview
 
-`fused-effects` is an effect system for Haskell emphasizing expressivity and efficiency. The former is achieved by encoding [algebraic](#algebraic-effects), [higher-order](#fused-effects) effects, while the latter is the result of [fusing](#fusion) effect handlers all the way through computations.
+`fused-effects` is an effect system for Haskell emphasizing expressivity and efficiency. The former is achieved by encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, while the latter is the result of [fusing](#fusion) effect handlers all the way through computations.
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead.
 
