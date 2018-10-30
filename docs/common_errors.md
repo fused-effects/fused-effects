@@ -46,3 +46,8 @@ data Teletype (m :: * -> *) k
   deriving (Functor)
 
 ```
+
+Alternatively, to disable this kind-defaulting behavior entirely, use the
+`PolyKinds` language extension. With this extension, the un-annotated version of
+the `Teletype` data type will be inferred to have kind `k -> * -> *`. When you use
+this type, `m`'s kind will correctly be instantiated to `* -> *`.

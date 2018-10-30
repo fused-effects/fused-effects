@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE PolyKinds, DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 module Teletype where
 
@@ -23,7 +23,7 @@ spec = describe "teletype" $ do
   prop "writes multiple things" $
     \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) `shouldBe` ((input, [output1, output2]), ())
 
-data Teletype (m :: * -> *) k
+data Teletype m k
   = Read (String -> k)
   | Write String k
   deriving (Functor)
