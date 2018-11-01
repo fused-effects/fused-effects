@@ -3,8 +3,10 @@ module Control.Effect.Cut
 ( Cut(..)
 , cutfail
 , call
+, cut
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
 
@@ -27,3 +29,6 @@ cutfail = send Cutfail
 
 call :: (Carrier sig m, Member Cut sig) => m a -> m a
 call m = send (Call m ret)
+
+cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
+cut = pure () <|> cutfail
