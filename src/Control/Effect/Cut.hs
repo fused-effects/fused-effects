@@ -5,6 +5,7 @@ module Control.Effect.Cut
 , call
 , cut
 , Branch(..)
+, branch
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -40,3 +41,8 @@ data Branch a
   | None
   | Some a
   deriving (Eq, Functor, Ord, Show)
+
+branch :: a -> a -> (b -> a) -> Branch b -> a
+branch a _ _ Prune    = a
+branch _ a _ None     = a
+branch _ _ f (Some a) = f a
