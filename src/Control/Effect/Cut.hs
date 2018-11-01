@@ -4,6 +4,7 @@ module Control.Effect.Cut
 , cutfail
 , call
 , cut
+, Branch(..)
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -32,3 +33,10 @@ call m = send (Call m ret)
 
 cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
 cut = pure () <|> cutfail
+
+
+data Branch a
+  = Prune
+  | None
+  | Some a
+  deriving (Eq, Functor, Ord, Show)
