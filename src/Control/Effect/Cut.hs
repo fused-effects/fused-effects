@@ -14,3 +14,7 @@ deriving instance Functor (Cut m)
 instance HFunctor Cut where
   hmap _ Cutfail    = Cutfail
   hmap f (Call m k) = Call (f m) k
+
+instance Effect Cut where
+  handle _     _       Cutfail    = Cutfail
+  handle state handler (Call m k) = Call (handler (m <$ state)) (handler . fmap k)
