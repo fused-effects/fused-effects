@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cut
 ( Cut(..)
 , cutfail
@@ -6,10 +6,14 @@ module Control.Effect.Cut
 , cut
 , Branch(..)
 , branch
+, runCut
+, CutC(..)
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
+import Control.Effect.Internal
+import Control.Effect.NonDet
 import Control.Effect.Sum
 
 data Cut m k
@@ -46,3 +50,20 @@ branch :: a -> a -> (b -> a) -> Branch b -> a
 branch a _ _ Prune    = a
 branch _ a _ None     = a
 branch _ _ f (Some a) = f a
+
+
+runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a -> m a
+runCut = (>>= branch empty empty pure) . runCutC . interpret
+
+newtype CutC m a = CutC { runCutC :: m (Branch a) }
+
+instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
+  ret = CutC . ret . Some
+  eff = CutC . handleSum (handleSum
+    (eff . handle (Some ()) (branch (ret Prune) (ret None) runCutC))
+    (\case
+      Empty    -> ret None
+      Choose k -> runCutC (k True) >>= branch (ret Prune) (runCutC (k False)) (\ a -> ret (Some a) <|> runCutC (k False))))
+    (\case
+      Cutfail  -> ret Prune
+      Call m k -> runCutC m >>= branch (ret None) (ret None) (runCutC . k))
