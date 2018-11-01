@@ -1,9 +1,12 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
 module Control.Effect.Cut
 ( Cut(..)
+, cutfail
+, call
 ) where
 
 import Control.Effect.Carrier
+import Control.Effect.Sum
 
 data Cut m k
   = Cutfail
@@ -18,3 +21,9 @@ instance HFunctor Cut where
 instance Effect Cut where
   handle _     _       Cutfail    = Cutfail
   handle state handler (Call m k) = Call (handler (m <$ state)) (handler . fmap k)
+
+cutfail :: (Carrier sig m, Member Cut sig) => m a
+cutfail = send Cutfail
+
+call :: (Carrier sig m, Member Cut sig) => m a -> m a
+call m = send (Call m ret)
