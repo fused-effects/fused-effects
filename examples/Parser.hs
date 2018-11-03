@@ -8,7 +8,7 @@ import Test.Hspec
 spec :: Spec
 spec = describe "parser" $ pure ()
 
-data Symbol (m :: * -> *) k = Symbol Char (Char -> k)
+data Symbol (m :: * -> *) k = Symbol (Char -> Bool) (Char -> k)
   deriving (Functor)
 
 instance HFunctor Symbol where
