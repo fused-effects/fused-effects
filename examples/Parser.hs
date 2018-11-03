@@ -37,6 +37,10 @@ spec = describe "parser" $ do
     prop "matches positive integers" $
       \ a -> run (runNonDet (parse (show (abs a)) factor)) == [abs a]
 
+  describe "term" $ do
+    prop "matches factors" $
+      \ a -> run (runNonDet (parse (show (abs a)) term)) == [abs a]
+
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
   deriving (Functor)
