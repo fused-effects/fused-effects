@@ -61,6 +61,8 @@ data Branch a
   deriving (Eq, Functor, Ord, Show)
 
 -- | Case analysis for 'Branch', taking a value to use for 'Prune', a value to use for 'None', and a function to apply to the contents of 'Some'.
+--
+--   prop> branch Prune None Some a == a
 branch :: a -> a -> (b -> a) -> Branch b -> a
 branch a _ _ Prune    = a
 branch _ a _ None     = a
