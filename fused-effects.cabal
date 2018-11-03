@@ -21,6 +21,7 @@ tested-with:         GHC == 8.2.2
 library
   exposed-modules:     Control.Effect
                      , Control.Effect.Carrier
+                     , Control.Effect.Cut
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.Fail.Internal
