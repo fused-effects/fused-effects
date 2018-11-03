@@ -50,3 +50,17 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) 
       c:cs | p c -> runParseC (k c) cs
       _          -> empty)
     op)
+
+
+expr :: (Alternative m, Carrier sig m, Member Symbol sig) => m Int
+expr
+  =   (+) <$> term <* char '+' <*> expr
+  <|> term
+
+term :: (Alternative m, Carrier sig m, Member Symbol sig) => m Int
+term
+  =   (*) <$> factor <* char '*' <*> term
+  <|> factor
+
+factor :: (Alternative m, Carrier sig m, Member Symbol sig) => m Int
+factor = read <$> some digit
