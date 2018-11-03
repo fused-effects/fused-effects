@@ -44,6 +44,10 @@ spec = describe "parser" $ do
     prop "matches multiplication" $
       \ a b -> run (runNonDet (parse (show (abs a) ++ "*" ++ show (abs b)) term)) == [abs a * abs b]
 
+  describe "expr" $ do
+    prop "matches factors" $
+      \ a -> run (runNonDet (parse (show (abs a)) expr)) == [abs a]
+
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
   deriving (Functor)
