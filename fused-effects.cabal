@@ -52,7 +52,8 @@ library
 test-suite examples
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
-  other-modules:       Teletype
+  other-modules:       Parser
+                     , Teletype
   build-depends:       base >=4.9 && <4.12
                      , fused-effects
                      , hspec >=2.4.1
