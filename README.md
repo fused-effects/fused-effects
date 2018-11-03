@@ -274,11 +274,14 @@ This project builds a Haskell package named `fused-effects`. The library’s sou
 
 This project adheres to the Contributor Covenant [code of conduct][]. By participating, you are expected to uphold this code.
 
+Finally, this project is licensed under the BSD 3-clause [license][].
+
 [`src`]: https://github.com/robrix/fused-effects/tree/master/src
 [`test`]: https://github.com/robrix/fused-effects/tree/master/test
 [`examples`]: https://github.com/robrix/fused-effects/tree/master/examples
 [`docs`]: https://github.com/robrix/fused-effects/tree/master/docs
 [code of conduct]: https://github.com/robrix/fused-effects/blob/master/CODE_OF_CONDUCT.md
+[license]: https://github.com/robrix/fused-effects/blob/master/LICENSE.md
 
 
 ### Development
