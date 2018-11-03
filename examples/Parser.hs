@@ -8,9 +8,14 @@ import Control.Effect.Sum
 import Data.Char
 import Data.Coerce
 import Test.Hspec
+import Test.Hspec.QuickCheck
+import Test.QuickCheck
 
 spec :: Spec
-spec = describe "parser" $ pure ()
+spec = describe "parser" $ do
+  describe "satisfy" $ do
+    prop "matches with a predicate" $
+      \ c f -> run (runNonDetOnce (parse [c] (satisfy (applyFun f)))) == if applyFun f c then Just c else Nothing
 
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
