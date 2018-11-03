@@ -3,6 +3,7 @@ module Parser where
 
 import Control.Effect.Carrier
 import Control.Effect.Sum
+import Data.Char
 import Data.Coerce
 import Test.Hspec
 
@@ -24,3 +25,6 @@ satisfy p = send (Satisfy p ret)
 
 char :: (Carrier sig m, Member Symbol sig) => Char -> m Char
 char = satisfy . (==)
+
+digit :: (Carrier sig m, Member Symbol sig) => m Char
+digit = satisfy isDigit
