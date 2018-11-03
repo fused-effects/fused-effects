@@ -52,6 +52,9 @@ spec = describe "parser" $ do
     prop "matches multiplication" $
       \ as -> run (runNonDet (parse (intercalate "*" (show . abs <$> 1:as)) expr)) == [product (map abs as)]
 
+    prop "matches addition" $
+      \ as -> run (runNonDet (parse (intercalate "+" (show . abs <$> 0:as)) expr)) == [sum (map abs as)]
+
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
   deriving (Functor)
