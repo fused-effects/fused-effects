@@ -5,6 +5,7 @@ import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Sum
+import Control.Monad (replicateM)
 import Data.Char
 import Data.Coerce
 import Data.List (intercalate)
@@ -54,6 +55,16 @@ spec = describe "parser" $ do
 
     prop "matches addition" $
       \ as -> run (runNonDet (parse (intercalate "+" (show . abs <$> 0:as)) expr)) == [sum (map abs as)]
+
+    prop "respects order of operations" . forAll (sized arbNested) $
+      \ as -> run (runNonDet (parse (intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as)) expr)) == [sum (map (product . map abs) as)]
+
+    where arbNested :: Arbitrary a => Int -> Gen [[a]]
+          arbNested 0 = pure []
+          arbNested n = do
+            Positive m <- arbitrary
+            let n' = n `div` (m + 1)
+            replicateM m (vector n')
 
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
