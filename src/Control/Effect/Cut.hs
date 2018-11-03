@@ -31,6 +31,8 @@ instance Effect Cut where
   handle state handler (Call m k) = Call (handler (m <$ state)) (handler . fmap k)
 
 -- | Fail the current branch, and prevent backtracking within the nearest enclosing 'call' (if any).
+--
+--   prop> run (runNonDetOnce (runCut (cutfail <|> pure a))) == Nothing
 cutfail :: (Carrier sig m, Member Cut sig) => m a
 cutfail = send Cutfail
 
