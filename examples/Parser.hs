@@ -1,7 +1,8 @@
-{-# LANGUAGE DeriveFunctor, KindSignatures #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, KindSignatures #-}
 module Parser where
 
 import Control.Effect.Carrier
+import Control.Effect.Sum
 import Data.Coerce
 import Test.Hspec
 
@@ -17,3 +18,6 @@ instance HFunctor Symbol where
 
 instance Effect Symbol where
   handle state handler = coerce . fmap (handler . (<$ state))
+
+satisfy :: (Carrier sig m, Member Symbol sig) => (Char -> Bool) -> m Char
+satisfy p = send (Symbol p ret)
