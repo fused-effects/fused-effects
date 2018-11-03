@@ -31,6 +31,9 @@ char = satisfy . (==)
 digit :: (Carrier sig m, Member Symbol sig) => m Char
 digit = satisfy isDigit
 
+parens :: (Applicative m, Carrier sig m, Member Symbol sig) => m a -> m a
+parens m = char '(' *> m <* char ')'
+
 
 parse :: (Alternative m, Carrier sig m, Effect sig, Monad m) => String -> Eff (ParseC m) a -> m a
 parse input = (>>= exhaustive) . flip runParseC input . interpret
