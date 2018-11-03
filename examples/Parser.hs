@@ -21,3 +21,6 @@ instance Effect Symbol where
 
 satisfy :: (Carrier sig m, Member Symbol sig) => (Char -> Bool) -> m Char
 satisfy p = send (Satisfy p ret)
+
+char :: (Carrier sig m, Member Symbol sig) => Char -> m Char
+char = satisfy . (==)
