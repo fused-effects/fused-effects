@@ -249,12 +249,15 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
 
 ## Project overview
 
-This project builds a Haskell package named `fused-effects`. The library’s sources are in [`src`][], with doctests (property tests written in documentation comments) attached to most functions. Unit tests are in [`test`][], and library usage examples are in [`examples`][]. Finally, further documentation can be found in [`docs`][].
+This project builds a Haskell package named `fused-effects`. The library’s sources are in [`src`][], with doctests (property tests written in documentation comments) attached to most functions. Unit tests are in [`test`][], and library usage examples are in [`examples`][]. Further documentation can be found in [`docs`][].
+
+This project adheres to the Contributor Covenant [code of conduct][]. By participating, you are expected to uphold this code.
 
 [`src`]: https://github.com/robrix/fused-effects/tree/master/src
 [`test`]: https://github.com/robrix/fused-effects/tree/master/test
 [`examples`]: https://github.com/robrix/fused-effects/tree/master/examples
 [`docs`]: https://github.com/robrix/fused-effects/tree/master/docs
+[code of conduct]: https://github.com/robrix/fused-effects/blob/master/CODE_OF_CONDUCT.md
 
 
 ### Development
