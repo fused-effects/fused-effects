@@ -17,6 +17,9 @@ spec = describe "parser" $ do
     prop "returns pure values at the end of input" $
       \ a -> run (runNonDetOnce (parse "" (pure a))) == Just (a :: Integer)
 
+    prop "fails if input remains" $
+      \ c cs a -> run (runNonDetOnce (parse (c:cs) (pure (a :: Integer)))) == Nothing
+
   describe "satisfy" $ do
     prop "matches with a predicate" $
       \ c f -> run (runNonDetOnce (parse [c] (satisfy (applyFun f)))) == if applyFun f c then Just c else Nothing
