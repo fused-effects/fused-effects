@@ -39,6 +39,9 @@ spec = describe "parser" $ do
     prop "matches positive integers" $
       \ a -> run (runNonDet (parse (show (abs a)) factor)) == [abs a]
 
+    prop "matches parenthesized expressions" .forAll (sized arbNested) $
+      \ as -> run (runNonDet (parse ('(' : intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as) ++ ")") factor)) == [sum (map (product . map abs) as)]
+
   describe "term" $ do
     prop "matches factors" $
       \ a -> run (runNonDet (parse (show (abs a)) term)) == [abs a]
