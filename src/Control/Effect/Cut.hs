@@ -46,6 +46,9 @@ call :: (Carrier sig m, Member Cut sig) => m a -> m a
 call m = send (Call m ret)
 
 -- | Commit to the current branch, preventing backtracking within the nearest enclosing 'call' (if any) on failure.
+--
+--   prop> run (runNonDetOnce (runCut (cut *> pure a <|> pure b))) == Just a
+--   prop> run (runNonDetOnce (runCut (cut *> empty <|> pure a))) == Nothing
 cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
 cut = pure () <|> cutfail
 
