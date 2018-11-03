@@ -16,8 +16,8 @@
   - [Development](#development)
 - [Benchmarks](#benchmarks)
 - [Related work](#related-work)
-  - [Comparison to `mtl`](#comparison-to--mtl-)
-  - [Comparison to `freer-simple`](#comparison-to--freer-simple-)
+  - [Comparison to `mtl`](#comparison-to-mtl)
+  - [Comparison to `freer-simple`](#comparison-to-freer-simple)
 
 
 ## Overview
