@@ -118,4 +118,6 @@ term
   <|> factor
 
 factor :: (Alternative m, Carrier sig m, Member Symbol sig) => m Int
-factor = read <$> some digit
+factor
+  =   read <$> some digit
+  <|> parens expr
