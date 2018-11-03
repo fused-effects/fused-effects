@@ -15,23 +15,23 @@ spec :: Spec
 spec = describe "parser" $ do
   describe "parse" $ do
     prop "returns pure values at the end of input" $
-      \ a -> run (runNonDet (parse "" (pure a))) == Just (a :: Integer)
+      \ a -> run (runNonDet (parse "" (pure a))) == [a :: Integer]
 
     prop "fails if input remains" $
-      \ c cs a -> run (runNonDet (parse (c:cs) (pure (a :: Integer)))) == Nothing
+      \ c cs a -> run (runNonDet (parse (c:cs) (pure (a :: Integer)))) == []
 
   describe "satisfy" $ do
     prop "matches with a predicate" $
-      \ c f -> run (runNonDet (parse [c] (satisfy (applyFun f)))) == if applyFun f c then Just c else Nothing
+      \ c f -> run (runNonDet (parse [c] (satisfy (applyFun f)))) == if applyFun f c then [c] else []
 
     prop "fails at end of input" $
-      \ f -> run (runNonDet (parse "" (satisfy (applyFun f)))) == Nothing
+      \ f -> run (runNonDet (parse "" (satisfy (applyFun f)))) == []
 
     prop "fails if input remains" $
-      \ c1 c2 f -> run (runNonDet (parse [c1, c2] (satisfy (applyFun f)))) == Nothing
+      \ c1 c2 f -> run (runNonDet (parse [c1, c2] (satisfy (applyFun f)))) == []
 
     prop "consumes input" $
-      \ c1 c2 f -> run (runNonDet (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) == if applyFun f c1 && applyFun f c2 then Just (c1, c2) else Nothing
+      \ c1 c2 f -> run (runNonDet (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) == if applyFun f c1 && applyFun f c2 then [(c1, c2)] else []
 
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
