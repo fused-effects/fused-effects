@@ -32,6 +32,8 @@ instance Effect Cut where
 
 -- | Fail the current branch, and prevent backtracking within the nearest enclosing 'call' (if any).
 --
+--   Contrast with 'empty', which fails the current branch but allows backtracking.
+--
 --   prop> run (runNonDetOnce (runCut (cutfail <|> pure a))) == Nothing
 --   prop> run (runNonDetOnce (runCut (pure a <|> cutfail))) == Just a
 cutfail :: (Carrier sig m, Member Cut sig) => m a
