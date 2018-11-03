@@ -53,6 +53,7 @@ cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
 cut = pure () <|> cutfail
 
 
+-- | The result of a nondeterministic branch of a computation.
 data Branch a
   = Prune
   | None
