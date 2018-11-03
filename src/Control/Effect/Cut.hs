@@ -16,6 +16,7 @@ import Control.Effect.Internal
 import Control.Effect.NonDet
 import Control.Effect.Sum
 
+-- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
 data Cut m k
   = Cutfail
   | forall a . Call (m a) (a -> k)
