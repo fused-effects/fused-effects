@@ -60,6 +60,7 @@ data Branch a
   | Some a
   deriving (Eq, Functor, Ord, Show)
 
+-- | Case analysis for 'Branch', taking a value to use for 'Prune', a value to use for 'None', and a function to apply to the contents of 'Some'.
 branch :: a -> a -> (b -> a) -> Branch b -> a
 branch a _ _ Prune    = a
 branch _ a _ None     = a
