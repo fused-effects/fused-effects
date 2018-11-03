@@ -130,7 +130,7 @@ example4 = runM . runReader "hello" . runState 0 $ do
 
 To use effects, you'll need a relatively-uncontroversial set of extensions: `-XFlexibleContexts`, `-XFlexibleInstances`, and `-XMultiParamTypeClasses`.
 
-When defining your own effects, you'll need `-XKindOperators` to declare a `Carrier` instance over (`:+:`), and `-XUndecidableInstances` to satisfy the coverage condition for this instance. `-XLambdaCase` provides a measure of syntactic convenience when handling an effect type with `handleSum.`  You may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case.
+When defining your own effects, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), and `-XUndecidableInstances` to satisfy the coverage condition for this instance. `-XLambdaCase` provides a measure of syntactic convenience when handling an effect type with `handleSum.`  You may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case.
 
 [common]: https://github.com/robrix/fused-effects/blob/master/docs/common_errors.md
 
