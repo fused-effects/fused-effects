@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Parser where
 
+import Control.Applicative ((<**>))
 import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.NonDet
@@ -111,9 +112,9 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) 
 
 
 expr :: (Alternative m, Carrier sig m, Member Symbol sig) => m Int
-expr
-  =   (+) <$> term <* char '+' <*> expr
-  <|> term
+expr = term <**>
+  (   (+) <$ char '+' <*> expr
+  <|> pure id)
 
 term :: (Alternative m, Carrier sig m, Member Symbol sig) => m Int
 term
