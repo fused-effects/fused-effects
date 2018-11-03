@@ -10,3 +10,6 @@ data Symbol (m :: * -> *) k = Symbol Char (Char -> k)
 instance HFunctor Symbol where
   hmap _ = coerce
   {-# INLINE hmap #-}
+
+instance Effect Symbol where
+  handle state handler = coerce . fmap (handler . (<$ state))
