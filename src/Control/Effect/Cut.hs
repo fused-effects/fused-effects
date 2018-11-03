@@ -34,6 +34,7 @@ instance Effect Cut where
 cutfail :: (Carrier sig m, Member Cut sig) => m a
 cutfail = send Cutfail
 
+-- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
 call :: (Carrier sig m, Member Cut sig) => m a -> m a
 call m = send (Call m ret)
 
