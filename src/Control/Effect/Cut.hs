@@ -30,6 +30,7 @@ instance Effect Cut where
   handle _     _       Cutfail    = Cutfail
   handle state handler (Call m k) = Call (handler (m <$ state)) (handler . fmap k)
 
+-- | Fail the current branch, and prevent backtracking within the nearest enclosing 'call' (if any).
 cutfail :: (Carrier sig m, Member Cut sig) => m a
 cutfail = send Cutfail
 
