@@ -3,6 +3,10 @@ module Parser where
 
 import Control.Effect.Carrier
 import Data.Coerce
+import Test.Hspec
+
+spec :: Spec
+spec = describe "parser" $ pure ()
 
 data Symbol (m :: * -> *) k = Symbol Char (Char -> k)
   deriving (Functor)
