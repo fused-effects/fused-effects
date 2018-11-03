@@ -70,3 +70,9 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
     (\case
       Cutfail  -> ret Prune
       Call m k -> runCutC m >>= branch (ret None) (ret None) (runCutC . k))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
