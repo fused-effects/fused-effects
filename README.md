@@ -13,6 +13,7 @@
   - [Defining new effects](#defining-new-effects)
   - [Defining effect handlers](#defining-effect-handlers)
 - [Project overview](#project-overview)
+  - [Development](#development)
 - [Benchmarks](#benchmarks)
 - [Related work](#related-work)
   - [Comparison to `mtl`](#comparison-to--mtl-)
@@ -255,6 +256,19 @@ This project builds a Haskell package named `fused-effects`. The library’s sou
 [`examples`]: https://github.com/robrix/fused-effects/tree/master/examples
 [`docs`]: https://github.com/robrix/fused-effects/tree/master/docs
 
+
+### Development
+
+Development of `fused-effects` is typically done using `cabal new-build`:
+
+```shell
+cabal new-build # build the library
+cabal new-test  # build and run the examples, unit tests, and doctests
+```
+
+The package is available on [hackage][], and can be used by adding it to a component’s `build-depends` field in your `.cabal` file.
+
+[hackage]: http://hackage.haskell.org
 
 
 ## Benchmarks
