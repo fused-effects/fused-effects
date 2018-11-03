@@ -27,6 +27,9 @@ spec = describe "parser" $ do
     prop "fails at end of input" $
       \ f -> run (runNonDetOnce (parse "" (satisfy (applyFun f)))) == Nothing
 
+    prop "fails if input remains" $
+      \ c1 c2 f -> run (runNonDetOnce (parse [c1, c2] (satisfy (applyFun f)))) == Nothing
+
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
   deriving (Functor)
