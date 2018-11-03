@@ -38,6 +38,8 @@ cutfail :: (Carrier sig m, Member Cut sig) => m a
 cutfail = send Cutfail
 
 -- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
+--
+--   prop> run (runNonDetOnce (runCut (call (cutfail <|> pure a) <|> pure b))) == Just b
 call :: (Carrier sig m, Member Cut sig) => m a -> m a
 call m = send (Call m ret)
 
