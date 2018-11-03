@@ -117,9 +117,9 @@ expr = term <**>
   <|> pure id)
 
 term :: (Alternative m, Carrier sig m, Member Symbol sig) => m Int
-term
-  =   (*) <$> factor <* char '*' <*> term
-  <|> factor
+term = factor <**>
+  (   (*) <$ char '*' <*> term
+  <|> pure id)
 
 factor :: (Alternative m, Carrier sig m, Member Symbol sig) => m Int
 factor
