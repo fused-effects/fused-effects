@@ -30,6 +30,9 @@ spec = describe "parser" $ do
     prop "fails if input remains" $
       \ c1 c2 f -> run (runNonDetOnce (parse [c1, c2] (satisfy (applyFun f)))) == Nothing
 
+    prop "consumes input" $
+      \ c1 c2 f -> run (runNonDetOnce (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) == if applyFun f c1 && applyFun f c2 then Just (c1, c2) else Nothing
+
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
   deriving (Functor)
