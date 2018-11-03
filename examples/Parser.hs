@@ -12,6 +12,7 @@ import Test.Hspec
 spec :: Spec
 spec = describe "parser" $ pure ()
 
+
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
   deriving (Functor)
 
