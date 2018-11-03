@@ -33,6 +33,10 @@ spec = describe "parser" $ do
     prop "consumes input" $
       \ c1 c2 f -> run (runNonDet (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) == if applyFun f c1 && applyFun f c2 then [(c1, c2)] else []
 
+  describe "factor" $ do
+    prop "matches positive integers" $
+      \ a -> run (runNonDet (parse (show (abs a)) factor)) == [abs a]
+
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
   deriving (Functor)
