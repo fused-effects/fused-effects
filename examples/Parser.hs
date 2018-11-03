@@ -7,6 +7,7 @@ import Control.Effect.NonDet
 import Control.Effect.Sum
 import Data.Char
 import Data.Coerce
+import Data.List (intercalate)
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
@@ -42,7 +43,7 @@ spec = describe "parser" $ do
       \ a -> run (runNonDet (parse (show (abs a)) term)) == [abs a]
 
     prop "matches multiplication" $
-      \ a b -> run (runNonDet (parse (show (abs a) ++ "*" ++ show (abs b)) term)) == [abs a * abs b]
+      \ as -> run (runNonDet (parse (intercalate "*" (show . abs <$> 1:as)) term)) == [product (map abs as)]
 
   describe "expr" $ do
     prop "matches factors" $
