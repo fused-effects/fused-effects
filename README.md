@@ -2,22 +2,43 @@
 
 [![Build Status](https://travis-ci.com/robrix/fused-effects.svg?branch=master)](https://travis-ci.com/robrix/fused-effects)
 
-- [Overview](#overview)
-  - [Algebraic effects](#algebraic-effects)
-  - [Higher-order effects](#higher-order-effects)
-  - [Fusion](#fusion)
-- [Usage](#usage)
-  - [Using built-in effects](#using-built-in-effects)
-  - [Running effects](#running-effects)
-  - [Required compiler extensions](#required-compiler-extensions)
-  - [Defining new effects](#defining-new-effects)
-  - [Defining effect handlers](#defining-effect-handlers)
-- [Project overview](#project-overview)
-  - [Development](#development)
-- [Benchmarks](#benchmarks)
-- [Related work](#related-work)
-  - [Comparison to `mtl`](#comparison-to-mtl)
-  - [Comparison to `freer-simple`](#comparison-to-freer-simple)
+- [Overview][]
+  - [Algebraic effects][]
+  - [Higher-order effects][]
+  - [Fusion][]
+- [Usage][]
+  - [Using built-in effects][]
+  - [Running effects][]
+  - [Required compiler extensions][]
+  - [Defining new effects][]
+  - [Defining effect handlers][]
+- [Project overview][]
+  - [Development][]
+- [Benchmarks][]
+- [Related work][]
+  - [Comparison to `mtl`][]
+  - [Comparison to `freer-simple`][]
+
+[Overview]: https://github.com/robrix/fused-effects#overview
+[Algebraic effects]: https://github.com/robrix/fused-effects#algebraic-effects
+[Higher-order effects]: https://github.com/robrix/fused-effects#higher-order-effects
+[Fusion]: https://github.com/robrix/fused-effects#fusion
+
+[Usage]: https://github.com/robrix/fused-effects#usage
+[Using built-in effects]: https://github.com/robrix/fused-effects#using-built-in-effects
+[Running effects]: https://github.com/robrix/fused-effects#running-effects
+[Required compiler extensions]: https://github.com/robrix/fused-effects#required-compiler-extensions
+[Defining new effects]: https://github.com/robrix/fused-effects#defining-new-effects
+[Defining effect handlers]: https://github.com/robrix/fused-effects#defining-effect-handlers
+
+[Project overview]: https://github.com/robrix/fused-effects#project-overview
+[Development]: https://github.com/robrix/fused-effects#development
+
+[Benchmarks]: https://github.com/robrix/fused-effects#benchmarks
+
+[Related work]: https://github.com/robrix/fused-effects#related-work
+[Comparison to `mtl`]: https://github.com/robrix/fused-effects#comparison-to-mtl
+[Comparison to `freer-simple`]: https://github.com/robrix/fused-effects#comparison-to-freer-simple
 
 
 ## Overview
