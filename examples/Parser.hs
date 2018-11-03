@@ -17,6 +17,9 @@ spec = describe "parser" $ do
     prop "matches with a predicate" $
       \ c f -> run (runNonDetOnce (parse [c] (satisfy (applyFun f)))) == if applyFun f c then Just c else Nothing
 
+    prop "fails at end of input" $
+      \ f -> run (runNonDetOnce (parse "" (satisfy (applyFun f)))) == Nothing
+
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
   deriving (Functor)
