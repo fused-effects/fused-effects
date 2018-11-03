@@ -12,6 +12,7 @@
   - [Required compiler extensions](#required-compiler-extensions)
   - [Defining new effects](#defining-new-effects)
   - [Defining effect handlers](#defining-effect-handlers)
+- [Project overview](#project-overview)
 - [Benchmarks](#benchmarks)
 - [Related work](#related-work)
   - [Comparison to `mtl`](#comparison-to--mtl-)
@@ -244,6 +245,16 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
     Read    k -> liftIO getLine      >>= k
     Write s k -> liftIO (putStrLn s) >>  k)
 ```
+
+## Project overview
+
+This project builds a Haskell package named `fused-effects`. The library’s sources are in [`src`][], with doctests (property tests written in documentation comments) attached to most functions. Unit tests are in [`test`][], and library usage examples are in [`examples`][]. Finally, further documentation can be found in [`docs`][].
+
+[`src`]: https://github.com/robrix/fused-effects/tree/master/src
+[`test`]: https://github.com/robrix/fused-effects/tree/master/test
+[`examples`]: https://github.com/robrix/fused-effects/tree/master/examples
+[`docs`]: https://github.com/robrix/fused-effects/tree/master/docs
+
 
 
 ## Benchmarks
