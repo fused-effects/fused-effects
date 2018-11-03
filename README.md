@@ -2,20 +2,43 @@
 
 [![Build Status](https://travis-ci.com/robrix/fused-effects.svg?branch=master)](https://travis-ci.com/robrix/fused-effects)
 
-- [Overview](#overview)
-  - [Algebraic effects](#algebraic-effects)
-  - [Higher-order effects](#higher-order-effects)
-  - [Fusion](#fusion)
-- [Usage](#usage)
-  - [Using built-in effects](#using-built-in-effects)
-  - [Running effects](#running-effects)
-  - [Required compiler extensions](#required-compiler-extensions)
-  - [Defining new effects](#defining-new-effects)
-  - [Defining effect handlers](#defining-effect-handlers)
-- [Benchmarks](#benchmarks)
-- [Related work](#related-work)
-  - [Comparison to `mtl`](#comparison-to--mtl-)
-  - [Comparison to `freer-simple`](#comparison-to--freer-simple-)
+- [Overview][]
+  - [Algebraic effects][]
+  - [Higher-order effects][]
+  - [Fusion][]
+- [Usage][]
+  - [Using built-in effects][]
+  - [Running effects][]
+  - [Required compiler extensions][]
+  - [Defining new effects][]
+  - [Defining effect handlers][]
+- [Project overview][]
+  - [Development][]
+- [Benchmarks][]
+- [Related work][]
+  - [Comparison to `mtl`][]
+  - [Comparison to `freer-simple`][]
+
+[Overview]: https://github.com/robrix/fused-effects#overview
+[Algebraic effects]: https://github.com/robrix/fused-effects#algebraic-effects
+[Higher-order effects]: https://github.com/robrix/fused-effects#higher-order-effects
+[Fusion]: https://github.com/robrix/fused-effects#fusion
+
+[Usage]: https://github.com/robrix/fused-effects#usage
+[Using built-in effects]: https://github.com/robrix/fused-effects#using-built-in-effects
+[Running effects]: https://github.com/robrix/fused-effects#running-effects
+[Required compiler extensions]: https://github.com/robrix/fused-effects#required-compiler-extensions
+[Defining new effects]: https://github.com/robrix/fused-effects#defining-new-effects
+[Defining effect handlers]: https://github.com/robrix/fused-effects#defining-effect-handlers
+
+[Project overview]: https://github.com/robrix/fused-effects#project-overview
+[Development]: https://github.com/robrix/fused-effects#development
+
+[Benchmarks]: https://github.com/robrix/fused-effects#benchmarks
+
+[Related work]: https://github.com/robrix/fused-effects#related-work
+[Comparison to `mtl`]: https://github.com/robrix/fused-effects#comparison-to-mtl
+[Comparison to `freer-simple`]: https://github.com/robrix/fused-effects#comparison-to-freer-simple
 
 
 ## Overview
@@ -244,6 +267,35 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
     Read    k -> liftIO getLine      >>= k
     Write s k -> liftIO (putStrLn s) >>  k)
 ```
+
+## Project overview
+
+This project builds a Haskell package named `fused-effects`. The library’s sources are in [`src`][], with doctests (property tests written in documentation comments) attached to most functions. Unit tests are in [`test`][], and library usage examples are in [`examples`][]. Further documentation can be found in [`docs`][].
+
+This project adheres to the Contributor Covenant [code of conduct][]. By participating, you are expected to uphold this code.
+
+Finally, this project is licensed under the BSD 3-clause [license][].
+
+[`src`]: https://github.com/robrix/fused-effects/tree/master/src
+[`test`]: https://github.com/robrix/fused-effects/tree/master/test
+[`examples`]: https://github.com/robrix/fused-effects/tree/master/examples
+[`docs`]: https://github.com/robrix/fused-effects/tree/master/docs
+[code of conduct]: https://github.com/robrix/fused-effects/blob/master/CODE_OF_CONDUCT.md
+[license]: https://github.com/robrix/fused-effects/blob/master/LICENSE.md
+
+
+### Development
+
+Development of `fused-effects` is typically done using `cabal new-build`:
+
+```shell
+cabal new-build # build the library
+cabal new-test  # build and run the examples, unit tests, and doctests
+```
+
+The package is available on [hackage][], and can be used by adding it to a component’s `build-depends` field in your `.cabal` file.
+
+[hackage]: http://hackage.haskell.org
 
 
 ## Benchmarks

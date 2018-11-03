@@ -1,4 +1,5 @@
 - Adds a `Cut` effect which adds committed choice to nondeterminism.
+- Fixes the table of contents links in the README.
 
 # 0.1.1.0
 
