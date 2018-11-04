@@ -62,5 +62,6 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
+-- >>> import Control.Effect.NonDet
 -- >>> import Control.Effect.Void
 -- >>> import Data.Foldable (asum)
