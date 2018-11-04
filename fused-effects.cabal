@@ -20,6 +20,7 @@ tested-with:         GHC == 8.2.2
 
 library
   exposed-modules:     Control.Effect
+                     , Control.Effect.Async
                      , Control.Effect.Carrier
                      , Control.Effect.Cut
                      , Control.Effect.Error
@@ -42,6 +43,7 @@ library
                      , Control.Effect.Void
                      , Control.Effect.Writer
   build-depends:       base >=4.9 && <4.12
+                     , async >= 2.1 && <2.3
                      , deepseq >=1.4.3 && <1.5
                      , MonadRandom >=0.5 && <0.6
                      , random

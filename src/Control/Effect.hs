@@ -2,6 +2,7 @@ module Control.Effect
 ( module X
 ) where
 
+import Control.Effect.Async     as X (Asynchronous, AsynchronousC)
 import Control.Effect.Carrier   as X (Carrier, Effect)
 import Control.Effect.Cut       as X (Cut, CutC)
 import Control.Effect.Error     as X (Error, ErrorC)
