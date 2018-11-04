@@ -106,24 +106,23 @@ runBranch = branch empty empty pure (<|>)
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
 runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a -> m a
-runCut = (>>= runBranch) . flip runCutC False . interpret
+runCut = (>>= runBranch) . runCutC . interpret
 
-newtype CutC m a = CutC { runCutC :: Bool -> m (Branch m a) }
+newtype CutC m a = CutC { runCutC :: m (Branch m a) }
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
-  ret = CutC . const . ret . Pure
+  ret = CutC . ret . Pure
   {-# INLINE ret #-}
 
-  eff op = CutC (\ once -> handleSum (handleSum
-    (eff . handle (Pure ()) (bindBranch (ret Cut) (flip runCutC once)))
+  eff = CutC . handleSum (handleSum
+    (eff . handle (Pure ()) (bindBranch (ret Cut) runCutC))
     (\case
       Empty    -> ret None
-      Choose k -> runCutC (k True) once >>= branch (ret Cut) (runCutC (k False) once) (if once then ret . Pure else \ a -> ret (Alt (ret a) (runCutC (k False) once >>= runBranch))) (fmap ret . Alt)))
+      Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Alt (ret a) (runCutC (k False) >>= runBranch))) (fmap ret . Alt)))
     (\case
       Cutfail  -> ret Cut
-      Call m k -> runCutC m once >>= bindBranch (ret None) (flip runCutC once . k)
-      Once m k -> runCutC m True >>= bindBranch (ret Cut) (flip runCutC once . k))
-    op)
+      Call m k -> runCutC m >>= bindBranch (ret None) (runCutC . k)
+      Once m k -> runCutC m >>= bindBranch (ret Cut) (runCutC . k))
     where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m a) -> (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
           bindBranch cut bind = branch cut (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
   {-# INLINE eff #-}
@@ -131,7 +130,7 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck hiding (once)
+-- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
 -- >>> instance Arbitrary1 m => Arbitrary1 (Branch m) where liftArbitrary arbitrary = frequency [(1, pure Cut), (1, pure None), (3, Pure <$> arbitrary), (3, Alt <$> liftArbitrary arbitrary <*> liftArbitrary arbitrary)]
 -- >>> instance (Arbitrary1 m, Arbitrary a) => Arbitrary (Branch m a) where arbitrary = arbitrary1
