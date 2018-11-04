@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
@@ -6,10 +6,14 @@ module Control.Effect.NonDet
 , AltC(..)
 , runNonDetOnce
 , OnceC(..)
+, Branch(..)
+, branch
+, runBranch
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
+import Control.Effect.Cull
 import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
@@ -39,20 +43,15 @@ instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Appl
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
 runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
-runNonDetOnce = runOnceC . interpret
+runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
 
-newtype OnceC f m a = OnceC { runOnceC :: m (f a) }
+newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
 
-instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Carrier (NonDet :+: sig) (OnceC f m) where
-  ret a = OnceC (ret (pure a))
-  eff = OnceC . handleSum (eff . handleTraversable runOnceC) (\case
-    Empty    -> ret empty
-    Choose k -> do
-      l <- runOnceC (k True)
-      if null l then
-        runOnceC (k False)
-      else
-        pure l)
+instance (Alternative f, Carrier sig m, Effect sig, Traversable f, Monad f, Monad m) => Carrier (NonDet :+: sig) (OnceC f m) where
+  ret = OnceC . ret
+  eff = OnceC . handleSum (eff . R . R . R . handleCoercible) (\case
+    Empty    -> empty
+    Choose k -> runOnceC (k True) <|> runOnceC (k False))
 
 
 -- $setup

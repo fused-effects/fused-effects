@@ -22,6 +22,7 @@ library
   exposed-modules:     Control.Effect
                      , Control.Effect.Async
                      , Control.Effect.Carrier
+                     , Control.Effect.Cull
                      , Control.Effect.Cut
                      , Control.Effect.Error
                      , Control.Effect.Fail
