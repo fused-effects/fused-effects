@@ -4,7 +4,6 @@ module Control.Effect.Cut
 , cutfail
 , call
 , cut
-, once
 , Branch(..)
 , branch
 , runBranch
@@ -22,20 +21,17 @@ import Control.Effect.Sum
 data Cut m k
   = Cutfail
   | forall a . Call (m a) (a -> k)
-  | forall a . Once (m a) (a -> k)
 
 deriving instance Functor (Cut m)
 
 instance HFunctor Cut where
   hmap _ Cutfail    = Cutfail
   hmap f (Call m k) = Call (f m) k
-  hmap f (Once m k) = Once (f m) k
   {-# INLINE hmap #-}
 
 instance Effect Cut where
   handle _     _       Cutfail    = Cutfail
   handle state handler (Call m k) = Call (handler (m <$ state)) (handler . fmap k)
-  handle state handler (Once m k) = Once (handler (m <$ state)) (handler . fmap k)
   {-# INLINE handle #-}
 
 -- | Fail the current branch, and prevent backtracking within the nearest enclosing 'call' (if any).
@@ -63,11 +59,6 @@ call m = send (Call m ret)
 cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}
-
-
-once :: (Carrier sig m, Member Cut sig) => m a -> m a
-once m = send (Once m ret)
-{-# INLINE once #-}
 
 
 -- | The result of a nondeterministic branch of a computation.
@@ -117,8 +108,7 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
       Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Alt (ret a) (runCutC (k False) >>= runBranch))) (fmap ret . Alt)))
     (\case
       Cutfail  -> ret Cut
-      Call m k -> runCutC m >>= bindBranch (ret None) (runCutC . k)
-      Once m k -> runCutC m >>= bindBranch (ret Cut) (runCutC . k))
+      Call m k -> runCutC m >>= bindBranch (ret None) (runCutC . k))
     where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m a) -> (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
           bindBranch cut bind = branch cut (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
   {-# INLINE eff #-}
