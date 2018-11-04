@@ -57,10 +57,10 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+
 --
 --   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
 --
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (CullC (Eff (AltC f m))) a -> m (f a)
-runNonDetOnce = runNonDet . runCull . cull
+--   prop> run (runNonDetCull (asum (map pure (repeat a)))) == [a]
+--   prop> run (runNonDetCull (asum (map pure (repeat a)))) == Just a
+runNonDetCull :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (CullC (Eff (AltC f m))) a -> m (f a)
+runNonDetCull = runNonDet . runCull . cull
 
 
 -- $setup
