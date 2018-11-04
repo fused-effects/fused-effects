@@ -29,6 +29,8 @@ cull m = send (Cull m ret)
 
 
 -- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
+--
+--   prop> run (runNonDet (runCull (pure a <|> pure b))) == [a, b]
 runCull :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CullC m) a -> m a
 runCull = (>>= runBranch (const empty)) . flip runCullC False . interpret
 
