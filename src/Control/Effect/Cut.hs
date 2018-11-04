@@ -6,6 +6,7 @@ module Control.Effect.Cut
 , cut
 , Branch(..)
 , branch
+, runBranch
 , runCut
 , CutC(..)
 ) where
@@ -71,6 +72,9 @@ branch :: a -> a -> (b -> a) -> Branch b -> a
 branch a _ _ Cut      = a
 branch _ a _ None     = a
 branch _ _ f (Pure a) = f a
+
+runBranch :: Alternative m => Branch a -> m a
+runBranch = branch empty empty pure
 
 
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
