@@ -62,30 +62,27 @@ cut = pure () <|> cutfail
 
 
 -- | The result of a nondeterministic branch of a computation.
-data Branch m a
-  = Cut
-  | None
+data Branch e m a
+  = None e
   | Pure a
   | Alt (m a) (m a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 -- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Pure'.
 --
---   prop> branch Cut None Pure Alt a == (a :: Branch [] a)
---   prop> branch a b (applyFun f) (applyFun2 g) (Cut :: Branch [] a) == a
---   prop> branch a b (applyFun f) (applyFun2 g) (None :: Branch [] a) == b
---   prop> branch a b (applyFun f) (applyFun2 g) (Pure c :: Branch [] a) == applyFun f c
---   prop> branch a b (applyFun f) (applyFun2 g) (Alt c d :: Branch [] a) == applyFun2 g c d
-branch :: a -> a -> (b -> a) -> (m b -> m b -> a) -> Branch m b -> a
-branch a _ _ _ Cut       = a
-branch _ a _ _ None      = a
-branch _ _ f _ (Pure a)  = f a
-branch _ _ _ f (Alt a b) = f a b
+--   prop> branch None Pure Alt a == (a :: Branch e [] a)
+--   prop> branch (applyFun f) (applyFun g) (applyFun2 h) (None a :: Branch [] a) == applyFun f a
+--   prop> branch (applyFun f) (applyFun g) (applyFun2 h) (Pure a :: Branch [] a) == applyFun g a
+--   prop> branch (applyFun f) (applyFun g) (applyFun2 h) (Alt a b :: Branch [] a) == applyFun2 h a b
+branch :: (e -> a) -> (b -> a) -> (m b -> m b -> a) -> Branch e m b -> a
+branch f _ _ (None a)  = f a
+branch _ f _ (Pure a)  = f a
+branch _ _ f (Alt a b) = f a b
 {-# INLINE branch #-}
 
 -- | Interpret a 'Branch' into an underlying 'Alternative' context.
-runBranch :: Alternative m => Branch m a -> m a
-runBranch = branch empty empty pure (<|>)
+runBranch :: Alternative m => (e -> m a) -> Branch e m a -> m a
+runBranch f = branch f pure (<|>)
 {-# INLINE runBranch #-}
 
 
@@ -93,24 +90,24 @@ runBranch = branch empty empty pure (<|>)
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
 runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a -> m a
-runCut = (>>= runBranch) . runCutC . interpret
+runCut = (>>= runBranch (const empty)) . runCutC . interpret
 
-newtype CutC m a = CutC { runCutC :: m (Branch m a) }
+newtype CutC m a = CutC { runCutC :: m (Branch Bool m a) }
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Pure
   {-# INLINE ret #-}
 
   eff = CutC . handleSum (handleSum
-    (eff . handle (Pure ()) (bindBranch (ret Cut) runCutC))
+    (eff . handle (Pure ()) (bindBranch (ret (None False)) runCutC))
     (\case
-      Empty    -> ret None
-      Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Alt (ret a) (runCutC (k False) >>= runBranch))) (fmap ret . Alt)))
+      Empty    -> ret (None True)
+      Choose k -> runCutC (k True) >>= branch (\ e -> if e then runCutC (k False) else ret (None False)) (\ a -> ret (Alt (ret a) (runCutC (k False) >>= runBranch (const empty)))) (fmap ret . Alt)))
     (\case
-      Cutfail  -> ret Cut
-      Call m k -> runCutC m >>= bindBranch (ret None) (runCutC . k))
-    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m a) -> (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
-          bindBranch cut bind = branch cut (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
+      Cutfail  -> ret (None False)
+      Call m k -> runCutC m >>= bindBranch (ret (None True)) (runCutC . k))
+    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch Bool m a) -> (b -> m (Branch Bool m a)) -> Branch Bool m b -> m (Branch Bool m a)
+          bindBranch cut bind = branch (\ e -> if e then ret (None True) else cut) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
   {-# INLINE eff #-}
 
 
