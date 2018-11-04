@@ -59,6 +59,8 @@ instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Mona
 
 
 -- | The result of a nondeterministic branch of a computation.
+--
+--   'Branch' can be used to define 'NonDet' carriers which control nondeterminism in some specific way, e.g. pruning branches according to some specific heuristic.
 data Branch m e a
   = None e
   | Pure a
