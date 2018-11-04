@@ -31,6 +31,7 @@ library
                      , Control.Effect.Lift.Internal
                      , Control.Effect.NonDet
                      , Control.Effect.NonDet.Internal
+                     , Control.Effect.Once
                      , Control.Effect.Random
                      , Control.Effect.Random.Internal
                      , Control.Effect.Reader
