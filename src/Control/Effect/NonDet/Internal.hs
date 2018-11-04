@@ -49,3 +49,12 @@ branch _ _ f (Alt a b) = f a b
 runBranch :: Alternative m => (e -> m a) -> Branch m e a -> m a
 runBranch f = branch f pure (<|>)
 {-# INLINE runBranch #-}
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Void
+-- >>> import Data.Foldable (asum)
+-- >>> instance (Arbitrary1 m, Arbitrary e) => Arbitrary1 (Branch m e) where liftArbitrary arb = frequency [(1, None <$> arbitrary), (3, Pure <$> arb), (3, Alt <$> liftArbitrary arb <*> liftArbitrary arb)]
+-- >>> instance (Arbitrary1 m, Arbitrary e, Arbitrary a) => Arbitrary (Branch m e a) where arbitrary = arbitrary1
