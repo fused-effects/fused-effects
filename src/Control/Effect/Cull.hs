@@ -2,6 +2,7 @@
 module Control.Effect.Cull where
 
 import Control.Effect.Carrier
+import Control.Effect.Cut
 import Control.Effect.Internal
 import Control.Effect.NonDet
 import Control.Effect.Sum
@@ -27,27 +28,10 @@ cull :: (Carrier sig m, Member Cull sig) => m a -> m a
 cull m = send (Cull m ret)
 
 
-data Branch m a
-  = None
-  | Pure a
-  | Alt (m a) (m a)
-  deriving (Functor)
-
-branch :: a -> (b -> a) -> (m b -> m b -> a) -> Branch m b -> a
-branch a _ _ None      = a
-branch _ f _ (Pure a)  = f a
-branch _ _ f (Alt a b) = f a b
-
--- | Interpret a 'Branch' into an underlying 'Alternative' context.
-runBranch :: Alternative m => Branch m a -> m a
-runBranch = branch empty pure (<|>)
-{-# INLINE runBranch #-}
-
-
 runCull :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CullC m) a -> m a
-runCull = (>>= runBranch) . flip runCullC False . interpret
+runCull = (>>= runBranch (const empty)) . flip runCullC False . interpret
 
-newtype CullC m a = CullC { runCullC :: Bool -> m (Branch m a) }
+newtype CullC m a = CullC { runCullC :: Bool -> m (Branch m () a) }
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   ret = CullC . const . ret . Pure
@@ -56,12 +40,12 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+
   eff op = CullC (\ cull -> handleSum (handleSum
     (eff . handle (Pure ()) (bindBranch (flip runCullC cull)))
     (\case
-      Empty       -> ret None
-      Choose k    -> runCullC (k True) cull >>= branch (runCullC (k False) cull) (if cull then ret . Pure else \ a -> ret (Alt (ret a) (runCullC (k False) cull >>= runBranch))) (fmap ret . Alt)))
+      Empty       -> ret (None ())
+      Choose k    -> runCullC (k True) cull >>= branch (const (runCullC (k False) cull)) (if cull then ret . Pure else \ a -> ret (Alt (ret a) (runCullC (k False) cull >>= runBranch (const empty)))) (fmap ret . Alt)))
     (\ (Cull m k) -> runCullC m True >>= bindBranch (flip runCullC cull . k))
     op)
-    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
-          bindBranch bind = branch (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
+    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => (b -> m (Branch m () a)) -> Branch m () b -> m (Branch m () a)
+          bindBranch bind = branch (const (ret (None ()))) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
   {-# INLINE eff #-}
 
 
