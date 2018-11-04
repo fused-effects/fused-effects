@@ -23,6 +23,7 @@ instance Effect Cull where
 --
 --   prop> run (runNonDet (runCull (cull (pure a <|> pure b)))) == [a]
 --   prop> run (runNonDet (runCull (cull (pure a <|> pure b) <|> pure c))) == [a, c]
+--   prop> run (runNonDet (runCull (cull (asum (map pure (repeat a)))))) == [a]
 cull :: (Carrier sig m, Member Cull sig) => m a -> m a
 cull m = send (Cull m ret)
 
@@ -52,3 +53,4 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
+-- >>> import Data.Foldable (asum)
