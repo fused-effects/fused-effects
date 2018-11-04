@@ -3,6 +3,7 @@ module Control.Effect
 ) where
 
 import Control.Effect.Carrier   as X (Carrier, Effect)
+import Control.Effect.Cull      as X (Cull, CullC)
 import Control.Effect.Cut       as X (Cut, CutC)
 import Control.Effect.Error     as X (Error, ErrorC)
 import Control.Effect.Fail      as X (Fail, FailC)
