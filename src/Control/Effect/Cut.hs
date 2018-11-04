@@ -58,18 +58,18 @@ cut = pure () <|> cutfail
 data Branch a
   = Cut
   | None
-  | Some a
+  | Pure a
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 instance Applicative Branch where
-  pure = Some
+  pure = Pure
   {-# INLINE pure #-}
 
   Cut    <*> _      = Cut
   _      <*> Cut    = Cut
   None   <*> _      = None
   _      <*> None   = None
-  Some f <*> Some a = Some (f a)
+  Pure f <*> Pure a = Pure (f a)
   {-# INLINE (<*>) #-}
 
 instance Monad Branch where
@@ -78,19 +78,19 @@ instance Monad Branch where
 
   Cut    >>= _ = Cut
   None   >>= _ = None
-  Some a >>= f = f a
+  Pure a >>= f = f a
   {-# INLINE (>>=) #-}
 
--- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Some'.
+-- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Pure'.
 --
---   prop> branch Cut None Some a == a
+--   prop> branch Cut None Pure a == a
 --   prop> branch a b (applyFun f) Cut == a
 --   prop> branch a b (applyFun f) None == b
---   prop> branch a b (applyFun f) (Some c) == applyFun f c
+--   prop> branch a b (applyFun f) (Pure c) == applyFun f c
 branch :: a -> a -> (b -> a) -> Branch b -> a
 branch a _ _ Cut      = a
 branch _ a _ None     = a
-branch _ _ f (Some a) = f a
+branch _ _ f (Pure a) = f a
 
 
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
@@ -102,12 +102,12 @@ runCut = (>>= branch empty empty pure) . runCutC . interpret
 newtype CutC m a = CutC { runCutC :: m (Branch a) }
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
-  ret = CutC . ret . Some
+  ret = CutC . ret . Pure
   eff = CutC . handleSum (handleSum
-    (eff . handle (Some ()) (branch (ret Cut) (ret None) runCutC))
+    (eff . handle (Pure ()) (branch (ret Cut) (ret None) runCutC))
     (\case
       Empty    -> ret None
-      Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Some a) <|> runCutC (k False))))
+      Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Pure a) <|> runCutC (k False))))
     (\case
       Cutfail  -> ret Cut
       Call m k -> runCutC m >>= branch (ret None) (ret None) (runCutC . k))
@@ -117,4 +117,4 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
--- >>> instance Arbitrary a => Arbitrary (Branch a) where arbitrary = frequency [(1, pure Cut), (1, pure None), (3, Some <$> arbitrary)] ; shrink b = case b of { Some a -> Cut : None : map Some (shrink a) ; None -> [Cut] ; Cut -> [] }
+-- >>> instance Arbitrary a => Arbitrary (Branch a) where arbitrary = frequency [(1, pure Cut), (1, pure None), (3, Pure <$> arbitrary)] ; shrink b = case b of { Pure a -> Cut : None : map Pure (shrink a) ; None -> [Cut] ; Cut -> [] }
