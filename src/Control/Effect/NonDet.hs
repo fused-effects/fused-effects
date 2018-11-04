@@ -4,8 +4,6 @@ module Control.Effect.NonDet
 , Alternative(..)
 , runNonDet
 , AltC(..)
-, runNonDetOnce
-, OnceC(..)
 , Branch(..)
 , branch
 , runBranch
@@ -33,29 +31,6 @@ instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Appl
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
     Empty    -> ret empty
     Choose k -> liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
-
-
--- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
---
---   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
---
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
-runNonDetOnce = runOnceC . interpret
-
-newtype OnceC f m a = OnceC { runOnceC :: m (f a) }
-
-instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Carrier (NonDet :+: sig) (OnceC f m) where
-  ret a = OnceC (ret (pure a))
-  eff = OnceC . handleSum (eff . handleTraversable runOnceC) (\case
-    Empty    -> ret empty
-    Choose k -> do
-      l <- runOnceC (k True)
-      if null l then
-        runOnceC (k False)
-      else
-        pure l)
 
 
 -- | The result of a nondeterministic branch of a computation.
