@@ -49,11 +49,9 @@ newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
 
 instance (Alternative f, Carrier sig m, Effect sig, Traversable f, Monad f, Monad m) => Carrier (NonDet :+: sig) (OnceC f m) where
   ret = OnceC . ret
-  eff = OnceC . handleSum
-    (eff . R . R . R . handleCoercible)
-    (\case
-      Empty    -> empty
-      Choose k -> runOnceC (k True) <|> runOnceC (k False))
+  eff = OnceC . handleSum (eff . R . R . R . handleCoercible) (\case
+    Empty    -> empty
+    Choose k -> runOnceC (k True) <|> runOnceC (k False))
 
 
 -- $setup
