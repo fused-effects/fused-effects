@@ -56,28 +56,31 @@ cut = pure () <|> cutfail
 
 
 -- | The result of a nondeterministic branch of a computation.
-data Branch a
+data Branch m a
   = Cut
   | None
   | Pure a
+  | Alt (m a) (m a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 -- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Pure'.
 --
---   prop> branch Cut None Pure a == a
---   prop> branch a b (applyFun f) Cut == a
---   prop> branch a b (applyFun f) None == b
---   prop> branch a b (applyFun f) (Pure c) == applyFun f c
-branch :: a -> a -> (b -> a) -> Branch b -> a
-branch a _ _ Cut      = a
-branch _ a _ None     = a
-branch _ _ f (Pure a) = f a
+--   prop> branch Cut None Pure Alt a == (a :: Branch [] a)
+--   prop> branch a b (applyFun f) (applyFun2 g) (Cut :: Branch [] a) == a
+--   prop> branch a b (applyFun f) (applyFun2 g) (None :: Branch [] a) == b
+--   prop> branch a b (applyFun f) (applyFun2 g) (Pure c :: Branch [] a) == applyFun f c
+--   prop> branch a b (applyFun f) (applyFun2 g) (Alt c d :: Branch [] a) == applyFun2 g c d
+branch :: a -> a -> (b -> a) -> (m b -> m b -> a) -> Branch m b -> a
+branch a _ _ _ Cut       = a
+branch _ a _ _ None      = a
+branch _ _ f _ (Pure a)  = f a
+branch _ _ _ f (Alt a b) = f a b
 
-runBranch :: Alternative m => Branch a -> m a
-runBranch = branch empty empty pure
+runBranch :: Alternative m => Branch m a -> m a
+runBranch = branch empty empty pure (<|>)
 
-bindBranch :: Carrier sig m => m (Branch a) -> (b -> m (Branch a)) -> Branch b -> m (Branch a)
-bindBranch cut = branch cut (ret None)
+bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m a) -> (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
+bindBranch cut bind = branch cut (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
 
 
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
@@ -86,7 +89,7 @@ bindBranch cut = branch cut (ret None)
 runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a -> m a
 runCut = (>>= runBranch) . runCutC . interpret
 
-newtype CutC m a = CutC { runCutC :: m (Branch a) }
+newtype CutC m a = CutC { runCutC :: m (Branch m a) }
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Pure
@@ -94,7 +97,7 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
     (eff . handle (Pure ()) (bindBranch (ret Cut) runCutC))
     (\case
       Empty    -> ret None
-      Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Pure a) <|> runCutC (k False))))
+      Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Alt (ret a) (runCutC (k False) >>= runBranch))) (fmap ret . Alt)))
     (\case
       Cutfail  -> ret Cut
       Call m k -> runCutC m >>= bindBranch (ret None) (runCutC . k))
@@ -104,4 +107,5 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
--- >>> instance Arbitrary a => Arbitrary (Branch a) where arbitrary = frequency [(1, pure Cut), (1, pure None), (3, Pure <$> arbitrary)] ; shrink b = case b of { Pure a -> Cut : None : map Pure (shrink a) ; None -> [Cut] ; Cut -> [] }
+-- >>> instance Arbitrary1 m => Arbitrary1 (Branch m) where liftArbitrary arbitrary = frequency [(1, pure Cut), (1, pure None), (3, Pure <$> arbitrary), (3, Alt <$> liftArbitrary arbitrary <*> liftArbitrary arbitrary)]
+-- >>> instance (Arbitrary1 m, Arbitrary a) => Arbitrary (Branch m a) where arbitrary = arbitrary1
