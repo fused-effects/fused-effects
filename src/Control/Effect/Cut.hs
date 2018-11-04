@@ -63,19 +63,23 @@ data Branch a
 
 instance Applicative Branch where
   pure = Some
+  {-# INLINE pure #-}
 
   Prune  <*> _      = Prune
   _      <*> Prune  = Prune
   None   <*> _      = None
   _      <*> None   = None
   Some f <*> Some a = Some (f a)
+  {-# INLINE (<*>) #-}
 
 instance Monad Branch where
   return = pure
+  {-# INLINE return #-}
 
   Prune  >>= _ = Prune
   None   >>= _ = None
   Some a >>= f = f a
+  {-# INLINE (>>=) #-}
 
 -- | Case analysis for 'Branch', taking a value to use for 'Prune', a value to use for 'None', and a function to apply to the contents of 'Some'.
 --
