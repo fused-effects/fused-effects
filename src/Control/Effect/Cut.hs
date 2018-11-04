@@ -36,21 +36,21 @@ instance Effect Cut where
 --
 --   Contrast with 'empty', which fails the current branch but allows backtracking.
 --
---   prop> run (runNonDetOnce (runCut (cutfail <|> pure a))) == Nothing
---   prop> run (runNonDetOnce (runCut (pure a <|> cutfail))) == Just a
+--   prop> run (runNonDet (runCut (cutfail <|> pure a))) == []
+--   prop> run (runNonDet (runCut (pure a <|> cutfail))) == [a]
 cutfail :: (Carrier sig m, Member Cut sig) => m a
 cutfail = send Cutfail
 
 -- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
 --
---   prop> run (runNonDetOnce (runCut (call (cutfail <|> pure a) <|> pure b))) == Just b
+--   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) == [b]
 call :: (Carrier sig m, Member Cut sig) => m a -> m a
 call m = send (Call m ret)
 
 -- | Commit to the current branch, preventing backtracking within the nearest enclosing 'call' (if any) on failure.
 --
---   prop> run (runNonDetOnce (runCut (cut *> pure a <|> pure b))) == Just a
---   prop> run (runNonDetOnce (runCut (cut *> empty <|> pure a))) == Nothing
+--   prop> run (runNonDet (runCut (cut *> pure a <|> pure b))) == [a, b]
+--   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) == []
 cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
 cut = pure () <|> cutfail
 
