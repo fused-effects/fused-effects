@@ -76,6 +76,9 @@ branch _ _ f (Pure a) = f a
 runBranch :: Alternative m => Branch a -> m a
 runBranch = branch empty empty pure
 
+bindBranch :: Carrier sig m => m (Branch a) -> (b -> m (Branch a)) -> Branch b -> m (Branch a)
+bindBranch cut = branch cut (ret None)
+
 
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
 --
@@ -88,13 +91,13 @@ newtype CutC m a = CutC { runCutC :: m (Branch a) }
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Pure
   eff = CutC . handleSum (handleSum
-    (eff . handle (Pure ()) (branch (ret Cut) (ret None) runCutC))
+    (eff . handle (Pure ()) (bindBranch (ret Cut) runCutC))
     (\case
       Empty    -> ret None
       Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Pure a) <|> runCutC (k False))))
     (\case
       Cutfail  -> ret Cut
-      Call m k -> runCutC m >>= branch (ret None) (ret None) (runCutC . k))
+      Call m k -> runCutC m >>= bindBranch (ret None) (runCutC . k))
 
 
 -- $setup
