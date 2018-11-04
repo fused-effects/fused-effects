@@ -28,6 +28,7 @@ cull :: (Carrier sig m, Member Cull sig) => m a -> m a
 cull m = send (Cull m ret)
 
 
+-- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
 runCull :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CullC m) a -> m a
 runCull = (>>= runBranch (const empty)) . flip runCullC False . interpret
 
