@@ -2,7 +2,6 @@
 module Control.Effect.Cull where
 
 import Control.Effect.Carrier
-import Control.Effect.Cut
 import Control.Effect.Internal
 import Control.Effect.NonDet
 import Control.Effect.Sum
