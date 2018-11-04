@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cut
 ( Cut(..)
 , cutfail
@@ -6,6 +6,7 @@ module Control.Effect.Cut
 , cut
 , Branch(..)
 , branch
+, runBranch
 , runCut
 , CutC(..)
 ) where
@@ -37,68 +38,79 @@ instance Effect Cut where
 --
 --   Contrast with 'empty', which fails the current branch but allows backtracking.
 --
---   prop> run (runNonDetOnce (runCut (cutfail <|> pure a))) == Nothing
---   prop> run (runNonDetOnce (runCut (pure a <|> cutfail))) == Just a
+--   prop> run (runNonDet (runCut (cutfail <|> pure a))) == []
+--   prop> run (runNonDet (runCut (pure a <|> cutfail))) == [a]
 cutfail :: (Carrier sig m, Member Cut sig) => m a
 cutfail = send Cutfail
 {-# INLINE cutfail #-}
 
 -- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
 --
---   prop> run (runNonDetOnce (runCut (call (cutfail <|> pure a) <|> pure b))) == Just b
+--   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) == [b]
 call :: (Carrier sig m, Member Cut sig) => m a -> m a
 call m = send (Call m ret)
 {-# INLINE call #-}
 
 -- | Commit to the current branch, preventing backtracking within the nearest enclosing 'call' (if any) on failure.
 --
---   prop> run (runNonDetOnce (runCut (cut *> pure a <|> pure b))) == Just a
---   prop> run (runNonDetOnce (runCut (cut *> empty <|> pure a))) == Nothing
+--   prop> run (runNonDet (runCut (pure a <|> cut *> pure b))) == [a, b]
+--   prop> run (runNonDet (runCut (cut *> pure a <|> pure b))) == [a]
+--   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) == []
 cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}
 
 
 -- | The result of a nondeterministic branch of a computation.
-data Branch a
-  = Prune
+data Branch m a
+  = Cut
   | None
-  | Some a
-  deriving (Eq, Functor, Ord, Show)
+  | Pure a
+  | Alt (m a) (m a)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
--- | Case analysis for 'Branch', taking a value to use for 'Prune', a value to use for 'None', and a function to apply to the contents of 'Some'.
+-- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Pure'.
 --
---   prop> branch Prune None Some a == a
---   prop> branch a b (applyFun f) Prune == a
---   prop> branch a b (applyFun f) None == b
---   prop> branch a b (applyFun f) (Some c) == applyFun f c
-branch :: a -> a -> (b -> a) -> Branch b -> a
-branch a _ _ Prune    = a
-branch _ a _ None     = a
-branch _ _ f (Some a) = f a
+--   prop> branch Cut None Pure Alt a == (a :: Branch [] a)
+--   prop> branch a b (applyFun f) (applyFun2 g) (Cut :: Branch [] a) == a
+--   prop> branch a b (applyFun f) (applyFun2 g) (None :: Branch [] a) == b
+--   prop> branch a b (applyFun f) (applyFun2 g) (Pure c :: Branch [] a) == applyFun f c
+--   prop> branch a b (applyFun f) (applyFun2 g) (Alt c d :: Branch [] a) == applyFun2 g c d
+branch :: a -> a -> (b -> a) -> (m b -> m b -> a) -> Branch m b -> a
+branch a _ _ _ Cut       = a
+branch _ a _ _ None      = a
+branch _ _ f _ (Pure a)  = f a
+branch _ _ _ f (Alt a b) = f a b
 {-# INLINE branch #-}
+
+-- | Interpret a 'Branch' into an underlying 'Alternative' context.
+runBranch :: Alternative m => Branch m a -> m a
+runBranch = branch empty empty pure (<|>)
+{-# INLINE runBranch #-}
 
 
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
 runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a -> m a
-runCut = (>>= branch empty empty pure) . runCutC . interpret
+runCut = (>>= runBranch) . runCutC . interpret
 
-newtype CutC m a = CutC { runCutC :: m (Branch a) }
+newtype CutC m a = CutC { runCutC :: m (Branch m a) }
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
-  ret = CutC . ret . Some
+  ret = CutC . ret . Pure
   {-# INLINE ret #-}
 
   eff = CutC . handleSum (handleSum
-    (eff . handle (Some ()) (branch (ret Prune) (ret None) runCutC))
+    (eff . handle (Pure ()) (bindBranch (ret Cut) runCutC))
     (\case
       Empty    -> ret None
-      Choose k -> runCutC (k True) >>= branch (ret Prune) (runCutC (k False)) (\ a -> ret (Some a) <|> runCutC (k False))))
+      Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Alt (ret a) (runCutC (k False) >>= runBranch))) (fmap ret . Alt)))
     (\case
-      Cutfail  -> ret Prune
-      Call m k -> runCutC m >>= branch (ret None) (ret None) (runCutC . k))
+      Cutfail  -> ret Cut
+      Call m k -> runCutC m >>= bindBranch (ret None) (runCutC . k))
+    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m a) -> (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
+          bindBranch cut bind = branch cut (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
   {-# INLINE eff #-}
 
 
@@ -106,4 +118,5 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
--- >>> instance Arbitrary a => Arbitrary (Branch a) where arbitrary = frequency [(1, pure Prune), (1, pure None), (3, Some <$> arbitrary)] ; shrink b = case b of { Some a -> Prune : None : map Some (shrink a) ; None -> [Prune] ; Prune -> [] }
+-- >>> instance Arbitrary1 m => Arbitrary1 (Branch m) where liftArbitrary arbitrary = frequency [(1, pure Cut), (1, pure None), (3, Pure <$> arbitrary), (3, Alt <$> liftArbitrary arbitrary <*> liftArbitrary arbitrary)]
+-- >>> instance (Arbitrary1 m, Arbitrary a) => Arbitrary (Branch m a) where arbitrary = arbitrary1
