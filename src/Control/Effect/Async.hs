@@ -80,7 +80,3 @@ instance (Carrier sig m, MonadIO m) => Carrier (Asynchronous :+: sig) (Asynchron
                                           (Wait it k) -> liftIO (C.wait it) >>= runAsynchronousC handler . k
                                       )
                                       op)
-  -- eff op = AsynchronousC (\ handler -> handleSum
-  --   (eff . handlePure (runAsynchronousC handler))
-  --   (\ (MkAsync act k) -> _))-- liftIO (C.async (handler act))
-  --     -- >>= runAsynchronousC handler . k) op)
