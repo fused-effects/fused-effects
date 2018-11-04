@@ -59,3 +59,4 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+
     op)
     where bindBranch :: (Alternative m, Carrier sig m, Monad m) => (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
           bindBranch bind = branch (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
+  {-# INLINE eff #-}
