@@ -77,6 +77,7 @@ branch _ a _ _ None      = a
 branch _ _ f _ (Pure a)  = f a
 branch _ _ _ f (Alt a b) = f a b
 
+-- | Interpret a 'Branch' into an underlying 'Alternative' context.
 runBranch :: Alternative m => Branch m a -> m a
 runBranch = branch empty empty pure (<|>)
 
