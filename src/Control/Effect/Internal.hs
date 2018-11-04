@@ -30,11 +30,14 @@ interpret = runEff ret
 
 instance Functor (Eff carrier) where
   fmap = liftM
+  {-# INLINE fmap #-}
 
 instance Applicative (Eff carrier) where
   pure a = Eff ($ a)
+  {-# INLINE pure #-}
 
   (<*>) = ap
+  {-# INLINE (<*>) #-}
 
 -- | Run computations nondeterministically.
 --
@@ -60,35 +63,49 @@ instance Applicative (Eff carrier) where
 --   prop> run (runNonDet (pure a <|> empty)) == (run (runNonDet (pure a)) :: Maybe Integer)
 instance (Member NonDet sig, Carrier sig carrier) => Alternative (Eff carrier) where
   empty = send Empty
+  {-# INLINE empty #-}
 
   l <|> r = send (Choose (\ c -> if c then l else r))
+  {-# INLINE (<|>) #-}
 
 instance Monad (Eff carrier) where
   return = pure
+  {-# INLINE return #-}
 
   Eff m >>= f = Eff (\ k -> m (runEff k . f))
+  {-# INLINE (>>=) #-}
 
 instance (Member Fail sig, Carrier sig carrier) => MonadFail (Eff carrier) where
   fail = send . Fail
+  {-# INLINE fail #-}
 
 instance (Member NonDet sig, Carrier sig carrier) => MonadPlus (Eff carrier)
 
 instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) where
   liftIO = send . Lift . fmap pure
+  {-# INLINE liftIO #-}
 
 instance (Member Random sig, Carrier sig carrier) => MonadRandom (Eff carrier) where
   getRandom = send (Random ret)
+  {-# INLINE getRandom #-}
   getRandomR r = send (RandomR r ret)
+  {-# INLINE getRandomR #-}
   getRandomRs interval = (:) <$> getRandomR interval <*> getRandomRs interval
+  {-# INLINE getRandomRs #-}
   getRandoms = (:) <$> getRandom <*> getRandoms
+  {-# INLINE getRandoms #-}
 
 instance (Member Random sig, Carrier sig carrier) => MonadInterleave (Eff carrier) where
   interleave m = send (Interleave m ret)
+  {-# INLINE interleave #-}
 
 
 instance Carrier sig carrier => Carrier sig (Eff carrier) where
   ret = pure
+  {-# INLINE ret #-}
+
   eff op = Eff (\ k -> eff (hmap (runEff ret) (fmap' (runEff k) op)))
+  {-# INLINE eff #-}
 
 
 -- $setup

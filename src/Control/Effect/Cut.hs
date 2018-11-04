@@ -27,10 +27,12 @@ deriving instance Functor (Cut m)
 instance HFunctor Cut where
   hmap _ Cutfail    = Cutfail
   hmap f (Call m k) = Call (f m) k
+  {-# INLINE hmap #-}
 
 instance Effect Cut where
   handle _     _       Cutfail    = Cutfail
   handle state handler (Call m k) = Call (handler (m <$ state)) (handler . fmap k)
+  {-# INLINE handle #-}
 
 -- | Fail the current branch, and prevent backtracking within the nearest enclosing 'call' (if any).
 --
@@ -40,12 +42,14 @@ instance Effect Cut where
 --   prop> run (runNonDet (runCut (pure a <|> cutfail))) == [a]
 cutfail :: (Carrier sig m, Member Cut sig) => m a
 cutfail = send Cutfail
+{-# INLINE cutfail #-}
 
 -- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
 --
 --   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) == [b]
 call :: (Carrier sig m, Member Cut sig) => m a -> m a
 call m = send (Call m ret)
+{-# INLINE call #-}
 
 -- | Commit to the current branch, preventing backtracking within the nearest enclosing 'call' (if any) on failure.
 --
@@ -54,6 +58,7 @@ call m = send (Call m ret)
 --   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) == []
 cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
 cut = pure () <|> cutfail
+{-# INLINE cut #-}
 
 
 -- | The result of a nondeterministic branch of a computation.
@@ -76,10 +81,12 @@ branch a _ _ _ Cut       = a
 branch _ a _ _ None      = a
 branch _ _ f _ (Pure a)  = f a
 branch _ _ _ f (Alt a b) = f a b
+{-# INLINE branch #-}
 
 -- | Interpret a 'Branch' into an underlying 'Alternative' context.
 runBranch :: Alternative m => Branch m a -> m a
 runBranch = branch empty empty pure (<|>)
+{-# INLINE runBranch #-}
 
 
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
@@ -92,6 +99,8 @@ newtype CutC m a = CutC { runCutC :: m (Branch m a) }
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Pure
+  {-# INLINE ret #-}
+
   eff = CutC . handleSum (handleSum
     (eff . handle (Pure ()) (bindBranch (ret Cut) runCutC))
     (\case
@@ -102,6 +111,7 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
       Call m k -> runCutC m >>= bindBranch (ret None) (runCutC . k))
     where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m a) -> (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
           bindBranch cut bind = branch cut (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
+  {-# INLINE eff #-}
 
 
 -- $setup

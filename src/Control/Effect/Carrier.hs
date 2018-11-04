@@ -21,6 +21,7 @@ class HFunctor h where
   fmap' :: (a -> b) -> (h m a -> h m b)
   default fmap' :: Functor (h m) => (a -> b) -> (h m a -> h m b)
   fmap' = fmap
+  {-# INLINE fmap' #-}
 
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   hmap :: (forall x . m x -> n x) -> (h m a -> h n a)
