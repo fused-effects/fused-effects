@@ -103,12 +103,15 @@ newtype ParseC m a = ParseC { runParseC :: String -> m (String, a) }
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
   ret a = ParseC (\ input -> ret (input, a))
+  {-# INLINE ret #-}
+
   eff op = ParseC (\ input -> handleSum
     (eff . handleState input runParseC)
     (\ (Satisfy p k) -> case input of
       c:cs | p c -> runParseC (k c) cs
       _          -> empty)
     op)
+  {-# INLINE eff #-}
 
 
 expr :: (Alternative m, Carrier sig m, Member Symbol sig) => m Int
