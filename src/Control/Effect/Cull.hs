@@ -4,7 +4,7 @@ module Control.Effect.Cull
 , cull
 , runCull
 , CullC(..)
-, runNonDetCull
+, runNonDetOnce
 ) where
 
 import Control.Effect.Carrier
@@ -63,10 +63,10 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+
 --
 --   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
 --
---   prop> run (runNonDetCull (asum (map pure (repeat a)))) == [a]
---   prop> run (runNonDetCull (asum (map pure (repeat a)))) == Just a
-runNonDetCull :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
-runNonDetCull = runNonDet . runCull . cull . runOnceC . interpret
+--   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
+--   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
+runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
+runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
 
 newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
 
