@@ -65,7 +65,6 @@ cut = pure () <|> cutfail
 {-# INLINE cut #-}
 
 
--- | Prune nondeterminism in the argument, returning at most one result.
 once :: (Carrier sig m, Member Cut sig) => m a -> m a
 once m = send (Once m ret)
 {-# INLINE once #-}
