@@ -20,6 +20,9 @@ instance Effect Cull where
   {-# INLINE handle #-}
 
 -- | Cull nondeterminism in the argument, returning at most one result.
+--
+--   prop> run (runNonDet (runCull (cull (pure a <|> pure b)))) == [a]
+--   prop> run (runNonDet (runCull (cull (pure a <|> pure b) <|> pure c))) == [a, c]
 cull :: (Carrier sig m, Member Cull sig) => m a -> m a
 cull m = send (Cull m ret)
 
