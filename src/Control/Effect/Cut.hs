@@ -62,7 +62,7 @@ cut = pure () <|> cutfail
 
 
 -- | The result of a nondeterministic branch of a computation.
-data Branch e m a
+data Branch m e a
   = None e
   | Pure a
   | Alt (m a) (m a)
@@ -74,14 +74,14 @@ data Branch e m a
 --   prop> branch (applyFun f) (applyFun g) (applyFun2 h) (None a :: Branch [] a) == applyFun f a
 --   prop> branch (applyFun f) (applyFun g) (applyFun2 h) (Pure a :: Branch [] a) == applyFun g a
 --   prop> branch (applyFun f) (applyFun g) (applyFun2 h) (Alt a b :: Branch [] a) == applyFun2 h a b
-branch :: (e -> a) -> (b -> a) -> (m b -> m b -> a) -> Branch e m b -> a
+branch :: (e -> a) -> (b -> a) -> (m b -> m b -> a) -> Branch m e b -> a
 branch f _ _ (None a)  = f a
 branch _ f _ (Pure a)  = f a
 branch _ _ f (Alt a b) = f a b
 {-# INLINE branch #-}
 
 -- | Interpret a 'Branch' into an underlying 'Alternative' context.
-runBranch :: Alternative m => (e -> m a) -> Branch e m a -> m a
+runBranch :: Alternative m => (e -> m a) -> Branch m e a -> m a
 runBranch f = branch f pure (<|>)
 {-# INLINE runBranch #-}
 
@@ -92,7 +92,7 @@ runBranch f = branch f pure (<|>)
 runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a -> m a
 runCut = (>>= runBranch (const empty)) . runCutC . interpret
 
-newtype CutC m a = CutC { runCutC :: m (Branch Bool m a) }
+newtype CutC m a = CutC { runCutC :: m (Branch m Bool a) }
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Pure
@@ -106,7 +106,7 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
     (\case
       Cutfail  -> ret (None False)
       Call m k -> runCutC m >>= bindBranch (ret (None True)) (runCutC . k))
-    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch Bool m a) -> (b -> m (Branch Bool m a)) -> Branch Bool m b -> m (Branch Bool m a)
+    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
           bindBranch cut bind = branch (\ e -> if e then ret (None True) else cut) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
   {-# INLINE eff #-}
 
