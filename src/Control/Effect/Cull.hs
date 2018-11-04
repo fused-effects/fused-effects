@@ -19,6 +19,7 @@ instance Effect Cull where
   handle state handler (Cull m k) = Cull (handler (m <$ state)) (handler . fmap k)
   {-# INLINE handle #-}
 
+-- | Cull nondeterminism in the argument, returning at most one result.
 cull :: (Carrier sig m, Member Cull sig) => m a -> m a
 cull m = send (Cull m ret)
 
