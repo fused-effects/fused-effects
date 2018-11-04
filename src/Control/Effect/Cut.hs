@@ -61,17 +61,6 @@ data Branch a
   | Pure a
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-instance Applicative Branch where
-  pure = Pure
-  {-# INLINE pure #-}
-
-  Cut    <*> _      = Cut
-  _      <*> Cut    = Cut
-  None   <*> _      = None
-  _      <*> None   = None
-  Pure f <*> Pure a = Pure (f a)
-  {-# INLINE (<*>) #-}
-
 -- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Pure'.
 --
 --   prop> branch Cut None Pure a == a
