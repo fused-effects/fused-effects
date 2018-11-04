@@ -81,7 +81,7 @@ runBranch = branch empty empty pure
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
 runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a -> m a
-runCut = (>>= branch empty empty pure) . runCutC . interpret
+runCut = (>>= runBranch) . runCutC . interpret
 
 newtype CutC m a = CutC { runCutC :: m (Branch a) }
 
