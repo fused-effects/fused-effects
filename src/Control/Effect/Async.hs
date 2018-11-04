@@ -23,7 +23,6 @@ import Control.Effect.Internal
 import Control.Effect.Sum
 
 data Spawn = ForkIO | ForkOS | ForkOn Int
-data MaskSpawn = MaskIO | MaskOn Int
 
 data Asynchronous m k where
   MkAsync :: Spawn -> m a -> (Async a -> k) -> Asynchronous m k
