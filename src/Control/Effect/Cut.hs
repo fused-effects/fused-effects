@@ -61,6 +61,15 @@ data Branch a
   | Some a
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
+instance Applicative Branch where
+  pure = Some
+
+  Prune  <*> _      = Prune
+  _      <*> Prune  = Prune
+  None   <*> _      = None
+  _      <*> None   = None
+  Some f <*> Some a = Some (f a)
+
 -- | Case analysis for 'Branch', taking a value to use for 'Prune', a value to use for 'None', and a function to apply to the contents of 'Some'.
 --
 --   prop> branch Prune None Some a == a
