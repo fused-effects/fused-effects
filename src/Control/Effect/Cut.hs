@@ -70,6 +70,13 @@ instance Applicative Branch where
   _      <*> None   = None
   Some f <*> Some a = Some (f a)
 
+instance Monad Branch where
+  return = pure
+
+  Prune  >>= _ = Prune
+  None   >>= _ = None
+  Some a >>= f = f a
+
 -- | Case analysis for 'Branch', taking a value to use for 'Prune', a value to use for 'None', and a function to apply to the contents of 'Some'.
 --
 --   prop> branch Prune None Some a == a
