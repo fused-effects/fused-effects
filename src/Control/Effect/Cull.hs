@@ -6,6 +6,7 @@ import Control.Effect.Internal
 import Control.Effect.NonDet
 import Control.Effect.Sum
 
+-- | 'Cull' effects are used with 'NonDet' to provide control over branching.
 data Cull m k
   = forall a . Cull (m a) (a -> k)
 
