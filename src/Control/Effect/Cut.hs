@@ -117,4 +117,4 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
--- >>> instance Arbitrary a => Arbitrary (Branch a) where arbitrary = frequency [(1, pure Prune), (1, pure None), (3, Some <$> arbitrary)] ; shrink b = case b of { Some a -> Prune : None : map Some (shrink a) ; None -> [Prune] ; Prune -> [] }
+-- >>> instance Arbitrary a => Arbitrary (Branch a) where arbitrary = frequency [(1, pure Cut), (1, pure None), (3, Some <$> arbitrary)] ; shrink b = case b of { Some a -> Cut : None : map Some (shrink a) ; None -> [Cut] ; Cut -> [] }
