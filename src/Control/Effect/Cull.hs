@@ -4,12 +4,12 @@ module Control.Effect.Cull
 , cull
 , runCull
 , CullC(..)
-, runNonDetOnce
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Internal
-import Control.Effect.NonDet
+import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 
 -- | 'Cull' effects are used with 'NonDet' to provide control over branching.
@@ -57,26 +57,6 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+
     where bindBranch :: (Alternative m, Carrier sig m, Monad m) => (b -> m (Branch m () a)) -> Branch m () b -> m (Branch m () a)
           bindBranch bind = branch (const (ret (None ()))) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
   {-# INLINE eff #-}
-
-
--- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
---
---   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
---
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
-runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
-
-newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
-
-instance (Alternative f, Carrier sig m, Effect sig, Traversable f, Monad f, Monad m) => Carrier (NonDet :+: sig) (OnceC f m) where
-  ret = OnceC . ret
-  eff = OnceC . handleSum
-    (eff . R . R . R . handleCoercible)
-    (\case
-      Empty    -> empty
-      Choose k -> runOnceC (k True) <|> runOnceC (k False))
 
 
 -- $setup

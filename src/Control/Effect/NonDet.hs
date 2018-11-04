@@ -4,6 +4,8 @@ module Control.Effect.NonDet
 , Alternative(..)
 , runNonDet
 , AltC(..)
+, runNonDetOnce
+, OnceC(..)
 , Branch(..)
 , branch
 , runBranch
@@ -11,6 +13,7 @@ module Control.Effect.NonDet
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
+import Control.Effect.Cull
 import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
@@ -31,6 +34,26 @@ instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Appl
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
     Empty    -> ret empty
     Choose k -> liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
+
+
+-- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
+--
+--   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
+--
+--   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
+--   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
+runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
+runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
+
+newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
+
+instance (Alternative f, Carrier sig m, Effect sig, Traversable f, Monad f, Monad m) => Carrier (NonDet :+: sig) (OnceC f m) where
+  ret = OnceC . ret
+  eff = OnceC . handleSum
+    (eff . R . R . R . handleCoercible)
+    (\case
+      Empty    -> empty
+      Choose k -> runOnceC (k True) <|> runOnceC (k False))
 
 
 -- $setup
