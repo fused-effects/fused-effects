@@ -15,7 +15,6 @@ import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.NonDet
 import Control.Effect.Sum
-import Data.Monoid (Alt(..))
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
 data Cut m k
@@ -119,50 +118,3 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
 -- >>> instance Arbitrary a => Arbitrary (Branch a) where arbitrary = frequency [(1, pure Prune), (1, pure None), (3, Some <$> arbitrary)] ; shrink b = case b of { Some a -> Prune : None : map Some (shrink a) ; None -> [Prune] ; Prune -> [] }
-
-data Branch1 f a
-  = Prune1
-  | None1
-  | Some1 (f a)
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-branch1 :: a -> a -> (f b -> a) -> Branch1 f b -> a
-branch1 a _ _ Prune1    = a
-branch1 _ a _ None1     = a
-branch1 _ _ f (Some1 a) = f a
-
-joinBranch1 :: (Alternative f, Monad f) => f (Branch1 f a) -> Branch1 f a
-joinBranch1 = Some1 . (>>= branch1 empty empty id)
-
-instance Applicative f => Applicative (Branch1 f) where
-  pure = Some1 . pure
-
-  Prune1  <*> _       = Prune1
-  _       <*> Prune1  = Prune1
-  None1   <*> _       = None1
-  _       <*> None1   = None1
-  Some1 f <*> Some1 a = Some1 (f <*> a)
-
-instance (Alternative f, Monad f) => Monad (Branch1 f) where
-  return = pure
-
-  Prune1  >>= _ = Prune1
-  None1   >>= _ = None1
-  Some1 a >>= f = Some1 (a >>= branch1 empty empty id . f)
-
-
-runCutAll :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutAllC [] m) a -> m a
-runCutAll = (>>= branch1 empty empty (getAlt . foldMap (Alt . pure))) . runCutAllC . interpret
-
-newtype CutAllC f m a = CutAllC { runCutAllC :: m (Branch1 f a) }
-
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Carrier (Cut :+: NonDet :+: sig) (CutAllC f m) where
-  ret = CutAllC . ret . Some1 . pure
-  eff = CutAllC . handleSum (handleSum
-    (eff . handleTraversable runCutAllC)
-    (\case
-      Empty    -> ret None1
-      Choose k -> runCutAllC (k True) >>= branch1 (ret Prune1) (runCutAllC (k False)) (\ a -> runCutAllC (k False) >>= branch1 (ret (Some1 a)) (ret (Some1 a)) (ret . Some1 . (a <|>)))))
-    (\case
-      Cutfail  -> ret Prune1
-      Call m k -> runCutAllC m >>= branch1 (ret None1) (ret None1) (fmap joinBranch1 . traverse (runCutAllC . k)))
