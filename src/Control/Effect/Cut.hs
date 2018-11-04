@@ -56,7 +56,7 @@ cut = pure () <|> cutfail
 
 -- | The result of a nondeterministic branch of a computation.
 data Branch a
-  = Prune
+  = Cut
   | None
   | Some a
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -65,8 +65,8 @@ instance Applicative Branch where
   pure = Some
   {-# INLINE pure #-}
 
-  Prune  <*> _      = Prune
-  _      <*> Prune  = Prune
+  Cut    <*> _      = Cut
+  _      <*> Cut    = Cut
   None   <*> _      = None
   _      <*> None   = None
   Some f <*> Some a = Some (f a)
@@ -76,19 +76,19 @@ instance Monad Branch where
   return = pure
   {-# INLINE return #-}
 
-  Prune  >>= _ = Prune
+  Cut    >>= _ = Cut
   None   >>= _ = None
   Some a >>= f = f a
   {-# INLINE (>>=) #-}
 
--- | Case analysis for 'Branch', taking a value to use for 'Prune', a value to use for 'None', and a function to apply to the contents of 'Some'.
+-- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Some'.
 --
---   prop> branch Prune None Some a == a
---   prop> branch a b (applyFun f) Prune == a
+--   prop> branch Cut None Some a == a
+--   prop> branch a b (applyFun f) Cut == a
 --   prop> branch a b (applyFun f) None == b
 --   prop> branch a b (applyFun f) (Some c) == applyFun f c
 branch :: a -> a -> (b -> a) -> Branch b -> a
-branch a _ _ Prune    = a
+branch a _ _ Cut      = a
 branch _ a _ None     = a
 branch _ _ f (Some a) = f a
 
@@ -104,12 +104,12 @@ newtype CutC m a = CutC { runCutC :: m (Branch a) }
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Some
   eff = CutC . handleSum (handleSum
-    (eff . handle (Some ()) (branch (ret Prune) (ret None) runCutC))
+    (eff . handle (Some ()) (branch (ret Cut) (ret None) runCutC))
     (\case
       Empty    -> ret None
-      Choose k -> runCutC (k True) >>= branch (ret Prune) (runCutC (k False)) (\ a -> ret (Some a) <|> runCutC (k False))))
+      Choose k -> runCutC (k True) >>= branch (ret Cut) (runCutC (k False)) (\ a -> ret (Some a) <|> runCutC (k False))))
     (\case
-      Cutfail  -> ret Prune
+      Cutfail  -> ret Cut
       Call m k -> runCutC m >>= branch (ret None) (ret None) (runCutC . k))
 
 
