@@ -115,5 +115,5 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
--- >>> instance Arbitrary1 m => Arbitrary1 (Branch m) where liftArbitrary arbitrary = frequency [(1, pure Cut), (1, pure None), (3, Pure <$> arbitrary), (3, Alt <$> liftArbitrary arbitrary <*> liftArbitrary arbitrary)]
--- >>> instance (Arbitrary1 m, Arbitrary a) => Arbitrary (Branch m a) where arbitrary = arbitrary1
+-- >>> instance (Arbitrary1 m, Arbitrary e) => Arbitrary1 (Branch m e) where liftArbitrary arb = frequency [(1, None <$> arbitrary), (3, Pure <$> arb), (3, Alt <$> liftArbitrary arb <*> liftArbitrary arb)]
+-- >>> instance (Arbitrary1 m, Arbitrary e, Arbitrary a) => Arbitrary (Branch m e a) where arbitrary = arbitrary1
