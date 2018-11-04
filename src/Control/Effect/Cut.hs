@@ -66,6 +66,9 @@ cut = pure () <|> cutfail
 
 
 -- | Prune nondeterminism in the argument, returning at most one result.
+--
+--   prop> run (runNonDet (runCut (once (pure a <|> pure b)))) == [a]
+--   prop> run (runNonDet (runCut (once (pure a <|> pure b) <|> pure c))) == [a, c]
 once :: (Carrier sig m, Member Cut sig) => m a -> m a
 once m = send (Once m ret)
 {-# INLINE once #-}
