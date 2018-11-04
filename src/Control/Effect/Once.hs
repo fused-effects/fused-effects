@@ -11,3 +11,7 @@ deriving instance Functor (Once m)
 instance HFunctor Once where
   hmap f (Once m k) = Once (f m) k
   {-# INLINE hmap #-}
+
+instance Effect Once where
+  handle state handler (Once m k) = Once (handler (m <$ state)) (handler . fmap k)
+  {-# INLINE handle #-}
