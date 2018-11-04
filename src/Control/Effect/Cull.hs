@@ -1,9 +1,15 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
-module Control.Effect.Cull where
+module Control.Effect.Cull
+( Cull(..)
+, cull
+, runCull
+, CullC(..)
+) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Internal
-import Control.Effect.NonDet
+import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 
 -- | 'Cull' effects are used with 'NonDet' to provide control over branching.
@@ -56,5 +62,6 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
+-- >>> import Control.Effect.NonDet
 -- >>> import Control.Effect.Void
 -- >>> import Data.Foldable (asum)
