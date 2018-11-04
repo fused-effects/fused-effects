@@ -81,9 +81,6 @@ branch _ _ _ f (Alt a b) = f a b
 runBranch :: Alternative m => Branch m a -> m a
 runBranch = branch empty empty pure (<|>)
 
-bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m a) -> (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
-bindBranch cut bind = branch cut (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
-
 
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
 --
@@ -103,6 +100,8 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
     (\case
       Cutfail  -> ret Cut
       Call m k -> runCutC m >>= bindBranch (ret None) (runCutC . k))
+    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m a) -> (b -> m (Branch m a)) -> Branch m b -> m (Branch m a)
+          bindBranch cut bind = branch cut (ret None) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch) (b >>= bind >>= runBranch)))
 
 
 -- $setup
