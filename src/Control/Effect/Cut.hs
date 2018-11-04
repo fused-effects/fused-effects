@@ -72,15 +72,6 @@ instance Applicative Branch where
   Pure f <*> Pure a = Pure (f a)
   {-# INLINE (<*>) #-}
 
-instance Monad Branch where
-  return = pure
-  {-# INLINE return #-}
-
-  Cut    >>= _ = Cut
-  None   >>= _ = None
-  Pure a >>= f = f a
-  {-# INLINE (>>=) #-}
-
 -- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Pure'.
 --
 --   prop> branch Cut None Pure a == a
