@@ -42,7 +42,7 @@ library
                      , Control.Effect.Trace
                      , Control.Effect.Void
                      , Control.Effect.Writer
-  build-depends:       base >=4.9 && <4.12
+  build-depends:       base >=4.9 && <4.13
                      , deepseq >=1.4.3 && <1.5
                      , MonadRandom >=0.5 && <0.6
                      , random
@@ -55,7 +55,7 @@ test-suite examples
   main-is:             Main.hs
   other-modules:       Parser
                      , Teletype
-  build-depends:       base >=4.9 && <4.12
+  build-depends:       base >=4.9 && <4.13
                      , fused-effects
                      , hspec >=2.4.1
                      , QuickCheck >= 2.7 && < 2.12
@@ -67,7 +67,7 @@ test-suite test
   main-is:             Spec.hs
   other-modules:       Control.Effect.Spec
                      , Control.Effect.NonDet.Spec
-  build-depends:       base >=4.9 && <4.12
+  build-depends:       base >=4.9 && <4.13
                      , fused-effects
                      , hspec >=2.4.1
   hs-source-dirs:      test
@@ -76,7 +76,7 @@ test-suite test
 test-suite doctest
   type:                exitcode-stdio-1.0
   main-is:             Doctest.hs
-  build-depends:       base >=4.9 && <4.12
+  build-depends:       base >=4.9 && <4.13
                      , doctest >=0.7 && <1.0
   hs-source-dirs:      test
   default-language:    Haskell2010
