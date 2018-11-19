@@ -17,6 +17,7 @@ cabal-version:       >=1.10
 
 tested-with:         GHC == 8.2.2
                    , GHC == 8.4.4
+                   , GHC == 8.6.2
 
 library
   exposed-modules:     Control.Effect
