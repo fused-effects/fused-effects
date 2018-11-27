@@ -35,6 +35,7 @@ handleSum :: (          sig2  m a -> b)
           -> ((sig1 :+: sig2) m a -> b)
 handleSum alg1 _    (R op) = alg1 op
 handleSum _    alg2 (L op) = alg2 op
+{-# INLINE handleSum #-}
 
 
 class Member (sub :: (* -> *) -> (* -> *)) sup where
@@ -59,3 +60,4 @@ instance {-# OVERLAPPABLE #-} Member sub sup => Member sub (sub' :+: sup) where
 -- | Construct a request for an effect to be interpreted by some handler later on.
 send :: (Member effect sig, Carrier sig m) => effect m (m a) -> m a
 send = eff . inj
+{-# INLINE send #-}

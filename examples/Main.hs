@@ -1,7 +1,10 @@
 module Main where
 
+import qualified Parser
 import qualified Teletype
 import Test.Hspec
 
 main :: IO ()
-main = hspec Teletype.spec
+main = hspec $ do
+  Teletype.spec
+  Parser.spec
