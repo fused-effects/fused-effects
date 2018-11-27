@@ -34,7 +34,7 @@
 
 [Project overview]: https://github.com/robrix/fused-effects#project-overview
 [Development]: https://github.com/robrix/fused-effects#development
-[Development]: https://github.com/robrix/fused-effects#versioning
+[Versioning]: https://github.com/robrix/fused-effects#versioning
 
 [Benchmarks]: https://github.com/robrix/fused-effects#benchmarks
 
