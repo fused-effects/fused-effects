@@ -1,5 +1,9 @@
 dist: xenial
 language: haskell
+addons:
+  apt:
+    packages:
+    - cabal-install-2.4
 ghc:
 - 8.2
 - 8.4
