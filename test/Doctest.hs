@@ -8,4 +8,4 @@ import Test.DocTest
 main :: IO ()
 main = do
   args <- getArgs
-  doctest ("-isrc" : "--fast" : if null args then ["src"] else args)
+  doctest ("-package random" : "-isrc" : "--fast" : if null args then ["src"] else args)
