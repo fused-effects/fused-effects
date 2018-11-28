@@ -8,6 +8,8 @@ ghc:
 - 8.2
 - 8.4
 - 8.6
+before_install:
+- echo "$PATH"
 install:
 - cabal new-install --only-dependencies --enable-tests
 script:
