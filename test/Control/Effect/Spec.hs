@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Effect.Spec where
+module Control.Effect.Spec (spec) where
 
 import Control.Effect
 import Control.Effect.Carrier

@@ -1,6 +1,10 @@
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
-module Teletype (spec) where
+module Teletype
+( spec
+, runTeletypeIO
+, TeletypeIOC(..)
+) where
 
 import Prelude hiding (read)
 
