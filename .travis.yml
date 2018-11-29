@@ -4,6 +4,8 @@ ghc:
 - "8.2.2"
 - "8.4.4"
 - "8.6.2"
+cabal:
+- "2.4"
 install:
 - cabal new-configure --enable-tests --write-ghc-environment-files=always
 - cabal new-build --only-dependencies --enable-tests
