@@ -1,9 +1,9 @@
 dist: xenial
 language: haskell
 ghc:
-- 8.2
-- 8.4
-- 8.6
+- "8.2.2"
+- "8.4.4"
+- "8.6.2"
 env:
 - TRAVIS_BUILD_CABAL_DEFAULT=2.4
 install:
