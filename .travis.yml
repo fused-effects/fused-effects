@@ -13,7 +13,7 @@ before_install:
 - echo "$PATH"
 - cabal new-update
 install:
-- cabal new-install --only-dependencies
+- cabal new-build --only-dependencies --enable-tests
 script:
 - cabal new-build --enable-tests
 - cabal new-test
