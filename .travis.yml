@@ -11,6 +11,7 @@ ghc:
 before_install:
 - export PATH="${PATH#*:}"
 - echo "$PATH"
+- cabal new-update
 install:
 - cabal new-install --only-dependencies
 script:
