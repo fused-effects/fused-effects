@@ -1,4 +1,4 @@
-module Control.Effect.NonDet.Spec (spec) where
+module Control.Effect.NonDet.Spec where
 
 import Control.Effect
 import Control.Effect.Error
