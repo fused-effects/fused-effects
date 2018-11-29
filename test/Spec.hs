@@ -1,4 +1,4 @@
-module Main (main) where
+module Main where
 
 import qualified Control.Effect.Spec
 import qualified Control.Effect.NonDet.Spec
