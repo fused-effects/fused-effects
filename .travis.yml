@@ -9,7 +9,8 @@ ghc:
 - 8.4
 - 8.6
 before_install:
-- export PATH="/opt/cabal/2.4:$PATH"
+- export PATH="${PATH#*:}"
+- echo "$PATH"
 install:
 - cabal new-install --only-dependencies --enable-tests
 script:
