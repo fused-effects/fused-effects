@@ -1,17 +1,11 @@
 dist: xenial
 language: haskell
-addons:
-  apt:
-    packages:
-    - cabal-install-2.4
 ghc:
 - 8.2
 - 8.4
 - 8.6
-before_install:
-- export PATH="${PATH#*:}"
-- echo "$PATH"
-- cabal new-update
+env:
+- TRAVIS_BUILD_CABAL_DEFAULT=2.4
 install:
 - cabal new-configure --enable-tests --write-ghc-environment-files=always
 - cabal new-build --only-dependencies --enable-tests
