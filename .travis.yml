@@ -12,7 +12,7 @@ before_install:
 - export PATH="${PATH#*:}"
 - echo "$PATH"
 install:
-- cabal new-install --only-dependencies --enable-tests
+- cabal new-install --only-dependencies
 script:
 - cabal new-build --enable-tests
 - cabal new-test
