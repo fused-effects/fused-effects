@@ -301,7 +301,7 @@ The package is available on [hackage][], and can be used by adding it to a compo
 
 ### Versioning
 
-Though `fused-effects` is suitable for production work, it is currently in a pre-release state. Though we will attempt to comply with the Haskell [Package Versioning Policy][pvp] standard, we make no concrete guarantees of API stability between versions < 1.0.0.0. Once v1.0.0.0 lands, all changes will abide by the semver MAJOR.MAJOR.MINOR.PATCH standard.
+Though `fused-effects` is suitable for production work, it is currently in a pre-release state. Though we will attempt to comply with the Haskell [Package Versioning Policy][pvp] standard, we make no concrete guarantees of API stability between versions < 1.0.0.0. Once v1.0.0.0 lands, all changes will abide by the PVP MAJOR.MAJOR.MINOR.PATCH standard.
 
 [pvp]: https://pvp.haskell.org/faq/
 
