@@ -26,19 +26,19 @@ matrix:
       addons: {apt: {packages: [cabal-install-2.4,ghc-8.2.2], sources: [hvr-ghc]}}
 
 before_install:
-  - mkdir -p $HOME/.local/bin
-  - "PATH=/opt/ghc/bin:$HOME/local/bin:$PATH"
-  - ghc --version
-  - cabal --version
+- mkdir -p $HOME/.local/bin
+- "PATH=/opt/ghc/bin:$HOME/local/bin:$PATH"
+- ghc --version
+- cabal --version
 
 install:
-  - cabal new-update
-  - cabal new-configure --enable-tests --write-ghc-environment-files=always
-  - cabal new-build --only-dependencies
+- cabal new-update
+- cabal new-configure --enable-tests --write-ghc-environment-files=always
+- cabal new-build --only-dependencies
 
 script:
-  - cabal new-build
-  - cabal new-test
-  - cabal new-haddock
-  - cabal new-sdist
-  - cabal check
+- cabal new-build
+- cabal new-test
+- cabal new-haddock
+- cabal new-sdist
+- cabal check
