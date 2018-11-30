@@ -40,7 +40,6 @@ install:
   - echo "$(${HC} --version) [$(${HC} --print-project-git-commit-id 2> /dev/null || echo '?')]"
   - BENCH=${BENCH---enable-benchmarks}
   - TEST=${TEST---enable-tests}
-  - HADDOCK=${HADDOCK-true}
   - NOINSTALLEDCONSTRAINTS=${NOINSTALLEDCONSTRAINTS-false}
   - GHCHEAD=${GHCHEAD-false}
   - travis_retry cabal update -v
@@ -87,4 +86,4 @@ script:
   - (cd fused-effects-* && cabal check)
 
   # haddock
-  - if $HADDOCK; then cabal new-haddock -w ${HC} ${TEST} ${BENCH} all; else echo "Skipping haddock generation";fi
+  - cabal new-haddock -w ${HC} ${TEST} ${BENCH} all
