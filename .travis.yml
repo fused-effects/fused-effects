@@ -51,9 +51,6 @@ install:
   - "for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- fused-effects | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done"
   - cat cabal.project || true
   - cat cabal.project.local || true
-  - if [ -f "./configure.ac" ]; then
-      (cd "." && autoreconf -i);
-    fi
   - rm -f cabal.project.freeze
   - cabal new-build -w ${HC} ${TEST} ${BENCH} --project-file="cabal.project" --dep -j2 all
   - cabal new-build -w ${HC} --disable-tests --disable-benchmarks --project-file="cabal.project" --dep -j2 all
