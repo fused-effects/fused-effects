@@ -37,46 +37,13 @@ before_install:
   - cabal --version
 
 install:
-  - echo "$(${HC} --version) [$(${HC} --print-project-git-commit-id 2> /dev/null || echo '?')]"
-  - BENCH=${BENCH---enable-benchmarks}
-  - TEST=${TEST---enable-tests}
-  - travis_retry cabal update -v
-  - rm -fv cabal.project cabal.project.local
-  - "printf 'packages: \".\"\\n' > cabal.project"
-  - "printf 'write-ghc-environment-files: always' >> cabal.project"
-  - touch cabal.project.local
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- fused-effects | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done"
-  - cat cabal.project || true
-  - cat cabal.project.local || true
-  - rm -f cabal.project.freeze
-  - cabal new-build -w ${HC} ${TEST} ${BENCH} --project-file="cabal.project" --dep -j2 all
-  - cabal new-build -w ${HC} --disable-tests --disable-benchmarks --project-file="cabal.project" --dep -j2 all
-  - rm -rf .ghc.environment.* "."/dist
-  - DISTDIR=$(mktemp -d /tmp/dist-test.XXXX)
+  - cabal new-update
+  - cabal new-configure --enable-tests --write-ghc-environment-files=always
+  - cabal new-build --only-dependencies
 
-# Here starts the actual work to be performed for the package under test;
-# any command which exits with a non-zero exit code causes the build to fail.
 script:
-  # test that source-distributions can be generated
-  - cabal new-sdist all
-  - mv dist-newstyle/sdist/*.tar.gz ${DISTDIR}/
-  - cd ${DISTDIR} || false
-  - find . -maxdepth 1 -name '*.tar.gz' -exec tar -xvf '{}' \;
-  - "printf 'packages: fused-effects-*/*.cabal\\n' > cabal.project"
-  - "printf 'write-ghc-environment-files: always' >> cabal.project"
-  - touch cabal.project.local
-  - "for pkg in $($HCPKG list --simple-output); do echo $pkg  | grep -vw -- fused-effects | sed 's/^/constraints: /' | sed 's/-[^-]*$/ installed/' >> cabal.project.local; done"
-  - cat cabal.project || true
-  - cat cabal.project.local || true
-  # this builds all libraries and executables (without tests/benchmarks)
-  - cabal new-build -w ${HC} --disable-tests --disable-benchmarks all
-
-  # build & run tests, build benchmarks
-  - cabal new-build -w ${HC} ${TEST} ${BENCH} all
-  - if [ "x$TEST" = "x--enable-tests" ]; then cabal new-test -w ${HC} ${TEST} ${BENCH} all; fi
-
-  # cabal check
-  - (cd fused-effects-* && cabal check)
-
-  # haddock
-  - cabal new-haddock -w ${HC} ${TEST} ${BENCH} all
+  - cabal new-build
+  - cabal new-test
+  - cabal new-haddock
+  - cabal new-sdist
+  - cabal check
