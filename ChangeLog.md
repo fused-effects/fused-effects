@@ -1,3 +1,6 @@
+# 0.1.2.0
+
+- Adds support for ghc 8.6.2, courtesy of @jkachmar.
 - Adds a `Cut` effect which adds committed choice to nondeterminism.
 - Adds a `Cull` effect which adds pruning to nondeterminism.
 - Adds an example of using `NonDet`, `Cut`, and a character parser effect to define parsers.
