@@ -41,7 +41,6 @@ install:
   - BENCH=${BENCH---enable-benchmarks}
   - TEST=${TEST---enable-tests}
   - HADDOCK=${HADDOCK-true}
-  - UNCONSTRAINED=${UNCONSTRAINED-true}
   - NOINSTALLEDCONSTRAINTS=${NOINSTALLEDCONSTRAINTS-false}
   - GHCHEAD=${GHCHEAD-false}
   - travis_retry cabal update -v
@@ -89,6 +88,3 @@ script:
 
   # haddock
   - if $HADDOCK; then cabal new-haddock -w ${HC} ${TEST} ${BENCH} all; else echo "Skipping haddock generation";fi
-
-  # Build without installed constraints for packages in global-db
-  - if $UNCONSTRAINED; then rm -f cabal.project.local; echo cabal new-build -w ${HC} --disable-tests --disable-benchmarks all; else echo "Not building without installed constraints"; fi
