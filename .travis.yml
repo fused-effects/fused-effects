@@ -26,14 +26,9 @@ matrix:
       addons: {apt: {packages: [cabal-install-2.4,ghc-8.2.2], sources: [hvr-ghc]}}
 
 before_install:
-  - HC=${CC}
-  - HCPKG=${HC/ghc/ghc-pkg}
-  - unset CC
-  - ROOTDIR=$(pwd)
   - mkdir -p $HOME/.local/bin
   - "PATH=/opt/ghc/bin:$HOME/local/bin:$PATH"
-  - HCNUMVER=$(( $(${HC} --numeric-version|sed -E 's/([0-9]+)\.([0-9]+)\.([0-9]+).*/\1 * 10000 + \2 * 100 + \3/') ))
-  - echo $HCNUMVER
+  - ghc --version
   - cabal --version
 
 install:
