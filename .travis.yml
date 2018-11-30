@@ -1,8 +1,5 @@
 language: c
 
-git:
-  submodules: false  # whether to recursively clone submodules
-
 cache:
   directories:
     - $HOME/.cabal/packages
