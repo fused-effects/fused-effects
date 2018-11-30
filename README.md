@@ -14,6 +14,7 @@
   - [Defining effect handlers][]
 - [Project overview][]
   - [Development][]
+  - [Versioning][]
 - [Benchmarks][]
 - [Related work][]
   - [Comparison to `mtl`][]
@@ -33,6 +34,7 @@
 
 [Project overview]: https://github.com/robrix/fused-effects#project-overview
 [Development]: https://github.com/robrix/fused-effects#development
+[Versioning]: https://github.com/robrix/fused-effects#versioning
 
 [Benchmarks]: https://github.com/robrix/fused-effects#benchmarks
 
@@ -297,6 +299,11 @@ The package is available on [hackage][], and can be used by adding it to a compo
 
 [hackage]: http://hackage.haskell.org
 
+### Versioning
+
+Though `fused-effects` is suitable for production work, it is currently in a pre-release state. Though we will attempt to comply with the Haskell [Package Versioning Policy][pvp] standard, we make no concrete guarantees of API stability between versions < 1.0.0.0. Once v1.0.0.0 lands, all changes will abide by the PVP MAJOR.MAJOR.MINOR.PATCH standard.
+
+[pvp]: https://pvp.haskell.org/faq/
 
 ## Benchmarks
 
