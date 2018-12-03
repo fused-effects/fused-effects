@@ -1,3 +1,7 @@
+# 0.1.2.1
+
+- Loosens the bounds on QuickCheck to accommodate 0.12.
+
 # 0.1.2.0
 
 - Adds support for ghc 8.6.2, courtesy of @jkachmar.
