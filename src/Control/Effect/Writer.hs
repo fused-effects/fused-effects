@@ -40,7 +40,7 @@ runWriter m = runWriterC (interpret m)
 --
 --   prop> run (execWriter (tell (Sum a) *> pure b)) == Sum a
 execWriter :: (Carrier sig m, Effect sig, Functor m, Monoid w) => Eff (WriterC w m) a -> m w
-execWriter m = fmap fst (runWriterC (interpret m))
+execWriter = fmap fst . runWriter
 
 
 newtype WriterC w m a = WriterC { runWriterC :: m (w, a) }
