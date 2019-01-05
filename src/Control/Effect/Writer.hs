@@ -45,6 +45,7 @@ listen :: (Member (Writer w) sig, Carrier sig m) => m a -> m (w, a)
 listen m = send (Listen m (curry ret))
 {-# INLINE listen #-}
 
+-- | Run a computation, applying a function to its output and returning the pair of the modified output and its result.
 listens :: (Member (Writer w) sig, Carrier sig m) => (w -> b) -> m a -> m (b, a)
 listens f m = send (Listen m (curry ret . f))
 {-# INLINE listens #-}
