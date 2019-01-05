@@ -1,3 +1,5 @@
+- Removes the `Functor` constraint on `asks`.
+
 # 0.1.2.1
 
 - Loosens the bounds on QuickCheck to accommodate 0.12.
