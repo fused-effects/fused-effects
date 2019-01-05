@@ -1,3 +1,4 @@
+- Adds `listen`, `listens`, and `censor` operations to `Writer`.
 - Adds benchmarks of `WriterC`/`VoidC` wrapped with `Eff` against their unwrapped counterparts.
 - Adds `Functor`, `Applicative`, and `Monad` instances for `WriterC`.
 - Adds `Functor`, `Applicative`, and `Monad` instances for `VoidC`.
