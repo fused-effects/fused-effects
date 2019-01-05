@@ -35,6 +35,7 @@ tell :: (Member (Writer w) sig, Carrier sig m) => w -> m ()
 tell w = send (Tell w (ret ()))
 {-# INLINE tell #-}
 
+-- | Run a computation, modifying its output with the passed function.
 censor :: (Member (Writer w) sig, Carrier sig m) => (w -> w) -> m a -> m a
 censor f m = send (Censor f m ret)
 {-# INLINE censor #-}
