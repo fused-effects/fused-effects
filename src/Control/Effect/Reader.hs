@@ -35,8 +35,8 @@ ask = send (Ask ret)
 -- | Project a function out of the current environment value.
 --
 --   prop> snd (run (runReader a (asks (applyFun f)))) == applyFun f a
-asks :: (Member (Reader r) sig, Carrier sig m, Functor m) => (r -> a) -> m a
-asks f = fmap f ask
+asks :: (Member (Reader r) sig, Carrier sig m) => (r -> a) -> m a
+asks f = send (Ask (ret . f))
 
 -- | Run a computation with an environment value locally modified by the passed function.
 --
