@@ -56,6 +56,7 @@ instance Functor m => Functor (WriterC w m) where
 instance (Monad m, Monoid w) => Applicative (WriterC w m) where
   pure a = WriterC $ \w -> pure (w, a)
   {-# INLINE pure #-}
+
   (<*>) = ap
   {-# INLINE (<*>) #-}
 
