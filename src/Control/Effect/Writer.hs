@@ -2,6 +2,7 @@
 module Control.Effect.Writer
 ( Writer(..)
 , tell
+, listen
 , censor
 , runWriter
 , execWriter
@@ -14,17 +15,20 @@ import Control.Effect.Internal
 
 data Writer w m k
   = Tell w k
+  | forall a . Listen (m a) (w -> a -> k)
   | forall a . Censor (w -> w) (m a) (a -> k)
 
 deriving instance Functor (Writer w m)
 
 instance HFunctor (Writer w) where
   hmap _ (Tell w     k) = Tell w         k
+  hmap f (Listen   m k) = Listen   (f m) k
   hmap f (Censor g m k) = Censor g (f m) k
   {-# INLINE hmap #-}
 
 instance Effect (Writer w) where
   handle state handler (Tell w     k) = Tell w                          (handler (k <$ state))
+  handle state handler (Listen   m k) = Listen   (handler (m <$ state)) (fmap handler . fmap . k)
   handle state handler (Censor f m k) = Censor f (handler (m <$ state)) (handler . fmap k)
   {-# INLINE handle #-}
 
@@ -34,6 +38,10 @@ instance Effect (Writer w) where
 tell :: (Member (Writer w) sig, Carrier sig m) => w -> m ()
 tell w = send (Tell w (ret ()))
 {-# INLINE tell #-}
+
+listen :: (Member (Writer w) sig, Carrier sig m) => m a -> m (w, a)
+listen m = send (Listen m (curry ret))
+{-# INLINE listen #-}
 
 -- | Run a computation, modifying its output with the passed function.
 --
@@ -91,6 +99,10 @@ instance (Monoid w, Carrier sig m, Effect sig, Monad m) => Carrier (Writer w :+:
 
   eff op = WriterC (\ w -> handleSum (eff . handleState w runWriterC) (\case
     Tell w'    k -> let w'' = mappend w w' in w'' `seq` runWriterC k w''
+    Listen   m k -> do
+      (w', a) <- runWriterC m mempty
+      let w'' = mappend w w'
+      w'' `seq` runWriterC (k w' a) w''
     Censor f m k -> do
       (w', a) <- runWriterC m mempty
       let w'' = mappend w (f w')
