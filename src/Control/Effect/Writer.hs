@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Writer
 ( Writer(..)
 , tell
@@ -10,17 +10,21 @@ module Control.Effect.Writer
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
-import Data.Coerce
 
-data Writer w (m :: * -> *) k = Tell w k
-  deriving (Functor)
+data Writer w m k
+  = Tell w k
+  | forall a . Censor (w -> w) (m a) (a -> k)
+
+deriving instance Functor (Writer w m)
 
 instance HFunctor (Writer w) where
-  hmap _ = coerce
+  hmap _ (Tell w     k) = Tell w         k
+  hmap f (Censor g m k) = Censor g (f m) k
   {-# INLINE hmap #-}
 
 instance Effect (Writer w) where
-  handle state handler (Tell w k) = Tell w (handler (k <$ state))
+  handle state handler (Tell w     k) = Tell w                          (handler (k <$ state))
+  handle state handler (Censor f m k) = Censor f (handler (m <$ state)) (handler . fmap k)
   {-# INLINE handle #-}
 
 -- | Write a value to the log.
@@ -34,14 +38,14 @@ tell w = send (Tell w (ret ()))
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --
 --   prop> run (runWriter (tell (Sum a) *> pure b)) == (Sum a, b)
-runWriter :: (Carrier sig m, Effect sig, Monoid w) => Eff (WriterC w m) a -> m (w, a)
+runWriter :: (Carrier sig m, Effect sig, Monad m, Monoid w) => Eff (WriterC w m) a -> m (w, a)
 runWriter m = runWriterC (interpret m) mempty
 {-# INLINE runWriter #-}
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
 --
 --   prop> run (execWriter (tell (Sum a) *> pure b)) == Sum a
-execWriter :: (Carrier sig m, Effect sig, Functor m, Monoid w) => Eff (WriterC w m) a -> m w
+execWriter :: (Carrier sig m, Effect sig, Monad m, Monoid w) => Eff (WriterC w m) a -> m w
 execWriter = fmap fst . runWriter
 {-# INLINE execWriter #-}
 
@@ -72,13 +76,16 @@ instance (Monad m, Monoid w) => Monad (WriterC w m) where
     runWriterC (f a) w'
   {-# INLINE (>>=) #-}
 
-instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
+instance (Monoid w, Carrier sig m, Effect sig, Monad m) => Carrier (Writer w :+: sig) (WriterC w m) where
   ret a = WriterC (\ w -> ret (w, a))
   {-# INLINE ret #-}
 
-  eff op = WriterC (\ w -> handleSum
-    (eff . handleState w runWriterC)
-    (\ (Tell w' k) -> let w'' = mappend w w' in w'' `seq` runWriterC k w'')
+  eff op = WriterC (\ w -> handleSum (eff . handleState w runWriterC) (\case
+    Tell w'    k -> let w'' = mappend w w' in w'' `seq` runWriterC k w''
+    Censor f m k -> do
+      (w', a) <- runWriterC m mempty
+      let w'' = mappend w (f w')
+      w'' `seq` runWriterC (k a) w'')
     op)
   {-# INLINE eff #-}
 
