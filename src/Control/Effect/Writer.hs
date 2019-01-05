@@ -41,6 +41,8 @@ tell w = send (Tell w (ret ()))
 {-# INLINE tell #-}
 
 -- | Run a computation, returning the pair of its output and its result.
+--
+--   prop> run (runWriter (fst <$ tell (Sum a) <*> listen (tell (Sum b)))) == (Sum a <> Sum b, Sum b)
 listen :: (Member (Writer w) sig, Carrier sig m) => m a -> m (w, a)
 listen m = send (Listen m (curry ret))
 {-# INLINE listen #-}
