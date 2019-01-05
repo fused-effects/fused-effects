@@ -59,6 +59,7 @@ benchmark benchmark
   type:               exitcode-stdio-1.0
   main-is:            Bench.hs
   build-depends:      base >=4.9 && <4.13
+                    , criterion
                     , fused-effects
   hs-source-dirs:     benchmark
   default-language:   Haskell2010
