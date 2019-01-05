@@ -3,6 +3,7 @@ module Control.Effect.Writer
 ( Writer(..)
 , tell
 , listen
+, listens
 , censor
 , runWriter
 , execWriter
@@ -43,6 +44,10 @@ tell w = send (Tell w (ret ()))
 listen :: (Member (Writer w) sig, Carrier sig m) => m a -> m (w, a)
 listen m = send (Listen m (curry ret))
 {-# INLINE listen #-}
+
+listens :: (Member (Writer w) sig, Carrier sig m) => (w -> b) -> m a -> m (b, a)
+listens f m = send (Listen m (curry ret . f))
+{-# INLINE listens #-}
 
 -- | Run a computation, modifying its output with the passed function.
 --
