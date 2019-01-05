@@ -10,6 +10,7 @@ module Control.Effect.Writer
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
+import Control.Monad (ap)
 import Data.Coerce
 
 data Writer w (m :: * -> *) k = Tell w k
@@ -47,6 +48,25 @@ execWriter = fmap fst . runWriter
 
 
 newtype WriterC w m a = WriterC { runWriterC :: w -> m (w, a) }
+
+instance Functor m => Functor (WriterC w m) where
+  fmap f (WriterC run) = WriterC (\ w -> fmap (fmap f) (run w))
+  {-# INLINE fmap #-}
+
+instance (Monad m, Monoid w) => Applicative (WriterC w m) where
+  pure a = WriterC $ \w -> pure (w, a)
+  {-# INLINE pure #-}
+  (<*>) = ap
+  {-# INLINE (<*>) #-}
+
+instance (Monad m, Monoid w) => Monad (WriterC w m) where
+  return = pure
+  {-# INLINE return #-}
+
+  m >>= f  = WriterC $ \w -> do
+    (w', a) <- runWriterC m w
+    runWriterC (f a) w'
+  {-# INLINE (>>=) #-}
 
 instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
   ret a = WriterC (\ w -> ret (w, a))
