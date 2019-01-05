@@ -21,6 +21,7 @@ instance HFunctor (Writer w) where
 
 instance Effect (Writer w) where
   handle state handler (Tell w k) = Tell w (handler (k <$ state))
+  {-# INLINE handle #-}
 
 -- | Write a value to the log.
 --
