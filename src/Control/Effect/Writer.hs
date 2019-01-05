@@ -10,7 +10,6 @@ module Control.Effect.Writer
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
-import Control.Monad (ap)
 import Data.Coerce
 
 data Writer w (m :: * -> *) k = Tell w k
@@ -57,7 +56,11 @@ instance (Monad m, Monoid w) => Applicative (WriterC w m) where
   pure a = WriterC $ \w -> pure (w, a)
   {-# INLINE pure #-}
 
-  (<*>) = ap
+  WriterC f <*> WriterC a = WriterC $ \ w -> do
+    (w', f') <- f w
+    (w'', a') <- a w'
+    let fa = f' a'
+    fa `seq` pure (w'', fa)
   {-# INLINE (<*>) #-}
 
 instance (Monad m, Monoid w) => Monad (WriterC w m) where
