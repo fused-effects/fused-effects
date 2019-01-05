@@ -27,6 +27,24 @@ run = runVoidC . interpret
 
 newtype VoidC a = VoidC { runVoidC :: a }
 
+instance Functor VoidC where
+  fmap f (VoidC a) = VoidC (f a)
+  {-# INLINE fmap #-}
+
+instance Applicative VoidC where
+  pure = VoidC
+  {-# INLINE pure #-}
+
+  VoidC f <*> VoidC a = VoidC (f a)
+  {-# INLINE (<*>) #-}
+
+instance Monad VoidC where
+  return = pure
+  {-# INLINE return #-}
+
+  VoidC a >>= f = f a
+  {-# INLINE (>>=) #-}
+
 instance Carrier Void VoidC where
   ret = VoidC
   {-# INLINE ret #-}
