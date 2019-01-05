@@ -2,6 +2,7 @@
 module Control.Effect.Writer
 ( Writer(..)
 , tell
+, censor
 , runWriter
 , execWriter
 , WriterC(..)
@@ -33,6 +34,10 @@ instance Effect (Writer w) where
 tell :: (Member (Writer w) sig, Carrier sig m) => w -> m ()
 tell w = send (Tell w (ret ()))
 {-# INLINE tell #-}
+
+censor :: (Member (Writer w) sig, Carrier sig m) => (w -> w) -> m a -> m a
+censor f m = send (Censor f m ret)
+{-# INLINE censor #-}
 
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
