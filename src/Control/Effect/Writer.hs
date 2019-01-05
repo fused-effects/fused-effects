@@ -10,7 +10,6 @@ module Control.Effect.Writer
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
-import Data.Bifunctor (first)
 import Data.Coerce
 
 data Writer w (m :: * -> *) k = Tell w k
@@ -33,8 +32,8 @@ tell w = send (Tell w (ret ()))
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --
 --   prop> run (runWriter (tell (Sum a) *> pure b)) == (Sum a, b)
-runWriter :: (Carrier sig m, Effect sig, Functor m, Monoid w) => Eff (WriterC w m) a -> m (w, a)
-runWriter m = runWriterC (interpret m)
+runWriter :: (Carrier sig m, Effect sig, Monoid w) => Eff (WriterC w m) a -> m (w, a)
+runWriter m = runWriterC (interpret m) mempty
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
 --
@@ -43,14 +42,14 @@ execWriter :: (Carrier sig m, Effect sig, Functor m, Monoid w) => Eff (WriterC w
 execWriter = fmap fst . runWriter
 
 
-newtype WriterC w m a = WriterC { runWriterC :: m (w, a) }
+newtype WriterC w m a = WriterC { runWriterC :: w -> m (w, a) }
 
-instance (Monoid w, Carrier sig m, Effect sig, Functor m) => Carrier (Writer w :+: sig) (WriterC w m) where
-  ret a = WriterC (ret (mempty, a))
-  eff = WriterC . handleSum
-    (eff . handle (mempty, ()) (uncurry runWriter'))
-    (\ (Tell w k) -> first (mappend w) <$> runWriterC k)
-    where runWriter' w = fmap (first (mappend w)) . runWriterC
+instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
+  ret a = WriterC (\ w -> ret (w, a))
+  eff op = WriterC (\ w -> handleSum
+    (eff . handleState w runWriterC)
+    (\ (Tell w' k) -> let w'' = mappend w w' in w'' `seq` runWriterC k w'')
+    op)
 
 
 -- $setup
