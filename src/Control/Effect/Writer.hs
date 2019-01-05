@@ -48,6 +48,8 @@ listen m = send (Listen m (curry ret))
 {-# INLINE listen #-}
 
 -- | Run a computation, applying a function to its output and returning the pair of the modified output and its result.
+--
+--   prop> run (runWriter (tell (Sum a) *> listens fst (tell (Sum b)))) == (Sum a <> Sum b, Sum b)
 listens :: (Member (Writer w) sig, Carrier sig m) => (w -> b) -> m a -> m (b, a)
 listens f m = send (Listen m (curry ret . f))
 {-# INLINE listens #-}
