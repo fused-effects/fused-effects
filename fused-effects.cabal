@@ -55,16 +55,6 @@ library
   if (impl(ghc >= 8.6))
     ghc-options:       -Wno-star-is-type
 
-benchmark benchmark
-  type:               exitcode-stdio-1.0
-  main-is:            Bench.hs
-  build-depends:      base >=4.9 && <4.13
-                    , criterion
-                    , fused-effects
-  hs-source-dirs:     benchmark
-  default-language:   Haskell2010
-  ghc-options:        -threaded -rtsopts "-with-rtsopts=-N -A4m -n2m"
-
 
 test-suite examples
   type:                exitcode-stdio-1.0
@@ -96,6 +86,18 @@ test-suite doctest
                      , doctest >=0.7 && <1.0
   hs-source-dirs:      test
   default-language:    Haskell2010
+
+
+benchmark benchmark
+  type:               exitcode-stdio-1.0
+  main-is:            Bench.hs
+  build-depends:      base >=4.9 && <4.13
+                    , criterion
+                    , fused-effects
+  hs-source-dirs:     benchmark
+  default-language:   Haskell2010
+  ghc-options:        -threaded -rtsopts "-with-rtsopts=-N -A4m -n2m"
+
 
 source-repository head
   type:     git
