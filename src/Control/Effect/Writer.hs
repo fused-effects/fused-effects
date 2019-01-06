@@ -49,6 +49,8 @@ execWriter = fmap fst . runWriter
 -- | A space-efficient carrier for 'Writer' effects.
 --
 --   This is based on a post Gabriel Gonzalez made to the Haskell mailing list: https://mail.haskell.org/pipermail/libraries/2013-March/019528.html
+--
+--   Note that currently, the constant-space behaviour observed there only occurs when using 'WriterC' and 'VoidC' without 'Eff' wrapping them. See the @benchmark@ component for details.
 newtype WriterC w m a = WriterC { runWriterC :: w -> m (w, a) }
 
 instance Functor m => Functor (WriterC w m) where
