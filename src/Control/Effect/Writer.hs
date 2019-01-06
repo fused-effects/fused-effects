@@ -42,14 +42,14 @@ tell w = send (Tell w (ret ()))
 
 -- | Run a computation, returning the pair of its output and its result.
 --
---   prop> run (runWriter (fst <$ tell (Sum a) <*> listen (tell (Sum b)))) == (Sum a <> Sum b, Sum b)
+--   prop> run (runWriter (fst <$ tell (Sum a) <*> listen @(Sum Integer) (tell (Sum b)))) == (Sum a <> Sum b, Sum b)
 listen :: (Member (Writer w) sig, Carrier sig m) => m a -> m (w, a)
 listen m = send (Listen m (curry ret))
 {-# INLINE listen #-}
 
 -- | Run a computation, applying a function to its output and returning the pair of the modified output and its result.
 --
---   prop> run (runWriter (tell (Sum a) *> listens fst (tell (Sum b)))) == (Sum a <> Sum b, Sum b)
+--   prop> run (runWriter (tell (Sum a) *> listens @(Sum Integer) fst (tell (Sum b)))) == (Sum a <> Sum b, Sum b)
 listens :: (Member (Writer w) sig, Carrier sig m) => (w -> b) -> m a -> m (b, a)
 listens f m = send (Listen m (curry ret . f))
 {-# INLINE listens #-}
@@ -129,6 +129,7 @@ instance (Monoid w, Carrier sig m, Effect sig, Monad m) => Carrier (Writer w :+:
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
 -- >>> import Data.Monoid (Sum(..))
