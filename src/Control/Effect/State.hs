@@ -61,13 +61,13 @@ modify f = do
 -- | Run a 'State' effect starting from the passed value.
 --
 --   prop> run (runState a (pure b)) == (a, b)
-runState :: forall s m a sig . (Carrier sig m, Effect sig) => s -> Eff (StateC s m) a -> m (s, a)
+runState :: forall s sig m a . (Carrier sig m, Effect sig) => s -> Eff (StateC s m) a -> m (s, a)
 runState s m = runStateC (interpret m) s
 
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
 --
 --   prop> run (evalState a (pure b)) == b
-evalState :: forall s m a sig . (Carrier sig m, Effect sig, Functor m) => s -> Eff (StateC s m) a -> m a
+evalState :: forall s sig m a . (Carrier sig m, Effect sig, Functor m) => s -> Eff (StateC s m) a -> m a
 evalState s m = fmap snd (runStateC (interpret m) s)
 
 -- | Run a 'State' effect, yielding the final state and discarding the return value.

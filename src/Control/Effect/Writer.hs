@@ -34,14 +34,14 @@ tell w = send (Tell w (ret ()))
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --
 --   prop> run (runWriter (tell (Sum a) *> pure b)) == (Sum a, b)
-runWriter :: forall w m a sig . (Carrier sig m, Effect sig, Monoid w) => Eff (WriterC w m) a -> m (w, a)
+runWriter :: forall w sig m a . (Carrier sig m, Effect sig, Monoid w) => Eff (WriterC w m) a -> m (w, a)
 runWriter m = runWriterC (interpret m) mempty
 {-# INLINE runWriter #-}
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
 --
 --   prop> run (execWriter (tell (Sum a) *> pure b)) == Sum a
-execWriter :: forall w m a sig . (Carrier sig m, Effect sig, Functor m, Monoid w) => Eff (WriterC w m) a -> m w
+execWriter :: forall w sig m a . (Carrier sig m, Effect sig, Functor m, Monoid w) => Eff (WriterC w m) a -> m w
 execWriter = fmap fst . runWriter
 {-# INLINE execWriter #-}
 
