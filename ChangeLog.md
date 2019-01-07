@@ -4,7 +4,7 @@
 - Fixes a space leak with `WriterC`.
 - Removes the `Functor` constraint on `asks`.
 - Provides explicit type parameters to `run`-style functions in `State`, `Reader`, and `Writer`. 
-  This may be a backwards-incompatible change for clients using these functons in combination
+  This is a backwards-incompatible change for clients using these functions in combination
   with visible type applications.
 
 # 0.1.2.1
