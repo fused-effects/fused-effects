@@ -307,7 +307,7 @@ Though `fused-effects` is suitable for production work, it is currently in a pre
 
 ## Benchmarks
 
-`fused-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
+To run the provided benchmark suite, use `cabal new-bench`. You may wish to provide the `-O2` compiler option to view performance under aggressive optimizations. `fused-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
 
 
 ## Related work
