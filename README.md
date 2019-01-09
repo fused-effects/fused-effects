@@ -324,7 +324,7 @@ Though `fused-effects` is suitable for production work, it is currently in a pre
 
 Though we aim to keep the `fused-effects` core minimal, we encourage the development of external `fused-effects`-compatible libraries. If you've written one that you'd like to be mentioned here, get in touch!
 
-* [fused-effects-lens][felens] provides combinators to use the [lens][lens] library fluently inside effectful computatios.
+* [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computatios.
 
 [felens]: http://hackage.haskell.org/package/fused-effects-lens
 [lens]: http://hackage.haskell.org/package/lens
