@@ -17,6 +17,7 @@
   - [Versioning][]
 - [Benchmarks][]
 - [Related work][]
+  - [Contributed packages][]
   - [Comparison to `mtl`][]
   - [Comparison to `freer-simple`][]
 
