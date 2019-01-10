@@ -17,6 +17,7 @@
   - [Versioning][]
 - [Benchmarks][]
 - [Related work][]
+  - [Contributed packages][]
   - [Comparison to `mtl`][]
   - [Comparison to `freer-simple`][]
 
@@ -39,6 +40,7 @@
 [Benchmarks]: https://github.com/robrix/fused-effects#benchmarks
 
 [Related work]: https://github.com/robrix/fused-effects#related-work
+[Contributed packages]: https://github.com/robrix/fused-effects#contributed-packages
 [Comparison to `mtl`]: https://github.com/robrix/fused-effects#comparison-to-mtl
 [Comparison to `freer-simple`]: https://github.com/robrix/fused-effects#comparison-to-freer-simple
 
@@ -318,6 +320,14 @@ Though `fused-effects` is suitable for production work, it is currently in a pre
 [Monad Transformers and Modular Algebraic Effects: What Binds Them Together]: http://www.cs.kuleuven.be/publicaties/rapporten/cw/CW699.pdf
 [Fusion for Free—Efficient Algebraic Effect Handlers]: https://people.cs.kuleuven.be/~tom.schrijvers/Research/papers/mpc2015.pdf
 
+### Contributed packages
+
+Though we aim to keep the `fused-effects` core minimal, we encourage the development of external `fused-effects`-compatible libraries. If you've written one that you'd like to be mentioned here, get in touch!
+
+* [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computatios.
+
+[felens]: http://hackage.haskell.org/package/fused-effects-lens
+[lens]: http://hackage.haskell.org/package/lens
 
 ### Comparison to `mtl`
 
