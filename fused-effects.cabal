@@ -72,6 +72,7 @@ test-suite test
   type:                exitcode-stdio-1.0
   main-is:             Spec.hs
   other-modules:       Control.Effect.Spec
+                     , Control.Effect.LiftIO
                      , Control.Effect.NonDet.Spec
   build-depends:       base >=4.9 && <4.13
                      , fused-effects
