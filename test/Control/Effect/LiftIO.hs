@@ -23,4 +23,4 @@ liftio = describe "liftio" $ do
     doliftio >>= (`shouldBe` ())
 
 doliftio :: MonadIO m => m ()
-doliftio = runM (liftIO $ putStr "")
+doliftio = runMIO (liftIO $ putStr "")

@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, RankNTypes, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeInType, UndecidableInstances #-}
 module Control.Effect.Internal
 ( Eff(..)
 , runEff
@@ -81,8 +81,8 @@ instance (Member Fail sig, Carrier sig carrier) => MonadFail (Eff carrier) where
 
 instance (Member NonDet sig, Carrier sig carrier) => MonadPlus (Eff carrier)
 
-instance (Member (Lift IO) sig, Carrier sig carrier) => MonadIO (Eff carrier) where
-  liftIO = send . Lift . fmap pure
+instance (Member (LiftIO IO) sig, Carrier sig (carrier m)) => MonadIO (Eff (carrier m)) where
+  liftIO = send . LiftIO . fmap pure
   {-# INLINE liftIO #-}
 
 instance (Member Random sig, Carrier sig carrier) => MonadRandom (Eff carrier) where
