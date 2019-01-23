@@ -6,6 +6,7 @@
 - Provides explicit type parameters to `run`-style functions in `State`, `Reader`, and `Writer`. 
   This is a backwards-incompatible change for clients using these functions in combination
   with visible type applications.
+- Adds `bracketOnError` to `Resource`.
 
 # 0.1.2.1
 
