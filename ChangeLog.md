@@ -1,11 +1,10 @@
+- Provides explicit type parameters to `run`-style functions in `State`, `Reader`, `Writer`, and `Error`.
+  This is a backwards-incompatible change for clients using these functions in combination with visible type applications.
 - Adds benchmarks of `WriterC`/`VoidC` wrapped with `Eff` against their unwrapped counterparts.
 - Adds `Functor`, `Applicative`, and `Monad` instances for `WriterC`.
 - Adds `Functor`, `Applicative`, and `Monad` instances for `VoidC`.
 - Fixes a space leak with `WriterC`.
 - Removes the `Functor` constraint on `asks`.
-- Provides explicit type parameters to `run`-style functions in `State`, `Reader`, and `Writer`. 
-  This is a backwards-incompatible change for clients using these functions in combination
-  with visible type applications.
 
 # 0.1.2.1
 
