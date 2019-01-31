@@ -34,7 +34,11 @@ throwError = send . Throw
 
 -- | Run a computation which can throw errors with a handler to run on error.
 --
---   Errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
+-- Errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
+-- Note that this effect does /not/ handle errors thrown from impure contexts such as IO,
+-- nor will it handle exceptions thrown from pure code. If you need to handle IO-based errors,
+-- consider if 'Control.Effect.Resource' fits your use case; if not, use 'liftIO' with
+-- 'Control.Exception.try' or use 'Control.Exception.Catch' from outside the effect invocation.
 --
 --   prop> run (runError (pure a `catchError` pure)) == Right a
 --   prop> run (runError (throwError a `catchError` pure)) == Right @Int @Int a
