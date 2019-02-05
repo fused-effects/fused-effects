@@ -5,7 +5,7 @@
 - Adds `Functor`, `Applicative`, and `Monad` instances for `VoidC`.
 - Fixes a space leak with `WriterC`.
 - Removes the `Functor` constraint on `asks`.
-- Adds `bracketOnError` to `Resource`.
+- Adds `bracketOnError`, `finally`, and `onException` to `Resource`.
 - Adds `sendM` to `Lift`.
 
 # 0.1.2.1

@@ -3,6 +3,8 @@ module Control.Effect.Resource
 ( Resource(..)
 , bracket
 , bracketOnError
+, finally
+, onException
 , runResource
 , ResourceC(..)
 ) where
@@ -53,6 +55,20 @@ bracketOnError :: (Member Resource sig, Carrier sig m)
                -> m a
 bracketOnError acquire release use = send (OnError acquire release use ret)
 
+-- | Like 'bracket', but for the simple case of one computation to run afterward.
+finally :: (Member Resource sig, Carrier sig m, Applicative m)
+        => m a -- ^ computation to run first
+        -> m b -- ^ computation to run afterward (even if an exception was raised)
+        -> m a
+finally act end = bracket (pure ()) (const end) (const act)
+
+-- | Like 'bracketOnError', but for the simple case of one computation to run afterward.
+onException :: (Member Resource sig, Carrier sig m, Applicative m)
+        => m a -- ^ computation to run first
+        -> m b -- ^ computation to run afterward if an exception was raised
+        -> m a
+onException act end = bracketOnError (pure ()) (const end) (const act)
+
 runResource :: (Carrier sig m, MonadIO m)
             => (forall x . m x -> IO x)
             -> Eff (ResourceC m) a
@@ -74,7 +90,7 @@ instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) 
                                                     (handler . runResourceC handler . release)
                                                     (handler . runResourceC handler . use))
                                             >>= runResourceC handler . k
-        OnError acquire release use k -> liftIO (Exc.bracketOnError 
+        OnError acquire release use k -> liftIO (Exc.bracketOnError
                                                     (handler (runResourceC handler acquire))
                                                     (handler . runResourceC handler . release)
                                                     (handler . runResourceC handler . use))
