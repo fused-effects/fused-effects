@@ -1,3 +1,4 @@
+- Adds `listen`, `listens`, and `censor` operations to `Writer`.
 - Provides explicit type parameters to `run`-style functions in `State`, `Reader`, `Writer`, and `Error`.
   This is a backwards-incompatible change for clients using these functions in combination with visible type applications.
 - Adds benchmarks of `WriterC`/`VoidC` wrapped with `Eff` against their unwrapped counterparts.
