@@ -1,9 +1,13 @@
 - Adds `listen`, `listens`, and `censor` operations to `Writer`.
+- Provides explicit type parameters to `run`-style functions in `State`, `Reader`, `Writer`, and `Error`.
+  This is a backwards-incompatible change for clients using these functions in combination with visible type applications.
 - Adds benchmarks of `WriterC`/`VoidC` wrapped with `Eff` against their unwrapped counterparts.
 - Adds `Functor`, `Applicative`, and `Monad` instances for `WriterC`.
 - Adds `Functor`, `Applicative`, and `Monad` instances for `VoidC`.
 - Fixes a space leak with `WriterC`.
 - Removes the `Functor` constraint on `asks`.
+- Adds `bracketOnError`, `finally`, and `onException` to `Resource`.
+- Adds `sendM` to `Lift`.
 
 # 0.1.2.1
 
