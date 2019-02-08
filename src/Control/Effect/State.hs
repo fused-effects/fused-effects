@@ -38,8 +38,8 @@ get = send (Get ret)
 -- | Project a function out of the current state value.
 --
 --   prop> snd (run (runState a (gets (applyFun f)))) == applyFun f a
-gets :: (Member (State s) sig, Carrier sig m, Functor m) => (s -> a) -> m a
-gets f = fmap f get
+gets :: (Member (State s) sig, Carrier sig m) => (s -> a) -> m a
+gets f = send (Get (ret . f))
 
 -- | Replace the state value with a new value.
 --
