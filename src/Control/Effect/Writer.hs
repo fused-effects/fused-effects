@@ -132,4 +132,4 @@ instance (Monoid w, Carrier sig m, Effect sig, Monad m) => Carrier (Writer w :+:
 -- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Void
--- >>> import Data.Monoid (Sum(..))
+-- >>> import Data.Semigroup (Semigroup(..), Sum(..))
