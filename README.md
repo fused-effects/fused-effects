@@ -254,8 +254,8 @@ Indeed, `Wrapper` can now be made an instance of `MonadState`:
 
 ```haskell
 instance (Carrier sig m, Member (State s) sig, Monad m) => MTL.MonadState s (Wrapper s m) where
-  get = get
-  put = put
+  get = Control.Effect.State.get
+  put = Control.Effect.State.put
 ```
 
 Thus, the approaches aren’t mutually exclusive; consumers are free to decide which approach makes the most sense for their situation.
