@@ -60,6 +60,9 @@ instance Applicative m => Applicative (ReaderC r m) where
   pure a = ReaderC (const (pure a))
   ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
 
+instance Monad m => Monad (ReaderC r m) where
+  ReaderC a >>= f = ReaderC (\ r -> a r >>= flip runReaderC r . f)
+
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
   ret a = ReaderC (const (ret a))
   eff op = ReaderC (\ r -> handleSum (eff . handleReader r runReaderC) (\case
