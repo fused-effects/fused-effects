@@ -52,9 +52,16 @@ newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fresh :+: sig) (FreshC m) where
   ret = pure
-  eff op = FreshC (StateC (\ i -> handleSum (eff . handleState i (runStateC . runFreshC)) (\case
-    Fresh   k -> runStateC (runFreshC (k i)) (succ i)
-    Reset m k -> runStateC (runFreshC m) i >>= flip runStateC i . runFreshC . k . snd) op))
+  eff = FreshC . handleSum (eff . R . handleCoercible) (\case
+    Fresh   k -> do
+      i <- get
+      put (succ i)
+      runFreshC (k i)
+    Reset m k -> do
+      i <- get
+      a <- runFreshC m
+      put (i :: Int)
+      runFreshC (k a))
 
 
 -- $setup
