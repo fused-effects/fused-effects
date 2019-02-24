@@ -116,11 +116,11 @@ newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
 instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
   ret = pure
-  eff = ResumableWithC . handleSum
-    (eff . R . handleCoercible)
+  eff = handleSum
+    (ResumableWithC . eff . R . handleCoercible)
     (\ (Resumable err k) -> do
-      res <- ReaderC (\ handler -> runHandler handler err)
-      runResumableWithC (k res))
+      res <- ResumableWithC (ReaderC (\ handler -> runHandler handler err))
+      k res)
 
 
 -- $setup
