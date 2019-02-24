@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resource
 ( Resource(..)
 , bracket
@@ -11,8 +11,10 @@ module Control.Effect.Resource
 
 import           Control.Effect.Carrier
 import           Control.Effect.Internal
+import           Control.Effect.Reader
 import           Control.Effect.Sum
 import qualified Control.Exception as Exc
+import           Control.Monad.Fail
 import           Control.Monad.IO.Class
 
 data Resource m k
@@ -73,26 +75,26 @@ runResource :: (Carrier sig m, MonadIO m)
             => (forall x . m x -> IO x)
             -> Eff (ResourceC m) a
             -> m a
-runResource handler = runResourceC handler . interpret
+runResource handler = flip runReaderC (Handler handler) . runResourceC . interpret
 
-newtype ResourceC m a = ResourceC ((forall x . m x -> IO x) -> m a)
+newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-runResourceC :: (forall x . m x -> IO x) -> ResourceC m a -> m a
-runResourceC handler (ResourceC m) = m handler
+newtype Handler m = Handler { runHandler :: forall x . m x -> IO x }
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
-  ret a = ResourceC (const (ret a))
-  eff op = ResourceC (\ handler -> handleSum
-    (eff . handlePure (runResourceC handler))
+  ret = pure
+  eff op = ResourceC (ReaderC (\ handler -> handleSum
+    (eff . handleReader handler (runReaderC . runResourceC))
     (\case
         Resource acquire release use k -> liftIO (Exc.bracket
-                                                    (handler (runResourceC handler acquire))
-                                                    (handler . runResourceC handler . release)
-                                                    (handler . runResourceC handler . use))
-                                            >>= runResourceC handler . k
+                                                    (runHandler handler (runReaderC (runResourceC acquire) handler))
+                                                    (runHandler handler . flip runReaderC handler . runResourceC . release)
+                                                    (runHandler handler . flip runReaderC handler . runResourceC . use))
+                                            >>= flip runReaderC handler . runResourceC . k
         OnError acquire release use k -> liftIO (Exc.bracketOnError
-                                                    (handler (runResourceC handler acquire))
-                                                    (handler . runResourceC handler . release)
-                                                    (handler . runResourceC handler . use))
-                                            >>= runResourceC handler . k
-    ) op)
+                                                    (runHandler handler (runReaderC (runResourceC acquire) handler))
+                                                    (runHandler handler . flip runReaderC handler . runResourceC . release)
+                                                    (runHandler handler . flip runReaderC handler . runResourceC . use))
+                                            >>= flip runReaderC handler . runResourceC . k
+    ) op))
