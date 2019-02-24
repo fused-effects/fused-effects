@@ -78,6 +78,7 @@ execState s m = fmap fst (runStateC (interpret m) s)
 
 
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
+  deriving (Functor)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   ret a = StateC (\ s -> ret (s, a))
