@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
 module Control.Effect.Lift
 ( Lift(..)
 , sendM
@@ -10,6 +10,8 @@ import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 import Control.Effect.Lift.Internal
+import Control.Monad.Fail
+import Control.Monad.IO.Class
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 runM :: Monad m => Eff (LiftC m) a -> m a
@@ -22,6 +24,7 @@ sendM :: (Member (Lift n) sig, Carrier sig m, Functor n, Applicative m) => n a -
 sendM = send . Lift . fmap pure
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
   ret = LiftC . pure
