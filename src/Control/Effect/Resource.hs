@@ -84,17 +84,16 @@ newtype Handler m = Handler { runHandler :: forall x . m x -> IO x }
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
   ret = pure
-  eff op = ResourceC (ReaderC (\ handler -> handleSum
-    (eff . handleReader handler (runReaderC . runResourceC))
+  eff = ResourceC . handleSum
+    (eff . R . handleCoercible)
     (\case
-        Resource acquire release use k -> liftIO (Exc.bracket
-                                                    (runHandler handler (runReaderC (runResourceC acquire) handler))
-                                                    (runHandler handler . flip runReaderC handler . runResourceC . release)
-                                                    (runHandler handler . flip runReaderC handler . runResourceC . use))
-                                            >>= flip runReaderC handler . runResourceC . k
-        OnError acquire release use k -> liftIO (Exc.bracketOnError
-                                                    (runHandler handler (runReaderC (runResourceC acquire) handler))
-                                                    (runHandler handler . flip runReaderC handler . runResourceC . release)
-                                                    (runHandler handler . flip runReaderC handler . runResourceC . use))
-                                            >>= flip runReaderC handler . runResourceC . k
-    ) op))
+        Resource acquire release use k -> ReaderC (\ handler -> liftIO (Exc.bracket
+          (runHandler handler (runReaderC (runResourceC acquire) handler))
+          (runHandler handler . flip runReaderC handler . runResourceC . release)
+          (runHandler handler . flip runReaderC handler . runResourceC . use)))
+          >>= runResourceC . k
+        OnError acquire release use k -> ReaderC (\ handler -> liftIO (Exc.bracketOnError
+          (runHandler handler (runReaderC (runResourceC acquire) handler))
+          (runHandler handler . flip runReaderC handler . runResourceC . release)
+          (runHandler handler . flip runReaderC handler . runResourceC . use)))
+          >>= runResourceC . k)
