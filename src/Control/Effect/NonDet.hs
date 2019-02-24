@@ -34,11 +34,11 @@ instance (Applicative f, Applicative m) => Applicative (AltC f m) where
   pure = AltC . pure . pure
   AltC f <*> AltC a = AltC (liftA2 (<*>) f a)
 
-instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Alternative (AltC f m) where
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Applicative m) => Alternative (AltC f m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
-instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
   ret = pure
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
     Empty    -> ret empty
