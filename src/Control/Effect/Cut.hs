@@ -65,6 +65,7 @@ runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a 
 runCut = (>>= runBranch (const empty)) . runCutC . interpret
 
 newtype CutC m a = CutC { runCutC :: m (Branch m Bool a) }
+  deriving (Functor)
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Pure
