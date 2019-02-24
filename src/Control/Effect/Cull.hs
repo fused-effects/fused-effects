@@ -12,6 +12,8 @@ import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Reader
 import Control.Effect.Sum
+import Control.Monad.Fail
+import Prelude hiding (fail)
 
 -- | 'Cull' effects are used with 'NonDet' to provide control over branching.
 data Cull m k
@@ -58,6 +60,9 @@ instance (Alternative m, Monad m) => Monad (CullC m) where
     None e    -> pure (None e)
     Pure a    -> runCullC (f a)
     Alt m1 m2 -> ReaderC (\ cull -> let k = flip runReaderC cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
+
+instance (Alternative m, MonadFail m) => MonadFail (CullC m) where
+  fail s = CullC (fail s)
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   ret = CullC . ret . Pure
