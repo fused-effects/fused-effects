@@ -45,6 +45,16 @@ evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
+instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => MonadRandom (RandomC g m) where
+  getRandom = send (Random ret)
+  {-# INLINE getRandom #-}
+  getRandomR r = send (RandomR r ret)
+  {-# INLINE getRandomR #-}
+  getRandomRs interval = (:) <$> getRandomR interval <*> getRandomRs interval
+  {-# INLINE getRandomRs #-}
+  getRandoms = (:) <$> getRandom <*> getRandoms
+  {-# INLINE getRandoms #-}
+
 instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => Carrier (Random :+: sig) (RandomC g m) where
   ret = pure
   eff = RandomC . handleSum (eff . R . handleCoercible) (\case
