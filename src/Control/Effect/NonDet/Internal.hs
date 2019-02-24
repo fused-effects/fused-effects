@@ -41,6 +41,7 @@ instance Alternative m => Applicative (Branch m e) where
   Alt f1 f2 <*> Pure a    = Alt (f1 <*> pure a) (f2 <*> pure a)
   Alt f1 f2 <*> Alt a1 a2 = Alt (f1 <*> a1 <|> f1 <*> a2) (f2 <*> a1 <|> f2 <*> a2)
 
+
 -- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Pure'.
 --
 --   prop> branch None Pure Alt a == (a :: Branch e [] a)
