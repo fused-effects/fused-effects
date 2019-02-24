@@ -76,7 +76,7 @@ newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: Stat
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Trace :+: sig) (TraceByReturningC m) where
-  ret a = TraceByReturningC (ret a)
+  ret = pure
   eff = handleSum
     (TraceByReturningC . eff . R . handleCoercible)
     (\ (Trace m k) -> TraceByReturningC (modify (m :)) *> k)
