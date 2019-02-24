@@ -42,6 +42,7 @@ runCull :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CullC m) 
 runCull = (>>= runBranch (const empty)) . flip runCullC False . interpret
 
 newtype CullC m a = CullC { runCullC :: Bool -> m (Branch m () a) }
+  deriving (Functor)
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   ret = CullC . const . ret . Pure
