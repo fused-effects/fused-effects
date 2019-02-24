@@ -27,5 +27,5 @@ newtype LiftC m a = LiftC { runLiftC :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
-  ret = LiftC . pure
+  ret = pure
   eff = LiftC . (>>= runLiftC) . unLift
