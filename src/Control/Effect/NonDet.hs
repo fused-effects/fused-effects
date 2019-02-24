@@ -30,6 +30,10 @@ runNonDet = runAltC . interpret
 newtype AltC f m a = AltC { runAltC :: m (f a) }
   deriving (Functor)
 
+instance (Applicative f, Applicative m) => Applicative (AltC f m) where
+  pure = AltC . pure . pure
+  AltC f <*> AltC a = AltC (liftA2 (<*>) f a)
+
 instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
   ret a = AltC (ret (pure a))
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
