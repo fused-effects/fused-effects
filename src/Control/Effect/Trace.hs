@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Trace
 ( Trace(..)
 , trace
@@ -14,6 +14,7 @@ import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Bifunctor (first)
 import Data.Coerce
@@ -70,6 +71,7 @@ runTraceByReturning :: (Carrier sig m, Effect sig, Functor m) => Eff (TraceByRet
 runTraceByReturning = fmap (first reverse) . flip runStateC [] . runTraceByReturningC . interpret
 
 newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
+  deriving (Applicative, Functor, Monad, MonadFail)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
   ret a = TraceByReturningC (ret a)
