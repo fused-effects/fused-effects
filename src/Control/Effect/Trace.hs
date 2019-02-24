@@ -43,6 +43,7 @@ runTraceByPrinting :: (MonadIO m, Carrier sig m) => Eff (TraceByPrintingC m) a -
 runTraceByPrinting = runTraceByPrintingC . interpret
 
 newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
+  deriving (Applicative, Functor, Monad, MonadFail)
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
   ret = TraceByPrintingC . ret
