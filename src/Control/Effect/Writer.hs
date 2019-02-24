@@ -110,7 +110,7 @@ instance (Monad m, Monoid w) => Monad (WriterC w m) where
   {-# INLINE (>>=) #-}
 
 instance (Monoid w, Carrier sig m, Effect sig, Monad m) => Carrier (Writer w :+: sig) (WriterC w m) where
-  ret a = WriterC (\ w -> ret (w, a))
+  ret = pure
   {-# INLINE ret #-}
 
   eff op = WriterC (\ w -> handleSum (eff . handleState w runWriterC) (\case

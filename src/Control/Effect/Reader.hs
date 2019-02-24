@@ -69,7 +69,7 @@ instance MonadFail m => MonadFail (ReaderC r m) where
   fail s = ReaderC (const (fail s))
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
-  ret a = ReaderC (const (ret a))
+  ret = pure
   eff op = ReaderC (\ r -> handleSum (eff . handleReader r runReaderC) (\case
     Ask       k -> runReaderC (k r) r
     Local f m k -> runReaderC m (f r) >>= flip runReaderC r . k) op)
