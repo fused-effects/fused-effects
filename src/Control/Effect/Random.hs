@@ -49,19 +49,16 @@ instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => Carrier (Random 
   ret = pure
   eff = RandomC . handleSum (eff . R . handleCoercible) (\case
     Random    k -> do
-      g <- get
-      let (a, g') = R.random    (g :: g)
-      put g'
+      (a, g') <- gets R.random
+      put (g' :: g)
       runRandomC (k a)
     RandomR r k -> do
-      g <- get
-      let (a, g') = R.randomR r (g :: g)
-      put g'
+      (a, g') <- gets (R.randomR r)
+      put (g' :: g)
       runRandomC (k a)
     Interleave m k -> do
-      g <- get
-      let (g1, g2) = R.split (g :: g)
-      put g1
+      (g1, g2) <- gets R.split
+      put (g1 :: g)
       a <- runRandomC m
       put g2
       runRandomC (k a))
