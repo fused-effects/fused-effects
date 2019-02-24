@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, ExplicitForAll, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Writer
 ( Writer(..)
 , tell
@@ -92,17 +92,23 @@ instance (Monoid w, Carrier sig m, Effect sig, Monad m) => Carrier (Writer w :+:
   ret = pure
   {-# INLINE ret #-}
 
-  eff op = WriterC (StateC (\ w -> handleSum (eff . handleState w (runStateC . runWriterC)) (\case
-    Tell w'    k -> let w'' = mappend w w' in w'' `seq` runStateC (runWriterC k) w''
+  eff = WriterC . handleSum (eff . R . handleCoercible) (\case
+    Tell w'    k -> do
+      modify (`mappend` w')
+      runWriterC k
     Listen   m k -> do
-      (w', a) <- runStateC (runWriterC m) mempty
-      let w'' = mappend w w'
-      w'' `seq` runStateC (runWriterC (k w' a)) w''
+      w <- get
+      put (mempty :: w)
+      a <- runWriterC m
+      w' <- get
+      modify (mappend (w :: w))
+      runWriterC (k w' a)
     Censor f m k -> do
-      (w', a) <- runStateC (runWriterC m) mempty
-      let w'' = mappend w (f w')
-      w'' `seq` runStateC (runWriterC (k a)) w'')
-    op))
+      w <- get
+      put (mempty :: w)
+      a <- runWriterC m
+      modify (mappend w . f)
+      runWriterC (k a))
   {-# INLINE eff #-}
 
 
