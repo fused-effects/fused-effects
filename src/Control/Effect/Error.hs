@@ -7,6 +7,7 @@ module Control.Effect.Error
 , ErrorC(..)
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
@@ -55,6 +56,10 @@ runError = runErrorC . interpret
 
 newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
   deriving (Functor)
+
+instance Applicative m => Applicative (ErrorC e m) where
+  pure a = ErrorC (pure (Right a))
+  ErrorC f <*> ErrorC a = ErrorC (liftA2 (<*>) f a)
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
   ret a = ErrorC (pure (Right a))
