@@ -89,7 +89,7 @@ instance Monad m => Applicative (StateC s m) where
     fa `seq` pure (s'', fa)
 
 instance Monad m => Monad (StateC s m) where
-  m >>= f  = StateC $ \ s -> do
+  m >>= f = StateC $ \ s -> do
     (s', a) <- runStateC m s
     runStateC (f a) s'
 
