@@ -13,6 +13,7 @@ import Control.DeepSeq
 import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Effect.Internal
+import Control.Effect.Reader
 import Control.Effect.Sum
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -106,18 +107,18 @@ runResumableWith :: (Carrier sig m, Monad m)
                  => (forall x . err x -> m x)
                  -> Eff (ResumableWithC err m) a
                  -> m a
-runResumableWith with = runResumableWithC with . interpret
+runResumableWith with = flip runReaderC (Handler with) . runResumableWithC . interpret
 
-newtype ResumableWithC err m a = ResumableWithC ((forall x . err x -> m x) -> m a)
+newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-runResumableWithC :: (forall x . err x -> m x) -> ResumableWithC err m a -> m a
-runResumableWithC f (ResumableWithC m) = m f
+newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
 instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
-  ret a = ResumableWithC (const (ret a))
-  eff op = ResumableWithC (\ handler -> handleSum
-    (eff . handlePure (runResumableWithC handler))
-    (\ (Resumable err k) -> handler err >>= runResumableWithC handler . k) op)
+  ret = pure
+  eff op = ResumableWithC (ReaderC (\ handler -> handleSum
+    (eff . handleReader handler (runReaderC . runResumableWithC))
+    (\ (Resumable err k) -> runHandler handler err >>= flip runReaderC handler . runResumableWithC . k) op))
 
 
 -- $setup
