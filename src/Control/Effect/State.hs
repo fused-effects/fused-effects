@@ -14,7 +14,9 @@ module Control.Effect.State
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
+import Control.Monad.Fail
 import Data.Coerce
+import Prelude hiding (fail)
 
 data State s (m :: * -> *) k
   = Get (s -> k)
@@ -93,6 +95,9 @@ instance Monad m => Monad (StateC s m) where
     (s', a) <- m s
     let fa = f a
     fa `seq` runStateC fa s'
+
+instance MonadFail m => MonadFail (StateC s m) where
+  fail s = StateC (const (fail s))
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   ret a = StateC (\ s -> ret (s, a))
