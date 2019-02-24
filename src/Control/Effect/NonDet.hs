@@ -38,7 +38,7 @@ instance (Applicative f, Applicative m) => Applicative (AltC f m) where
   pure = AltC . pure . pure
   AltC f <*> AltC a = AltC (liftA2 (<*>) f a)
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Applicative m) => Alternative (AltC f m) where
+instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (AltC f m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
@@ -51,7 +51,7 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traver
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (AltC f m) where
   liftIO io = AltC (pure <$> liftIO io)
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
+instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
   ret = pure
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
     Empty    -> ret empty
@@ -70,7 +70,7 @@ runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
 newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
   deriving (Applicative, Functor, Monad)
 
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Applicative m) => Alternative (OnceC f m)
+deriving instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
 deriving instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Member Fail sig, Monad f, Traversable f) => MonadFail (OnceC f m)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
