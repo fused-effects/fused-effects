@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fail
 ( Fail(..)
 , MonadFail(..)
@@ -19,6 +19,7 @@ runFail :: (Carrier sig m, Effect sig) => Eff (FailC m) a -> m (Either String a)
 runFail = runFailC . interpret
 
 newtype FailC m a = FailC { runFailC :: m (Either String a) }
+  deriving (Functor)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
   ret a = FailC (ret (Right a))
