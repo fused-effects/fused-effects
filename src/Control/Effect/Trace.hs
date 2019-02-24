@@ -46,10 +46,10 @@ newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
-  ret = TraceByPrintingC . ret
-  eff = TraceByPrintingC . handleSum
-    (eff . handleCoercible)
-    (\ (Trace s k) -> liftIO (hPutStrLn stderr s) *> runTraceByPrintingC k)
+  ret = pure
+  eff = handleSum
+    (TraceByPrintingC . eff . handleCoercible)
+    (\ (Trace s k) -> liftIO (hPutStrLn stderr s) *> k)
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
