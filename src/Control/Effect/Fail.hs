@@ -29,6 +29,9 @@ instance Applicative m => Applicative (FailC m) where
 instance Monad m => Monad (FailC m) where
   FailC a >>= f = FailC (a >>= either (pure . Left) (runFailC . f))
 
+instance Monad m => MonadFail (FailC m) where
+  fail s = FailC (pure (Left s))
+
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
   ret a = FailC (ret (Right a))
   eff = FailC . handleSum (eff . handleEither runFailC) (\ (Fail s) -> ret (Left s))
