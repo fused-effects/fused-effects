@@ -12,6 +12,7 @@ module Control.Effect.Trace
 
 import Control.Effect.Carrier
 import Control.Effect.Internal
+import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad.IO.Class
 import Data.Bifunctor (first)
@@ -66,15 +67,15 @@ instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
 --
 --   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) == ([a, b], c)
 runTraceByReturning :: (Carrier sig m, Effect sig, Functor m) => Eff (TraceByReturningC m) a -> m ([String], a)
-runTraceByReturning = fmap (first reverse) . flip runTraceByReturningC [] . interpret
+runTraceByReturning = fmap (first reverse) . flip runStateC [] . runTraceByReturningC . interpret
 
-newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: [String] -> m ([String], a) }
+newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
-  ret a = TraceByReturningC (\ s -> ret (s, a))
-  eff op = TraceByReturningC (\ s -> handleSum
-    (eff . handleState s runTraceByReturningC)
-    (\ (Trace m k) -> runTraceByReturningC k (m : s)) op)
+  ret a = TraceByReturningC (ret a)
+  eff op = TraceByReturningC (StateC (\ s -> handleSum
+    (eff . handleState s (runStateC . runTraceByReturningC))
+    (\ (Trace m k) -> runStateC (runTraceByReturningC k) (m : s)) op))
 
 
 -- $setup
