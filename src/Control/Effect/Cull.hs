@@ -49,6 +49,12 @@ instance Alternative m => Applicative (CullC m) where
   pure = CullC . pure . Pure
   CullC f <*> CullC a = CullC (liftA2 (<*>) f a)
 
+instance (Alternative m, Monad m) => Monad (CullC m) where
+  CullC m >>= f = CullC (ReaderC (\ cull -> runReaderC m cull >>= \case
+    None e    -> pure (None e)
+    Pure a    -> runReaderC (runCullC (f a)) cull
+    Alt m1 m2 -> let k = flip runReaderC cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
+
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   ret = CullC . ret . Pure
   {-# INLINE ret #-}
