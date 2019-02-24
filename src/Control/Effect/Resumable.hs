@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
@@ -11,8 +11,11 @@ module Control.Effect.Resumable
 
 import Control.DeepSeq
 import Control.Effect.Carrier
+import Control.Effect.Error
 import Control.Effect.Internal
 import Control.Effect.Sum
+import Control.Monad.Fail
+import Control.Monad.IO.Class
 import Data.Coerce
 import Data.Functor.Classes
 
@@ -78,17 +81,17 @@ instance NFData1 err => NFData (SomeError err) where
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runResumable (pure a)) == Right @(SomeError Identity) @Int a
-runResumable :: (Carrier sig m, Effect sig) => Eff (ResumableC err m) a -> m (Either (SomeError err) a)
-runResumable = runResumableC . interpret
+runResumable :: (Carrier sig m, Effect sig, Monad m) => Eff (ResumableC err m) a -> m (Either (SomeError err) a)
+runResumable = runErrorC . runResumableC . interpret
 
-newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError err) a) }
-  deriving (Functor)
+newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
-  ret a = ResumableC (ret (Right a))
+instance (Carrier sig m, Effect sig, Monad m) => Carrier (Resumable err :+: sig) (ResumableC err m) where
+  ret = pure
   eff = ResumableC . handleSum
-    (eff . handleEither runResumableC)
-    (\ (Resumable err _) -> ret (Left (SomeError err)))
+    (eff . R . handleCoercible)
+    (\ (Resumable err _) -> throwError (SomeError err))
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
