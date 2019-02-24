@@ -91,7 +91,8 @@ instance Monad m => Applicative (StateC s m) where
 instance Monad m => Monad (StateC s m) where
   StateC m >>= f = StateC $ \ s -> do
     (s', a) <- m s
-    runStateC (f a) s'
+    let fa = f a
+    fa `seq` runStateC fa s'
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   ret a = StateC (\ s -> ret (s, a))
