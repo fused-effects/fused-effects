@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
 module Control.Effect.Lift
 ( Lift(..)
 , sendM
@@ -24,7 +24,10 @@ sendM :: (Member (Lift n) sig, Carrier sig m, Functor n, Applicative m) => n a -
 sendM = send . Lift . fmap pure
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail)
+
+instance MonadIO (LiftC IO) where
+  liftIO = sendM
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
   ret = pure
