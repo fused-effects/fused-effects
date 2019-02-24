@@ -6,7 +6,7 @@ module Control.Effect.Cull
 , CullC(..)
 ) where
 
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
@@ -44,6 +44,10 @@ runCull = (>>= runBranch (const empty)) . flip runReaderC False . runCullC . int
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool m (Branch m () a) }
   deriving (Functor)
+
+instance Alternative m => Applicative (CullC m) where
+  pure = CullC . pure . Pure
+  CullC f <*> CullC a = CullC (liftA2 (<*>) f a)
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   ret = CullC . ret . Pure
