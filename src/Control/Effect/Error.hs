@@ -12,7 +12,9 @@ import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 import Control.Monad ((<=<))
+import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Prelude hiding (fail)
 
 data Error exc m k
   = Throw exc
@@ -67,6 +69,9 @@ instance Monad m => Monad (ErrorC e m) where
 
 instance MonadIO m => MonadIO (ErrorC e m) where
   liftIO io = ErrorC (Right <$> liftIO io)
+
+instance MonadFail m => MonadFail (ErrorC e m) where
+  fail s = ErrorC (fail s)
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
   ret = pure
