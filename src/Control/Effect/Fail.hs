@@ -6,6 +6,7 @@ module Control.Effect.Fail
 , FailC(..)
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Fail.Internal
 import Control.Effect.Internal
@@ -20,6 +21,10 @@ runFail = runFailC . interpret
 
 newtype FailC m a = FailC { runFailC :: m (Either String a) }
   deriving (Functor)
+
+instance Applicative m => Applicative (FailC m) where
+  pure a = FailC (pure (Right a))
+  FailC f <*> FailC a = FailC (liftA2 (<*>) f a)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
   ret a = FailC (ret (Right a))
