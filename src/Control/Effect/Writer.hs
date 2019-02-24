@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, ExplicitForAll, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, ExplicitForAll, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Writer
 ( Writer(..)
 , tell
@@ -12,7 +12,9 @@ module Control.Effect.Writer
 
 import Control.Effect.Carrier
 import Control.Effect.Internal
+import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad.Fail
 
 data Writer w m k
   = Tell w k
@@ -67,7 +69,7 @@ censor f m = send (Censor f m ret)
 --
 --   prop> run (runWriter (tell (Sum a) *> pure b)) == (Sum a, b)
 runWriter :: forall w sig m a . (Carrier sig m, Effect sig, Monad m, Monoid w) => Eff (WriterC w m) a -> m (w, a)
-runWriter m = runWriterC (interpret m) mempty
+runWriter m = runStateC (runWriterC (interpret m)) mempty
 {-# INLINE runWriter #-}
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
@@ -83,47 +85,24 @@ execWriter = fmap fst . runWriter
 --   This is based on a post Gabriel Gonzalez made to the Haskell mailing list: https://mail.haskell.org/pipermail/libraries/2013-March/019528.html
 --
 --   Note that currently, the constant-space behaviour observed there only occurs when using 'WriterC' and 'VoidC' without 'Eff' wrapping them. See the @benchmark@ component for details.
-newtype WriterC w m a = WriterC { runWriterC :: w -> m (w, a) }
-
-instance Functor m => Functor (WriterC w m) where
-  fmap f (WriterC run) = WriterC (\ w -> fmap (fmap f) (run w))
-  {-# INLINE fmap #-}
-
-instance Monad m => Applicative (WriterC w m) where
-  pure a = WriterC $ \w -> pure (w, a)
-  {-# INLINE pure #-}
-
-  WriterC f <*> WriterC a = WriterC $ \ w -> do
-    (w', f') <- f w
-    (w'', a') <- a w'
-    let fa = f' a'
-    fa `seq` pure (w'', fa)
-  {-# INLINE (<*>) #-}
-
-instance Monad m => Monad (WriterC w m) where
-  return = pure
-  {-# INLINE return #-}
-
-  m >>= f  = WriterC $ \w -> do
-    (w', a) <- runWriterC m w
-    runWriterC (f a) w'
-  {-# INLINE (>>=) #-}
+newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
+  deriving (Applicative, Functor, Monad, MonadFail)
 
 instance (Monoid w, Carrier sig m, Effect sig, Monad m) => Carrier (Writer w :+: sig) (WriterC w m) where
   ret = pure
   {-# INLINE ret #-}
 
-  eff op = WriterC (\ w -> handleSum (eff . handleState w runWriterC) (\case
-    Tell w'    k -> let w'' = mappend w w' in w'' `seq` runWriterC k w''
+  eff op = WriterC (StateC (\ w -> handleSum (eff . handleState w (runStateC . runWriterC)) (\case
+    Tell w'    k -> let w'' = mappend w w' in w'' `seq` runStateC (runWriterC k) w''
     Listen   m k -> do
-      (w', a) <- runWriterC m mempty
+      (w', a) <- runStateC (runWriterC m) mempty
       let w'' = mappend w w'
-      w'' `seq` runWriterC (k w' a) w''
+      w'' `seq` runStateC (runWriterC (k w' a)) w''
     Censor f m k -> do
-      (w', a) <- runWriterC m mempty
+      (w', a) <- runStateC (runWriterC m) mempty
       let w'' = mappend w (f w')
-      w'' `seq` runWriterC (k a) w'')
-    op)
+      w'' `seq` runStateC (runWriterC (k a)) w'')
+    op))
   {-# INLINE eff #-}
 
 
