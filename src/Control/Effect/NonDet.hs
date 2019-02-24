@@ -28,6 +28,7 @@ runNonDet :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, 
 runNonDet = runAltC . interpret
 
 newtype AltC f m a = AltC { runAltC :: m (f a) }
+  deriving (Functor)
 
 instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
   ret a = AltC (ret (pure a))
