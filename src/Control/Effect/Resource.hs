@@ -87,16 +87,16 @@ runHandler h@(Handler handler) = handler . flip runReaderC h . runResourceC
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
   ret = pure
-  eff = ResourceC . handleSum
-    (eff . R . handleCoercible)
+  eff = handleSum
+    (ResourceC . eff . R . handleCoercible)
     (\case
-        Resource acquire release use k -> ReaderC (\ handler -> liftIO (Exc.bracket
+        Resource acquire release use k -> ResourceC (ReaderC (\ handler -> liftIO (Exc.bracket
           (runHandler handler acquire)
           (runHandler handler . release)
-          (runHandler handler . use)))
-          >>= runResourceC . k
-        OnError acquire release use k -> ReaderC (\ handler -> liftIO (Exc.bracketOnError
+          (runHandler handler . use))))
+          >>= k
+        OnError acquire release use k -> ResourceC (ReaderC (\ handler -> liftIO (Exc.bracketOnError
           (runHandler handler acquire)
           (runHandler handler . release)
-          (runHandler handler . use)))
-          >>= runResourceC . k)
+          (runHandler handler . use))))
+          >>= k)
