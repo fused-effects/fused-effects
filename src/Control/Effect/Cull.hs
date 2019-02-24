@@ -49,6 +49,10 @@ instance Alternative m => Applicative (CullC m) where
   pure = CullC . pure . Pure
   CullC f <*> CullC a = CullC (liftA2 (<*>) f a)
 
+instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Alternative (CullC m) where
+  empty = send Empty
+  l <|> r = send (Choose (\ c -> if c then l else r))
+
 instance (Alternative m, Monad m) => Monad (CullC m) where
   CullC m >>= f = CullC (ReaderC (\ cull -> runReaderC m cull >>= \case
     None e    -> pure (None e)
