@@ -61,6 +61,9 @@ instance Applicative m => Applicative (ErrorC e m) where
   pure a = ErrorC (pure (Right a))
   ErrorC f <*> ErrorC a = ErrorC (liftA2 (<*>) f a)
 
+instance Monad m => Monad (ErrorC e m) where
+  ErrorC a >>= f = ErrorC (a >>= either (pure . Left) (runErrorC . f))
+
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
   ret a = ErrorC (pure (Right a))
   eff = ErrorC . handleSum (eff . handleEither runErrorC) (\case
