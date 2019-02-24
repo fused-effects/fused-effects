@@ -80,6 +80,14 @@ execState s m = fmap fst (runStateC (interpret m) s)
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
   deriving (Functor)
 
+instance Monad m => Applicative (StateC s m) where
+  pure a = StateC (\ s -> pure (s, a))
+  StateC f <*> StateC a = StateC $ \ s -> do
+    (s', f') <- f s
+    (s'', a') <- a s'
+    let fa = f' a'
+    fa `seq` pure (s'', fa)
+
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   ret a = StateC (\ s -> ret (s, a))
   eff op = StateC (\ s -> handleSum (eff . handleState s runStateC) (\case
