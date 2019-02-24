@@ -33,6 +33,14 @@ data Branch m e a
   | Alt (m a) (m a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
+instance Alternative m => Applicative (Branch m e) where
+  pure = Pure
+  None e    <*> _         = None e
+  Pure f    <*> a         = f <$> a
+  Alt _  _  <*> None e    = None e
+  Alt f1 f2 <*> Pure a    = Alt (f1 <*> pure a) (f2 <*> pure a)
+  Alt f1 f2 <*> Alt a1 a2 = Alt (f1 <*> a1 <|> f1 <*> a2) (f2 <*> a1 <|> f2 <*> a2)
+
 -- | Case analysis for 'Branch', taking a value to use for 'Cut', a value to use for 'None', and a function to apply to the contents of 'Pure'.
 --
 --   prop> branch None Pure Alt a == (a :: Branch e [] a)
