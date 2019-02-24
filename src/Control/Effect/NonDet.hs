@@ -68,7 +68,7 @@ runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Tr
 runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
 
 newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
-  deriving (Applicative, Functor)
+  deriving (Applicative, Functor, Monad)
 
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Applicative m) => Alternative (OnceC f m)
 
