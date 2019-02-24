@@ -71,6 +71,10 @@ instance Alternative m => Applicative (CutC m) where
   pure = CutC . pure . Pure
   CutC f <*> CutC a = CutC (liftA2 (<*>) f a)
 
+instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Alternative (CutC m) where
+  empty = send Empty
+  l <|> r = send (Choose (\ c -> if c then l else r))
+
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Pure
   {-# INLINE ret #-}
