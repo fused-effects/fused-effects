@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Random
 ( Random(..)
 , runRandom
@@ -47,10 +47,24 @@ newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
 
 instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => Carrier (Random :+: sig) (RandomC g m) where
   ret = pure
-  eff op = RandomC (StateC (\ g -> handleSum (eff . handleState g (runStateC . runRandomC)) (\case
-    Random    k -> let (a, g') = R.random    g in runStateC (runRandomC (k a)) g'
-    RandomR r k -> let (a, g') = R.randomR r g in runStateC (runRandomC (k a)) g'
-    Interleave m k -> let (g1, g2) = R.split g in runStateC (runRandomC m) g1 >>= flip runStateC g2 . runRandomC . k . snd) op))
+  eff = RandomC . handleSum (eff . R . handleCoercible) (\case
+    Random    k -> do
+      g <- get
+      let (a, g') = R.random    (g :: g)
+      put g'
+      runRandomC (k a)
+    RandomR r k -> do
+      g <- get
+      let (a, g') = R.randomR r (g :: g)
+      put g'
+      runRandomC (k a)
+    Interleave m k -> do
+      g <- get
+      let (g1, g2) = R.split (g :: g)
+      put g1
+      a <- runRandomC m
+      put g2
+      runRandomC (k a))
 
 
 -- $setup
