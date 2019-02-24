@@ -8,6 +8,7 @@ module Control.Effect.Reader
 , ReaderC(..)
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
@@ -54,6 +55,10 @@ runReader r m = runReaderC (interpret m) r
 
 newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
   deriving (Functor)
+
+instance Applicative m => Applicative (ReaderC r m) where
+  pure a = ReaderC (const (pure a))
+  ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
   ret a = ReaderC (const (ret a))
