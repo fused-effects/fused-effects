@@ -17,7 +17,9 @@ import Control.Effect.Cull
 import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
+import Control.Monad.Fail
 import Data.Monoid as Monoid (Alt(..))
+import Prelude hiding (fail)
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
@@ -41,6 +43,9 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Appl
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Monad (AltC f m) where
   AltC a >>= f = AltC (a >>= runAltC . getAlt . foldMap (Monoid.Alt . f))
+
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (AltC f m) where
+  fail s = AltC (fail s)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
   ret = pure
