@@ -82,6 +82,7 @@ runResumable :: (Carrier sig m, Effect sig) => Eff (ResumableC err m) a -> m (Ei
 runResumable = runResumableC . interpret
 
 newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError err) a) }
+  deriving (Functor)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   ret a = ResumableC (ret (Right a))
