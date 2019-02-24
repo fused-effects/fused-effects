@@ -80,7 +80,10 @@ runResource handler = flip runReaderC (Handler handler) . runResourceC . interpr
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-newtype Handler m = Handler { runHandler :: forall x . m x -> IO x }
+newtype Handler m = Handler (forall x . m x -> IO x)
+
+runHandler :: Handler m -> ResourceC m a -> IO a
+runHandler h@(Handler handler) = handler . flip runReaderC h . runResourceC
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
   ret = pure
@@ -88,12 +91,12 @@ instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) 
     (eff . R . handleCoercible)
     (\case
         Resource acquire release use k -> ReaderC (\ handler -> liftIO (Exc.bracket
-          (runHandler handler (runReaderC (runResourceC acquire) handler))
-          (runHandler handler . flip runReaderC handler . runResourceC . release)
-          (runHandler handler . flip runReaderC handler . runResourceC . use)))
+          (runHandler handler acquire)
+          (runHandler handler . release)
+          (runHandler handler . use)))
           >>= runResourceC . k
         OnError acquire release use k -> ReaderC (\ handler -> liftIO (Exc.bracketOnError
-          (runHandler handler (runReaderC (runResourceC acquire) handler))
-          (runHandler handler . flip runReaderC handler . runResourceC . release)
-          (runHandler handler . flip runReaderC handler . runResourceC . use)))
+          (runHandler handler acquire)
+          (runHandler handler . release)
+          (runHandler handler . use)))
           >>= runResourceC . k)
