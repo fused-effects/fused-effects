@@ -15,6 +15,7 @@ import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 import Control.Monad.Fail
+import Control.Monad.IO.Class
 import Data.Coerce
 import Prelude hiding (fail)
 
@@ -98,6 +99,9 @@ instance Monad m => Monad (StateC s m) where
 
 instance MonadFail m => MonadFail (StateC s m) where
   fail s = StateC (const (fail s))
+
+instance MonadIO m => MonadIO (StateC s m) where
+  liftIO io = StateC (\ s -> (,) s <$> liftIO io)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   ret a = StateC (\ s -> ret (s, a))

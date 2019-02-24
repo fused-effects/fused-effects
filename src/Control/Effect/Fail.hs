@@ -12,6 +12,7 @@ import Control.Effect.Fail.Internal
 import Control.Effect.Internal
 import Control.Effect.Sum
 import Control.Monad.Fail
+import Control.Monad.IO.Class
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
@@ -31,6 +32,9 @@ instance Monad m => Monad (FailC m) where
 
 instance Monad m => MonadFail (FailC m) where
   fail s = FailC (pure (Left s))
+
+instance MonadIO m => MonadIO (FailC m) where
+  liftIO io = FailC (Right <$> liftIO io)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
   ret a = FailC (ret (Right a))

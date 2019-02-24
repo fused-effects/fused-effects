@@ -13,6 +13,7 @@ import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 import Control.Monad.Fail
+import Control.Monad.IO.Class
 import Prelude hiding (fail)
 
 data Reader r m k
@@ -67,6 +68,9 @@ instance Monad m => Monad (ReaderC r m) where
 
 instance MonadFail m => MonadFail (ReaderC r m) where
   fail s = ReaderC (const (fail s))
+
+instance MonadIO m => MonadIO (ReaderC r m) where
+  liftIO = ReaderC . const . liftIO
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
   ret = pure

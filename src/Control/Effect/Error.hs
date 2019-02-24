@@ -12,6 +12,7 @@ import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
 import Control.Monad ((<=<))
+import Control.Monad.IO.Class
 
 data Error exc m k
   = Throw exc
@@ -63,6 +64,9 @@ instance Applicative m => Applicative (ErrorC e m) where
 
 instance Monad m => Monad (ErrorC e m) where
   ErrorC a >>= f = ErrorC (a >>= either (pure . Left) (runErrorC . f))
+
+instance MonadIO m => MonadIO (ErrorC e m) where
+  liftIO io = ErrorC (Right <$> liftIO io)
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
   ret = pure

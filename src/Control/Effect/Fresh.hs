@@ -12,6 +12,7 @@ import Control.Effect.Internal
 import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad.Fail
+import Control.Monad.IO.Class
 
 data Fresh m k
   = Fresh (Int -> k)
@@ -48,7 +49,7 @@ runFresh :: (Carrier sig m, Effect sig, Monad m) => Eff (FreshC m) a -> m a
 runFresh = fmap snd . flip runStateC 0 . runFreshC . interpret
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
-  deriving (Applicative, Functor, Monad, MonadFail)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fresh :+: sig) (FreshC m) where
   ret = pure

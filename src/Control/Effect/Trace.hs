@@ -43,7 +43,7 @@ runTraceByPrinting :: (MonadIO m, Carrier sig m) => Eff (TraceByPrintingC m) a -
 runTraceByPrinting = runTraceByPrintingC . interpret
 
 newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
-  deriving (Applicative, Functor, Monad, MonadFail)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
   ret = TraceByPrintingC . ret
@@ -59,7 +59,7 @@ runTraceByIgnoring :: Carrier sig m => Eff (TraceByIgnoringC m) a -> m a
 runTraceByIgnoring = runTraceByIgnoringC . interpret
 
 newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
-  deriving (Applicative, Functor, Monad, MonadFail)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
   ret = TraceByIgnoringC . ret
@@ -73,7 +73,7 @@ runTraceByReturning :: (Carrier sig m, Effect sig, Monad m) => Eff (TraceByRetur
 runTraceByReturning = fmap (first reverse) . flip runStateC [] . runTraceByReturningC . interpret
 
 newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
-  deriving (Applicative, Functor, Monad, MonadFail)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Trace :+: sig) (TraceByReturningC m) where
   ret a = TraceByReturningC (ret a)

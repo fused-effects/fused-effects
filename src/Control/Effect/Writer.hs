@@ -15,6 +15,7 @@ import Control.Effect.Internal
 import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad.Fail
+import Control.Monad.IO.Class
 
 data Writer w m k
   = Tell w k
@@ -86,7 +87,7 @@ execWriter = fmap fst . runWriter
 --
 --   Note that currently, the constant-space behaviour observed there only occurs when using 'WriterC' and 'VoidC' without 'Eff' wrapping them. See the @benchmark@ component for details.
 newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
-  deriving (Applicative, Functor, Monad, MonadFail)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Monoid w, Carrier sig m, Effect sig, Monad m) => Carrier (Writer w :+: sig) (WriterC w m) where
   ret = pure
