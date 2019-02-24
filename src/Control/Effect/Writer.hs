@@ -11,8 +11,8 @@ module Control.Effect.Writer
 ) where
 
 import Control.Effect.Carrier
-import Control.Effect.Sum
 import Control.Effect.Internal
+import Control.Effect.Sum
 
 data Writer w m k
   = Tell w k
