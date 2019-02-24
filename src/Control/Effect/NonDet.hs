@@ -48,6 +48,9 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversabl
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (AltC f m) where
   fail s = AltC (fail s)
 
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (AltC f m) where
+  liftIO io = AltC (pure <$> liftIO io)
+
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
   ret = pure
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
