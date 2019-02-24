@@ -23,8 +23,8 @@ runFail = runErrorC . runFailC . interpret
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance Monad m => MonadFail (FailC m) where
-  fail s = FailC (ErrorC (pure (Left s)))
+instance (Carrier sig m, Effect sig, Monad m) => MonadFail (FailC m) where
+  fail s = send (Fail s)
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fail :+: sig) (FailC m) where
   ret a = FailC (ret a)
