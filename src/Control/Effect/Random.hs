@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Random
 ( Random(..)
 , runRandom
@@ -13,7 +13,9 @@ module Control.Effect.Random
 import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Random.Internal
+import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad.Fail
 import Control.Monad.Random.Class (MonadInterleave(..), MonadRandom(..))
 import Control.Monad.IO.Class (MonadIO(..))
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
@@ -22,7 +24,7 @@ import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGe
 --
 --   prop> run (runRandom (PureGen a) (pure b)) == (PureGen a, b)
 runRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
-runRandom g = flip runRandomC g . interpret
+runRandom g = flip runStateC g . runRandomC . interpret
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
 --
@@ -40,14 +42,15 @@ execRandom g = fmap fst . runRandom g
 evalRandomIO :: (Carrier sig m, Effect sig, MonadIO m) => Eff (RandomC R.StdGen m) a -> m a
 evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
-newtype RandomC g m a = RandomC { runRandomC :: g -> m (g, a) }
+newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => Carrier (Random :+: sig) (RandomC g m) where
-  ret a = RandomC (\ g -> ret (g, a))
-  eff op = RandomC (\ g -> handleSum (eff . handleState g runRandomC) (\case
-    Random    k -> let (a, g') = R.random    g in runRandomC (k a) g'
-    RandomR r k -> let (a, g') = R.randomR r g in runRandomC (k a) g'
-    Interleave m k -> let (g1, g2) = R.split g in runRandomC m g1 >>= flip runRandomC g2 . k . snd) op)
+  ret = pure
+  eff op = RandomC (StateC (\ g -> handleSum (eff . handleState g (runStateC . runRandomC)) (\case
+    Random    k -> let (a, g') = R.random    g in runStateC (runRandomC (k a)) g'
+    RandomR r k -> let (a, g') = R.randomR r g in runStateC (runRandomC (k a)) g'
+    Interleave m k -> let (g1, g2) = R.split g in runStateC (runRandomC m) g1 >>= flip runStateC g2 . runRandomC . k . snd) op))
 
 
 -- $setup
