@@ -16,6 +16,7 @@ import Control.Effect.Carrier
 import Control.Effect.Cull
 import Control.Effect.Fail
 import Control.Effect.Internal
+import Control.Effect.Lift
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 import Control.Monad.IO.Class
@@ -72,6 +73,7 @@ newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
 
 deriving instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
 deriving instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Member Fail sig, Monad f, Traversable f) => MonadFail (OnceC f m)
+deriving instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Member (Lift IO) sig, Monad f, Traversable f) => MonadIO (OnceC f m)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   ret = OnceC . ret
