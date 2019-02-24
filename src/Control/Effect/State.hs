@@ -88,6 +88,11 @@ instance Monad m => Applicative (StateC s m) where
     let fa = f' a'
     fa `seq` pure (s'', fa)
 
+instance Monad m => Monad (StateC s m) where
+  m >>= f  = StateC $ \ s -> do
+    (s', a) <- runStateC m s
+    runStateC (f a) s'
+
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   ret a = StateC (\ s -> ret (s, a))
   eff op = StateC (\ s -> handleSum (eff . handleState s runStateC) (\case
