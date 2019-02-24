@@ -58,6 +58,7 @@ runTraceByIgnoring :: Carrier sig m => Eff (TraceByIgnoringC m) a -> m a
 runTraceByIgnoring = runTraceByIgnoringC . interpret
 
 newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
+  deriving (Applicative, Functor, Monad, MonadFail)
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
   ret = TraceByIgnoringC . ret
