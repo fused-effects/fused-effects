@@ -12,6 +12,8 @@ import Control.Applicative (liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
+import Control.Monad.Fail
+import Prelude hiding (fail)
 
 data Reader r m k
   = Ask (r -> k)
@@ -62,6 +64,9 @@ instance Applicative m => Applicative (ReaderC r m) where
 
 instance Monad m => Monad (ReaderC r m) where
   ReaderC a >>= f = ReaderC (\ r -> a r >>= flip runReaderC r . f)
+
+instance MonadFail m => MonadFail (ReaderC r m) where
+  fail s = ReaderC (const (fail s))
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
   ret a = ReaderC (const (ret a))
