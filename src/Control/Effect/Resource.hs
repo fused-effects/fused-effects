@@ -90,13 +90,17 @@ instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) 
   eff = handleSum
     (ResourceC . eff . R . handleCoercible)
     (\case
-        Resource acquire release use k -> ResourceC (ReaderC (\ handler -> liftIO (Exc.bracket
-          (runHandler handler acquire)
-          (runHandler handler . release)
-          (runHandler handler . use))))
-          >>= k
-        OnError acquire release use k -> ResourceC (ReaderC (\ handler -> liftIO (Exc.bracketOnError
-          (runHandler handler acquire)
-          (runHandler handler . release)
-          (runHandler handler . use))))
-          >>= k)
+        Resource acquire release use k -> do
+          handler <- ResourceC ask
+          a <- liftIO (Exc.bracket
+            (runHandler handler acquire)
+            (runHandler handler . release)
+            (runHandler handler . use))
+          k a
+        OnError acquire release use k -> do
+          handler <- ResourceC ask
+          a <- liftIO (Exc.bracketOnError
+            (runHandler handler acquire)
+            (runHandler handler . release)
+            (runHandler handler . use))
+          k a)
