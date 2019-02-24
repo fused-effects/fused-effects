@@ -54,10 +54,10 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Alternative (Cul
   l <|> r = send (Choose (\ c -> if c then l else r))
 
 instance (Alternative m, Monad m) => Monad (CullC m) where
-  CullC m >>= f = CullC (ReaderC (\ cull -> runReaderC m cull >>= \case
+  CullC m >>= f = CullC (m >>= \case
     None e    -> pure (None e)
-    Pure a    -> runReaderC (runCullC (f a)) cull
-    Alt m1 m2 -> let k = flip runReaderC cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
+    Pure a    -> runCullC (f a)
+    Alt m1 m2 -> ReaderC (\ cull -> let k = flip runReaderC cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   ret = CullC . ret . Pure
