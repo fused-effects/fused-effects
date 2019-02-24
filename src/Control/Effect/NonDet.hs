@@ -18,6 +18,7 @@ import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 import Control.Monad.Fail
+import Control.Monad.IO.Class
 import Data.Monoid as Monoid (Alt(..))
 import Prelude hiding (fail)
 
@@ -64,6 +65,7 @@ runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Tr
 runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
 
 newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
+  deriving (Functor)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   ret = OnceC . ret
