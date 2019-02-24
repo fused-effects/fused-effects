@@ -39,7 +39,7 @@ instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Appl
   l <|> r = send (Choose (\ c -> if c then l else r))
 
 instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
-  ret a = AltC (ret (pure a))
+  ret = pure
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
     Empty    -> ret empty
     Choose k -> liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
