@@ -119,8 +119,7 @@ instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableW
   eff = ResumableWithC . handleSum
     (eff . R . handleCoercible)
     (\ (Resumable err k) -> do
-      handler <- ask
-      res <- ReaderC (const (runHandler handler err))
+      res <- ReaderC (\ handler -> runHandler handler err)
       runResumableWithC (k res))
 
 
