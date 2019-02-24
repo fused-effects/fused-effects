@@ -53,6 +53,7 @@ runReader :: forall r sig m a . (Carrier sig m, Monad m) => r -> Eff (ReaderC r 
 runReader r m = runReaderC (interpret m) r
 
 newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
+  deriving (Functor)
 
 instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
   ret a = ReaderC (const (ret a))
