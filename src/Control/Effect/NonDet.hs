@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
@@ -68,7 +68,7 @@ runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Tr
 runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
 
 newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
-  deriving (Functor)
+  deriving (Applicative, Functor)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   ret = OnceC . ret
