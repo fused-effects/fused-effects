@@ -75,6 +75,12 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Alternative (Cut
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
+instance (Alternative m, Monad m) => Monad (CutC m) where
+  CutC m >>= f = CutC (m >>= \case
+    None e    -> pure (None e)
+    Pure a    -> runCutC (f a)
+    Alt m1 m2 -> let k = runCutC . f in (m1 >>= k) <|> (m2 >>= k))
+
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Pure
   {-# INLINE ret #-}
