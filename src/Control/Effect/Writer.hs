@@ -89,7 +89,7 @@ instance Functor m => Functor (WriterC w m) where
   fmap f (WriterC run) = WriterC (\ w -> fmap (fmap f) (run w))
   {-# INLINE fmap #-}
 
-instance (Monad m, Monoid w) => Applicative (WriterC w m) where
+instance Monad m => Applicative (WriterC w m) where
   pure a = WriterC $ \w -> pure (w, a)
   {-# INLINE pure #-}
 
@@ -100,7 +100,7 @@ instance (Monad m, Monoid w) => Applicative (WriterC w m) where
     fa `seq` pure (w'', fa)
   {-# INLINE (<*>) #-}
 
-instance (Monad m, Monoid w) => Monad (WriterC w m) where
+instance Monad m => Monad (WriterC w m) where
   return = pure
   {-# INLINE return #-}
 
