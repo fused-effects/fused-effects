@@ -55,12 +55,12 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f, Appl
 --
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
+runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Eff (OnceC f m) a -> m (f a)
 runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
 
 newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
 
-instance (Alternative f, Carrier sig m, Effect sig, Traversable f, Monad f, Monad m) => Carrier (NonDet :+: sig) (OnceC f m) where
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   ret = OnceC . ret
   eff = OnceC . handleSum (eff . R . R . R . handleCoercible) (\case
     Empty    -> empty
