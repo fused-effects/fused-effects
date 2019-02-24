@@ -54,6 +54,7 @@ runError :: forall exc sig m a . (Carrier sig m, Effect sig, Monad m) => Eff (Er
 runError = runErrorC . interpret
 
 newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
+  deriving (Functor)
 
 instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
   ret a = ErrorC (pure (Right a))
