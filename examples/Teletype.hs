@@ -6,7 +6,9 @@ import Prelude hiding (read)
 
 import Control.Effect
 import Control.Effect.Carrier
+import Control.Effect.State
 import Control.Effect.Sum
+import Control.Effect.Writer
 import Control.Monad.IO.Class
 import Data.Coerce
 import Test.Hspec
@@ -15,13 +17,13 @@ import Test.Hspec.QuickCheck
 spec :: Spec
 spec = describe "teletype" $ do
   prop "reads" $
-    \ line -> run (runTeletypeRet [line] read) `shouldBe` (([], []), line)
+    \ line -> run (runTeletypeRet [line] read) `shouldBe` ([], ([], line))
 
   prop "writes" $
-    \ input output -> run (runTeletypeRet input (write output)) `shouldBe` ((input, [output]), ())
+    \ input output -> run (runTeletypeRet input (write output)) `shouldBe` ([output], (input, ()))
 
   prop "writes multiple things" $
-    \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) `shouldBe` ((input, [output1, output2]), ())
+    \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) `shouldBe` ([output1, output2], (input, ()))
 
 data Teletype (m :: * -> *) k
   = Read (String -> k)
@@ -55,30 +57,17 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
     Write s k -> liftIO (putStrLn s) >>  k)
 
 
-runTeletypeRet :: [String] -> TeletypeRetC m a -> m (([String], [String]), a)
-runTeletypeRet = flip runTeletypeRetC
+runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
+runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 
-newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: [String] -> m (([String], [String]), a) }
-  deriving (Functor)
-
-instance Monad m => Applicative (TeletypeRetC m) where
-  pure a = TeletypeRetC (\ i -> pure ((i, []), a))
-  TeletypeRetC f <*> TeletypeRetC a = TeletypeRetC (\ i1 -> do
-    ((i2, o1), f') <- f i1
-    ((i3, o2), a') <- a i2
-    pure ((i3, o1 ++ o2), f' a'))
-
-instance Monad m => Monad (TeletypeRetC m) where
-  TeletypeRetC a >>= f = TeletypeRetC (\ i -> a i >>= \ ((i', o), a') -> runTeletypeRetC (f a') i')
+newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
+  deriving (Applicative, Functor, Monad)
 
 instance (Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
-  eff op = TeletypeRetC (\ i -> handleSum (eff . handle ((i, []), ()) mergeResults) (\case
-    Read k -> case i of
-      []  -> runTeletypeRetC (k "") []
-      h:t -> runTeletypeRetC (k h)  t
-    Write s k -> do
-      ((i, out), a) <- runTeletypeRetC k i
-      pure ((i, s:out), a)) op)
-    where mergeResults ((i, o), m) = do
-            ((i', o'), a) <- runTeletypeRetC m i
-            pure ((i', o ++ o'), a)
+  eff = TeletypeRetC . handleSum (eff . R . R . handleCoercible) (\case
+    Read k -> do
+      i <- get
+      case i of
+        []  -> runTeletypeRetC (k "")
+        h:t -> put t *> runTeletypeRetC (k h)
+    Write s k -> tell [s] *> runTeletypeRetC k)
