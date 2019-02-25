@@ -62,3 +62,6 @@ newtype MaybeC m a = MaybeC { runMaybeC :: m (Maybe a) }
 instance Applicative m => Applicative (MaybeC m) where
   pure = MaybeC . pure . Just
   MaybeC f <*> MaybeC a = MaybeC (liftA2 (<*>) f a)
+
+instance Monad m => Monad (MaybeC m) where
+  MaybeC a >>= f = MaybeC (a >>= maybe (pure Nothing) (runMaybeC . f))
