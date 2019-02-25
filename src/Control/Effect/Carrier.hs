@@ -1,10 +1,11 @@
-{-# LANGUAGE DefaultSignatures, FunctionalDependencies, RankNTypes #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, FunctionalDependencies, RankNTypes #-}
 module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
 , Carrier(..)
 , handlePure
 , handleCoercible
+, MaybeC(..)
 ) where
 
 import Data.Coerce
@@ -52,3 +53,7 @@ handlePure handler = hmap handler . fmap' handler
 handleCoercible :: (HFunctor sig, Coercible f g) => sig f (f a) -> sig g (g a)
 handleCoercible = handlePure coerce
 {-# INLINE handleCoercible #-}
+
+
+newtype MaybeC m a = MaybeC { runMaybeC :: m (Maybe a) }
+  deriving (Functor)
