@@ -45,13 +45,13 @@ resetFresh m = send (Reset m ret)
 --
 --   prop> run (runFresh (replicateM n fresh)) == [0..pred n]
 --   prop> run (runFresh (replicateM n fresh *> pure b)) == b
-runFresh :: (Carrier sig m, Effect sig, Monad m) => Eff (FreshC m) a -> m a
+runFresh :: (Carrier sig m, Effect sig) => Eff (FreshC m) a -> m a
 runFresh = fmap snd . flip runStateC 0 . runFreshC . interpret
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fresh :+: sig) (FreshC m) where
+instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
   ret = pure
   eff = FreshC . handleSum (eff . R . handleCoercible) (\case
     Fresh   k -> do

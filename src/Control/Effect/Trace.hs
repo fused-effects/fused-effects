@@ -69,13 +69,13 @@ instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
 --   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) == ([a, b], c)
-runTraceByReturning :: (Carrier sig m, Effect sig, Monad m) => Eff (TraceByReturningC m) a -> m ([String], a)
+runTraceByReturning :: (Carrier sig m, Effect sig) => Eff (TraceByReturningC m) a -> m ([String], a)
 runTraceByReturning = fmap (first reverse) . flip runStateC [] . runTraceByReturningC . interpret
 
 newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance (Carrier sig m, Effect sig, Monad m) => Carrier (Trace :+: sig) (TraceByReturningC m) where
+instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
   ret = pure
   eff = handleSum
     (TraceByReturningC . eff . R . handleCoercible)

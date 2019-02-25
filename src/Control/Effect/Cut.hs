@@ -61,7 +61,7 @@ cut = pure () <|> cutfail
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
-runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a -> m a
+runCut :: (Alternative m, Carrier sig m, Effect sig) => Eff (CutC m) a -> m a
 runCut = (>>= runBranch (const empty)) . runCutC . interpret
 
 newtype CutC m a = CutC { runCutC :: m (Branch m Bool a) }
@@ -71,7 +71,7 @@ instance Alternative m => Applicative (CutC m) where
   pure = CutC . pure . Pure
   CutC f <*> CutC a = CutC (liftA2 (<*>) f a)
 
-instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Alternative (CutC m) where
+instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
@@ -81,7 +81,7 @@ instance (Alternative m, Monad m) => Monad (CutC m) where
     Pure a    -> runCutC (f a)
     Alt m1 m2 -> let k = runCutC . f in (m1 >>= k) <|> (m2 >>= k))
 
-instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
+instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   ret = CutC . ret . Pure
   {-# INLINE ret #-}
 
@@ -93,7 +93,7 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+:
     (\case
       Cutfail  -> ret (None False)
       Call m k -> runCutC m >>= bindBranch (ret (None True)) (runCutC . k))
-    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
+    where bindBranch :: (Alternative m, Carrier sig m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
           bindBranch cut bind = branch (\ e -> if e then ret (None True) else cut) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
   {-# INLINE eff #-}
 

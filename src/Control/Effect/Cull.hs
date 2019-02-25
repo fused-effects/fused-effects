@@ -42,7 +42,7 @@ cull m = send (Cull m ret)
 -- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
 --
 --   prop> run (runNonDet (runCull (pure a <|> pure b))) == [a, b]
-runCull :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CullC m) a -> m a
+runCull :: (Alternative m, Carrier sig m, Effect sig) => Eff (CullC m) a -> m a
 runCull = (>>= runBranch (const empty)) . flip runReaderC False . runCullC . interpret
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool m (Branch m () a) }
@@ -52,7 +52,7 @@ instance Alternative m => Applicative (CullC m) where
   pure = CullC . pure . Pure
   CullC f <*> CullC a = CullC (liftA2 (<*>) f a)
 
-instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Alternative (CullC m) where
+instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CullC m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
@@ -68,7 +68,7 @@ instance (Alternative m, MonadFail m) => MonadFail (CullC m) where
 instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
   liftIO io = CullC (Pure <$> liftIO io)
 
-instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
+instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   ret = CullC . ret . Pure
   {-# INLINE ret #-}
 
@@ -79,7 +79,7 @@ instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cull :+
       Choose k    -> runReaderC (runCullC (k True)) cull >>= branch (const (runReaderC (runCullC (k False)) cull)) (if cull then ret . Pure else \ a -> ret (Alt (ret a) (runReaderC (runCullC (k False)) cull >>= runBranch (const empty)))) (fmap ret . Alt)))
     (\ (Cull m k) -> runReaderC (runCullC m) True >>= bindBranch (flip runReaderC cull . runCullC . k))
     op))
-    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => (b -> m (Branch m () a)) -> Branch m () b -> m (Branch m () a)
+    where bindBranch :: (Alternative m, Carrier sig m) => (b -> m (Branch m () a)) -> Branch m () b -> m (Branch m () a)
           bindBranch bind = branch (const (ret (None ()))) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
   {-# INLINE eff #-}
 

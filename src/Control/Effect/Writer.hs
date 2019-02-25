@@ -69,14 +69,14 @@ censor f m = send (Censor f m ret)
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --
 --   prop> run (runWriter (tell (Sum a) *> pure b)) == (Sum a, b)
-runWriter :: forall w sig m a . (Carrier sig m, Effect sig, Monad m, Monoid w) => Eff (WriterC w m) a -> m (w, a)
+runWriter :: forall w sig m a . (Carrier sig m, Effect sig, Monoid w) => Eff (WriterC w m) a -> m (w, a)
 runWriter m = runStateC (runWriterC (interpret m)) mempty
 {-# INLINE runWriter #-}
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
 --
 --   prop> run (execWriter (tell (Sum a) *> pure b)) == Sum a
-execWriter :: forall w sig m a . (Carrier sig m, Effect sig, Monad m, Monoid w) => Eff (WriterC w m) a -> m w
+execWriter :: forall w sig m a . (Carrier sig m, Effect sig, Monoid w) => Eff (WriterC w m) a -> m w
 execWriter = fmap fst . runWriter
 {-# INLINE execWriter #-}
 
@@ -89,7 +89,7 @@ execWriter = fmap fst . runWriter
 newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance (Monoid w, Carrier sig m, Effect sig, Monad m) => Carrier (Writer w :+: sig) (WriterC w m) where
+instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
   ret = pure
   {-# INLINE ret #-}
 

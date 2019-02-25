@@ -17,16 +17,16 @@ import Control.Monad.IO.Class
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
 --   prop> run (runFail (pure a)) == Right a
-runFail :: (Carrier sig m, Effect sig, Monad m) => Eff (FailC m) a -> m (Either String a)
+runFail :: (Carrier sig m, Effect sig) => Eff (FailC m) a -> m (Either String a)
 runFail = runErrorC . runFailC . interpret
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance (Carrier sig m, Effect sig, Monad m) => MonadFail (FailC m) where
+instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
   fail s = send (Fail s)
 
-instance (Carrier sig m, Effect sig, Monad m) => Carrier (Fail :+: sig) (FailC m) where
+instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
   ret a = FailC (ret a)
   eff = FailC . handleSum (eff . R . handleCoercible) (\ (Fail s) -> throwError s)
 

@@ -58,14 +58,14 @@ bracketOnError :: (Member Resource sig, Carrier sig m)
 bracketOnError acquire release use = send (OnError acquire release use ret)
 
 -- | Like 'bracket', but for the simple case of one computation to run afterward.
-finally :: (Member Resource sig, Carrier sig m, Applicative m)
+finally :: (Member Resource sig, Carrier sig m)
         => m a -- ^ computation to run first
         -> m b -- ^ computation to run afterward (even if an exception was raised)
         -> m a
 finally act end = bracket (pure ()) (const end) (const act)
 
 -- | Like 'bracketOnError', but for the simple case of one computation to run afterward.
-onException :: (Member Resource sig, Carrier sig m, Applicative m)
+onException :: (Member Resource sig, Carrier sig m)
         => m a -- ^ computation to run first
         -> m b -- ^ computation to run afterward if an exception was raised
         -> m a

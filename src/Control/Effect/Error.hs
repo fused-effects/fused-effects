@@ -54,7 +54,7 @@ catchError m h = send (Catch m h ret)
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runError (pure a)) == Right @Int @Int a
-runError :: forall exc sig m a . (Carrier sig m, Effect sig, Monad m) => Eff (ErrorC exc m) a -> m (Either exc a)
+runError :: forall exc sig m a . (Carrier sig m, Effect sig) => Eff (ErrorC exc m) a -> m (Either exc a)
 runError = runErrorC . interpret
 
 newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
@@ -73,7 +73,7 @@ instance MonadIO m => MonadIO (ErrorC e m) where
 instance MonadFail m => MonadFail (ErrorC e m) where
   fail s = ErrorC (fail s)
 
-instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
+instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
   ret = pure
   eff = ErrorC . handleSum (eff . handleEither runErrorC) (\case
     Throw e     -> pure (Left e)

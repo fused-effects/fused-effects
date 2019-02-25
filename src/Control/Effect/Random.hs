@@ -23,19 +23,19 @@ import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGe
 -- | Run a random computation starting from a given generator.
 --
 --   prop> run (runRandom (PureGen a) (pure b)) == (PureGen a, b)
-runRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
+runRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
 runRandom g = flip runStateC g . runRandomC . interpret
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
 --
 --   prop> run (evalRandom (PureGen a) (pure b)) == b
-evalRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m a
+evalRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m a
 evalRandom g = fmap snd . runRandom g
 
 -- | Run a random computation starting from a given generator and discarding the final result.
 --
 --   prop> run (execRandom (PureGen a) (pure b)) == PureGen a
-execRandom :: (Carrier sig m, Effect sig, Monad m, R.RandomGen g) => g -> Eff (RandomC g m) a -> m g
+execRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m g
 execRandom g = fmap fst . runRandom g
 
 -- | Run a random computation in 'IO', splitting the global standard generator to get a new one for the computation.
@@ -45,7 +45,7 @@ evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => MonadRandom (RandomC g m) where
+instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m) where
   getRandom = send (Random ret)
   {-# INLINE getRandom #-}
   getRandomR r = send (RandomR r ret)
@@ -55,11 +55,11 @@ instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => MonadRandom (Ran
   getRandoms = (:) <$> getRandom <*> getRandoms
   {-# INLINE getRandoms #-}
 
-instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => MonadInterleave (RandomC g m) where
+instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadInterleave (RandomC g m) where
   interleave m = send (Interleave m ret)
   {-# INLINE interleave #-}
 
-instance (Carrier sig m, Effect sig, R.RandomGen g, Monad m) => Carrier (Random :+: sig) (RandomC g m) where
+instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) (RandomC g m) where
   ret = pure
   eff = RandomC . handleSum (eff . R . handleCoercible) (\case
     Random    k -> do

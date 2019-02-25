@@ -56,7 +56,7 @@ put s = send (Put s (ret ()))
 --   This is strict in the new state; if you need laziness, use @get >>= put . f@.
 --
 --   prop> fst (run (runState a (modify (+1)))) == (1 + a :: Integer)
-modify :: (Member (State s) sig, Carrier sig m, Monad m) => (s -> s) -> m ()
+modify :: (Member (State s) sig, Carrier sig m) => (s -> s) -> m ()
 modify f = do
    a <- get
    put $! f a
@@ -70,13 +70,13 @@ runState s m = runStateC (interpret m) s
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
 --
 --   prop> run (evalState a (pure b)) == b
-evalState :: forall s sig m a . (Carrier sig m, Effect sig, Functor m) => s -> Eff (StateC s m) a -> m a
+evalState :: forall s sig m a . (Carrier sig m, Effect sig) => s -> Eff (StateC s m) a -> m a
 evalState s m = fmap snd (runStateC (interpret m) s)
 
 -- | Run a 'State' effect, yielding the final state and discarding the return value.
 --
 --   prop> run (execState a (pure b)) == a
-execState :: forall s sig m a . (Carrier sig m, Effect sig, Functor m) => s -> Eff (StateC s m) a -> m s
+execState :: forall s sig m a . (Carrier sig m, Effect sig) => s -> Eff (StateC s m) a -> m s
 execState s m = fmap fst (runStateC (interpret m) s)
 
 

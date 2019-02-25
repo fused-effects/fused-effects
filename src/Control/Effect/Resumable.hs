@@ -82,13 +82,13 @@ instance NFData1 err => NFData (SomeError err) where
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runResumable (pure a)) == Right @(SomeError Identity) @Int a
-runResumable :: (Carrier sig m, Effect sig, Monad m) => Eff (ResumableC err m) a -> m (Either (SomeError err) a)
+runResumable :: (Carrier sig m, Effect sig) => Eff (ResumableC err m) a -> m (Either (SomeError err) a)
 runResumable = runErrorC . runResumableC . interpret
 
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance (Carrier sig m, Effect sig, Monad m) => Carrier (Resumable err :+: sig) (ResumableC err m) where
+instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   ret = pure
   eff = ResumableC . handleSum
     (eff . R . handleCoercible)
@@ -103,7 +103,7 @@ instance (Carrier sig m, Effect sig, Monad m) => Carrier (Resumable err :+: sig)
 --
 --   prop> run (runResumableWith (\ (Err b) -> pure (1 + b)) (pure a)) == a
 --   prop> run (runResumableWith (\ (Err b) -> pure (1 + b)) (throwResumable (Err a))) == 1 + a
-runResumableWith :: (Carrier sig m, Monad m)
+runResumableWith :: Carrier sig m
                  => (forall x . err x -> m x)
                  -> Eff (ResumableWithC err m) a
                  -> m a
@@ -114,7 +114,7 @@ newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (
 
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
-instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
+instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
   ret = pure
   eff = handleSum
     (ResumableWithC . eff . R . handleCoercible)

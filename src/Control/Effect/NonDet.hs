@@ -29,7 +29,7 @@ import Prelude hiding (fail)
 --
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
-runNonDet :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Eff (AltC f m) a -> m (f a)
+runNonDet :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig) => Eff (AltC f m) a -> m (f a)
 runNonDet = runAltC . interpret
 
 newtype AltC f m a = AltC { runAltC :: m (f a) }
@@ -39,11 +39,11 @@ instance (Applicative f, Applicative m) => Applicative (AltC f m) where
   pure = AltC . pure . pure
   AltC f <*> AltC a = AltC (liftA2 (<*>) f a)
 
-instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (AltC f m) where
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (AltC f m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Monad (AltC f m) where
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Monad (AltC f m) where
   AltC a >>= f = AltC (a >>= runAltC . getAlt . foldMap (Monoid.Alt . f))
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (AltC f m) where
@@ -52,7 +52,7 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traver
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (AltC f m) where
   liftIO io = AltC (pure <$> liftIO io)
 
-instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
   ret = pure
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
     Empty    -> ret empty
@@ -65,17 +65,17 @@ instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Monad f, Trav
 --
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Eff (OnceC f m) a -> m (f a)
+runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Eff (OnceC f m) a -> m (f a)
 runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
 
 newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
   deriving (Applicative, Functor, Monad)
 
-deriving instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
-deriving instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Member Fail sig, Monad f, Traversable f) => MonadFail (OnceC f m)
-deriving instance (Alternative f, Applicative m, Carrier sig m, Effect sig, Member (Lift IO) sig, Monad f, Traversable f) => MonadIO (OnceC f m)
+deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
+deriving instance (Alternative f, Carrier sig m, Effect sig, Member Fail sig, Monad f, Traversable f) => MonadFail (OnceC f m)
+deriving instance (Alternative f, Carrier sig m, Effect sig, Member (Lift IO) sig, Monad f, Traversable f) => MonadIO (OnceC f m)
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Monad m, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   ret = OnceC . ret
   eff = OnceC . handleSum (eff . R . R . R . handleCoercible) (\case
     Empty    -> empty

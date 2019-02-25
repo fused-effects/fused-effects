@@ -53,7 +53,7 @@ local f m = send (Local f m ret)
 -- | Run a 'Reader' effect with the passed environment value.
 --
 --   prop> run (runReader a (pure b)) == b
-runReader :: forall r sig m a . (Carrier sig m, Monad m) => r -> Eff (ReaderC r m) a -> m a
+runReader :: forall r sig m a . Carrier sig m => r -> Eff (ReaderC r m) a -> m a
 runReader r m = runReaderC (interpret m) r
 
 newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
@@ -72,7 +72,7 @@ instance MonadFail m => MonadFail (ReaderC r m) where
 instance MonadIO m => MonadIO (ReaderC r m) where
   liftIO = ReaderC . const . liftIO
 
-instance (Carrier sig m, Monad m) => Carrier (Reader r :+: sig) (ReaderC r m) where
+instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   ret = pure
   eff op = ReaderC (\ r -> handleSum (eff . handleReader r runReaderC) (\case
     Ask       k -> runReaderC (k r) r
