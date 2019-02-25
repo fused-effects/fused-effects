@@ -10,7 +10,6 @@ module Control.Effect.Error
 import Control.Applicative (liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Effect.Internal
 import Control.Monad ((<=<))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -54,8 +53,8 @@ catchError m h = send (Catch m h ret)
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runError (pure a)) == Right @Int @Int a
-runError :: forall exc sig m a . (Carrier sig m, Effect sig) => Eff (ErrorC exc m) a -> m (Either exc a)
-runError = runErrorC . interpret
+runError :: ErrorC exc m a -> m (Either exc a)
+runError = runErrorC
 
 newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
   deriving (Functor)
