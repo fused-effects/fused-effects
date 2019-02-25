@@ -17,7 +17,7 @@ import Control.Monad.IO.Class
 --
 --   prop> run (runFail (pure a)) == Right a
 runFail :: FailC m a -> m (Either String a)
-runFail = runErrorC . runFailC
+runFail = runError . runFailC
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
   deriving (Applicative, Functor, Monad, MonadIO)

@@ -82,7 +82,7 @@ instance NFData1 err => NFData (SomeError err) where
 --
 --   prop> run (runResumable (pure a)) == Right @(SomeError Identity) @Int a
 runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
-runResumable = runErrorC . runResumableC
+runResumable = runError . runResumableC
 
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)

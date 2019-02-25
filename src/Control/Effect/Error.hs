@@ -64,7 +64,7 @@ instance Applicative m => Applicative (ErrorC e m) where
   ErrorC f <*> ErrorC a = ErrorC (liftA2 (<*>) f a)
 
 instance Monad m => Monad (ErrorC e m) where
-  ErrorC a >>= f = ErrorC (a >>= either (pure . Left) (runErrorC . f))
+  ErrorC a >>= f = ErrorC (a >>= either (pure . Left) (runError . f))
 
 instance MonadIO m => MonadIO (ErrorC e m) where
   liftIO io = ErrorC (Right <$> liftIO io)
@@ -73,9 +73,9 @@ instance MonadFail m => MonadFail (ErrorC e m) where
   fail s = ErrorC (fail s)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  eff = ErrorC . handleSum (eff . handle (Right ()) (either (pure . Left) runErrorC)) (\case
+  eff = ErrorC . handleSum (eff . handle (Right ()) (either (pure . Left) runError)) (\case
     Throw e     -> pure (Left e)
-    Catch m h k -> runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k))
+    Catch m h k -> runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k))
 
 
 -- $setup
