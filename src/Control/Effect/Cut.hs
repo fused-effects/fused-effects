@@ -81,9 +81,6 @@ instance (Alternative m, Monad m) => Monad (CutC m) where
     Alt m1 m2 -> let k = runCutC . f in (m1 >>= k) <|> (m2 >>= k))
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
-  ret = CutC . ret . Pure
-  {-# INLINE ret #-}
-
   eff = CutC . handleSum (handleSum
     (eff . handle (Pure ()) (bindBranch (ret (None False)) runCutC))
     (\case

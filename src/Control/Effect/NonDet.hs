@@ -51,7 +51,6 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversa
   liftIO io = AltC (pure <$> liftIO io)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
-  ret = pure
   eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
     Empty    -> ret empty
     Choose k -> liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
@@ -76,7 +75,6 @@ deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail 
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (OnceC f m)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
-  ret = OnceC . ret
   eff = OnceC . handleSum (eff . R . R . R . handleCoercible) (\case
     Empty    -> empty
     Choose k -> runOnceC (k True) <|> runOnceC (k False))

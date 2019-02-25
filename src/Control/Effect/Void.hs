@@ -45,8 +45,5 @@ instance Monad VoidC where
   {-# INLINE (>>=) #-}
 
 instance Carrier Void VoidC where
-  ret = VoidC
-  {-# INLINE ret #-}
-
   eff v = case v of {}
   {-# INLINE eff #-}

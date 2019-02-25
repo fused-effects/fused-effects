@@ -103,7 +103,6 @@ instance MonadIO m => MonadIO (StateC s m) where
   liftIO io = StateC (\ s -> (,) s <$> liftIO io)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
-  ret a = StateC (\ s -> ret (s, a))
   eff op = StateC (\ s -> handleSum (eff . handleState s runStateC) (\case
     Get   k -> runStateC (k s) s
     Put s k -> runStateC  k    s) op)

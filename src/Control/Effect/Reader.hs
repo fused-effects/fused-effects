@@ -72,7 +72,6 @@ instance MonadIO m => MonadIO (ReaderC r m) where
   liftIO = ReaderC . const . liftIO
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
-  ret = pure
   eff op = ReaderC (\ r -> handleSum (eff . handlePure (runReader r)) (\case
     Ask       k -> runReader r (k r)
     Local f m k -> runReader (f r) m >>= runReader r . k) op)

@@ -88,7 +88,6 @@ newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
-  ret = pure
   eff = ResumableC . handleSum
     (eff . R . handleCoercible)
     (\ (Resumable err _) -> throwError (SomeError err))
@@ -113,7 +112,6 @@ newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
 instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
-  ret = pure
   eff = handleSum
     (ResumableWithC . eff . R . handleCoercible)
     (\ (Resumable err k) -> do

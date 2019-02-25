@@ -73,7 +73,6 @@ instance MonadFail m => MonadFail (ErrorC e m) where
   fail s = ErrorC (fail s)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  ret = pure
   eff = ErrorC . handleSum (eff . handleEither runErrorC) (\case
     Throw e     -> pure (Left e)
     Catch m h k -> runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k))

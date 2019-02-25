@@ -84,7 +84,6 @@ runHandler :: Handler m -> ResourceC m a -> IO a
 runHandler h@(Handler handler) = handler . flip runReaderC h . runResourceC
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
-  ret = pure
   eff = handleSum
     (ResourceC . eff . R . handleCoercible)
     (\case

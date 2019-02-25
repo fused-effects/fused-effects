@@ -51,7 +51,6 @@ newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
-  ret = pure
   eff = FreshC . handleSum (eff . R . handleCoercible) (\case
     Fresh   k -> do
       i <- get

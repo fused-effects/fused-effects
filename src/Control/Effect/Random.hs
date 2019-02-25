@@ -59,7 +59,6 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadInterleave (RandomC 
   {-# INLINE interleave #-}
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) (RandomC g m) where
-  ret = pure
   eff = RandomC . handleSum (eff . R . handleCoercible) (\case
     Random    k -> do
       (a, g') <- gets R.random

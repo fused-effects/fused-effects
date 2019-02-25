@@ -26,7 +26,6 @@ instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
   fail s = send (Fail s)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
-  ret a = FailC (ret a)
   eff = FailC . handleSum (eff . R . handleCoercible) (\ (Fail s) -> throwError s)
 
 

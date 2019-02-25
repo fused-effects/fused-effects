@@ -68,9 +68,6 @@ instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
   liftIO io = CullC (Pure <$> liftIO io)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
-  ret = CullC . ret . Pure
-  {-# INLINE ret #-}
-
   eff op = CullC (ReaderC (\ cull -> handleSum (handleSum
     (eff . handle (Pure ()) (bindBranch (flip runReaderC cull . runCullC)))
     (\case

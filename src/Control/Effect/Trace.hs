@@ -45,7 +45,6 @@ newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
-  ret = pure
   eff = handleSum
     (TraceByPrintingC . eff . handleCoercible)
     (\ (Trace s k) -> liftIO (hPutStrLn stderr s) *> k)
@@ -61,7 +60,6 @@ newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
-  ret = TraceByIgnoringC . ret
   eff = handleSum (TraceByIgnoringC . eff . handleCoercible) traceCont
 
 
@@ -75,7 +73,6 @@ newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: Stat
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
-  ret = pure
   eff = handleSum
     (TraceByReturningC . eff . R . handleCoercible)
     (\ (Trace m k) -> TraceByReturningC (modify (m :)) *> k)

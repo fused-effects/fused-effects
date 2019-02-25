@@ -29,5 +29,4 @@ instance MonadIO (LiftC IO) where
   liftIO = sendM
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
-  ret = pure
   eff = LiftC . (>>= runLiftC) . unLift

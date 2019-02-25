@@ -89,9 +89,6 @@ newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
-  ret = pure
-  {-# INLINE ret #-}
-
   eff = WriterC . handleSum (eff . R . handleCoercible) (\case
     Tell w'    k -> do
       modify (`mappend` w')
