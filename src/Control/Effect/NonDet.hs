@@ -15,8 +15,6 @@ import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Cull
 import Control.Effect.Fail
-import Control.Effect.Internal
-import Control.Effect.Lift
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 import Control.Monad.IO.Class
@@ -29,8 +27,8 @@ import Prelude hiding (fail)
 --
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
-runNonDet :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig) => Eff (AltC f m) a -> m (f a)
-runNonDet = runAltC . interpret
+runNonDet :: AltC f m a -> m (f a)
+runNonDet = runAltC
 
 newtype AltC f m a = AltC { runAltC :: m (f a) }
   deriving (Functor)
@@ -65,15 +63,17 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => C
 --
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Eff (OnceC f m) a -> m (f a)
-runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
+runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => OnceC f m a -> m (f a)
+runNonDetOnce = runNonDet . runCull . cull . runOnceC
 
-newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
-  deriving (Applicative, Functor, Monad)
+newtype OnceC f m a = OnceC { runOnceC :: CullC (AltC f m) a }
+  deriving (Functor)
 
+deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Applicative (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Member Fail sig, Monad f, Traversable f) => MonadFail (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Member (Lift IO) sig, Monad f, Traversable f) => MonadIO (OnceC f m)
+deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Monad (OnceC f m)
+deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (OnceC f m)
+deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (OnceC f m)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   ret = OnceC . ret
