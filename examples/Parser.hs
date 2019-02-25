@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, ExistentialQuantification, FlexibleContexts, FlexibleInstances, KindSignatures, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Parser
 ( spec
 ) where
@@ -101,7 +101,8 @@ parse input = (>>= exhaustive) . flip runParseC input
   where exhaustive ("", a) = pure a
         exhaustive _       = empty
 
-newtype ParseC m a = ParseC { runParseC :: String -> m (String, a) }
+newtype ParseC m a = ParseC { runParseC :: StateC String m a }
+  deriving (Applicative, Functor, Monad)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
   eff op = ParseC (\ input -> handleSum
