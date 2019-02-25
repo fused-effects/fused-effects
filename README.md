@@ -69,9 +69,9 @@ As Nicolas Wu et al showed in _[Effect Handlers in Scope][]_, this has implicati
 
 In order to maximize efficiency, `fused-effects` applies _fusion laws_, avoiding the construction of intermediate representations of effectful computations between effect handlers. In fact, this is applied as far as the initial construction as well: there is no representation of the computation as a free monad parameterized by some syntax type. As such, `fused-effects` avoids the overhead associated with constructing and evaluating any underlying free or freer monad.
 
-Instead, computations are performed in a monad named `Eff`, parameterized by the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.
+Instead, computations are performed in the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.
 
-Carriers needn’t be `Functor`s (let alone `Monad`s), allowing a great deal of freedom in the interpretation of effects. And since the interpretation is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
+Since the interpretation of the effect syntax is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
 
 Finally, since the fusion of carrier algebras occurs as a result of the selection of the carriers, it doesn’t depend on complex `RULES` pragmas, making it very easy to reason about and tune.
 
@@ -140,7 +140,7 @@ example3 = run . runReader "hello" . runState 0 $ do
 
 `run` is itself actually an effect handler for the `Void` effect, which has no operations and thus can only represent a final result value.
 
-Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for `Eff` to lift `putStrLn` into the middle of our computation:
+Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for the `LiftC` carrier to lift `putStrLn` into the middle of our computation:
 
 ```haskell
 example4 :: IO (Int, ())
@@ -241,7 +241,7 @@ Unlike `mtl`, effects are automatically available regardless of where they occur
 Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a signature. This is a tradeoff: `mtl` is able to provide excellent type inference for effectful operations like `get`, since the functional dependencies can resolve the state type from the monad type. On the other hand, this behaviour can be recovered in `fused-effects` using `newtype` wrappers with phantom type parameters and helper functions, e.g.:
 
 ```haskell
-newtype Wrapper s m a = Wrapper { runWrapper :: Eff m a }
+newtype Wrapper s m a = Wrapper { runWrapper :: m a }
   deriving (Applicative, Functor, Monad)
 
 instance Carrier sig m => Carrier sig (Wrapper s m) where …
