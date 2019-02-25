@@ -8,7 +8,6 @@ module Control.Effect.Cull
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
-import Control.Effect.Internal
 import Control.Effect.NonDet.Internal
 import Control.Effect.Reader
 import Control.Effect.Sum
@@ -42,8 +41,8 @@ cull m = send (Cull m ret)
 -- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
 --
 --   prop> run (runNonDet (runCull (pure a <|> pure b))) == [a, b]
-runCull :: (Alternative m, Carrier sig m, Effect sig) => Eff (CullC m) a -> m a
-runCull = (>>= runBranch (const empty)) . flip runReaderC False . runCullC . interpret
+runCull :: (Alternative m, Carrier sig m) => CullC m a -> m a
+runCull = (>>= runBranch (const empty)) . flip runReaderC False . runCullC
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool m (Branch m () a) }
   deriving (Functor)
