@@ -10,7 +10,6 @@ module Control.Effect.Resource
 ) where
 
 import           Control.Effect.Carrier
-import           Control.Effect.Internal
 import           Control.Effect.Reader
 import           Control.Effect.Sum
 import qualified Control.Exception as Exc
@@ -71,11 +70,10 @@ onException :: (Member Resource sig, Carrier sig m)
         -> m a
 onException act end = bracketOnError (pure ()) (const end) (const act)
 
-runResource :: (Carrier sig m, MonadIO m)
-            => (forall x . m x -> IO x)
-            -> Eff (ResourceC m) a
+runResource :: (forall x . m x -> IO x)
+            -> ResourceC m a
             -> m a
-runResource handler = flip runReaderC (Handler handler) . runResourceC . interpret
+runResource handler = runReader (Handler handler) . runResourceC
 
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
