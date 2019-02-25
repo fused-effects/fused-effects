@@ -13,7 +13,6 @@ module Control.Effect.State
 
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Effect.Internal
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Coerce
@@ -64,20 +63,20 @@ modify f = do
 -- | Run a 'State' effect starting from the passed value.
 --
 --   prop> run (runState a (pure b)) == (a, b)
-runState :: forall s sig m a . (Carrier sig m, Effect sig) => s -> Eff (StateC s m) a -> m (s, a)
-runState s m = runStateC (interpret m) s
+runState :: s -> StateC s m a -> m (s, a)
+runState = flip runStateC
 
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
 --
 --   prop> run (evalState a (pure b)) == b
-evalState :: forall s sig m a . (Carrier sig m, Effect sig) => s -> Eff (StateC s m) a -> m a
-evalState s m = fmap snd (runStateC (interpret m) s)
+evalState :: forall s m a . Functor m => s -> StateC s m a -> m a
+evalState s = fmap snd . runState s
 
 -- | Run a 'State' effect, yielding the final state and discarding the return value.
 --
 --   prop> run (execState a (pure b)) == a
-execState :: forall s sig m a . (Carrier sig m, Effect sig) => s -> Eff (StateC s m) a -> m s
-execState s m = fmap fst (runStateC (interpret m) s)
+execState :: forall s m a . Functor m => s -> StateC s m a -> m s
+execState s = fmap fst . runState s
 
 
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
