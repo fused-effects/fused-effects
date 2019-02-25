@@ -8,7 +8,6 @@ module Control.Effect.Fresh
 ) where
 
 import Control.Effect.Carrier
-import Control.Effect.Internal
 import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad.Fail
@@ -45,8 +44,8 @@ resetFresh m = send (Reset m ret)
 --
 --   prop> run (runFresh (replicateM n fresh)) == [0..pred n]
 --   prop> run (runFresh (replicateM n fresh *> pure b)) == b
-runFresh :: (Carrier sig m, Effect sig) => Eff (FreshC m) a -> m a
-runFresh = fmap snd . flip runStateC 0 . runFreshC . interpret
+runFresh :: Functor m => FreshC m a -> m a
+runFresh = fmap snd . flip runStateC 0 . runFreshC
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
