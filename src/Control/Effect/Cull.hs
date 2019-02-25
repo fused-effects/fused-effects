@@ -42,7 +42,7 @@ cull m = send (Cull m pure)
 --
 --   prop> run (runNonDet (runCull (pure a <|> pure b))) == [a, b]
 runCull :: (Alternative m, Carrier sig m) => CullC m a -> m a
-runCull = (>>= runBranch (const empty)) . flip runReaderC False . runCullC
+runCull = (>>= runBranch (const empty)) . runReader False . runCullC
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool m (Branch m () a) }
   deriving (Functor)
@@ -59,7 +59,7 @@ instance (Alternative m, Monad m) => Monad (CullC m) where
   CullC m >>= f = CullC (m >>= \case
     None e    -> pure (None e)
     Pure a    -> runCullC (f a)
-    Alt m1 m2 -> ReaderC (\ cull -> let k = flip runReaderC cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
+    Alt m1 m2 -> ReaderC (\ cull -> let k = runReader cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
 
 instance (Alternative m, MonadFail m) => MonadFail (CullC m) where
   fail s = CullC (fail s)
@@ -69,11 +69,11 @@ instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   eff op = CullC (ReaderC (\ cull -> handleSum (handleSum
-    (eff . handle (Pure ()) (bindBranch (flip runReaderC cull . runCullC)))
+    (eff . handle (Pure ()) (bindBranch (runReader cull . runCullC)))
     (\case
       Empty       -> pure (None ())
-      Choose k    -> runReaderC (runCullC (k True)) cull >>= branch (const (runReaderC (runCullC (k False)) cull)) (if cull then pure . Pure else \ a -> pure (Alt (pure a) (runReaderC (runCullC (k False)) cull >>= runBranch (const empty)))) (fmap pure . Alt)))
-    (\ (Cull m k) -> runReaderC (runCullC m) True >>= bindBranch (flip runReaderC cull . runCullC . k))
+      Choose k    -> runReader cull (runCullC (k True)) >>= branch (const (runReader cull (runCullC (k False)))) (if cull then pure . Pure else \ a -> pure (Alt (pure a) (runReader cull (runCullC (k False)) >>= runBranch (const empty)))) (fmap pure . Alt)))
+    (\ (Cull m k) -> runReader True (runCullC m) >>= bindBranch (runReader cull . runCullC . k))
     op))
     where bindBranch :: (Alternative m, Carrier sig m) => (b -> m (Branch m () a)) -> Branch m () b -> m (Branch m () a)
           bindBranch bind = branch (const (pure (None ()))) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))

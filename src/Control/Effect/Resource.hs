@@ -81,7 +81,7 @@ newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
 newtype Handler m = Handler (forall x . m x -> IO x)
 
 runHandler :: Handler m -> ResourceC m a -> IO a
-runHandler h@(Handler handler) = handler . flip runReaderC h . runResourceC
+runHandler h@(Handler handler) = handler . runReader h . runResourceC
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
   eff = handleSum

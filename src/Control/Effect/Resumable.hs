@@ -104,7 +104,7 @@ instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (Resumab
 runResumableWith :: (forall x . err x -> m x)
                  -> ResumableWithC err m a
                  -> m a
-runResumableWith with = flip runReaderC (Handler with) . runResumableWithC
+runResumableWith with = runReader (Handler with) . runResumableWithC
 
 newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
