@@ -37,32 +37,30 @@ instance Effect Teletype where
   handle state handler (Write s k) = Write s (handler (k <$ state))
 
 read :: (Member Teletype sig, Carrier sig m) => m String
-read = send (Read ret)
+read = send (Read pure)
 
 write :: (Member Teletype sig, Carrier sig m) => String -> m ()
-write s = send (Write s (ret ()))
+write s = send (Write s (pure ()))
 
 
-runTeletypeIO :: (MonadIO m, Carrier sig m) => Eff (TeletypeIOC m) a -> m a
-runTeletypeIO = runTeletypeIOC . interpret
+runTeletypeIO :: TeletypeIOC m a -> m a
+runTeletypeIO = runTeletypeIOC
 
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
-  ret = pure
   eff = handleSum (TeletypeIOC . eff . handleCoercible) (\case
     Read    k -> liftIO getLine      >>= k
     Write s k -> liftIO (putStrLn s) >>  k)
 
 
-runTeletypeRet :: (Carrier sig m, Effect sig, Monad m) => [String] -> Eff (TeletypeRetC m) a -> m (([String], [String]), a)
-runTeletypeRet s m = runTeletypeRetC (interpret m) s
+runTeletypeRet :: [String] -> TeletypeRetC m a -> m (([String], [String]), a)
+runTeletypeRet = flip runTeletypeRetC
 
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: [String] -> m (([String], [String]), a) }
 
 instance (Monad m, Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
-  ret a = TeletypeRetC (\ i -> ret ((i, []), a))
   eff op = TeletypeRetC (\ i -> handleSum (eff . handle ((i, []), ()) mergeResults) (\case
     Read k -> case i of
       []  -> runTeletypeRetC (k "") []

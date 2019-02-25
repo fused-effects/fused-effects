@@ -96,17 +96,14 @@ parens :: (Applicative m, Carrier sig m, Member Symbol sig) => m a -> m a
 parens m = char '(' *> m <* char ')'
 
 
-parse :: (Alternative m, Carrier sig m, Effect sig, Monad m) => String -> Eff (ParseC m) a -> m a
-parse input = (>>= exhaustive) . flip runParseC input . interpret
+parse :: (Alternative m, Monad m) => String -> ParseC m a -> m a
+parse input = (>>= exhaustive) . flip runParseC input
   where exhaustive ("", a) = pure a
         exhaustive _       = empty
 
 newtype ParseC m a = ParseC { runParseC :: String -> m (String, a) }
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
-  ret a = ParseC (\ input -> ret (input, a))
-  {-# INLINE ret #-}
-
   eff op = ParseC (\ input -> handleSum
     (eff . handleState input runParseC)
     (\ (Satisfy p k) -> case input of
