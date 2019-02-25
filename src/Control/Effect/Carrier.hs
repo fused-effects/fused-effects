@@ -41,12 +41,12 @@ class HFunctor sig => Effect sig where
 
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'ret' and 'eff' methods.
-class HFunctor sig => Carrier sig h | h -> sig where
+class HFunctor sig => Carrier sig m | m -> sig where
   -- | Wrap a return value.
-  ret :: a -> h a
+  ret :: a -> m a
 
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
-  eff :: sig h (h a) -> h a
+  eff :: sig m (m a) -> m a
 
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
