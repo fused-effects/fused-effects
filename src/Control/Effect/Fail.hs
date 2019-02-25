@@ -9,7 +9,6 @@ module Control.Effect.Fail
 import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Effect.Fail.Internal
-import Control.Effect.Internal
 import Control.Effect.Sum
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -17,8 +16,8 @@ import Control.Monad.IO.Class
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
 --   prop> run (runFail (pure a)) == Right a
-runFail :: (Carrier sig m, Effect sig) => Eff (FailC m) a -> m (Either String a)
-runFail = runErrorC . runFailC . interpret
+runFail :: FailC m a -> m (Either String a)
+runFail = runErrorC . runFailC
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
   deriving (Applicative, Functor, Monad, MonadIO)
