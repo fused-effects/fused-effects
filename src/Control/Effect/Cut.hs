@@ -10,7 +10,6 @@ module Control.Effect.Cut
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
-import Control.Effect.Internal
 import Control.Effect.NonDet
 import Control.Effect.Sum
 
@@ -61,8 +60,8 @@ cut = pure () <|> cutfail
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
-runCut :: (Alternative m, Carrier sig m, Effect sig) => Eff (CutC m) a -> m a
-runCut = (>>= runBranch (const empty)) . runCutC . interpret
+runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
+runCut = (>>= runBranch (const empty)) . runCutC
 
 newtype CutC m a = CutC { runCutC :: m (Branch m Bool a) }
   deriving (Functor)
