@@ -42,13 +42,12 @@ reinterpretation = describe "reinterpretation" $ do
   it "can reinterpret effects into other effects" $
     run (runState "a" ((++) <$> reinterpretReader (local ('b':) ask) <*> get)) `shouldBe` ("a", "baa")
 
-reinterpretReader :: (Carrier sig m, Effect sig) => Eff (ReinterpretReaderC r m) a -> Eff (StateC r m) a
-reinterpretReader = runReinterpretReaderC . interpret
+reinterpretReader :: ReinterpretReaderC r m a -> StateC r m a
+reinterpretReader = runReinterpretReaderC
 
-newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC :: Eff (StateC r m) a }
+newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC :: StateC r m a }
 
 instance (Carrier sig m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
-  ret = ReinterpretReaderC . ret
   eff = ReinterpretReaderC . handleSum (eff . R . handleCoercible) (\case
     Ask       k -> get >>= runReinterpretReaderC . k
     Local f m k -> do
@@ -68,8 +67,8 @@ interposition = describe "interposition" $ do
     run (runFail (fail "world" *> interposeFail (pure (0 :: Int)))) `shouldBe` Left "world"
     run (runFail (interposeFail (pure (0 :: Int)) <* fail "world")) `shouldBe` Left "world"
 
-interposeFail :: (Member Fail sig, Carrier sig m) => Eff (InterposeC m) a -> m a
-interposeFail = runInterposeC . interpret
+interposeFail :: InterposeC m a -> m a
+interposeFail = runInterposeC
 
 newtype InterposeC m a = InterposeC { runInterposeC :: m a }
 
