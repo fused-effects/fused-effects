@@ -7,6 +7,7 @@ import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.Cut
 import Control.Effect.NonDet
+import Control.Effect.State
 import Control.Effect.Sum hiding (L)
 import Control.Monad (replicateM)
 import Data.Char
@@ -84,7 +85,7 @@ instance Effect Symbol where
   handle state handler = coerce . fmap (handler . (<$ state))
 
 satisfy :: (Carrier sig m, Member Symbol sig) => (Char -> Bool) -> m Char
-satisfy p = send (Satisfy p ret)
+satisfy p = send (Satisfy p pure)
 
 char :: (Carrier sig m, Member Symbol sig) => Char -> m Char
 char = satisfy . (==)
@@ -97,12 +98,12 @@ parens m = char '(' *> m <* char ')'
 
 
 parse :: (Alternative m, Monad m) => String -> ParseC m a -> m a
-parse input = (>>= exhaustive) . flip runParseC input
+parse input = (>>= exhaustive) . runState input . runParseC
   where exhaustive ("", a) = pure a
         exhaustive _       = empty
 
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
-  deriving (Applicative, Functor, Monad)
+  deriving (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
   eff = ParseC . handleSum
