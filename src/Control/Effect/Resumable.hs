@@ -12,7 +12,6 @@ module Control.Effect.Resumable
 import Control.DeepSeq
 import Control.Effect.Carrier
 import Control.Effect.Error
-import Control.Effect.Internal
 import Control.Effect.Reader
 import Control.Effect.Sum
 import Control.Monad.Fail
@@ -82,8 +81,8 @@ instance NFData1 err => NFData (SomeError err) where
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runResumable (pure a)) == Right @(SomeError Identity) @Int a
-runResumable :: (Carrier sig m, Effect sig) => Eff (ResumableC err m) a -> m (Either (SomeError err) a)
-runResumable = runErrorC . runResumableC . interpret
+runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
+runResumable = runErrorC . runResumableC
 
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
@@ -103,11 +102,10 @@ instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (Resumab
 --
 --   prop> run (runResumableWith (\ (Err b) -> pure (1 + b)) (pure a)) == a
 --   prop> run (runResumableWith (\ (Err b) -> pure (1 + b)) (throwResumable (Err a))) == 1 + a
-runResumableWith :: Carrier sig m
-                 => (forall x . err x -> m x)
-                 -> Eff (ResumableWithC err m) a
+runResumableWith :: (forall x . err x -> m x)
+                 -> ResumableWithC err m a
                  -> m a
-runResumableWith with = flip runReaderC (Handler with) . runResumableWithC . interpret
+runResumableWith with = flip runReaderC (Handler with) . runResumableWithC
 
 newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
