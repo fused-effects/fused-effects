@@ -11,7 +11,6 @@ module Control.Effect.Random
 ) where
 
 import Control.Effect.Carrier
-import Control.Effect.Internal
 import Control.Effect.Random.Internal
 import Control.Effect.State
 import Control.Effect.Sum
@@ -23,23 +22,23 @@ import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGe
 -- | Run a random computation starting from a given generator.
 --
 --   prop> run (runRandom (PureGen a) (pure b)) == (PureGen a, b)
-runRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m (g, a)
-runRandom g = flip runStateC g . runRandomC . interpret
+runRandom :: g -> RandomC g m a -> m (g, a)
+runRandom g = runState g . runRandomC
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
 --
 --   prop> run (evalRandom (PureGen a) (pure b)) == b
-evalRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m a
+evalRandom :: Functor m => g -> RandomC g m a -> m a
 evalRandom g = fmap snd . runRandom g
 
 -- | Run a random computation starting from a given generator and discarding the final result.
 --
 --   prop> run (execRandom (PureGen a) (pure b)) == PureGen a
-execRandom :: (Carrier sig m, Effect sig, R.RandomGen g) => g -> Eff (RandomC g m) a -> m g
+execRandom :: Functor m => g -> RandomC g m a -> m g
 execRandom g = fmap fst . runRandom g
 
 -- | Run a random computation in 'IO', splitting the global standard generator to get a new one for the computation.
-evalRandomIO :: (Carrier sig m, Effect sig, MonadIO m) => Eff (RandomC R.StdGen m) a -> m a
+evalRandomIO :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
