@@ -8,10 +8,8 @@ module Control.Effect.Carrier
 , handleReader
 , handleState
 , handleEither
-, handleTraversable
 ) where
 
-import Control.Monad (join)
 import Data.Coerce
 
 class HFunctor h where
@@ -72,8 +70,3 @@ handleState s run = handle (s, ()) (uncurry (flip run))
 handleEither :: (Carrier sig g, Effect sig) => (forall x . f x -> g (Either e x)) -> sig f (f a) -> sig g (g (Either e a))
 handleEither run = handle (Right ()) (either (pure . Left) run)
 {-# INLINE handleEither #-}
-
--- | Thread a carrier producing values in a 'Traversable' 'Monad' (e.g. '[]') through an 'Effect'.
-handleTraversable :: (Effect sig, Applicative g, Monad m, Traversable m) => (forall x . f x -> g (m x)) -> sig f (f a) -> sig g (g (m a))
-handleTraversable run = handle (pure ()) (fmap join . traverse run)
-{-# INLINE handleTraversable #-}
