@@ -67,7 +67,7 @@ instance Ord1 err => Ord (SomeError err) where
 --
 --   prop> show (SomeError (Identity a)) == "SomeError (Identity )"
 --   prop> show (SomeError (Const a)) == ("SomeError (Const " ++ showsPrec 11 a ")")
-instance (Show1 err) => Show (SomeError err) where
+instance Show1 err => Show (SomeError err) where
   showsPrec d (SomeError err) = showsUnaryWith (liftShowsPrec (const (const id)) (const id)) "SomeError" d err
 
 
