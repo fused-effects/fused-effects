@@ -11,7 +11,6 @@ module Control.Effect.Reader
 import Control.Applicative (liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Effect.Internal
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
@@ -53,8 +52,8 @@ local f m = send (Local f m ret)
 -- | Run a 'Reader' effect with the passed environment value.
 --
 --   prop> run (runReader a (pure b)) == b
-runReader :: forall r sig m a . Carrier sig m => r -> Eff (ReaderC r m) a -> m a
-runReader r m = runReaderC (interpret m) r
+runReader :: r -> ReaderC r m a -> m a
+runReader = flip runReaderC
 
 newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
   deriving (Functor)
@@ -64,7 +63,7 @@ instance Applicative m => Applicative (ReaderC r m) where
   ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
 
 instance Monad m => Monad (ReaderC r m) where
-  ReaderC a >>= f = ReaderC (\ r -> a r >>= flip runReaderC r . f)
+  ReaderC a >>= f = ReaderC (\ r -> a r >>= runReader r . f)
 
 instance MonadFail m => MonadFail (ReaderC r m) where
   fail s = ReaderC (const (fail s))
@@ -74,9 +73,9 @@ instance MonadIO m => MonadIO (ReaderC r m) where
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   ret = pure
-  eff op = ReaderC (\ r -> handleSum (eff . handleReader r runReaderC) (\case
-    Ask       k -> runReaderC (k r) r
-    Local f m k -> runReaderC m (f r) >>= flip runReaderC r . k) op)
+  eff op = ReaderC (\ r -> handleSum (eff . handlePure (runReader r)) (\case
+    Ask       k -> runReader r (k r)
+    Local f m k -> runReader (f r) m >>= runReader r . k) op)
 
 
 -- $setup
