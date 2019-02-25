@@ -10,3 +10,4 @@ This checklist is designed to help @robrix remember the steps involved in making
 - [ ] Build locally using `cabal new-build`, then collect the sources and docs with `cabal new-sdist` and `cabal new-haddock --haddock-for-hackage`, respectively. Note the paths to the tarballs in the output of these commands.
 - [ ] Publish a candidate release to Hackage with `cabal upload dist-newstyle/sdist/fused-effects-x.y.z.w.tar.gz` and `cabal upload --documentation dist-newstyle/fused-effects-x.y.z.w-docs.tar.gz`. Add a link to the candidate release in a comment on the PR.
 - [ ] Once the PR has been approved and you’re satisfied with the candidate release, merge the PR. Publish the release to Hackage by running the above commands with the addition of `--publish`.
+- [ ] Locally, check out `master` and pull the latest changes to your working copy. Make a new tag, e.g. `git tag x.y.z.w`. Push tags to GitHub using `git push --tags`.
