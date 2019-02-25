@@ -5,7 +5,6 @@ module Control.Effect.Carrier
 , Carrier(..)
 , handlePure
 , handleCoercible
-, handleEither
 ) where
 
 import Data.Coerce
@@ -53,8 +52,3 @@ handlePure handler = hmap handler . fmap' handler
 handleCoercible :: (HFunctor sig, Coercible f g) => sig f (f a) -> sig g (g a)
 handleCoercible = handlePure coerce
 {-# INLINE handleCoercible #-}
-
--- | Thread a carrier producing 'Either's through an 'Effect'.
-handleEither :: (Carrier sig g, Effect sig) => (forall x . f x -> g (Either e x)) -> sig f (f a) -> sig g (g (Either e a))
-handleEither run = handle (Right ()) (either (pure . Left) run)
-{-# INLINE handleEither #-}
