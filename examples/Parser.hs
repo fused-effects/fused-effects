@@ -92,7 +92,7 @@ char = satisfy . (==)
 digit :: (Carrier sig m, Member Symbol sig) => m Char
 digit = satisfy isDigit
 
-parens :: (Applicative m, Carrier sig m, Member Symbol sig) => m a -> m a
+parens :: (Carrier sig m, Member Symbol sig) => m a -> m a
 parens m = char '(' *> m <* char ')'
 
 
@@ -114,19 +114,19 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) 
   {-# INLINE eff #-}
 
 
-expr :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig, Monad m) => m Int
+expr :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig) => m Int
 expr = do
   i <- term
   call ((i +) <$ char '+' <* cut <*> expr
     <|> pure i)
 
-term :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig, Monad m) => m Int
+term :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig) => m Int
 term = do
   i <- factor
   call ((i *) <$ char '*' <* cut <*> term
     <|> pure i)
 
-factor :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig, Monad m) => m Int
+factor :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig) => m Int
 factor
   =   read <$> some digit
   <|> parens expr
