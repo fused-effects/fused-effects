@@ -28,7 +28,6 @@ library
                      , Control.Effect.Fail
                      , Control.Effect.Fail.Internal
                      , Control.Effect.Fresh
-                     , Control.Effect.Internal
                      , Control.Effect.Lift
                      , Control.Effect.Lift.Internal
                      , Control.Effect.NonDet
