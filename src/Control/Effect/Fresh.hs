@@ -45,7 +45,7 @@ resetFresh m = send (Reset m pure)
 --   prop> run (runFresh (replicateM n fresh)) == [0..pred n]
 --   prop> run (runFresh (replicateM n fresh *> pure b)) == b
 runFresh :: Functor m => FreshC m a -> m a
-runFresh = fmap snd . flip runStateC 0 . runFreshC
+runFresh = fmap snd . runState 0 . runFreshC
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)

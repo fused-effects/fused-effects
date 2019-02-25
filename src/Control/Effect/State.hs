@@ -94,7 +94,7 @@ instance Monad m => Monad (StateC s m) where
   StateC m >>= f = StateC $ \ s -> do
     (s', a) <- m s
     let fa = f a
-    fa `seq` runStateC fa s'
+    fa `seq` runState s' fa
 
 instance MonadFail m => MonadFail (StateC s m) where
   fail s = StateC (const (fail s))
@@ -104,8 +104,8 @@ instance MonadIO m => MonadIO (StateC s m) where
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   eff op = StateC (\ s -> handleSum (eff . handle (s, ()) (uncurry runState)) (\case
-    Get   k -> runStateC (k s) s
-    Put s k -> runStateC  k    s) op)
+    Get   k -> runState s (k s)
+    Put s k -> runState s k) op)
 
 
 -- $setup

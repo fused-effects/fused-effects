@@ -67,7 +67,7 @@ instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
 --
 --   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) == ([a, b], c)
 runTraceByReturning :: Functor m => TraceByReturningC m a -> m ([String], a)
-runTraceByReturning = fmap (first reverse) . flip runStateC [] . runTraceByReturningC
+runTraceByReturning = fmap (first reverse) . runState [] . runTraceByReturningC
 
 newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
