@@ -35,13 +35,13 @@ instance Effect (State s) where
 --
 --   prop> snd (run (runState a get)) == a
 get :: (Member (State s) sig, Carrier sig m) => m s
-get = send (Get ret)
+get = send (Get pure)
 
 -- | Project a function out of the current state value.
 --
 --   prop> snd (run (runState a (gets (applyFun f)))) == applyFun f a
 gets :: (Member (State s) sig, Carrier sig m) => (s -> a) -> m a
-gets f = send (Get (ret . f))
+gets f = send (Get (pure . f))
 
 -- | Replace the state value with a new value.
 --
@@ -49,7 +49,7 @@ gets f = send (Get (ret . f))
 --   prop> snd (run (runState a (get <* put b))) == a
 --   prop> snd (run (runState a (put b *> get))) == b
 put :: (Member (State s) sig, Carrier sig m) => s -> m ()
-put s = send (Put s (ret ()))
+put s = send (Put s (pure ()))
 
 -- | Replace the state value with the result of applying a function to the current state value.
 --   This is strict in the new state; if you need laziness, use @get >>= put . f@.

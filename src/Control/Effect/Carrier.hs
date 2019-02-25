@@ -40,12 +40,8 @@ class HFunctor sig => Effect sig where
          -> sig n (n (f a))
 
 
--- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'ret' and 'eff' methods.
+-- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
-  -- | Wrap a return value.
-  ret :: a -> m a
-  ret = pure
-
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   eff :: sig m (m a) -> m a
 
@@ -74,7 +70,7 @@ handleState s run = handle (s, ()) (uncurry (flip run))
 
 -- | Thread a carrier producing 'Either's through an 'Effect'.
 handleEither :: (Carrier sig g, Effect sig) => (forall x . f x -> g (Either e x)) -> sig f (f a) -> sig g (g (Either e a))
-handleEither run = handle (Right ()) (either (ret . Left) run)
+handleEither run = handle (Right ()) (either (pure . Left) run)
 {-# INLINE handleEither #-}
 
 -- | Thread a carrier producing values in a 'Traversable' 'Monad' (e.g. '[]') through an 'Effect'.

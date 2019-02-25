@@ -35,7 +35,7 @@ instance Effect Cull where
 --   prop> run (runNonDet (runCull (cull (pure a <|> pure b) <|> pure c))) == [a, c]
 --   prop> run (runNonDet (runCull (cull (asum (map pure (repeat a)))))) == [a]
 cull :: (Carrier sig m, Member Cull sig) => m a -> m a
-cull m = send (Cull m ret)
+cull m = send (Cull m pure)
 
 
 -- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
@@ -71,12 +71,12 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet 
   eff op = CullC (ReaderC (\ cull -> handleSum (handleSum
     (eff . handle (Pure ()) (bindBranch (flip runReaderC cull . runCullC)))
     (\case
-      Empty       -> ret (None ())
-      Choose k    -> runReaderC (runCullC (k True)) cull >>= branch (const (runReaderC (runCullC (k False)) cull)) (if cull then ret . Pure else \ a -> ret (Alt (ret a) (runReaderC (runCullC (k False)) cull >>= runBranch (const empty)))) (fmap ret . Alt)))
+      Empty       -> pure (None ())
+      Choose k    -> runReaderC (runCullC (k True)) cull >>= branch (const (runReaderC (runCullC (k False)) cull)) (if cull then pure . Pure else \ a -> pure (Alt (pure a) (runReaderC (runCullC (k False)) cull >>= runBranch (const empty)))) (fmap pure . Alt)))
     (\ (Cull m k) -> runReaderC (runCullC m) True >>= bindBranch (flip runReaderC cull . runCullC . k))
     op))
     where bindBranch :: (Alternative m, Carrier sig m) => (b -> m (Branch m () a)) -> Branch m () b -> m (Branch m () a)
-          bindBranch bind = branch (const (ret (None ()))) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
+          bindBranch bind = branch (const (pure (None ()))) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
   {-# INLINE eff #-}
 
 

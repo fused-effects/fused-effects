@@ -47,7 +47,7 @@ throwError = send . Throw
 --   prop> run (runError (throwError a `catchError` pure)) == Right @Int @Int a
 --   prop> run (runError (throwError a `catchError` (throwError @Int))) == Left @Int @Int a
 catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
-catchError m h = send (Catch m h ret)
+catchError m h = send (Catch m h pure)
 
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.

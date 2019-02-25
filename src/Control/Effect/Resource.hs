@@ -45,7 +45,7 @@ bracket :: (Member Resource sig, Carrier sig m)
         -> (resource -> m any)  -- ^ computation to run last ("release resource")
         -> (resource -> m a)    -- ^ computation to run in-between
         -> m a
-bracket acquire release use = send (Resource acquire release use ret)
+bracket acquire release use = send (Resource acquire release use pure)
 
 -- | Like 'bracket', but only performs the final action if there was an
 -- exception raised by the in-between computation.
@@ -54,7 +54,7 @@ bracketOnError :: (Member Resource sig, Carrier sig m)
                -> (resource -> m any)  -- ^ computation to run last ("release resource")
                -> (resource -> m a)    -- ^ computation to run in-between
                -> m a
-bracketOnError acquire release use = send (OnError acquire release use ret)
+bracketOnError acquire release use = send (OnError acquire release use pure)
 
 -- | Like 'bracket', but for the simple case of one computation to run afterward.
 finally :: (Member Resource sig, Carrier sig m)

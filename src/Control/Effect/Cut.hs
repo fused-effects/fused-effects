@@ -44,7 +44,7 @@ cutfail = send Cutfail
 --
 --   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) == [b]
 call :: (Carrier sig m, Member Cut sig) => m a -> m a
-call m = send (Call m ret)
+call m = send (Call m pure)
 {-# INLINE call #-}
 
 -- | Commit to the current branch, preventing backtracking within the nearest enclosing 'call' (if any) on failure.
@@ -82,15 +82,15 @@ instance (Alternative m, Monad m) => Monad (CutC m) where
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff = CutC . handleSum (handleSum
-    (eff . handle (Pure ()) (bindBranch (ret (None False)) runCutC))
+    (eff . handle (Pure ()) (bindBranch (pure (None False)) runCutC))
     (\case
-      Empty    -> ret (None True)
-      Choose k -> runCutC (k True) >>= branch (\ e -> if e then runCutC (k False) else ret (None False)) (\ a -> ret (Alt (ret a) (runCutC (k False) >>= runBranch (const empty)))) (fmap ret . Alt)))
+      Empty    -> pure (None True)
+      Choose k -> runCutC (k True) >>= branch (\ e -> if e then runCutC (k False) else pure (None False)) (\ a -> pure (Alt (pure a) (runCutC (k False) >>= runBranch (const empty)))) (fmap pure . Alt)))
     (\case
-      Cutfail  -> ret (None False)
-      Call m k -> runCutC m >>= bindBranch (ret (None True)) (runCutC . k))
+      Cutfail  -> pure (None False)
+      Call m k -> runCutC m >>= bindBranch (pure (None True)) (runCutC . k))
     where bindBranch :: (Alternative m, Carrier sig m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
-          bindBranch cut bind = branch (\ e -> if e then ret (None True) else cut) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
+          bindBranch cut bind = branch (\ e -> if e then pure (None True) else cut) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
   {-# INLINE eff #-}
 
 

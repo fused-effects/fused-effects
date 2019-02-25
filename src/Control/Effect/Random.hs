@@ -45,9 +45,9 @@ newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m) where
-  getRandom = send (Random ret)
+  getRandom = send (Random pure)
   {-# INLINE getRandom #-}
-  getRandomR r = send (RandomR r ret)
+  getRandomR r = send (RandomR r pure)
   {-# INLINE getRandomR #-}
   getRandomRs interval = (:) <$> getRandomR interval <*> getRandomRs interval
   {-# INLINE getRandomRs #-}
@@ -55,7 +55,7 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m)
   {-# INLINE getRandoms #-}
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadInterleave (RandomC g m) where
-  interleave m = send (Interleave m ret)
+  interleave m = send (Interleave m pure)
   {-# INLINE interleave #-}
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) (RandomC g m) where

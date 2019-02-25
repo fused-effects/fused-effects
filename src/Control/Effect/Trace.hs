@@ -34,7 +34,7 @@ instance Effect Trace where
 
 -- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()
-trace message = send (Trace message (ret ()))
+trace message = send (Trace message (pure ()))
 
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
