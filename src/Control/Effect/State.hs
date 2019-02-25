@@ -11,6 +11,7 @@ module Control.Effect.State
 , StateC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Monad.Fail
@@ -89,6 +90,10 @@ instance Monad m => Applicative (StateC s m) where
     (s'', a') <- a s'
     let fa = f' a'
     fa `seq` pure (s'', fa)
+
+instance (Alternative m, Monad m) => Alternative (StateC s m) where
+  empty = StateC (const empty)
+  StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
 
 instance Monad m => Monad (StateC s m) where
   StateC m >>= f = StateC $ \ s -> do
