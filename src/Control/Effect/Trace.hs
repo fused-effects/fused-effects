@@ -11,7 +11,6 @@ module Control.Effect.Trace
 ) where
 
 import Control.Effect.Carrier
-import Control.Effect.Internal
 import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad.Fail
@@ -39,8 +38,8 @@ trace message = send (Trace message (ret ()))
 
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
-runTraceByPrinting :: (MonadIO m, Carrier sig m) => Eff (TraceByPrintingC m) a -> m a
-runTraceByPrinting = runTraceByPrintingC . interpret
+runTraceByPrinting :: TraceByPrintingC m a -> m a
+runTraceByPrinting = runTraceByPrintingC
 
 newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
@@ -55,8 +54,8 @@ instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC
 -- | Run a 'Trace' effect, ignoring all traces.
 --
 --   prop> run (runTraceByIgnoring (trace a *> pure b)) == b
-runTraceByIgnoring :: Carrier sig m => Eff (TraceByIgnoringC m) a -> m a
-runTraceByIgnoring = runTraceByIgnoringC . interpret
+runTraceByIgnoring :: TraceByIgnoringC m a -> m a
+runTraceByIgnoring = runTraceByIgnoringC
 
 newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
@@ -69,8 +68,8 @@ instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
 --   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) == ([a, b], c)
-runTraceByReturning :: (Carrier sig m, Effect sig) => Eff (TraceByReturningC m) a -> m ([String], a)
-runTraceByReturning = fmap (first reverse) . flip runStateC [] . runTraceByReturningC . interpret
+runTraceByReturning :: Functor m => TraceByReturningC m a -> m ([String], a)
+runTraceByReturning = fmap (first reverse) . flip runStateC [] . runTraceByReturningC
 
 newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
