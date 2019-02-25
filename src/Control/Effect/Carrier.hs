@@ -44,6 +44,7 @@ class HFunctor sig => Effect sig where
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   -- | Wrap a return value.
   ret :: a -> m a
+  ret = pure
 
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   eff :: sig m (m a) -> m a
