@@ -8,14 +8,13 @@ module Control.Effect.Lift
 
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Effect.Internal
 import Control.Effect.Lift.Internal
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
-runM :: Monad m => Eff (LiftC m) a -> m a
-runM = runLiftC . interpret
+runM :: LiftC m a -> m a
+runM = runLiftC
 
 -- | Given a @Lift n@ constraint in a signature carried by @m@, 'sendM'
 -- promotes arbitrary actions of type @n a@ to @m a@. It is spiritually
