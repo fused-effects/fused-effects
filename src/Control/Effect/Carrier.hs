@@ -8,6 +8,7 @@ module Control.Effect.Carrier
 , MaybeC(..)
 ) where
 
+import Control.Applicative (liftA2)
 import Data.Coerce
 
 class HFunctor h where
@@ -57,3 +58,7 @@ handleCoercible = handlePure coerce
 
 newtype MaybeC m a = MaybeC { runMaybeC :: m (Maybe a) }
   deriving (Functor)
+
+instance Applicative m => Applicative (MaybeC m) where
+  pure = MaybeC . pure . Just
+  MaybeC f <*> MaybeC a = MaybeC (liftA2 (<*>) f a)
