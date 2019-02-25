@@ -59,8 +59,19 @@ runTeletypeRet :: [String] -> TeletypeRetC m a -> m (([String], [String]), a)
 runTeletypeRet = flip runTeletypeRetC
 
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: [String] -> m (([String], [String]), a) }
+  deriving (Functor)
 
-instance (Monad m, Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
+instance Monad m => Applicative (TeletypeRetC m) where
+  pure a = TeletypeRetC (\ i -> pure ((i, []), a))
+  TeletypeRetC f <*> TeletypeRetC a = TeletypeRetC (\ i1 -> do
+    ((i2, o1), f') <- f i1
+    ((i3, o2), a') <- a i2
+    pure ((i3, o1 ++ o2), f' a'))
+
+instance Monad m => Monad (TeletypeRetC m) where
+  TeletypeRetC a >>= f = TeletypeRetC (\ i -> a i >>= \ ((i', o), a') -> runTeletypeRetC (f a') i')
+
+instance (Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
   eff op = TeletypeRetC (\ i -> handleSum (eff . handle ((i, []), ()) mergeResults) (\case
     Read k -> case i of
       []  -> runTeletypeRetC (k "") []
