@@ -6,7 +6,6 @@ module Control.Effect.Void
 ) where
 
 import Control.Effect.Carrier
-import Control.Effect.Internal
 
 data Void (m :: * -> *) k
   deriving (Functor)
@@ -20,9 +19,9 @@ instance Effect Void where
   {-# INLINE handle #-}
 
 
--- | Run an 'Eff' exhausted of effects to produce its final result value.
-run :: Eff VoidC a -> a
-run = runVoidC . interpret
+-- | Run an action exhausted of effects to produce its final result value.
+run :: VoidC a -> a
+run = runVoidC
 {-# INLINE run #-}
 
 newtype VoidC a = VoidC { runVoidC :: a }
