@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, FunctionalDependencies, RankNTypes #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, UndecidableInstances #-}
 module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
@@ -65,3 +65,6 @@ instance Applicative m => Applicative (MaybeC m) where
 
 instance Monad m => Monad (MaybeC m) where
   MaybeC a >>= f = MaybeC (a >>= maybe (pure Nothing) (runMaybeC . f))
+
+instance (Carrier sig m, Effect sig) => Carrier sig (MaybeC m) where
+  eff = MaybeC . eff . handle (pure ()) (maybe (pure Nothing) runMaybeC)
