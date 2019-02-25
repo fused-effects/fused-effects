@@ -43,7 +43,7 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => A
   l <|> r = send (Choose (\ c -> if c then l else r))
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Monad (AltC f m) where
-  AltC a >>= f = AltC (a >>= runAltC . getAlt . foldMap (Monoid.Alt . f))
+  AltC a >>= f = AltC (a >>= runNonDet . getAlt . foldMap (Monoid.Alt . f))
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (AltC f m) where
   fail s = AltC (fail s)
@@ -52,9 +52,9 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversa
   liftIO io = AltC (pure <$> liftIO io)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
-  eff = AltC . handleSum (eff . handle (pure ()) (fmap join . traverse runAltC)) (\case
+  eff = AltC . handleSum (eff . handle (pure ()) (fmap join . traverse runNonDet)) (\case
     Empty    -> pure empty
-    Choose k -> liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
+    Choose k -> liftA2 (<|>) (runNonDet (k True)) (runNonDet (k False)))
 
 
 -- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
