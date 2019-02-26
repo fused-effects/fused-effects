@@ -74,9 +74,9 @@ instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) wher
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff = CutC . handleSum (handleSum
     (eff . R . handleCoercible)
-    (\case
-      Empty    -> MaybeC (pure Nothing)
-      Choose k -> MaybeC $ do
+    (MaybeC . \case
+      Empty    -> pure Nothing
+      Choose k -> do
         l <- runMaybeC (runCutC (k True))
         let interpret = maybe empty (pure . Just)
         shouldBacktrack <- get
@@ -85,9 +85,9 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :
           interpret l <|> interpret r
         else
           interpret l))
-    (\case
-      Cutfail  -> MaybeC (Nothing <$ put False)
-      Call m k -> MaybeC $ do
+    (MaybeC . \case
+      Cutfail  -> Nothing <$ put False
+      Call m k -> do
         shouldBacktrack <- get
         a <- runMaybeC (runCutC m)
         put (shouldBacktrack :: Bool)
