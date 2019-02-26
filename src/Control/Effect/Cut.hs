@@ -87,11 +87,11 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :
           interpret l))
     (\case
       Cutfail  -> MaybeC (Nothing <$ put False)
-      Call m k -> do
+      Call m k -> MaybeC $ do
         shouldBacktrack <- get
-        a <- runCutC m
+        a <- runMaybeC (runCutC m)
         put (shouldBacktrack :: Bool)
-        runCutC (k a))
+        maybe (pure Nothing) (runMaybeC . runCutC . k) a)
   {-# INLINE eff #-}
 
 
