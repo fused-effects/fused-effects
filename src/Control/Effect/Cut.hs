@@ -84,7 +84,7 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :
           r <- runMaybeC (runCutC (k False))
           interpret l <|> interpret r
         else
-          interpret l))
+          pure l))
     (MaybeC . \case
       Cutfail  -> Nothing <$ put False
       Call m k -> do
