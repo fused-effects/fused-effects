@@ -153,6 +153,11 @@ instance Applicative (BTreeC m) where
   BTreeC f <*> BTreeC a = BTreeC $ \ alt pur nil ->
     f alt (\ f' -> a alt (pur . f') nil) nil
 
+instance Alternative (BTreeC m) where
+  empty = BTreeC $ \ _ _ nil -> nil
+  BTreeC l <|> BTreeC r = BTreeC $ \ alt pur nil ->
+    l alt (\ l' -> alt (pur l') (r alt pur nil)) nil
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
