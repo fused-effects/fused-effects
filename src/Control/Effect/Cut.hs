@@ -131,6 +131,12 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BacktrackC m) 
 data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
+instance Applicative BTree where
+  pure = Leaf
+  Nil          <*> _ = Nil
+  Leaf f       <*> a = fmap f a
+  Branch f1 f2 <*> a = Branch (f1 <*> a) (f2 <*> a)
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
