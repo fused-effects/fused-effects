@@ -16,6 +16,7 @@ import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad (join)
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
 data Cut m k
@@ -121,7 +122,7 @@ instance Monad (BacktrackC m) where
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BacktrackC m) where
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other) = BacktrackC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runBacktrackAll) other) >>= foldr cons nil
+  eff (R other) = BacktrackC $ \ cons nil -> eff (handle (Leaf ()) (fmap join . traverse runBacktrackAll) other) >>= foldr cons nil
 
 
 data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
