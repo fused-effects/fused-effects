@@ -102,8 +102,8 @@ newtype BacktrackC m a = BacktrackC { runBacktrackC :: forall b . (a -> m b -> m
 runBacktrackAll :: BacktrackC [] a -> [a]
 runBacktrackAll (BacktrackC m) = m (:) []
 
-runBacktrackAllC :: Applicative m => BacktrackC m a -> m [a]
-runBacktrackAllC (BacktrackC m) = m (\ a as -> (a :) <$> as) (pure [])
+runBacktrackAllC :: (Alternative f, Applicative m) => BacktrackC m a -> m (f a)
+runBacktrackAllC (BacktrackC m) = m (\ a as -> (pure a <|>) <$> as) (pure empty)
 
 runBacktrackAltC :: Alternative m => BacktrackC m a -> m a
 runBacktrackAltC (BacktrackC m) = m ((<|>) . pure) empty
