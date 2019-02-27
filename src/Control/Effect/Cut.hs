@@ -112,8 +112,7 @@ instance Applicative (BacktrackC m) where
 
 instance Alternative (BacktrackC m) where
   empty = BacktrackC (\ _ nil -> nil)
-  BacktrackC l <|> BacktrackC r = BacktrackC $ \ cons nil ->
-    l cons (r cons nil)
+  BacktrackC l <|> BacktrackC r = BacktrackC $ \ cons -> l cons . r cons
 
 instance Monad (BacktrackC m) where
   BacktrackC a >>= f = BacktrackC $ \ cons ->
