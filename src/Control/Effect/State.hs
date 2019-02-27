@@ -14,6 +14,7 @@ module Control.Effect.State
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Coerce
@@ -106,6 +107,8 @@ instance MonadFail m => MonadFail (StateC s m) where
 
 instance MonadIO m => MonadIO (StateC s m) where
   liftIO io = StateC (\ s -> (,) s <$> liftIO io)
+
+instance (Alternative m, Monad m) => MonadPlus (StateC s m)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   eff op = StateC (\ s -> handleSum (eff . handle (s, ()) (uncurry runState)) (\case
