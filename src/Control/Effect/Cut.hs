@@ -12,7 +12,7 @@ import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Sum
-import Control.Monad (ap)
+import Control.Monad (MonadPlus(..), ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
@@ -123,6 +123,8 @@ instance (Alternative m, MonadFail m) => MonadFail (CutC' m) where
 
 instance (Alternative m, MonadIO m) => MonadIO (CutC' m) where
   liftIO io = CutC' (Pure <$> liftIO io)
+
+instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CutC' m)
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC' m) where
   eff = CutC' . handleSum (handleSum
