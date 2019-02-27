@@ -94,6 +94,9 @@ instance Monad (Cod m) where
 instance MonadFail m => MonadFail (Cod m) where
   fail s = Cod (\ _ -> fail s)
 
+instance MonadIO m => MonadIO (Cod m) where
+  liftIO io = Cod (\ k -> liftIO io >>= k)
+
 instance Carrier sig m => Carrier sig (Cod m) where
   eff op = Cod (\ k -> eff (hmap (runCod pure) (fmap' (runCod k) op)))
 
