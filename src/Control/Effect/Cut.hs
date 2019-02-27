@@ -90,6 +90,9 @@ instance Applicative (Cod m) where
 instance Monad (Cod m) where
   Cod a >>= f = Cod (\ k -> a (runCod k . f))
 
+instance MonadFail m => MonadFail (Cod m) where
+  fail s = Cod (\ _ -> fail s)
+
 instance Carrier sig m => Carrier sig (Cod m) where
   eff op = Cod (\ k -> eff (hmap (runCod pure) (fmap' (runCod k) op)))
 
