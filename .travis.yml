@@ -38,6 +38,7 @@ install:
 
 script:
 - cabal new-build
+- cabal new-build benchmark
 - cabal new-test
 - cabal new-haddock
 - cabal new-sdist
