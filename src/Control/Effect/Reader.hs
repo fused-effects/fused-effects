@@ -8,7 +8,7 @@ module Control.Effect.Reader
 , ReaderC(..)
 ) where
 
-import Control.Applicative (liftA2)
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Monad.Fail
@@ -61,6 +61,10 @@ newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
 instance Applicative m => Applicative (ReaderC r m) where
   pure a = ReaderC (const (pure a))
   ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
+
+instance Alternative m => Alternative (ReaderC r m) where
+  empty = ReaderC (const empty)
+  ReaderC l <|> ReaderC r = ReaderC (\ e -> l e <|> r e)
 
 instance Monad m => Monad (ReaderC r m) where
   ReaderC a >>= f = ReaderC (\ r -> a r >>= runReader r . f)
