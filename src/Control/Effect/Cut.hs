@@ -13,6 +13,8 @@ import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Sum
 import Control.Monad (ap)
+import Control.Monad.Fail
+import Prelude hiding (fail)
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
 data Cut m k
@@ -108,6 +110,9 @@ instance (Alternative m, Monad m) => Monad (CutC' m) where
     None e    -> pure (None e)
     Pure a    -> runCutC' (f a)
     Alt m1 m2 -> let k = runCutC' . f in (m1 >>= k) <|> (m2 >>= k))
+
+instance (Alternative m, MonadFail m) => MonadFail (CutC' m) where
+  fail s = CutC' (fail s)
 
 instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC' m) where
   eff = CutC' . handleSum (handleSum
