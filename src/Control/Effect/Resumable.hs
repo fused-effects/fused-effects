@@ -9,6 +9,7 @@ module Control.Effect.Resumable
 , ResumableWithC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.DeepSeq
 import Control.Effect.Carrier
 import Control.Effect.Error
@@ -85,7 +86,7 @@ runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
 runResumable = runError . runResumableC
 
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   eff = ResumableC . handleSum
@@ -107,7 +108,7 @@ runResumableWith :: (forall x . err x -> m x)
 runResumableWith with = runReader (Handler with) . runResumableWithC
 
 newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
 
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
