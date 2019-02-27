@@ -10,6 +10,7 @@ module Control.Effect.Cut
 , runListAll
 , runListAlt
 , BTree(..)
+, BTreeC(..)
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -142,6 +143,10 @@ instance Monad BTree where
   Nil          >>= _ = Nil
   Leaf a       >>= f = f a
   Branch a1 a2 >>= f = Branch (a1 >>= f) (a2 >>= f)
+
+
+newtype BTreeC m a = BTreeC { runBTreeC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b }
+  deriving (Functor)
 
 
 -- $setup
