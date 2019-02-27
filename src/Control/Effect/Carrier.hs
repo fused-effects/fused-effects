@@ -5,10 +5,8 @@ module Control.Effect.Carrier
 , Carrier(..)
 , handlePure
 , handleCoercible
-, MaybeC(..)
 ) where
 
-import Control.Applicative (liftA2)
 import Data.Coerce
 
 class HFunctor h where
@@ -54,17 +52,3 @@ handlePure handler = hmap handler . fmap' handler
 handleCoercible :: (HFunctor sig, Coercible f g) => sig f (f a) -> sig g (g a)
 handleCoercible = handlePure coerce
 {-# INLINE handleCoercible #-}
-
-
-newtype MaybeC m a = MaybeC { runMaybeC :: m (Maybe a) }
-  deriving (Functor)
-
-instance Applicative m => Applicative (MaybeC m) where
-  pure = MaybeC . pure . Just
-  MaybeC f <*> MaybeC a = MaybeC (liftA2 (<*>) f a)
-
-instance Monad m => Monad (MaybeC m) where
-  MaybeC a >>= f = MaybeC (a >>= maybe (pure Nothing) (runMaybeC . f))
-
-instance (Carrier sig m, Effect sig) => Carrier sig (MaybeC m) where
-  eff = MaybeC . eff . handle (pure ()) (maybe (pure Nothing) runMaybeC)
