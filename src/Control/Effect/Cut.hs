@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cut
 ( Cut(..)
 , cutfail
@@ -93,6 +93,10 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :
         put (shouldBacktrack :: Bool)
         maybe (pure Nothing) (runMaybeC . runCutC . k) a)
   {-# INLINE eff #-}
+
+
+newtype BacktrackC m a = BacktrackC { runBacktrackC :: forall b . (a -> m b -> m b) -> m b -> m b }
+  deriving (Functor)
 
 
 -- $setup
