@@ -98,6 +98,11 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :
 newtype BacktrackC m a = BacktrackC { runBacktrackC :: forall b . (a -> m b -> m b) -> m b -> m b }
   deriving (Functor)
 
+instance Applicative m => Applicative (BacktrackC m) where
+  pure a = BacktrackC (\ cons nil -> cons a nil)
+  f <*> a = BacktrackC $ \ cons nil ->
+    runBacktrackC f (\ f' -> runBacktrackC a (cons . f')) nil
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
