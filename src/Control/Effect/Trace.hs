@@ -14,6 +14,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Bifunctor (first)
@@ -43,7 +44,7 @@ runTraceByPrinting :: TraceByPrintingC m a -> m a
 runTraceByPrinting = runTraceByPrintingC
 
 newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
   eff = handleSum
@@ -58,7 +59,7 @@ runTraceByIgnoring :: TraceByIgnoringC m a -> m a
 runTraceByIgnoring = runTraceByIgnoringC
 
 newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
   eff = handleSum (TraceByIgnoringC . eff . handleCoercible) traceCont
@@ -71,7 +72,7 @@ runTraceByReturning :: Functor m => TraceByReturningC m a -> m ([String], a)
 runTraceByReturning = fmap (first reverse) . runState [] . runTraceByReturningC
 
 newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
   eff = handleSum
