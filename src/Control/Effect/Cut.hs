@@ -9,6 +9,7 @@ module Control.Effect.Cut
 , ListC(..)
 , runListAll
 , runListAlt
+, BTree(..)
 ) where
 
 import Control.Applicative (Alternative(..))
