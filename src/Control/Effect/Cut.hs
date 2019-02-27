@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cut
 ( Cut(..)
 , cutfail
@@ -12,6 +12,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Sum
+import Control.Monad (ap)
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
 data Cut m k
@@ -95,6 +96,23 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :
     where bindBranch :: (Alternative m, Carrier sig m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
           bindBranch cut bind = branch (\ e -> if e then pure (None True) else cut) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
   {-# INLINE eff #-}
+
+
+newtype Cod m a = Cod { unCod :: forall b . (a -> m b) -> m b }
+  deriving (Functor)
+
+runCod :: (a -> carrier b) -> Cod carrier a -> carrier b
+runCod = flip unCod
+
+instance Applicative (Cod m) where
+  pure a = Cod (\ k -> k a)
+  (<*>) = ap
+
+instance Monad (Cod m) where
+  Cod a >>= f = Cod (\ k -> a (runCod k . f))
+
+instance Carrier sig m => Carrier sig (Cod m) where
+  eff op = Cod (\ k -> eff (hmap (runCod pure) (fmap' (runCod k) op)))
 
 
 -- $setup
