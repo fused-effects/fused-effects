@@ -71,9 +71,7 @@ instance (Alternative m, Monad m) => Applicative (CutC m) where
   CutC f <*> CutC a = CutC $ f >>= \case
     None e    -> pure (None e)
     Pure f'   -> fmap f' <$> a
-    Alt f1 f2 -> do
-      a' <- a
-      pure (Alt (fmap <$> f1 <*> pure a' >>= runBranch (const empty)) (fmap <$> f2 <*> pure a' >>= runBranch (const empty)))
+    Alt f1 f2 -> pure (Alt (fmap <$> f1 <*> a >>= runBranch (const empty)) (fmap <$> f2 <*> a >>= runBranch (const empty)))
 
 instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = send Empty
