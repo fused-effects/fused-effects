@@ -12,9 +12,9 @@ main :: IO ()
 main = defaultMain
   [ bgroup "WriterC"
     [ bgroup "Eff"
-      [ bench "100"       $ whnf (run . execWriter @_ @_ @(Sum Int) . tellLoop) 100
-      , bench "100000"    $ whnf (run . execWriter @_ @_ @(Sum Int) . tellLoop) 100000
-      , bench "100000000" $ whnf (run . execWriter @_ @_ @(Sum Int) . tellLoop) 100000000
+      [ bench "100"       $ whnf (run . execWriter @(Sum Int) . tellLoop) 100
+      , bench "100000"    $ whnf (run . execWriter @(Sum Int) . tellLoop) 100000
+      , bench "100000000" $ whnf (run . execWriter @(Sum Int) . tellLoop) 100000000
       ]
     , bgroup "standalone"
       [ bench "100"       $ whnf (fst . runVoidC . flip runWriterC (Sum (0 :: Int)) . tellLoop) 100
