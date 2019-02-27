@@ -14,6 +14,7 @@ import           Control.Effect.Carrier
 import           Control.Effect.Reader
 import           Control.Effect.Sum
 import qualified Control.Exception as Exc
+import           Control.Monad (MonadPlus(..))
 import           Control.Monad.Fail
 import           Control.Monad.IO.Class
 
@@ -77,7 +78,7 @@ runResource :: (forall x . m x -> IO x)
 runResource handler = runReader (Handler handler) . runResourceC
 
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 newtype Handler m = Handler (forall x . m x -> IO x)
 
