@@ -7,8 +7,8 @@ module Control.Effect.Cut
 , runCut
 , CutC(..)
 , ListC(..)
-, runBacktrackAll
-, runBacktrackAlt
+, runListAll
+, runListAlt
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -66,7 +66,7 @@ cut = pure () <|> cutfail
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
 runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
-runCut = evalState True . runBacktrackAlt . runCutC
+runCut = evalState True . runListAlt . runCutC
 
 newtype CutC m a = CutC { runCutC :: ListC (StateC Bool m) a }
   deriving (Applicative, Functor, Monad)
@@ -99,11 +99,11 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
 newtype ListC m a = ListC { runListC :: forall b . (a -> m b -> m b) -> m b -> m b }
   deriving (Functor)
 
-runBacktrackAll :: (Alternative f, Applicative m) => ListC m a -> m (f a)
-runBacktrackAll (ListC m) = m (fmap . (<|>) . pure) (pure empty)
+runListAll :: (Alternative f, Applicative m) => ListC m a -> m (f a)
+runListAll (ListC m) = m (fmap . (<|>) . pure) (pure empty)
 
-runBacktrackAlt :: Alternative m => ListC m a -> m a
-runBacktrackAlt (ListC m) = m ((<|>) . pure) empty
+runListAlt :: Alternative m => ListC m a -> m a
+runListAlt (ListC m) = m ((<|>) . pure) empty
 
 instance Applicative (ListC m) where
   pure a = ListC (\ cons -> cons a)
@@ -121,7 +121,7 @@ instance Monad (ListC m) where
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other) = ListC $ \ cons nil -> eff (handle (Leaf ()) (fmap join . traverse runBacktrackAll) other) >>= foldr cons nil
+  eff (R other) = ListC $ \ cons nil -> eff (handle (Leaf ()) (fmap join . traverse runListAll) other) >>= foldr cons nil
 
 
 data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
