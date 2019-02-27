@@ -137,6 +137,11 @@ instance Applicative BTree where
   Leaf f       <*> a = fmap f a
   Branch f1 f2 <*> a = Branch (f1 <*> a) (f2 <*> a)
 
+instance Monad BTree where
+  Nil          >>= _ = Nil
+  Leaf a       >>= f = f a
+  Branch a1 a2 >>= f = Branch (a1 >>= f) (a2 >>= f)
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
