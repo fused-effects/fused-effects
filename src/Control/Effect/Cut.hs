@@ -67,7 +67,7 @@ runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
 runCut = (>>= runBranch (const empty)) . runCutC' . runCod (CutC' . pure . Pure) . runCutC
 
 newtype CutC m a = CutC { runCutC :: Cod (CutC' m) a }
-  deriving (Applicative, Functor, Monad)
+  deriving (Applicative, Functor, Monad, MonadFail)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = send Empty
