@@ -11,6 +11,7 @@ module Control.Effect.Reader
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
@@ -74,6 +75,8 @@ instance MonadFail m => MonadFail (ReaderC r m) where
 
 instance MonadIO m => MonadIO (ReaderC r m) where
   liftIO = ReaderC . const . liftIO
+
+instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff op = ReaderC (\ r -> handleSum (eff . handlePure (runReader r)) (\case
