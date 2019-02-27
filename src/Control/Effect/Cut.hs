@@ -6,6 +6,7 @@ module Control.Effect.Cut
 , cut
 , runCut
 , CutC(..)
+, BacktrackC(..)
 ) where
 
 import Control.Applicative (Alternative(..))
