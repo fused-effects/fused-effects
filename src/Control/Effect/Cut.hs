@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cut
 ( Cut(..)
 , cutfail
@@ -8,7 +8,7 @@ module Control.Effect.Cut
 , CutC(..)
 ) where
 
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Sum
@@ -62,46 +62,23 @@ cut = pure () <|> cutfail
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
 runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
-runCut = (>>= runBranch (const empty)) . runCutC
+runCut = (>>= runBranch (const empty)) . runCutC' . runCod (CutC' . pure . Pure) . runCutC
 
-newtype CutC m a = CutC { runCutC :: m (Branch m Bool a) }
-  deriving (Functor)
-
-instance (Alternative m, Monad m) => Applicative (CutC m) where
-  pure = CutC . pure . Pure
-  CutC f <*> CutC a = CutC $ f >>= \case
-    None e    -> pure (None e)
-    Pure f'   -> fmap f' <$> a
-    Alt f1 f2 -> pure (Alt (fmap <$> f1 <*> a >>= runBranch (const empty)) (fmap <$> f2 <*> a >>= runBranch (const empty)))
+newtype CutC m a = CutC { runCutC :: Cod (CutC' m) a }
+  deriving (Applicative, Functor, Monad)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
-instance (Alternative m, Monad m) => Monad (CutC m) where
-  CutC m >>= f = CutC (m >>= \case
-    None e    -> pure (None e)
-    Pure a    -> runCutC (f a)
-    Alt m1 m2 -> let k = runCutC . f in (m1 >>= k) <|> (m2 >>= k))
-
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
-  eff = CutC . handleSum (handleSum
-    (eff . handle (Pure ()) (bindBranch (pure (None False)) runCutC))
-    (\case
-      Empty    -> pure (None True)
-      Choose k -> runCutC (k True) >>= branch (\ e -> if e then runCutC (k False) else pure (None False)) (\ a -> pure (Alt (pure a) (runCutC (k False) >>= runBranch (const empty)))) (fmap pure . Alt)))
-    (\case
-      Cutfail  -> pure (None False)
-      Call m k -> runCutC m >>= bindBranch (pure (None True)) (runCutC . k))
-    where bindBranch :: (Alternative m, Carrier sig m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
-          bindBranch cut bind = branch (\ e -> if e then pure (None True) else cut) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
-  {-# INLINE eff #-}
+  eff = CutC . eff . handleCoercible
 
 
 newtype Cod m a = Cod { unCod :: forall b . (a -> m b) -> m b }
   deriving (Functor)
 
-runCod :: (a -> carrier b) -> Cod carrier a -> carrier b
+runCod :: (a -> m b) -> Cod m a -> m b
 runCod = flip unCod
 
 instance Applicative (Cod m) where
@@ -113,6 +90,37 @@ instance Monad (Cod m) where
 
 instance Carrier sig m => Carrier sig (Cod m) where
   eff op = Cod (\ k -> eff (hmap (runCod pure) (fmap' (runCod k) op)))
+
+
+newtype CutC' m a = CutC' { runCutC' :: m (Branch m Bool a) }
+  deriving (Functor)
+
+instance Alternative m => Applicative (CutC' m) where
+  pure = CutC' . pure . Pure
+  CutC' f <*> CutC' a = CutC' (liftA2 (<*>) f a)
+
+instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC' m) where
+  empty = send Empty
+  l <|> r = send (Choose (\ c -> if c then l else r))
+
+instance (Alternative m, Monad m) => Monad (CutC' m) where
+  CutC' m >>= f = CutC' (m >>= \case
+    None e    -> pure (None e)
+    Pure a    -> runCutC' (f a)
+    Alt m1 m2 -> let k = runCutC' . f in (m1 >>= k) <|> (m2 >>= k))
+
+instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC' m) where
+  eff = CutC' . handleSum (handleSum
+    (eff . handle (Pure ()) (bindBranch (pure (None False)) runCutC'))
+    (\case
+      Empty    -> pure (None True)
+      Choose k -> runCutC' (k True) >>= branch (\ e -> if e then runCutC' (k False) else pure (None False)) (\ a -> pure (Alt (pure a) (runCutC' (k False) >>= runBranch (const empty)))) (fmap pure . Alt)))
+    (\case
+      Cutfail  -> pure (None False)
+      Call m k -> runCutC' m >>= bindBranch (pure (None True)) (runCutC' . k))
+    where bindBranch :: (Alternative m, Carrier sig m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
+          bindBranch cut bind = branch (\ e -> if e then pure (None True) else cut) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
+  {-# INLINE eff #-}
 
 
 -- $setup
