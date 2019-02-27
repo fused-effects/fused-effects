@@ -8,7 +8,7 @@ module Control.Effect.Cut
 , CutC(..)
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Sum
@@ -66,9 +66,14 @@ runCut = (>>= runBranch (const empty)) . runCutC
 newtype CutC m a = CutC { runCutC :: m (Branch m Bool a) }
   deriving (Functor)
 
-instance Alternative m => Applicative (CutC m) where
+instance (Alternative m, Monad m) => Applicative (CutC m) where
   pure = CutC . pure . Pure
-  CutC f <*> CutC a = CutC (liftA2 (<*>) f a)
+  CutC f <*> CutC a = CutC $ f >>= \case
+    None e    -> pure (None e)
+    Pure f'   -> fmap f' <$> a
+    Alt f1 f2 -> do
+      a' <- a
+      pure (Alt (fmap <$> f1 <*> pure a' >>= runBranch (const empty)) (fmap <$> f2 <*> pure a' >>= runBranch (const empty)))
 
 instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = send Empty
