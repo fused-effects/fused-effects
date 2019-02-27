@@ -6,6 +6,7 @@ module Control.Effect.Lift
 , LiftC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Lift.Internal
@@ -23,7 +24,7 @@ sendM :: (Member (Lift n) sig, Carrier sig m, Functor n) => n a -> m a
 sendM = send . Lift . fmap pure
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
-  deriving (Applicative, Functor, Monad, MonadFail)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail)
 
 instance MonadIO (LiftC IO) where
   liftIO = sendM
