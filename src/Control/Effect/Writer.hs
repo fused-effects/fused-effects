@@ -14,6 +14,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 
@@ -85,7 +86,7 @@ execWriter = fmap fst . runWriter
 --
 --   This is based on a post Gabriel Gonzalez made to the Haskell mailing list: https://mail.haskell.org/pipermail/libraries/2013-March/019528.html
 newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
   eff = WriterC . handleSum (eff . R . handleCoercible) (\case
