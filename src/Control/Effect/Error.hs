@@ -10,7 +10,7 @@ module Control.Effect.Error
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Monad ((<=<))
+import Control.Monad (MonadPlus(..), (<=<))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
@@ -75,6 +75,8 @@ instance MonadIO m => MonadIO (ErrorC e m) where
 
 instance MonadFail m => MonadFail (ErrorC e m) where
   fail s = ErrorC (fail s)
+
+instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
   eff = ErrorC . handleSum (eff . handle (Right ()) (either (pure . Left) runError)) (\case
