@@ -51,6 +51,8 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traver
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (AltC f m) where
   liftIO io = AltC (pure <$> liftIO io)
 
+instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (AltC f m)
+
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
   eff = AltC . handleSum (eff . handle (pure ()) (fmap join . traverse runNonDet)) (\case
     Empty    -> pure empty
