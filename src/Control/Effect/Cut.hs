@@ -103,7 +103,7 @@ runBacktrackAll :: BacktrackC [] a -> [a]
 runBacktrackAll (BacktrackC m) = m (:) []
 
 runBacktrackAllC :: (Alternative f, Applicative m) => BacktrackC m a -> m (f a)
-runBacktrackAllC (BacktrackC m) = m (\ a as -> (pure a <|>) <$> as) (pure empty)
+runBacktrackAllC (BacktrackC m) = m (fmap . (<|>) . pure) (pure empty)
 
 runBacktrackAltC :: Alternative m => BacktrackC m a -> m a
 runBacktrackAltC (BacktrackC m) = m ((<|>) . pure) empty
