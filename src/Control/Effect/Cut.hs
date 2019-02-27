@@ -7,8 +7,8 @@ module Control.Effect.Cut
 , runCut
 , CutC(..)
 , BacktrackC(..)
-, runBacktrackAllC
-, runBacktrackAltC
+, runBacktrackAll
+, runBacktrackAlt
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -65,7 +65,7 @@ cut = pure () <|> cutfail
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
 runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
-runCut = evalState True . runBacktrackAltC . runCutC
+runCut = evalState True . runBacktrackAlt . runCutC
 
 newtype CutC m a = CutC { runCutC :: BacktrackC (StateC Bool m) a }
   deriving (Applicative, Functor, Monad)
@@ -98,11 +98,11 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
 newtype BacktrackC m a = BacktrackC { runBacktrackC :: forall b . (a -> m b -> m b) -> m b -> m b }
   deriving (Functor)
 
-runBacktrackAllC :: (Alternative f, Applicative m) => BacktrackC m a -> m (f a)
-runBacktrackAllC (BacktrackC m) = m (fmap . (<|>) . pure) (pure empty)
+runBacktrackAll :: (Alternative f, Applicative m) => BacktrackC m a -> m (f a)
+runBacktrackAll (BacktrackC m) = m (fmap . (<|>) . pure) (pure empty)
 
-runBacktrackAltC :: Alternative m => BacktrackC m a -> m a
-runBacktrackAltC (BacktrackC m) = m ((<|>) . pure) empty
+runBacktrackAlt :: Alternative m => BacktrackC m a -> m a
+runBacktrackAlt (BacktrackC m) = m ((<|>) . pure) empty
 
 instance Applicative (BacktrackC m) where
   pure a = BacktrackC (\ cons nil -> cons a nil)
@@ -121,7 +121,7 @@ instance Monad (BacktrackC m) where
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BacktrackC m) where
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other) = BacktrackC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runBacktrackAllC) other) >>= foldr cons nil
+  eff (R other) = BacktrackC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runBacktrackAll) other) >>= foldr cons nil
 
 
 data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
