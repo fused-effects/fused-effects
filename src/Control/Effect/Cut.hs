@@ -7,7 +7,6 @@ module Control.Effect.Cut
 , runCut
 , CutC(..)
 , BacktrackC(..)
-, runBacktrackAll
 , runBacktrackAllC
 , runBacktrackAltC
 ) where
@@ -98,9 +97,6 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
 
 newtype BacktrackC m a = BacktrackC { runBacktrackC :: forall b . (a -> m b -> m b) -> m b -> m b }
   deriving (Functor)
-
-runBacktrackAll :: BacktrackC [] a -> [a]
-runBacktrackAll (BacktrackC m) = m (:) []
 
 runBacktrackAllC :: (Alternative f, Applicative m) => BacktrackC m a -> m (f a)
 runBacktrackAllC (BacktrackC m) = m (fmap . (<|>) . pure) (pure empty)
