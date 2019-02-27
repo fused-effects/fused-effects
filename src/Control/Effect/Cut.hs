@@ -98,12 +98,12 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :
 newtype BacktrackC m a = BacktrackC { runBacktrackC :: forall b . (a -> m b -> m b) -> m b -> m b }
   deriving (Functor)
 
-instance Applicative m => Applicative (BacktrackC m) where
+instance Applicative (BacktrackC m) where
   pure a = BacktrackC (\ cons nil -> cons a nil)
   BacktrackC f <*> BacktrackC a = BacktrackC $ \ cons nil ->
     f (\ f' -> a (cons . f')) nil
 
-instance Monad m => Monad (BacktrackC m) where
+instance Monad (BacktrackC m) where
   BacktrackC a >>= f = BacktrackC $ \ cons nil ->
     a (\ a' -> runBacktrackC (f a') cons) nil
 
