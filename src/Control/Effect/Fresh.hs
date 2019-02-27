@@ -11,6 +11,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 
@@ -49,7 +50,7 @@ runFresh :: Functor m => FreshC m a -> m a
 runFresh = fmap snd . runState 0 . runFreshC
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
   eff = FreshC . handleSum (eff . R . handleCoercible) (\case
