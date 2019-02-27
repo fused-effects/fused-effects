@@ -16,7 +16,7 @@ import Control.Effect.Carrier
 import Control.Effect.Cull
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
-import Control.Monad (join)
+import Control.Monad (MonadPlus(..), join)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Monoid as Monoid (Alt(..))
@@ -74,6 +74,7 @@ deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversabl
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Monad (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (OnceC f m)
+deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (OnceC f m)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   eff = OnceC . handleSum (eff . R . R . R . handleCoercible) (\case
