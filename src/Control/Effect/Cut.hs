@@ -103,6 +103,10 @@ instance Applicative m => Applicative (BacktrackC m) where
   f <*> a = BacktrackC $ \ cons nil ->
     runBacktrackC f (\ f' -> runBacktrackC a (cons . f')) nil
 
+instance Monad m => Monad (BacktrackC m) where
+  a >>= f = BacktrackC $ \ cons nil ->
+    runBacktrackC a (\ a' -> runBacktrackC (f a') cons) nil
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
