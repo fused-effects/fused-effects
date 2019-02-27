@@ -66,36 +66,33 @@ cut = pure () <|> cutfail
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
 runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
-runCut = (>>= maybe empty pure) . evalState True . runMaybeC . runCutC
+runCut = evalState True . runBacktrackAltC . runCutC
 
-newtype CutC m a = CutC { runCutC :: MaybeC (StateC Bool m) a }
+newtype CutC m a = CutC { runCutC :: BacktrackC (StateC Bool m) a }
   deriving (Applicative, Functor, Monad)
 
-instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) where
+instance (Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
-instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
+instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff = CutC . handleSum (handleSum
-    (eff . R . handleCoercible)
-    (MaybeC . \case
-      Empty    -> pure Nothing
-      Choose k -> do
-        l <- runMaybeC (runCutC (k True))
-        let interpret = maybe empty (pure . Just)
+    (eff . R . R . handleCoercible)
+    (\case
+      Empty    -> BacktrackC $ \ _    nil -> nil
+      Choose k -> BacktrackC $ \ cons nil -> do
+        let handle a as = do
+              shouldBacktrack <- get
+              if shouldBacktrack then do
+                maybe id cons a $ runBacktrackC (runCutC (k False)) cons as
+              else
+                maybe nil (flip cons nil) a
+        runBacktrackC (runCutC (k True)) (handle . Just) (handle Nothing nil)))
+    (\case
+      Cutfail  -> BacktrackC $ \ _    nil -> put False *> nil
+      Call m k -> BacktrackC $ \ cons nil -> do
         shouldBacktrack <- get
-        if shouldBacktrack then do
-          r <- runMaybeC (runCutC (k False))
-          interpret l <|> interpret r
-        else
-          pure l))
-    (MaybeC . \case
-      Cutfail  -> Nothing <$ put False
-      Call m k -> do
-        shouldBacktrack <- get
-        a <- runMaybeC (runCutC m)
-        put (shouldBacktrack :: Bool)
-        maybe (pure Nothing) (runMaybeC . runCutC . k) a)
+        runBacktrackC (runCutC m) (\ a as -> put shouldBacktrack *> runBacktrackC (runCutC (k a)) cons as) (put (shouldBacktrack :: Bool) *> nil))
   {-# INLINE eff #-}
 
 
