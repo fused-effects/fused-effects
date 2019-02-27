@@ -68,7 +68,7 @@ instance (Alternative m, MonadFail m) => MonadFail (CullC m) where
 instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
   liftIO io = CullC (Pure <$> liftIO io)
 
-instance (Alternative m, Carrier sig m, Effect sig, Monad m) => MonadPlus (CullC m)
+instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CullC m)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   eff op = CullC (ReaderC (\ cull -> handleSum (handleSum
