@@ -24,10 +24,7 @@ sendM :: (Member (Lift n) sig, Carrier sig m, Functor n) => n a -> m a
 sendM = send . Lift . fmap pure
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail)
-
-instance MonadIO m => MonadIO (LiftC m) where
-  liftIO = LiftC . liftIO
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
   eff = LiftC . (>>= runLiftC) . unLift
