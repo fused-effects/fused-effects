@@ -6,7 +6,7 @@ module Control.Effect.Cut
 , cut
 , runCut
 , CutC(..)
-, BacktrackC(..)
+, ListC(..)
 , runBacktrackAll
 , runBacktrackAlt
 ) where
@@ -68,7 +68,7 @@ cut = pure () <|> cutfail
 runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
 runCut = evalState True . runBacktrackAlt . runCutC
 
-newtype CutC m a = CutC { runCutC :: BacktrackC (StateC Bool m) a }
+newtype CutC m a = CutC { runCutC :: ListC (StateC Bool m) a }
   deriving (Applicative, Functor, Monad)
 
 instance (Carrier sig m, Effect sig) => Alternative (CutC m) where
@@ -79,49 +79,49 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
   eff = CutC . handleSum (handleSum
     (eff . R . R . handleCoercible)
     (\case
-      Empty    -> BacktrackC $ \ _    nil -> nil
-      Choose k -> BacktrackC $ \ cons nil -> do
+      Empty    -> ListC $ \ _    nil -> nil
+      Choose k -> ListC $ \ cons nil -> do
         let handle a as = do
               shouldBacktrack <- get
               if shouldBacktrack then do
-                maybe id cons a $ runBacktrackC (runCutC (k False)) cons as
+                maybe id cons a $ runListC (runCutC (k False)) cons as
               else
                 maybe nil (flip cons nil) a
-        runBacktrackC (runCutC (k True)) (handle . Just) (handle Nothing nil)))
+        runListC (runCutC (k True)) (handle . Just) (handle Nothing nil)))
     (\case
-      Cutfail  -> BacktrackC $ \ _    nil -> put False *> nil
-      Call m k -> BacktrackC $ \ cons nil -> do
+      Cutfail  -> ListC $ \ _    nil -> put False *> nil
+      Call m k -> ListC $ \ cons nil -> do
         shouldBacktrack <- get
-        runBacktrackC (runCutC m) (\ a as -> put shouldBacktrack *> runBacktrackC (runCutC (k a)) cons as) (put (shouldBacktrack :: Bool) *> nil))
+        runListC (runCutC m) (\ a as -> put shouldBacktrack *> runListC (runCutC (k a)) cons as) (put (shouldBacktrack :: Bool) *> nil))
   {-# INLINE eff #-}
 
 
-newtype BacktrackC m a = BacktrackC { runBacktrackC :: forall b . (a -> m b -> m b) -> m b -> m b }
+newtype ListC m a = ListC { runListC :: forall b . (a -> m b -> m b) -> m b -> m b }
   deriving (Functor)
 
-runBacktrackAll :: (Alternative f, Applicative m) => BacktrackC m a -> m (f a)
-runBacktrackAll (BacktrackC m) = m (fmap . (<|>) . pure) (pure empty)
+runBacktrackAll :: (Alternative f, Applicative m) => ListC m a -> m (f a)
+runBacktrackAll (ListC m) = m (fmap . (<|>) . pure) (pure empty)
 
-runBacktrackAlt :: Alternative m => BacktrackC m a -> m a
-runBacktrackAlt (BacktrackC m) = m ((<|>) . pure) empty
+runBacktrackAlt :: Alternative m => ListC m a -> m a
+runBacktrackAlt (ListC m) = m ((<|>) . pure) empty
 
-instance Applicative (BacktrackC m) where
-  pure a = BacktrackC (\ cons -> cons a)
-  BacktrackC f <*> BacktrackC a = BacktrackC $ \ cons ->
+instance Applicative (ListC m) where
+  pure a = ListC (\ cons -> cons a)
+  ListC f <*> ListC a = ListC $ \ cons ->
     f (\ f' -> a (cons . f'))
 
-instance Alternative (BacktrackC m) where
-  empty = BacktrackC (\ _ nil -> nil)
-  BacktrackC l <|> BacktrackC r = BacktrackC $ \ cons -> l cons . r cons
+instance Alternative (ListC m) where
+  empty = ListC (\ _ nil -> nil)
+  ListC l <|> ListC r = ListC $ \ cons -> l cons . r cons
 
-instance Monad (BacktrackC m) where
-  BacktrackC a >>= f = BacktrackC $ \ cons ->
-    a (\ a' -> runBacktrackC (f a') cons)
+instance Monad (ListC m) where
+  ListC a >>= f = ListC $ \ cons ->
+    a (\ a' -> runListC (f a') cons)
 
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BacktrackC m) where
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other) = BacktrackC $ \ cons nil -> eff (handle (Leaf ()) (fmap join . traverse runBacktrackAll) other) >>= foldr cons nil
+  eff (R other) = ListC $ \ cons nil -> eff (handle (Leaf ()) (fmap join . traverse runBacktrackAll) other) >>= foldr cons nil
 
 
 data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
