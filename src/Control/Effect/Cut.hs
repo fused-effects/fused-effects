@@ -158,6 +158,10 @@ instance Alternative (BTreeC m) where
   BTreeC l <|> BTreeC r = BTreeC $ \ alt pur nil ->
     l alt (\ l' -> alt (pur l') (r alt pur nil)) nil
 
+instance Monad (BTreeC m) where
+  BTreeC a >>= f = BTreeC $ \ alt pur nil ->
+    a alt (\ a' -> runBTreeC (f a') alt pur nil) nil
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
