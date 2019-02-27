@@ -148,6 +148,11 @@ instance Monad BTree where
 newtype BTreeC m a = BTreeC { runBTreeC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b }
   deriving (Functor)
 
+instance Applicative (BTreeC m) where
+  pure a = BTreeC $ \ _ pur _ -> pur a
+  BTreeC f <*> BTreeC a = BTreeC $ \ alt pur nil ->
+    f alt (\ f' -> a alt (pur . f') nil) nil
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
