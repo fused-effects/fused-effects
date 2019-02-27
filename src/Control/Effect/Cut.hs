@@ -137,6 +137,10 @@ instance Applicative BTree where
   Leaf f       <*> a = fmap f a
   Branch f1 f2 <*> a = Branch (f1 <*> a) (f2 <*> a)
 
+instance Alternative BTree where
+  empty = Nil
+  (<|>) = Branch
+
 instance Monad BTree where
   Nil          >>= _ = Nil
   Leaf a       >>= f = f a
