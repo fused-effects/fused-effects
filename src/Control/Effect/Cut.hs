@@ -106,9 +106,9 @@ runBacktrackAlt :: Alternative m => BacktrackC m a -> m a
 runBacktrackAlt (BacktrackC m) = m ((<|>) . pure) empty
 
 instance Applicative (BacktrackC m) where
-  pure a = BacktrackC (\ cons nil -> cons a nil)
-  BacktrackC f <*> BacktrackC a = BacktrackC $ \ cons nil ->
-    f (\ f' -> a (cons . f')) nil
+  pure a = BacktrackC (\ cons -> cons a)
+  BacktrackC f <*> BacktrackC a = BacktrackC $ \ cons ->
+    f (\ f' -> a (cons . f'))
 
 instance Alternative (BacktrackC m) where
   empty = BacktrackC (\ _ nil -> nil)
@@ -116,8 +116,8 @@ instance Alternative (BacktrackC m) where
     l cons (r cons nil)
 
 instance Monad (BacktrackC m) where
-  BacktrackC a >>= f = BacktrackC $ \ cons nil ->
-    a (\ a' -> runBacktrackC (f a') cons) nil
+  BacktrackC a >>= f = BacktrackC $ \ cons ->
+    a (\ a' -> runBacktrackC (f a') cons)
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BacktrackC m) where
   eff (L Empty) = empty
