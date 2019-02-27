@@ -12,6 +12,7 @@ module Control.Effect.Cut
 , BTree(..)
 , BTreeC(..)
 , runBTreeAll
+, runBTreeAlt
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
@@ -151,6 +152,9 @@ newtype BTreeC m a = BTreeC { runBTreeC :: forall b . (m b -> m b -> m b) -> (a 
 
 runBTreeAll :: (Alternative f, Applicative m) => BTreeC m a -> m (f a)
 runBTreeAll (BTreeC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
+
+runBTreeAlt :: Alternative m => BTreeC m a -> m a
+runBTreeAlt (BTreeC m) = m (<|>) pure empty
 
 instance Applicative (BTreeC m) where
   pure a = BTreeC $ \ _ pur _ -> pur a
