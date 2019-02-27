@@ -125,6 +125,11 @@ instance Monad (BacktrackC m) where
   BacktrackC a >>= f = BacktrackC $ \ cons nil ->
     a (\ a' -> runBacktrackC (f a') cons) nil
 
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BacktrackC m) where
+  eff (L Empty) = empty
+  eff (L (Choose k)) = k True <|> k False
+  eff (R other) = BacktrackC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runBacktrackAllC) other) >>= foldr cons nil
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
