@@ -126,7 +126,7 @@ instance (Alternative m, MonadIO m) => MonadIO (CutC' m) where
 
 instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CutC' m)
 
-instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC' m) where
+instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC' m) where
   eff = CutC' . handleSum (handleSum
     (eff . handle (Pure ()) (bindBranch (pure (None False)) runCutC'))
     (\case
