@@ -6,6 +6,7 @@ module Control.Effect.Fail
 , FailC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Effect.Fail.Internal
@@ -20,7 +21,7 @@ runFail :: FailC m a -> m (Either String a)
 runFail = runError . runFailC
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadIO)
 
 instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
   fail s = send (Fail s)
