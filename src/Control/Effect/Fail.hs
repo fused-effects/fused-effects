@@ -11,6 +11,7 @@ import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Effect.Fail.Internal
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 
@@ -21,7 +22,7 @@ runFail :: FailC m a -> m (Either String a)
 runFail = runError . runFailC
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadIO, MonadPlus)
 
 instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
   fail s = send (Fail s)
