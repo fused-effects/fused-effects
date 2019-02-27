@@ -9,6 +9,7 @@ module Control.Effect.Cut
 , BacktrackC(..)
 , runBacktrackAll
 , runBacktrackAllC
+, runBacktrackAltC
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -106,6 +107,9 @@ runBacktrackAll (BacktrackC m) = m (:) []
 
 runBacktrackAllC :: Applicative m => BacktrackC m a -> m [a]
 runBacktrackAllC (BacktrackC m) = m (\ a as -> (a :) <$> as) (pure [])
+
+runBacktrackAltC :: Alternative m => BacktrackC m a -> m a
+runBacktrackAltC (BacktrackC m) = m ((<|>) . pure) empty
 
 instance Applicative (BacktrackC m) where
   pure a = BacktrackC (\ cons nil -> cons a nil)
