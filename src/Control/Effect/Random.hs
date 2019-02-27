@@ -10,6 +10,7 @@ module Control.Effect.Random
 , MonadInterleave(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Random.Internal
 import Control.Effect.State
@@ -42,7 +43,7 @@ evalRandomIO :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m) where
   getRandom = send (Random pure)
