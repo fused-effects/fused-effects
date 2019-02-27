@@ -74,6 +74,8 @@ instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) wher
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
+instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CutC m)
+
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff = CutC . eff . handleCoercible
 
