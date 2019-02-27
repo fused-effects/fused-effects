@@ -14,10 +14,10 @@ module Control.Effect.NonDet
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Cull
-import Control.Effect.Fail
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 import Control.Monad (join)
+import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Monoid as Monoid (Alt(..))
 import Prelude hiding (fail)
