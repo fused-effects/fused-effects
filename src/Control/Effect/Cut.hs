@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cut
 ( Cut(..)
 , cutfail
@@ -126,6 +126,10 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BacktrackC m) 
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
   eff (R other) = BacktrackC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runBacktrackAllC) other) >>= foldr cons nil
+
+
+data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 
 -- $setup
