@@ -100,12 +100,12 @@ newtype BacktrackC m a = BacktrackC { runBacktrackC :: forall b . (a -> m b -> m
 
 instance Applicative m => Applicative (BacktrackC m) where
   pure a = BacktrackC (\ cons nil -> cons a nil)
-  f <*> a = BacktrackC $ \ cons nil ->
-    runBacktrackC f (\ f' -> runBacktrackC a (cons . f')) nil
+  BacktrackC f <*> BacktrackC a = BacktrackC $ \ cons nil ->
+    f (\ f' -> a (cons . f')) nil
 
 instance Monad m => Monad (BacktrackC m) where
-  a >>= f = BacktrackC $ \ cons nil ->
-    runBacktrackC a (\ a' -> runBacktrackC (f a') cons) nil
+  BacktrackC a >>= f = BacktrackC $ \ cons nil ->
+    a (\ a' -> runBacktrackC (f a') cons) nil
 
 
 -- $setup
