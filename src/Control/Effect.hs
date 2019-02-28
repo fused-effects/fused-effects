@@ -3,13 +3,13 @@ module Control.Effect
 ) where
 
 import Control.Effect.Carrier   as X (Carrier, Effect)
-import Control.Effect.Cull      as X (Cull, CullC)
+import Control.Effect.Cull      as X (Cull, CullC, OnceC)
 import Control.Effect.Cut       as X (Cut, CutC)
 import Control.Effect.Error     as X (Error, ErrorC)
 import Control.Effect.Fail      as X (Fail, FailC)
 import Control.Effect.Fresh     as X (Fresh, FreshC)
 import Control.Effect.Lift      as X (Lift, LiftC, runM)
-import Control.Effect.NonDet    as X (NonDet, AltC, OnceC)
+import Control.Effect.NonDet    as X (NonDet, AltC)
 import Control.Effect.Random    as X (Random, RandomC)
 import Control.Effect.Reader    as X (Reader, ReaderC)
 import Control.Effect.Resource  as X (Resource, ResourceC)

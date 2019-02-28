@@ -1,11 +1,9 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
 , runNonDet
 , AltC(..)
-, runNonDetOnce
-, OnceC(..)
 , Branch(..)
 , branch
 , runBranch
@@ -13,7 +11,6 @@ module Control.Effect.NonDet
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
-import Control.Effect.Cull
 import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), join)
@@ -57,31 +54,6 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => C
   eff = AltC . handleSum (eff . handle (pure ()) (fmap join . traverse runNonDet)) (\case
     Empty    -> pure empty
     Choose k -> liftA2 (<|>) (runNonDet (k True)) (runNonDet (k False)))
-
-
--- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
---
---   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
---
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => OnceC f m a -> m (f a)
-runNonDetOnce = runNonDet . runCull . cull . runOnceC
-
-newtype OnceC f m a = OnceC { runOnceC :: CullC (AltC f m) a }
-  deriving (Functor)
-
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Applicative (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Monad (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (OnceC f m)
-
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
-  eff = OnceC . handleSum (eff . R . R . R . handleCoercible) (\case
-    Empty    -> empty
-    Choose k -> runOnceC (k True) <|> runOnceC (k False))
 
 
 -- $setup
