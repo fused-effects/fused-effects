@@ -105,9 +105,7 @@ deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m,
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (OnceC f m)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
-  eff = OnceC . handleSum (eff . R . R . R . handleCoercible) (\case
-    Empty    -> empty
-    Choose k -> runOnceC (k True) <|> runOnceC (k False))
+  eff = OnceC . eff . R . R . handleCoercible
 
 
 -- $setup
