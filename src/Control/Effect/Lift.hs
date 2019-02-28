@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses #-}
 module Control.Effect.Lift
 ( Lift(..)
 , sendM
@@ -9,10 +9,21 @@ module Control.Effect.Lift
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Effect.Lift.Internal
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Data.Coerce
+
+newtype Lift sig (m :: * -> *) k = Lift { unLift :: sig k }
+  deriving (Functor)
+
+instance Functor sig => HFunctor (Lift sig) where
+  hmap _ = coerce
+  {-# INLINE hmap #-}
+
+instance Functor sig => Effect (Lift sig) where
+  handle state handler (Lift op) = Lift (fmap (handler . (<$ state)) op)
+
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 runM :: LiftC m a -> m a
