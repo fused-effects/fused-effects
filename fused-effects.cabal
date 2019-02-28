@@ -29,7 +29,6 @@ library
                      , Control.Effect.Fresh
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
-                     , Control.Effect.NonDet.Internal
                      , Control.Effect.Random
                      , Control.Effect.Random.Internal
                      , Control.Effect.Reader
