@@ -73,15 +73,28 @@ instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
 instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CullC m)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
-  eff op = CullC (ReaderC (\ cull -> handleSum (handleSum
-    (eff . handle (Pure ()) (bindBranch (runReader cull . runCullC)))
+  eff op = CullC (handleSum (handleSum
+    (eff . R . handle (Pure ()) (bindBranch runCullC))
     (\case
       Empty       -> pure (None ())
-      Choose k    -> runReader cull (runCullC (k True)) >>= branch (const (runReader cull (runCullC (k False)))) (if cull then pure . Pure else \ a -> pure (Alt (pure a) (runReader cull (runCullC (k False)) >>= runBranch (const empty)))) (fmap pure . Alt)))
-    (\ (Cull m k) -> runReader True (runCullC m) >>= bindBranch (runReader cull . runCullC . k))
-    op))
-    where bindBranch :: (Alternative m, Carrier sig m) => (b -> m (Branch m () a)) -> Branch m () b -> m (Branch m () a)
-          bindBranch bind = branch (const (pure (None ()))) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
+      Choose k    -> do
+        res <- runCullC (k True)
+        case res of
+          None _ -> runCullC (k False)
+          Pure a -> do
+            cull <- ask
+            if cull then
+              pure res
+            else
+              pure (Alt (pure a) (runReader cull (runCullC (k False)) >>= runBranch (const empty)))
+          Alt _ _ -> pure res
+          ))
+    (\ (Cull m k) -> local (const True) (runCullC m) >>= bindBranch (runCullC . k))
+    op)
+    where bindBranch :: (Alternative m, Carrier sig m) => (b -> ReaderC Bool m (Branch m () a)) -> Branch m () b -> ReaderC Bool m (Branch m () a)
+          bindBranch bind a = do
+            cull <- ask
+            branch (const (pure (None ()))) bind (\ a b -> pure (Alt (a >>= runReader cull . bind >>= runBranch (const empty)) (b >>= runReader cull . bind >>= runBranch (const empty)))) a
   {-# INLINE eff #-}
 
 
