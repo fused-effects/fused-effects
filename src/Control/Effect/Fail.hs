@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fail
 ( Fail(..)
 , MonadFail(..)
@@ -9,11 +9,23 @@ module Control.Effect.Fail
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Error
-import Control.Effect.Fail.Internal
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Data.Coerce
+
+newtype Fail (m :: * -> *) k = Fail String
+  deriving (Functor)
+
+instance HFunctor Fail where
+  hmap _ = coerce
+  {-# INLINE hmap #-}
+
+instance Effect Fail where
+  handle _ _ = coerce
+  {-# INLINE handle #-}
+
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --

@@ -26,7 +26,6 @@ library
                      , Control.Effect.Cut
                      , Control.Effect.Error
                      , Control.Effect.Fail
-                     , Control.Effect.Fail.Internal
                      , Control.Effect.Fresh
                      , Control.Effect.Lift
                      , Control.Effect.Lift.Internal
