@@ -59,8 +59,8 @@ put s = send (Put s (pure ()))
 --   prop> fst (run (runState a (modify (+1)))) == (1 + a :: Integer)
 modify :: (Member (State s) sig, Carrier sig m) => (s -> s) -> m ()
 modify f = do
-   a <- get
-   put $! f a
+  a <- get
+  put $! f a
 
 -- | Run a 'State' effect starting from the passed value.
 --
