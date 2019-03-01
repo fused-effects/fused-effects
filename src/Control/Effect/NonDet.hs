@@ -86,20 +86,20 @@ instance (Applicative f, Applicative m) => Applicative (AltC f m) where
   pure = AltC . pure . pure
   AltC f <*> AltC a = AltC (liftA2 (<*>) f a)
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (AltC f m) where
+instance (Alternative f, Applicative m, Monad f, Traversable f) => Alternative (AltC f m) where
   empty = AltC (pure empty)
   l <|> r = AltC (liftA2 (<|>) (runNonDet l) (runNonDet r))
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Monad (AltC f m) where
+instance (Alternative f, Monad f, Monad m, Traversable f) => Monad (AltC f m) where
   AltC a >>= f = AltC (a >>= runNonDet . Monoid.getAlt . foldMap (Monoid.Alt . f))
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (AltC f m) where
+instance (Alternative f, Monad f, MonadFail m, Traversable f) => MonadFail (AltC f m) where
   fail s = AltC (fail s)
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (AltC f m) where
+instance (Alternative f, Monad f, MonadIO m, Traversable f) => MonadIO (AltC f m) where
   liftIO io = AltC (pure <$> liftIO io)
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (AltC f m)
+instance (Alternative f, Monad f, Monad m, Traversable f) => MonadPlus (AltC f m)
 
 instance Applicative f => MonadTrans (AltC f) where
   lift m = AltC (pure <$> m)

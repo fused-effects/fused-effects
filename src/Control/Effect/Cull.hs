@@ -115,7 +115,7 @@ runNonDetOnce = runNonDet . runCull . cull . runOnceC
 newtype OnceC f m a = OnceC { runOnceC :: CullC (AltC f m) a }
   deriving (Functor)
 
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Applicative (OnceC f m)
+deriving instance (Alternative f, Applicative m, Monad f, Traversable f) => Applicative (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Monad (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (OnceC f m)
