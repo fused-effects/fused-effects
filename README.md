@@ -71,7 +71,7 @@ In order to maximize efficiency, `fused-effects` applies _fusion laws_, avoiding
 
 Instead, computations are performed in the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.
 
-Since the interpretation of the effect syntax is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
+Since the interpretation of effects is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
 
 Finally, since the fusion of carrier algebras occurs as a result of the selection of the carriers, it doesn’t depend on complex `RULES` pragmas, making it very easy to reason about and tune.
 
