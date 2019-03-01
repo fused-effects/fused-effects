@@ -164,7 +164,7 @@ The following invocation, taken from the teletype example, should suffice for an
 
 ```haskell
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving,
-    KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+    KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 ```
 
 ### Defining new effects
