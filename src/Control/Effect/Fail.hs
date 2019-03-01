@@ -42,7 +42,8 @@ instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
   fail s = FailC (throwError s)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
-  eff = handleSum (FailC . eff . R . handleCoercible) (\ (Fail s) -> fail s)
+  eff (L (Fail s)) = fail s
+  eff (R other)    = FailC (eff (R (handleCoercible other)))
 
 
 -- $setup
