@@ -69,7 +69,7 @@ instance (Carrier sig m, MonadIO m) => Carrier (Teletype :+: sig) (TeletypeIOC m
     Write s k -> liftIO (putStrLn s) >>  runTeletypeIOC   k)
 ```
 
-Here, `ret` is responsible for wrapping pure values in the carrier, and `eff` is responsible for handling an effectful computations. Since the `Carrier` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `eff` has two parts: a handler for `Teletype` (`alg`), and a handler for teletype effects that might be embedded in other effects in the signature.
+Here, `eff` is responsible for handling effectful computations. Since the `Carrier` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `eff` has two parts: a handler for `Teletype` (`alg`), and a handler for teletype effects that might be embedded in other effects in the signature.
 
 In this case, since the `Teletype` carrier is just a thin wrapper around the underlying computation, we can use `handleCoercible` to handle any embedded `TeletypeIOC` carriers by simply mapping `coerce` over them.
 
