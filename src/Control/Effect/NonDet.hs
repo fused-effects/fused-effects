@@ -105,9 +105,9 @@ instance Applicative f => MonadTrans (AltC f) where
   lift m = AltC (pure <$> m)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
-  eff = AltC . handleSum (eff . handle (pure ()) (fmap join . traverse runNonDet)) (\case
-    Empty    -> pure empty
-    Choose k -> liftA2 (<|>) (runNonDet (k True)) (runNonDet (k False)))
+  eff (L Empty)      = AltC (pure empty)
+  eff (L (Choose k)) = AltC (liftA2 (<|>) (runNonDet (k True)) (runNonDet (k False)))
+  eff (R other)      = AltC (eff (handle (pure ()) (fmap join . traverse runNonDet) other))
 
 
 -- $setup
