@@ -93,7 +93,6 @@ This allows us to use `liftIO` directly on the carrier itself, instead of only i
 
 ```haskell
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
-  ret = pure
   eff = handleSum (TeletypeIOC . eff . handleCoercible) (\ t -> case t of
     Read    k -> liftIO getLine      >>= k
     Write s k -> liftIO (putStrLn s) >>  k)
