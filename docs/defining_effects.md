@@ -82,7 +82,7 @@ runTeletypeIO :: TeletypeIOC m a -> m a
 runTeletypeIO = runTeletypeIOC
 ```
 
-In this case, by using `-XGeneralizedNewtypeDeriving`, we can derive `Functor`, `Applicative`, `Monad`, and `MonadIO` instances for `TeletypeIOC`:
+`Carrier`s are also `Monad`s. Since `TeletypeIOC` is just a thin wrapper around an underlying computation, we can derive several instances using `-XGeneralizedNewtypeDeriving`:
 
 ```haskell
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
