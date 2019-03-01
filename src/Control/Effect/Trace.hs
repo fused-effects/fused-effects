@@ -1,4 +1,7 @@
+{-# LANGUAGE DeriveAnyClass                                                                                                                 #-}
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric                                                                                                                  #-}
+
 module Control.Effect.Trace
 ( Trace(..)
 , trace
@@ -10,26 +13,23 @@ module Control.Effect.Trace
 , TraceByReturningC(..)
 ) where
 
+import GHC.Generics (Generic)
 import Control.Effect.Carrier
 import Control.Effect.Internal
 import Control.Effect.Sum
 import Control.Monad.IO.Class
 import Data.Bifunctor (first)
-import Data.Coerce
 import System.IO
 
 data Trace (m :: * -> *) k = Trace
   { traceMessage :: String
   , traceCont    :: k
   }
-  deriving (Functor)
+  deriving (Functor, Generic)
 
-instance HFunctor Trace where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
+instance HFunctor Trace
 
-instance Effect Trace where
-  handle state handler (Trace s k) = Trace s (handler (k <$ state))
+instance Effect Trace
 
 -- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()

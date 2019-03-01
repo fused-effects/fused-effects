@@ -1,23 +1,23 @@
+{-# LANGUAGE DeriveAnyClass                                                  #-}
 {-# LANGUAGE DeriveFunctor, EmptyCase, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveGeneric                                                   #-}
+
 module Control.Effect.Void
 ( Void
 , run
 , VoidC(..)
 ) where
 
+import GHC.Generics (Generic)
 import Control.Effect.Carrier
 import Control.Effect.Internal
 
 data Void (m :: * -> *) k
-  deriving (Functor)
+  deriving (Functor, Generic)
 
-instance HFunctor Void where
-  hmap _ v = case v of {}
-  {-# INLINE hmap #-}
+instance HFunctor Void
 
-instance Effect Void where
-  handle _ _ v = case v of {}
-  {-# INLINE handle #-}
+instance Effect Void
 
 
 -- | Run an 'Eff' exhausted of effects to produce its final result value.

@@ -1,4 +1,7 @@
+{-# LANGUAGE DeriveAnyClass                    #-}
+{-# LANGUAGE DeriveGeneric                     #-}
 {-# LANGUAGE DeriveTraversable, KindSignatures #-}
+
 module Control.Effect.NonDet.Internal
 ( NonDet(..)
 , Branch(..)
@@ -8,20 +11,16 @@ module Control.Effect.NonDet.Internal
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
-import Data.Coerce
+import GHC.Generics (Generic)
 
 data NonDet (m :: * -> *) k
   = Empty
   | Choose (Bool -> k)
-  deriving (Functor)
+  deriving (Functor, Generic)
 
-instance HFunctor NonDet where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
+instance HFunctor NonDet
 
-instance Effect NonDet where
-  handle _     _       Empty      = Empty
-  handle state handler (Choose k) = Choose (handler . (<$ state) . k)
+instance Effect NonDet
 
 
 -- | The result of a nondeterministic branch of a computation.

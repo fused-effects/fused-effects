@@ -1,9 +1,13 @@
+{-# LANGUAGE DeriveAnyClass                                                                                                                                                         #-}
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric                                                                                                                                                          #-}
+{-# LANGUAGE DerivingStrategies                                                                                                                                                     #-}
 
 module Teletype where
 
 import Prelude hiding (read)
 
+import GHC.Generics (Generic)
 import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.Sum
@@ -26,15 +30,10 @@ spec = describe "teletype" $ do
 data Teletype (m :: * -> *) k
   = Read (String -> k)
   | Write String k
-  deriving (Functor)
+  deriving (Functor, Generic)
 
-instance HFunctor Teletype where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect Teletype where
-  handle state handler (Read    k) = Read (handler . (<$ state) . k)
-  handle state handler (Write s k) = Write s (handler (k <$ state))
+instance HFunctor Teletype
+instance Effect Teletype
 
 read :: (Member Teletype sig, Carrier sig m) => m String
 read = send (Read ret)
@@ -47,7 +46,7 @@ runTeletypeIO :: (MonadIO m, Carrier sig m) => Eff (TeletypeIOC m) a -> m a
 runTeletypeIO = runTeletypeIOC . interpret
 
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving newtype (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
   ret = pure

@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
+{-# LANGUAGE DeriveGeneric                                                                          #-}
+
 module Control.Effect.Sum
 ( (:+:)(..)
 , handleSum
@@ -6,19 +8,17 @@ module Control.Effect.Sum
 , send
 ) where
 
+import GHC.Generics (Generic)
 import Control.Effect.Carrier
 
 data (f :+: g) (m :: * -> *) k
   = L (f m k)
   | R (g m k)
-  deriving (Eq, Functor, Ord, Show)
+  deriving (Eq, Functor, Ord, Show, Generic)
 
 infixr 4 :+:
 
 instance (HFunctor l, HFunctor r) => HFunctor (l :+: r) where
-  hmap f (L l) = L (hmap f l)
-  hmap f (R r) = R (hmap f r)
-
   fmap' f (L l) = L (fmap' f l)
   fmap' f (R r) = R (fmap' f r)
 

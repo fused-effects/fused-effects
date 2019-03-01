@@ -1,4 +1,7 @@
+{-# LANGUAGE DeriveAnyClass                                                                                                                                             #-}
 {-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric                                                                                                                                              #-}
+
 module Control.Effect.State
 ( State(..)
 , get
@@ -14,20 +17,16 @@ module Control.Effect.State
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Effect.Internal
-import Data.Coerce
+import GHC.Generics (Generic)
 
 data State s (m :: * -> *) k
   = Get (s -> k)
   | Put s k
-  deriving (Functor)
+  deriving (Functor, Generic)
 
-instance HFunctor (State s) where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
+instance HFunctor (State s)
 
-instance Effect (State s) where
-  handle state handler (Get k)   = Get   (handler . (<$ state) . k)
-  handle state handler (Put s k) = Put s (handler . (<$ state) $ k)
+instance Effect (State s)
 
 -- | Get the current state value.
 --
