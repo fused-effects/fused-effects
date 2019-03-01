@@ -118,11 +118,8 @@ instance MonadTrans (ResumableWithC err) where
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
 instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
-  eff = handleSum
-    (ResumableWithC . eff . R . handleCoercible)
-    (\ (Resumable err k) -> do
-      res <- ResumableWithC (ReaderC (MT.ReaderT (\ handler -> runHandler handler err)))
-      k res)
+  eff (L (Resumable err k)) = ResumableWithC (ReaderC (MT.ReaderT (\ handler -> runHandler handler err))) >>= k
+  eff (R other)             = ResumableWithC (eff (R (handleCoercible other)))
 
 
 -- $setup
