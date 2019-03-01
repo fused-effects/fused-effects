@@ -95,11 +95,12 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet 
       Choose k    -> runCullC (k True <|> k False)))
     (\ (Cull m k) -> local (const True) (runCullC m) >>= bindBranch (runCullC . k))
     op)
-    where bindBranch :: (Alternative m, Carrier sig m) => (b -> ReaderC Bool m (Branch m () a)) -> Branch m () b -> ReaderC Bool m (Branch m () a)
-          bindBranch bind a = do
-            cull <- ask
-            branch (const (pure (None ()))) bind (\ a b -> pure (Alt (a >>= runReader cull . bind >>= runBranch (const empty)) (b >>= runReader cull . bind >>= runBranch (const empty)))) a
   {-# INLINE eff #-}
+
+bindBranch :: (Alternative m, Carrier sig m) => (b -> ReaderC Bool m (Branch m () a)) -> Branch m () b -> ReaderC Bool m (Branch m () a)
+bindBranch bind a = do
+  cull <- ask
+  branch (const (pure (None ()))) bind (\ a b -> pure (Alt (a >>= runReader cull . bind >>= runBranch (const empty)) (b >>= runReader cull . bind >>= runBranch (const empty)))) a
 
 
 -- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
