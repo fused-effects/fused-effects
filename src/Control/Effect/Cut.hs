@@ -83,6 +83,9 @@ instance (Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
+instance MonadTrans CutC where
+  lift m = CutC (lift (lift m))
+
 instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)    = CutC $ ListC $ \ _    nil -> put False *> nil
   eff (L (Call m k)) = CutC $ ListC $ \ cons nil -> do
