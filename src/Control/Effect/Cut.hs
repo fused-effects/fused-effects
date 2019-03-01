@@ -83,6 +83,8 @@ instance (Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
+instance (Carrier sig m, Effect sig) => MonadPlus (CutC m)
+
 instance MonadTrans CutC where
   lift m = CutC (lift (lift m))
 
