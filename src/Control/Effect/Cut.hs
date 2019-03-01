@@ -20,7 +20,10 @@ import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.State
 import Control.Effect.Sum
-import Control.Monad (join)
+import Control.Monad (MonadPlus(..), join)
+import Control.Monad.Fail
+import Control.Monad.IO.Class
+import Prelude hiding (fail)
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
 data Cut m k
@@ -73,30 +76,27 @@ runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
 runCut = evalState True . runListAlt . runCutC
 
 newtype CutC m a = CutC { runCutC :: ListC (StateC Bool m) a }
-  deriving (Applicative, Functor, Monad)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
 instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
-  eff = CutC . handleSum (handleSum
-    (eff . R . R . handleCoercible)
-    (\case
-      Empty    -> ListC $ \ _    nil -> nil
-      Choose k -> ListC $ \ cons nil -> do
-        let handle a as = do
-              shouldBacktrack <- get
-              if shouldBacktrack then do
-                maybe id cons a $ runListC (runCutC (k False)) cons as
-              else
-                maybe nil (flip cons nil) a
-        runListC (runCutC (k True)) (handle . Just) (handle Nothing nil)))
-    (\case
-      Cutfail  -> ListC $ \ _    nil -> put False *> nil
-      Call m k -> ListC $ \ cons nil -> do
-        shouldBacktrack <- get
-        runListC (runCutC m) (\ a as -> put shouldBacktrack *> runListC (runCutC (k a)) cons as) (put (shouldBacktrack :: Bool) *> nil))
+  eff (L Cutfail)    = CutC $ ListC $ \ _    nil -> put False *> nil
+  eff (L (Call m k)) = CutC $ ListC $ \ cons nil -> do
+    shouldBacktrack <- get
+    runListC (runCutC m) (\ a as -> put shouldBacktrack *> runListC (runCutC (k a)) cons as) (put (shouldBacktrack :: Bool) *> nil)
+  eff (R (L Empty))      = CutC $ ListC $ \ _    nil -> nil
+  eff (R (L (Choose k))) = CutC $ ListC $ \ cons nil -> do
+    let handle a as = do
+          shouldBacktrack <- get
+          if shouldBacktrack then do
+            maybe id cons a $ runListC (runCutC (k False)) cons as
+          else
+            maybe nil (flip cons nil) a
+    runListC (runCutC (k True)) (handle . Just) (handle Nothing nil)
+  eff (R (R other)) = CutC (eff (R (R (handleCoercible other))))
   {-# INLINE eff #-}
 
 
@@ -121,6 +121,14 @@ instance Alternative (ListC m) where
 instance Monad (ListC m) where
   ListC a >>= f = ListC $ \ cons ->
     a (\ a' -> runListC (f a') cons)
+
+instance MonadFail m => MonadFail (ListC m) where
+  fail s = ListC (\ _ _ -> fail s)
+
+instance MonadIO m => MonadIO (ListC m) where
+  liftIO io = ListC (\ cons nil -> liftIO io >>= flip cons nil)
+
+instance MonadPlus (ListC m)
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
   eff (L Empty) = empty
@@ -170,8 +178,17 @@ instance Monad (BTreeC m) where
   BTreeC a >>= f = BTreeC $ \ alt pur nil ->
     a alt (\ a' -> runBTreeC (f a') alt pur nil) nil
 
+instance MonadFail m => MonadFail (BTreeC m) where
+  fail s = BTreeC (\ _ _ _ -> fail s)
+
+instance MonadIO m => MonadIO (BTreeC m) where
+  liftIO io = BTreeC (\ _ pur _ -> liftIO io >>= pur)
+
+instance MonadPlus (BTreeC m)
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Cull
 -- >>> import Control.Effect.Void

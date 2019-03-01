@@ -1,3 +1,16 @@
+- Adds `Monad` instances for all carrier types.
+- Adds `MonadTrans` instances for almost all carrier types.
+- Adds `Monad` as a superclass of `Carrier`, obviating the need for a lot of constraints.
+- Removes `ret`; `pure` or `return` can be used instead.
+- Removes `Eff`, in favour of computing directly in the carriers. This enables the compiler to perform significant optimizations; see the benchmarks for details.
+- Removes `handleEither`, `handleReader`, `handleState`, `handleSum`, and `handleTraversable` in favour of composing carrier types directly.
+
+# 0.2.0.1
+
+- Fixes the benchmarks, and builds them in CI to avoid regressing them again.
+
+# 0.2.0.0
+
 - Adds `listen`, `listens`, and `censor` operations to `Writer`.
 - Provides explicit type parameters to `run`-style functions in `State`, `Reader`, `Writer`, and `Error`.
   This is a backwards-incompatible change for clients using these functions in combination with visible type applications.

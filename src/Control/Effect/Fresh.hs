@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fresh
 ( Fresh(..)
 , fresh
@@ -7,11 +7,14 @@ module Control.Effect.Fresh
 , FreshC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 data Fresh m k
   = Fresh (Int -> k)
@@ -45,22 +48,22 @@ resetFresh m = send (Reset m pure)
 --   prop> run (runFresh (replicateM n fresh)) == [0..pred n]
 --   prop> run (runFresh (replicateM n fresh *> pure b)) == b
 runFresh :: Functor m => FreshC m a -> m a
-runFresh = fmap snd . runState 0 . runFreshC
+runFresh = evalState 0 . runFreshC
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
-  eff = FreshC . handleSum (eff . R . handleCoercible) (\case
-    Fresh   k -> do
-      i <- get
-      put (succ i)
-      runFreshC (k i)
-    Reset m k -> do
-      i <- get
-      a <- runFreshC m
-      put (i :: Int)
-      runFreshC (k a))
+  eff (L (Fresh   k)) = FreshC $ do
+    i <- get
+    put (succ i)
+    runFreshC (k i)
+  eff (L (Reset m k)) = FreshC $ do
+    i <- get
+    a <- runFreshC m
+    put (i :: Int)
+    runFreshC (k a)
+  eff (R other)       = FreshC (eff (R (handleCoercible other)))
 
 
 -- $setup

@@ -9,13 +9,16 @@ module Control.Effect.Resumable
 , ResumableWithC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.DeepSeq
 import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Effect.Reader
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Coerce
 import Data.Functor.Classes
 
@@ -85,12 +88,11 @@ runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
 runResumable = runError . runResumableC
 
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
-  eff = ResumableC . handleSum
-    (eff . R . handleCoercible)
-    (\ (Resumable err _) -> throwError (SomeError err))
+  eff (L (Resumable err _)) = ResumableC (throwError (SomeError err))
+  eff (R other)             = ResumableC (eff (R (handleCoercible other)))
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
@@ -107,16 +109,16 @@ runResumableWith :: (forall x . err x -> m x)
 runResumableWith with = runReader (Handler with) . runResumableWithC
 
 newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+
+instance MonadTrans (ResumableWithC err) where
+  lift m = ResumableWithC (lift m)
 
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
 instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
-  eff = handleSum
-    (ResumableWithC . eff . R . handleCoercible)
-    (\ (Resumable err k) -> do
-      res <- ResumableWithC (ReaderC (\ handler -> runHandler handler err))
-      k res)
+  eff (L (Resumable err k)) = ResumableWithC ask >>= lift . flip runHandler err >>= k
+  eff (R other)             = ResumableWithC (eff (R (handleCoercible other)))
 
 
 -- $setup

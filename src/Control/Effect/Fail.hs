@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fail
 ( Fail(..)
 , MonadFail(..)
@@ -6,12 +6,28 @@ module Control.Effect.Fail
 , FailC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Error
-import Control.Effect.Fail.Internal
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Coerce
+import Prelude hiding (fail)
+
+newtype Fail (m :: * -> *) k = Fail String
+  deriving (Functor)
+
+instance HFunctor Fail where
+  hmap _ = coerce
+  {-# INLINE hmap #-}
+
+instance Effect Fail where
+  handle _ _ = coerce
+  {-# INLINE handle #-}
+
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
@@ -20,13 +36,14 @@ runFail :: FailC m a -> m (Either String a)
 runFail = runError . runFailC
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
-  fail s = send (Fail s)
+  fail s = FailC (throwError s)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
-  eff = FailC . handleSum (eff . R . handleCoercible) (\ (Fail s) -> throwError s)
+  eff (L (Fail s)) = fail s
+  eff (R other)    = FailC (eff (R (handleCoercible other)))
 
 
 -- $setup

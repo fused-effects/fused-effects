@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State
 ( State(..)
 , get
@@ -14,8 +14,10 @@ module Control.Effect.State
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Coerce
 import Prelude hiding (fail)
 
@@ -58,8 +60,8 @@ put s = send (Put s (pure ()))
 --   prop> fst (run (runState a (modify (+1)))) == (1 + a :: Integer)
 modify :: (Member (State s) sig, Carrier sig m) => (s -> s) -> m ()
 modify f = do
-   a <- get
-   put $! f a
+  a <- get
+  put $! f a
 
 -- | Run a 'State' effect starting from the passed value.
 --
@@ -107,10 +109,15 @@ instance MonadFail m => MonadFail (StateC s m) where
 instance MonadIO m => MonadIO (StateC s m) where
   liftIO io = StateC (\ s -> (,) s <$> liftIO io)
 
+instance (Alternative m, Monad m) => MonadPlus (StateC s m)
+
+instance MonadTrans (StateC s) where
+  lift m = StateC (\ s -> (,) s <$> m)
+
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
-  eff op = StateC (\ s -> handleSum (eff . handle (s, ()) (uncurry runState)) (\case
-    Get   k -> runState s (k s)
-    Put s k -> runState s k) op)
+  eff (L (Get   k)) = StateC (\ s -> runState s (k s))
+  eff (L (Put s k)) = StateC (\ _ -> runState s k)
+  eff (R other)     = StateC (\ s -> eff (handle (s, ()) (uncurry runState) other))
 
 
 -- $setup

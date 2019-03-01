@@ -33,11 +33,12 @@ before_install:
 
 install:
 - cabal new-update
-- cabal new-configure --enable-tests --write-ghc-environment-files=always
+- cabal new-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always
 - cabal new-build --only-dependencies
 
 script:
 - cabal new-build
+- cabal new-build benchmark
 - cabal new-test
 - cabal new-haddock
 - cabal new-sdist

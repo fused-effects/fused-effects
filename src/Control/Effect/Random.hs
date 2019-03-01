@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Random
 ( Random(..)
 , runRandom
@@ -10,14 +10,35 @@ module Control.Effect.Random
 , MonadInterleave(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
-import Control.Effect.Random.Internal
 import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Random.Class (MonadInterleave(..), MonadRandom(..))
 import Control.Monad.IO.Class (MonadIO(..))
+import Control.Monad.Trans.Class
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
+
+data Random m k
+  = forall a . R.Random a => Random (a -> k)
+  | forall a . R.Random a => RandomR (a, a) (a -> k)
+  | forall a . Interleave (m a) (a -> k)
+
+deriving instance Functor (Random m)
+
+instance HFunctor Random where
+  hmap _ (Random k) = Random k
+  hmap _ (RandomR r k) = RandomR r k
+  hmap f (Interleave m k) = Interleave (f m) k
+  {-# INLINE hmap #-}
+
+instance Effect Random where
+  handle state handler (Random    k) = Random    (handler . (<$ state) . k)
+  handle state handler (RandomR r k) = RandomR r (handler . (<$ state) . k)
+  handle state handler (Interleave m k) = Interleave (handler (m <$ state)) (handler . fmap k)
+
 
 -- | Run a random computation starting from a given generator.
 --
@@ -42,12 +63,16 @@ evalRandomIO :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m) where
-  getRandom = send (Random pure)
+  getRandom = RandomC $ do
+    (a, g') <- gets R.random
+    a <$ put (g' :: g)
   {-# INLINE getRandom #-}
-  getRandomR r = send (RandomR r pure)
+  getRandomR r = RandomC $ do
+    (a, g') <- gets (R.randomR r)
+    a <$ put (g' :: g)
   {-# INLINE getRandomR #-}
   getRandomRs interval = (:) <$> getRandomR interval <*> getRandomRs interval
   {-# INLINE getRandomRs #-}
@@ -55,25 +80,18 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m)
   {-# INLINE getRandoms #-}
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadInterleave (RandomC g m) where
-  interleave m = send (Interleave m pure)
+  interleave m = RandomC $ do
+    (g1, g2) <- gets R.split
+    put (g1 :: g)
+    a <- runRandomC m
+    a <$ put g2
   {-# INLINE interleave #-}
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) (RandomC g m) where
-  eff = RandomC . handleSum (eff . R . handleCoercible) (\case
-    Random    k -> do
-      (a, g') <- gets R.random
-      put (g' :: g)
-      runRandomC (k a)
-    RandomR r k -> do
-      (a, g') <- gets (R.randomR r)
-      put (g' :: g)
-      runRandomC (k a)
-    Interleave m k -> do
-      (g1, g2) <- gets R.split
-      put (g1 :: g)
-      a <- runRandomC m
-      put g2
-      runRandomC (k a))
+  eff (L (Random       k)) = getRandom >>= k
+  eff (L (RandomR r    k)) = getRandomR r >>= k
+  eff (L (Interleave m k)) = interleave m >>= k
+  eff (R other)            = RandomC (eff (R (handleCoercible other)))
 
 
 -- $setup

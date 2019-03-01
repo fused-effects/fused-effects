@@ -71,7 +71,7 @@ In order to maximize efficiency, `fused-effects` applies _fusion laws_, avoiding
 
 Instead, computations are performed in the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.
 
-Since the interpretation of the effect syntax is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
+Since the interpretation of effects is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
 
 Finally, since the fusion of carrier algebras occurs as a result of the selection of the carriers, it doesn’t depend on complex `RULES` pragmas, making it very easy to reason about and tune.
 
@@ -156,7 +156,7 @@ example4 = runM . runReader "hello" . runState 0 $ do
 
 To use effects, you'll need a relatively-uncontroversial set of extensions: `-XFlexibleContexts`, `-XFlexibleInstances`, and `-XMultiParamTypeClasses`.
 
-When defining your own effects, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), and `-XUndecidableInstances` to satisfy the coverage condition for this instance. `-XLambdaCase` provides a measure of syntactic convenience when handling an effect type with `handleSum.`  You may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case.
+When defining your own effects, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), and `-XUndecidableInstances` to satisfy the coverage condition for this instance. You may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case.
 
 [common]: https://github.com/robrix/fused-effects/blob/master/docs/common_errors.md
 
@@ -164,7 +164,7 @@ The following invocation, taken from the teletype example, should suffice for an
 
 ```haskell
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving,
-    KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+    KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 ```
 
 ### Defining new effects

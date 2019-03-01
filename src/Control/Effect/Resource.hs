@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resource
 ( Resource(..)
 , bracket
@@ -9,12 +9,15 @@ module Control.Effect.Resource
 , ResourceC(..)
 ) where
 
+import           Control.Applicative (Alternative(..))
 import           Control.Effect.Carrier
 import           Control.Effect.Reader
 import           Control.Effect.Sum
 import qualified Control.Exception as Exc
+import           Control.Monad (MonadPlus(..))
 import           Control.Monad.Fail
 import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 
 data Resource m k
   = forall resource any output . Resource (m resource) (resource -> m any) (resource -> m output) (output -> k)
@@ -76,28 +79,29 @@ runResource :: (forall x . m x -> IO x)
 runResource handler = runReader (Handler handler) . runResourceC
 
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 newtype Handler m = Handler (forall x . m x -> IO x)
 
 runHandler :: Handler m -> ResourceC m a -> IO a
 runHandler h@(Handler handler) = handler . runReader h . runResourceC
 
+instance MonadTrans ResourceC where
+  lift m = ResourceC (lift m)
+
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
-  eff = handleSum
-    (ResourceC . eff . R . handleCoercible)
-    (\case
-        Resource acquire release use k -> do
-          handler <- ResourceC ask
-          a <- liftIO (Exc.bracket
-            (runHandler handler acquire)
-            (runHandler handler . release)
-            (runHandler handler . use))
-          k a
-        OnError acquire release use k -> do
-          handler <- ResourceC ask
-          a <- liftIO (Exc.bracketOnError
-            (runHandler handler acquire)
-            (runHandler handler . release)
-            (runHandler handler . use))
-          k a)
+  eff (L (Resource acquire release use k)) = do
+    handler <- ResourceC ask
+    a <- liftIO (Exc.bracket
+      (runHandler handler acquire)
+      (runHandler handler . release)
+      (runHandler handler . use))
+    k a
+  eff (L (OnError  acquire release use k)) = do
+    handler <- ResourceC ask
+    a <- liftIO (Exc.bracketOnError
+      (runHandler handler acquire)
+      (runHandler handler . release)
+      (runHandler handler . use))
+    k a
+  eff (R other)                            = ResourceC (eff (R (handleCoercible other)))

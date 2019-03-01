@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses #-}
 module Control.Effect.Lift
 ( Lift(..)
 , sendM
@@ -6,11 +6,25 @@ module Control.Effect.Lift
 , LiftC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Effect.Lift.Internal
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Coerce
+
+newtype Lift sig (m :: * -> *) k = Lift { unLift :: sig k }
+  deriving (Functor)
+
+instance Functor sig => HFunctor (Lift sig) where
+  hmap _ = coerce
+  {-# INLINE hmap #-}
+
+instance Functor sig => Effect (Lift sig) where
+  handle state handler (Lift op) = Lift (fmap (handler . (<$ state)) op)
+
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 runM :: LiftC m a -> m a
@@ -23,10 +37,10 @@ sendM :: (Member (Lift n) sig, Carrier sig m, Functor n) => n a -> m a
 sendM = send . Lift . fmap pure
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
-  deriving (Applicative, Functor, Monad, MonadFail)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
-instance MonadIO (LiftC IO) where
-  liftIO = sendM
+instance MonadTrans LiftC where
+  lift = LiftC
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
   eff = LiftC . (>>= runLiftC) . unLift
