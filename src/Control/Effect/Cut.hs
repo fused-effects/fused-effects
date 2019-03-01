@@ -6,9 +6,6 @@ module Control.Effect.Cut
 , cut
 , runCut
 , CutC(..)
-, ListC(..)
-, runListAll
-, runListAlt
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -108,45 +105,6 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
   eff (R (L (Choose k))) = k True <|> k False
   eff (R (R other)) = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
   {-# INLINE eff #-}
-
-
-newtype ListC m a = ListC { runListC :: forall b . (a -> m b -> m b) -> m b -> m b }
-  deriving (Functor)
-
-runListAll :: (Alternative f, Applicative m) => ListC m a -> m (f a)
-runListAll (ListC m) = m (fmap . (<|>) . pure) (pure empty)
-
-runListAlt :: Alternative m => ListC m a -> m a
-runListAlt (ListC m) = m ((<|>) . pure) empty
-
-instance Applicative (ListC m) where
-  pure a = ListC (\ cons -> cons a)
-  ListC f <*> ListC a = ListC $ \ cons ->
-    f (\ f' -> a (cons . f'))
-
-instance Alternative (ListC m) where
-  empty = ListC (\ _ nil -> nil)
-  ListC l <|> ListC r = ListC $ \ cons -> l cons . r cons
-
-instance Monad (ListC m) where
-  ListC a >>= f = ListC $ \ cons ->
-    a (\ a' -> runListC (f a') cons)
-
-instance MonadFail m => MonadFail (ListC m) where
-  fail s = ListC (\ _ _ -> fail s)
-
-instance MonadIO m => MonadIO (ListC m) where
-  liftIO io = ListC (\ cons nil -> liftIO io >>= flip cons nil)
-
-instance MonadPlus (ListC m)
-
-instance MonadTrans ListC where
-  lift m = ListC (\ cons nil -> m >>= flip cons nil)
-
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
-  eff (L Empty) = empty
-  eff (L (Choose k)) = k True <|> k False
-  eff (R other) = ListC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runListAll) other) >>= foldr cons nil
 
 
 -- $setup

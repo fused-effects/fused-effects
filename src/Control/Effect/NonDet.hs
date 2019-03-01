@@ -6,6 +6,9 @@ module Control.Effect.NonDet
 , runBTreeAll
 , runBTreeAlt
 , BTreeC(..)
+, runListAll
+, runListAlt
+, ListC(..)
 , Branch(..)
 , branch
 , runBranch
@@ -138,6 +141,44 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BTreeC m) wher
   eff (L (Choose k)) = k True <|> k False
   eff (R other)      = BTreeC (\ alt pur nil -> eff (handle (Leaf ()) (fmap join . traverse runBTreeAll) other) >>= foldr (alt . pur) nil)
 
+
+runListAll :: (Alternative f, Applicative m) => ListC m a -> m (f a)
+runListAll (ListC m) = m (fmap . (<|>) . pure) (pure empty)
+
+runListAlt :: Alternative m => ListC m a -> m a
+runListAlt (ListC m) = m ((<|>) . pure) empty
+
+newtype ListC m a = ListC { runListC :: forall b . (a -> m b -> m b) -> m b -> m b }
+  deriving (Functor)
+
+instance Applicative (ListC m) where
+  pure a = ListC (\ cons -> cons a)
+  ListC f <*> ListC a = ListC $ \ cons ->
+    f (\ f' -> a (cons . f'))
+
+instance Alternative (ListC m) where
+  empty = ListC (\ _ nil -> nil)
+  ListC l <|> ListC r = ListC $ \ cons -> l cons . r cons
+
+instance Monad (ListC m) where
+  ListC a >>= f = ListC $ \ cons ->
+    a (\ a' -> runListC (f a') cons)
+
+instance MonadFail m => MonadFail (ListC m) where
+  fail s = ListC (\ _ _ -> fail s)
+
+instance MonadIO m => MonadIO (ListC m) where
+  liftIO io = ListC (\ cons nil -> liftIO io >>= flip cons nil)
+
+instance MonadPlus (ListC m)
+
+instance MonadTrans ListC where
+  lift m = ListC (\ cons nil -> m >>= flip cons nil)
+
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
+  eff (L Empty) = empty
+  eff (L (Choose k)) = k True <|> k False
+  eff (R other) = ListC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runListAll) other) >>= foldr cons nil
 
 
 -- $setup
