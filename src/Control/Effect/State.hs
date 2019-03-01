@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State
 ( State(..)
 , get
@@ -17,9 +17,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import qualified Control.Monad.Trans.State.Strict as MT
 import Data.Coerce
-import Data.Tuple (swap)
 import Prelude hiding (fail)
 
 data State s (m :: * -> *) k
@@ -67,8 +65,8 @@ modify f = do
 -- | Run a 'State' effect starting from the passed value.
 --
 --   prop> run (runState a (pure b)) == (a, b)
-runState :: Functor m => s -> StateC s m a -> m (s, a)
-runState s = fmap swap . flip MT.runStateT s . runStateC
+runState :: s -> StateC s m a -> m (s, a)
+runState = flip runStateC
 
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
 --
@@ -83,13 +81,39 @@ execState :: forall s m a . Functor m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 
 
-newtype StateC s m a = StateC { runStateC :: MT.StateT s m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
+  deriving (Functor)
+
+instance Monad m => Applicative (StateC s m) where
+  pure a = StateC (\ s -> pure (s, a))
+  StateC f <*> StateC a = StateC $ \ s -> do
+    (s', f') <- f s
+    (s'', a') <- a s'
+    let fa = f' a'
+    fa `seq` pure (s'', fa)
+
+instance (Alternative m, Monad m) => Alternative (StateC s m) where
+  empty = StateC (const empty)
+  StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
+
+instance Monad m => Monad (StateC s m) where
+  StateC m >>= f = StateC $ \ s -> do
+    (s', a) <- m s
+    let fa = f a
+    fa `seq` runState s' fa
+
+instance MonadFail m => MonadFail (StateC s m) where
+  fail s = StateC (const (fail s))
+
+instance MonadIO m => MonadIO (StateC s m) where
+  liftIO io = StateC (\ s -> (,) s <$> liftIO io)
+
+instance (Alternative m, Monad m) => MonadPlus (StateC s m)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
-  eff (L (Get   k)) = StateC MT.get     >>= k
-  eff (L (Put s k)) = StateC (MT.put s) >>  k
-  eff (R other)     = StateC (MT.StateT (\ s -> swap <$> eff (handle (s, ()) (uncurry runState) other)))
+  eff op = StateC (\ s -> handleSum (eff . handle (s, ()) (uncurry runState)) (\case
+    Get   k -> runState s (k s)
+    Put s k -> runState s k) op)
 
 
 -- $setup

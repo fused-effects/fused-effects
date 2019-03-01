@@ -42,7 +42,7 @@ instance Effect Random where
 -- | Run a random computation starting from a given generator.
 --
 --   prop> run (runRandom (PureGen a) (pure b)) == (PureGen a, b)
-runRandom :: Functor m => g -> RandomC g m a -> m (g, a)
+runRandom :: g -> RandomC g m a -> m (g, a)
 runRandom g = runState g . runRandomC
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
