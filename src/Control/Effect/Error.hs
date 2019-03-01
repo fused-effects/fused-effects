@@ -67,7 +67,7 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  eff = ErrorC . handleSum (MT.ExceptT . eff . handle (Right ()) (either (pure . Left) runError)) (\case
+  eff = ErrorC . handleSum (MT.ExceptT . eff . handle (Right ()) (either (pure . Left) (MT.runExceptT . runErrorC))) (\case
     Throw e     -> MT.throwE e
     Catch m h k -> MT.catchE (runErrorC m) (runErrorC . h) >>= runErrorC . k)
 
