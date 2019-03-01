@@ -1,3 +1,7 @@
+# 0.2.0.1
+
+- Fixes the benchmarks, and builds them in CI to avoid regressing them again.
+
 # 0.2.0.0
 
 - Adds `listen`, `listens`, and `censor` operations to `Writer`.
