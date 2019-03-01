@@ -145,4 +145,5 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Cull
 -- >>> import Control.Effect.Void
