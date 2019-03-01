@@ -64,8 +64,6 @@ Following from the above section, we can define a carrier for the `Teletype` eff
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 
 instance (Carrier sig m, MonadIO m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
-  ret = TeletypeIOC . ret
-
   eff = TeletypeIOC . handleSum (eff . handleCoercible) (\ t -> case t of
     Read    k -> liftIO getLine      >>= runTeletypeIOC . k
     Write s k -> liftIO (putStrLn s) >>  runTeletypeIOC   k)
