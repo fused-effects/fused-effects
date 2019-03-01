@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Reader
 ( Reader(..)
 , ask
@@ -8,12 +8,13 @@ module Control.Effect.Reader
 , ReaderC(..)
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import qualified Control.Monad.Trans.Reader as MT
 import Prelude hiding (fail)
 
 data Reader r m k
@@ -54,34 +55,15 @@ local f m = send (Local f m pure)
 --
 --   prop> run (runReader a (pure b)) == b
 runReader :: r -> ReaderC r m a -> m a
-runReader = flip runReaderC
+runReader r = flip MT.runReaderT r . runReaderC
 
-newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
-  deriving (Functor)
-
-instance Applicative m => Applicative (ReaderC r m) where
-  pure a = ReaderC (const (pure a))
-  ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
-
-instance Alternative m => Alternative (ReaderC r m) where
-  empty = ReaderC (const empty)
-  ReaderC l <|> ReaderC r = ReaderC (\ e -> l e <|> r e)
-
-instance Monad m => Monad (ReaderC r m) where
-  ReaderC a >>= f = ReaderC (\ r -> a r >>= runReader r . f)
-
-instance MonadFail m => MonadFail (ReaderC r m) where
-  fail s = ReaderC (const (fail s))
-
-instance MonadIO m => MonadIO (ReaderC r m) where
-  liftIO = ReaderC . const . liftIO
-
-instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
+newtype ReaderC r m a = ReaderC { runReaderC :: MT.ReaderT r m a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
-  eff op = ReaderC (\ r -> handleSum (eff . handlePure (runReader r)) (\case
-    Ask       k -> runReader r (k r)
-    Local f m k -> runReader (f r) m >>= runReader r . k) op)
+  eff (L (Ask       k)) = ReaderC MT.ask >>= k
+  eff (L (Local f m k)) = ReaderC (MT.local f (runReaderC m)) >>= k
+  eff (R other)         = ReaderC (MT.ReaderT (\ r -> eff (handlePure (runReader r) other)))
 
 
 -- $setup

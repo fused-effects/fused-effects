@@ -16,6 +16,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import qualified Control.Monad.Trans.Reader as MT
 import Prelude hiding (fail)
 
 -- | 'Cull' effects are used with 'NonDet' to provide control over branching.
@@ -58,16 +59,16 @@ instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CullC m) whe
   empty = send Empty
   l <|> r = send (Choose (\ c -> if c then l else r))
 
-instance (Alternative m, Monad m) => Monad (CullC m) where
+instance (Alternative m, Carrier sig m) => Monad (CullC m) where
   CullC m >>= f = CullC (m >>= \case
     None e    -> pure (None e)
     Pure a    -> runCullC (f a)
-    Alt m1 m2 -> ReaderC (\ cull -> let k = runReader cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
+    Alt m1 m2 -> ReaderC (MT.ReaderT (\ cull -> let k = runReader cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k))))
 
-instance (Alternative m, MonadFail m) => MonadFail (CullC m) where
+instance (Alternative m, Carrier sig m, MonadFail m) => MonadFail (CullC m) where
   fail s = CullC (fail s)
 
-instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
+instance (Alternative m, Carrier sig m, MonadIO m) => MonadIO (CullC m) where
   liftIO io = CullC (Pure <$> liftIO io)
 
 instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CullC m)

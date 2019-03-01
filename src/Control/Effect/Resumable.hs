@@ -18,6 +18,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import qualified Control.Monad.Trans.Reader as MT
 import Data.Coerce
 import Data.Functor.Classes
 
@@ -117,7 +118,7 @@ instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m)
   eff = handleSum
     (ResumableWithC . eff . R . handleCoercible)
     (\ (Resumable err k) -> do
-      res <- ResumableWithC (ReaderC (\ handler -> runHandler handler err))
+      res <- ResumableWithC (ReaderC (MT.ReaderT (\ handler -> runHandler handler err)))
       k res)
 
 
