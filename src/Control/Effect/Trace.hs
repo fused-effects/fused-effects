@@ -82,9 +82,8 @@ newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: Stat
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
-  eff = handleSum
-    (TraceByReturningC . eff . R . handleCoercible)
-    (\ (Trace m k) -> TraceByReturningC (modify (m :)) *> k)
+  eff (L (Trace m k)) = TraceByReturningC (modify (m :)) *> k
+  eff (R other)       = TraceByReturningC (eff (R (handleCoercible other)))
 
 
 -- $setup
