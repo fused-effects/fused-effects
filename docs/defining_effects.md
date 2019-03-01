@@ -46,10 +46,10 @@ Now that we have our effect datatype, we can give definitions for `read` and `wr
 
 ```haskell
 read :: (Member Teletype sig, Carrier sig m) => m String
-read = send (Read ret)
+read = send (Read pure)
 
 write :: (Member Teletype sig, Carrier sig m) => String -> m ()
-write s = send (Write s (ret ()))
+write s = send (Write s (pure ()))
 ```
 
 This gives us enough to write computations using the `Teletype` effect. The next section discusses how to run `Teletype` computations.
