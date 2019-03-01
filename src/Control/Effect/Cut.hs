@@ -20,7 +20,7 @@ import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.State
 import Control.Effect.Sum
-import Control.Monad (MonadPlus(..), join)
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -142,7 +142,7 @@ instance MonadTrans ListC where
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other) = ListC $ \ cons nil -> eff (handle (Leaf ()) (fmap join . traverse runListAll) other) >>= foldr cons nil
+  eff (R other) = ListC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runListAll) other) >>= foldr cons nil
 
 
 data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
