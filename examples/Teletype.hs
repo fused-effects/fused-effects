@@ -57,7 +57,7 @@ instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m
     Write s k -> liftIO (putStrLn s) >>  k)
 
 
-runTeletypeRet :: Functor m => [String] -> TeletypeRetC m a -> m ([String], ([String], a))
+runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
 runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
