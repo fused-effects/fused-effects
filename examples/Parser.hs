@@ -106,10 +106,10 @@ newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
-  eff (L (Satisfy p k)) = ParseC $ do
-    input <- get
+  eff (L (Satisfy p k)) = do
+    input <- ParseC get
     case input of
-      c:cs | p c -> put cs *> runParseC (k c)
+      c:cs | p c -> ParseC (put cs) *> k c
       _          -> empty
   eff (R other)         = ParseC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
