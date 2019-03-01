@@ -20,7 +20,7 @@ import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.State
 import Control.Effect.Sum
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus(..), join)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -197,6 +197,11 @@ instance MonadPlus (BTreeC m)
 
 instance MonadTrans BTreeC where
   lift m = BTreeC (\ _ pur _ -> m >>= pur)
+
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BTreeC m) where
+  eff (L Empty)      = empty
+  eff (L (Choose k)) = k True <|> k False
+  eff (R other)      = BTreeC (\ alt pur nil -> eff (handle (Leaf ()) (fmap join . traverse runBTreeAll) other) >>= foldr (alt . pur) nil)
 
 
 -- $setup
