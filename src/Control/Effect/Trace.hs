@@ -51,9 +51,8 @@ instance MonadTrans TraceByPrintingC where
   lift = TraceByPrintingC
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
-  eff = handleSum
-    (TraceByPrintingC . eff . handleCoercible)
-    (\ (Trace s k) -> liftIO (hPutStrLn stderr s) *> k)
+  eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
+  eff (R other)       = TraceByPrintingC (eff (handleCoercible other))
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
