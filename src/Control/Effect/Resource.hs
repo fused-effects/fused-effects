@@ -26,11 +26,7 @@ instance HFunctor Resource where
   hmap f (OnError acquire release use k)  = OnError  (f acquire) (f . release) (f . use) k
 
 instance Effect Resource where
-  handle state handler (Resource acquire release use k)
-    = Resource (handler (acquire <$ state))
-               (handler . fmap release)
-               (handler . fmap use)
-               (handler . fmap k)
+  handle state handler (Resource acquire release use k) = Resource (handler (acquire <$ state)) (handler . fmap release) (handler . fmap use) (handler . fmap k)
   handle state handler (OnError acquire release use k)  = OnError  (handler (acquire <$ state)) (handler . fmap release) (handler . fmap use) (handler . fmap k)
 
 -- | Provides a safe idiom to acquire and release resources safely.
