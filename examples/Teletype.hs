@@ -52,9 +52,9 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
-  eff = handleSum (TeletypeIOC . eff . handleCoercible) (\case
-    Read    k -> liftIO getLine      >>= k
-    Write s k -> liftIO (putStrLn s) >>  k)
+  eff (L (Read    k)) = liftIO getLine      >>= k
+  eff (L (Write s k)) = liftIO (putStrLn s) >>  k
+  eff (R other)       = TeletypeIOC (eff (handleCoercible other))
 
 
 runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
