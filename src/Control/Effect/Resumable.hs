@@ -92,9 +92,8 @@ newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
-  eff = ResumableC . handleSum
-    (eff . R . handleCoercible)
-    (\ (Resumable err _) -> throwError (SomeError err))
+  eff (L (Resumable err _)) = ResumableC (throwError (SomeError err))
+  eff (R other)             = ResumableC (eff (R (handleCoercible other)))
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
