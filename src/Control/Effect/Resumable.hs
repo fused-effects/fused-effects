@@ -19,7 +19,6 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import qualified Control.Monad.Trans.Reader as MT
 import Data.Coerce
 import Data.Functor.Classes
 
@@ -118,7 +117,7 @@ instance MonadTrans (ResumableWithC err) where
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
 instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
-  eff (L (Resumable err k)) = ResumableWithC (ReaderC (MT.ReaderT (\ handler -> runHandler handler err))) >>= k
+  eff (L (Resumable err k)) = ResumableWithC ask >>= lift . flip runHandler err >>= k
   eff (R other)             = ResumableWithC (eff (R (handleCoercible other)))
 
 
