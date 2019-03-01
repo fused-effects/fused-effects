@@ -90,20 +90,18 @@ instance MonadTrans ResourceC where
   lift m = ResourceC (lift m)
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
-  eff = handleSum
-    (ResourceC . eff . R . handleCoercible)
-    (\case
-        Resource acquire release use k -> do
-          handler <- ResourceC ask
-          a <- liftIO (Exc.bracket
-            (runHandler handler acquire)
-            (runHandler handler . release)
-            (runHandler handler . use))
-          k a
-        OnError acquire release use k -> do
-          handler <- ResourceC ask
-          a <- liftIO (Exc.bracketOnError
-            (runHandler handler acquire)
-            (runHandler handler . release)
-            (runHandler handler . use))
-          k a)
+  eff (L (Resource acquire release use k)) = do
+    handler <- ResourceC ask
+    a <- liftIO (Exc.bracket
+      (runHandler handler acquire)
+      (runHandler handler . release)
+      (runHandler handler . use))
+    k a
+  eff (L (OnError  acquire release use k)) = do
+    handler <- ResourceC ask
+    a <- liftIO (Exc.bracketOnError
+      (runHandler handler acquire)
+      (runHandler handler . release)
+      (runHandler handler . use))
+    k a
+  eff (R other)                            = ResourceC (eff (R (handleCoercible other)))
