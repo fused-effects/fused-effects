@@ -83,9 +83,9 @@ instance MonadTrans (ErrorC e) where
   lift m = ErrorC (Right <$> m)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  eff = ErrorC . handleSum (eff . handle (Right ()) (either (pure . Left) runError)) (\case
-    Throw e     -> pure (Left e)
-    Catch m h k -> runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k))
+  eff (L (Throw e))     = ErrorC (pure (Left e))
+  eff (L (Catch m h k)) = ErrorC (runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k))
+  eff (R other)         = ErrorC (eff (handle (Right ()) (either (pure . Left) runError) other))
 
 
 -- $setup
