@@ -64,10 +64,10 @@ newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (Wr
   deriving (Applicative, Functor, Monad)
 
 instance (Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
-  eff = TeletypeRetC . handleSum (eff . R . R . handleCoercible) (\case
-    Read k -> do
-      i <- get
-      case i of
-        []  -> runTeletypeRetC (k "")
-        h:t -> put t *> runTeletypeRetC (k h)
-    Write s k -> tell [s] *> runTeletypeRetC k)
+  eff (L (Read    k)) = TeletypeRetC $ do
+    i <- get
+    case i of
+      []  -> runTeletypeRetC (k "")
+      h:t -> put t *> runTeletypeRetC (k h)
+  eff (L (Write s k)) = TeletypeRetC (tell [s]) *> k
+  eff (R other)       = TeletypeRetC (eff (R (R (handleCoercible other))))
