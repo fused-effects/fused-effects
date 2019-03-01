@@ -6,6 +6,7 @@ module Control.Effect.Void
 ) where
 
 import Control.Effect.Carrier
+import Data.Coerce
 
 data Void (m :: * -> *) k
   deriving (Functor)
@@ -27,14 +28,14 @@ run = runVoidC
 newtype VoidC a = VoidC { runVoidC :: a }
 
 instance Functor VoidC where
-  fmap f (VoidC a) = VoidC (f a)
+  fmap = coerce
   {-# INLINE fmap #-}
 
 instance Applicative VoidC where
   pure = VoidC
   {-# INLINE pure #-}
 
-  VoidC f <*> VoidC a = VoidC (f a)
+  (<*>) = coerce
   {-# INLINE (<*>) #-}
 
 instance Monad VoidC where
