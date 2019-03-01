@@ -75,7 +75,7 @@ In this case, since the `Teletype` carrier is just a thin wrapper around the und
 
 That leaves `Teletype` effects themselves, which are handled with one case per constructor. Since we’re assuming the existence of a `MonadIO` instance for the underlying computation, we can use `liftIO` to inject the `getLine` and `putStrLn` actions into it, and then proceed with the continuations, unwrapping them in the process.
 
-By convention, we also provide a `runTeletypeIO` function. For `TeletypeIOC` this just unwrapps the carrier, but for more involved carriers it might also apply some arguments.
+By convention, we also provide a `runTeletypeIO` function. For `TeletypeIOC` this just unwrapps the carrier, but for more involved carriers it might also apply some arguments. (We could also have used this name for the type’s field selector directly, at the cost of some asymmetry in its name.)
 
 ```haskell
 runTeletypeIO :: TeletypeIOC m a -> m a
