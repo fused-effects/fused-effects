@@ -133,17 +133,15 @@ instance (Alternative m, MonadIO m) => MonadIO (CutC' m) where
 instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CutC' m)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC' m) where
-  eff = CutC' . handleSum (handleSum
-    (eff . handle (Pure ()) (bindBranch (pure (None False)) runCutC'))
-    (\case
-      Empty    -> pure (None True)
-      Choose k -> runCutC' (k True) >>= branch (\ e -> if e then runCutC' (k False) else pure (None False)) (\ a -> pure (Alt (pure a) (runCutC' (k False) >>= runBranch (const empty)))) (fmap pure . Alt)))
-    (\case
-      Cutfail  -> pure (None False)
-      Call m k -> runCutC' m >>= bindBranch (pure (None True)) (runCutC' . k))
-    where bindBranch :: (Alternative m, Carrier sig m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
-          bindBranch cut bind = branch (\ e -> if e then pure (None True) else cut) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
+  eff (L Cutfail)        = CutC' (pure (None False))
+  eff (L (Call m k))     = CutC' (runCutC' m >>= bindBranch (pure (None True)) (runCutC' . k))
+  eff (R (L Empty))      = CutC' (pure (None True))
+  eff (R (L (Choose k))) = CutC' (runCutC' (k True) >>= branch (\ e -> if e then runCutC' (k False) else pure (None False)) (\ a -> pure (Alt (pure a) (runCutC' (k False) >>= runBranch (const empty)))) (fmap pure . Alt))
+  eff (R (R other))      = CutC' (eff (handle (Pure ()) (bindBranch (pure (None False)) runCutC') other))
   {-# INLINE eff #-}
+
+bindBranch :: (Alternative m, Carrier sig m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
+bindBranch cut bind = branch (\ e -> if e then pure (None True) else cut) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
 
 
 -- $setup
