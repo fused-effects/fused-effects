@@ -18,7 +18,6 @@ module Control.Effect.Cut
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.NonDet
-import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), join)
 import Control.Monad.Fail
@@ -73,36 +72,45 @@ cut = pure () <|> cutfail
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for a 'NonDet' effect).
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
-runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
-runCut = evalState True . runListAlt . runCutC
+runCut :: Alternative m => CutC m a -> m a
+runCut m = runCutC m ((<|>) . pure) empty empty
 
-newtype CutC m a = CutC { runCutC :: ListC (StateC Bool m) a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+newtype CutC m a = CutC { runCutC :: forall b . (a -> m b -> m b) -> m b -> m b -> m b }
+  deriving (Functor)
 
-instance (Carrier sig m, Effect sig) => Alternative (CutC m) where
-  empty = CutC empty
-  l <|> r = CutC $ ListC $ \ cons nil -> do
-    let handle a as = do
-          shouldBacktrack <- get
-          if shouldBacktrack then do
-            maybe id cons a $ runListC (runCutC r) cons as
-          else
-            maybe nil (flip cons nil) a
-    runListC (runCutC l) (handle . Just) (handle Nothing nil)
+runCutAll :: (Alternative f, Applicative m) => CutC m a -> m (f a)
+runCutAll (CutC m) = m (fmap . (<|>) . pure) (pure empty) (pure empty)
 
-instance (Carrier sig m, Effect sig) => MonadPlus (CutC m)
+instance Applicative (CutC m) where
+  pure a = CutC (\ cons nil _ -> cons a nil)
+  CutC f <*> CutC a = CutC $ \ cons nil fail ->
+    f (\ f' fs -> a (cons . f') fs fail) nil fail
+
+instance Alternative (CutC m) where
+  empty = CutC (\ _ nil _ -> nil)
+  CutC l <|> CutC r = CutC (\ cons nil fail -> l cons (r cons nil fail) fail)
+
+instance Monad (CutC m) where
+  CutC a >>= f = CutC $ \ cons nil fail ->
+    a (\ a' as -> runCutC (f a') cons as fail) nil fail
+
+instance MonadFail m => MonadFail (CutC m) where
+  fail s = CutC (\ _ _ _ -> fail s)
+
+instance MonadIO m => MonadIO (CutC m) where
+  liftIO io = CutC (\ cons nil _ -> liftIO io >>= flip cons nil)
+
+instance MonadPlus (CutC m)
 
 instance MonadTrans CutC where
-  lift m = CutC (lift (lift m))
+  lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
 
 instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
-  eff (L Cutfail)    = CutC (put False *> empty)
-  eff (L (Call m k)) = CutC $ ListC $ \ cons nil -> do
-    shouldBacktrack <- get
-    runListC (runCutC m) (\ a as -> put shouldBacktrack *> runListC (runCutC (k a)) cons as) (put (shouldBacktrack :: Bool) *> nil)
+  eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
+  eff (L (Call m k)) = CutC $ \ cons nil fail -> runCutC m (\ a as -> runCutC (k a) cons as fail) nil nil
   eff (R (L Empty))      = empty
   eff (R (L (Choose k))) = k True <|> k False
-  eff (R (R other)) = CutC (eff (R (R (handleCoercible other))))
+  eff (R (R other)) = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
   {-# INLINE eff #-}
 
 
