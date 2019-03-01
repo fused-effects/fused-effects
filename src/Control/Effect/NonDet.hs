@@ -87,8 +87,8 @@ instance (Applicative f, Applicative m) => Applicative (AltC f m) where
   AltC f <*> AltC a = AltC (liftA2 (<*>) f a)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (AltC f m) where
-  empty = send Empty
-  l <|> r = send (Choose (\ c -> if c then l else r))
+  empty = AltC (pure empty)
+  l <|> r = AltC (liftA2 (<|>) (runNonDet l) (runNonDet r))
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Monad (AltC f m) where
   AltC a >>= f = AltC (a >>= runNonDet . Monoid.getAlt . foldMap (Monoid.Alt . f))
@@ -105,8 +105,8 @@ instance Applicative f => MonadTrans (AltC f) where
   lift m = AltC (pure <$> m)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
-  eff (L Empty)      = AltC (pure empty)
-  eff (L (Choose k)) = AltC (liftA2 (<|>) (runNonDet (k True)) (runNonDet (k False)))
+  eff (L Empty)      = empty
+  eff (L (Choose k)) = k True <|> k False
   eff (R other)      = AltC (eff (handle (pure ()) (fmap join . traverse runNonDet) other))
 
 
