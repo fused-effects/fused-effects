@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error
 ( Error(..)
 , throwError
@@ -7,13 +7,12 @@ module Control.Effect.Error
 , ErrorC(..)
 ) where
 
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus(..), (<=<))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import qualified Control.Monad.Trans.Except as MT
 import Prelude hiding (fail)
 
 data Error exc m k
@@ -55,21 +54,34 @@ catchError m h = send (Catch m h pure)
 --
 --   prop> run (runError (pure a)) == Right @Int @Int a
 runError :: ErrorC exc m a -> m (Either exc a)
-runError = MT.runExceptT . runErrorC
+runError = runErrorC
 
-newtype ErrorC e m a = ErrorC { runErrorC :: MT.ExceptT e m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
+  deriving (Functor)
 
-instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
-  empty = ErrorC (MT.ExceptT empty)
-  ErrorC (MT.ExceptT l) <|> ErrorC (MT.ExceptT r) = ErrorC (MT.ExceptT (l <|> r))
+instance Applicative m => Applicative (ErrorC e m) where
+  pure a = ErrorC (pure (Right a))
+  ErrorC f <*> ErrorC a = ErrorC (liftA2 (<*>) f a)
+
+instance Alternative m => Alternative (ErrorC e m) where
+  empty = ErrorC empty
+  ErrorC l <|> ErrorC r = ErrorC (l <|> r)
+
+instance Monad m => Monad (ErrorC e m) where
+  ErrorC a >>= f = ErrorC (a >>= either (pure . Left) (runError . f))
+
+instance MonadIO m => MonadIO (ErrorC e m) where
+  liftIO io = ErrorC (Right <$> liftIO io)
+
+instance MonadFail m => MonadFail (ErrorC e m) where
+  fail s = ErrorC (fail s)
 
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  eff = ErrorC . handleSum (MT.ExceptT . eff . handle (Right ()) (either (pure . Left) (MT.runExceptT . runErrorC))) (\case
-    Throw e     -> MT.throwE e
-    Catch m h k -> MT.catchE (runErrorC m) (runErrorC . h) >>= runErrorC . k)
+  eff = ErrorC . handleSum (eff . handle (Right ()) (either (pure . Left) runError)) (\case
+    Throw e     -> pure (Left e)
+    Catch m h k -> runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k))
 
 
 -- $setup
