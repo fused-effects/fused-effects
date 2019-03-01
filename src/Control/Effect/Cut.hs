@@ -131,6 +131,9 @@ instance MonadIO m => MonadIO (ListC m) where
 
 instance MonadPlus (ListC m)
 
+instance MonadTrans ListC where
+  lift m = ListC (\ cons nil -> m >>= flip cons nil)
+
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
