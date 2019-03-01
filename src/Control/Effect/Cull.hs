@@ -70,19 +70,19 @@ instance (Alternative m, Carrier sig m) => Alternative (CullC m) where
           pure (Alt (pure a) (runReader cull (runCullC r) >>= runBranch (const empty)))
       Alt _ _ -> pure res
 
-instance (Alternative m, Carrier sig m) => Monad (CullC m) where
+instance (Alternative m, Monad m) => Monad (CullC m) where
   CullC m >>= f = CullC (m >>= \case
     None e    -> pure (None e)
     Pure a    -> runCullC (f a)
     Alt m1 m2 -> ReaderC (MT.ReaderT (\ cull -> let k = runReader cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k))))
 
-instance (Alternative m, Carrier sig m, MonadFail m) => MonadFail (CullC m) where
+instance (Alternative m, MonadFail m) => MonadFail (CullC m) where
   fail s = CullC (fail s)
 
-instance (Alternative m, Carrier sig m, MonadIO m) => MonadIO (CullC m) where
+instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
   liftIO io = CullC (Pure <$> liftIO io)
 
-instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CullC m)
+instance (Alternative m, Carrier sig m) => MonadPlus (CullC m)
 
 instance MonadTrans CullC where
   lift m = CullC (lift (Pure <$> m))
@@ -114,9 +114,9 @@ newtype OnceC f m a = OnceC { runOnceC :: CullC (AltC f m) a }
 
 deriving instance (Alternative f, Applicative m, Monad f, Traversable f) => Applicative (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Monad (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail m, Traversable f) => MonadFail (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (OnceC f m)
+deriving instance (Alternative f, Monad f, Monad m, Traversable f) => Monad (OnceC f m)
+deriving instance (Alternative f, Monad f, MonadFail m, Traversable f) => MonadFail (OnceC f m)
+deriving instance (Alternative f, Monad f, MonadIO m, Traversable f) => MonadIO (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (OnceC f m)
 
 instance Applicative f => MonadTrans (OnceC f) where
