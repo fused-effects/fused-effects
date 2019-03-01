@@ -57,8 +57,18 @@ instance Alternative m => Applicative (CullC m) where
   CullC f <*> CullC a = CullC (liftA2 (<*>) f a)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CullC m) where
-  empty = send Empty
-  l <|> r = send (Choose (\ c -> if c then l else r))
+  empty = CullC (pure (None ()))
+  l <|> r = CullC $ do
+    res <- runCullC l
+    case res of
+      None _ -> runCullC r
+      Pure a -> do
+        cull <- ask
+        if cull then
+          pure res
+        else
+          pure (Alt (pure a) (runReader cull (runCullC r) >>= runBranch (const empty)))
+      Alt _ _ -> pure res
 
 instance (Alternative m, Carrier sig m) => Monad (CullC m) where
   CullC m >>= f = CullC (m >>= \case
@@ -81,19 +91,8 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet 
   eff op = CullC (handleSum (handleSum
     (eff . R . handle (Pure ()) (bindBranch runCullC))
     (\case
-      Empty       -> pure (None ())
-      Choose k    -> do
-        res <- runCullC (k True)
-        case res of
-          None _ -> runCullC (k False)
-          Pure a -> do
-            cull <- ask
-            if cull then
-              pure res
-            else
-              pure (Alt (pure a) (runReader cull (runCullC (k False)) >>= runBranch (const empty)))
-          Alt _ _ -> pure res
-          ))
+      Empty       -> runCullC empty
+      Choose k    -> runCullC (k True <|> k False)))
     (\ (Cull m k) -> local (const True) (runCullC m) >>= bindBranch (runCullC . k))
     op)
     where bindBranch :: (Alternative m, Carrier sig m) => (b -> ReaderC Bool m (Branch m () a)) -> Branch m () b -> ReaderC Bool m (Branch m () a)
