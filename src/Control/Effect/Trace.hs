@@ -68,7 +68,8 @@ instance MonadTrans TraceByIgnoringC where
   lift = TraceByIgnoringC
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
-  eff = handleSum (TraceByIgnoringC . eff . handleCoercible) traceCont
+  eff (L trace) = traceCont trace
+  eff (R other) = TraceByIgnoringC (eff (handleCoercible other))
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.
