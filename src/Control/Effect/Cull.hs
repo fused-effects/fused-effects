@@ -122,6 +122,9 @@ deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadFail 
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversable f) => MonadIO (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (OnceC f m)
 
+instance Applicative f => MonadTrans (OnceC f) where
+  lift m = OnceC (CullC (ReaderC (MT.ReaderT (const (AltC (pure . Pure <$> m))))))
+
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   eff = OnceC . eff . R . R . handleCoercible
 
