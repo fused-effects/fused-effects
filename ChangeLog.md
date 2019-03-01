@@ -1,5 +1,5 @@
-- Defines `Monad` instances for all carrier types.
-- Defines `MonadTrans` instances for almost all carrier types.
+- Adds `Monad` instances for all carrier types.
+- Adds `MonadTrans` instances for almost all carrier types.
 - Makes `Monad` a superclass of `Carrier`, obviating the need for a lot of constraints.
 - Removes `ret`; `pure` or `return` can be used instead.
 - Removes `Eff`, in favour of computing directly in the carriers. This enables the compiler to perform significant optimizations; see the benchmarks for details.
