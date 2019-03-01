@@ -9,7 +9,7 @@ import Control.Effect.Cut
 import Control.Effect.NonDet
 import Control.Effect.State
 import Control.Effect.Sum hiding (L)
-import Control.Monad (MonadPlus, replicateM)
+import Control.Monad (replicateM)
 import Data.Char
 import Data.Coerce
 import Data.List (intercalate)
@@ -105,7 +105,7 @@ parse input = (>>= exhaustive) . runState input . runParseC
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
-instance (Alternative m, Carrier sig m, Effect sig, MonadPlus m) => Carrier (Symbol :+: sig) (ParseC m) where
+instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
   eff = ParseC . handleSum
     (eff . R . handleCoercible)
     (\ (Satisfy p k) -> do
