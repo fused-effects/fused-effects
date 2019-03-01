@@ -3,6 +3,7 @@
 - Adds `Monad` as a superclass of `Carrier`, obviating the need for a lot of constraints.
 - Removes `ret`; `pure` or `return` can be used instead.
 - Removes `Eff`, in favour of computing directly in the carriers. This enables the compiler to perform significant optimizations; see the benchmarks for details.
+- Removes `handleEither`, `handleReader`, `handleState`, `handleSum`, and `handleTraversable` in favour of composing carrier types directly.
 
 # 0.2.0.1
 
