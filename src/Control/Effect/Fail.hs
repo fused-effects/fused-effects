@@ -15,6 +15,7 @@ import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Coerce
+import Prelude hiding (fail)
 
 newtype Fail (m :: * -> *) k = Fail String
   deriving (Functor)
@@ -38,10 +39,10 @@ newtype FailC m a = FailC { runFailC :: ErrorC String m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
-  fail s = send (Fail s)
+  fail s = FailC (throwError s)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
-  eff = FailC . handleSum (eff . R . handleCoercible) (\ (Fail s) -> throwError s)
+  eff = handleSum (FailC . eff . R . handleCoercible) (\ (Fail s) -> fail s)
 
 
 -- $setup
