@@ -106,19 +106,19 @@ bindBranch bind a = do
 --
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => OnceC f m a -> m (f a)
+runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig) => OnceC m a -> m (f a)
 runNonDetOnce = runNonDet . runCull . cull . runOnceC
 
-newtype OnceC f m a = OnceC { runOnceC :: CullC (AltC f m) a }
+newtype OnceC m a = OnceC { runOnceC :: CullC (BTreeC m) a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (OnceC f m)
+deriving instance (Carrier sig m, Effect sig) => Alternative (OnceC m)
+deriving instance (Carrier sig m, Effect sig) => MonadPlus (OnceC m)
 
-instance Applicative f => MonadTrans (OnceC f) where
-  lift m = OnceC (CullC (ReaderC (MT.ReaderT (const (AltC (pure . Pure <$> m))))))
+instance MonadTrans OnceC where
+  lift m = OnceC (CullC (ReaderC (MT.ReaderT (const (BTreeC (\ _ pur _ -> m >>= pur . Pure))))))
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (OnceC m) where
   eff = OnceC . eff . R . R . handleCoercible
 
 

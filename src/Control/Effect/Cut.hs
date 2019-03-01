@@ -9,17 +9,13 @@ module Control.Effect.Cut
 , ListC(..)
 , runListAll
 , runListAlt
-, BTree(..)
-, BTreeC(..)
-, runBTreeAll
-, runBTreeAlt
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Sum
-import Control.Monad (MonadPlus(..), join)
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -151,65 +147,6 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
   eff (R other) = ListC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runListAll) other) >>= foldr cons nil
-
-
-data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-instance Applicative BTree where
-  pure = Leaf
-  Nil          <*> _ = Nil
-  Leaf f       <*> a = fmap f a
-  Branch f1 f2 <*> a = Branch (f1 <*> a) (f2 <*> a)
-
-instance Alternative BTree where
-  empty = Nil
-  (<|>) = Branch
-
-instance Monad BTree where
-  Nil          >>= _ = Nil
-  Leaf a       >>= f = f a
-  Branch a1 a2 >>= f = Branch (a1 >>= f) (a2 >>= f)
-
-
-newtype BTreeC m a = BTreeC { runBTreeC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b }
-  deriving (Functor)
-
-runBTreeAll :: (Alternative f, Applicative m) => BTreeC m a -> m (f a)
-runBTreeAll (BTreeC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
-
-runBTreeAlt :: Alternative m => BTreeC m a -> m a
-runBTreeAlt (BTreeC m) = m (<|>) pure empty
-
-instance Applicative (BTreeC m) where
-  pure a = BTreeC $ \ _ pur _ -> pur a
-  BTreeC f <*> BTreeC a = BTreeC $ \ alt pur nil ->
-    f alt (\ f' -> a alt (pur . f') nil) nil
-
-instance Alternative (BTreeC m) where
-  empty = BTreeC $ \ _ _ nil -> nil
-  BTreeC l <|> BTreeC r = BTreeC $ \ alt pur nil ->
-    l alt (\ l' -> alt (pur l') (r alt pur nil)) nil
-
-instance Monad (BTreeC m) where
-  BTreeC a >>= f = BTreeC $ \ alt pur nil ->
-    a alt (\ a' -> runBTreeC (f a') alt pur nil) nil
-
-instance MonadFail m => MonadFail (BTreeC m) where
-  fail s = BTreeC (\ _ _ _ -> fail s)
-
-instance MonadIO m => MonadIO (BTreeC m) where
-  liftIO io = BTreeC (\ _ pur _ -> liftIO io >>= pur)
-
-instance MonadPlus (BTreeC m)
-
-instance MonadTrans BTreeC where
-  lift m = BTreeC (\ _ pur _ -> m >>= pur)
-
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BTreeC m) where
-  eff (L Empty)      = empty
-  eff (L (Choose k)) = k True <|> k False
-  eff (R other)      = BTreeC (\ alt pur nil -> eff (handle (Leaf ()) (fmap join . traverse runBTreeAll) other) >>= foldr (alt . pur) nil)
 
 
 -- $setup

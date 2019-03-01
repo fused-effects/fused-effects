@@ -1,9 +1,11 @@
-{-# LANGUAGE DeriveTraversable, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
 , runNonDet
-, AltC(..)
+, runBTreeAll
+, runBTreeAlt
+, BTreeC(..)
 , Branch(..)
 , branch
 , runBranch
@@ -17,7 +19,6 @@ import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Coerce
-import qualified Data.Monoid as Monoid (Alt(..))
 import Prelude hiding (fail)
 
 data NonDet (m :: * -> *) k
@@ -70,44 +71,73 @@ runBranch f = branch f pure (<|>)
 {-# INLINE runBranch #-}
 
 
+data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+instance Applicative BTree where
+  pure = Leaf
+  Nil          <*> _ = Nil
+  Leaf f       <*> a = fmap f a
+  Branch f1 f2 <*> a = Branch (f1 <*> a) (f2 <*> a)
+
+instance Alternative BTree where
+  empty = Nil
+  (<|>) = Branch
+
+instance Monad BTree where
+  Nil          >>= _ = Nil
+  Leaf a       >>= f = f a
+  Branch a1 a2 >>= f = Branch (a1 >>= f) (a2 >>= f)
+
+
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
 --   Using '[]' as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unlike 'runNonDetOnce', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
 --
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
-runNonDet :: AltC f m a -> m (f a)
-runNonDet = runAltC
+runNonDet :: (Alternative f, Applicative m) => BTreeC m a -> m (f a)
+runNonDet = runBTreeAll
 
-newtype AltC f m a = AltC { runAltC :: m (f a) }
+runBTreeAll :: (Alternative f, Applicative m) => BTreeC m a -> m (f a)
+runBTreeAll (BTreeC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
+
+runBTreeAlt :: Alternative m => BTreeC m a -> m a
+runBTreeAlt (BTreeC m) = m (<|>) pure empty
+
+newtype BTreeC m a = BTreeC { runBTreeC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b }
   deriving (Functor)
 
-instance (Applicative f, Applicative m) => Applicative (AltC f m) where
-  pure = AltC . pure . pure
-  AltC f <*> AltC a = AltC (liftA2 (<*>) f a)
+instance Applicative (BTreeC m) where
+  pure a = BTreeC $ \ _ pur _ -> pur a
+  BTreeC f <*> BTreeC a = BTreeC $ \ alt pur nil ->
+    f alt (\ f' -> a alt (pur . f') nil) nil
 
-instance (Alternative f, Applicative m, Monad f, Traversable f) => Alternative (AltC f m) where
-  empty = AltC (pure empty)
-  l <|> r = AltC (liftA2 (<|>) (runNonDet l) (runNonDet r))
+instance Alternative (BTreeC m) where
+  empty = BTreeC $ \ _ _ nil -> nil
+  BTreeC l <|> BTreeC r = BTreeC $ \ alt pur nil ->
+    l alt (\ l' -> alt (pur l') (r alt pur nil)) nil
 
-instance (Alternative f, Monad f, Monad m, Traversable f) => Monad (AltC f m) where
-  AltC a >>= f = AltC (a >>= runNonDet . Monoid.getAlt . foldMap (Monoid.Alt . f))
+instance Monad (BTreeC m) where
+  BTreeC a >>= f = BTreeC $ \ alt pur nil ->
+    a alt (\ a' -> runBTreeC (f a') alt pur nil) nil
 
-instance (Alternative f, Monad f, MonadFail m, Traversable f) => MonadFail (AltC f m) where
-  fail s = AltC (fail s)
+instance MonadFail m => MonadFail (BTreeC m) where
+  fail s = BTreeC (\ _ _ _ -> fail s)
 
-instance (Alternative f, Monad f, MonadIO m, Traversable f) => MonadIO (AltC f m) where
-  liftIO io = AltC (pure <$> liftIO io)
+instance MonadIO m => MonadIO (BTreeC m) where
+  liftIO io = BTreeC (\ _ pur _ -> liftIO io >>= pur)
 
-instance (Alternative f, Monad f, Monad m, Traversable f) => MonadPlus (AltC f m)
+instance MonadPlus (BTreeC m)
 
-instance Applicative f => MonadTrans (AltC f) where
-  lift m = AltC (pure <$> m)
+instance MonadTrans BTreeC where
+  lift m = BTreeC (\ _ pur _ -> m >>= pur)
 
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BTreeC m) where
   eff (L Empty)      = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other)      = AltC (eff (handle (pure ()) (fmap join . traverse runNonDet) other))
+  eff (R other)      = BTreeC (\ alt pur nil -> eff (handle (Leaf ()) (fmap join . traverse runBTreeAll) other) >>= foldr (alt . pur) nil)
+
 
 
 -- $setup
