@@ -44,5 +44,4 @@ data Teletype (m :: * -> *) k
   = Read (String -> k)
   | Write String k
   deriving (Functor)
-
 ```
