@@ -14,6 +14,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import qualified Control.Monad.Trans.Reader as MT
 import Prelude hiding (fail)
 
@@ -58,7 +59,7 @@ runReader :: r -> ReaderC r m a -> m a
 runReader r = flip MT.runReaderT r . runReaderC
 
 newtype ReaderC r m a = ReaderC { runReaderC :: MT.ReaderT r m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff (L (Ask       k)) = ReaderC MT.ask >>= k
