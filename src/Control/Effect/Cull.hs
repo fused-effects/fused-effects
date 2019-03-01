@@ -56,7 +56,7 @@ instance Alternative m => Applicative (CullC m) where
   pure = CullC . pure . Pure
   CullC f <*> CullC a = CullC (liftA2 (<*>) f a)
 
-instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CullC m) where
+instance (Alternative m, Carrier sig m) => Alternative (CullC m) where
   empty = CullC (pure (None ()))
   l <|> r = CullC $ do
     res <- runCullC l
