@@ -115,9 +115,9 @@ instance MonadTrans (StateC s) where
   lift m = StateC (\ s -> (,) s <$> m)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
-  eff op = StateC (\ s -> handleSum (eff . handle (s, ()) (uncurry runState)) (\case
-    Get   k -> runState s (k s)
-    Put s k -> runState s k) op)
+  eff (L (Get   k)) = StateC (\ s -> runState s (k s))
+  eff (L (Put s k)) = StateC (\ _ -> runState s k)
+  eff (R other)     = StateC (\ s -> eff (handle (s, ()) (uncurry runState) other))
 
 
 -- $setup
