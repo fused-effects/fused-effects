@@ -80,21 +80,21 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadInterleave (RandomC 
   {-# INLINE interleave #-}
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) (RandomC g m) where
-  eff = RandomC . handleSum (eff . R . handleCoercible) (\case
-    Random    k -> do
-      (a, g') <- gets R.random
-      put (g' :: g)
-      runRandomC (k a)
-    RandomR r k -> do
-      (a, g') <- gets (R.randomR r)
-      put (g' :: g)
-      runRandomC (k a)
-    Interleave m k -> do
-      (g1, g2) <- gets R.split
-      put (g1 :: g)
-      a <- runRandomC m
-      put g2
-      runRandomC (k a))
+  eff (L (Random       k)) = RandomC $ do
+    (a, g') <- gets R.random
+    put (g' :: g)
+    runRandomC (k a)
+  eff (L (RandomR r    k)) = RandomC $ do
+    (a, g') <- gets (R.randomR r)
+    put (g' :: g)
+    runRandomC (k a)
+  eff (L (Interleave m k)) = RandomC $ do
+    (g1, g2) <- gets R.split
+    put (g1 :: g)
+    a <- runRandomC m
+    put g2
+    runRandomC (k a)
+  eff (R other)            = RandomC (eff (R (handleCoercible other)))
 
 
 -- $setup
