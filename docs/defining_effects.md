@@ -64,9 +64,9 @@ Following from the above section, we can define a carrier for the `Teletype` eff
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 
 instance (Carrier sig m, MonadIO m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
-  eff = TeletypeIOC . handleSum (eff . handleCoercible) (\ t -> case t of
-    Read    k -> liftIO getLine      >>= runTeletypeIOC . k
-    Write s k -> liftIO (putStrLn s) >>  runTeletypeIOC   k)
+  eff (L (Read    k)) = TeletypeIOC (liftIO getLine      >>= runTeletypeIOC . k)
+  eff (L (Write s k)) = TeletypeIOC (liftIO (putStrLn s) >>  runTeletypeIOC   k)
+  eff (R other)       = TeletypeIOC (eff (handleCoercible other))
 ```
 
 Here, `eff` is responsible for handling effectful computations. Since the `Carrier` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `eff` has two parts: a handler for `Teletype` (`alg`), and a handler for teletype effects that might be embedded in other effects in the signature.
