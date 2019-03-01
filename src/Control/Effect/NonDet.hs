@@ -15,6 +15,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), join)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Coerce
 import qualified Data.Monoid as Monoid (Alt(..))
 import Prelude hiding (fail)
@@ -99,6 +100,9 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, MonadIO m, Traversa
   liftIO io = AltC (pure <$> liftIO io)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (AltC f m)
+
+instance Applicative f => MonadTrans (AltC f) where
+  lift m = AltC (pure <$> m)
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (AltC f m) where
   eff = AltC . handleSum (eff . handle (pure ()) (fmap join . traverse runNonDet)) (\case
