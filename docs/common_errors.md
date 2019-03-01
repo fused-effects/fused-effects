@@ -22,7 +22,7 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 Declaring a `Carrier` instance will fail:
 
 ```haskell
-instance (Monad m, Carrier sig m, Effect sig)
+instance (Carrier sig m, Effect sig)
     => Carrier (Teletype :+: sig) (TeletypeIOC m) where…
 ```
 
