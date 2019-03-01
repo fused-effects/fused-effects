@@ -90,23 +90,23 @@ newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
-  eff = WriterC . handleSum (eff . R . handleCoercible) (\case
-    Tell w'    k -> do
-      modify (`mappend` w')
-      runWriterC k
-    Listen   m k -> do
-      w <- get
-      put (mempty :: w)
-      a <- runWriterC m
-      w' <- get
-      modify (mappend (w :: w))
-      runWriterC (k w' a)
-    Censor f m k -> do
-      w <- get
-      put (mempty :: w)
-      a <- runWriterC m
-      modify (mappend w . f)
-      runWriterC (k a))
+  eff (L (Tell w     k)) = WriterC $ do
+    modify (`mappend` w)
+    runWriterC k
+  eff (L (Listen   m k)) = WriterC $ do
+    w <- get
+    put (mempty :: w)
+    a <- runWriterC m
+    w' <- get
+    modify (mappend (w :: w))
+    runWriterC (k w' a)
+  eff (L (Censor f m k)) = WriterC $ do
+    w <- get
+    put (mempty :: w)
+    a <- runWriterC m
+    modify (mappend w . f)
+    runWriterC (k a)
+  eff (R other)          = WriterC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
 
 
