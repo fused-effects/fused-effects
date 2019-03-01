@@ -88,13 +88,10 @@ instance MonadTrans CullC where
   lift m = CullC (lift (Pure <$> m))
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
-  eff op = CullC (handleSum (handleSum
-    (eff . R . handle (Pure ()) (bindBranch runCullC))
-    (\case
-      Empty       -> runCullC empty
-      Choose k    -> runCullC (k True <|> k False)))
-    (\ (Cull m k) -> local (const True) (runCullC m) >>= bindBranch (runCullC . k))
-    op)
+  eff (L (Cull m k))     = CullC (local (const True) (runCullC m) >>= bindBranch (runCullC . k))
+  eff (R (L Empty))      = empty
+  eff (R (L (Choose k))) = k True <|> k False
+  eff (R (R other))      = CullC (eff (R (handle (Pure ()) (bindBranch runCullC) other)))
   {-# INLINE eff #-}
 
 bindBranch :: (Alternative m, Carrier sig m) => (b -> ReaderC Bool m (Branch m () a)) -> Branch m () b -> ReaderC Bool m (Branch m () a)
