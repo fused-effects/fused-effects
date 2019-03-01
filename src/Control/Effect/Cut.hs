@@ -80,8 +80,15 @@ newtype CutC m a = CutC { runCutC :: ListC (StateC Bool m) a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Carrier sig m, Effect sig) => Alternative (CutC m) where
-  empty = send Empty
-  l <|> r = send (Choose (\ c -> if c then l else r))
+  empty = CutC empty
+  l <|> r = CutC $ ListC $ \ cons nil -> do
+    let handle a as = do
+          shouldBacktrack <- get
+          if shouldBacktrack then do
+            maybe id cons a $ runListC (runCutC r) cons as
+          else
+            maybe nil (flip cons nil) a
+    runListC (runCutC l) (handle . Just) (handle Nothing nil)
 
 instance (Carrier sig m, Effect sig) => MonadPlus (CutC m)
 
@@ -93,15 +100,8 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
   eff (L (Call m k)) = CutC $ ListC $ \ cons nil -> do
     shouldBacktrack <- get
     runListC (runCutC m) (\ a as -> put shouldBacktrack *> runListC (runCutC (k a)) cons as) (put (shouldBacktrack :: Bool) *> nil)
-  eff (R (L Empty))      = CutC $ ListC $ \ _    nil -> nil
-  eff (R (L (Choose k))) = CutC $ ListC $ \ cons nil -> do
-    let handle a as = do
-          shouldBacktrack <- get
-          if shouldBacktrack then do
-            maybe id cons a $ runListC (runCutC (k False)) cons as
-          else
-            maybe nil (flip cons nil) a
-    runListC (runCutC (k True)) (handle . Just) (handle Nothing nil)
+  eff (R (L Empty))      = empty
+  eff (R (L (Choose k))) = k True <|> k False
   eff (R (R other)) = CutC (eff (R (R (handleCoercible other))))
   {-# INLINE eff #-}
 
