@@ -48,14 +48,14 @@ newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC ::
   deriving (Applicative, Functor, Monad, MonadFail)
 
 instance (Carrier sig m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
-  eff = ReinterpretReaderC . handleSum (eff . R . handleCoercible) (\case
-    Ask       k -> get >>= runReinterpretReaderC . k
-    Local f m k -> do
-      a <- get
-      put (f a)
-      v <- runReinterpretReaderC m
-      put a
-      runReinterpretReaderC (k v))
+  eff (L (Ask       k)) = ReinterpretReaderC get >>= k
+  eff (L (Local f m k)) = do
+    a <- ReinterpretReaderC get
+    ReinterpretReaderC (put (f a))
+    v <- m
+    ReinterpretReaderC (put a)
+    k v
+  eff (R other)         = ReinterpretReaderC (eff (R (handleCoercible other)))
 
 
 interposition :: Spec
