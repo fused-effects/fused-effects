@@ -23,6 +23,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), join)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
@@ -185,6 +186,9 @@ instance MonadIO m => MonadIO (BTreeC m) where
   liftIO io = BTreeC (\ _ pur _ -> liftIO io >>= pur)
 
 instance MonadPlus (BTreeC m)
+
+instance MonadTrans BTreeC where
+  lift m = BTreeC (\ _ pur _ -> m >>= pur)
 
 
 -- $setup
