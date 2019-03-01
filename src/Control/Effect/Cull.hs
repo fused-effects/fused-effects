@@ -16,6 +16,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import qualified Control.Monad.Trans.Reader as MT
 import Prelude hiding (fail)
 
@@ -72,6 +73,9 @@ instance (Alternative m, Carrier sig m, MonadIO m) => MonadIO (CullC m) where
   liftIO io = CullC (Pure <$> liftIO io)
 
 instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CullC m)
+
+instance MonadTrans CullC where
+  lift m = CullC (lift (Pure <$> m))
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   eff op = CullC (handleSum (handleSum
