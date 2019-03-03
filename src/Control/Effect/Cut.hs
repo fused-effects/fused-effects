@@ -15,7 +15,6 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), ap)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
@@ -76,9 +75,6 @@ instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) wher
   l <|> r = send (Choose (\ c -> if c then l else r))
 
 instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CutC m)
-
-instance MonadTrans CutC where
-  lift m = CutC (Cod (\ k -> CutC' (m >>= runCutC' . k)))
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff = CutC . eff . handleCoercible

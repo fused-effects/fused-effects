@@ -16,7 +16,6 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 -- | 'Cull' effects are used with 'NonDet' to provide control over branching.
@@ -83,9 +82,6 @@ instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
 
 instance (Alternative m, Carrier sig m) => MonadPlus (CullC m)
 
-instance MonadTrans CullC where
-  lift m = CullC (lift (Pure <$> m))
-
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   eff (L (Cull m k))     = CullC (local (const True) (runCullC m) >>= bindBranch (runCullC . k))
   eff (R (L Empty))      = empty
@@ -113,9 +109,6 @@ newtype OnceC f m a = OnceC { runOnceC :: CullC (AltC f m) a }
 
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (OnceC f m)
-
-instance Applicative f => MonadTrans (OnceC f) where
-  lift m = OnceC (CullC (ReaderC (const (AltC (pure . Pure <$> m)))))
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   eff = OnceC . eff . R . R . handleCoercible

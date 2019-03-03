@@ -14,7 +14,6 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 data Reader r m k
@@ -78,9 +77,6 @@ instance MonadIO m => MonadIO (ReaderC r m) where
   liftIO = ReaderC . const . liftIO
 
 instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
-
-instance MonadTrans (ReaderC r) where
-  lift = ReaderC . const
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))

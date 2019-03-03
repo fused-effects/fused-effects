@@ -13,7 +13,6 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), (<=<))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 data Error exc m k
@@ -78,9 +77,6 @@ instance MonadFail m => MonadFail (ErrorC e m) where
   fail s = ErrorC (fail s)
 
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
-
-instance MonadTrans (ErrorC e) where
-  lift m = ErrorC (Right <$> m)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
   eff (L (Throw e))     = ErrorC (pure (Left e))

@@ -12,7 +12,6 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
 import Data.Coerce
 
 newtype Lift sig (m :: * -> *) k = Lift { unLift :: sig k }
@@ -38,9 +37,6 @@ sendM = send . Lift . fmap pure
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
-
-instance MonadTrans LiftC where
-  lift = LiftC
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
   eff = LiftC . (>>= runLiftC) . unLift

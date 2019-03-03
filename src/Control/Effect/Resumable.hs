@@ -18,7 +18,6 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
 import Data.Coerce
 import Data.Functor.Classes
 
@@ -88,7 +87,7 @@ runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
 runResumable = runError . runResumableC
 
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   eff (L (Resumable err _)) = ResumableC (throwError (SomeError err))
@@ -111,13 +110,10 @@ runResumableWith with = runReader (Handler with) . runResumableWithC
 newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
-instance MonadTrans (ResumableWithC err) where
-  lift m = ResumableWithC (lift m)
-
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
 instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
-  eff (L (Resumable err k)) = ResumableWithC ask >>= lift . flip runHandler err >>= k
+  eff (L (Resumable err k)) = ResumableWithC (ReaderC (\ handler -> runHandler handler err)) >>= k
   eff (R other)             = ResumableWithC (eff (R (handleCoercible other)))
 
 
