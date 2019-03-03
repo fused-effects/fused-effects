@@ -79,6 +79,7 @@ test-suite doctest
   main-is:             Doctest.hs
   build-depends:       base >=4.9 && <4.13
                      , doctest >=0.7 && <1.0
+                     , fused-effects
   hs-source-dirs:      test
   default-language:    Haskell2010
 
