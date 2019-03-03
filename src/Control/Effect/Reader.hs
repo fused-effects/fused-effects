@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Reader
 ( Reader(..)
 , ask
@@ -8,14 +8,13 @@ module Control.Effect.Reader
 , ReaderC(..)
 ) where
 
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import qualified Control.Monad.Trans.Reader as MT
 import Prelude hiding (fail)
 
 data Reader r m k
@@ -56,15 +55,37 @@ local f m = send (Local f m pure)
 --
 --   prop> run (runReader a (pure b)) == b
 runReader :: r -> ReaderC r m a -> m a
-runReader r = flip MT.runReaderT r . runReaderC
+runReader = flip runReaderC
 
-newtype ReaderC r m a = ReaderC { runReaderC :: MT.ReaderT r m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
+newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
+  deriving (Functor)
+
+instance Applicative m => Applicative (ReaderC r m) where
+  pure = ReaderC . const . pure
+  ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
+
+instance Alternative m => Alternative (ReaderC r m) where
+  empty = ReaderC (const empty)
+  ReaderC l <|> ReaderC r = ReaderC (liftA2 (<|>) l r)
+
+instance Monad m => Monad (ReaderC r m) where
+  ReaderC a >>= f = ReaderC (\ r -> a r >>= runReader r . f)
+
+instance MonadFail m => MonadFail (ReaderC r m) where
+  fail = ReaderC . const . fail
+
+instance MonadIO m => MonadIO (ReaderC r m) where
+  liftIO = ReaderC . const . liftIO
+
+instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
+
+instance MonadTrans (ReaderC r) where
+  lift = ReaderC . const
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
-  eff (L (Ask       k)) = ReaderC MT.ask >>= k
-  eff (L (Local f m k)) = ReaderC (MT.local f (runReaderC m)) >>= k
-  eff (R other)         = ReaderC (MT.ReaderT (\ r -> eff (handlePure (runReader r) other)))
+  eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
+  eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
+  eff (R other)         = ReaderC (\ r -> eff (handlePure (runReader r) other))
 
 
 -- $setup

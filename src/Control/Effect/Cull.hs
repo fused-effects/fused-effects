@@ -17,7 +17,6 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import qualified Control.Monad.Trans.Reader as MT
 import Prelude hiding (fail)
 
 -- | 'Cull' effects are used with 'NonDet' to provide control over branching.
@@ -74,7 +73,7 @@ instance (Alternative m, Monad m) => Monad (CullC m) where
   CullC m >>= f = CullC (m >>= \case
     None e    -> pure (None e)
     Pure a    -> runCullC (f a)
-    Alt m1 m2 -> ReaderC (MT.ReaderT (\ cull -> let k = runReader cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k))))
+    Alt m1 m2 -> ReaderC (\ cull -> let k = runReader cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
 
 instance (Alternative m, MonadFail m) => MonadFail (CullC m) where
   fail s = CullC (fail s)
@@ -116,7 +115,7 @@ deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversabl
 deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (OnceC f m)
 
 instance Applicative f => MonadTrans (OnceC f) where
-  lift m = OnceC (CullC (ReaderC (MT.ReaderT (const (AltC (pure . Pure <$> m))))))
+  lift m = OnceC (CullC (ReaderC (const (AltC (pure . Pure <$> m)))))
 
 instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
   eff = OnceC . eff . R . R . handleCoercible
