@@ -3,7 +3,6 @@ module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
 , runNonDet
-, runListAlt
 , NonDetC(..)
 , Branch(..)
 , branch
@@ -77,9 +76,6 @@ runBranch f = branch f pure (<|>)
 --   prop> run (runNonDet (pure a)) == Just a
 runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDet (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
-
-runListAlt :: Alternative m => NonDetC m a -> m a
-runListAlt (NonDetC m) = m ((<|>) . pure) empty
 
 newtype NonDetC m a = NonDetC { runNonDetC :: forall b . (a -> m b -> m b) -> m b -> m b }
   deriving (Functor)

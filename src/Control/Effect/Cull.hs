@@ -45,7 +45,7 @@ cull m = send (Cull m pure)
 --
 --   prop> run (runNonDet (runCull (pure a <|> pure b))) == [a, b]
 runCull :: Alternative m => CullC m a -> m a
-runCull = runListAlt . runReader False . runCullC
+runCull (CullC m) = runNonDetC (runReader False m) ((<|>) . pure) empty
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
