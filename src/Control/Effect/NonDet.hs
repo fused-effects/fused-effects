@@ -70,25 +70,6 @@ runBranch f = branch f pure (<|>)
 {-# INLINE runBranch #-}
 
 
-data BTree a = Nil | Leaf a | Branch (BTree a) (BTree a)
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-instance Applicative BTree where
-  pure = Leaf
-  Nil          <*> _ = Nil
-  Leaf f       <*> a = fmap f a
-  Branch f1 f2 <*> a = Branch (f1 <*> a) (f2 <*> a)
-
-instance Alternative BTree where
-  empty = Nil
-  (<|>) = Branch
-
-instance Monad BTree where
-  Nil          >>= _ = Nil
-  Leaf a       >>= f = f a
-  Branch a1 a2 >>= f = Branch (a1 >>= f) (a2 >>= f)
-
-
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
 --   Using '[]' as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unlike 'runNonDetOnce', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
