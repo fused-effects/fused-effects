@@ -60,7 +60,7 @@ instance (Alternative m, Carrier sig m) => Alternative (CullC m) where
 instance (Alternative m, Carrier sig m) => MonadPlus (CullC m)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
-  eff (L (Cull m k))     = CullC (local (const True) (runCullC m) >>= runCullC . k)
+  eff (L (Cull m k))     = CullC (local (const True) (runCullC m)) >>= k
   eff (R (L Empty))      = empty
   eff (R (L (Choose k))) = k True <|> k False
   eff (R (R other))      = CullC (eff (R (R (handleCoercible other))))
