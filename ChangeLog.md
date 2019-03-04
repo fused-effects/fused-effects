@@ -7,6 +7,8 @@
   This is a backwards-incompatible change to any code mentioning `Eff`. For example, handlers can simply remove the `Eff` wrapping the carrier type & any use of `interpret`. As above, we also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
 - Removes `handleEither`, `handleReader`, `handleState`, `handleSum`, and `handleTraversable` in favour of composing carrier types directly.
   This is a backwards-incompatible change for `Carrier` instances making use of these helpers. Instead, carriers can be composed from other carriers and `eff` defined with `handleCoercible`; and other definitions can use `handlePure` & `handle` directly.
+- Renames `Control.Effect.Void`, `Void`, and `VoidC` to `Control.Effect.Pure`, `Pure`, and `PureC` respectively.
+  This is a backwards-incompatible change for code mentioning `VoidC`; it should be updated to reference `PureC` instead.
 
 # 0.2.0.1
 
