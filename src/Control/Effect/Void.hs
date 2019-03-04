@@ -6,7 +6,7 @@ module Control.Effect.Void
 ) where
 
 import Control.Effect.Carrier
-import Control.Effect.Internal
+import Data.Coerce
 
 data Void (m :: * -> *) k
   deriving (Functor)
@@ -20,22 +20,22 @@ instance Effect Void where
   {-# INLINE handle #-}
 
 
--- | Run an 'Eff' exhausted of effects to produce its final result value.
-run :: Eff VoidC a -> a
-run = runVoidC . interpret
+-- | Run an action exhausted of effects to produce its final result value.
+run :: VoidC a -> a
+run = runVoidC
 {-# INLINE run #-}
 
 newtype VoidC a = VoidC { runVoidC :: a }
 
 instance Functor VoidC where
-  fmap f (VoidC a) = VoidC (f a)
+  fmap = coerce
   {-# INLINE fmap #-}
 
 instance Applicative VoidC where
   pure = VoidC
   {-# INLINE pure #-}
 
-  VoidC f <*> VoidC a = VoidC (f a)
+  (<*>) = coerce
   {-# INLINE (<*>) #-}
 
 instance Monad VoidC where
@@ -46,8 +46,5 @@ instance Monad VoidC where
   {-# INLINE (>>=) #-}
 
 instance Carrier Void VoidC where
-  ret = VoidC
-  {-# INLINE ret #-}
-
   eff v = case v of {}
   {-# INLINE eff #-}

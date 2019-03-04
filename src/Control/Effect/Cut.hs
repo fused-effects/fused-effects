@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cut
 ( Cut(..)
 , cutfail
@@ -8,11 +8,14 @@ module Control.Effect.Cut
 , CutC(..)
 ) where
 
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
-import Control.Effect.Internal
 import Control.Effect.NonDet
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..), ap)
+import Control.Monad.Fail
+import Control.Monad.IO.Class
+import Prelude hiding (fail)
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
 data Cut m k
@@ -45,7 +48,7 @@ cutfail = send Cutfail
 --
 --   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) == [b]
 call :: (Carrier sig m, Member Cut sig) => m a -> m a
-call m = send (Call m ret)
+call m = send (Call m pure)
 {-# INLINE call #-}
 
 -- | Commit to the current branch, preventing backtracking within the nearest enclosing 'call' (if any) on failure.
@@ -58,32 +61,87 @@ cut = pure () <|> cutfail
 {-# INLINE cut #-}
 
 
--- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically 'Eff' carrying a 'NonDet' effect).
+-- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for a 'NonDet' effect).
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
-runCut :: (Alternative m, Carrier sig m, Effect sig, Monad m) => Eff (CutC m) a -> m a
-runCut = (>>= runBranch (const empty)) . runCutC . interpret
+runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
+runCut = (>>= runBranch (const empty)) . runCutC' . runCod (CutC' . pure . Pure) . runCutC
 
-newtype CutC m a = CutC { runCutC :: m (Branch m Bool a) }
+newtype CutC m a = CutC { runCutC :: Cod (CutC' m) a }
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance (Alternative m, Carrier sig m, Effect sig, Monad m) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
-  ret = CutC . ret . Pure
-  {-# INLINE ret #-}
+instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) where
+  empty = send Empty
+  l <|> r = send (Choose (\ c -> if c then l else r))
 
-  eff = CutC . handleSum (handleSum
-    (eff . handle (Pure ()) (bindBranch (ret (None False)) runCutC))
-    (\case
-      Empty    -> ret (None True)
-      Choose k -> runCutC (k True) >>= branch (\ e -> if e then runCutC (k False) else ret (None False)) (\ a -> ret (Alt (ret a) (runCutC (k False) >>= runBranch (const empty)))) (fmap ret . Alt)))
-    (\case
-      Cutfail  -> ret (None False)
-      Call m k -> runCutC m >>= bindBranch (ret (None True)) (runCutC . k))
-    where bindBranch :: (Alternative m, Carrier sig m, Monad m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
-          bindBranch cut bind = branch (\ e -> if e then ret (None True) else cut) bind (\ a b -> ret (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
+instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CutC m)
+
+instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
+  eff = CutC . eff . handleCoercible
+
+
+newtype Cod m a = Cod { unCod :: forall b . (a -> m b) -> m b }
+  deriving (Functor)
+
+runCod :: (a -> m b) -> Cod m a -> m b
+runCod = flip unCod
+
+instance Applicative (Cod m) where
+  pure a = Cod (\ k -> k a)
+  (<*>) = ap
+
+instance Monad (Cod m) where
+  Cod a >>= f = Cod (\ k -> a (runCod k . f))
+
+instance MonadFail m => MonadFail (Cod m) where
+  fail s = Cod (\ _ -> fail s)
+
+instance MonadIO m => MonadIO (Cod m) where
+  liftIO io = Cod (\ k -> liftIO io >>= k)
+
+instance Carrier sig m => Carrier sig (Cod m) where
+  eff op = Cod (\ k -> eff (hmap (runCod pure) (fmap' (runCod k) op)))
+
+
+newtype CutC' m a = CutC' { runCutC' :: m (Branch m Bool a) }
+  deriving (Functor)
+
+instance Alternative m => Applicative (CutC' m) where
+  pure = CutC' . pure . Pure
+  CutC' f <*> CutC' a = CutC' (liftA2 (<*>) f a)
+
+instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC' m) where
+  empty = send Empty
+  l <|> r = send (Choose (\ c -> if c then l else r))
+
+instance (Alternative m, Monad m) => Monad (CutC' m) where
+  CutC' m >>= f = CutC' (m >>= \case
+    None e    -> pure (None e)
+    Pure a    -> runCutC' (f a)
+    Alt m1 m2 -> let k = runCutC' . f in (m1 >>= k) <|> (m2 >>= k))
+
+instance (Alternative m, MonadFail m) => MonadFail (CutC' m) where
+  fail s = CutC' (fail s)
+
+instance (Alternative m, MonadIO m) => MonadIO (CutC' m) where
+  liftIO io = CutC' (Pure <$> liftIO io)
+
+instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CutC' m)
+
+instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC' m) where
+  eff (L Cutfail)        = CutC' (pure (None False))
+  eff (L (Call m k))     = CutC' (runCutC' m >>= bindBranch (pure (None True)) (runCutC' . k))
+  eff (R (L Empty))      = CutC' (pure (None True))
+  eff (R (L (Choose k))) = CutC' (runCutC' (k True) >>= branch (\ e -> if e then runCutC' (k False) else pure (None False)) (\ a -> pure (Alt (pure a) (runCutC' (k False) >>= runBranch (const empty)))) (fmap pure . Alt))
+  eff (R (R other))      = CutC' (eff (handle (Pure ()) (bindBranch (pure (None False)) runCutC') other))
   {-# INLINE eff #-}
+
+bindBranch :: (Alternative m, Carrier sig m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
+bindBranch cut bind = branch (\ e -> if e then pure (None True) else cut) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
 
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Cull
 -- >>> import Control.Effect.Void

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error
 ( Error(..)
 , throwError
@@ -7,10 +7,13 @@ module Control.Effect.Error
 , ErrorC(..)
 ) where
 
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Effect.Internal
-import Control.Monad ((<=<))
+import Control.Monad (MonadPlus(..), (<=<))
+import Control.Monad.Fail
+import Control.Monad.IO.Class
+import Prelude hiding (fail)
 
 data Error exc m k
   = Throw exc
@@ -44,22 +47,41 @@ throwError = send . Throw
 --   prop> run (runError (throwError a `catchError` pure)) == Right @Int @Int a
 --   prop> run (runError (throwError a `catchError` (throwError @Int))) == Left @Int @Int a
 catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
-catchError m h = send (Catch m h ret)
+catchError m h = send (Catch m h pure)
 
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runError (pure a)) == Right @Int @Int a
-runError :: forall exc sig m a . (Carrier sig m, Effect sig, Monad m) => Eff (ErrorC exc m) a -> m (Either exc a)
-runError = runErrorC . interpret
+runError :: ErrorC exc m a -> m (Either exc a)
+runError = runErrorC
 
 newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
+  deriving (Functor)
 
-instance (Carrier sig m, Effect sig, Monad m) => Carrier (Error e :+: sig) (ErrorC e m) where
-  ret a = ErrorC (pure (Right a))
-  eff = ErrorC . handleSum (eff . handleEither runErrorC) (\case
-    Throw e     -> pure (Left e)
-    Catch m h k -> runErrorC m >>= either (either (pure . Left) (runErrorC . k) <=< runErrorC . h) (runErrorC . k))
+instance Applicative m => Applicative (ErrorC e m) where
+  pure a = ErrorC (pure (Right a))
+  ErrorC f <*> ErrorC a = ErrorC (liftA2 (<*>) f a)
+
+instance Alternative m => Alternative (ErrorC e m) where
+  empty = ErrorC empty
+  ErrorC l <|> ErrorC r = ErrorC (l <|> r)
+
+instance Monad m => Monad (ErrorC e m) where
+  ErrorC a >>= f = ErrorC (a >>= either (pure . Left) (runError . f))
+
+instance MonadIO m => MonadIO (ErrorC e m) where
+  liftIO io = ErrorC (Right <$> liftIO io)
+
+instance MonadFail m => MonadFail (ErrorC e m) where
+  fail s = ErrorC (fail s)
+
+instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
+
+instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
+  eff (L (Throw e))     = ErrorC (pure (Left e))
+  eff (L (Catch m h k)) = ErrorC (runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k))
+  eff (R other)         = ErrorC (eff (handle (Right ()) (either (pure . Left) runError) other))
 
 
 -- $setup

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 module Teletype where
 
@@ -6,7 +6,9 @@ import Prelude hiding (read)
 
 import Control.Effect
 import Control.Effect.Carrier
+import Control.Effect.State
 import Control.Effect.Sum
+import Control.Effect.Writer
 import Control.Monad.IO.Class
 import Data.Coerce
 import Test.Hspec
@@ -15,13 +17,13 @@ import Test.Hspec.QuickCheck
 spec :: Spec
 spec = describe "teletype" $ do
   prop "reads" $
-    \ line -> run (runTeletypeRet [line] read) `shouldBe` (([], []), line)
+    \ line -> run (runTeletypeRet [line] read) `shouldBe` ([], ([], line))
 
   prop "writes" $
-    \ input output -> run (runTeletypeRet input (write output)) `shouldBe` ((input, [output]), ())
+    \ input output -> run (runTeletypeRet input (write output)) `shouldBe` ([output], (input, ()))
 
   prop "writes multiple things" $
-    \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) `shouldBe` ((input, [output1, output2]), ())
+    \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) `shouldBe` ([output1, output2], (input, ()))
 
 data Teletype (m :: * -> *) k
   = Read (String -> k)
@@ -37,39 +39,35 @@ instance Effect Teletype where
   handle state handler (Write s k) = Write s (handler (k <$ state))
 
 read :: (Member Teletype sig, Carrier sig m) => m String
-read = send (Read ret)
+read = send (Read pure)
 
 write :: (Member Teletype sig, Carrier sig m) => String -> m ()
-write s = send (Write s (ret ()))
+write s = send (Write s (pure ()))
 
 
-runTeletypeIO :: (MonadIO m, Carrier sig m) => Eff (TeletypeIOC m) a -> m a
-runTeletypeIO = runTeletypeIOC . interpret
+runTeletypeIO :: TeletypeIOC m a -> m a
+runTeletypeIO = runTeletypeIOC
 
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
-  ret = pure
-  eff = handleSum (TeletypeIOC . eff . handleCoercible) (\case
-    Read    k -> liftIO getLine      >>= k
-    Write s k -> liftIO (putStrLn s) >>  k)
+  eff (L (Read    k)) = liftIO getLine      >>= k
+  eff (L (Write s k)) = liftIO (putStrLn s) >>  k
+  eff (R other)       = TeletypeIOC (eff (handleCoercible other))
 
 
-runTeletypeRet :: (Carrier sig m, Effect sig, Monad m) => [String] -> Eff (TeletypeRetC m) a -> m (([String], [String]), a)
-runTeletypeRet s m = runTeletypeRetC (interpret m) s
+runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
+runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 
-newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: [String] -> m (([String], [String]), a) }
+newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
+  deriving (Applicative, Functor, Monad)
 
-instance (Monad m, Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
-  ret a = TeletypeRetC (\ i -> ret ((i, []), a))
-  eff op = TeletypeRetC (\ i -> handleSum (eff . handle ((i, []), ()) mergeResults) (\case
-    Read k -> case i of
-      []  -> runTeletypeRetC (k "") []
-      h:t -> runTeletypeRetC (k h)  t
-    Write s k -> do
-      ((i, out), a) <- runTeletypeRetC k i
-      pure ((i, s:out), a)) op)
-    where mergeResults ((i, o), m) = do
-            ((i', o'), a) <- runTeletypeRetC m i
-            pure ((i', o ++ o'), a)
+instance (Carrier sig m, Effect sig) => Carrier (Teletype :+: sig) (TeletypeRetC m) where
+  eff (L (Read    k)) = do
+    i <- TeletypeRetC get
+    case i of
+      []  -> k ""
+      h:t -> TeletypeRetC (put t) *> k h
+  eff (L (Write s k)) = TeletypeRetC (tell [s]) *> k
+  eff (R other)       = TeletypeRetC (eff (R (R (handleCoercible other))))

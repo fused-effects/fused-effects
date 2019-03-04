@@ -1,17 +1,12 @@
-{-# LANGUAGE DefaultSignatures, FunctionalDependencies, RankNTypes #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, UndecidableInstances #-}
 module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
 , Carrier(..)
 , handlePure
 , handleCoercible
-, handleReader
-, handleState
-, handleEither
-, handleTraversable
 ) where
 
-import Control.Monad (join)
 import Data.Coerce
 
 class HFunctor h where
@@ -40,13 +35,10 @@ class HFunctor sig => Effect sig where
          -> sig n (n (f a))
 
 
--- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'ret' and 'eff' methods.
-class HFunctor sig => Carrier sig h | h -> sig where
-  -- | Wrap a return value.
-  ret :: a -> h a
-
+-- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
+class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
-  eff :: sig h (h a) -> h a
+  eff :: sig m (m a) -> m a
 
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
@@ -60,23 +52,3 @@ handlePure handler = hmap handler . fmap' handler
 handleCoercible :: (HFunctor sig, Coercible f g) => sig f (f a) -> sig g (g a)
 handleCoercible = handlePure coerce
 {-# INLINE handleCoercible #-}
-
--- | Thread a @Reader@-like carrier through an 'HFunctor'.
-handleReader :: HFunctor sig => r -> (forall x . f x -> r -> g x) -> sig f (f a) -> sig g (g a)
-handleReader r run = handlePure (flip run r)
-{-# INLINE handleReader #-}
-
--- | Thread a @State@-like carrier through an 'Effect'.
-handleState :: Effect sig => s -> (forall x . f x -> s -> g (s, x)) -> sig f (f a) -> sig g (g (s, a))
-handleState s run = handle (s, ()) (uncurry (flip run))
-{-# INLINE handleState #-}
-
--- | Thread a carrier producing 'Either's through an 'Effect'.
-handleEither :: (Carrier sig g, Effect sig) => (forall x . f x -> g (Either e x)) -> sig f (f a) -> sig g (g (Either e a))
-handleEither run = handle (Right ()) (either (ret . Left) run)
-{-# INLINE handleEither #-}
-
--- | Thread a carrier producing values in a 'Traversable' 'Monad' (e.g. '[]') through an 'Effect'.
-handleTraversable :: (Effect sig, Applicative g, Monad m, Traversable m) => (forall x . f x -> g (m x)) -> sig f (f a) -> sig g (g (m a))
-handleTraversable run = handle (pure ()) (fmap join . traverse run)
-{-# INLINE handleTraversable #-}

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, ExistentialQuantification, FlexibleContexts, FlexibleInstances, KindSignatures, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Parser
 ( spec
 ) where
@@ -7,7 +7,8 @@ import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.Cut
 import Control.Effect.NonDet
-import Control.Effect.Sum hiding (L)
+import Control.Effect.State
+import Control.Effect.Sum
 import Control.Monad (replicateM)
 import Data.Char
 import Data.Coerce
@@ -84,7 +85,7 @@ instance Effect Symbol where
   handle state handler = coerce . fmap (handler . (<$ state))
 
 satisfy :: (Carrier sig m, Member Symbol sig) => (Char -> Bool) -> m Char
-satisfy p = send (Satisfy p ret)
+satisfy p = send (Satisfy p pure)
 
 char :: (Carrier sig m, Member Symbol sig) => Char -> m Char
 char = satisfy . (==)
@@ -92,43 +93,41 @@ char = satisfy . (==)
 digit :: (Carrier sig m, Member Symbol sig) => m Char
 digit = satisfy isDigit
 
-parens :: (Applicative m, Carrier sig m, Member Symbol sig) => m a -> m a
+parens :: (Carrier sig m, Member Symbol sig) => m a -> m a
 parens m = char '(' *> m <* char ')'
 
 
-parse :: (Alternative m, Carrier sig m, Effect sig, Monad m) => String -> Eff (ParseC m) a -> m a
-parse input = (>>= exhaustive) . flip runParseC input . interpret
+parse :: (Alternative m, Monad m) => String -> ParseC m a -> m a
+parse input = (>>= exhaustive) . runState input . runParseC
   where exhaustive ("", a) = pure a
         exhaustive _       = empty
 
-newtype ParseC m a = ParseC { runParseC :: String -> m (String, a) }
+newtype ParseC m a = ParseC { runParseC :: StateC String m a }
+  deriving (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
-  ret a = ParseC (\ input -> ret (input, a))
-  {-# INLINE ret #-}
-
-  eff op = ParseC (\ input -> handleSum
-    (eff . handleState input runParseC)
-    (\ (Satisfy p k) -> case input of
-      c:cs | p c -> runParseC (k c) cs
-      _          -> empty)
-    op)
+  eff (L (Satisfy p k)) = do
+    input <- ParseC get
+    case input of
+      c:cs | p c -> ParseC (put cs) *> k c
+      _          -> empty
+  eff (R other)         = ParseC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
 
 
-expr :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig, Monad m) => m Int
+expr :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig) => m Int
 expr = do
   i <- term
   call ((i +) <$ char '+' <* cut <*> expr
     <|> pure i)
 
-term :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig, Monad m) => m Int
+term :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig) => m Int
 term = do
   i <- factor
   call ((i *) <$ char '*' <* cut <*> term
     <|> pure i)
 
-factor :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig, Monad m) => m Int
+factor :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig) => m Int
 factor
   =   read <$> some digit
   <|> parens expr

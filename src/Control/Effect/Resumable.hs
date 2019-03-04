@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
@@ -9,10 +9,15 @@ module Control.Effect.Resumable
 , ResumableWithC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.DeepSeq
 import Control.Effect.Carrier
-import Control.Effect.Internal
+import Control.Effect.Error
+import Control.Effect.Reader
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
+import Control.Monad.Fail
+import Control.Monad.IO.Class
 import Data.Coerce
 import Data.Functor.Classes
 
@@ -33,7 +38,7 @@ instance Effect (Resumable err) where
 --
 --   prop> run (runResumable (throwResumable (Identity a))) == Left (SomeError (Identity a))
 throwResumable :: (Member (Resumable err) sig, Carrier sig m) => err a -> m a
-throwResumable err = send (Resumable err ret)
+throwResumable err = send (Resumable err pure)
 
 
 -- | An error at some existentially-quantified type index.
@@ -64,7 +69,7 @@ instance Ord1 err => Ord (SomeError err) where
 --
 --   prop> show (SomeError (Identity a)) == "SomeError (Identity )"
 --   prop> show (SomeError (Const a)) == ("SomeError (Const " ++ showsPrec 11 a ")")
-instance (Show1 err) => Show (SomeError err) where
+instance Show1 err => Show (SomeError err) where
   showsPrec d (SomeError err) = showsUnaryWith (liftShowsPrec (const (const id)) (const id)) "SomeError" d err
 
 
@@ -78,16 +83,15 @@ instance NFData1 err => NFData (SomeError err) where
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runResumable (pure a)) == Right @(SomeError Identity) @Int a
-runResumable :: (Carrier sig m, Effect sig) => Eff (ResumableC err m) a -> m (Either (SomeError err) a)
-runResumable = runResumableC . interpret
+runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
+runResumable = runError . runResumableC
 
-newtype ResumableC err m a = ResumableC { runResumableC :: m (Either (SomeError err) a) }
+newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
-  ret a = ResumableC (ret (Right a))
-  eff = ResumableC . handleSum
-    (eff . handleEither runResumableC)
-    (\ (Resumable err _) -> ret (Left (SomeError err)))
+  eff (L (Resumable err _)) = ResumableC (throwError (SomeError err))
+  eff (R other)             = ResumableC (eff (R (handleCoercible other)))
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
@@ -98,22 +102,19 @@ instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (Resumab
 --
 --   prop> run (runResumableWith (\ (Err b) -> pure (1 + b)) (pure a)) == a
 --   prop> run (runResumableWith (\ (Err b) -> pure (1 + b)) (throwResumable (Err a))) == 1 + a
-runResumableWith :: (Carrier sig m, Monad m)
-                 => (forall x . err x -> m x)
-                 -> Eff (ResumableWithC err m) a
+runResumableWith :: (forall x . err x -> m x)
+                 -> ResumableWithC err m a
                  -> m a
-runResumableWith with = runResumableWithC with . interpret
+runResumableWith with = runReader (Handler with) . runResumableWithC
 
-newtype ResumableWithC err m a = ResumableWithC ((forall x . err x -> m x) -> m a)
+newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
-runResumableWithC :: (forall x . err x -> m x) -> ResumableWithC err m a -> m a
-runResumableWithC f (ResumableWithC m) = m f
+newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
-instance (Carrier sig m, Monad m) => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
-  ret a = ResumableWithC (const (ret a))
-  eff op = ResumableWithC (\ handler -> handleSum
-    (eff . handlePure (runResumableWithC handler))
-    (\ (Resumable err k) -> handler err >>= runResumableWithC handler . k) op)
+instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
+  eff (L (Resumable err k)) = ResumableWithC (ReaderC (\ handler -> runHandler handler err)) >>= k
+  eff (R other)             = ResumableWithC (eff (R (handleCoercible other)))
 
 
 -- $setup

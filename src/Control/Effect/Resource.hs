@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resource
 ( Resource(..)
 , bracket
@@ -9,10 +9,13 @@ module Control.Effect.Resource
 , ResourceC(..)
 ) where
 
+import           Control.Applicative (Alternative(..))
 import           Control.Effect.Carrier
-import           Control.Effect.Internal
+import           Control.Effect.Reader
 import           Control.Effect.Sum
 import qualified Control.Exception as Exc
+import           Control.Monad (MonadPlus(..))
+import           Control.Monad.Fail
 import           Control.Monad.IO.Class
 
 data Resource m k
@@ -44,7 +47,7 @@ bracket :: (Member Resource sig, Carrier sig m)
         -> (resource -> m any)  -- ^ computation to run last ("release resource")
         -> (resource -> m a)    -- ^ computation to run in-between
         -> m a
-bracket acquire release use = send (Resource acquire release use ret)
+bracket acquire release use = send (Resource acquire release use pure)
 
 -- | Like 'bracket', but only performs the final action if there was an
 -- exception raised by the in-between computation.
@@ -53,46 +56,48 @@ bracketOnError :: (Member Resource sig, Carrier sig m)
                -> (resource -> m any)  -- ^ computation to run last ("release resource")
                -> (resource -> m a)    -- ^ computation to run in-between
                -> m a
-bracketOnError acquire release use = send (OnError acquire release use ret)
+bracketOnError acquire release use = send (OnError acquire release use pure)
 
 -- | Like 'bracket', but for the simple case of one computation to run afterward.
-finally :: (Member Resource sig, Carrier sig m, Applicative m)
+finally :: (Member Resource sig, Carrier sig m)
         => m a -- ^ computation to run first
         -> m b -- ^ computation to run afterward (even if an exception was raised)
         -> m a
 finally act end = bracket (pure ()) (const end) (const act)
 
 -- | Like 'bracketOnError', but for the simple case of one computation to run afterward.
-onException :: (Member Resource sig, Carrier sig m, Applicative m)
+onException :: (Member Resource sig, Carrier sig m)
         => m a -- ^ computation to run first
         -> m b -- ^ computation to run afterward if an exception was raised
         -> m a
 onException act end = bracketOnError (pure ()) (const end) (const act)
 
-runResource :: (Carrier sig m, MonadIO m)
-            => (forall x . m x -> IO x)
-            -> Eff (ResourceC m) a
+runResource :: (forall x . m x -> IO x)
+            -> ResourceC m a
             -> m a
-runResource handler = runResourceC handler . interpret
+runResource handler = runReader (Handler handler) . runResourceC
 
-newtype ResourceC m a = ResourceC ((forall x . m x -> IO x) -> m a)
+newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
-runResourceC :: (forall x . m x -> IO x) -> ResourceC m a -> m a
-runResourceC handler (ResourceC m) = m handler
+newtype Handler m = Handler (forall x . m x -> IO x)
+
+runHandler :: Handler m -> ResourceC m a -> IO a
+runHandler h@(Handler handler) = handler . runReader h . runResourceC
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
-  ret a = ResourceC (const (ret a))
-  eff op = ResourceC (\ handler -> handleSum
-    (eff . handlePure (runResourceC handler))
-    (\case
-        Resource acquire release use k -> liftIO (Exc.bracket
-                                                    (handler (runResourceC handler acquire))
-                                                    (handler . runResourceC handler . release)
-                                                    (handler . runResourceC handler . use))
-                                            >>= runResourceC handler . k
-        OnError acquire release use k -> liftIO (Exc.bracketOnError
-                                                    (handler (runResourceC handler acquire))
-                                                    (handler . runResourceC handler . release)
-                                                    (handler . runResourceC handler . use))
-                                            >>= runResourceC handler . k
-    ) op)
+  eff (L (Resource acquire release use k)) = do
+    handler <- ResourceC ask
+    a <- liftIO (Exc.bracket
+      (runHandler handler acquire)
+      (runHandler handler . release)
+      (runHandler handler . use))
+    k a
+  eff (L (OnError  acquire release use k)) = do
+    handler <- ResourceC ask
+    a <- liftIO (Exc.bracketOnError
+      (runHandler handler acquire)
+      (runHandler handler . release)
+      (runHandler handler . use))
+    k a
+  eff (R other)                            = ResourceC (eff (R (handleCoercible other)))
