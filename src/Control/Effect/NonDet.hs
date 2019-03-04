@@ -5,7 +5,7 @@ module Control.Effect.NonDet
 , runNonDet
 , runListAll
 , runListAlt
-, ListC(..)
+, NonDetC(..)
 , Branch(..)
 , branch
 , runBranch
@@ -76,44 +76,44 @@ runBranch f = branch f pure (<|>)
 --
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
-runNonDet :: (Alternative f, Applicative m) => ListC m a -> m (f a)
+runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDet = runListAll
 
 
-runListAll :: (Alternative f, Applicative m) => ListC m a -> m (f a)
-runListAll (ListC m) = m (fmap . (<|>) . pure) (pure empty)
+runListAll :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
+runListAll (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
 
-runListAlt :: Alternative m => ListC m a -> m a
-runListAlt (ListC m) = m ((<|>) . pure) empty
+runListAlt :: Alternative m => NonDetC m a -> m a
+runListAlt (NonDetC m) = m ((<|>) . pure) empty
 
-newtype ListC m a = ListC { runListC :: forall b . (a -> m b -> m b) -> m b -> m b }
+newtype NonDetC m a = NonDetC { runNonDetC :: forall b . (a -> m b -> m b) -> m b -> m b }
   deriving (Functor)
 
-instance Applicative (ListC m) where
-  pure a = ListC (\ cons -> cons a)
-  ListC f <*> ListC a = ListC $ \ cons ->
+instance Applicative (NonDetC m) where
+  pure a = NonDetC (\ cons -> cons a)
+  NonDetC f <*> NonDetC a = NonDetC $ \ cons ->
     f (\ f' -> a (cons . f'))
 
-instance Alternative (ListC m) where
-  empty = ListC (\ _ nil -> nil)
-  ListC l <|> ListC r = ListC $ \ cons -> l cons . r cons
+instance Alternative (NonDetC m) where
+  empty = NonDetC (\ _ nil -> nil)
+  NonDetC l <|> NonDetC r = NonDetC $ \ cons -> l cons . r cons
 
-instance Monad (ListC m) where
-  ListC a >>= f = ListC $ \ cons ->
-    a (\ a' -> runListC (f a') cons)
+instance Monad (NonDetC m) where
+  NonDetC a >>= f = NonDetC $ \ cons ->
+    a (\ a' -> runNonDetC (f a') cons)
 
-instance MonadFail m => MonadFail (ListC m) where
-  fail s = ListC (\ _ _ -> fail s)
+instance MonadFail m => MonadFail (NonDetC m) where
+  fail s = NonDetC (\ _ _ -> fail s)
 
-instance MonadIO m => MonadIO (ListC m) where
-  liftIO io = ListC (\ cons nil -> liftIO io >>= flip cons nil)
+instance MonadIO m => MonadIO (NonDetC m) where
+  liftIO io = NonDetC (\ cons nil -> liftIO io >>= flip cons nil)
 
-instance MonadPlus (ListC m)
+instance MonadPlus (NonDetC m)
 
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other) = ListC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runListAll) other) >>= foldr cons nil
+  eff (R other) = NonDetC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runListAll) other) >>= foldr cons nil
 
 
 -- $setup

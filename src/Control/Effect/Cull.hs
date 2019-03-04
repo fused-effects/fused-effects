@@ -47,15 +47,15 @@ cull m = send (Cull m pure)
 runCull :: Alternative m => CullC m a -> m a
 runCull = runListAlt . runReader False . runCullC
 
-newtype CullC m a = CullC { runCullC :: ReaderC Bool (ListC m) a }
+newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 instance (Alternative m, Carrier sig m) => Alternative (CullC m) where
   empty = CullC empty
-  l <|> r = CullC $ ReaderC $ \ cull -> ListC $ \ cons nil -> do
-    runListC (runReader cull (runCullC l))
+  l <|> r = CullC $ ReaderC $ \ cull -> NonDetC $ \ cons nil -> do
+    runNonDetC (runReader cull (runCullC l))
       (\ a as -> cons a (if cull then nil else as))
-      (runListC (runReader cull (runCullC r)) cons nil)
+      (runNonDetC (runReader cull (runCullC r)) cons nil)
 
 instance (Alternative m, Carrier sig m) => MonadPlus (CullC m)
 
@@ -76,7 +76,7 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet 
 runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig) => OnceC m a -> m (f a)
 runNonDetOnce = runNonDet . runCull . cull . runOnceC
 
-newtype OnceC m a = OnceC { runOnceC :: CullC (ListC m) a }
+newtype OnceC m a = OnceC { runOnceC :: CullC (NonDetC m) a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 deriving instance (Carrier sig m, Effect sig) => Alternative (OnceC m)
