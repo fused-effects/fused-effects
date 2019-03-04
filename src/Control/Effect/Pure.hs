@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveFunctor, EmptyCase, KindSignatures, MultiParamTypeClasses #-}
 module Control.Effect.Pure
-( Void
+( Pure
 , run
 , VoidC(..)
 ) where
@@ -8,14 +8,14 @@ module Control.Effect.Pure
 import Control.Effect.Carrier
 import Data.Coerce
 
-data Void (m :: * -> *) k
+data Pure (m :: * -> *) k
   deriving (Functor)
 
-instance HFunctor Void where
+instance HFunctor Pure where
   hmap _ v = case v of {}
   {-# INLINE hmap #-}
 
-instance Effect Void where
+instance Effect Pure where
   handle _ _ v = case v of {}
   {-# INLINE handle #-}
 
@@ -45,6 +45,6 @@ instance Monad VoidC where
   VoidC a >>= f = f a
   {-# INLINE (>>=) #-}
 
-instance Carrier Void VoidC where
+instance Carrier Pure VoidC where
   eff v = case v of {}
   {-# INLINE eff #-}
