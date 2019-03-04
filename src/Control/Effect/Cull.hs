@@ -104,7 +104,7 @@ bindBranch bind a = do
 runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig) => OnceC m a -> m (f a)
 runNonDetOnce = runNonDet . runCull . cull . runOnceC
 
-newtype OnceC m a = OnceC { runOnceC :: CullC (BTreeC m) a }
+newtype OnceC m a = OnceC { runOnceC :: CullC (ListC m) a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 deriving instance (Carrier sig m, Effect sig) => Alternative (OnceC m)

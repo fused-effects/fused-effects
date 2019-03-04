@@ -98,8 +98,8 @@ instance Monad BTree where
 --
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
-runNonDet :: (Alternative f, Applicative m) => BTreeC m a -> m (f a)
-runNonDet = runBTreeAll
+runNonDet :: (Alternative f, Applicative m) => ListC m a -> m (f a)
+runNonDet = runListAll
 
 runBTreeAll :: (Alternative f, Applicative m) => BTreeC m a -> m (f a)
 runBTreeAll (BTreeC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
