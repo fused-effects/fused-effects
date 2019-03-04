@@ -3,7 +3,6 @@ module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
 , runNonDet
-, runListAll
 , runListAlt
 , NonDetC(..)
 , Branch(..)
@@ -77,11 +76,7 @@ runBranch f = branch f pure (<|>)
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
 runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
-runNonDet = runListAll
-
-
-runListAll :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
-runListAll (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
+runNonDet (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
 
 runListAlt :: Alternative m => NonDetC m a -> m a
 runListAlt (NonDetC m) = m ((<|>) . pure) empty
@@ -113,7 +108,7 @@ instance MonadPlus (NonDetC m)
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L Empty) = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other) = NonDetC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runListAll) other) >>= foldr cons nil
+  eff (R other) = NonDetC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runNonDet) other) >>= foldr cons nil
 
 
 -- $setup
