@@ -2,7 +2,7 @@
 module Control.Effect.Pure
 ( Pure
 , run
-, VoidC(..)
+, PureC(..)
 ) where
 
 import Control.Effect.Carrier
@@ -21,30 +21,30 @@ instance Effect Pure where
 
 
 -- | Run an action exhausted of effects to produce its final result value.
-run :: VoidC a -> a
-run = runVoidC
+run :: PureC a -> a
+run = runPureC
 {-# INLINE run #-}
 
-newtype VoidC a = VoidC { runVoidC :: a }
+newtype PureC a = PureC { runPureC :: a }
 
-instance Functor VoidC where
+instance Functor PureC where
   fmap = coerce
   {-# INLINE fmap #-}
 
-instance Applicative VoidC where
-  pure = VoidC
+instance Applicative PureC where
+  pure = PureC
   {-# INLINE pure #-}
 
   (<*>) = coerce
   {-# INLINE (<*>) #-}
 
-instance Monad VoidC where
+instance Monad PureC where
   return = pure
   {-# INLINE return #-}
 
-  VoidC a >>= f = f a
+  PureC a >>= f = f a
   {-# INLINE (>>=) #-}
 
-instance Carrier Pure VoidC where
+instance Carrier Pure PureC where
   eff v = case v of {}
   {-# INLINE eff #-}

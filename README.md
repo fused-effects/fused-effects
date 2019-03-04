@@ -138,7 +138,7 @@ example3 = run . runReader "hello" . runState 0 $ do
   put (length (list :: String))
 ```
 
-`run` is itself actually an effect handler for the `Void` effect, which has no operations and thus can only represent a final result value.
+`run` is itself actually an effect handler for the `Pure` effect, which has no operations and thus can only represent a final result value.
 
 Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for the `LiftC` carrier to lift `putStrLn` into the middle of our computation:
 
