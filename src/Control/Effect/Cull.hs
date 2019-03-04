@@ -77,10 +77,7 @@ runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig) => OnceC m a -> m (f
 runNonDetOnce = runNonDet . runCull . cull . runOnceC
 
 newtype OnceC m a = OnceC { runOnceC :: CullC (NonDetC m) a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
-
-deriving instance Carrier sig m => Alternative (OnceC m)
-deriving instance Carrier sig m => MonadPlus (OnceC m)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (OnceC m) where
   eff = OnceC . eff . R . R . handleCoercible
