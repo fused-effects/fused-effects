@@ -67,7 +67,10 @@ cut = pure () <|> cutfail
 runCut :: Alternative m => CutC m a -> m a
 runCut m = runCutC m ((<|>) . pure) empty empty
 
-newtype CutC m a = CutC { runCutC :: forall b . (a -> m b -> m b) -> m b -> m b -> m b }
+newtype CutC m a = CutC
+  { -- | A higher-order function receiving three parameters: a function to combine each solution with the rest of the solutions, an action to run when no results are produced (e.g. on 'empty'), and an action to run when no results are produced and backtrcking should not be attempted (e.g. on 'cutfail').
+    runCutC :: forall b . (a -> m b -> m b) -> m b -> m b -> m b
+  }
   deriving (Functor)
 
 runCutAll :: (Alternative f, Applicative m) => CutC m a -> m (f a)
