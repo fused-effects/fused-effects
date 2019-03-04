@@ -68,6 +68,7 @@ cut = pure () <|> cutfail
 runCut :: Alternative m => CutC m a -> m a
 runCut m = runCutC m ((<|>) . pure) empty empty
 
+-- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 runCutAll :: (Alternative f, Applicative m) => CutC m a -> m (f a)
 runCutAll (CutC m) = m (fmap . (<|>) . pure) (pure empty) (pure empty)
 
