@@ -3,9 +3,6 @@ module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
 , runNonDet
-, runBTreeAll
-, runBTreeAlt
-, BTreeC(..)
 , runListAll
 , runListAlt
 , ListC(..)
@@ -14,10 +11,10 @@ module Control.Effect.NonDet
 , runBranch
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Monad (MonadPlus(..), join)
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Data.Coerce
@@ -100,42 +97,6 @@ instance Monad BTree where
 --   prop> run (runNonDet (pure a)) == Just a
 runNonDet :: (Alternative f, Applicative m) => ListC m a -> m (f a)
 runNonDet = runListAll
-
-runBTreeAll :: (Alternative f, Applicative m) => BTreeC m a -> m (f a)
-runBTreeAll (BTreeC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
-
-runBTreeAlt :: Alternative m => BTreeC m a -> m a
-runBTreeAlt (BTreeC m) = m (<|>) pure empty
-
-newtype BTreeC m a = BTreeC { runBTreeC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b }
-  deriving (Functor)
-
-instance Applicative (BTreeC m) where
-  pure a = BTreeC $ \ _ pur _ -> pur a
-  BTreeC f <*> BTreeC a = BTreeC $ \ alt pur nil ->
-    f alt (\ f' -> a alt (pur . f') nil) nil
-
-instance Alternative (BTreeC m) where
-  empty = BTreeC $ \ _ _ nil -> nil
-  BTreeC l <|> BTreeC r = BTreeC $ \ alt pur nil ->
-    l alt (\ l' -> alt (pur l') (r alt pur nil)) nil
-
-instance Monad (BTreeC m) where
-  BTreeC a >>= f = BTreeC $ \ alt pur nil ->
-    a alt (\ a' -> runBTreeC (f a') alt pur nil) nil
-
-instance MonadFail m => MonadFail (BTreeC m) where
-  fail s = BTreeC (\ _ _ _ -> fail s)
-
-instance MonadIO m => MonadIO (BTreeC m) where
-  liftIO io = BTreeC (\ _ pur _ -> liftIO io >>= pur)
-
-instance MonadPlus (BTreeC m)
-
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BTreeC m) where
-  eff (L Empty)      = empty
-  eff (L (Choose k)) = k True <|> k False
-  eff (R other)      = BTreeC (\ alt pur nil -> eff (handle (Leaf ()) (fmap join . traverse runBTreeAll) other) >>= foldr (alt . pur) nil)
 
 
 runListAll :: (Alternative f, Applicative m) => ListC m a -> m (f a)
