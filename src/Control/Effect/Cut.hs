@@ -5,6 +5,7 @@ module Control.Effect.Cut
 , call
 , cut
 , runCut
+, runCutAll
 , CutC(..)
 ) where
 
