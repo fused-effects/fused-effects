@@ -1,6 +1,6 @@
 - Adds `Monad` instances for all carrier types.
 - Adds `Monad` as a superclass of `Carrier`, obviating the need for a lot of constraints.
-  This is a backwards-incompatible change, as any carriers users have defined now require `Monad` instances. Note that in many cases carriers can be composed out of existing carriers, and thus these can be derived using `-XGeneralizedNewtypeDeriving`. We also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
+  This is a backwards-incompatible change, as any carriers users have defined now require `Monad` instances. Note that in many cases carriers can be composed out of existing carriers and monad transformers, and thus these instances can often be derived using `-XGeneralizedNewtypeDeriving`. We also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
 - Removes `ret`.
   This is a backwards-incompatible change, but `pure` or `return` can be used instead.
 - Removes `Eff`, in favour of computing directly in the carriers. This enables the compiler to perform significant optimizations; see the benchmarks for details.
