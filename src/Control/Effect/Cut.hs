@@ -144,4 +144,4 @@ bindBranch cut bind = branch (\ e -> if e then pure (None True) else cut) bind (
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Cull
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure

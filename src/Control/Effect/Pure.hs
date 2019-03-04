@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor, EmptyCase, KindSignatures, MultiParamTypeClasses #-}
-module Control.Effect.Void
+module Control.Effect.Pure
 ( Void
 , run
 , VoidC(..)

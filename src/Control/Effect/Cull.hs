@@ -118,5 +118,5 @@ instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => C
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.NonDet
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Data.Foldable (asum)
