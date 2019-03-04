@@ -14,6 +14,7 @@
 - Rewrites `CutC` using an approach related to `NonDetC`, with the addition of a continuation to distinguish `empty` from `cutfail`.
 - Rewrites `CullC` using `ListC` and `ReaderC`.
 - Moves `OnceC` from `Control.Effect.NonDet` to `Control.Effect.Cull` to avoid cyclic dependencies.
+- Adds a `runCutAll` handler for `Cut` effects, returning a collection of all results.
 
 # 0.2.0.1
 
