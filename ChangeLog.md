@@ -1,9 +1,12 @@
 - Adds `Monad` instances for all carrier types.
-- Adds `MonadTrans` instances for almost all carrier types.
 - Adds `Monad` as a superclass of `Carrier`, obviating the need for a lot of constraints.
-- Removes `ret`; `pure` or `return` can be used instead.
+  This is a backwards-incompatible change, as any carriers users have defined now require `Monad` instances. Note that in many cases carriers can be composed out of existing carriers and monad transformers, and thus these instances can often be derived using `-XGeneralizedNewtypeDeriving`. We also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
+- Removes `ret`.
+  This is a backwards-incompatible change, but `pure` or `return` can be used instead.
 - Removes `Eff`, in favour of computing directly in the carriers. This enables the compiler to perform significant optimizations; see the benchmarks for details.
+  This is a backwards-incompatible change to any code mentioning `Eff`. For example, handlers can simply remove the `Eff` wrapping the carrier type & any use of `interpret`. As above, we also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
 - Removes `handleEither`, `handleReader`, `handleState`, `handleSum`, and `handleTraversable` in favour of composing carrier types directly.
+  This is a backwards-incompatible change for `Carrier` instances making use of these helpers. Instead, carriers can be composed from other carriers and `eff` defined with `handleCoercible`; and other definitions can use `handlePure` & `handle` directly.
 
 # 0.2.0.1
 

@@ -20,7 +20,6 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), join)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
 import Data.Coerce
 import Prelude hiding (fail)
 
@@ -133,9 +132,6 @@ instance MonadIO m => MonadIO (BTreeC m) where
 
 instance MonadPlus (BTreeC m)
 
-instance MonadTrans BTreeC where
-  lift m = BTreeC (\ _ pur _ -> m >>= pur)
-
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (BTreeC m) where
   eff (L Empty)      = empty
   eff (L (Choose k)) = k True <|> k False
@@ -171,9 +167,6 @@ instance MonadIO m => MonadIO (ListC m) where
   liftIO io = ListC (\ cons nil -> liftIO io >>= flip cons nil)
 
 instance MonadPlus (ListC m)
-
-instance MonadTrans ListC where
-  lift m = ListC (\ cons nil -> m >>= flip cons nil)
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (ListC m) where
   eff (L Empty) = empty

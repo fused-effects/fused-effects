@@ -17,7 +17,6 @@ import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))
 import           Control.Monad.Fail
 import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
 
 data Resource m k
   = forall resource any output . Resource (m resource) (resource -> m any) (resource -> m output) (output -> k)
@@ -85,9 +84,6 @@ newtype Handler m = Handler (forall x . m x -> IO x)
 
 runHandler :: Handler m -> ResourceC m a -> IO a
 runHandler h@(Handler handler) = handler . runReader h . runResourceC
-
-instance MonadTrans ResourceC where
-  lift m = ResourceC (lift m)
 
 instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
   eff (L (Resource acquire release use k)) = do

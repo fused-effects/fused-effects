@@ -17,7 +17,6 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
 import Data.Coerce
 import Prelude hiding (fail)
 
@@ -110,9 +109,6 @@ instance MonadIO m => MonadIO (StateC s m) where
   liftIO io = StateC (\ s -> (,) s <$> liftIO io)
 
 instance (Alternative m, Monad m) => MonadPlus (StateC s m)
-
-instance MonadTrans (StateC s) where
-  lift m = StateC (\ s -> (,) s <$> m)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   eff (L (Get   k)) = StateC (\ s -> runState s (k s))

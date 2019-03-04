@@ -1,4 +1,4 @@
 packages: fused-effects.cabal
 jobs: $ncpus
 package fused-effects
-  ghc-options: -Werror
+  ghc-options: -Werror -O0

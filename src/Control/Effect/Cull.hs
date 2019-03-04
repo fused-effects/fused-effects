@@ -16,8 +16,6 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import qualified Control.Monad.Trans.Reader as MT
 import Prelude hiding (fail)
 
 -- | 'Cull' effects are used with 'NonDet' to provide control over branching.
@@ -74,7 +72,7 @@ instance (Alternative m, Monad m) => Monad (CullC m) where
   CullC m >>= f = CullC (m >>= \case
     None e    -> pure (None e)
     Pure a    -> runCullC (f a)
-    Alt m1 m2 -> ReaderC (MT.ReaderT (\ cull -> let k = runReader cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k))))
+    Alt m1 m2 -> ReaderC (\ cull -> let k = runReader cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
 
 instance (Alternative m, MonadFail m) => MonadFail (CullC m) where
   fail s = CullC (fail s)
@@ -83,9 +81,6 @@ instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
   liftIO io = CullC (Pure <$> liftIO io)
 
 instance (Alternative m, Carrier sig m) => MonadPlus (CullC m)
-
-instance MonadTrans CullC where
-  lift m = CullC (lift (Pure <$> m))
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   eff (L (Cull m k))     = CullC (local (const True) (runCullC m) >>= bindBranch (runCullC . k))
@@ -114,9 +109,6 @@ newtype OnceC m a = OnceC { runOnceC :: CullC (BTreeC m) a }
 
 deriving instance (Carrier sig m, Effect sig) => Alternative (OnceC m)
 deriving instance (Carrier sig m, Effect sig) => MonadPlus (OnceC m)
-
-instance MonadTrans OnceC where
-  lift m = OnceC (CullC (ReaderC (MT.ReaderT (const (BTreeC (\ _ pur _ -> m >>= pur . Pure))))))
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (OnceC m) where
   eff = OnceC . eff . R . R . handleCoercible
