@@ -38,6 +38,7 @@ instance Effect NonDet where
 runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDet (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
 
+-- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in _Deriving Backtracking Monad Transformers_.
 newtype NonDetC m a = NonDetC { runNonDetC :: forall b . (a -> m b -> m b) -> m b -> m b }
   deriving (Functor)
 
