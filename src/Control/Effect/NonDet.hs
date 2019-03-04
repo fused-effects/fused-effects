@@ -63,9 +63,9 @@ instance MonadIO m => MonadIO (NonDetC m) where
 instance MonadPlus (NonDetC m)
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
-  eff (L Empty) = empty
+  eff (L Empty)      = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other) = NonDetC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runNonDet) other) >>= foldr cons nil
+  eff (R other)      = NonDetC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runNonDet) other) >>= foldr cons nil
 
 
 -- $setup
