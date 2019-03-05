@@ -18,6 +18,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Coerce
 import Data.Functor.Classes
 
@@ -109,6 +110,9 @@ runResumableWith with = runReader (Handler with) . runResumableWithC
 
 newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+
+instance MonadTrans (ResumableWithC err) where
+  lift = ResumableWithC . lift
 
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
