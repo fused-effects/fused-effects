@@ -64,6 +64,9 @@ runTraceByIgnoring = runTraceByIgnoringC
 newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
+instance MonadTrans TraceByIgnoringC where
+  lift = TraceByIgnoringC
+
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
   eff (L trace) = traceCont trace
   eff (R other) = TraceByIgnoringC (eff (handleCoercible other))
