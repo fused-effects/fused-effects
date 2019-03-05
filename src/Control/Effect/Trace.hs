@@ -17,6 +17,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Bifunctor (first)
 import Data.Coerce
 import System.IO
@@ -45,6 +46,9 @@ runTraceByPrinting = runTraceByPrintingC
 
 newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+
+instance MonadTrans TraceByPrintingC where
+  lift = TraceByPrintingC
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
   eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
