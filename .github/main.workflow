@@ -5,5 +5,5 @@ workflow "Build" {
 
 action "robrix/cabal-action@master" {
   uses = "robrix/cabal-action@master"
-  args = "new-build"
+  args = "new-update && cabal new-build"
 }
