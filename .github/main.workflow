@@ -1,6 +1,10 @@
 workflow "Build fused-effects" {
   on = "push"
-  resolves = ["Test", "Haddock"]
+  resolves = [
+    "Test",
+    "Haddock",
+    "Benchmark",
+  ]
 }
 
 action "Build" {
@@ -18,4 +22,10 @@ action "Haddock" {
   uses = "robrix/cabal-action@master"
   needs = ["Build"]
   args = "new-haddock"
+}
+
+action "Benchmark" {
+  uses = "robrix/cabal-action@master"
+  needs = ["Build"]
+  args = "new-build benchmark"
 }
