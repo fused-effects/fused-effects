@@ -1,9 +1,21 @@
-workflow "Build" {
+workflow "Build fused-effects" {
   on = "push"
-  resolves = ["robrix/cabal-action@master"]
+  resolves = ["Test", "Haddock"]
 }
 
-action "robrix/cabal-action@master" {
+action "Build" {
   uses = "robrix/cabal-action@master"
-  args = "new-update && cabal new-build"
+  args = "new-build"
+}
+
+action "Test" {
+  uses = "robrix/cabal-action@master"
+  args = "new-test"
+  needs = ["Build"]
+}
+
+action "Haddock" {
+  uses = "robrix/cabal-action@master"
+  needs = ["Build"]
+  args = "new-haddock"
 }
