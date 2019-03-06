@@ -9,7 +9,7 @@ workflow "Build fused-effects" {
 
 action "Build" {
   uses = "robrix/cabal-action@master"
-  args = "new-update && cabal new-build"
+  args = "new-build"
 }
 
 action "Test" {
