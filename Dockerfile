@@ -41,6 +41,7 @@ WORKDIR /usr/src/fused-effects
 
 COPY fused-effects.cabal .
 RUN cabal new-update
+RUN cabal new-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always
 RUN cabal new-build --only-dependencies
 
 COPY . .
