@@ -4,6 +4,4 @@
 
 set -eux
 
-cabal new-update
-
 sh -c "cabal $*"

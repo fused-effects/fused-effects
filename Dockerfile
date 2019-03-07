@@ -44,6 +44,10 @@ RUN cabal new-update
 RUN cabal new-build --only-dependencies
 
 COPY . .
-RUN cabal new-build
+RUN cabal new-build \
+    && cabal new-test \
+    && cabal new-haddock \
+    && cabal new-sdist \
+    && cabal check
 
 ENTRYPOINT ["./build.sh"]
