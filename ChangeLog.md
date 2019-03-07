@@ -7,6 +7,14 @@
   This is a backwards-incompatible change to any code mentioning `Eff`. For example, handlers can simply remove the `Eff` wrapping the carrier type & any use of `interpret`. As above, we also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
 - Removes `handleEither`, `handleReader`, `handleState`, `handleSum`, and `handleTraversable` in favour of composing carrier types directly.
   This is a backwards-incompatible change for `Carrier` instances making use of these helpers. Instead, carriers can be composed from other carriers and `eff` defined with `handleCoercible`; and other definitions can use `handlePure` & `handle` directly.
+- Replaces `AltC` with a new carrier, `NonDetC`, based on Ralf Hinze’s work in _[Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12)_.
+  This is a backwards-incompatible change. `AltC` was equivalent to the `ListT` monad transformer, and had the same well-known limitation to commutative monads. Therefore, the elimination of `Eff` required a more durable approach.
+- Removes `Branch`.
+  This is a backwards-incompatible change, but was necessitated by the difficulty of implementing correct `Applicative` & `Monad` instances for carriers which used it. Carriers which were employing `Branch` internally should be reimplemented using `NonDetC` or a similar approach; see `CutC` and `CullC` for examples.
+- Rewrites `CutC` using an approach related to `NonDetC`, with the addition of a continuation to distinguish `empty` from `cutfail`.
+- Rewrites `CullC` using `ListC` and `ReaderC`.
+- Moves `OnceC` from `Control.Effect.NonDet` to `Control.Effect.Cull` to avoid cyclic dependencies.
+- Adds a `runCutAll` handler for `Cut` effects, returning a collection of all results.
 
 # 0.2.0.1
 
