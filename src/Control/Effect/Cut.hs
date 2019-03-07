@@ -5,14 +5,15 @@ module Control.Effect.Cut
 , call
 , cut
 , runCut
+, runCutAll
 , CutC(..)
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Sum
-import Control.Monad (MonadPlus(..), ap)
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Prelude hiding (fail)
@@ -64,80 +65,47 @@ cut = pure () <|> cutfail
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for a 'NonDet' effect).
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) == Just a
-runCut :: (Alternative m, Carrier sig m) => CutC m a -> m a
-runCut = (>>= runBranch (const empty)) . runCutC' . runCod (CutC' . pure . Pure) . runCutC
+runCut :: Alternative m => CutC m a -> m a
+runCut m = runCutC m ((<|>) . pure) empty empty
 
-newtype CutC m a = CutC { runCutC :: Cod (CutC' m) a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+-- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
+runCutAll :: (Alternative f, Applicative m) => CutC m a -> m (f a)
+runCutAll (CutC m) = m (fmap . (<|>) . pure) (pure empty) (pure empty)
 
-instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC m) where
-  empty = send Empty
-  l <|> r = send (Choose (\ c -> if c then l else r))
-
-instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CutC m)
-
-instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
-  eff = CutC . eff . handleCoercible
-
-
-newtype Cod m a = Cod { unCod :: forall b . (a -> m b) -> m b }
+newtype CutC m a = CutC
+  { -- | A higher-order function receiving three parameters: a function to combine each solution with the rest of the solutions, an action to run when no results are produced (e.g. on 'empty'), and an action to run when no results are produced and backtrcking should not be attempted (e.g. on 'cutfail').
+    runCutC :: forall b . (a -> m b -> m b) -> m b -> m b -> m b
+  }
   deriving (Functor)
 
-runCod :: (a -> m b) -> Cod m a -> m b
-runCod = flip unCod
+instance Applicative (CutC m) where
+  pure a = CutC (\ cons nil _ -> cons a nil)
+  CutC f <*> CutC a = CutC $ \ cons nil fail ->
+    f (\ f' fs -> a (cons . f') fs fail) nil fail
 
-instance Applicative (Cod m) where
-  pure a = Cod (\ k -> k a)
-  (<*>) = ap
+instance Alternative (CutC m) where
+  empty = CutC (\ _ nil _ -> nil)
+  CutC l <|> CutC r = CutC (\ cons nil fail -> l cons (r cons nil fail) fail)
 
-instance Monad (Cod m) where
-  Cod a >>= f = Cod (\ k -> a (runCod k . f))
+instance Monad (CutC m) where
+  CutC a >>= f = CutC $ \ cons nil fail ->
+    a (\ a' as -> runCutC (f a') cons as fail) nil fail
 
-instance MonadFail m => MonadFail (Cod m) where
-  fail s = Cod (\ _ -> fail s)
+instance MonadFail m => MonadFail (CutC m) where
+  fail s = CutC (\ _ _ _ -> fail s)
 
-instance MonadIO m => MonadIO (Cod m) where
-  liftIO io = Cod (\ k -> liftIO io >>= k)
+instance MonadIO m => MonadIO (CutC m) where
+  liftIO io = CutC (\ cons nil _ -> liftIO io >>= flip cons nil)
 
-instance Carrier sig m => Carrier sig (Cod m) where
-  eff op = Cod (\ k -> eff (hmap (runCod pure) (fmap' (runCod k) op)))
+instance MonadPlus (CutC m)
 
-
-newtype CutC' m a = CutC' { runCutC' :: m (Branch m Bool a) }
-  deriving (Functor)
-
-instance Alternative m => Applicative (CutC' m) where
-  pure = CutC' . pure . Pure
-  CutC' f <*> CutC' a = CutC' (liftA2 (<*>) f a)
-
-instance (Alternative m, Carrier sig m, Effect sig) => Alternative (CutC' m) where
-  empty = send Empty
-  l <|> r = send (Choose (\ c -> if c then l else r))
-
-instance (Alternative m, Monad m) => Monad (CutC' m) where
-  CutC' m >>= f = CutC' (m >>= \case
-    None e    -> pure (None e)
-    Pure a    -> runCutC' (f a)
-    Alt m1 m2 -> let k = runCutC' . f in (m1 >>= k) <|> (m2 >>= k))
-
-instance (Alternative m, MonadFail m) => MonadFail (CutC' m) where
-  fail s = CutC' (fail s)
-
-instance (Alternative m, MonadIO m) => MonadIO (CutC' m) where
-  liftIO io = CutC' (Pure <$> liftIO io)
-
-instance (Alternative m, Carrier sig m, Effect sig) => MonadPlus (CutC' m)
-
-instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC' m) where
-  eff (L Cutfail)        = CutC' (pure (None False))
-  eff (L (Call m k))     = CutC' (runCutC' m >>= bindBranch (pure (None True)) (runCutC' . k))
-  eff (R (L Empty))      = CutC' (pure (None True))
-  eff (R (L (Choose k))) = CutC' (runCutC' (k True) >>= branch (\ e -> if e then runCutC' (k False) else pure (None False)) (\ a -> pure (Alt (pure a) (runCutC' (k False) >>= runBranch (const empty)))) (fmap pure . Alt))
-  eff (R (R other))      = CutC' (eff (handle (Pure ()) (bindBranch (pure (None False)) runCutC') other))
+instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
+  eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
+  eff (L (Call m k)) = CutC $ \ cons nil fail -> runCutC m (\ a as -> runCutC (k a) cons as fail) nil nil
+  eff (R (L Empty))      = empty
+  eff (R (L (Choose k))) = k True <|> k False
+  eff (R (R other)) = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
   {-# INLINE eff #-}
-
-bindBranch :: (Alternative m, Carrier sig m) => m (Branch m Bool a) -> (b -> m (Branch m Bool a)) -> Branch m Bool b -> m (Branch m Bool a)
-bindBranch cut bind = branch (\ e -> if e then pure (None True) else cut) bind (\ a b -> pure (Alt (a >>= bind >>= runBranch (const empty)) (b >>= bind >>= runBranch (const empty))))
 
 
 -- $setup
