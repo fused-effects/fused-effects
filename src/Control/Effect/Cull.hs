@@ -8,7 +8,7 @@ module Control.Effect.Cull
 , OnceC(..)
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Reader
@@ -44,55 +44,27 @@ cull m = send (Cull m pure)
 -- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
 --
 --   prop> run (runNonDet (runCull (pure a <|> pure b))) == [a, b]
-runCull :: (Alternative m, Carrier sig m) => CullC m a -> m a
-runCull = (>>= runBranch (const empty)) . runReader False . runCullC
+runCull :: Alternative m => CullC m a -> m a
+runCull (CullC m) = runNonDetC (runReader False m) ((<|>) . pure) empty
 
-newtype CullC m a = CullC { runCullC :: ReaderC Bool m (Branch m () a) }
-  deriving (Functor)
+newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance Alternative m => Applicative (CullC m) where
-  pure = CullC . pure . Pure
-  CullC f <*> CullC a = CullC (liftA2 (<*>) f a)
+instance Alternative (CullC m) where
+  empty = CullC empty
+  l <|> r = CullC $ ReaderC $ \ cull -> NonDetC $ \ cons nil -> do
+    runNonDetC (runReader cull (runCullC l))
+      (\ a as -> cons a (if cull then nil else as))
+      (runNonDetC (runReader cull (runCullC r)) cons nil)
 
-instance (Alternative m, Carrier sig m) => Alternative (CullC m) where
-  empty = CullC (pure (None ()))
-  l <|> r = CullC $ do
-    res <- runCullC l
-    case res of
-      None _ -> runCullC r
-      Pure a -> do
-        cull <- ask
-        if cull then
-          pure res
-        else
-          pure (Alt (pure a) (runReader cull (runCullC r) >>= runBranch (const empty)))
-      Alt _ _ -> pure res
+instance MonadPlus (CullC m)
 
-instance (Alternative m, Monad m) => Monad (CullC m) where
-  CullC m >>= f = CullC (m >>= \case
-    None e    -> pure (None e)
-    Pure a    -> runCullC (f a)
-    Alt m1 m2 -> ReaderC (\ cull -> let k = runReader cull . runCullC . f in (m1 >>= k) <|> (m2 >>= k)))
-
-instance (Alternative m, MonadFail m) => MonadFail (CullC m) where
-  fail s = CullC (fail s)
-
-instance (Alternative m, MonadIO m) => MonadIO (CullC m) where
-  liftIO io = CullC (Pure <$> liftIO io)
-
-instance (Alternative m, Carrier sig m) => MonadPlus (CullC m)
-
-instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
-  eff (L (Cull m k))     = CullC (local (const True) (runCullC m) >>= bindBranch (runCullC . k))
+instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
+  eff (L (Cull m k))     = CullC (local (const True) (runCullC m)) >>= k
   eff (R (L Empty))      = empty
   eff (R (L (Choose k))) = k True <|> k False
-  eff (R (R other))      = CullC (eff (R (handle (Pure ()) (bindBranch runCullC) other)))
+  eff (R (R other))      = CullC (eff (R (R (handleCoercible other))))
   {-# INLINE eff #-}
-
-bindBranch :: (Alternative m, Carrier sig m) => (b -> ReaderC Bool m (Branch m () a)) -> Branch m () b -> ReaderC Bool m (Branch m () a)
-bindBranch bind a = do
-  cull <- ask
-  branch (const (pure (None ()))) bind (\ a b -> pure (Alt (a >>= runReader cull . bind >>= runBranch (const empty)) (b >>= runReader cull . bind >>= runBranch (const empty)))) a
 
 
 -- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
@@ -101,16 +73,13 @@ bindBranch bind a = do
 --
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
 --   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => OnceC f m a -> m (f a)
+runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig) => OnceC m a -> m (f a)
 runNonDetOnce = runNonDet . runCull . cull . runOnceC
 
-newtype OnceC f m a = OnceC { runOnceC :: CullC (AltC f m) a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+newtype OnceC m a = OnceC { runOnceC :: CullC (NonDetC m) a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Alternative (OnceC f m)
-deriving instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => MonadPlus (OnceC f m)
-
-instance (Alternative f, Carrier sig m, Effect sig, Monad f, Traversable f) => Carrier (NonDet :+: sig) (OnceC f m) where
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (OnceC m) where
   eff = OnceC . eff . R . R . handleCoercible
 
 
