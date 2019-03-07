@@ -1,3 +1,6 @@
+
+## Backwards-incompatible changes
+
 - Adds `Monad` instances for all carrier types.
 - Adds `Monad` as a superclass of `Carrier`, obviating the need for a lot of constraints.
   This is a backwards-incompatible change, as any carriers users have defined now require `Monad` instances. Note that in many cases carriers can be composed out of existing carriers and monad transformers, and thus these instances can often be derived using `-XGeneralizedNewtypeDeriving`. We also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
@@ -11,6 +14,10 @@
   This is a backwards-incompatible change. `AltC` was equivalent to the `ListT` monad transformer, and had the same well-known limitation to commutative monads. Therefore, the elimination of `Eff` required a more durable approach.
 - Removes `Branch`.
   This is a backwards-incompatible change, but was necessitated by the difficulty of implementing correct `Applicative` & `Monad` instances for carriers which used it. Carriers which were employing `Branch` internally should be reimplemented using `NonDetC` or a similar approach; see `CutC` and `CullC` for examples.
+
+## Other changes
+
+- Adds a lazy `State` carrier to `Control.Effect.State`.
 - Rewrites `CutC` using an approach related to `NonDetC`, with the addition of a continuation to distinguish `empty` from `cutfail`.
 - Rewrites `CullC` using `ListC` and `ReaderC`.
 - Moves `OnceC` from `Control.Effect.NonDet` to `Control.Effect.Cull` to avoid cyclic dependencies.
