@@ -43,6 +43,4 @@ COPY . .
 RUN cabal new-update
 RUN cabal new-build --only-dependencies
 
-COPY build.sh /build.sh
-
-ENTRYPOINT ["/build.sh"]
+ENTRYPOINT ["./build.sh"]
