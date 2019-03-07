@@ -1,7 +1,5 @@
 FROM debian:stretch
 
-WORKDIR /usr/src/fused-effects
-
 LABEL "name"="Build fused-effects"
 LABEL "maintainer"="GitHub Actions <support+actions@github.com>"
 LABEL "version"="0.1.0"
@@ -39,8 +37,12 @@ RUN echo "deb http://downloads.haskell.org/debian stretch main" >> /etc/apt/sour
 RUN update-alternatives --install "/usr/bin/ld" "ld" "/usr/bin/ld.gold" 20 && \
     update-alternatives --install "/usr/bin/ld" "ld" "/usr/bin/ld.bfd" 10
 
+WORKDIR /usr/src/fused-effects
+
 COPY . .
 RUN cabal new-update
 RUN cabal new-build --only-dependencies
+
+COPY build.sh /build.sh
 
 ENTRYPOINT ["/build.sh"]
