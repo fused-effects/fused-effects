@@ -39,8 +39,11 @@ RUN update-alternatives --install "/usr/bin/ld" "ld" "/usr/bin/ld.gold" 20 && \
 
 WORKDIR /usr/src/fused-effects
 
-COPY . .
+COPY fused-effects.cabal .
 RUN cabal new-update
 RUN cabal new-build --only-dependencies
+
+COPY . .
+RUN cabal new-build
 
 ENTRYPOINT ["./build.sh"]

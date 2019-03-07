@@ -1,17 +1,9 @@
 workflow "Build fused-effects" {
   on = "push"
-  resolves = [
-    "Test",
-  ]
+  resolves = ["Build (not really)"]
 }
 
-action "Build" {
+action "Build (not really)" {
   uses = "./"
-  args = "new-build"
-}
-
-action "Test" {
-  uses = "./"
-  args = "new-test"
-  needs = ["Build"]
+  args = "new-build --help"
 }
