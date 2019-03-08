@@ -82,4 +82,4 @@ instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturnin
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure

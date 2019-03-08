@@ -97,7 +97,7 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) 
 -- >>> :seti -XFlexibleContexts
 -- >>> import System.Random
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Control.Effect.NonDet
 -- >>> newtype PureGen = PureGen Int deriving (Eq, Show)
 -- >>> instance RandomGen PureGen where next (PureGen i) = (i, PureGen i) ; split g = (g, g)
