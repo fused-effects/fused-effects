@@ -29,6 +29,7 @@ library
                      , Control.Effect.Fresh
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
+                     , Control.Effect.Pure
                      , Control.Effect.Random
                      , Control.Effect.Reader
                      , Control.Effect.Resource
@@ -36,7 +37,6 @@ library
                      , Control.Effect.State
                      , Control.Effect.Sum
                      , Control.Effect.Trace
-                     , Control.Effect.Void
                      , Control.Effect.Writer
   build-depends:       base >=4.9 && <4.13
                      , deepseq >=1.4.3 && <1.5

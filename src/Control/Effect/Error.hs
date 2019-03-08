@@ -92,4 +92,4 @@ instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) w
 -- >>> :seti -XFlexibleContexts
 -- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure

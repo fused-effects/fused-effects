@@ -114,5 +114,5 @@ instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (Wr
 -- >>> :seti -XFlexibleContexts
 -- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Data.Semigroup (Semigroup(..), Sum(..))

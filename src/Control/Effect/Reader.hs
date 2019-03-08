@@ -91,4 +91,4 @@ instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
