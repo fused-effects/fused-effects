@@ -12,6 +12,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Coerce
 import Prelude hiding (fail)
 
@@ -65,6 +66,9 @@ instance MonadIO m => MonadIO (NonDetC m) where
   liftIO io = NonDetC (\ cons nil -> liftIO io >>= flip cons nil)
 
 instance MonadPlus (NonDetC m)
+
+instance MonadTrans NonDetC where
+  lift m = NonDetC (\ cons nil -> m >>= flip cons nil)
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L Empty)      = empty
