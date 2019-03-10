@@ -1,6 +1,6 @@
 # A fast, flexible, fused effect system for Haskell
 
-[![Build Status](https://travis-ci.com/robrix/fused-effects.svg?branch=master)](https://travis-ci.com/robrix/fused-effects)
+[![Build Status](https://travis-ci.com/fused-effects/fused-effects.svg?branch=master)](https://travis-ci.com/fused-effects/fused-effects)
 
 - [Overview][]
   - [Algebraic effects][]
@@ -20,28 +20,28 @@
   - [Comparison to `mtl`][]
   - [Comparison to `freer-simple`][]
 
-[Overview]: https://github.com/robrix/fused-effects#overview
-[Algebraic effects]: https://github.com/robrix/fused-effects#algebraic-effects
-[Higher-order effects]: https://github.com/robrix/fused-effects#higher-order-effects
-[Fusion]: https://github.com/robrix/fused-effects#fusion
+[Overview]: https://github.com/fused-effects/fused-effects#overview
+[Algebraic effects]: https://github.com/fused-effects/fused-effects#algebraic-effects
+[Higher-order effects]: https://github.com/fused-effects/fused-effects#higher-order-effects
+[Fusion]: https://github.com/fused-effects/fused-effects#fusion
 
-[Usage]: https://github.com/robrix/fused-effects#usage
-[Using built-in effects]: https://github.com/robrix/fused-effects#using-built-in-effects
-[Running effects]: https://github.com/robrix/fused-effects#running-effects
-[Required compiler extensions]: https://github.com/robrix/fused-effects#required-compiler-extensions
-[Defining new effects]: https://github.com/robrix/fused-effects#defining-new-effects
-[Defining effect handlers]: https://github.com/robrix/fused-effects#defining-effect-handlers
+[Usage]: https://github.com/fused-effects/fused-effects#usage
+[Using built-in effects]: https://github.com/fused-effects/fused-effects#using-built-in-effects
+[Running effects]: https://github.com/fused-effects/fused-effects#running-effects
+[Required compiler extensions]: https://github.com/fused-effects/fused-effects#required-compiler-extensions
+[Defining new effects]: https://github.com/fused-effects/fused-effects#defining-new-effects
+[Defining effect handlers]: https://github.com/fused-effects/fused-effects#defining-effect-handlers
 
-[Project overview]: https://github.com/robrix/fused-effects#project-overview
-[Development]: https://github.com/robrix/fused-effects#development
-[Versioning]: https://github.com/robrix/fused-effects#versioning
+[Project overview]: https://github.com/fused-effects/fused-effects#project-overview
+[Development]: https://github.com/fused-effects/fused-effects#development
+[Versioning]: https://github.com/fused-effects/fused-effects#versioning
 
-[Benchmarks]: https://github.com/robrix/fused-effects#benchmarks
+[Benchmarks]: https://github.com/fused-effects/fused-effects#benchmarks
 
-[Related work]: https://github.com/robrix/fused-effects#related-work
-[Contributed packages]: https://github.com/robrix/fused-effects#contributed-packages
-[Comparison to `mtl`]: https://github.com/robrix/fused-effects#comparison-to-mtl
-[Comparison to `freer-simple`]: https://github.com/robrix/fused-effects#comparison-to-freer-simple
+[Related work]: https://github.com/fused-effects/fused-effects#related-work
+[Contributed packages]: https://github.com/fused-effects/fused-effects#contributed-packages
+[Comparison to `mtl`]: https://github.com/fused-effects/fused-effects#comparison-to-mtl
+[Comparison to `freer-simple`]: https://github.com/fused-effects/fused-effects#comparison-to-freer-simple
 
 
 ## Overview
@@ -158,7 +158,7 @@ To use effects, you'll need a relatively-uncontroversial set of extensions: `-XF
 
 When defining your own effects, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), and `-XUndecidableInstances` to satisfy the coverage condition for this instance. You may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case.
 
-[common]: https://github.com/robrix/fused-effects/blob/master/docs/common_errors.md
+[common]: https://github.com/fused-effects/fused-effects/blob/master/docs/common_errors.md
 
 The following invocation, taken from the teletype example, should suffice for any use or construction of effects:
 
@@ -171,7 +171,7 @@ The following invocation, taken from the teletype example, should suffice for an
 
 The process of defining new effects is outlined in [`docs/defining_effects.md`][], using the classic `Teletype` effect as an example.
 
-[`docs/defining_effects.md`]: https://github.com/robrix/fused-effects/blob/master/docs/defining_effects.md
+[`docs/defining_effects.md`]: https://github.com/fused-effects/fused-effects/blob/master/docs/defining_effects.md
 
 ## Project overview
 
@@ -181,12 +181,12 @@ This project adheres to the Contributor Covenant [code of conduct][]. By partici
 
 Finally, this project is licensed under the BSD 3-clause [license][].
 
-[`src`]: https://github.com/robrix/fused-effects/tree/master/src
-[`test`]: https://github.com/robrix/fused-effects/tree/master/test
-[`examples`]: https://github.com/robrix/fused-effects/tree/master/examples
-[`docs`]: https://github.com/robrix/fused-effects/tree/master/docs
-[code of conduct]: https://github.com/robrix/fused-effects/blob/master/CODE_OF_CONDUCT.md
-[license]: https://github.com/robrix/fused-effects/blob/master/LICENSE.md
+[`src`]: https://github.com/fused-effects/fused-effects/tree/master/src
+[`test`]: https://github.com/fused-effects/fused-effects/tree/master/test
+[`examples`]: https://github.com/fused-effects/fused-effects/tree/master/examples
+[`docs`]: https://github.com/fused-effects/fused-effects/tree/master/docs
+[code of conduct]: https://github.com/fused-effects/fused-effects/blob/master/CODE_OF_CONDUCT.md
+[license]: https://github.com/fused-effects/fused-effects/blob/master/LICENSE.md
 
 
 ### Development

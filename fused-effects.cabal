@@ -2,7 +2,7 @@ name:                fused-effects
 version:             0.2.0.1
 synopsis:            A fast, flexible, fused effect system.
 description:         A fast, flexible, fused effect system, à la Effect Handlers in Scope, Monad Transformers and Modular Algebraic Effects: What Binds Them Together, and Fusion for Free—Efficient Algebraic Effect Handlers.
-homepage:            https://github.com/robrix/fused-effects
+homepage:            https://github.com/fused-effects/fused-effects
 license:             BSD3
 license-file:        LICENSE
 author:              Nicolas Wu, Tom Schrijvers, Rob Rix, Patrick Thomson
@@ -97,4 +97,4 @@ benchmark benchmark
 
 source-repository head
   type:     git
-  location: https://github.com/robrix/fused-effects
+  location: https://github.com/fused-effects/fused-effects
