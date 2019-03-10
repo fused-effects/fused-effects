@@ -87,5 +87,5 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (OnceC m) where
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.NonDet
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Data.Foldable (asum)

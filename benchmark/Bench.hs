@@ -3,7 +3,7 @@ module Main where
 
 import Control.Effect
 import Control.Effect.Carrier
-import Control.Effect.Void
+import Control.Effect.Pure
 import Control.Effect.Writer
 import Control.Monad (ap, replicateM_)
 import Criterion.Main

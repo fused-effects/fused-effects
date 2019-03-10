@@ -22,6 +22,8 @@
 - Rewrites `CullC` using `ListC` and `ReaderC`.
 - Moves `OnceC` from `Control.Effect.NonDet` to `Control.Effect.Cull` to avoid cyclic dependencies.
 - Adds a `runCutAll` handler for `Cut` effects, returning a collection of all results.
+- Renames `Control.Effect.Void`, `Void`, and `VoidC` to `Control.Effect.Pure`, `Pure`, and `PureC` respectively.
+  This is a backwards-incompatible change for code mentioning `VoidC`; it should be updated to reference `PureC` instead.
 
 # 0.2.0.1
 

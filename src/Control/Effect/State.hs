@@ -180,4 +180,4 @@ execLazyState s = fmap fst . runLazyState s
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
