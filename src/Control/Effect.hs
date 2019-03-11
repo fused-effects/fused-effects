@@ -1,5 +1,6 @@
 module Control.Effect
 ( module X
+, Eff
 ) where
 
 import Control.Effect.Carrier   as X (Carrier, Effect)
@@ -19,3 +20,6 @@ import Control.Effect.State     as X (State, StateC)
 import Control.Effect.Sum       as X ((:+:), Member, send)
 import Control.Effect.Trace     as X (Trace, TraceByPrintingC, TraceByIgnoringC, TraceByReturningC)
 import Control.Effect.Writer    as X (Writer, WriterC)
+
+type Eff m = m
+{-# DEPRECATED Eff "Carriers are now monads; use @m@ instead of @Eff m@." #-}
