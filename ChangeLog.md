@@ -21,7 +21,7 @@ All deprecated APIs will be removed in the next release.
 
 ## Other changes
 
-- Adds `Monad` instances for all carrier types.
+- Adds a lazy `State` carrier in `Control.Effect.State.Lazy`
 - Rewrites `CutC` using an approach related to `NonDetC`, with the addition of a continuation to distinguish `empty` from `cutfail`.
 - Rewrites `CullC` using `ListC` and `ReaderC`.
 - Moves `OnceC` from `Control.Effect.NonDet` to `Control.Effect.Cull` to avoid cyclic dependencies.

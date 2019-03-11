@@ -55,7 +55,7 @@ put :: (Member (State s) sig, Carrier sig m) => s -> m ()
 put s = send (Put s (pure ()))
 
 -- | Replace the state value with the result of applying a function to the current state value.
---   This is strict in the new state; if you need laziness, use @get >>= put . f@.
+--   This is strict in the new state.
 --
 --   prop> fst (run (runState a (modify (+1)))) == (1 + a :: Integer)
 modify :: (Member (State s) sig, Carrier sig m) => (s -> s) -> m ()
@@ -118,7 +118,6 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) w
   eff (L (Get   k)) = StateC (\ s -> runState s (k s))
   eff (L (Put s k)) = StateC (\ _ -> runState s k)
   eff (R other)     = StateC (\ s -> eff (handle (s, ()) (uncurry runState) other))
-
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
