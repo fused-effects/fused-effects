@@ -1,29 +1,31 @@
-
 ## Backwards-incompatible changes
 
-- Adds `Monad` instances for all carrier types.
 - Adds `Monad` as a superclass of `Carrier`, obviating the need for a lot of constraints.
   This is a backwards-incompatible change, as any carriers users have defined now require `Monad` instances. Note that in many cases carriers can be composed out of existing carriers and monad transformers, and thus these instances can often be derived using `-XGeneralizedNewtypeDeriving`. We also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
-- Removes `ret`.
-  This is a backwards-incompatible change, but `pure` or `return` can be used instead.
-- Removes `Eff`, in favour of computing directly in the carriers. This enables the compiler to perform significant optimizations; see the benchmarks for details.
-  This is a backwards-incompatible change to any code mentioning `Eff`. For example, handlers can simply remove the `Eff` wrapping the carrier type & any use of `interpret`. As above, we also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
-- Removes `handleEither`, `handleReader`, `handleState`, `handleSum`, and `handleTraversable` in favour of composing carrier types directly.
-  This is a backwards-incompatible change for `Carrier` instances making use of these helpers. Instead, carriers can be composed from other carriers and `eff` defined with `handleCoercible`; and other definitions can use `handlePure` & `handle` directly.
 - Replaces `AltC` with a new carrier, `NonDetC`, based on Ralf Hinze’s work in _[Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12)_.
   This is a backwards-incompatible change. `AltC` was equivalent to the `ListT` monad transformer, and had the same well-known limitation to commutative monads. Therefore, the elimination of `Eff` required a more durable approach.
 - Removes `Branch`.
   This is a backwards-incompatible change, but was necessitated by the difficulty of implementing correct `Applicative` & `Monad` instances for carriers which used it. Carriers which were employing `Branch` internally should be reimplemented using `NonDetC` or a similar approach; see `CutC` and `CullC` for examples.
+- Renames `Control.Effect.Void`, `Void`, and `VoidC` to `Control.Effect.Pure`, `Pure`, and `PureC` respectively.
+  This is a backwards-incompatible change for code mentioning `VoidC`; it should be updated to reference `PureC` instead.
+
+## Deprecations
+
+- `Eff` and `interpret`, in favour of computing directly in the carriers. This enables the compiler to perform significant optimizations; see the benchmarks for details.
+   Handlers can simply remove the `Eff` wrapping the carrier type & any use of `interpret`. As above, we also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
+- `ret`, in favor of `pure` or `return`.
+- `handleEither`, `handleReader`, `handleState`, `handleSum`, and `handleTraversable` in favour of composing carrier types directly.
+   Carriers can be composed from other carriers and `eff` defined with `handleCoercible`; and other definitions can use `handlePure` & `handle` directly.
+
+All deprecated APIs will be removed in the next release.
 
 ## Other changes
 
-- Adds a lazy `State` carrier to `Control.Effect.State`.
+- Adds a lazy `State` carrier in `Control.Effect.State.Lazy`
 - Rewrites `CutC` using an approach related to `NonDetC`, with the addition of a continuation to distinguish `empty` from `cutfail`.
 - Rewrites `CullC` using `ListC` and `ReaderC`.
 - Moves `OnceC` from `Control.Effect.NonDet` to `Control.Effect.Cull` to avoid cyclic dependencies.
 - Adds a `runCutAll` handler for `Cut` effects, returning a collection of all results.
-- Renames `Control.Effect.Void`, `Void`, and `VoidC` to `Control.Effect.Pure`, `Pure`, and `PureC` respectively.
-  This is a backwards-incompatible change for code mentioning `VoidC`; it should be updated to reference `PureC` instead.
 
 # 0.2.0.1
 
