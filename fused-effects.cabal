@@ -35,7 +35,9 @@ library
                      , Control.Effect.Resource
                      , Control.Effect.Resumable
                      , Control.Effect.State
+                     , Control.Effect.State.Internal
                      , Control.Effect.State.Lazy
+                     , Control.Effect.State.Strict
                      , Control.Effect.Sum
                      , Control.Effect.Trace
                      , Control.Effect.Writer
