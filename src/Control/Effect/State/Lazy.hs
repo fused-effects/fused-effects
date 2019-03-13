@@ -31,38 +31,48 @@ newtype LazyStateC s m a = LazyStateC { runLazyStateC :: s -> m (s, a) }
 
 instance Functor m => Functor (LazyStateC s m) where
   fmap f m = LazyStateC $ \ s -> fmap (\ ~(s', a) -> (s', f a)) $ runLazyStateC m s
+  {-# INLINE fmap #-}
 
 instance (Functor m, Monad m) => Applicative (LazyStateC s m) where
   pure a = LazyStateC $ \ s -> pure (s, a)
+  {-# INLINE pure #-}
   LazyStateC mf <*> LazyStateC mx = LazyStateC $ \ s -> do
     ~(s', f) <- mf s
     ~(s'', x) <- mx s'
     return (s'', f x)
+  {-# INLINE (<*>) #-}
 
 instance Monad m => Monad (LazyStateC s m) where
   m >>= k  = LazyStateC $ \ s -> do
     ~(s', a) <- runLazyStateC m s
     runLazyStateC (k a) s'
+  {-# INLINE (>>=) #-}
 
 instance (Alternative m, Monad m) => Alternative (LazyStateC s m) where
   empty = LazyStateC (const empty)
+  {-# INLINE empty #-}
   LazyStateC l <|> LazyStateC r = LazyStateC (\ s -> l s <|> r s)
+  {-# INLINE (<|>) #-}
 
 instance MonadFail m => MonadFail (LazyStateC s m) where
   fail s = LazyStateC (const (fail s))
+  {-# INLINE fail #-}
 
 instance MonadIO m => MonadIO (LazyStateC s m) where
   liftIO io = LazyStateC (\ s -> (,) s <$> liftIO io)
+  {-# INLINE liftIO #-}
 
 instance (Alternative m, Monad m) => MonadPlus (LazyStateC s m)
 
 instance MonadTrans (LazyStateC s) where
   lift m = LazyStateC (\ s -> (,) s <$> m)
+  {-# INLINE lift #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (LazyStateC s m) where
   eff (L (Get   k)) = LazyStateC (\ s -> runLazyState s (k s))
   eff (L (Put s k)) = LazyStateC (\ _ -> runLazyState s k)
   eff (R other)     = LazyStateC (\ s -> eff (handle (s, ()) (uncurry runLazyState) other))
+  {-# INLINE eff #-}
 
 -- | Run a lazy 'State' effect, yielding the result value and the final state.
 --   More programs terminate with lazy state than strict state, but injudicious
