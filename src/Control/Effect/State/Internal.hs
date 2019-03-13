@@ -64,3 +64,4 @@ modifyLazy f = get >>= put . f
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Pure
+-- >>> import Control.Effect.State.Strict
