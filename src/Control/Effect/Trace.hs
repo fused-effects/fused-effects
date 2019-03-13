@@ -49,10 +49,12 @@ newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
 
 instance MonadTrans TraceByPrintingC where
   lift = TraceByPrintingC
+  {-# INLINE lift #-}
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
   eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
   eff (R other)       = TraceByPrintingC (eff (handleCoercible other))
+  {-# INLINE eff #-}
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
@@ -66,10 +68,12 @@ newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
 
 instance MonadTrans TraceByIgnoringC where
   lift = TraceByIgnoringC
+  {-# INLINE lift #-}
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
   eff (L trace) = traceCont trace
   eff (R other) = TraceByIgnoringC (eff (handleCoercible other))
+  {-# INLINE eff #-}
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.

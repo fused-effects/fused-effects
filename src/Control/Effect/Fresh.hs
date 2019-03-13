@@ -64,6 +64,7 @@ instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
     put (i :: Int)
     runFreshC (k a)
   eff (R other)       = FreshC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- $setup

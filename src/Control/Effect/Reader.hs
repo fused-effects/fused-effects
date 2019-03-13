@@ -55,37 +55,47 @@ local f m = send (Local f m pure)
 --
 --   prop> run (runReader a (pure b)) == b
 runReader :: r -> ReaderC r m a -> m a
-runReader = flip runReaderC
+runReader r c = runReaderC c r
+{-# INLINE runReader #-}
 
 newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
   deriving (Functor)
 
 instance Applicative m => Applicative (ReaderC r m) where
   pure = ReaderC . const . pure
+  {-# INLINE pure #-}
   ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
+  {-# INLINE (<*>) #-}
 
 instance Alternative m => Alternative (ReaderC r m) where
   empty = ReaderC (const empty)
+  {-# INLINE empty #-}
   ReaderC l <|> ReaderC r = ReaderC (liftA2 (<|>) l r)
+  {-# INLINE (<|>) #-}
 
 instance Monad m => Monad (ReaderC r m) where
   ReaderC a >>= f = ReaderC (\ r -> a r >>= runReader r . f)
+  {-# INLINE (>>=) #-}
 
 instance MonadFail m => MonadFail (ReaderC r m) where
   fail = ReaderC . const . fail
+  {-# INLINE fail #-}
 
 instance MonadIO m => MonadIO (ReaderC r m) where
   liftIO = ReaderC . const . liftIO
+  {-# INLINE liftIO #-}
 
 instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
 
 instance MonadTrans (ReaderC r) where
   lift = ReaderC . const
+  {-# INLINE lift #-}
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
   eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
   eff (R other)         = ReaderC (\ r -> eff (handlePure (runReader r) other))
+  {-# INLINE eff #-}
 
 
 -- $setup

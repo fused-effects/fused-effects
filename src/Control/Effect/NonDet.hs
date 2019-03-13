@@ -48,32 +48,41 @@ newtype NonDetC m a = NonDetC
 
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ cons -> cons a)
+  {-# INLINE pure #-}
   NonDetC f <*> NonDetC a = NonDetC $ \ cons ->
     f (\ f' -> a (cons . f'))
+  {-# INLINE (<*>) #-}
 
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ nil -> nil)
+  {-# INLINE empty #-}
   NonDetC l <|> NonDetC r = NonDetC $ \ cons -> l cons . r cons
+  {-# INLINE (<|>) #-}
 
 instance Monad (NonDetC m) where
   NonDetC a >>= f = NonDetC $ \ cons ->
     a (\ a' -> runNonDetC (f a') cons)
+  {-# INLINE (>>=) #-}
 
 instance MonadFail m => MonadFail (NonDetC m) where
   fail s = NonDetC (\ _ _ -> fail s)
+  {-# INLINE fail #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
   liftIO io = NonDetC (\ cons nil -> liftIO io >>= flip cons nil)
+  {-# INLINE liftIO #-}
 
 instance MonadPlus (NonDetC m)
 
 instance MonadTrans NonDetC where
   lift m = NonDetC (\ cons nil -> m >>= flip cons nil)
+  {-# INLINE lift #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L Empty)      = empty
   eff (L (Choose k)) = k True <|> k False
   eff (R other)      = NonDetC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runNonDet) other) >>= foldr cons nil
+  {-# INLINE eff #-}
 
 
 -- $setup

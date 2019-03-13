@@ -40,10 +40,12 @@ newtype FailC m a = FailC { runFailC :: ErrorC String m a }
 
 instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
   fail s = FailC (throwError s)
+  {-# INLINE fail #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
   eff (L (Fail s)) = fail s
   eff (R other)    = FailC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- $setup

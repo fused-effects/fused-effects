@@ -92,6 +92,7 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) 
   eff (L (RandomR r    k)) = getRandomR r >>= k
   eff (L (Interleave m k)) = interleave m >>= k
   eff (R other)            = RandomC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- $setup
