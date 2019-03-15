@@ -1,6 +1,6 @@
 ## Backwards-incompatible changes
 
-- Adds `Monad` as a superclass of `Carrier`, obviating the need for a lot of constraints.
+- Adds `Monad` as a superclass of `Carrier`, obviating the need for a lot of constraints, and `Monad` instances for all carrier types.
   This is a backwards-incompatible change, as any carriers users have defined now require `Monad` instances. Note that in many cases carriers can be composed out of existing carriers and monad transformers, and thus these instances can often be derived using `-XGeneralizedNewtypeDeriving`. We also recommend compiling with `-Wredundant-constraints` as many of these can now be removed.
 - Replaces `AltC` with a new carrier, `NonDetC`, based on Ralf Hinze’s work in _[Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12)_.
   This is a backwards-incompatible change. `AltC` was equivalent to the `ListT` monad transformer, and had the same well-known limitation to commutative monads. Therefore, the elimination of `Eff` required a more durable approach.
