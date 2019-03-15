@@ -93,6 +93,7 @@ newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   eff (L (Resumable err _)) = ResumableC (throwError (SomeError err))
   eff (R other)             = ResumableC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
@@ -113,12 +114,14 @@ newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (
 
 instance MonadTrans (ResumableWithC err) where
   lift = ResumableWithC . lift
+  {-# INLINE lift #-}
 
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
 instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
   eff (L (Resumable err k)) = ResumableWithC (ReaderC (\ handler -> runHandler handler err)) >>= k
   eff (R other)             = ResumableWithC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- $setup
