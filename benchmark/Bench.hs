@@ -15,27 +15,27 @@ main = defaultMain
   [
     bgroup "WriterC"
     [ bgroup "Cod"
-      [ bench "100"       $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 100
-      , bench "1000"    $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 1000
+      [ bench "100"   $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 100
+      , bench "1000"  $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 1000
       , bench "10000" $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 10000
       ]
     , bgroup "standalone"
-      [ bench "100"       $ whnf (run . execWriter @(Sum Int) . tellLoop) 100
-      , bench "1000"    $ whnf (run . execWriter @(Sum Int) . tellLoop) 1000
+      [ bench "100"   $ whnf (run . execWriter @(Sum Int) . tellLoop) 100
+      , bench "1000"  $ whnf (run . execWriter @(Sum Int) . tellLoop) 1000
       , bench "10000" $ whnf (run . execWriter @(Sum Int) . tellLoop) 10000
       ]
     ]
   ,
     bgroup "Strict StateC"
     [ bgroup "Cod"
-      [ bench "100"       $ whnf (run . runCod pure . execState @(Sum Int) 0 . runCod pure . modLoop) 100
-      , bench "1000"    $ whnf (run . runCod pure . execState @(Sum Int) 0 . runCod pure . modLoop) 1000
-      , bench "10000" $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 10000
+      [ bench "100"   $ whnf (run . runCod pure . execState @(Sum Int) 0 . runCod pure . modLoop) 100
+      , bench "1000"  $ whnf (run . runCod pure . execState @(Sum Int) 0 . runCod pure . modLoop) 1000
+      , bench "10000" $ whnf (run . runCod pure . execState @(Sum Int) 0 . runCod pure . modLoop) 10000
       ]
     , bgroup "standalone"
-      [ bench "100"       $ whnf (run . execState @(Sum Int) 0 . modLoop) 100
-      , bench "1000"    $ whnf (run . execState @(Sum Int) 0 . modLoop) 1000
-      , bench "10000" $ whnf (run . execWriter @(Sum Int) . tellLoop) 10000
+      [ bench "100"   $ whnf (run . execState @(Sum Int) 0 . modLoop) 100
+      , bench "1000"  $ whnf (run . execState @(Sum Int) 0 . modLoop) 1000
+      , bench "10000" $ whnf (run . execState @(Sum Int) 0 . modLoop) 10000
       ]
     ]
   ]
