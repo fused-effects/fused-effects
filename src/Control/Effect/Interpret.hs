@@ -31,6 +31,7 @@ newtype InterpretC eff m a = InterpretC { runInterpretC :: ReaderC (Handler eff 
 
 instance MonadTrans (InterpretC eff) where
   lift = InterpretC . lift
+  {-# INLINE lift #-}
 
 newtype Handler eff m = Handler (forall x . eff m (m x) -> m x)
 
@@ -42,6 +43,7 @@ instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff 
     handler <- InterpretC ask
     lift (runHandler handler op)
   eff (R other) = InterpretC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- | Interpret an effect using a higher-order function with some state variable.
@@ -59,6 +61,7 @@ newtype InterpretStateC eff s m a = InterpretStateC { runInterpretStateC :: Read
 
 instance MonadTrans (InterpretStateC eff s) where
   lift = InterpretStateC . lift . lift
+  {-# INLINE lift #-}
 
 newtype HandlerState eff s m = HandlerState (forall x . eff (StateC s m) (StateC s m x) -> StateC s m x)
 
@@ -70,6 +73,7 @@ instance (HFunctor eff, Carrier sig m, Effect sig) => Carrier (eff :+: sig) (Int
     handler <- InterpretStateC ask
     InterpretStateC (lift (runHandlerState handler op))
   eff (R other) = InterpretStateC (eff (R (R (handleCoercible other))))
+  {-# INLINE eff #-}
 
 
 -- $setup
