@@ -2,11 +2,14 @@
 module Control.Effect.Interpret
 ( runInterpret
 , InterpretC(..)
+, runInterpretState
+, InterpretStateC(..)
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Reader
+import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
@@ -37,6 +40,27 @@ instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff 
     handler <- InterpretC ask
     lift (runHandler handler op)
   eff (R other) = InterpretC (eff (R (handleCoercible other)))
+
+
+runInterpretState :: (forall x . s -> eff (StateC s m) (StateC s m x) -> m (s, x)) -> s -> InterpretStateC eff s m a -> m (s, a)
+runInterpretState handler state = runState state . runReader (HandlerState (\ eff -> StateC (\ s -> handler s eff))) . runInterpretStateC
+
+newtype InterpretStateC eff s m a = InterpretStateC { runInterpretStateC :: ReaderC (HandlerState eff s m) (StateC s m) a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+
+instance MonadTrans (InterpretStateC eff s) where
+  lift = InterpretStateC . lift . lift
+
+newtype HandlerState eff s m = HandlerState (forall x . eff (StateC s m) (StateC s m x) -> StateC s m x)
+
+runHandlerState :: HFunctor eff => HandlerState eff s m -> eff (InterpretStateC eff s m) (InterpretStateC eff s m a) -> StateC s m a
+runHandlerState h@(HandlerState handler) = handler . handlePure (runReader h . runInterpretStateC)
+
+instance (HFunctor eff, Carrier sig m, Effect sig) => Carrier (eff :+: sig) (InterpretStateC eff s m) where
+  eff (L op) = do
+    handler <- InterpretStateC ask
+    InterpretStateC (lift (runHandlerState handler op))
+  eff (R other) = InterpretStateC (eff (R (R (handleCoercible other))))
 
 
 -- $setup
