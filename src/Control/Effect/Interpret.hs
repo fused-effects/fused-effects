@@ -20,6 +20,8 @@ import Control.Monad.Trans.Class
 --
 --   This involves a great deal less boilerplate than defining a custom 'Carrier' instance, at the expense of somewhat less performance. It’s a reasonable starting point for new interpretations, and if more performance or flexibility is required, it’s straightforward to “graduate” by replacing the relevant 'runInterpret' handlers with specialized 'Carrier' instances for the effects.
 --
+--   At time of writing, a simple passthrough use of 'runInterpret' to handle a 'State' effect is about five times slower than using 'StateC' directly.
+--
 --   prop> run (runInterpret (\ op -> case op of { Get k -> k a ; Put _ k -> k }) get) == a
 runInterpret :: (forall x . eff m (m x) -> m x) -> InterpretC eff m a -> m a
 runInterpret handler = runReader (Handler handler) . runInterpretC
