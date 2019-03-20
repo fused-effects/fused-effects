@@ -44,6 +44,11 @@ instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff 
   eff (R other) = InterpretC (eff (R (handleCoercible other)))
 
 
+-- | Interpret an effect using a higher-order function with some state variable.
+--
+--   This involves a great deal less boilerplate than defining a custom 'Carrier' instance, at the expense of somewhat less performance. It’s a reasonable starting point for new interpretations, and if more performance or flexibility is required, it’s straightforward to “graduate” by replacing the relevant 'runInterpretState' handlers with specialized 'Carrier' instances for the effects.
+--
+--   At time of writing, a simple use of 'runInterpretState' to handle a 'State' effect is about four times slower than using 'StateC' directly.
 runInterpretState :: (forall x . s -> eff (StateC s m) (StateC s m x) -> m (s, x)) -> s -> InterpretStateC eff s m a -> m (s, a)
 runInterpretState handler state = runState state . runReader (HandlerState (\ eff -> StateC (\ s -> handler s eff))) . runInterpretStateC
 
