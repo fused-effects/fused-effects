@@ -1,8 +1,9 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
 module Main where
 
 import Control.Effect
 import Control.Effect.Carrier
+import Control.Effect.Interpret
 import Control.Effect.Pure
 import Control.Effect.Writer
 import Control.Effect.State
@@ -36,6 +37,19 @@ main = defaultMain
       [ bench "100"   $ whnf (run . execState @(Sum Int) 0 . modLoop) 100
       , bench "1000"  $ whnf (run . execState @(Sum Int) 0 . modLoop) 1000
       , bench "10000" $ whnf (run . execState @(Sum Int) 0 . modLoop) 10000
+      ]
+    ]
+  ,
+    bgroup "InterpretC vs StateC"
+    [ bgroup "InterpretC"
+      [ bench "100"   $ whnf (run . evalState @(Sum Int) 0 . runInterpret @(State (Sum Int)) (\case { Get k -> get @(Sum Int) >>= k ; Put s k -> put s >> k }) . modLoop) 100
+      , bench "1000"  $ whnf (run . evalState @(Sum Int) 0 . runInterpret @(State (Sum Int)) (\case { Get k -> get @(Sum Int) >>= k ; Put s k -> put s >> k }) . modLoop) 1000
+      , bench "10000" $ whnf (run . evalState @(Sum Int) 0 . runInterpret @(State (Sum Int)) (\case { Get k -> get @(Sum Int) >>= k ; Put s k -> put s >> k }) . modLoop) 10000
+      ]
+    , bgroup "StateC"
+      [ bench "100"   $ whnf (run . evalState @(Sum Int) 0 . modLoop) 100
+      , bench "1000"  $ whnf (run . evalState @(Sum Int) 0 . modLoop) 1000
+      , bench "10000" $ whnf (run . evalState @(Sum Int) 0 . modLoop) 10000
       ]
     ]
   ]
