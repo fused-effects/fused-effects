@@ -42,9 +42,9 @@ main = defaultMain
   ,
     bgroup "InterpretC vs StateC"
     [ bgroup "InterpretC"
-      [ bench "100"   $ whnf (run . evalState @(Sum Int) 0 . runInterpret @(State (Sum Int)) (\case { Get k -> get @(Sum Int) >>= k ; Put s k -> put s >> k }) . modLoop) 100
-      , bench "1000"  $ whnf (run . evalState @(Sum Int) 0 . runInterpret @(State (Sum Int)) (\case { Get k -> get @(Sum Int) >>= k ; Put s k -> put s >> k }) . modLoop) 1000
-      , bench "10000" $ whnf (run . evalState @(Sum Int) 0 . runInterpret @(State (Sum Int)) (\case { Get k -> get @(Sum Int) >>= k ; Put s k -> put s >> k }) . modLoop) 10000
+      [ bench "100"   $ whnf (run . evalState @(Sum Int) 0 . runInterpret (\case { Get k -> get @(Sum Int) >>= k ; Put s k -> put s >> k }) . modLoop) 100
+      , bench "1000"  $ whnf (run . evalState @(Sum Int) 0 . runInterpret (\case { Get k -> get @(Sum Int) >>= k ; Put s k -> put s >> k }) . modLoop) 1000
+      , bench "10000" $ whnf (run . evalState @(Sum Int) 0 . runInterpret (\case { Get k -> get @(Sum Int) >>= k ; Put s k -> put s >> k }) . modLoop) 10000
       ]
     , bgroup "StateC"
       [ bench "100"   $ whnf (run . evalState @(Sum Int) 0 . modLoop) 100
