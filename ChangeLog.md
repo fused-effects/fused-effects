@@ -1,3 +1,5 @@
+# 0.3.0.0
+
 ## Backwards-incompatible changes
 
 - Adds `Monad` as a superclass of `Carrier`, obviating the need for a lot of constraints, and `Monad` instances for all carrier types.
