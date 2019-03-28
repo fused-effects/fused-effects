@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, FunctionalDependencies, RankNTypes #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, UndecidableInstances #-}
 module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
@@ -9,6 +9,7 @@ module Control.Effect.Carrier
 , handleState
 , handleEither
 , handleTraversable
+, interpret
 ) where
 
 import Control.Monad (join)
@@ -40,14 +41,16 @@ class HFunctor sig => Effect sig where
          -> sig n (n (f a))
 
 
--- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'ret' and 'eff' methods.
-class HFunctor sig => Carrier sig h | h -> sig where
-  -- | Wrap a return value.
-  ret :: a -> h a
+-- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
+class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
+  -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
+  eff :: sig m (m a) -> m a
 
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
-  eff :: sig h (h a) -> h a
+  ret :: a -> m a
+  ret = pure
 
+{-# DEPRECATED ret "Use 'pure' instead; 'ret' is a historical alias and will be removed in future versions" #-}
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
 handlePure :: HFunctor sig => (forall x . f x -> g x) -> sig f (f a) -> sig g (g a)
@@ -61,6 +64,9 @@ handleCoercible :: (HFunctor sig, Coercible f g) => sig f (f a) -> sig g (g a)
 handleCoercible = handlePure coerce
 {-# INLINE handleCoercible #-}
 
+{-# DEPRECATED handleReader, handleState, handleEither, handleTraversable
+  "Compose carrier types from other carriers and define 'eff' with handleCoercible instead" #-}
+
 -- | Thread a @Reader@-like carrier through an 'HFunctor'.
 handleReader :: HFunctor sig => r -> (forall x . f x -> r -> g x) -> sig f (f a) -> sig g (g a)
 handleReader r run = handlePure (flip run r)
@@ -73,10 +79,15 @@ handleState s run = handle (s, ()) (uncurry (flip run))
 
 -- | Thread a carrier producing 'Either's through an 'Effect'.
 handleEither :: (Carrier sig g, Effect sig) => (forall x . f x -> g (Either e x)) -> sig f (f a) -> sig g (g (Either e a))
-handleEither run = handle (Right ()) (either (ret . Left) run)
+handleEither run = handle (Right ()) (either (pure . Left) run)
 {-# INLINE handleEither #-}
 
 -- | Thread a carrier producing values in a 'Traversable' 'Monad' (e.g. '[]') through an 'Effect'.
 handleTraversable :: (Effect sig, Applicative g, Monad m, Traversable m) => (forall x . f x -> g (m x)) -> sig f (f a) -> sig g (g (m a))
 handleTraversable run = handle (pure ()) (fmap join . traverse run)
 {-# INLINE handleTraversable #-}
+
+-- | A backwards-compatibility shim, equivalent to 'id'.
+interpret :: carrier a -> carrier a
+interpret = id
+{-# DEPRECATED interpret "Not necessary with monadic carriers; remove or replace with 'id'." #-}

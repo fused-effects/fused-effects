@@ -1,6 +1,6 @@
 # A fast, flexible, fused effect system for Haskell
 
-[![Build Status](https://travis-ci.com/robrix/fused-effects.svg?branch=master)](https://travis-ci.com/robrix/fused-effects)
+[![Build Status](https://travis-ci.com/fused-effects/fused-effects.svg?branch=master)](https://travis-ci.com/fused-effects/fused-effects)
 
 - [Overview][]
   - [Algebraic effects][]
@@ -20,28 +20,28 @@
   - [Comparison to `mtl`][]
   - [Comparison to `freer-simple`][]
 
-[Overview]: https://github.com/robrix/fused-effects#overview
-[Algebraic effects]: https://github.com/robrix/fused-effects#algebraic-effects
-[Higher-order effects]: https://github.com/robrix/fused-effects#higher-order-effects
-[Fusion]: https://github.com/robrix/fused-effects#fusion
+[Overview]: https://github.com/fused-effects/fused-effects#overview
+[Algebraic effects]: https://github.com/fused-effects/fused-effects#algebraic-effects
+[Higher-order effects]: https://github.com/fused-effects/fused-effects#higher-order-effects
+[Fusion]: https://github.com/fused-effects/fused-effects#fusion
 
-[Usage]: https://github.com/robrix/fused-effects#usage
-[Using built-in effects]: https://github.com/robrix/fused-effects#using-built-in-effects
-[Running effects]: https://github.com/robrix/fused-effects#running-effects
-[Required compiler extensions]: https://github.com/robrix/fused-effects#required-compiler-extensions
-[Defining new effects]: https://github.com/robrix/fused-effects#defining-new-effects
-[Defining effect handlers]: https://github.com/robrix/fused-effects#defining-effect-handlers
+[Usage]: https://github.com/fused-effects/fused-effects#usage
+[Using built-in effects]: https://github.com/fused-effects/fused-effects#using-built-in-effects
+[Running effects]: https://github.com/fused-effects/fused-effects#running-effects
+[Required compiler extensions]: https://github.com/fused-effects/fused-effects#required-compiler-extensions
+[Defining new effects]: https://github.com/fused-effects/fused-effects#defining-new-effects
+[Defining effect handlers]: https://github.com/fused-effects/fused-effects#defining-effect-handlers
 
-[Project overview]: https://github.com/robrix/fused-effects#project-overview
-[Development]: https://github.com/robrix/fused-effects#development
-[Versioning]: https://github.com/robrix/fused-effects#versioning
+[Project overview]: https://github.com/fused-effects/fused-effects#project-overview
+[Development]: https://github.com/fused-effects/fused-effects#development
+[Versioning]: https://github.com/fused-effects/fused-effects#versioning
 
-[Benchmarks]: https://github.com/robrix/fused-effects#benchmarks
+[Benchmarks]: https://github.com/fused-effects/fused-effects#benchmarks
 
-[Related work]: https://github.com/robrix/fused-effects#related-work
-[Contributed packages]: https://github.com/robrix/fused-effects#contributed-packages
-[Comparison to `mtl`]: https://github.com/robrix/fused-effects#comparison-to-mtl
-[Comparison to `freer-simple`]: https://github.com/robrix/fused-effects#comparison-to-freer-simple
+[Related work]: https://github.com/fused-effects/fused-effects#related-work
+[Contributed packages]: https://github.com/fused-effects/fused-effects#contributed-packages
+[Comparison to `mtl`]: https://github.com/fused-effects/fused-effects#comparison-to-mtl
+[Comparison to `freer-simple`]: https://github.com/fused-effects/fused-effects#comparison-to-freer-simple
 
 
 ## Overview
@@ -69,9 +69,9 @@ As Nicolas Wu et al showed in _[Effect Handlers in Scope][]_, this has implicati
 
 In order to maximize efficiency, `fused-effects` applies _fusion laws_, avoiding the construction of intermediate representations of effectful computations between effect handlers. In fact, this is applied as far as the initial construction as well: there is no representation of the computation as a free monad parameterized by some syntax type. As such, `fused-effects` avoids the overhead associated with constructing and evaluating any underlying free or freer monad.
 
-Instead, computations are performed in a monad named `Eff`, parameterized by the carrier type for the syntax. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.
+Instead, computations are performed in a carrier type for the syntax, typically a monad wrapping further monads, via an instance of the `Carrier` class. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.
 
-Carriers needn’t be `Functor`s (let alone `Monad`s), allowing a great deal of freedom in the interpretation of effects. And since the interpretation is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
+Since the interpretation of effects is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
 
 Finally, since the fusion of carrier algebras occurs as a result of the selection of the carriers, it doesn’t depend on complex `RULES` pragmas, making it very easy to reason about and tune.
 
@@ -138,9 +138,9 @@ example3 = run . runReader "hello" . runState 0 $ do
   put (length (list :: String))
 ```
 
-`run` is itself actually an effect handler for the `Void` effect, which has no operations and thus can only represent a final result value.
+`run` is itself actually an effect handler for the `Pure` effect, which has no operations and thus can only represent a final result value.
 
-Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for `Eff` to lift `putStrLn` into the middle of our computation:
+Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for the `LiftC` carrier to lift `putStrLn` into the middle of our computation:
 
 ```haskell
 example4 :: IO (Int, ())
@@ -156,22 +156,22 @@ example4 = runM . runReader "hello" . runState 0 $ do
 
 To use effects, you'll need a relatively-uncontroversial set of extensions: `-XFlexibleContexts`, `-XFlexibleInstances`, and `-XMultiParamTypeClasses`.
 
-When defining your own effects, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), and `-XUndecidableInstances` to satisfy the coverage condition for this instance. `-XLambdaCase` provides a measure of syntactic convenience when handling an effect type with `handleSum.`  You may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case.
+When defining your own effects, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), and `-XUndecidableInstances` to satisfy the coverage condition for this instance. You may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case.
 
-[common]: https://github.com/robrix/fused-effects/blob/master/docs/common_errors.md
+[common]: https://github.com/fused-effects/fused-effects/blob/master/docs/common_errors.md
 
 The following invocation, taken from the teletype example, should suffice for any use or construction of effects:
 
 ```haskell
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving,
-    KindSignatures, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+    KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 ```
 
 ### Defining new effects
 
 The process of defining new effects is outlined in [`docs/defining_effects.md`][], using the classic `Teletype` effect as an example.
 
-[`docs/defining_effects.md`]: https://github.com/robrix/fused-effects/blob/master/docs/defining_effects.md
+[`docs/defining_effects.md`]: https://github.com/fused-effects/fused-effects/blob/master/docs/defining_effects.md
 
 ## Project overview
 
@@ -181,12 +181,12 @@ This project adheres to the Contributor Covenant [code of conduct][]. By partici
 
 Finally, this project is licensed under the BSD 3-clause [license][].
 
-[`src`]: https://github.com/robrix/fused-effects/tree/master/src
-[`test`]: https://github.com/robrix/fused-effects/tree/master/test
-[`examples`]: https://github.com/robrix/fused-effects/tree/master/examples
-[`docs`]: https://github.com/robrix/fused-effects/tree/master/docs
-[code of conduct]: https://github.com/robrix/fused-effects/blob/master/CODE_OF_CONDUCT.md
-[license]: https://github.com/robrix/fused-effects/blob/master/LICENSE.md
+[`src`]: https://github.com/fused-effects/fused-effects/tree/master/src
+[`test`]: https://github.com/fused-effects/fused-effects/tree/master/test
+[`examples`]: https://github.com/fused-effects/fused-effects/tree/master/examples
+[`docs`]: https://github.com/fused-effects/fused-effects/tree/master/docs
+[code of conduct]: https://github.com/fused-effects/fused-effects/blob/master/CODE_OF_CONDUCT.md
+[license]: https://github.com/fused-effects/fused-effects/blob/master/LICENSE.md
 
 
 ### Development
@@ -225,8 +225,10 @@ To run the provided benchmark suite, use `cabal new-bench`. You may wish to prov
 
 Though we aim to keep the `fused-effects` core minimal, we encourage the development of external `fused-effects`-compatible libraries. If you've written one that you'd like to be mentioned here, get in touch!
 
-* [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computatios.
+* [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computations.
+* [`fused-effects-exceptions`][exc] provides handlers for exceptions thrown in the `IO` monad.
 
+[exc]: https://github.com/fused-effects/fused-effects-exceptions
 [felens]: http://hackage.haskell.org/package/fused-effects-lens
 [lens]: http://hackage.haskell.org/package/lens
 
@@ -241,7 +243,7 @@ Unlike `mtl`, effects are automatically available regardless of where they occur
 Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a signature. This is a tradeoff: `mtl` is able to provide excellent type inference for effectful operations like `get`, since the functional dependencies can resolve the state type from the monad type. On the other hand, this behaviour can be recovered in `fused-effects` using `newtype` wrappers with phantom type parameters and helper functions, e.g.:
 
 ```haskell
-newtype Wrapper s m a = Wrapper { runWrapper :: Eff m a }
+newtype Wrapper s m a = Wrapper { runWrapper :: m a }
   deriving (Applicative, Functor, Monad)
 
 instance Carrier sig m => Carrier sig (Wrapper s m) where …

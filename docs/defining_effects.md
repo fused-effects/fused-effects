@@ -46,10 +46,10 @@ Now that we have our effect datatype, we can give definitions for `read` and `wr
 
 ```haskell
 read :: (Member Teletype sig, Carrier sig m) => m String
-read = send (Read ret)
+read = send (Read pure)
 
 write :: (Member Teletype sig, Carrier sig m) => String -> m ()
-write s = send (Write s (ret ()))
+write s = send (Write s (pure ()))
 ```
 
 This gives us enough to write computations using the `Teletype` effect. The next section discusses how to run `Teletype` computations.
@@ -64,27 +64,25 @@ Following from the above section, we can define a carrier for the `Teletype` eff
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 
 instance (Carrier sig m, MonadIO m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
-  ret = TeletypeIOC . ret
-
-  eff = TeletypeIOC . handleSum (eff . handleCoercible) (\ t -> case t of
-    Read    k -> liftIO getLine      >>= runTeletypeIOC . k
-    Write s k -> liftIO (putStrLn s) >>  runTeletypeIOC   k)
+  eff (L (Read    k)) = TeletypeIOC (liftIO getLine      >>= runTeletypeIOC . k)
+  eff (L (Write s k)) = TeletypeIOC (liftIO (putStrLn s) >>  runTeletypeIOC   k)
+  eff (R other)       = TeletypeIOC (eff (handleCoercible other))
 ```
 
-Here, `ret` is responsible for wrapping pure values in the carrier, and `eff` is responsible for handling an effectful computations. Since the `Carrier` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `eff` has two parts: a handler for `Teletype` (`alg`), and a handler for teletype effects that might be embedded in other effects in the signature.
+Here, `eff` is responsible for handling effectful computations. Since the `Carrier` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `eff` has two parts: a handler for `Teletype`, and a handler for teletype effects that might be embedded inside other effects in the signature.
 
 In this case, since the `Teletype` carrier is just a thin wrapper around the underlying computation, we can use `handleCoercible` to handle any embedded `TeletypeIOC` carriers by simply mapping `coerce` over them.
 
-That leaves `alg`, which handles `Teletype` effects with one case per constructor. Since we’re assuming the existence of a `MonadIO` instance for the underlying computation, we can use `liftIO` to inject the `getLine` and `putStrLn` actions into it, and then proceed with the continuations, unwrapping them in the process.
+That leaves `Teletype` effects themselves, which are handled with one case per constructor. Since we’re assuming the existence of a `MonadIO` instance for the underlying computation, we can use `liftIO` to inject the `getLine` and `putStrLn` actions into it, and then proceed with the continuations, unwrapping them in the process.
 
-Users could use `interpret` directly to run the effect, but it’s more convenient to provide effect handler functions applying `interpret` and then unwrapping the carrier:
+By convention, we also provide a `runTeletypeIO` function. For `TeletypeIOC` this just unwrapps the carrier, but for more involved carriers it might also apply some arguments. (We could also have used this name for the type’s field selector directly, at the cost of some asymmetry in its name.)
 
 ```haskell
-runTeletypeIO :: (MonadIO m, Carrier sig m) => Eff (TeletypeIOC m) a -> m a
-runTeletypeIO = runTeletypeIOC . interpret
+runTeletypeIO :: TeletypeIOC m a -> m a
+runTeletypeIO = runTeletypeIOC
 ```
 
-In general, carriers don’t have to be `Functor`s, let alone `Monad`s. However, sometimes—especially in cases where the carrier is a thin wrapper like this—they can be more convenient to write using (derived) `Monad` instances. In this case, by using `-XGeneralizedNewtypeDeriving`, we can derive `Functor`, `Applicative`, `Monad`, and `MonadIO` instances for `TeletypeIOC`:
+`Carrier`s are also `Monad`s. Since `TeletypeIOC` is just a thin wrapper around an underlying computation, we can derive several instances using `-XGeneralizedNewtypeDeriving`:
 
 ```haskell
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
@@ -95,8 +93,7 @@ This allows us to use `liftIO` directly on the carrier itself, instead of only i
 
 ```haskell
 instance (MonadIO m, Carrier sig m) => Carrier (Teletype :+: sig) (TeletypeIOC m) where
-  ret = pure
-  eff = handleSum (TeletypeIOC . eff . handleCoercible) (\ t -> case t of
-    Read    k -> liftIO getLine      >>= k
-    Write s k -> liftIO (putStrLn s) >>  k)
+  eff (L (Read    k)) = liftIO getLine      >>= k
+  eff (L (Write s k)) = liftIO (putStrLn s) >>  k
+  eff (R other)       = TeletypeIOC (eff (handleCoercible other))
 ```

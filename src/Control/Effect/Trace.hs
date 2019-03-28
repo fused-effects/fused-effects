@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Trace
 ( Trace(..)
 , trace
@@ -10,10 +10,14 @@ module Control.Effect.Trace
 , TraceByReturningC(..)
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
-import Control.Effect.Internal
+import Control.Effect.State
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
+import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Bifunctor (first)
 import Data.Coerce
 import System.IO
@@ -33,51 +37,60 @@ instance Effect Trace where
 
 -- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()
-trace message = send (Trace message (ret ()))
+trace message = send (Trace message (pure ()))
 
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
-runTraceByPrinting :: (MonadIO m, Carrier sig m) => Eff (TraceByPrintingC m) a -> m a
-runTraceByPrinting = runTraceByPrintingC . interpret
+runTraceByPrinting :: TraceByPrintingC m a -> m a
+runTraceByPrinting = runTraceByPrintingC
 
 newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+
+instance MonadTrans TraceByPrintingC where
+  lift = TraceByPrintingC
+  {-# INLINE lift #-}
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
-  ret = TraceByPrintingC . ret
-  eff = TraceByPrintingC . handleSum
-    (eff . handlePure runTraceByPrintingC)
-    (\ (Trace s k) -> liftIO (hPutStrLn stderr s) *> runTraceByPrintingC k)
+  eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
+  eff (R other)       = TraceByPrintingC (eff (handleCoercible other))
+  {-# INLINE eff #-}
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
 --
 --   prop> run (runTraceByIgnoring (trace a *> pure b)) == b
-runTraceByIgnoring :: Carrier sig m => Eff (TraceByIgnoringC m) a -> m a
-runTraceByIgnoring = runTraceByIgnoringC . interpret
+runTraceByIgnoring :: TraceByIgnoringC m a -> m a
+runTraceByIgnoring = runTraceByIgnoringC
 
 newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+
+instance MonadTrans TraceByIgnoringC where
+  lift = TraceByIgnoringC
+  {-# INLINE lift #-}
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
-  ret = TraceByIgnoringC . ret
-  eff = handleSum (TraceByIgnoringC . eff . handlePure runTraceByIgnoringC) traceCont
+  eff (L trace) = traceCont trace
+  eff (R other) = TraceByIgnoringC (eff (handleCoercible other))
+  {-# INLINE eff #-}
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
 --   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) == ([a, b], c)
-runTraceByReturning :: (Carrier sig m, Effect sig, Functor m) => Eff (TraceByReturningC m) a -> m ([String], a)
-runTraceByReturning = fmap (first reverse) . flip runTraceByReturningC [] . interpret
+runTraceByReturning :: Functor m => TraceByReturningC m a -> m ([String], a)
+runTraceByReturning = fmap (first reverse) . runState [] . runTraceByReturningC
 
-newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: [String] -> m ([String], a) }
+newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
-  ret a = TraceByReturningC (\ s -> ret (s, a))
-  eff op = TraceByReturningC (\ s -> handleSum
-    (eff . handleState s runTraceByReturningC)
-    (\ (Trace m k) -> runTraceByReturningC k (m : s)) op)
+  eff (L (Trace m k)) = TraceByReturningC (modify (m :)) *> k
+  eff (R other)       = TraceByReturningC (eff (R (handleCoercible other)))
 
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure

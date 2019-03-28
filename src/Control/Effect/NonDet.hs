@@ -1,22 +1,34 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
 , runNonDet
-, AltC(..)
-, runNonDetOnce
-, OnceC(..)
-, Branch(..)
-, branch
-, runBranch
+, NonDetC(..)
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
-import Control.Effect.Cull
-import Control.Effect.Internal
-import Control.Effect.NonDet.Internal
 import Control.Effect.Sum
+import Control.Monad (MonadPlus(..))
+import Control.Monad.Fail
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Coerce
+import Prelude hiding (fail)
+
+data NonDet (m :: * -> *) k
+  = Empty
+  | Choose (Bool -> k)
+  deriving (Functor)
+
+instance HFunctor NonDet where
+  hmap _ = coerce
+  {-# INLINE hmap #-}
+
+instance Effect NonDet where
+  handle _     _       Empty      = Empty
+  handle state handler (Choose k) = Choose (handler . (<$ state) . k)
+
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
@@ -24,38 +36,57 @@ import Control.Effect.Sum
 --
 --   prop> run (runNonDet (pure a)) == [a]
 --   prop> run (runNonDet (pure a)) == Just a
-runNonDet :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Eff (AltC f m) a -> m (f a)
-runNonDet = runAltC . interpret
+runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
+runNonDet (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
 
-newtype AltC f m a = AltC { runAltC :: m (f a) }
+-- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
+newtype NonDetC m a = NonDetC
+  { -- | A higher-order function receiving two parameters: a function to combine each solution with the rest of the solutions, and an action to run when no results are produced.
+    runNonDetC :: forall b . (a -> m b -> m b) -> m b -> m b
+  }
+  deriving (Functor)
 
-instance (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Applicative m) => Carrier (NonDet :+: sig) (AltC f m) where
-  ret a = AltC (ret (pure a))
-  eff = AltC . handleSum (eff . handleTraversable runAltC) (\case
-    Empty    -> ret empty
-    Choose k -> liftA2 (<|>) (runAltC (k True)) (runAltC (k False)))
+instance Applicative (NonDetC m) where
+  pure a = NonDetC (\ cons -> cons a)
+  {-# INLINE pure #-}
+  NonDetC f <*> NonDetC a = NonDetC $ \ cons ->
+    f (\ f' -> a (cons . f'))
+  {-# INLINE (<*>) #-}
 
+instance Alternative (NonDetC m) where
+  empty = NonDetC (\ _ nil -> nil)
+  {-# INLINE empty #-}
+  NonDetC l <|> NonDetC r = NonDetC $ \ cons -> l cons . r cons
+  {-# INLINE (<|>) #-}
 
--- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
---
---   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
---
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
-runNonDetOnce :: (Alternative f, Monad f, Traversable f, Carrier sig m, Effect sig, Monad m) => Eff (OnceC f m) a -> m (f a)
-runNonDetOnce = runNonDet . runCull . cull . runOnceC . interpret
+instance Monad (NonDetC m) where
+  NonDetC a >>= f = NonDetC $ \ cons ->
+    a (\ a' -> runNonDetC (f a') cons)
+  {-# INLINE (>>=) #-}
 
-newtype OnceC f m a = OnceC { runOnceC :: Eff (CullC (Eff (AltC f m))) a }
+instance MonadFail m => MonadFail (NonDetC m) where
+  fail s = NonDetC (\ _ _ -> fail s)
+  {-# INLINE fail #-}
 
-instance (Alternative f, Carrier sig m, Effect sig, Traversable f, Monad f, Monad m) => Carrier (NonDet :+: sig) (OnceC f m) where
-  ret = OnceC . ret
-  eff = OnceC . handleSum (eff . R . R . R . handleCoercible) (\case
-    Empty    -> empty
-    Choose k -> runOnceC (k True) <|> runOnceC (k False))
+instance MonadIO m => MonadIO (NonDetC m) where
+  liftIO io = NonDetC (\ cons nil -> liftIO io >>= flip cons nil)
+  {-# INLINE liftIO #-}
+
+instance MonadPlus (NonDetC m)
+
+instance MonadTrans NonDetC where
+  lift m = NonDetC (\ cons nil -> m >>= flip cons nil)
+  {-# INLINE lift #-}
+
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
+  eff (L Empty)      = empty
+  eff (L (Choose k)) = k True <|> k False
+  eff (R other)      = NonDetC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runNonDet) other) >>= foldr cons nil
+  {-# INLINE eff #-}
 
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Data.Foldable (asum)
