@@ -27,6 +27,10 @@ All deprecated APIs will be removed in the next release.
 - Moves `OnceC` from `Control.Effect.NonDet` to `Control.Effect.Cull` to avoid cyclic dependencies.
 - Adds a `runCutAll` handler for `Cut` effects, returning a collection of all results.
 
+# 0.2.0.2
+
+- Loosens the bounds on QuickCheck to accommodate 2.x.
+
 # 0.2.0.1
 
 - Fixes the benchmarks, and builds them in CI to avoid regressing them again.
