@@ -1,3 +1,7 @@
+# 0.2.0.2
+
+- Loosens the bounds on QuickCheck to accommodate 2.x.
+
 # 0.2.0.1
 
 - Fixes the benchmarks, and builds them in CI to avoid regressing them again.
