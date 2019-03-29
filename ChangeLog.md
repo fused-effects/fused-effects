@@ -1,3 +1,7 @@
+## Backwards-incompatible changes
+
+- Removes APIs deprecated in 0.3.0.0, including `Eff`, `interpret`, `ret`, and the `handle*` family of helper functions.
+
 # 0.3.0.0
 
 ## Backwards-incompatible changes
