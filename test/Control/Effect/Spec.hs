@@ -1,21 +1,25 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, MultiWayIf, TemplateHaskell, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# OPTIONS_GHC -O2 -fplugin Test.Inspection.Plugin #-}
 module Control.Effect.Spec where
 
 import Control.Effect
 import Control.Effect.Carrier
+import Control.Effect.Error
 import Control.Effect.Fail
 import Control.Effect.Reader
 import Control.Effect.State
 import Control.Effect.Sum
 import Prelude hiding (fail)
 import Test.Hspec
+import Test.Inspection as Inspection
+import Test.Inspection.Plugin
 
 spec :: Spec
 spec = do
   inference
   reinterpretation
   interposition
-
+  fusion
 
 inference :: Spec
 inference = describe "inference" $ do
@@ -80,3 +84,40 @@ instance (Carrier sig m, Member Fail sig) => Carrier sig (InterposeC m) where
   eff op
     | Just (Fail s) <- prj op = InterposeC (send (Fail ("hello, " ++ s)))
     | otherwise               = InterposeC (eff (handleCoercible op))
+
+
+shouldSucceed :: Inspection.Result -> Expectation
+shouldSucceed (Success _) = pure ()
+shouldSucceed (Failure f) = expectationFailure f
+
+fusion :: Spec
+fusion = describe "fusion" $ do
+  it "eliminates StateCs" $ do
+    shouldSucceed $(inspectTest $ 'countDown `doesNotUse` ''StateC)
+
+  it "eliminates nested StateCs" $ do
+    shouldSucceed $(inspectTest $ 'countBoth `doesNotUse` ''StateC)
+
+  it "eliminates catch and throw" $ do
+    shouldSucceed $(inspectTest $ 'throwing `doesNotUse` ''ErrorC)
+
+  it "eliminates calls to eff" $ do
+    shouldSucceed $(inspectTest $ 'countDown `doesNotUse` 'eff)
+
+countDown :: Int -> (Int, Int)
+countDown start = run . runState start $ go
+  where go = get >>= \n -> if n <= 0 then pure n else modify @Int pred *> go
+
+countBoth :: Int -> (Int, (Float, ()))
+countBoth n = run . runState n . runState (fromIntegral n) $ go where
+  go = do
+    int <- get @Int
+    if
+      | n == 0         -> pure ()
+      | n `mod` 2 == 0 -> modify @Float (+ 1) *> modify @Int pred *> go
+      | otherwise     -> modify @Int pred    *> go
+
+throwing :: Int -> Either Int String
+throwing n = run $ runError go
+  where go = if n > 10 then throwError @Int 42 else pure "fine"
+
