@@ -1,4 +1,7 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, UndecidableInstances #-}
+{-# LANGUAGE CPP, DefaultSignatures, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, UndecidableInstances #-}
+#if __GLASGOW_HASKELL__ >= 861
+{-# LANGUAGE QuantifiedConstraints #-}
+#endif
 module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
@@ -15,6 +18,18 @@ module Control.Effect.Carrier
 import Control.Monad (join)
 import Data.Coerce
 
+-- | A higher-order functor, as defined by Johann and Ghani in
+-- /Foundations for Structured Programming with GADTs/. In versions of
+-- GHC without support for the @QuantifiedConstraints@ extension, this
+-- is expressed with an additional @fmap'@ function. In neither case
+-- do you need to supply a definition for @fmap'@, as it is handled
+-- with a @default@ case.
+#if __GLASGOW_HASKELL__ >= 861
+class (forall f . Functor f => Functor (h f)) => HFunctor h where
+  -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
+
+  hmap :: (Functor f , Functor g) => (forall x . f x -> g x) -> (forall x . h f x -> h g x)
+#else
 class HFunctor h where
   -- | Functor map. This is required to be 'fmap'.
   --
@@ -26,7 +41,7 @@ class HFunctor h where
 
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   hmap :: (forall x . m x -> n x) -> (h m a -> h n a)
-
+#endif
 
 -- | The class of effect types, which must:
 --
@@ -54,7 +69,11 @@ class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
 handlePure :: HFunctor sig => (forall x . f x -> g x) -> sig f (f a) -> sig g (g a)
+#if __GLASGOW_HASKELL__ >= 861
+handlePure handler = hmap handler . fmap handler
+#else
 handlePure handler = hmap handler . fmap' handler
+#endif
 {-# INLINE handlePure #-}
 
 -- | Thread a 'Coercible' carrier through an 'HFunctor'.

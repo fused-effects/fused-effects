@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
+{-# LANGUAGE CPP, DeriveFunctor, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
 module Control.Effect.Sum
 ( (:+:)(..)
 , handleSum
@@ -19,8 +19,10 @@ instance (HFunctor l, HFunctor r) => HFunctor (l :+: r) where
   hmap f (L l) = L (hmap f l)
   hmap f (R r) = R (hmap f r)
 
+#if __GLASGOW_HASKELL__ <= 861
   fmap' f (L l) = L (fmap' f l)
   fmap' f (R r) = R (fmap' f r)
+#endif
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
   handle state handler (L l) = L (handle state handler l)
