@@ -44,6 +44,11 @@ instance Effect Resource where
 -- if @op@ throws an exception.
 --
 -- 'bracket' is safe in the presence of asynchronous exceptions.
+--
+-- If all the carrier types in your effect stack are instances of
+-- 'MonadBaseControl', you may not need 'Resource', as the @lifted-base@
+-- package provides APIs equivalent in power. The 'Resource' effect is
+-- useful when working with non-@MBC@ carriers such as 'NonDet'.
 bracket :: (Member Resource sig, Carrier sig m)
         => m resource           -- ^ computation to run first ("acquire resource")
         -> (resource -> m any)  -- ^ computation to run last ("release resource")
