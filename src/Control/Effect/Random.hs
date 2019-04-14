@@ -15,10 +15,12 @@ import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
+import Control.Monad.Base
 import Control.Monad.Fail
 import Control.Monad.Random.Class (MonadInterleave(..), MonadRandom(..))
 import Control.Monad.IO.Class (MonadIO(..))
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Control
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
 data Random m k
@@ -63,7 +65,7 @@ evalRandomIO :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, MonadBase b, MonadFail, MonadIO, MonadPlus, MonadTrans, MonadTransControl)
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m) where
   getRandom = RandomC $ do

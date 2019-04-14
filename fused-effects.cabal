@@ -45,8 +45,10 @@ library
   build-depends:       base >=4.9 && <4.13
                      , deepseq >=1.4.3 && <1.5
                      , MonadRandom >=0.5 && <0.6
+                     , monad-control >=1 && <2
                      , random
                      , transformers
+                     , transformers-base >= 0.4.4 && <0.5
   hs-source-dirs:      src
   default-language:    Haskell2010
   ghc-options:         -Weverything -Wno-missing-local-signatures -Wno-missing-import-lists -Wno-implicit-prelude -Wno-safe -Wno-unsafe -Wno-name-shadowing -Wno-monomorphism-restriction -Wno-missed-specialisations -Wno-all-missed-specialisations
@@ -64,6 +66,7 @@ test-suite examples
   build-depends:       base >=4.9 && <4.13
                      , fused-effects
                      , hspec >=2.4.1
+                     , transformers-base
                      , QuickCheck >= 2.7 && < 3
   hs-source-dirs:      examples
   default-language:    Haskell2010
@@ -86,6 +89,7 @@ test-suite doctest
   build-depends:       base >=4.9 && <4.13
                      , doctest >=0.7 && <1.0
                      , fused-effects
+                     , transformers-base
   hs-source-dirs:      test
   default-language:    Haskell2010
 

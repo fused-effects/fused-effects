@@ -7,6 +7,7 @@ module Control.Effect.Fail
 ) where
 
 import Control.Applicative (Alternative(..))
+import Control.Monad.Base
 import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Effect.Sum
@@ -14,6 +15,7 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Control
 import Data.Coerce
 import Prelude hiding (fail)
 
@@ -36,7 +38,7 @@ runFail :: FailC m a -> m (Either String a)
 runFail = runError . runFailC
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, MonadBase b, MonadIO, MonadPlus, MonadTrans, MonadTransControl)
 
 instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
   fail s = FailC (throwError s)

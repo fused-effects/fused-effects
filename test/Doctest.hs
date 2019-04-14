@@ -2,6 +2,7 @@ module Main
 ( main
 ) where
 
+import Control.Monad.Base
 import System.Environment
 import Test.DocTest
 

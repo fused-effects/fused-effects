@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeFamilies, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Reader
 ( Reader(..)
 , ask
@@ -12,9 +12,11 @@ import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
+import Control.Monad.Base
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Control
 import Prelude hiding (fail)
 
 data Reader r m k
@@ -90,6 +92,24 @@ instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
 instance MonadTrans (ReaderC r) where
   lift = ReaderC . const
   {-# INLINE lift #-}
+
+instance MonadBase b m => MonadBase b (ReaderC r m) where
+  liftBase = liftBaseDefault
+  {-# INLINE liftBase #-}
+
+instance MonadTransControl (ReaderC r) where
+  type StT (ReaderC r) a = a
+  liftWith f = ReaderC $ \r -> f (runReader r)
+  restoreT   = ReaderC . const
+  {-# INLINABLE liftWith #-}
+  {-# INLINABLE restoreT #-}
+
+instance MonadBaseControl b m => MonadBaseControl b (ReaderC r m) where
+  type StM (ReaderC r m) a = ComposeSt (ReaderC r) m a
+  liftBaseWith = defaultLiftBaseWith
+  restoreM     = defaultRestoreM
+  {-# INLINABLE liftBaseWith #-}
+  {-# INLINABLE restoreM #-}
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))

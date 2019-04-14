@@ -6,6 +6,7 @@ module Control.Effect.Pure
 ) where
 
 import Control.Effect.Carrier
+import Control.Monad.Base
 import Data.Coerce
 
 data Pure (m :: * -> *) k
@@ -48,3 +49,5 @@ instance Monad PureC where
 instance Carrier Pure PureC where
   eff v = case v of {}
   {-# INLINE eff #-}
+
+instance MonadBase PureC PureC where liftBase = id

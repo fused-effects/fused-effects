@@ -8,6 +8,7 @@ module Control.Effect.Fresh
 ) where
 
 import Control.Applicative (Alternative(..))
+import Control.Monad.Base
 import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Effect.Sum
@@ -15,6 +16,7 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Control
 
 data Fresh m k
   = Fresh (Int -> k)
@@ -51,7 +53,7 @@ runFresh :: Functor m => FreshC m a -> m a
 runFresh = evalState 0 . runFreshC
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, MonadBase b, MonadFail, MonadIO, MonadPlus, MonadTrans, MonadTransControl)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
   eff (L (Fresh   k)) = FreshC $ do

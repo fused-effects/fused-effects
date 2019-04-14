@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State.Strict
 ( State (..)
 , get
@@ -13,13 +13,15 @@ module Control.Effect.State.Strict
 ) where
 
 import Control.Applicative (Alternative(..))
+import Control.Monad.Base
 import Control.Effect.Carrier
 import Control.Effect.State.Internal
 import Control.Effect.Sum
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus(..), liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Control
 import Prelude hiding (fail)
 
 -- | Run a 'State' effect starting from the passed value.
@@ -79,6 +81,24 @@ instance (Alternative m, Monad m) => MonadPlus (StateC s m)
 instance MonadTrans (StateC s) where
   lift m = StateC (\ s -> (,) s <$> m)
   {-# INLINE lift #-}
+
+instance MonadBase b m => MonadBase b (StateC e m) where
+  liftBase = liftBaseDefault
+  {-# INLINE liftBase #-}
+
+instance MonadTransControl (StateC s) where
+  type StT (StateC s) a = (s, a)
+  liftWith f = StateC $ \s -> liftM (\a -> (s, a)) (f (runState s))
+  restoreT   = StateC . const
+  {-# INLINABLE liftWith #-}
+  {-# INLINABLE restoreT #-}
+
+instance MonadBaseControl b m => MonadBaseControl b (StateC s m) where
+  type StM (StateC s m) a = ComposeSt (StateC s) m a
+  liftBaseWith = defaultLiftBaseWith
+  restoreM     = defaultRestoreM
+  {-# INLINABLE liftBaseWith #-}
+  {-# INLINABLE restoreM #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   eff (L (Get   k)) = StateC (\ s -> runState s (k s))

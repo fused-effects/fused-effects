@@ -15,6 +15,7 @@ import           Control.Effect.Reader
 import           Control.Effect.Sum
 import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))
+import           Control.Monad.Base
 import           Control.Monad.Fail
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
@@ -83,6 +84,10 @@ newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
 
 instance MonadTrans ResourceC where
   lift = ResourceC . lift
+
+instance MonadBase b m => MonadBase b (ResourceC m) where
+  liftBase = liftBaseDefault
+  {-# INLINE liftBase #-}
 
 newtype Handler m = Handler (forall x . m x -> IO x)
 

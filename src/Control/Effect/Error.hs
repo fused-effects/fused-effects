@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeFamilies, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error
 ( Error(..)
 , throwError
@@ -8,12 +8,14 @@ module Control.Effect.Error
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
+import Control.Monad.Base
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Control.Monad (MonadPlus(..), (<=<))
+import Control.Monad (MonadPlus(..), (<=<), liftM)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Control
 import Prelude hiding (fail)
 
 data Error exc m k
@@ -89,6 +91,24 @@ instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 instance MonadTrans (ErrorC e) where
   lift = ErrorC . fmap Right
   {-# INLINE lift #-}
+
+instance MonadBase b m => MonadBase b (ErrorC e m) where
+  liftBase = liftBaseDefault
+  {-# INLINE liftBase #-}
+
+instance MonadTransControl (ErrorC e) where
+  type StT (ErrorC e) a = Either e a
+  liftWith f = ErrorC . liftM pure $ f runError
+  restoreT   = ErrorC
+  {-# INLINABLE liftWith #-}
+  {-# INLINABLE restoreT #-}
+
+instance MonadBaseControl b m => MonadBaseControl b (ErrorC e m) where
+  type StM (ErrorC e m) a = ComposeSt (ErrorC e) m a
+  liftBaseWith = defaultLiftBaseWith
+  restoreM     = defaultRestoreM
+  {-# INLINABLE liftBaseWith #-}
+  {-# INLINABLE restoreM #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
   eff (L (Throw e))     = ErrorC (pure (Left e))

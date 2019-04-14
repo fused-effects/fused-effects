@@ -14,6 +14,7 @@ import Control.Effect.NonDet
 import Control.Effect.Reader
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
+import Control.Monad.Base
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -49,7 +50,7 @@ runCull :: Alternative m => CullC m a -> m a
 runCull (CullC m) = runNonDetC (runReader False m) ((<|>) . pure) empty
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadBase b, MonadFail, MonadIO)
 
 instance Alternative (CullC m) where
   empty = CullC empty

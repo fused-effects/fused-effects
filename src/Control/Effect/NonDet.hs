@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
@@ -7,6 +7,7 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (Alternative(..))
+import Control.Monad.Base
 import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
@@ -77,6 +78,10 @@ instance MonadPlus (NonDetC m)
 instance MonadTrans NonDetC where
   lift m = NonDetC (\ cons nil -> m >>= flip cons nil)
   {-# INLINE lift #-}
+
+instance MonadBase b m => MonadBase b (NonDetC m) where
+  liftBase = liftBaseDefault
+  {-# INLINE liftBase #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L Empty)      = empty

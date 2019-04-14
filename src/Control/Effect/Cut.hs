@@ -14,6 +14,7 @@ import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
+import Control.Monad.Base
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -110,6 +111,10 @@ instance MonadPlus (CutC m)
 instance MonadTrans CutC where
   lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
   {-# INLINE lift #-}
+
+instance MonadBase b m => MonadBase b (CutC m) where
+  liftBase = liftBaseDefault
+  {-# INLINE liftBase #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)    = CutC $ \ _    _   fail -> fail

@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeFamilies, UndecidableInstances #-}
 module Control.Effect.Lift
 ( Lift(..)
 , sendM
@@ -9,10 +9,12 @@ module Control.Effect.Lift
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Sum
+import Control.Monad.Base
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Control
 import Data.Coerce
 
 newtype Lift sig (m :: * -> *) k = Lift { unLift :: sig k }
@@ -41,6 +43,24 @@ newtype LiftC m a = LiftC { runLiftC :: m a }
 
 instance MonadTrans LiftC where
   lift = LiftC
+
+instance MonadBase b m => MonadBase b (LiftC m) where
+  liftBase = liftBaseDefault
+  {-# INLINE liftBase #-}
+
+instance MonadTransControl LiftC where
+  type StT LiftC a = a
+  liftWith f = LiftC $ f runM
+  restoreT   = LiftC
+  {-# INLINABLE liftWith #-}
+  {-# INLINABLE restoreT #-}
+
+instance MonadBaseControl b m => MonadBaseControl b (LiftC m) where
+  type StM (LiftC m) a = ComposeSt LiftC m a
+  liftBaseWith = defaultLiftBaseWith
+  restoreM     = defaultRestoreM
+  {-# INLINABLE liftBaseWith #-}
+  {-# INLINABLE restoreM #-}
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
   eff = LiftC . (>>= runLiftC) . unLift
