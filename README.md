@@ -273,7 +273,7 @@ Finally, thanks to the fusion and inlining of carriers, `fused-effects` is appro
 
 Like [`freer-simple`][], `fused-effects` uses an initial encoding of library- and user-defined effects as syntax which can then be given different interpretations. In `freer-simple`, this is done with a family of interpreter functions (which cover a variety of needs, and which can be extended for more bespoke needs), whereas in `fused-effects` this is done with `Carrier` instances for `newtype`s.
 
-(Technically, it is possible to define handlers like `freer-simple`’s `interpret` using `fused-effects`, but passing handlers in as higher-order functions defeats the fusion and inlining of `Carrier` instances which makes `fused-effects` so efficient.)
+(Tho note that as of `fused-effects` 0.3.1, it is possible to define handlers using `runInterpret` in a manner analogous to `freer-simple`’s `interpret`, with the caveat that its use of higher-order functions defeats the fusion and inlining of `Carrier` instances which makes `fused-effects` so efficient.)
 
 Unlike `fused-effects`, in `freer-simple`, scoped operations like `catchError` and `local` are implemented as interpreters, and can therefore not be given new interpretations.
 
