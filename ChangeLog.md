@@ -1,3 +1,5 @@
+- Adds `MonadBase` instances to all carriers and `MonadTransControl`/`MonadBaseControl` instances for carriers that support them. This provides compatibility with the `monad-control` ecosystem.
+
 # 0.3.1.0
 
 - Adds `runInterpret` & `runInterpretState` handlers in `Control.Effect.Interpret` as a convenient way to experiment with effect handlers without defining a new carrier type and `Carrier` instance. Such handlers are somewhat less efficient than custom `Carrier`s, but allow for a smooth upgrade path when more efficiency is required.
