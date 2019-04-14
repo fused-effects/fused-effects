@@ -116,6 +116,10 @@ newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (
 
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
+instance MonadTrans (ResumableWithC err) where
+  lift = ResumableWithC . lift
+  {-# INLINE lift #-}
+
 instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
   eff (L (Resumable err k)) = ResumableWithC (ReaderC (\ handler -> runHandler handler err)) >>= k
   eff (R other)             = ResumableWithC (eff (R (handleCoercible other)))
