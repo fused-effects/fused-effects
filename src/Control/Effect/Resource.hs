@@ -1,4 +1,21 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-|
+The 'Resource' effect provides functions that enable safe acquisition
+and relinquishment of resources, using the 'bracket' pattern as specified
+by 'Control.Exception'.
+
+If all the carrier types in your effect stack are instances of
+'MonadBaseControl', you may not need 'Resource', as the @lifted-base@
+package provides a more complete interface. Be aware, however, that it
+is possible to misuse the 'MonadBaseControl' interface to produce
+unexpected results with certain carrier types. The 'Resource' effect
+is not subject to these limitations, and also works for carriers without
+a 'MonadBaseControl' instance, such as 'NonDet'. For more information
+about correct 'MonadBaseControl' use, consult Edward Yang's post:
+<http://blog.ezyang.com/2012/01/monadbasecontrol-is-unsound/>
+-}
+-- {}
+
 module Control.Effect.Resource
 ( Resource(..)
 , bracket
@@ -44,11 +61,6 @@ instance Effect Resource where
 -- if @op@ throws an exception.
 --
 -- 'bracket' is safe in the presence of asynchronous exceptions.
---
--- If all the carrier types in your effect stack are instances of
--- 'MonadBaseControl', you may not need 'Resource', as the @lifted-base@
--- package provides APIs equivalent in power. The 'Resource' effect is
--- useful when working with non-@MBC@ carriers such as 'NonDet'.
 bracket :: (Member Resource sig, Carrier sig m)
         => m resource           -- ^ computation to run first ("acquire resource")
         -> (resource -> m any)  -- ^ computation to run last ("release resource")
