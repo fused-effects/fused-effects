@@ -30,6 +30,7 @@ instance Functor m => Functor (StateC s m) where
 
 instance (Functor m, Monad m) => Applicative (StateC s m) where
   pure a = StateC $ \ s -> pure (s, a)
+  {-# INLINE pure #-}
   StateC mf <*> StateC mx = StateC $ \ s -> do
     ~(s', f) <- mf s
     ~(s'', x) <- mx s'
