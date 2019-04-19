@@ -52,6 +52,8 @@ instance Monad m => Applicative (StateC s m) where
     let fa = f' a'
     fa `seq` pure (s'', fa)
   {-# INLINE (<*>) #-}
+  m *> k = m >>= \_ -> k
+  {-# INLINE (*>) #-}
 
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
   empty = StateC (const empty)

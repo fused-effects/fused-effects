@@ -35,6 +35,8 @@ instance (Functor m, Monad m) => Applicative (StateC s m) where
     ~(s'', x) <- mx s'
     return (s'', f x)
   {-# INLINE (<*>) #-}
+  m *> k = m >>= \_ -> k
+  {-# INLINE (*>) #-}
 
 instance Monad m => Monad (StateC s m) where
   m >>= k  = StateC $ \ s -> do
