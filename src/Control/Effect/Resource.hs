@@ -6,6 +6,7 @@ module Control.Effect.Resource
 , finally
 , onException
 , runResource
+, unliftResource
 , ResourceC(..)
 ) where
 
@@ -74,17 +75,17 @@ onException :: (Member Resource sig, Carrier sig m)
         -> m a
 onException act end = bracketOnError (pure ()) (const end) (const act)
 
-runResource :: (forall x . m x -> IO x)
+runResource :: (forall x . m x -> IO x) -- ^ "unlifting" function to run the carrier in 'IO'
             -> ResourceC m a
             -> m a
 runResource handler = runReader (Handler handler) . runResourceC
 
 -- | A helper for 'runResource' that uses 'withRunInIO' to automatically
 -- select a correct unlifting function.
-runLiftingResource :: MonadUnliftIO m
-                   => ResourceC m a
-                   -> m a
-runLiftingResource r = withRunInIO (\f -> runHandler (Handler f) r)
+unliftResource :: MonadUnliftIO m
+               => ResourceC m a
+               -> m a
+unliftResource r = withRunInIO (\f -> runHandler (Handler f) r)
 
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
