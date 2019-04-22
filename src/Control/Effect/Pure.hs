@@ -32,6 +32,9 @@ instance Functor PureC where
   fmap = coerce
   {-# INLINE fmap #-}
 
+  a <$ _ = pure a
+  {-# INLINE (<$) #-}
+
 instance Applicative PureC where
   pure = PureC
   {-# INLINE pure #-}
