@@ -6,7 +6,7 @@ module Control.Effect.Resource
 , finally
 , onException
 , runResource
-, unliftResource
+, withResource
 , ResourceC(..)
 ) where
 
@@ -82,10 +82,10 @@ runResource handler = runReader (Handler handler) . runResourceC
 
 -- | A helper for 'runResource' that uses 'withRunInIO' to automatically
 -- select a correct unlifting function.
-unliftResource :: MonadUnliftIO m
+withResource :: MonadUnliftIO m
                => ResourceC m a
                -> m a
-unliftResource r = withRunInIO (\f -> runHandler (Handler f) r)
+withResource r = withRunInIO (\f -> runHandler (Handler f) r)
 
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
