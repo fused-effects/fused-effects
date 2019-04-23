@@ -67,6 +67,10 @@ instance Applicative m => Applicative (ReaderC r m) where
   {-# INLINE pure #-}
   ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
   {-# INLINE (<*>) #-}
+  ReaderC u *> ReaderC v = ReaderC $ \ r -> u r *> v r
+  {-# INLINE (*>) #-}
+  ReaderC u <* ReaderC v = ReaderC $ \ r -> u r <* v r
+  {-# INLINE (<*) #-}
 
 instance Alternative m => Alternative (ReaderC r m) where
   empty = ReaderC (const empty)

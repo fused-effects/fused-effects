@@ -46,12 +46,15 @@ newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
 instance Monad m => Applicative (StateC s m) where
   pure a = StateC (\ s -> pure (s, a))
+  {-# INLINE pure #-}
   StateC f <*> StateC a = StateC $ \ s -> do
     (s', f') <- f s
     (s'', a') <- a s'
     let fa = f' a'
     fa `seq` pure (s'', fa)
   {-# INLINE (<*>) #-}
+  m *> k = m >>= \_ -> k
+  {-# INLINE (*>) #-}
 
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
   empty = StateC (const empty)
