@@ -4,6 +4,10 @@
 
 - Removes APIs deprecated in 0.3.0.0, including `Eff`, `interpret`, `ret`, and the `handle*` family of helper functions.
 
+## Other changes
+
+- Adds a generic `Interpose` effect that enables arbitrary "eavesdropping" on other effects.
+
 # 0.3.1.0
 
 - Improved speed of `Reader`, `State`, `Writer`, and `Pure` effects by defining and inlining auxiliary `Applicative` methods.
