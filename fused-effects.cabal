@@ -27,6 +27,7 @@ library
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.Fresh
+                     , Control.Effect.Interpose
                      , Control.Effect.Interpret
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
