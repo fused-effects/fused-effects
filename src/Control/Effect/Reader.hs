@@ -14,6 +14,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
@@ -94,6 +95,12 @@ instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
 instance MonadTrans (ReaderC r) where
   lift = ReaderC . const
   {-# INLINE lift #-}
+
+instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
+  askUnliftIO = ReaderC $ \r -> withUnliftIO $ \u -> pure (UnliftIO (\(ReaderC x) -> unliftIO u (x r)))
+  {-# INLINE askUnliftIO #-}
+  withRunInIO inner = ReaderC $ \r -> withRunInIO $ \go -> inner (go . runReader r)
+  {-# INLINE withRunInIO #-}
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
