@@ -5,7 +5,10 @@ This module provides an 'InterposeC' carrier capable of "eavesdropping" on reque
 made to other carriers. This is a useful capability for dynamism in deeply-nested
 effect stacks, but can lead to complicated control flow. Be careful.
 -}
-module Control.Effect.Interpose where
+module Control.Effect.Interpose
+  ( InterposeC (..)
+  , runInterpose
+  ) where
 
 import Control.Effect.Carrier
 import Control.Effect.Reader
@@ -18,10 +21,8 @@ import Control.Monad.Trans.Class
 -- the intercepted effect, and you can pass the effect on to the original handler
 -- using 'send'.
 --
--- The following shows the use of 'runInterpose' to eavesdrop on 'State' effects:
--- @
---  runM . runState @Int 5 . runInterpose @(State Int) (\op -> liftIO (print "State op") *> send op) $ go
--- @
+--   prop> run . evalState @Int a . runInterpose @(State Int) (\op -> modify @Int (+b) *> send op) $ modify @Int (+b) == a + b + b
+--
 runInterpose :: (forall x . eff m (m x) -> m x) -> InterposeC eff m a -> m a
 runInterpose handler = runReader (Handler handler) . runInterposeC
 
@@ -42,3 +43,9 @@ instance (HFunctor eff, Carrier sig m, Member eff sig) => Carrier sig (Interpose
       handler <- InterposeC ask
       lift (runHandler handler (handleCoercible op'))
     | otherwise = InterposeC (ReaderC (\ handler -> eff (handlePure (runReader handler . runInterposeC) op)))
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Pure
+-- >>> import Control.Effect.State
