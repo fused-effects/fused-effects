@@ -1,6 +1,15 @@
+
+
 ## Backwards-incompatible changes
 
 - Removes APIs deprecated in 0.3.0.0, including `Eff`, `interpret`, `ret`, and the `handle*` family of helper functions.
+
+# 0.3.1.0
+
+- Improved speed of `Reader`, `State`, `Writer`, and `Pure` effects by defining and inlining auxiliary `Applicative` methods.
+- Adds `runInterpret` & `runInterpretState` handlers in `Control.Effect.Interpret` as a convenient way to experiment with effect handlers without defining a new carrier type and `Carrier` instance. Such handlers are somewhat less efficient than custom `Carrier`s, but allow for a smooth upgrade path when more efficiency is required.
+- Added `unliftio-core` as a dependency so as to provide a blessed API for unlift-style effects and a solution to the cubic-caller problem.
+>>>>>>> origin/master
 
 # 0.3.0.0
 

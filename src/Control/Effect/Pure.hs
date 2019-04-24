@@ -5,6 +5,7 @@ module Control.Effect.Pure
 , PureC(..)
 ) where
 
+import Control.Applicative
 import Control.Effect.Carrier
 import Data.Coerce
 
@@ -31,12 +32,24 @@ instance Functor PureC where
   fmap = coerce
   {-# INLINE fmap #-}
 
+  a <$ _ = pure a
+  {-# INLINE (<$) #-}
+
 instance Applicative PureC where
   pure = PureC
   {-# INLINE pure #-}
 
   (<*>) = coerce
   {-# INLINE (<*>) #-}
+
+  liftA2 = coerce
+  {-# INLINE liftA2 #-}
+
+  _ *> b = b
+  {-# INLINE (*>) #-}
+
+  a <* _ = a
+  {-# INLINE (<*) #-}
 
 instance Monad PureC where
   return = pure

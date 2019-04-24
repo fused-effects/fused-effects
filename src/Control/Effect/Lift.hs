@@ -12,6 +12,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 import Data.Coerce
 
@@ -44,3 +45,9 @@ instance MonadTrans LiftC where
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
   eff = LiftC . (>>= runLiftC) . unLift
+
+instance MonadUnliftIO m => MonadUnliftIO (LiftC m) where
+  askUnliftIO = LiftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runLiftC))
+  {-# INLINE askUnliftIO #-}
+  withRunInIO inner = LiftC $ withRunInIO $ \run -> inner (run . runLiftC)
+  {-# INLINE withRunInIO #-}

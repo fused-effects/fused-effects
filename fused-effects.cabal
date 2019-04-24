@@ -1,5 +1,5 @@
 name:                fused-effects
-version:             0.3.0.0
+version:             0.3.1.0
 synopsis:            A fast, flexible, fused effect system.
 description:         A fast, flexible, fused effect system, à la Effect Handlers in Scope, Monad Transformers and Modular Algebraic Effects: What Binds Them Together, and Fusion for Free—Efficient Algebraic Effect Handlers.
 homepage:            https://github.com/fused-effects/fused-effects
@@ -27,6 +27,7 @@ library
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.Fresh
+                     , Control.Effect.Interpret
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
                      , Control.Effect.Pure
@@ -44,6 +45,7 @@ library
   build-depends:       base >=4.9 && <4.13
                      , deepseq >=1.4.3 && <1.5
                      , MonadRandom >=0.5 && <0.6
+                     , unliftio-core >= 0.1.2
                      , random
                      , transformers
   hs-source-dirs:      src
@@ -59,11 +61,13 @@ test-suite examples
   type:                exitcode-stdio-1.0
   main-is:             Main.hs
   other-modules:       Parser
+                     , ReinterpretLog
                      , Teletype
   build-depends:       base >=4.9 && <4.13
                      , fused-effects
                      , hspec >=2.4.1
                      , QuickCheck >= 2.7 && < 3
+                     , transformers
   hs-source-dirs:      examples
   default-language:    Haskell2010
 

@@ -46,37 +46,49 @@ newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
 instance Monad m => Applicative (StateC s m) where
   pure a = StateC (\ s -> pure (s, a))
+  {-# INLINE pure #-}
   StateC f <*> StateC a = StateC $ \ s -> do
     (s', f') <- f s
     (s'', a') <- a s'
     let fa = f' a'
     fa `seq` pure (s'', fa)
+  {-# INLINE (<*>) #-}
+  m *> k = m >>= \_ -> k
+  {-# INLINE (*>) #-}
 
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
   empty = StateC (const empty)
+  {-# INLINE empty #-}
   StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
+  {-# INLINE (<|>) #-}
 
 instance Monad m => Monad (StateC s m) where
   StateC m >>= f = StateC $ \ s -> do
     (s', a) <- m s
     let fa = f a
     fa `seq` runState s' fa
+  {-# INLINE (>>=) #-}
 
 instance MonadFail m => MonadFail (StateC s m) where
   fail s = StateC (const (fail s))
+  {-# INLINE fail #-}
 
 instance MonadIO m => MonadIO (StateC s m) where
   liftIO io = StateC (\ s -> (,) s <$> liftIO io)
+  {-# INLINE liftIO #-}
 
 instance (Alternative m, Monad m) => MonadPlus (StateC s m)
 
 instance MonadTrans (StateC s) where
   lift m = StateC (\ s -> (,) s <$> m)
+  {-# INLINE lift #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
   eff (L (Get   k)) = StateC (\ s -> runState s (k s))
   eff (L (Put s k)) = StateC (\ _ -> runState s k)
   eff (R other)     = StateC (\ s -> eff (handle (s, ()) (uncurry runState) other))
+  {-# INLINE eff #-}
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
