@@ -73,14 +73,14 @@ censor f m = send (Censor f m pure)
 --   prop> run (runWriter (tell (Sum a) *> pure b)) == (Sum a, b)
 runWriter :: Monoid w => WriterC w m a -> m (w, a)
 runWriter = runState mempty . runWriterC
-{-# INLINE runWriter #-}
+{-# INLINE[3] runWriter #-}
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
 --
 --   prop> run (execWriter (tell (Sum a) *> pure b)) == Sum a
 execWriter :: (Monoid w, Functor m) => WriterC w m a -> m w
 execWriter = fmap fst . runWriter
-{-# INLINE execWriter #-}
+{-# INLINE[3] execWriter #-}
 
 
 -- | A space-efficient carrier for 'Writer' effects.
