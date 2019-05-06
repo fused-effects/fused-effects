@@ -26,6 +26,14 @@ class HFunctor h where
 --
 --   1. Be functorial in their last two arguments, and
 --   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
+--
+-- Instances of this class must satisfy the following laws:
+--
+-- > handle state f . fmap pure = handle state f
+-- > handle state f . fmap join = join . fmap (handle state f) . handle state f
+--
+-- The first law ensures that handlers preserve pure computations; the second ensures that handler behavior is identical before or after composition.
+-- In other words, 'handle' must be a well-behaved distributive law that composes with monads.
 class HFunctor sig => Effect sig where
   -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
   handle :: Functor f
