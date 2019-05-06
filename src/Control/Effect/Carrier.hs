@@ -21,6 +21,13 @@ class HFunctor h where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   hmap :: (forall x . m x -> n x) -> (h m a -> h n a)
 
+  -- | When an 'HFunctor' contains no recursive occurrences of @m@, 'hmap' can default to 'coerce'.
+  default hmap :: Coercible (h m a) (h n a)
+               => (forall x . m x -> n x)
+               -> (h m a -> h n a)
+  hmap _ = coerce
+  {-# INLINE hmap #-}
+
 
 -- | The class of effect types, which must:
 --
