@@ -33,7 +33,7 @@ class HFunctor h where
 -- > handle state f . fmap join = join . fmap (handle state f) . handle state f
 --
 -- The first law ensures that handlers preserve pure computations; the second ensures that handler behavior is identical before or after composition.
--- In other words, 'handle' must be a well-behaved distributive law that composes with monads.
+-- In other words, the function passed to 'handle' must be a well-behaved distributive law that composes with monads.
 class HFunctor sig => Effect sig where
   -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
   handle :: Functor f
