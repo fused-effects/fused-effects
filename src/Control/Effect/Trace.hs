@@ -25,10 +25,7 @@ data Trace (m :: * -> *) k = Trace
   { traceMessage :: String
   , traceCont    :: k
   } deriving stock Functor
-    deriving anyclass HFunctor
-
-instance Effect Trace where
-  handle state handler (Trace s k) = Trace s (handler (k <$ state))
+    deriving anyclass (HFunctor, Effect)
 
 -- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()

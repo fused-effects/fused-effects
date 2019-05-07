@@ -27,9 +27,7 @@ data Resumable err (m :: * -> *) k
 
 deriving instance Functor (Resumable err m)
 deriving instance HFunctor (Resumable err)
-
-instance Effect (Resumable err) where
-  handle state handler (Resumable err k) = Resumable err (handler . (<$ state) . k)
+deriving instance Effect (Resumable err)
 
 -- | Throw an error which can be resumed with a value of its result type.
 --

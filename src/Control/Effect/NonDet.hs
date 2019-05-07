@@ -18,11 +18,7 @@ import Prelude hiding (fail)
 data NonDet (m :: * -> *) k
   = Empty
   | Choose (Bool -> k)
-  deriving (Functor, HFunctor)
-
-instance Effect NonDet where
-  handle _     _       Empty      = Empty
-  handle state handler (Choose k) = Choose (handler . (<$ state) . k)
+  deriving (Functor, HFunctor, Effect)
 
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.

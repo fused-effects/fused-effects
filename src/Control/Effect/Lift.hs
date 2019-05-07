@@ -17,11 +17,7 @@ import Control.Monad.Trans.Class
 
 newtype Lift sig (m :: * -> *) k = Lift { unLift :: sig k }
   deriving stock Functor
-  deriving anyclass HFunctor
-
-instance Functor sig => Effect (Lift sig) where
-  handle state handler (Lift op) = Lift (fmap (handler . (<$ state)) op)
-
+  deriving anyclass (HFunctor, Effect)
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 runM :: LiftC m a -> m a

@@ -14,17 +14,11 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Coerce
 import Prelude hiding (fail)
 
 newtype Fail (m :: * -> *) k = Fail String
   deriving stock Functor
-  deriving anyclass HFunctor
-
-instance Effect Fail where
-  handle _ _ = coerce
-  {-# INLINE handle #-}
-
+  deriving anyclass (HFunctor, Effect)
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
