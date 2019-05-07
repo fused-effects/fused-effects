@@ -28,15 +28,7 @@ spec = describe "teletype" $ do
 data Teletype (m :: * -> *) k
   = Read (String -> k)
   | Write String k
-  deriving (Functor)
-
-instance HFunctor Teletype where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect Teletype where
-  handle state handler (Read    k) = Read (handler . (<$ state) . k)
-  handle state handler (Write s k) = Write s (handler (k <$ state))
+  deriving (Functor, HFunctor, Effect)
 
 read :: (Member Teletype sig, Carrier sig m) => m String
 read = send (Read pure)

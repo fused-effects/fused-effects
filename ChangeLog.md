@@ -6,6 +6,7 @@
 
 ## Other changes
 
+- Adds the ability to derive default instances of `HFunctor` and `Effect` for first-order effects, using the `-XDeriveAnyClass` extension.
 - Adds a generic `Interpose` effect that enables arbitrary "eavesdropping" on other effects.
 
 # 0.3.1.0
