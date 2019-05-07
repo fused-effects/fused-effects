@@ -19,7 +19,7 @@ class HFunctor h where
   {-# INLINE fmap' #-}
 
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
-  -- A definition for 'hmap' over first-order effects can be derived with the @-XDeriveAnyClass@ extension.
+  -- A definition for 'hmap' over first-order effects can be derived automatically.
   hmap :: (forall x . m x -> n x) -> (h m a -> h n a)
 
   default hmap :: Coercible (h m a) (h n a)
