@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
@@ -19,7 +19,6 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Coerce
 import Data.Functor.Classes
 
 -- | Errors which can be resumed with values of some existentially-quantified type.
@@ -27,13 +26,8 @@ data Resumable err (m :: * -> *) k
   = forall a . Resumable (err a) (a -> k)
 
 deriving instance Functor (Resumable err m)
-
-instance HFunctor (Resumable err) where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect (Resumable err) where
-  handle state handler (Resumable err k) = Resumable err (handler . (<$ state) . k)
+deriving instance HFunctor (Resumable err)
+deriving instance Effect (Resumable err)
 
 -- | Throw an error which can be resumed with a value of its result type.
 --
@@ -88,7 +82,7 @@ runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
 runResumable = runError . runResumableC
 
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   eff (L (Resumable err _)) = ResumableC (throwError (SomeError err))
@@ -110,7 +104,7 @@ runResumableWith :: (forall x . err x -> m x)
 runResumableWith with = runReader (Handler with) . runResumableWithC
 
 newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance MonadTrans (ResumableWithC err) where
   lift = ResumableWithC . lift

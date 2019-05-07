@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State.Internal
 ( State(..)
 , get
@@ -10,21 +10,12 @@ module Control.Effect.State.Internal
 
 import Control.Effect.Carrier
 import Control.Effect.Sum
-import Data.Coerce
 import Prelude hiding (fail)
 
 data State s (m :: * -> *) k
   = Get (s -> k)
   | Put s k
-  deriving (Functor)
-
-instance HFunctor (State s) where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect (State s) where
-  handle state handler (Get k)   = Get   (handler . (<$ state) . k)
-  handle state handler (Put s k) = Put s (handler . (<$ state) $ k)
+  deriving (Functor, HFunctor, Effect)
 
 -- | Get the current state value.
 --

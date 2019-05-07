@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fail
 ( Fail(..)
 , MonadFail(..)
@@ -14,20 +14,11 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Coerce
 import Prelude hiding (fail)
 
 newtype Fail (m :: * -> *) k = Fail String
-  deriving (Functor)
-
-instance HFunctor Fail where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect Fail where
-  handle _ _ = coerce
-  {-# INLINE handle #-}
-
+  deriving stock Functor
+  deriving anyclass (HFunctor, Effect)
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
@@ -36,7 +27,7 @@ runFail :: FailC m a -> m (Either String a)
 runFail = runError . runFailC
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadIO, MonadPlus, MonadTrans)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
   fail s = FailC (throwError s)
