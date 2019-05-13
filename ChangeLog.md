@@ -1,10 +1,4 @@
-
-
-## Backwards-incompatible changes
-
-- Removes APIs deprecated in 0.3.0.0, including `Eff`, `interpret`, `ret`, and the `handle*` family of helper functions.
-
-## Other changes
+# 0.3.2.0
 
 - Adds the ability to derive default instances of `HFunctor` and `Effect` for first-order effects, using the `-XDeriveAnyClass` extension.
 - Adds a generic `Interpose` effect that enables arbitrary "eavesdropping" on other effects.
