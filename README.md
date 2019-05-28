@@ -112,11 +112,11 @@ Effects are run with _effect handlers_, specified as functions (generally starti
 ```haskell
 example1 :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
 example1 list = runState 0 $ do
-  i <- get
+  i <- get @Int
   put (i + length list)
 ```
 
-`runState` returns a tuple of both the computed value (the `()`) and the final state (the `Int`), visible in the result of the returned computation.
+`runState` returns a tuple of both the computed value (the `()`) and the final state (the `Int`), visible in the result of the returned computation. The `get` function is resolved with a visible type application, due to the fact that effects can contain more than one state type (in contrast with `mtl`'s `MonadState`, which limits the user to a single state type).
 
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
