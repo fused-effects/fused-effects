@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
@@ -12,21 +12,13 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Data.Coerce
+import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 data NonDet (m :: * -> *) k
   = Empty
   | Choose (Bool -> k)
-  deriving (Functor)
-
-instance HFunctor NonDet where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect NonDet where
-  handle _     _       Empty      = Empty
-  handle state handler (Choose k) = Choose (handler . (<$ state) . k)
+  deriving (Functor, HFunctor, Effect)
 
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
@@ -47,33 +39,45 @@ newtype NonDetC m a = NonDetC
 
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ cons -> cons a)
+  {-# INLINE pure #-}
   NonDetC f <*> NonDetC a = NonDetC $ \ cons ->
     f (\ f' -> a (cons . f'))
+  {-# INLINE (<*>) #-}
 
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ nil -> nil)
+  {-# INLINE empty #-}
   NonDetC l <|> NonDetC r = NonDetC $ \ cons -> l cons . r cons
+  {-# INLINE (<|>) #-}
 
 instance Monad (NonDetC m) where
   NonDetC a >>= f = NonDetC $ \ cons ->
     a (\ a' -> runNonDetC (f a') cons)
+  {-# INLINE (>>=) #-}
 
 instance MonadFail m => MonadFail (NonDetC m) where
   fail s = NonDetC (\ _ _ -> fail s)
+  {-# INLINE fail #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
   liftIO io = NonDetC (\ cons nil -> liftIO io >>= flip cons nil)
+  {-# INLINE liftIO #-}
 
 instance MonadPlus (NonDetC m)
+
+instance MonadTrans NonDetC where
+  lift m = NonDetC (\ cons nil -> m >>= flip cons nil)
+  {-# INLINE lift #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L Empty)      = empty
   eff (L (Choose k)) = k True <|> k False
   eff (R other)      = NonDetC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runNonDet) other) >>= foldr cons nil
+  {-# INLINE eff #-}
 
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Data.Foldable (asum)

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Trace
 ( Trace(..)
 , trace
@@ -17,22 +17,15 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Bifunctor (first)
-import Data.Coerce
 import System.IO
 
 data Trace (m :: * -> *) k = Trace
   { traceMessage :: String
   , traceCont    :: k
-  }
-  deriving (Functor)
-
-instance HFunctor Trace where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect Trace where
-  handle state handler (Trace s k) = Trace s (handler (k <$ state))
+  } deriving stock Functor
+    deriving anyclass (HFunctor, Effect)
 
 -- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()
@@ -44,11 +37,16 @@ runTraceByPrinting :: TraceByPrintingC m a -> m a
 runTraceByPrinting = runTraceByPrintingC
 
 newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+
+instance MonadTrans TraceByPrintingC where
+  lift = TraceByPrintingC
+  {-# INLINE lift #-}
 
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
   eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
   eff (R other)       = TraceByPrintingC (eff (handleCoercible other))
+  {-# INLINE eff #-}
 
 
 -- | Run a 'Trace' effect, ignoring all traces.
@@ -58,11 +56,16 @@ runTraceByIgnoring :: TraceByIgnoringC m a -> m a
 runTraceByIgnoring = runTraceByIgnoringC
 
 newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+
+instance MonadTrans TraceByIgnoringC where
+  lift = TraceByIgnoringC
+  {-# INLINE lift #-}
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
   eff (L trace) = traceCont trace
   eff (R other) = TraceByIgnoringC (eff (handleCoercible other))
+  {-# INLINE eff #-}
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.
@@ -72,7 +75,7 @@ runTraceByReturning :: Functor m => TraceByReturningC m a -> m ([String], a)
 runTraceByReturning = fmap (first reverse) . runState [] . runTraceByReturningC
 
 newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
   eff (L (Trace m k)) = TraceByReturningC (modify (m :)) *> k
@@ -82,4 +85,4 @@ instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturnin
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure

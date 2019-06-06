@@ -18,6 +18,7 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Random.Class (MonadInterleave(..), MonadRandom(..))
 import Control.Monad.IO.Class (MonadIO(..))
+import Control.Monad.Trans.Class
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
 data Random m k
@@ -62,7 +63,7 @@ evalRandomIO :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m) where
   getRandom = RandomC $ do
@@ -91,13 +92,14 @@ instance (Carrier sig m, Effect sig, R.RandomGen g) => Carrier (Random :+: sig) 
   eff (L (RandomR r    k)) = getRandomR r >>= k
   eff (L (Interleave m k)) = interleave m >>= k
   eff (R other)            = RandomC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import System.Random
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Control.Effect.NonDet
 -- >>> newtype PureGen = PureGen Int deriving (Eq, Show)
 -- >>> instance RandomGen PureGen where next (PureGen i) = (i, PureGen i) ; split g = (g, g)

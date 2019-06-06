@@ -16,6 +16,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 -- | 'Cull' effects are used with 'NonDet' to provide control over branching.
@@ -52,12 +53,18 @@ newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
 
 instance Alternative (CullC m) where
   empty = CullC empty
+  {-# INLINE empty #-}
   l <|> r = CullC $ ReaderC $ \ cull -> NonDetC $ \ cons nil -> do
     runNonDetC (runReader cull (runCullC l))
       (\ a as -> cons a (if cull then nil else as))
       (runNonDetC (runReader cull (runCullC r)) cons nil)
+  {-# INLINE (<|>) #-}
 
 instance MonadPlus (CullC m)
+
+instance MonadTrans CullC where
+  lift = CullC . lift . lift
+  {-# INLINE lift #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   eff (L (Cull m k))     = CullC (local (const True) (runCullC m)) >>= k
@@ -81,11 +88,12 @@ newtype OnceC m a = OnceC { runOnceC :: CullC (NonDetC m) a }
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (OnceC m) where
   eff = OnceC . eff . R . R . handleCoercible
+  {-# INLINE eff #-}
 
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.NonDet
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Data.Foldable (asum)

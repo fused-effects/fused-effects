@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
@@ -18,7 +18,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
-import Data.Coerce
+import Control.Monad.Trans.Class
 import Data.Functor.Classes
 
 -- | Errors which can be resumed with values of some existentially-quantified type.
@@ -26,13 +26,8 @@ data Resumable err (m :: * -> *) k
   = forall a . Resumable (err a) (a -> k)
 
 deriving instance Functor (Resumable err m)
-
-instance HFunctor (Resumable err) where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect (Resumable err) where
-  handle state handler (Resumable err k) = Resumable err (handler . (<$ state) . k)
+deriving instance HFunctor (Resumable err)
+deriving instance Effect (Resumable err)
 
 -- | Throw an error which can be resumed with a value of its result type.
 --
@@ -87,11 +82,12 @@ runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
 runResumable = runError . runResumableC
 
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
   eff (L (Resumable err _)) = ResumableC (throwError (SomeError err))
   eff (R other)             = ResumableC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
@@ -108,13 +104,18 @@ runResumableWith :: (forall x . err x -> m x)
 runResumableWith with = runReader (Handler with) . runResumableWithC
 
 newtype ResumableWithC err m a = ResumableWithC { runResumableWithC :: ReaderC (Handler err m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+
+instance MonadTrans (ResumableWithC err) where
+  lift = ResumableWithC . lift
+  {-# INLINE lift #-}
 
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
 instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m) where
   eff (L (Resumable err k)) = ResumableWithC (ReaderC (\ handler -> runHandler handler err)) >>= k
   eff (R other)             = ResumableWithC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- $setup
@@ -122,6 +123,6 @@ instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableWithC err m)
 -- >>> :seti -XGADTs
 -- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Data.Functor.Const
 -- >>> import Data.Functor.Identity

@@ -16,6 +16,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
@@ -80,24 +81,35 @@ newtype CutC m a = CutC
 
 instance Applicative (CutC m) where
   pure a = CutC (\ cons nil _ -> cons a nil)
+  {-# INLINE pure #-}
   CutC f <*> CutC a = CutC $ \ cons nil fail ->
     f (\ f' fs -> a (cons . f') fs fail) nil fail
+  {-# INLINE (<*>) #-}
 
 instance Alternative (CutC m) where
   empty = CutC (\ _ nil _ -> nil)
+  {-# INLINE empty #-}
   CutC l <|> CutC r = CutC (\ cons nil fail -> l cons (r cons nil fail) fail)
+  {-# INLINE (<|>) #-}
 
 instance Monad (CutC m) where
   CutC a >>= f = CutC $ \ cons nil fail ->
     a (\ a' as -> runCutC (f a') cons as fail) nil fail
+  {-# INLINE (>>=) #-}
 
 instance MonadFail m => MonadFail (CutC m) where
   fail s = CutC (\ _ _ _ -> fail s)
+  {-# INLINE fail #-}
 
 instance MonadIO m => MonadIO (CutC m) where
   liftIO io = CutC (\ cons nil _ -> liftIO io >>= flip cons nil)
+  {-# INLINE liftIO #-}
 
 instance MonadPlus (CutC m)
+
+instance MonadTrans CutC where
+  lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
+  {-# INLINE lift #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
@@ -112,4 +124,4 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Cull
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure

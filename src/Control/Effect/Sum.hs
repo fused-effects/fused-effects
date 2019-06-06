@@ -25,7 +25,6 @@ instance (Effect l, Effect r) => Effect (l :+: r) where
   handle state handler (L l) = L (handle state handler l)
   handle state handler (R r) = R (handle state handler r)
 
-
 class Member (sub :: (* -> *) -> (* -> *)) sup where
   inj :: sub m a -> sup m a
   prj :: sup m a -> Maybe (sub m a)

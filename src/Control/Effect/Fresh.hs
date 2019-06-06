@@ -14,6 +14,7 @@ import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 data Fresh m k
   = Fresh (Int -> k)
@@ -50,7 +51,7 @@ runFresh :: Functor m => FreshC m a -> m a
 runFresh = evalState 0 . runFreshC
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
   eff (L (Fresh   k)) = FreshC $ do
@@ -63,11 +64,12 @@ instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
     put (i :: Int)
     runFreshC (k a)
   eff (R other)       = FreshC (eff (R (handleCoercible other)))
+  {-# INLINE eff #-}
 
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Void
+-- >>> import Control.Effect.Pure
 -- >>> import Control.Monad (replicateM)
 -- >>> import Data.List (nub)

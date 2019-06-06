@@ -1,6 +1,6 @@
 # A fast, flexible, fused effect system for Haskell
 
-[![Build Status](https://travis-ci.com/robrix/fused-effects.svg?branch=master)](https://travis-ci.com/robrix/fused-effects)
+[![Build Status](https://travis-ci.com/fused-effects/fused-effects.svg?branch=master)](https://travis-ci.com/fused-effects/fused-effects) [![hackage](https://img.shields.io/hackage/v/fused-effects.svg?color=blue&style=popout)](http://hackage.haskell.org/package/fused-effects)
 
 - [Overview][]
   - [Algebraic effects][]
@@ -20,28 +20,28 @@
   - [Comparison to `mtl`][]
   - [Comparison to `freer-simple`][]
 
-[Overview]: https://github.com/robrix/fused-effects#overview
-[Algebraic effects]: https://github.com/robrix/fused-effects#algebraic-effects
-[Higher-order effects]: https://github.com/robrix/fused-effects#higher-order-effects
-[Fusion]: https://github.com/robrix/fused-effects#fusion
+[Overview]: https://github.com/fused-effects/fused-effects#overview
+[Algebraic effects]: https://github.com/fused-effects/fused-effects#algebraic-effects
+[Higher-order effects]: https://github.com/fused-effects/fused-effects#higher-order-effects
+[Fusion]: https://github.com/fused-effects/fused-effects#fusion
 
-[Usage]: https://github.com/robrix/fused-effects#usage
-[Using built-in effects]: https://github.com/robrix/fused-effects#using-built-in-effects
-[Running effects]: https://github.com/robrix/fused-effects#running-effects
-[Required compiler extensions]: https://github.com/robrix/fused-effects#required-compiler-extensions
-[Defining new effects]: https://github.com/robrix/fused-effects#defining-new-effects
-[Defining effect handlers]: https://github.com/robrix/fused-effects#defining-effect-handlers
+[Usage]: https://github.com/fused-effects/fused-effects#usage
+[Using built-in effects]: https://github.com/fused-effects/fused-effects#using-built-in-effects
+[Running effects]: https://github.com/fused-effects/fused-effects#running-effects
+[Required compiler extensions]: https://github.com/fused-effects/fused-effects#required-compiler-extensions
+[Defining new effects]: https://github.com/fused-effects/fused-effects#defining-new-effects
+[Defining effect handlers]: https://github.com/fused-effects/fused-effects#defining-effect-handlers
 
-[Project overview]: https://github.com/robrix/fused-effects#project-overview
-[Development]: https://github.com/robrix/fused-effects#development
-[Versioning]: https://github.com/robrix/fused-effects#versioning
+[Project overview]: https://github.com/fused-effects/fused-effects#project-overview
+[Development]: https://github.com/fused-effects/fused-effects#development
+[Versioning]: https://github.com/fused-effects/fused-effects#versioning
 
-[Benchmarks]: https://github.com/robrix/fused-effects#benchmarks
+[Benchmarks]: https://github.com/fused-effects/fused-effects#benchmarks
 
-[Related work]: https://github.com/robrix/fused-effects#related-work
-[Contributed packages]: https://github.com/robrix/fused-effects#contributed-packages
-[Comparison to `mtl`]: https://github.com/robrix/fused-effects#comparison-to-mtl
-[Comparison to `freer-simple`]: https://github.com/robrix/fused-effects#comparison-to-freer-simple
+[Related work]: https://github.com/fused-effects/fused-effects#related-work
+[Contributed packages]: https://github.com/fused-effects/fused-effects#contributed-packages
+[Comparison to `mtl`]: https://github.com/fused-effects/fused-effects#comparison-to-mtl
+[Comparison to `freer-simple`]: https://github.com/fused-effects/fused-effects#comparison-to-freer-simple
 
 
 ## Overview
@@ -112,11 +112,11 @@ Effects are run with _effect handlers_, specified as functions (generally starti
 ```haskell
 example1 :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
 example1 list = runState 0 $ do
-  i <- get
+  i <- get @Int
   put (i + length list)
 ```
 
-`runState` returns a tuple of both the computed value (the `()`) and the final state (the `Int`), visible in the result of the returned computation.
+`runState` returns a tuple of both the computed value (the `()`) and the final state (the `Int`), visible in the result of the returned computation. The `get` function is resolved with a visible type application, due to the fact that effects can contain more than one state type (in contrast with `mtl`'s `MonadState`, which limits the user to a single state type).
 
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
@@ -138,7 +138,7 @@ example3 = run . runReader "hello" . runState 0 $ do
   put (length (list :: String))
 ```
 
-`run` is itself actually an effect handler for the `Void` effect, which has no operations and thus can only represent a final result value.
+`run` is itself actually an effect handler for the `Pure` effect, which has no operations and thus can only represent a final result value.
 
 Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for the `LiftC` carrier to lift `putStrLn` into the middle of our computation:
 
@@ -158,7 +158,7 @@ To use effects, you'll need a relatively-uncontroversial set of extensions: `-XF
 
 When defining your own effects, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), and `-XUndecidableInstances` to satisfy the coverage condition for this instance. You may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case.
 
-[common]: https://github.com/robrix/fused-effects/blob/master/docs/common_errors.md
+[common]: https://github.com/fused-effects/fused-effects/blob/master/docs/common_errors.md
 
 The following invocation, taken from the teletype example, should suffice for any use or construction of effects:
 
@@ -171,7 +171,7 @@ The following invocation, taken from the teletype example, should suffice for an
 
 The process of defining new effects is outlined in [`docs/defining_effects.md`][], using the classic `Teletype` effect as an example.
 
-[`docs/defining_effects.md`]: https://github.com/robrix/fused-effects/blob/master/docs/defining_effects.md
+[`docs/defining_effects.md`]: https://github.com/fused-effects/fused-effects/blob/master/docs/defining_effects.md
 
 ## Project overview
 
@@ -181,12 +181,12 @@ This project adheres to the Contributor Covenant [code of conduct][]. By partici
 
 Finally, this project is licensed under the BSD 3-clause [license][].
 
-[`src`]: https://github.com/robrix/fused-effects/tree/master/src
-[`test`]: https://github.com/robrix/fused-effects/tree/master/test
-[`examples`]: https://github.com/robrix/fused-effects/tree/master/examples
-[`docs`]: https://github.com/robrix/fused-effects/tree/master/docs
-[code of conduct]: https://github.com/robrix/fused-effects/blob/master/CODE_OF_CONDUCT.md
-[license]: https://github.com/robrix/fused-effects/blob/master/LICENSE.md
+[`src`]: https://github.com/fused-effects/fused-effects/tree/master/src
+[`test`]: https://github.com/fused-effects/fused-effects/tree/master/test
+[`examples`]: https://github.com/fused-effects/fused-effects/tree/master/examples
+[`docs`]: https://github.com/fused-effects/fused-effects/tree/master/docs
+[code of conduct]: https://github.com/fused-effects/fused-effects/blob/master/CODE_OF_CONDUCT.md
+[license]: https://github.com/fused-effects/fused-effects/blob/master/LICENSE.md
 
 
 ### Development
@@ -225,8 +225,10 @@ To run the provided benchmark suite, use `cabal new-bench`. You may wish to prov
 
 Though we aim to keep the `fused-effects` core minimal, we encourage the development of external `fused-effects`-compatible libraries. If you've written one that you'd like to be mentioned here, get in touch!
 
-* [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computatios.
+* [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computations.
+* [`fused-effects-exceptions`][exc] provides handlers for exceptions thrown in the `IO` monad.
 
+[exc]: https://github.com/fused-effects/fused-effects-exceptions
 [felens]: http://hackage.haskell.org/package/fused-effects-lens
 [lens]: http://hackage.haskell.org/package/lens
 
@@ -271,7 +273,7 @@ Finally, thanks to the fusion and inlining of carriers, `fused-effects` is appro
 
 Like [`freer-simple`][], `fused-effects` uses an initial encoding of library- and user-defined effects as syntax which can then be given different interpretations. In `freer-simple`, this is done with a family of interpreter functions (which cover a variety of needs, and which can be extended for more bespoke needs), whereas in `fused-effects` this is done with `Carrier` instances for `newtype`s.
 
-(Technically, it is possible to define handlers like `freer-simple`’s `interpret` using `fused-effects`, but passing handlers in as higher-order functions defeats the fusion and inlining of `Carrier` instances which makes `fused-effects` so efficient.)
+(Tho note that as of `fused-effects` 0.3.1, it is possible to define handlers using `runInterpret` in a manner analogous to `freer-simple`’s `interpret`, with the caveat that its use of higher-order functions defeats the fusion and inlining of `Carrier` instances which makes `fused-effects` so efficient.)
 
 Unlike `fused-effects`, in `freer-simple`, scoped operations like `catchError` and `local` are implemented as interpreters, and can therefore not be given new interpretations.
 
