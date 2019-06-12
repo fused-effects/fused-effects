@@ -2,3 +2,4 @@
 .stack-work
 dist-newstyle
 stack.yaml
+cabal.project.local
