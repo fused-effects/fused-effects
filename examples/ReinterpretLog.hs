@@ -10,6 +10,7 @@
 --   structured log messages as strings.
 
 
+{-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveFunctor              #-}
 {-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE FlexibleContexts           #-}
@@ -107,23 +108,7 @@ runApplication =
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a k
   deriving stock (Functor)
-
--- Log is a "first order" effect, so the Effect and HFunctor instance are
--- boilerplate. See https://github.com/fused-effects/fused-effects/issues/54
-instance Effect (Log a) where
-  handle ::
-       Functor f
-    => f ()
-    -> (forall x. f (m x) -> n (f x))
-    -> Log a m (m b)
-    -> Log a n (n (f b))
-  handle state handler =
-    coerce . fmap (handler . ((<$ state)))
-
-instance HFunctor (Log a) where
-  hmap :: (forall x. m x -> n x) -> Log a m k -> Log a n k
-  hmap _ =
-    coerce
+  deriving anyclass (HFunctor, Effect)
 
 -- Log an 'a'.
 log ::
