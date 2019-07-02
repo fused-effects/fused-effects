@@ -127,7 +127,7 @@ example2 = runReader "hello" . runState 0 $ do
   put (length (list :: String))
 ```
 
-(Note that the type annotation on `list` is necessary to disambiguate the requested value, since otherwise all the typechecker knows is that it’s an arbitrary `Foldable`. For more information, see the [comparison to `mtl`](#comparison-to--mtl-).)
+(Note that the type annotation on `list` is necessary to disambiguate the requested value, since otherwise all the typechecker knows is that it’s an arbitrary `Foldable`. For more information, see the [comparison to `mtl`](#comparison-to-mtl).)
 
 When all effects have been handled, a computation’s final value can be extracted with `run`:
 
