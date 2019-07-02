@@ -1,5 +1,7 @@
 # v0.5.0.0
 
+## Backwards-incompatible changes
+
 - Replaces `runResource` with an equivalent function that uses `MonadUnliftIO` to select the correct unlifting function (a la `withResource`, which is removed in favor of `runResource`).
 
 # v0.4.0.0
