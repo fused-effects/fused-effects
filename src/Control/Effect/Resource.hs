@@ -6,7 +6,6 @@ module Control.Effect.Resource
 , finally
 , onException
 , runResource
-, withResource
 , ResourceC(..)
 ) where
 
@@ -75,24 +74,34 @@ onException :: (Member Resource sig, Carrier sig m)
         -> m a
 onException act end = bracketOnError (pure ()) (const end) (const act)
 
-runResource :: (forall x . m x -> IO x) -- ^ "unlifting" function to run the carrier in 'IO'
+-- Not exposed due to its potential to silently drop effects (#180).
+unliftResource :: (forall x . m x -> IO x) -- ^ "unlifting" function to run the carrier in 'IO'
             -> ResourceC m a
             -> m a
-runResource handler = runReader (Handler handler) . runResourceC
+unliftResource handler = runReader (Handler handler) . runResourceC
 
--- | A helper for 'runResource' that uses 'withRunInIO' to automatically
--- select a correct unlifting function.
-withResource :: MonadUnliftIO m
-               => ResourceC m a
-               -> m a
-withResource r = withRunInIO (\f -> runHandler (Handler f) r)
+-- | Executes a 'Resource' effect. Because this runs using 'MonadUnliftIO',
+-- invocations of 'runResource' must happen at the "bottom" of a stack of
+-- effect invocations, i.e. before the use of any monads that lack such
+-- instances, such as 'StateC':
+--
+-- @
+--   runM
+--   . runResource
+--   . runState @Int 1
+--   $ myComputation
+-- @
+runResource :: MonadUnliftIO m
+            => ResourceC m a
+            -> m a
+runResource r = withRunInIO (\f -> runHandler (Handler f) r)
 
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance MonadUnliftIO m => MonadUnliftIO (ResourceC m) where
   askUnliftIO = ResourceC . ReaderC $ \(Handler h) ->
-    withUnliftIO $ \u -> pure (UnliftIO $ \r -> unliftIO u (runResource h r))
+    withUnliftIO $ \u -> pure (UnliftIO $ \r -> unliftIO u (unliftResource h r))
 
 instance MonadTrans ResourceC where
   lift = ResourceC . lift
