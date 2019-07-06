@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, FlexibleContexts, FlexibleInstances, FunctionalDependencies, RankNTypes, UndecidableInstances #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, FlexibleContexts, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
@@ -55,3 +55,7 @@ class GHFunctor m m' rep rep' | rep -> m, rep' -> m' where
 
 instance GHFunctor m m' rep rep' => GHFunctor m m' (M1 i c rep) (M1 i c rep') where
   ghmap f = M1 . ghmap f . unM1
+
+instance (GHFunctor m m' l l', GHFunctor m m' r r') => GHFunctor m m' (l :+: r) (l' :+: r') where
+  ghmap f (L1 l) = L1 (ghmap f l)
+  ghmap f (R1 r) = R1 (ghmap f r)
