@@ -68,3 +68,6 @@ instance GHFunctor m m' (K1 R c) (K1 R c) where
 
 instance (Functor f, GHFunctor m m' g g') => GHFunctor m m' (f :.: g) (f :.: g') where
   ghmap f = Comp1 . fmap (ghmap f) . unComp1
+
+instance GHFunctor m m' (Rec1 m) (Rec1 m') where
+  ghmap f = Rec1 . f . unRec1
