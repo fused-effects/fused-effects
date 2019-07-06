@@ -18,7 +18,7 @@ import Data.Coerce
 import Prelude hiding (fail)
 
 newtype Fail (m :: * -> *) k = Fail String
-  deriving Functor
+  deriving (Functor)
 
 instance HFunctor Fail where
   hmap _ = coerce
