@@ -8,11 +8,11 @@
 
 - Changes the signature of `eff` from `sig m (m a) -> m a` to `sig m a -> m a`, requiring effects to hold `m k` in their continuation positions instead of merely `k`. This was done in order to improve interoperability with other presentations of higher-order syntax, e.g. `bound`; syntax used with `bound` can now be given `HFunctor` and `Carrier` instances.
 
-- Removes `fmap'`, as it is now obsolete.
-
 - Adds `Functor` constraints to `hmap` and `Monad` constraints to `handle`, allowing a greater variety of instances to be defined (e.g. for recursively-nested syntax).
 
 - Replaces the default definitions of `hmap` and `handle` with derivations based on `Generic1` instead of `Coercible`. Therefore, first-order effects wishing to derive these instances will require `Generic1` instances, presumably derived using `-XDeriveGeneric`.
+
+- Deprecates `fmap'` in favour of `fmap`.
 
 - Deprecates `handlePure` in favour of `hmap`.
 
