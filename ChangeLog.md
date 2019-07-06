@@ -12,6 +12,8 @@
 
 - Replaces the default definitions of `hmap` and `handle` with derivations based on `Generic1` instead of `Coercible`. Therefore, first-order effects wishing to derive these instances will require `Generic1` instances, presumably derived using `-XDeriveGeneric`.
 
+- Deprecates `handlePure` in favour of `hmap`.
+
 # v0.4.0.0
 
 ## Backwards-incompatible changes

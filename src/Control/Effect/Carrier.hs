@@ -51,6 +51,7 @@ class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
 handlePure :: (HFunctor sig, Functor f, Functor g) => (forall x . f x -> g x) -> sig f a -> sig g a
 handlePure = hmap
 {-# INLINE handlePure #-}
+{-# DEPRECATED handlePure "handlePure has been subsumed by hmap." #-}
 
 -- | Thread a 'Coercible' carrier through an 'HFunctor'.
 --
