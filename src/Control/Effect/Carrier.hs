@@ -20,8 +20,8 @@ class HFunctor h where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   --
   -- A definition for 'hmap' over first-order effects can be derived automatically provided a 'Generic1' instance is available.
-  hmap :: (Functor m, Functor n) => (forall x . m x -> n x) -> (h m a -> h n a)
-  default hmap :: (Functor m, Functor n, Generic1 (h m), Generic1 (h n), GHFunctor m n (Rep1 (h m)) (Rep1 (h n))) => (forall x . m x -> n x) -> (h m a -> h n a)
+  hmap :: Functor m => (forall x . m x -> n x) -> (h m a -> h n a)
+  default hmap :: (Functor m, Generic1 (h m), Generic1 (h n), GHFunctor m n (Rep1 (h m)) (Rep1 (h n))) => (forall x . m x -> n x) -> (h m a -> h n a)
   hmap f = to1 . ghmap f . from1
   {-# INLINE hmap #-}
 
@@ -34,12 +34,12 @@ class HFunctor h where
 -- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'handle' provided a 'Generic1' instance is available for the effect.
 class HFunctor sig => Effect sig where
   -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
-  handle :: (Functor f, Monad m, Monad n)
+  handle :: (Functor f, Monad m)
          => f ()
          -> (forall x . f (m x) -> n (f x))
          -> sig m a
          -> sig n (f a)
-  default handle :: (Functor f, Monad m, Monad n, Generic1 (sig m), Generic1 (sig n), GEffect m n (Rep1 (sig m)) (Rep1 (sig n)))
+  default handle :: (Functor f, Monad m, Generic1 (sig m), Generic1 (sig n), GEffect m n (Rep1 (sig m)) (Rep1 (sig n)))
                  => f ()
                  -> (forall x . f (m x) -> n (f x))
                  -> sig m a
@@ -54,7 +54,7 @@ class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   eff :: sig m a -> m a
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
-handlePure :: (HFunctor sig, Functor f, Functor g) => (forall x . f x -> g x) -> sig f a -> sig g a
+handlePure :: (HFunctor sig, Functor f) => (forall x . f x -> g x) -> sig f a -> sig g a
 handlePure = hmap
 {-# INLINE handlePure #-}
 {-# DEPRECATED handlePure "handlePure has been subsumed by hmap." #-}
@@ -62,7 +62,7 @@ handlePure = hmap
 -- | Thread a 'Coercible' carrier through an 'HFunctor'.
 --
 --   This is applicable whenever @f@ is 'Coercible' to @g@, e.g. simple @newtype@s.
-handleCoercible :: (HFunctor sig, Functor f, Functor g, Coercible f g) => sig f a -> sig g a
+handleCoercible :: (HFunctor sig, Functor f, Coercible f g) => sig f a -> sig g a
 handleCoercible = hmap coerce
 {-# INLINE handleCoercible #-}
 
@@ -70,7 +70,7 @@ handleCoercible = hmap coerce
 -- | Generic implementation of 'HFunctor'.
 class GHFunctor m m' rep rep' where
   -- | Generic implementation of 'hmap'.
-  ghmap :: (Functor m, Functor m') => (forall x . m x -> m' x) -> (rep a -> rep' a)
+  ghmap :: Functor m => (forall x . m x -> m' x) -> (rep a -> rep' a)
 
 instance GHFunctor m m' rep rep' => GHFunctor m m' (M1 i c rep) (M1 i c rep') where
   ghmap f = M1 . ghmap f . unM1
@@ -104,7 +104,7 @@ instance HFunctor f => GHFunctor m m' (Rec1 (f m)) (Rec1 (f m')) where
 -- | Generic implementation of 'Effect'.
 class GEffect m m' rep rep' where
   -- | Generic implementation of 'handle'.
-  ghandle :: (Functor f, Monad m, Monad m')
+  ghandle :: (Functor f, Monad m)
           => f ()
           -> (forall x . f (m x) -> m' (f x))
           -> rep a
