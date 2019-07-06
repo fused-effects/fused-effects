@@ -20,11 +20,7 @@ data NonDet m k
   = Empty
   | Choose (Bool -> m k)
   deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor)
-
-instance Effect NonDet where
-  handle _     _       Empty      = Empty
-  handle state handler (Choose k) = Choose (handler . (<$ state) . k)
+  deriving anyclass (HFunctor, Effect)
 
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
