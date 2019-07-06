@@ -13,6 +13,7 @@ import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
@@ -27,7 +28,7 @@ runInterpret :: (forall x . eff m x -> m x) -> InterpretC eff m a -> m a
 runInterpret handler = runReader (Handler handler) . runInterpretC
 
 newtype InterpretC eff m a = InterpretC { runInterpretC :: ReaderC (Handler eff m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (InterpretC eff) where
   lift = InterpretC . lift
@@ -57,7 +58,7 @@ runInterpretState :: (forall x . s -> eff (StateC s m) x -> m (s, x)) -> s -> In
 runInterpretState handler state = runState state . runReader (HandlerState (\ eff -> StateC (\ s -> handler s eff))) . runInterpretStateC
 
 newtype InterpretStateC eff s m a = InterpretStateC { runInterpretStateC :: ReaderC (HandlerState eff s m) (StateC s m) a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (InterpretStateC eff s) where
   lift = InterpretStateC . lift . lift
