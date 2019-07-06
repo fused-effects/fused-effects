@@ -5,6 +5,9 @@ module Control.Effect.Carrier
 , Carrier(..)
 , handlePure
 , handleCoercible
+-- * Generic deriving of 'HFunctor' & 'Effect' instances.
+, GHFunctor(..)
+, GEffect(..)
 ) where
 
 import Data.Coerce
