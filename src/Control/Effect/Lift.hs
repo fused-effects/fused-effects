@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
 module Control.Effect.Lift
 ( Lift(..)
 , sendM
@@ -14,12 +14,11 @@ import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
+import GHC.Generics
 
 newtype Lift sig m k = Lift { unLift :: sig (m k) }
-  deriving (Functor)
-
-instance Functor sig => HFunctor (Lift sig) where
-  hmap f (Lift op) = Lift (f <$> op)
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor)
 
 instance Functor sig => Effect (Lift sig) where
   handle state handler (Lift op) = Lift (handler . (<$ state) <$> op)
@@ -35,7 +34,7 @@ sendM :: (Member (Lift n) sig, Carrier sig m, Functor n) => n a -> m a
 sendM = send . Lift . fmap pure
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance MonadTrans LiftC where
   lift = LiftC
