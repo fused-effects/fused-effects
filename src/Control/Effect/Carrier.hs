@@ -52,3 +52,6 @@ handleCoercible = handlePure coerce
 
 class GHFunctor m m' rep rep' | rep -> m, rep' -> m' where
   ghmap :: (Functor m, Functor m') => (forall x . m x -> m' x) -> (rep a -> rep' a)
+
+instance GHFunctor m m' rep rep' => GHFunctor m m' (M1 i c rep) (M1 i c rep') where
+  ghmap f = M1 . ghmap f . unM1
