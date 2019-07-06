@@ -80,34 +80,44 @@ class GHFunctor m m' rep rep' where
 
 instance GHFunctor m m' rep rep' => GHFunctor m m' (M1 i c rep) (M1 i c rep') where
   ghmap f = M1 . ghmap f . unM1
+  {-# INLINE ghmap #-}
 
 instance (GHFunctor m m' l l', GHFunctor m m' r r') => GHFunctor m m' (l :+: r) (l' :+: r') where
   ghmap f (L1 l) = L1 (ghmap f l)
   ghmap f (R1 r) = R1 (ghmap f r)
+  {-# INLINE ghmap #-}
 
 instance (GHFunctor m m' l l', GHFunctor m m' r r') => GHFunctor m m' (l :*: r) (l' :*: r') where
   ghmap f (l :*: r) = ghmap f l :*: ghmap f r
+  {-# INLINE ghmap #-}
 
 instance GHFunctor m m' V1 V1 where
   ghmap _ v = case v of {}
+  {-# INLINE ghmap #-}
 
 instance GHFunctor m m' U1 U1 where
   ghmap _ = id
+  {-# INLINE ghmap #-}
 
 instance GHFunctor m m' (K1 R c) (K1 R c) where
   ghmap _ = coerce
+  {-# INLINE ghmap #-}
 
 instance GHFunctor m m' Par1 Par1 where
   ghmap _ = coerce
+  {-# INLINE ghmap #-}
 
 instance (Functor f, GHFunctor m m' g g') => GHFunctor m m' (f :.: g) (f :.: g') where
   ghmap f = Comp1 . fmap (ghmap f) . unComp1
+  {-# INLINE ghmap #-}
 
 instance GHFunctor m m' (Rec1 m) (Rec1 m') where
   ghmap f = Rec1 . f . unRec1
+  {-# INLINE ghmap #-}
 
 instance HFunctor f => GHFunctor m m' (Rec1 (f m)) (Rec1 (f m')) where
   ghmap f = Rec1 . hmap f . unRec1
+  {-# INLINE ghmap #-}
 
 
 -- | Generic implementation of 'Effect'.
@@ -121,31 +131,41 @@ class GEffect m m' rep rep' where
 
 instance GEffect m m' rep rep' => GEffect m m' (M1 i c rep) (M1 i c rep') where
   ghandle state handler = M1 . ghandle state handler . unM1
+  {-# INLINE ghandle #-}
 
 instance (GEffect m m' l l', GEffect m m' r r') => GEffect m m' (l :+: r) (l' :+: r') where
   ghandle state handler (L1 l) = L1 (ghandle state handler l)
   ghandle state handler (R1 r) = R1 (ghandle state handler r)
+  {-# INLINE ghandle #-}
 
 instance (GEffect m m' l l', GEffect m m' r r') => GEffect m m' (l :*: r) (l' :*: r') where
   ghandle state handler (l :*: r) = ghandle state handler l :*: ghandle state handler r
+  {-# INLINE ghandle #-}
 
 instance GEffect m m' V1 V1 where
   ghandle _ _ v = case v of {}
+  {-# INLINE ghandle #-}
 
 instance GEffect m m' U1 U1 where
   ghandle _ _ = coerce
+  {-# INLINE ghandle #-}
 
 instance GEffect m m' (K1 R c) (K1 R c) where
   ghandle _ _ = coerce
+  {-# INLINE ghandle #-}
 
 instance GEffect m m' Par1 Par1 where
   ghandle state _ = Par1 . (<$ state) . unPar1
+  {-# INLINE ghandle #-}
 
 instance (Functor f, GEffect m m' g g') => GEffect m m' (f :.: g) (f :.: g') where
   ghandle state handler = Comp1 . fmap (ghandle state handler) . unComp1
+  {-# INLINE ghandle #-}
 
 instance GEffect m m' (Rec1 m) (Rec1 m') where
   ghandle state handler = Rec1 . handler . (<$ state) . unRec1
+  {-# INLINE ghandle #-}
 
 instance Effect f => GEffect m m' (Rec1 (f m)) (Rec1 (f m')) where
   ghandle state handler = Rec1 . handle state handler . unRec1
+  {-# INLINE ghandle #-}
