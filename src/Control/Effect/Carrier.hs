@@ -13,6 +13,9 @@ module Control.Effect.Carrier
 import Data.Coerce
 import GHC.Generics
 
+-- | Higher-order functors of kind @(* -> *) -> (* -> *)@ map functors to functors.
+--
+--   All effects must be 'HFunctor's.
 class HFunctor h where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   --
