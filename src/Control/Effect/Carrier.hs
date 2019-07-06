@@ -59,3 +59,6 @@ instance GHFunctor m m' rep rep' => GHFunctor m m' (M1 i c rep) (M1 i c rep') wh
 instance (GHFunctor m m' l l', GHFunctor m m' r r') => GHFunctor m m' (l :+: r) (l' :+: r') where
   ghmap f (L1 l) = L1 (ghmap f l)
   ghmap f (R1 r) = R1 (ghmap f r)
+
+instance (GHFunctor m m' l l', GHFunctor m m' r r') => GHFunctor m m' (l :*: r) (l' :*: r') where
+  ghmap f (l :*: r) = ghmap f l :*: ghmap f r
