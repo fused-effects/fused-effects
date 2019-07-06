@@ -10,6 +10,8 @@
 
 - Changes the signature of `eff` from `sig m (m a) -> m a` to `sig m a -> m a`, requiring effects to hold `m k` in their continuation positions instead of merely `k`. This was done in order to improve interoperability with other presentations of higher-order syntax, e.g. `bound`; syntax used with `bound` can now be given `HFunctor` and `Carrier` instances.
 
+  To upgrade effects used with previous versions, change any continuations from `k` to `m k`. If no existential type variables appear in the effect, you can derive `Generic1`, and thence `HFunctor` & `Effect` instances. Otherwise, implement the required instances by hand. Since continuation positions now occur in `m`, `hmap` definitions will have to apply the higher-order function to these as well.
+
 - Adds `Functor` constraints to `hmap` and `Monad` constraints to `handle`, allowing a greater variety of instances to be defined (e.g. for recursively-nested syntax).
 
 - Replaces the default definitions of `hmap` and `handle` with derivations based on `Generic1` instead of `Coercible`. Therefore, first-order effects wishing to derive these instances will require `Generic1` instances, presumably derived using `-XDeriveGeneric`.
