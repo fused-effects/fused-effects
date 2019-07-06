@@ -113,3 +113,6 @@ instance (Functor f, GEffect m m' g g') => GEffect m m' (f :.: g) (f :.: g') whe
 
 instance GEffect m m' (Rec1 m) (Rec1 m') where
   ghandle state handler = Rec1 . handler . (<$ state) . unRec1
+
+instance Effect f => GEffect m m' (Rec1 (f m)) (Rec1 (f m')) where
+  ghandle state handler = Rec1 . handle state handler . unRec1
