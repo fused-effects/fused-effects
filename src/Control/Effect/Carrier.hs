@@ -49,7 +49,7 @@ class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
 handlePure :: (HFunctor sig, Functor f, Functor g) => (forall x . f x -> g x) -> sig f a -> sig g a
-handlePure handler = hmap handler
+handlePure = hmap
 {-# INLINE handlePure #-}
 
 -- | Thread a 'Coercible' carrier through an 'HFunctor'.
