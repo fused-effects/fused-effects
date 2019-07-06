@@ -8,40 +8,38 @@ progress.)
 
 ## I'm getting kind errors when implementing a `Carrier` instance!
 
-Given a `Teletype` data type:
+Given an effect datatype that doesn’t use the `m` parameter:
 
 ```haskell
-data Teletype m k
-  = Read (String -> k)
-  | Write String k
+data Fail m k
+  = Fail String
   deriving (Functor)
 
-newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
+newtype FailC m a = FailC { runFailC :: m (Either String a) }
 ```
 
 Declaring a `Carrier` instance will fail:
 
 ```haskell
 instance (Carrier sig m, Effect sig)
-    => Carrier (Teletype :+: sig) (TeletypeIOC m) where…
+    => Carrier (Fail :+: sig) (FailC m) where…
 ```
 
 ```
 • Expected kind ‘(* -> *) -> * -> *’,
-    but ‘Teletype :+: sig’ has kind ‘* -> * -> *’
-• In the first argument of ‘Carrier’, namely ‘(Teletype :+: sig)’
+    but ‘Fail :+: sig’ has kind ‘* -> * -> *’
+• In the first argument of ‘Carrier’, namely ‘(Fail :+: sig)’
   In the instance declaration for
-    ‘Carrier (Teletype :+: sig) (TeletypeIOC m)
+    ‘Carrier (Fail :+: sig) (FailC m)
 ```
 
-This is because the `m` parameter to `Teletype` is inferred to be of kind `*`:
+This is because the `m` parameter to `Fail` is inferred to be of kind `*`:
 though `Carrier` expects an `m` of kind `* -> *`, `m` is never referenced in
-the definition of `Teletype`, so GHC makes an understandable but incorrect inference.
+the definition of `Fail`, so GHC makes an understandable but incorrect inference.
 An explicit kind annotation on `m` fixes the problem.
 
 ```haskell
-data Teletype (m :: * -> *) k
-  = Read (String -> k)
-  | Write String k
+data Fail (m :: * -> *) k
+  = Fail String
   deriving (Functor)
 ```
