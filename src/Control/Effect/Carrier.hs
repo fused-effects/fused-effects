@@ -98,3 +98,6 @@ instance GEffect m m' rep rep' => GEffect m m' (M1 i c rep) (M1 i c rep') where
 instance (GEffect m m' l l', GEffect m m' r r') => GEffect m m' (l :+: r) (l' :+: r') where
   ghandle state handler (L1 l) = L1 (ghandle state handler l)
   ghandle state handler (R1 r) = R1 (ghandle state handler r)
+
+instance (GEffect m m' l l', GEffect m m' r r') => GEffect m m' (l :*: r) (l' :*: r') where
+  ghandle state handler (l :*: r) = ghandle state handler l :*: ghandle state handler r
