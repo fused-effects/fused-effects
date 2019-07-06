@@ -97,6 +97,9 @@ instance GHFunctor m m' U1 U1 where
 instance GHFunctor m m' (K1 R c) (K1 R c) where
   ghmap _ = coerce
 
+instance GHFunctor m m' Par1 Par1 where
+  ghmap _ = coerce
+
 instance (Functor f, GHFunctor m m' g g') => GHFunctor m m' (f :.: g) (f :.: g') where
   ghmap f = Comp1 . fmap (ghmap f) . unComp1
 
