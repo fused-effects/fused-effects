@@ -16,6 +16,7 @@ import           Control.Effect.Sum
 import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))
 import           Control.Monad.Fail
+import           Control.Monad.Fix
 import           Control.Monad.IO.Class
 import           Control.Monad.IO.Unlift
 import           Control.Monad.Trans.Class
@@ -97,7 +98,7 @@ runResource :: MonadUnliftIO m
 runResource r = withRunInIO (\f -> runHandler (Handler f) r)
 
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (Handler m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadUnliftIO m => MonadUnliftIO (ResourceC m) where
   askUnliftIO = ResourceC . ReaderC $ \(Handler h) ->
