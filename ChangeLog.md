@@ -2,6 +2,8 @@
 
 - Derives `Generic1` instances for all non-existentially-quantified effect datatypes.
 
+- Defines `MonadFix` instances for all of the carriers.
+
 ## Backwards-incompatible changes
 
 - Replaces `runResource` with an equivalent function that uses `MonadUnliftIO` to select the correct unlifting function (a la `withResource`, which is removed in favor of `runResource`).
