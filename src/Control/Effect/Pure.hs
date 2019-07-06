@@ -7,7 +7,9 @@ module Control.Effect.Pure
 
 import Control.Applicative
 import Control.Effect.Carrier
+import Control.Monad.Fix
 import Data.Coerce
+import Data.Function (fix)
 import GHC.Generics (Generic1)
 
 data Pure (m :: * -> *) k
@@ -50,6 +52,10 @@ instance Monad PureC where
 
   PureC a >>= f = f a
   {-# INLINE (>>=) #-}
+
+instance MonadFix PureC where
+  mfix f = PureC (fix (runPureC . f))
+  {-# INLINE mfix #-}
 
 instance Carrier Pure PureC where
   eff v = case v of {}
