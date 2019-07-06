@@ -1,5 +1,7 @@
 # v0.5.0.0
 
+- Derives `Generic1` instances for all non-existentially-quantified effect datatypes.
+
 ## Backwards-incompatible changes
 
 - Replaces `runResource` with an equivalent function that uses `MonadUnliftIO` to select the correct unlifting function (a la `withResource`, which is removed in favor of `runResource`).
