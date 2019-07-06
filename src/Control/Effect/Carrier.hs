@@ -61,7 +61,6 @@ handleCoercible = hmap coerce
 {-# INLINE handleCoercible #-}
 
 
-
 class GHFunctor m m' rep rep' where
   ghmap :: (Functor m, Functor m') => (forall x . m x -> m' x) -> (rep a -> rep' a)
 
