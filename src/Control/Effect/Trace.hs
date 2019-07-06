@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Trace
 ( Trace(..)
 , trace
@@ -23,9 +23,16 @@ import System.IO
 
 data Trace (m :: * -> *) k = Trace
   { traceMessage :: String
-  , traceCont    :: k
-  } deriving stock Functor
-    deriving anyclass (HFunctor, Effect)
+  , traceCont    :: m k
+  }
+  deriving (Functor)
+
+instance HFunctor Trace where
+  hmap f (Trace m k) = Trace m (f k)
+
+instance Effect Trace where
+  handle state handler (Trace m k) = Trace m (handler (k <$ state))
+
 
 -- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()
@@ -37,7 +44,7 @@ runTraceByPrinting :: TraceByPrintingC m a -> m a
 runTraceByPrinting = runTraceByPrintingC
 
 newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance MonadTrans TraceByPrintingC where
   lift = TraceByPrintingC
@@ -56,7 +63,7 @@ runTraceByIgnoring :: TraceByIgnoringC m a -> m a
 runTraceByIgnoring = runTraceByIgnoringC
 
 newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance MonadTrans TraceByIgnoringC where
   lift = TraceByIgnoringC
@@ -75,7 +82,7 @@ runTraceByReturning :: Functor m => TraceByReturningC m a -> m ([String], a)
 runTraceByReturning = fmap (first reverse) . runState [] . runTraceByReturningC
 
 newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
   eff (L (Trace m k)) = TraceByReturningC (modify (m :)) *> k

@@ -18,9 +18,6 @@ instance (HFunctor l, HFunctor r) => HFunctor (l :+: r) where
   hmap f (L l) = L (hmap f l)
   hmap f (R r) = R (hmap f r)
 
-  fmap' f (L l) = L (fmap' f l)
-  fmap' f (R r) = R (fmap' f r)
-
 instance (Effect l, Effect r) => Effect (l :+: r) where
   handle state handler (L l) = L (handle state handler l)
   handle state handler (R r) = R (handle state handler r)
@@ -45,6 +42,6 @@ instance {-# OVERLAPPABLE #-} Member sub sup => Member sub (sub' :+: sup) where
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
-send :: (Member effect sig, Carrier sig m) => effect m (m a) -> m a
+send :: (Member effect sig, Carrier sig m) => effect m a -> m a
 send = eff . inj
 {-# INLINE send #-}

@@ -23,7 +23,7 @@ import Control.Monad.Trans.Class
 --   At time of writing, a simple passthrough use of 'runInterpret' to handle a 'State' effect is about five times slower than using 'StateC' directly.
 --
 --   prop> run (runInterpret (\ op -> case op of { Get k -> k a ; Put _ k -> k }) get) == a
-runInterpret :: (forall x . eff m (m x) -> m x) -> InterpretC eff m a -> m a
+runInterpret :: (forall x . eff m x -> m x) -> InterpretC eff m a -> m a
 runInterpret handler = runReader (Handler handler) . runInterpretC
 
 newtype InterpretC eff m a = InterpretC { runInterpretC :: ReaderC (Handler eff m) m a }
@@ -33,9 +33,9 @@ instance MonadTrans (InterpretC eff) where
   lift = InterpretC . lift
   {-# INLINE lift #-}
 
-newtype Handler eff m = Handler (forall x . eff m (m x) -> m x)
+newtype Handler eff m = Handler (forall x . eff m x -> m x)
 
-runHandler :: HFunctor eff => Handler eff m -> eff (InterpretC eff m) (InterpretC eff m a) -> m a
+runHandler :: (HFunctor eff, Functor m) => Handler eff m -> eff (InterpretC eff m) a -> m a
 runHandler h@(Handler handler) = handler . handlePure (runReader h . runInterpretC)
 
 instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff m) where
@@ -53,7 +53,7 @@ instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff 
 --   At time of writing, a simple use of 'runInterpretState' to handle a 'State' effect is about four times slower than using 'StateC' directly.
 --
 --   prop> run (runInterpretState (\ s op -> case op of { Get k -> runState s (k s) ; Put s' k -> runState s' k }) a get) == a
-runInterpretState :: (forall x . s -> eff (StateC s m) (StateC s m x) -> m (s, x)) -> s -> InterpretStateC eff s m a -> m (s, a)
+runInterpretState :: (forall x . s -> eff (StateC s m) x -> m (s, x)) -> s -> InterpretStateC eff s m a -> m (s, a)
 runInterpretState handler state = runState state . runReader (HandlerState (\ eff -> StateC (\ s -> handler s eff))) . runInterpretStateC
 
 newtype InterpretStateC eff s m a = InterpretStateC { runInterpretStateC :: ReaderC (HandlerState eff s m) (StateC s m) a }
@@ -63,9 +63,9 @@ instance MonadTrans (InterpretStateC eff s) where
   lift = InterpretStateC . lift . lift
   {-# INLINE lift #-}
 
-newtype HandlerState eff s m = HandlerState (forall x . eff (StateC s m) (StateC s m x) -> StateC s m x)
+newtype HandlerState eff s m = HandlerState (forall x . eff (StateC s m) x -> StateC s m x)
 
-runHandlerState :: HFunctor eff => HandlerState eff s m -> eff (InterpretStateC eff s m) (InterpretStateC eff s m a) -> StateC s m a
+runHandlerState :: (HFunctor eff, Functor m) => HandlerState eff s m -> eff (InterpretStateC eff s m) a -> StateC s m a
 runHandlerState h@(HandlerState handler) = handler . handlePure (runReader h . runInterpretStateC)
 
 instance (HFunctor eff, Carrier sig m, Effect sig) => Carrier (eff :+: sig) (InterpretStateC eff s m) where

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
 module Control.Effect.Lift
 ( Lift(..)
 , sendM
@@ -15,9 +15,14 @@ import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 
-newtype Lift sig (m :: * -> *) k = Lift { unLift :: sig k }
-  deriving stock Functor
-  deriving anyclass (HFunctor, Effect)
+newtype Lift sig m k = Lift { unLift :: sig (m k) }
+  deriving (Functor)
+
+instance Functor sig => HFunctor (Lift sig) where
+  hmap f (Lift op) = Lift (f <$> op)
+
+instance Functor sig => Effect (Lift sig) where
+  handle state handler (Lift op) = Lift (handler . (<$ state) <$> op)
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 runM :: LiftC m a -> m a
@@ -30,7 +35,7 @@ sendM :: (Member (Lift n) sig, Carrier sig m, Functor n) => n a -> m a
 sendM = send . Lift . fmap pure
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
 
 instance MonadTrans LiftC where
   lift = LiftC

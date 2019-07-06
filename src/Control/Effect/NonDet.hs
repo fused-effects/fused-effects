@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
@@ -15,10 +15,18 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
-data NonDet (m :: * -> *) k
+data NonDet m k
   = Empty
-  | Choose (Bool -> k)
-  deriving (Functor, HFunctor, Effect)
+  | Choose (Bool -> m k)
+  deriving (Functor)
+
+instance HFunctor NonDet where
+  hmap _ Empty      = Empty
+  hmap f (Choose k) = Choose (f . k)
+
+instance Effect NonDet where
+  handle _     _       Empty      = Empty
+  handle state handler (Choose k) = Choose (handler . (<$ state) . k)
 
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.

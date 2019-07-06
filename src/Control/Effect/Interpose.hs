@@ -23,7 +23,7 @@ import Control.Monad.Trans.Class
 --
 --   prop> run . evalState @Int a . runInterpose @(State Int) (\op -> modify @Int (+b) *> send op) $ modify @Int (+b) == a + b + b
 --
-runInterpose :: (forall x . eff m (m x) -> m x) -> InterposeC eff m a -> m a
+runInterpose :: (forall x . eff m x -> m x) -> InterposeC eff m a -> m a
 runInterpose handler = runReader (Handler handler) . runInterposeC
 
 newtype InterposeC eff m a = InterposeC { runInterposeC :: ReaderC (Handler eff m) m a }
@@ -32,14 +32,14 @@ newtype InterposeC eff m a = InterposeC { runInterposeC :: ReaderC (Handler eff 
 instance MonadTrans (InterposeC eff) where
   lift = InterposeC . lift
 
-newtype Handler eff m = Handler (forall x . eff m (m x) -> m x)
+newtype Handler eff m = Handler (forall x . eff m x -> m x)
 
-runHandler :: HFunctor eff => Handler eff m -> eff (ReaderC (Handler eff m) m) (ReaderC (Handler eff m) m a) -> m a
+runHandler :: (HFunctor eff, Functor m) => Handler eff m -> eff (ReaderC (Handler eff m) m) a -> m a
 runHandler h@(Handler handler) = handler . handlePure (runReader h)
 
 instance (HFunctor eff, Carrier sig m, Member eff sig) => Carrier sig (InterposeC eff m) where
-  eff (op :: sig (InterposeC eff m) (InterposeC eff m a))
-    | Just (op' :: eff (InterposeC eff m) (InterposeC eff m a)) <- prj op = do
+  eff (op :: sig (InterposeC eff m) a)
+    | Just (op' :: eff (InterposeC eff m) a) <- prj op = do
       handler <- InterposeC ask
       lift (runHandler handler (handleCoercible op'))
     | otherwise = InterposeC (ReaderC (\ handler -> eff (handlePure (runReader handler . runInterposeC) op)))

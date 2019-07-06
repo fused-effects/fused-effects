@@ -10,9 +10,7 @@
 --   structured log messages as strings.
 
 
-{-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveFunctor              #-}
-{-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -106,9 +104,14 @@ runApplication =
 
 -- Log an 'a', then continue with 'k'.
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
-  = Log a k
-  deriving stock (Functor)
-  deriving anyclass (HFunctor, Effect)
+  = Log a (m k)
+  deriving (Functor)
+
+instance HFunctor (Log a) where
+  hmap f (Log m k) = Log m (f k)
+
+instance Effect (Log a) where
+  handle state handler (Log m k) = Log m (handler (k <$ state))
 
 -- Log an 'a'.
 log ::
@@ -128,7 +131,7 @@ log x =
 -- Carrier one: log strings to stdout.
 newtype LogStdoutC m a
   = LogStdoutC (m a)
-  deriving newtype (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadIO)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects (and also
@@ -139,7 +142,7 @@ instance
      -- ... the 'LogStdoutC m' monad can interpret 'Log String :+: sig' effects
   => Carrier (Log String :+: sig) (LogStdoutC m) where
 
-  eff :: (Log String :+: sig) (LogStdoutC m) (LogStdoutC m a) -> LogStdoutC m a
+  eff :: (Log String :+: sig) (LogStdoutC m) a -> LogStdoutC m a
   eff = \case
     L (Log message k) ->
       LogStdoutC $ do
@@ -161,7 +164,7 @@ runLogStdout (LogStdoutC m) =
 -- using a function (provided at runtime) from 's' to 't'.
 newtype ReinterpretLogC s t m a
   = ReinterpretLogC { unReinterpretLogC :: ReaderC (s -> t) m a }
-  deriving newtype (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadIO)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects, one of which
@@ -174,7 +177,7 @@ instance
   => Carrier (Log s :+: sig) (ReinterpretLogC s t m) where
 
   eff ::
-       (Log s :+: sig) (ReinterpretLogC s t m) (ReinterpretLogC s t m a)
+       (Log s :+: sig) (ReinterpretLogC s t m) a
     -> ReinterpretLogC s t m a
   eff = \case
     L (Log s k) ->
@@ -200,7 +203,7 @@ reinterpretLog f =
 -- example's test spec.
 newtype CollectLogMessagesC s m a
   = CollectLogMessagesC { unCollectLogMessagesC :: WriterC [s] m a }
-  deriving newtype (Applicative, Functor, Monad)
+  deriving (Applicative, Functor, Monad)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
@@ -212,7 +215,7 @@ instance
   => Carrier (Log s :+: sig) (CollectLogMessagesC s m) where
 
   eff ::
-       (Log s :+: sig) (CollectLogMessagesC s m) (CollectLogMessagesC s m a)
+       (Log s :+: sig) (CollectLogMessagesC s m) a
     -> CollectLogMessagesC s m a
   eff = \case
     L (Log s k) ->

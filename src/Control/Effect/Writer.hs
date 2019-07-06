@@ -20,16 +20,16 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 data Writer w m k
-  = Tell w k
-  | forall a . Listen (m a) (w -> a -> k)
-  | forall a . Censor (w -> w) (m a) (a -> k)
+  = Tell w (m k)
+  | forall a . Listen (m a) (w -> a -> m k)
+  | forall a . Censor (w -> w) (m a) (a -> m k)
 
-deriving instance Functor (Writer w m)
+deriving instance Functor m => Functor (Writer w m)
 
 instance HFunctor (Writer w) where
-  hmap _ (Tell w     k) = Tell w         k
-  hmap f (Listen   m k) = Listen   (f m) k
-  hmap f (Censor g m k) = Censor g (f m) k
+  hmap f (Tell w     k) = Tell w         (f       k)
+  hmap f (Listen   m k) = Listen   (f m) ((f .) . k)
+  hmap f (Censor g m k) = Censor g (f m) (f     . k)
   {-# INLINE hmap #-}
 
 instance Effect (Writer w) where
