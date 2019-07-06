@@ -12,6 +12,7 @@ import Control.Effect.Error
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import GHC.Generics (Generic1)
@@ -28,7 +29,7 @@ runFail :: FailC m a -> m (Either String a)
 runFail = runError . runFailC
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadIO, MonadPlus, MonadTrans)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
   fail s = FailC (throwError s)
