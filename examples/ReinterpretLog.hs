@@ -10,7 +10,10 @@
 --   structured log messages as strings.
 
 
+{-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveFunctor              #-}
+{-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -37,6 +40,7 @@ import Control.Monad.IO.Class (MonadIO(..))
 import Data.Coerce            (coerce)
 import Data.Function          ((&))
 import Data.Kind              (Type)
+import GHC.Generics           (Generic1)
 import Prelude                hiding (log)
 import Test.Hspec
 
@@ -105,13 +109,8 @@ runApplication =
 -- Log an 'a', then continue with 'k'.
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a (m k)
-  deriving (Functor)
-
-instance HFunctor (Log a) where
-  hmap f (Log m k) = Log m (f k)
-
-instance Effect (Log a) where
-  handle state handler (Log m k) = Log m (handler (k <$ state))
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor, Effect)
 
 -- Log an 'a'.
 log ::
@@ -131,7 +130,7 @@ log x =
 -- Carrier one: log strings to stdout.
 newtype LogStdoutC m a
   = LogStdoutC (m a)
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving newtype (Applicative, Functor, Monad, MonadIO)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects (and also
@@ -164,7 +163,7 @@ runLogStdout (LogStdoutC m) =
 -- using a function (provided at runtime) from 's' to 't'.
 newtype ReinterpretLogC s t m a
   = ReinterpretLogC { unReinterpretLogC :: ReaderC (s -> t) m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving newtype (Applicative, Functor, Monad, MonadIO)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects, one of which
@@ -203,7 +202,7 @@ reinterpretLog f =
 -- example's test spec.
 newtype CollectLogMessagesC s m a
   = CollectLogMessagesC { unCollectLogMessagesC :: WriterC [s] m a }
-  deriving (Applicative, Functor, Monad)
+  deriving newtype (Applicative, Functor, Monad)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
