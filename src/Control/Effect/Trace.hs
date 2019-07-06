@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Trace
 ( Trace(..)
 , trace
@@ -22,7 +22,7 @@ import Data.Bifunctor (first)
 import GHC.Generics (Generic1)
 import System.IO
 
-data Trace (m :: * -> *) k = Trace
+data Trace m k = Trace
   { traceMessage :: String
   , traceCont    :: m k
   }
