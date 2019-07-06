@@ -104,3 +104,6 @@ instance (GEffect m m' l l', GEffect m m' r r') => GEffect m m' (l :*: r) (l' :*
 
 instance GEffect m m' (K1 R c) (K1 R c) where
   ghandle _ _ = coerce
+
+instance (Functor f, GEffect m m' g g') => GEffect m m' (f :.: g) (f :.: g') where
+  ghandle state handler = Comp1 . fmap (ghandle state handler) . unComp1
