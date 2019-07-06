@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DerivingStrategies, DeriveFoldable, DeriveFunctor, DeriveTraversable, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Parser
 ( spec
 ) where
@@ -75,14 +75,8 @@ spec = describe "parser" $ do
 
 
 data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
-  deriving (Functor)
-
-instance HFunctor Symbol where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect Symbol where
-  handle state handler = coerce . fmap (handler . (<$ state))
+  deriving stock (Functor)
+  deriving anyclass (HFunctor, Effect)
 
 satisfy :: (Carrier sig m, Member Symbol sig) => (Char -> Bool) -> m Char
 satisfy p = send (Satisfy p pure)
@@ -103,7 +97,7 @@ parse input = (>>= exhaustive) . runState input . runParseC
         exhaustive _       = empty
 
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
-  deriving (Alternative, Applicative, Functor, Monad)
+  deriving newtype (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
   eff (L (Satisfy p k)) = do
