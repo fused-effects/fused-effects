@@ -66,6 +66,7 @@ handleCoercible = hmap coerce
 
 -- | Generic implementation of 'HFunctor'.
 class GHFunctor m m' rep rep' where
+  -- | Generic implementation of 'hmap'.
   ghmap :: (Functor m, Functor m') => (forall x . m x -> m' x) -> (rep a -> rep' a)
 
 instance GHFunctor m m' rep rep' => GHFunctor m m' (M1 i c rep) (M1 i c rep') where
@@ -99,6 +100,7 @@ instance HFunctor f => GHFunctor m m' (Rec1 (f m)) (Rec1 (f m')) where
 
 -- | Generic implementation of 'Effect'.
 class GEffect m m' rep rep' where
+  -- | Generic implementation of 'handle'.
   ghandle :: (Functor f, Monad m, Monad m')
           => f ()
           -> (forall x . f (m x) -> m' (f x))
