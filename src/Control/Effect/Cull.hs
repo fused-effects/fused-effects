@@ -36,16 +36,16 @@ instance Effect Cull where
 
 -- | Cull nondeterminism in the argument, returning at most one result.
 --
---   prop> run (runNonDet (runCull (cull (pure a <|> pure b)))) == [a]
---   prop> run (runNonDet (runCull (cull (pure a <|> pure b) <|> pure c))) == [a, c]
---   prop> run (runNonDet (runCull (cull (asum (map pure (repeat a)))))) == [a]
+--   prop> run (runNonDet (runCull (cull (pure a <|> pure b)))) === [a]
+--   prop> run (runNonDet (runCull (cull (pure a <|> pure b) <|> pure c))) === [a, c]
+--   prop> run (runNonDet (runCull (cull (asum (map pure (repeat a)))))) === [a]
 cull :: (Carrier sig m, Member Cull sig) => m a -> m a
 cull m = send (Cull m pure)
 
 
 -- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
 --
---   prop> run (runNonDet (runCull (pure a <|> pure b))) == [a, b]
+--   prop> run (runNonDet (runCull (pure a <|> pure b))) === [a, b]
 runCull :: Alternative m => CullC m a -> m a
 runCull (CullC m) = runNonDetC (runReader False m) ((<|>) . pure) empty
 
@@ -79,8 +79,8 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC
 --
 --   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
 --
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == [a]
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) == Just a
+--   prop> run (runNonDetOnce (asum (map pure (repeat a)))) === [a]
+--   prop> run (runNonDetOnce (asum (map pure (repeat a)))) === Just a
 runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig) => OnceC m a -> m (f a)
 runNonDetOnce = runNonDet . runCull . cull . runOnceC
 

@@ -33,7 +33,7 @@ instance Effect (Error exc) where
 
 -- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
 --
---   prop> run (runError (throwError a)) == Left @Int @Int a
+--   prop> run (runError (throwError a)) === Left @Int @Int a
 throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
 throwError = send . Throw
 
@@ -45,16 +45,16 @@ throwError = send . Throw
 -- consider if 'Control.Effect.Resource' fits your use case; if not, use 'liftIO' with
 -- 'Control.Exception.try' or use 'Control.Exception.Catch' from outside the effect invocation.
 --
---   prop> run (runError (pure a `catchError` pure)) == Right a
---   prop> run (runError (throwError a `catchError` pure)) == Right @Int @Int a
---   prop> run (runError (throwError a `catchError` (throwError @Int))) == Left @Int @Int a
+--   prop> run (runError (pure a `catchError` pure)) === Right a
+--   prop> run (runError (throwError a `catchError` pure)) === Right @Int @Int a
+--   prop> run (runError (throwError a `catchError` (throwError @Int))) === Left @Int @Int a
 catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h pure)
 
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
---   prop> run (runError (pure a)) == Right @Int @Int a
+--   prop> run (runError (pure a)) === Right @Int @Int a
 runError :: ErrorC exc m a -> m (Either exc a)
 runError = runErrorC
 

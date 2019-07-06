@@ -26,7 +26,7 @@ import Control.Monad.Trans.Class
 -- the intercepted effect, and you can pass the effect on to the original handler
 -- using 'send'.
 --
---   prop> run . evalState @Int a . runInterpose @(State Int) (\op -> modify @Int (+b) *> send op) $ modify @Int (+b) == a + b + b
+--   prop> run . evalState @Int a . runInterpose @(State Int) (\op -> modify @Int (+b) *> send op) $ modify @Int (+b) === a + b + b
 --
 runInterpose :: (forall x . eff m x -> m x) -> InterposeC eff m a -> m a
 runInterpose handler = runReader (Handler handler) . runInterposeC

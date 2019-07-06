@@ -24,7 +24,7 @@ newtype Fail (m :: * -> *) k = Fail String
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
---   prop> run (runFail (pure a)) == Right a
+--   prop> run (runFail (pure a)) === Right a
 runFail :: FailC m a -> m (Either String a)
 runFail = runError . runFailC
 

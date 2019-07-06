@@ -28,8 +28,8 @@ data NonDet m k
 --
 --   Using '[]' as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unlike 'runNonDetOnce', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
 --
---   prop> run (runNonDet (pure a)) == [a]
---   prop> run (runNonDet (pure a)) == Just a
+--   prop> run (runNonDet (pure a)) === [a]
+--   prop> run (runNonDet (pure a)) === Just a
 runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDet (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
 
