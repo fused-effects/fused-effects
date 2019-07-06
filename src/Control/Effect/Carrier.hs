@@ -12,6 +12,8 @@ import GHC.Generics
 
 class HFunctor h where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
+  --
+  -- A definition for 'hmap' over first-order effects can be derived automatically provided a 'Generic1' instance is available.
   hmap :: (Functor m, Functor n) => (forall x . m x -> n x) -> (h m a -> h n a)
   default hmap :: (Functor m, Functor n, Generic1 (h m), Generic1 (h n), GHFunctor m n (Rep1 (h m)) (Rep1 (h n))) => (forall x . m x -> n x) -> (h m a -> h n a)
   hmap f = to1 . ghmap f . from1
@@ -22,6 +24,8 @@ class HFunctor h where
 --
 --   1. Be functorial in their last two arguments, and
 --   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
+--
+-- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'handle' provided a 'Generic1' instance is available for the effect.
 class HFunctor sig => Effect sig where
   -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
   handle :: (Functor f, Monad m, Monad n)
