@@ -18,13 +18,13 @@ import Prelude hiding (fail)
 
 data Error exc m k
   = Throw exc
-  | forall b . Catch (m b) (exc -> m b) (b -> k)
+  | forall b . Catch (m b) (exc -> m b) (b -> m k)
 
-deriving instance Functor (Error exc m)
+deriving instance Functor m => Functor (Error exc m)
 
 instance HFunctor (Error exc) where
   hmap _ (Throw exc)   = Throw exc
-  hmap f (Catch m h k) = Catch (f m) (f . h) k
+  hmap f (Catch m h k) = Catch (f m) (f . h) (f . k)
 
 instance Effect (Error exc) where
   handle _     _       (Throw exc)   = Throw exc

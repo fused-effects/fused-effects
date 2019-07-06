@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFoldable, DeriveFunctor, DeriveTraversable, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, DeriveTraversable, DerivingStrategies, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Parser
 ( spec
 ) where
@@ -13,6 +13,7 @@ import Control.Monad (replicateM)
 import Data.Char
 import Data.Coerce
 import Data.List (intercalate)
+import GHC.Generics (Generic1)
 import Test.Hspec
 import Test.Hspec.QuickCheck
 import Test.QuickCheck
@@ -74,15 +75,9 @@ spec = describe "parser" $ do
             replicateM m (vector n')
 
 
-data Symbol (m :: * -> *) k = Satisfy (Char -> Bool) (Char -> k)
-  deriving (Functor)
-
-instance HFunctor Symbol where
-  hmap _ = coerce
-  {-# INLINE hmap #-}
-
-instance Effect Symbol where
-  handle state handler = coerce . fmap (handler . (<$ state))
+data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor, Effect)
 
 satisfy :: (Carrier sig m, Member Symbol sig) => (Char -> Bool) -> m Char
 satisfy p = send (Satisfy p pure)
@@ -103,7 +98,7 @@ parse input = (>>= exhaustive) . runState input . runParseC
         exhaustive _       = empty
 
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
-  deriving (Alternative, Applicative, Functor, Monad)
+  deriving newtype (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
   eff (L (Satisfy p k)) = do

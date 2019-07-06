@@ -19,14 +19,14 @@ import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 data Reader r m k
-  = Ask (r -> k)
-  | forall b . Local (r -> r) (m b) (b -> k)
+  = Ask (r -> m k)
+  | forall b . Local (r -> r) (m b) (b -> m k)
 
-deriving instance Functor (Reader r m)
+deriving instance Functor m => Functor (Reader r m)
 
 instance HFunctor (Reader r) where
-  hmap _ (Ask k)       = Ask k
-  hmap f (Local g m k) = Local g (f m) k
+  hmap f (Ask k)       = Ask           (f . k)
+  hmap f (Local g m k) = Local g (f m) (f . k)
 
 instance Effect (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
@@ -105,7 +105,7 @@ instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
   eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
-  eff (R other)         = ReaderC (\ r -> eff (handlePure (runReader r) other))
+  eff (R other)         = ReaderC (\ r -> eff (hmap (runReader r) other))
   {-# INLINE eff #-}
 
 

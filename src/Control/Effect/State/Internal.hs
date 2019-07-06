@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State.Internal
 ( State(..)
 , get
@@ -10,12 +10,14 @@ module Control.Effect.State.Internal
 
 import Control.Effect.Carrier
 import Control.Effect.Sum
+import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 
-data State s (m :: * -> *) k
-  = Get (s -> k)
-  | Put s k
-  deriving (Functor, HFunctor, Effect)
+data State s m k
+  = Get (s -> m k)
+  | Put s (m k)
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor, Effect)
 
 -- | Get the current state value.
 --

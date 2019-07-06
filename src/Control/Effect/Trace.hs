@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Trace
 ( Trace(..)
 , trace
@@ -19,13 +19,15 @@ import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Bifunctor (first)
+import GHC.Generics (Generic1)
 import System.IO
 
-data Trace (m :: * -> *) k = Trace
+data Trace m k = Trace
   { traceMessage :: String
-  , traceCont    :: k
-  } deriving stock Functor
-    deriving anyclass (HFunctor, Effect)
+  , traceCont    :: m k
+  }
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor, Effect)
 
 -- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()

@@ -22,13 +22,13 @@ import Prelude hiding (fail)
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
 data Cut m k
   = Cutfail
-  | forall a . Call (m a) (a -> k)
+  | forall a . Call (m a) (a -> m k)
 
-deriving instance Functor (Cut m)
+deriving instance Functor m => Functor (Cut m)
 
 instance HFunctor Cut where
   hmap _ Cutfail    = Cutfail
-  hmap f (Call m k) = Call (f m) k
+  hmap f (Call m k) = Call (f m) (f . k)
   {-# INLINE hmap #-}
 
 instance Effect Cut where

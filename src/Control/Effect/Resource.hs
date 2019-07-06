@@ -21,14 +21,14 @@ import           Control.Monad.IO.Unlift
 import           Control.Monad.Trans.Class
 
 data Resource m k
-  = forall resource any output . Resource (m resource) (resource -> m any) (resource -> m output) (output -> k)
-  | forall resource any output . OnError  (m resource) (resource -> m any) (resource -> m output) (output -> k)
+  = forall resource any output . Resource (m resource) (resource -> m any) (resource -> m output) (output -> m k)
+  | forall resource any output . OnError  (m resource) (resource -> m any) (resource -> m output) (output -> m k)
 
-deriving instance Functor (Resource m)
+deriving instance Functor m => Functor (Resource m)
 
 instance HFunctor Resource where
-  hmap f (Resource acquire release use k) = Resource (f acquire) (f . release) (f . use) k
-  hmap f (OnError acquire release use k)  = OnError  (f acquire) (f . release) (f . use) k
+  hmap f (Resource acquire release use k) = Resource (f acquire) (f . release) (f . use) (f . k)
+  hmap f (OnError acquire release use k)  = OnError  (f acquire) (f . release) (f . use) (f . k)
 
 instance Effect Resource where
   handle state handler (Resource acquire release use k) = Resource (handler (acquire <$ state)) (handler . fmap release) (handler . fmap use) (handler . fmap k)

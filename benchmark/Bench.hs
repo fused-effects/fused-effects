@@ -9,6 +9,7 @@ import Control.Effect.Writer
 import Control.Effect.State
 import Control.Monad (ap, replicateM_)
 import Criterion.Main
+import Data.Functor.Identity
 import Data.Monoid (Sum(..))
 
 main :: IO ()
@@ -78,5 +79,5 @@ instance Applicative (Cod m) where
 instance Monad (Cod m) where
   Cod a >>= f = Cod (\ k -> a (runCod k . f))
 
-instance Carrier sig m => Carrier sig (Cod m) where
-  eff op = Cod (\ k -> eff (hmap (runCod pure) (fmap' (runCod k) op)))
+instance (Carrier sig m, Effect sig) => Carrier sig (Cod m) where
+  eff op = Cod (\ k -> eff (handle (Identity ()) (runCod (pure . Identity) . runIdentity) op) >>= k . runIdentity)

@@ -12,6 +12,7 @@
 
 {-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveFunctor              #-}
+{-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE FlexibleInstances          #-}
@@ -39,6 +40,7 @@ import Control.Monad.IO.Class (MonadIO(..))
 import Data.Coerce            (coerce)
 import Data.Function          ((&))
 import Data.Kind              (Type)
+import GHC.Generics           (Generic1)
 import Prelude                hiding (log)
 import Test.Hspec
 
@@ -106,8 +108,8 @@ runApplication =
 
 -- Log an 'a', then continue with 'k'.
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
-  = Log a k
-  deriving stock (Functor)
+  = Log a (m k)
+  deriving stock (Functor, Generic1)
   deriving anyclass (HFunctor, Effect)
 
 -- Log an 'a'.
@@ -139,7 +141,7 @@ instance
      -- ... the 'LogStdoutC m' monad can interpret 'Log String :+: sig' effects
   => Carrier (Log String :+: sig) (LogStdoutC m) where
 
-  eff :: (Log String :+: sig) (LogStdoutC m) (LogStdoutC m a) -> LogStdoutC m a
+  eff :: (Log String :+: sig) (LogStdoutC m) a -> LogStdoutC m a
   eff = \case
     L (Log message k) ->
       LogStdoutC $ do
@@ -147,7 +149,7 @@ instance
         runLogStdout k
 
     R other ->
-      LogStdoutC (eff (handlePure runLogStdout other))
+      LogStdoutC (eff (hmap runLogStdout other))
 
 -- The 'LogStdoutC' runner.
 runLogStdout ::
@@ -174,7 +176,7 @@ instance
   => Carrier (Log s :+: sig) (ReinterpretLogC s t m) where
 
   eff ::
-       (Log s :+: sig) (ReinterpretLogC s t m) (ReinterpretLogC s t m a)
+       (Log s :+: sig) (ReinterpretLogC s t m) a
     -> ReinterpretLogC s t m a
   eff = \case
     L (Log s k) ->
@@ -212,7 +214,7 @@ instance
   => Carrier (Log s :+: sig) (CollectLogMessagesC s m) where
 
   eff ::
-       (Log s :+: sig) (CollectLogMessagesC s m) (CollectLogMessagesC s m a)
+       (Log s :+: sig) (CollectLogMessagesC s m) a
     -> CollectLogMessagesC s m a
   eff = \case
     L (Log s k) ->

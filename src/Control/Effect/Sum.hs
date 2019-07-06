@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
 module Control.Effect.Sum
 ( (:+:)(..)
 , Member(..)
@@ -6,24 +6,15 @@ module Control.Effect.Sum
 ) where
 
 import Control.Effect.Carrier
+import GHC.Generics (Generic1)
 
 data (f :+: g) (m :: * -> *) k
   = L (f m k)
   | R (g m k)
-  deriving (Eq, Functor, Ord, Show)
+  deriving stock (Eq, Functor, Generic1, Ord, Show)
+  deriving anyclass (HFunctor, Effect)
 
 infixr 4 :+:
-
-instance (HFunctor l, HFunctor r) => HFunctor (l :+: r) where
-  hmap f (L l) = L (hmap f l)
-  hmap f (R r) = R (hmap f r)
-
-  fmap' f (L l) = L (fmap' f l)
-  fmap' f (R r) = R (fmap' f r)
-
-instance (Effect l, Effect r) => Effect (l :+: r) where
-  handle state handler (L l) = L (handle state handler l)
-  handle state handler (R r) = R (handle state handler r)
 
 class Member (sub :: (* -> *) -> (* -> *)) sup where
   inj :: sub m a -> sup m a
@@ -45,6 +36,6 @@ instance {-# OVERLAPPABLE #-} Member sub sup => Member sub (sub' :+: sup) where
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
-send :: (Member effect sig, Carrier sig m) => effect m (m a) -> m a
+send :: (Member effect sig, Carrier sig m) => effect m a -> m a
 send = eff . inj
 {-# INLINE send #-}

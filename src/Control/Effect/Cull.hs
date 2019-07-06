@@ -21,12 +21,12 @@ import Prelude hiding (fail)
 
 -- | 'Cull' effects are used with 'NonDet' to provide control over branching.
 data Cull m k
-  = forall a . Cull (m a) (a -> k)
+  = forall a . Cull (m a) (a -> m k)
 
-deriving instance Functor (Cull m)
+deriving instance Functor m => Functor (Cull m)
 
 instance HFunctor Cull where
-  hmap f (Cull m k) = Cull (f m) k
+  hmap f (Cull m k) = Cull (f m) (f . k)
   {-# INLINE hmap #-}
 
 instance Effect Cull where

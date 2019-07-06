@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, DerivingStrategies, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
 ( Resumable(..)
 , throwResumable
@@ -22,12 +22,16 @@ import Control.Monad.Trans.Class
 import Data.Functor.Classes
 
 -- | Errors which can be resumed with values of some existentially-quantified type.
-data Resumable err (m :: * -> *) k
-  = forall a . Resumable (err a) (a -> k)
+data Resumable err m k
+  = forall a . Resumable (err a) (a -> m k)
 
-deriving instance Functor (Resumable err m)
-deriving instance HFunctor (Resumable err)
-deriving instance Effect (Resumable err)
+deriving instance Functor m => Functor (Resumable err m)
+
+instance HFunctor (Resumable err) where
+  hmap f (Resumable err k) = Resumable err (f . k)
+
+instance Effect (Resumable err) where
+  handle state handler (Resumable err k) = Resumable err (handler . (<$ state) . k)
 
 -- | Throw an error which can be resumed with a value of its result type.
 --
@@ -37,7 +41,7 @@ throwResumable err = send (Resumable err pure)
 
 
 -- | An error at some existentially-quantified type index.
-data SomeError (err :: * -> *)
+data SomeError err
   = forall a . SomeError (err a)
 
 -- | Equality for 'SomeError' is determined by an 'Eq1' instance for the error type.

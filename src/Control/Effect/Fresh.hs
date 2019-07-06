@@ -17,14 +17,14 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 data Fresh m k
-  = Fresh (Int -> k)
-  | forall b . Reset (m b) (b -> k)
+  = Fresh (Int -> m k)
+  | forall b . Reset (m b) (b -> m k)
 
-deriving instance Functor (Fresh m)
+deriving instance Functor m => Functor (Fresh m)
 
 instance HFunctor Fresh where
-  hmap _ (Fresh   k) = Fresh k
-  hmap f (Reset m k) = Reset (f m) k
+  hmap f (Fresh   k) = Fresh       (f . k)
+  hmap f (Reset m k) = Reset (f m) (f . k)
 
 instance Effect Fresh where
   handle state handler (Fresh   k) = Fresh (handler . (<$ state) . k)

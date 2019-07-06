@@ -22,21 +22,21 @@ import Control.Monad.Trans.Class
 import qualified System.Random as R (Random(..), RandomGen(..), StdGen, newStdGen)
 
 data Random m k
-  = forall a . R.Random a => Random (a -> k)
-  | forall a . R.Random a => RandomR (a, a) (a -> k)
-  | forall a . Interleave (m a) (a -> k)
+  = forall a . R.Random a => Random (a -> m k)
+  | forall a . R.Random a => RandomR (a, a) (a -> m k)
+  | forall a . Interleave (m a) (a -> m k)
 
-deriving instance Functor (Random m)
+deriving instance Functor m => Functor (Random m)
 
 instance HFunctor Random where
-  hmap _ (Random k) = Random k
-  hmap _ (RandomR r k) = RandomR r k
-  hmap f (Interleave m k) = Interleave (f m) k
+  hmap f (Random       k) = Random           (f . k)
+  hmap f (RandomR r    k) = RandomR r        (f . k)
+  hmap f (Interleave m k) = Interleave (f m) (f . k)
   {-# INLINE hmap #-}
 
 instance Effect Random where
-  handle state handler (Random    k) = Random    (handler . (<$ state) . k)
-  handle state handler (RandomR r k) = RandomR r (handler . (<$ state) . k)
+  handle state handler (Random       k) = Random                            (handler . (<$ state) . k)
+  handle state handler (RandomR r    k) = RandomR r                         (handler . (<$ state) . k)
   handle state handler (Interleave m k) = Interleave (handler (m <$ state)) (handler . fmap k)
 
 

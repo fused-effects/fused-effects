@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, EmptyCase, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, EmptyCase, KindSignatures, MultiParamTypeClasses #-}
 module Control.Effect.Pure
 ( Pure
 , run
@@ -8,18 +8,11 @@ module Control.Effect.Pure
 import Control.Applicative
 import Control.Effect.Carrier
 import Data.Coerce
+import GHC.Generics (Generic1)
 
 data Pure (m :: * -> *) k
-  deriving (Functor)
-
-instance HFunctor Pure where
-  hmap _ v = case v of {}
-  {-# INLINE hmap #-}
-
-instance Effect Pure where
-  handle _ _ v = case v of {}
-  {-# INLINE handle #-}
-
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor, Effect)
 
 -- | Run an action exhausted of effects to produce its final result value.
 run :: PureC a -> a

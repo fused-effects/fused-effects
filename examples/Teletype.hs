@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 module Teletype where
 
@@ -11,6 +11,7 @@ import Control.Effect.Sum
 import Control.Effect.Writer
 import Control.Monad.IO.Class
 import Data.Coerce
+import GHC.Generics (Generic1)
 import Test.Hspec
 import Test.Hspec.QuickCheck
 
@@ -25,10 +26,11 @@ spec = describe "teletype" $ do
   prop "writes multiple things" $
     \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) `shouldBe` ([output1, output2], (input, ()))
 
-data Teletype (m :: * -> *) k
-  = Read (String -> k)
-  | Write String k
-  deriving (Functor, HFunctor, Effect)
+data Teletype m k
+  = Read (String -> m k)
+  | Write String (m k)
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor, Effect)
 
 read :: (Member Teletype sig, Carrier sig m) => m String
 read = send (Read pure)

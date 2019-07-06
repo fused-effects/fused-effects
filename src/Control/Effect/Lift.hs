@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
 module Control.Effect.Lift
 ( Lift(..)
 , sendM
@@ -14,9 +14,10 @@ import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
+import GHC.Generics
 
-newtype Lift sig (m :: * -> *) k = Lift { unLift :: sig k }
-  deriving stock Functor
+newtype Lift sig m k = Lift { unLift :: sig (m k) }
+  deriving stock (Functor, Generic1)
   deriving anyclass (HFunctor, Effect)
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
