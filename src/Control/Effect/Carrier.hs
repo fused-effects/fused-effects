@@ -29,6 +29,12 @@ class HFunctor sig => Effect sig where
          -> (forall x . f (m x) -> n (f x))
          -> sig m a
          -> sig n (f a)
+  default handle :: (Functor f, Monad m, Monad n, Generic1 (sig m), Generic1 (sig n), GEffect m n (Rep1 (sig m)) (Rep1 (sig n)))
+                 => f ()
+                 -> (forall x . f (m x) -> n (f x))
+                 -> sig m a
+                 -> sig n (f a)
+  handle state handler = to1 . ghandle state handler . from1
 
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
@@ -77,3 +83,11 @@ instance GHFunctor m m' (Rec1 m) (Rec1 m') where
 
 instance HFunctor f => GHFunctor m m' (Rec1 (f m)) (Rec1 (f m')) where
   ghmap f = Rec1 . hmap f . unRec1
+
+
+class GEffect m m' rep rep' where
+  ghandle :: (Functor f, Monad m, Monad m')
+          => f ()
+          -> (forall x . f (m x) -> m' (f x))
+          -> rep a
+          -> rep' (f a)
