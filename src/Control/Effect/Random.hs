@@ -42,19 +42,19 @@ instance Effect Random where
 
 -- | Run a random computation starting from a given generator.
 --
---   prop> run (runRandom (PureGen a) (pure b)) == (PureGen a, b)
+--   prop> run (runRandom (PureGen a) (pure b)) === (PureGen a, b)
 runRandom :: g -> RandomC g m a -> m (g, a)
 runRandom g = runState g . runRandomC
 
 -- | Run a random computation starting from a given generator and discarding the final generator.
 --
---   prop> run (evalRandom (PureGen a) (pure b)) == b
+--   prop> run (evalRandom (PureGen a) (pure b)) === b
 evalRandom :: Functor m => g -> RandomC g m a -> m a
 evalRandom g = fmap snd . runRandom g
 
 -- | Run a random computation starting from a given generator and discarding the final result.
 --
---   prop> run (execRandom (PureGen a) (pure b)) == PureGen a
+--   prop> run (execRandom (PureGen a) (pure b)) === PureGen a
 execRandom :: Functor m => g -> RandomC g m a -> m g
 execRandom g = fmap fst . runRandom g
 

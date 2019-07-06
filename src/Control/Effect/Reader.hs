@@ -34,27 +34,27 @@ instance Effect (Reader r) where
 
 -- | Retrieve the environment value.
 --
---   prop> run (runReader a ask) == a
+--   prop> run (runReader a ask) === a
 ask :: (Member (Reader r) sig, Carrier sig m) => m r
 ask = send (Ask pure)
 
 -- | Project a function out of the current environment value.
 --
---   prop> snd (run (runReader a (asks (applyFun f)))) == applyFun f a
+--   prop> snd (run (runReader a (asks (applyFun f)))) === applyFun f a
 asks :: (Member (Reader r) sig, Carrier sig m) => (r -> a) -> m a
 asks f = send (Ask (pure . f))
 
 -- | Run a computation with an environment value locally modified by the passed function.
 --
---   prop> run (runReader a (local (applyFun f) ask)) == applyFun f a
---   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) == (a, applyFun f a, a)
+--   prop> run (runReader a (local (applyFun f) ask)) === applyFun f a
+--   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) === (a, applyFun f a, a)
 local :: (Member (Reader r) sig, Carrier sig m) => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
 
 
 -- | Run a 'Reader' effect with the passed environment value.
 --
---   prop> run (runReader a (pure b)) == b
+--   prop> run (runReader a (pure b)) === b
 runReader :: r -> ReaderC r m a -> m a
 runReader r c = runReaderC c r
 {-# INLINE runReader #-}

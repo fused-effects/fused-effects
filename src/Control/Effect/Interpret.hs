@@ -22,7 +22,7 @@ import Control.Monad.Trans.Class
 --
 --   At time of writing, a simple passthrough use of 'runInterpret' to handle a 'State' effect is about five times slower than using 'StateC' directly.
 --
---   prop> run (runInterpret (\ op -> case op of { Get k -> k a ; Put _ k -> k }) get) == a
+--   prop> run (runInterpret (\ op -> case op of { Get k -> k a ; Put _ k -> k }) get) === a
 runInterpret :: (forall x . eff m x -> m x) -> InterpretC eff m a -> m a
 runInterpret handler = runReader (Handler handler) . runInterpretC
 
@@ -52,7 +52,7 @@ instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff 
 --
 --   At time of writing, a simple use of 'runInterpretState' to handle a 'State' effect is about four times slower than using 'StateC' directly.
 --
---   prop> run (runInterpretState (\ s op -> case op of { Get k -> runState s (k s) ; Put s' k -> runState s' k }) a get) == a
+--   prop> run (runInterpretState (\ s op -> case op of { Get k -> runState s (k s) ; Put s' k -> runState s' k }) a get) === a
 runInterpretState :: (forall x . s -> eff (StateC s m) x -> m (s, x)) -> s -> InterpretStateC eff s m a -> m (s, a)
 runInterpretState handler state = runState state . runReader (HandlerState (\ eff -> StateC (\ s -> handler s eff))) . runInterpretStateC
 

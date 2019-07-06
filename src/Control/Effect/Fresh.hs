@@ -32,21 +32,21 @@ instance Effect Fresh where
 
 -- | Produce a fresh (i.e. unique) 'Int'.
 --
---   prop> run (runFresh (replicateM n fresh)) == nub (run (runFresh (replicateM n fresh)))
+--   prop> run (runFresh (replicateM n fresh)) === nub (run (runFresh (replicateM n fresh)))
 fresh :: (Member Fresh sig, Carrier sig m) => m Int
 fresh = send (Fresh pure)
 
 -- | Reset the fresh counter after running a computation.
 --
---   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) == run (runFresh (replicateM n fresh))
+--   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) === run (runFresh (replicateM n fresh))
 resetFresh :: (Member Fresh sig, Carrier sig m) => m a -> m a
 resetFresh m = send (Reset m pure)
 
 
 -- | Run a 'Fresh' effect counting up from 0.
 --
---   prop> run (runFresh (replicateM n fresh)) == [0..pred n]
---   prop> run (runFresh (replicateM n fresh *> pure b)) == b
+--   prop> run (runFresh (replicateM n fresh)) === [0..pred n]
+--   prop> run (runFresh (replicateM n fresh *> pure b)) === b
 runFresh :: Functor m => FreshC m a -> m a
 runFresh = evalState 0 . runFreshC
 

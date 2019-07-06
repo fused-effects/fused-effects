@@ -53,7 +53,7 @@ instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC
 
 -- | Run a 'Trace' effect, ignoring all traces.
 --
---   prop> run (runTraceByIgnoring (trace a *> pure b)) == b
+--   prop> run (runTraceByIgnoring (trace a *> pure b)) === b
 runTraceByIgnoring :: TraceByIgnoringC m a -> m a
 runTraceByIgnoring = runTraceByIgnoringC
 
@@ -72,7 +72,7 @@ instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
---   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) == ([a, b], c)
+--   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) === ([a, b], c)
 runTraceByReturning :: Functor m => TraceByReturningC m a -> m ([String], a)
 runTraceByReturning = fmap (first reverse) . runState [] . runTraceByReturningC
 
