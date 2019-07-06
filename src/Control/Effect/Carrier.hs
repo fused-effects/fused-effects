@@ -62,3 +62,6 @@ instance (GHFunctor m m' l l', GHFunctor m m' r r') => GHFunctor m m' (l :+: r) 
 
 instance (GHFunctor m m' l l', GHFunctor m m' r r') => GHFunctor m m' (l :*: r) (l' :*: r') where
   ghmap f (l :*: r) = ghmap f l :*: ghmap f r
+
+instance GHFunctor m m' (K1 R c) (K1 R c) where
+  ghmap _ = coerce
