@@ -15,6 +15,7 @@ import Control.Effect.Reader
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
@@ -49,7 +50,7 @@ runCull :: Alternative m => CullC m a -> m a
 runCull (CullC m) = runNonDetC (runReader False m) ((<|>) . pure) empty
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
 
 instance Alternative (CullC m) where
   empty = CullC empty
@@ -84,7 +85,7 @@ runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig) => OnceC m a -> m (f
 runNonDetOnce = runNonDet . runCull . cull . runOnceC
 
 newtype OnceC m a = OnceC { runOnceC :: CullC (NonDetC m) a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (OnceC m) where
   eff = OnceC . eff . R . R . handleCoercible
