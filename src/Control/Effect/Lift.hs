@@ -18,10 +18,7 @@ import GHC.Generics
 
 newtype Lift sig m k = Lift { unLift :: sig (m k) }
   deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor)
-
-instance Functor sig => Effect (Lift sig) where
-  handle state handler (Lift op) = Lift (handler . (<$ state) <$> op)
+  deriving anyclass (HFunctor, Effect)
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 runM :: LiftC m a -> m a
