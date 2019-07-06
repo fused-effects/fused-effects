@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, UndecidableInstances #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, FlexibleContexts, FlexibleInstances, FunctionalDependencies, RankNTypes, UndecidableInstances #-}
 module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
@@ -8,10 +8,14 @@ module Control.Effect.Carrier
 ) where
 
 import Data.Coerce
+import GHC.Generics
 
 class HFunctor h where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   hmap :: (Functor m, Functor n) => (forall x . m x -> n x) -> (h m a -> h n a)
+  default hmap :: (Functor m, Functor n, Generic1 (h m), Generic1 (h n), GHFunctor m n (Rep1 (h m)) (Rep1 (h n))) => (forall x . m x -> n x) -> (h m a -> h n a)
+  hmap f = to1 . ghmap f . from1
+  {-# INLINE hmap #-}
 
 
 -- | The class of effect types, which must:
@@ -43,3 +47,8 @@ handlePure handler = hmap handler
 handleCoercible :: (HFunctor sig, Functor f, Functor g, Coercible f g) => sig f a -> sig g a
 handleCoercible = handlePure coerce
 {-# INLINE handleCoercible #-}
+
+
+
+class GHFunctor m m' rep rep' | rep -> m, rep' -> m' where
+  ghmap :: (Functor m, Functor m') => (forall x . m x -> m' x) -> (rep a -> rep' a)
