@@ -16,6 +16,7 @@ import Control.Effect.State
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Bifunctor (first)
@@ -39,7 +40,7 @@ runTraceByPrinting :: TraceByPrintingC m a -> m a
 runTraceByPrinting = runTraceByPrintingC
 
 newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans TraceByPrintingC where
   lift = TraceByPrintingC
@@ -58,7 +59,7 @@ runTraceByIgnoring :: TraceByIgnoringC m a -> m a
 runTraceByIgnoring = runTraceByIgnoringC
 
 newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans TraceByIgnoringC where
   lift = TraceByIgnoringC
@@ -77,7 +78,7 @@ runTraceByReturning :: Functor m => TraceByReturningC m a -> m ([String], a)
 runTraceByReturning = fmap (first reverse) . runState [] . runTraceByReturningC
 
 newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
   eff (L (Trace m k)) = TraceByReturningC (modify (m :)) *> k
