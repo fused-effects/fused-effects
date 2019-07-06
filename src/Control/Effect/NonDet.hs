@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( NonDet(..)
 , Alternative(..)
@@ -13,16 +13,14 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 
 data NonDet m k
   = Empty
   | Choose (Bool -> m k)
-  deriving (Functor)
-
-instance HFunctor NonDet where
-  hmap _ Empty      = Empty
-  hmap f (Choose k) = Choose (f . k)
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor)
 
 instance Effect NonDet where
   handle _     _       Empty      = Empty
@@ -43,7 +41,7 @@ newtype NonDetC m a = NonDetC
   { -- | A higher-order function receiving two parameters: a function to combine each solution with the rest of the solutions, and an action to run when no results are produced.
     runNonDetC :: forall b . (a -> m b -> m b) -> m b -> m b
   }
-  deriving (Functor)
+  deriving stock (Functor)
 
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ cons -> cons a)
