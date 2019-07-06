@@ -12,13 +12,9 @@ data (f :+: g) (m :: * -> *) k
   = L (f m k)
   | R (g m k)
   deriving stock (Eq, Functor, Generic1, Ord, Show)
-  deriving anyclass (HFunctor)
+  deriving anyclass (HFunctor, Effect)
 
 infixr 4 :+:
-
-instance (Effect l, Effect r) => Effect (l :+: r) where
-  handle state handler (L l) = L (handle state handler l)
-  handle state handler (R r) = R (handle state handler r)
 
 class Member (sub :: (* -> *) -> (* -> *)) sup where
   inj :: sub m a -> sup m a
