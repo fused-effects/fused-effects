@@ -17,11 +17,7 @@ data State s m k
   = Get (s -> m k)
   | Put s (m k)
   deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor)
-
-instance Effect (State s) where
-  handle state handler (Get   k) = Get   (handler . (<$ state) . k)
-  handle state handler (Put s k) = Put s (handler (k <$ state))
+  deriving anyclass (HFunctor, Effect)
 
 -- | Get the current state value.
 --
