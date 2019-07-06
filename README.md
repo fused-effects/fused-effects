@@ -154,17 +154,18 @@ example4 = runM . runReader "hello" . runState 0 $ do
 
 ### Required compiler extensions
 
-To use effects, you'll need a relatively-uncontroversial set of extensions: `-XFlexibleContexts`, `-XFlexibleInstances`, and `-XMultiParamTypeClasses`.
+To use effects, you'll typically need `-XFlexibleContexts`.
 
-When defining your own effects, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), and `-XUndecidableInstances` to satisfy the coverage condition for this instance. You may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case.
+When defining your own effects, you may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case. `-XDeriveGeneric` can be used with many first-order effects to derive default implementations of `HFunctor` and `Effect`.
+
+When defining carriers, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), `-XFlexibleInstances` to loosen the conditions on the instance, `-XMultiParamTypeClasses` since `Carrier` takes two parameters, and `-XUndecidableInstances` to satisfy the coverage condition for this instance.
 
 [common]: https://github.com/fused-effects/fused-effects/blob/master/docs/common_errors.md
 
-The following invocation, taken from the teletype example, should suffice for any use or construction of effects:
+The following invocation, taken from the teletype example, should suffice for most use or construction of effects and carriers:
 
 ```haskell
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving,
-    KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 ```
 
 ### Defining new effects
