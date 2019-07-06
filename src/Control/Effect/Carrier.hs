@@ -91,3 +91,6 @@ class GEffect m m' rep rep' where
           -> (forall x . f (m x) -> m' (f x))
           -> rep a
           -> rep' (f a)
+
+instance GEffect m m' rep rep' => GEffect m m' (M1 i c rep) (M1 i c rep') where
+  ghandle state handler = M1 . ghandle state handler . unM1
