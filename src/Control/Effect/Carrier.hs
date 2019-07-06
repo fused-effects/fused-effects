@@ -74,3 +74,6 @@ instance (Functor f, GHFunctor m m' g g') => GHFunctor m m' (f :.: g) (f :.: g')
 
 instance GHFunctor m m' (Rec1 m) (Rec1 m') where
   ghmap f = Rec1 . f . unRec1
+
+instance HFunctor f => GHFunctor m m' (Rec1 (f m)) (Rec1 (f m')) where
+  ghmap f = Rec1 . hmap f . unRec1
