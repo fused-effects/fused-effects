@@ -56,7 +56,7 @@ handlePure = hmap
 --
 --   This is applicable whenever @f@ is 'Coercible' to @g@, e.g. simple @newtype@s.
 handleCoercible :: (HFunctor sig, Functor f, Functor g, Coercible f g) => sig f a -> sig g a
-handleCoercible = handlePure coerce
+handleCoercible = hmap coerce
 {-# INLINE handleCoercible #-}
 
 

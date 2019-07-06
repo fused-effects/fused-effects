@@ -149,7 +149,7 @@ instance
         runLogStdout k
 
     R other ->
-      LogStdoutC (eff (handlePure runLogStdout other))
+      LogStdoutC (eff (hmap runLogStdout other))
 
 -- The 'LogStdoutC' runner.
 runLogStdout ::

@@ -35,14 +35,14 @@ instance MonadTrans (InterposeC eff) where
 newtype Handler eff m = Handler (forall x . eff m x -> m x)
 
 runHandler :: (HFunctor eff, Functor m) => Handler eff m -> eff (ReaderC (Handler eff m) m) a -> m a
-runHandler h@(Handler handler) = handler . handlePure (runReader h)
+runHandler h@(Handler handler) = handler . hmap (runReader h)
 
 instance (HFunctor eff, Carrier sig m, Member eff sig) => Carrier sig (InterposeC eff m) where
   eff (op :: sig (InterposeC eff m) a)
     | Just (op' :: eff (InterposeC eff m) a) <- prj op = do
       handler <- InterposeC ask
       lift (runHandler handler (handleCoercible op'))
-    | otherwise = InterposeC (ReaderC (\ handler -> eff (handlePure (runReader handler . runInterposeC) op)))
+    | otherwise = InterposeC (ReaderC (\ handler -> eff (hmap (runReader handler . runInterposeC) op)))
 
 -- $setup
 -- >>> :seti -XFlexibleContexts

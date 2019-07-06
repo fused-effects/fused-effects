@@ -36,7 +36,7 @@ instance MonadTrans (InterpretC eff) where
 newtype Handler eff m = Handler (forall x . eff m x -> m x)
 
 runHandler :: (HFunctor eff, Functor m) => Handler eff m -> eff (InterpretC eff m) a -> m a
-runHandler h@(Handler handler) = handler . handlePure (runReader h . runInterpretC)
+runHandler h@(Handler handler) = handler . hmap (runReader h . runInterpretC)
 
 instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff m) where
   eff (L op) = do
@@ -66,7 +66,7 @@ instance MonadTrans (InterpretStateC eff s) where
 newtype HandlerState eff s m = HandlerState (forall x . eff (StateC s m) x -> StateC s m x)
 
 runHandlerState :: (HFunctor eff, Functor m) => HandlerState eff s m -> eff (InterpretStateC eff s m) a -> StateC s m a
-runHandlerState h@(HandlerState handler) = handler . handlePure (runReader h . runInterpretStateC)
+runHandlerState h@(HandlerState handler) = handler . hmap (runReader h . runInterpretStateC)
 
 instance (HFunctor eff, Carrier sig m, Effect sig) => Carrier (eff :+: sig) (InterpretStateC eff s m) where
   eff (L op) = do

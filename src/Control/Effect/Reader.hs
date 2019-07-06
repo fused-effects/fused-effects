@@ -105,7 +105,7 @@ instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
 instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
   eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
-  eff (R other)         = ReaderC (\ r -> eff (handlePure (runReader r) other))
+  eff (R other)         = ReaderC (\ r -> eff (hmap (runReader r) other))
   {-# INLINE eff #-}
 
 
