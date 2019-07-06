@@ -101,3 +101,6 @@ instance (GEffect m m' l l', GEffect m m' r r') => GEffect m m' (l :+: r) (l' :+
 
 instance (GEffect m m' l l', GEffect m m' r r') => GEffect m m' (l :*: r) (l' :*: r') where
   ghandle state handler (l :*: r) = ghandle state handler l :*: ghandle state handler r
+
+instance GEffect m m' (K1 R c) (K1 R c) where
+  ghandle _ _ = coerce
