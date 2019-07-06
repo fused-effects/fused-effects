@@ -35,6 +35,7 @@ class HFunctor sig => Effect sig where
                  -> sig m a
                  -> sig n (f a)
   handle state handler = to1 . ghandle state handler . from1
+  {-# INLINE handle #-}
 
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
