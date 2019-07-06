@@ -40,24 +40,24 @@ instance Effect Cut where
 --
 --   Contrast with 'empty', which fails the current branch but allows backtracking.
 --
---   prop> run (runNonDet (runCut (cutfail <|> pure a))) == []
---   prop> run (runNonDet (runCut (pure a <|> cutfail))) == [a]
+--   prop> run (runNonDet (runCut (cutfail <|> pure a))) === []
+--   prop> run (runNonDet (runCut (pure a <|> cutfail))) === [a]
 cutfail :: (Carrier sig m, Member Cut sig) => m a
 cutfail = send Cutfail
 {-# INLINE cutfail #-}
 
 -- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
 --
---   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) == [b]
+--   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) === [b]
 call :: (Carrier sig m, Member Cut sig) => m a -> m a
 call m = send (Call m pure)
 {-# INLINE call #-}
 
 -- | Commit to the current branch, preventing backtracking within the nearest enclosing 'call' (if any) on failure.
 --
---   prop> run (runNonDet (runCut (pure a <|> cut *> pure b))) == [a, b]
---   prop> run (runNonDet (runCut (cut *> pure a <|> pure b))) == [a]
---   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) == []
+--   prop> run (runNonDet (runCut (pure a <|> cut *> pure b))) === [a, b]
+--   prop> run (runNonDet (runCut (cut *> pure a <|> pure b))) === [a]
+--   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) === []
 cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}
@@ -65,7 +65,7 @@ cut = pure () <|> cutfail
 
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for a 'NonDet' effect).
 --
---   prop> run (runNonDetOnce (runCut (pure a))) == Just a
+--   prop> run (runNonDetOnce (runCut (pure a))) === Just a
 runCut :: Alternative m => CutC m a -> m a
 runCut m = runCutC m ((<|>) . pure) empty empty
 
