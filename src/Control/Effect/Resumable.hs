@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveFunctor, DerivingStrategies, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resumable
-( Resumable(..)
+( -- * Resumable effect
+  Resumable(..)
 , throwResumable
 , SomeError(..)
+  -- * Resumable carriers
 , runResumable
 , ResumableC(..)
 , runResumableWith

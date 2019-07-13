@@ -1,10 +1,12 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Resource
-( Resource(..)
+( -- * Resource effect
+  Resource(..)
 , bracket
 , bracketOnError
 , finally
 , onException
+  -- * Resource carrier
 , runResource
 , ResourceC(..)
 ) where

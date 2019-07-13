@@ -1,9 +1,11 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cut
-( Cut(..)
+( -- * Cut effect
+  Cut(..)
 , cutfail
 , call
 , cut
+  -- * Cut carrier
 , runCut
 , runCutAll
 , CutC(..)

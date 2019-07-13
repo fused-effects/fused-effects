@@ -1,9 +1,11 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Reader
-( Reader(..)
+( -- * Reader effect
+  Reader(..)
 , ask
 , asks
 , local
+  -- * Reader carrier
 , runReader
 , ReaderC(..)
 ) where

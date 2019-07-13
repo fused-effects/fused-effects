@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Trace
-( Trace(..)
+( -- * Trace effect
+  Trace(..)
 , trace
+  -- * Trace carriers
 , runTraceByPrinting
 , TraceByPrintingC(..)
 , runTraceByIgnoring

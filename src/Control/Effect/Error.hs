@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error
-( Error(..)
+( -- * Error effect
+  Error(..)
 , throwError
 , catchError
+  -- * Error carrier
 , runError
 , ErrorC(..)
 ) where
