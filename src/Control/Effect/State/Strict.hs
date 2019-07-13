@@ -18,6 +18,7 @@ import Control.Effect.State.Internal
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
@@ -75,6 +76,10 @@ instance Monad m => Monad (StateC s m) where
 instance MonadFail m => MonadFail (StateC s m) where
   fail s = StateC (const (fail s))
   {-# INLINE fail #-}
+
+instance MonadFix m => MonadFix (StateC s m) where
+  mfix f = StateC (\ s -> mfix (runState s . f . snd))
+  {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (StateC s m) where
   liftIO io = StateC (\ s -> (,) s <$> liftIO io)

@@ -13,6 +13,7 @@ import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
@@ -85,6 +86,10 @@ instance Monad m => Monad (ReaderC r m) where
 instance MonadFail m => MonadFail (ReaderC r m) where
   fail = ReaderC . const . fail
   {-# INLINE fail #-}
+
+instance MonadFix m => MonadFix (ReaderC s m) where
+  mfix f = ReaderC (\ r -> mfix (runReader r . f))
+  {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (ReaderC r m) where
   liftIO = ReaderC . const . liftIO

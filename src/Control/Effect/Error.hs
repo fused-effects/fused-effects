@@ -12,6 +12,7 @@ import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), (<=<))
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
@@ -75,6 +76,10 @@ instance Alternative m => Alternative (ErrorC e m) where
 instance Monad m => Monad (ErrorC e m) where
   ErrorC a >>= f = ErrorC (a >>= either (pure . Left) (runError . f))
   {-# INLINE (>>=) #-}
+
+instance MonadFix m => MonadFix (ErrorC e m) where
+  mfix f = ErrorC (mfix (runError . either (error "mfix (ErrorC): function returned failure") f))
+  {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (ErrorC e m) where
   liftIO io = ErrorC (Right <$> liftIO io)
