@@ -17,6 +17,7 @@ import Control.Effect.NonDet
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
@@ -102,6 +103,10 @@ instance Monad (CutC m) where
 instance MonadFail m => MonadFail (CutC m) where
   fail s = CutC (\ _ _ _ -> fail s)
   {-# INLINE fail #-}
+
+instance MonadFix m => MonadFix (CutC m) where
+  mfix f = CutC (\ cons nil _ -> mfix (\ a -> runCutC (f (head a)) (fmap . (:)) (pure []) (pure [])) >>= foldr cons nil)
+  {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (CutC m) where
   liftIO io = CutC (\ cons nil _ -> liftIO io >>= flip cons nil)

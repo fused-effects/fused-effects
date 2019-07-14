@@ -14,6 +14,7 @@ import Control.Effect.Carrier
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import GHC.Generics (Generic1)
@@ -63,6 +64,10 @@ instance Monad (NonDetC m) where
 instance MonadFail m => MonadFail (NonDetC m) where
   fail s = NonDetC (\ _ _ -> fail s)
   {-# INLINE fail #-}
+
+instance MonadFix m => MonadFix (NonDetC m) where
+  mfix f = NonDetC (\ cons nil -> mfix (\ a -> runNonDetC (f (head a)) (fmap . (:)) (pure [])) >>= foldr cons nil)
+  {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
   liftIO io = NonDetC (\ cons nil -> liftIO io >>= flip cons nil)

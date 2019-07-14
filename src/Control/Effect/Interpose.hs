@@ -10,9 +10,14 @@ module Control.Effect.Interpose
   , runInterpose
   ) where
 
+import Control.Applicative
 import Control.Effect.Carrier
 import Control.Effect.Reader
 import Control.Effect.Sum
+import Control.Monad (MonadPlus (..))
+import Control.Monad.Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 -- | 'runInterpose' takes a handler for a given effect (such as 'State' or 'Reader')
@@ -27,7 +32,7 @@ runInterpose :: (forall x . eff m x -> m x) -> InterposeC eff m a -> m a
 runInterpose handler = runReader (Handler handler) . runInterposeC
 
 newtype InterposeC eff m a = InterposeC { runInterposeC :: ReaderC (Handler eff m) m a }
-  deriving (Applicative, Functor, Monad)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (InterposeC eff) where
   lift = InterposeC . lift
