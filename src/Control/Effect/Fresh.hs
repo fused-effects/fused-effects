@@ -1,8 +1,10 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fresh
-( Fresh(..)
+( -- * Fresh effect
+  Fresh(..)
 , fresh
 , resetFresh
+  -- * Fresh carrier
 , runFresh
 , FreshC(..)
 ) where

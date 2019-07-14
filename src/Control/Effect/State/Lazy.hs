@@ -1,15 +1,17 @@
 {-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State.Lazy
-( State (..)
+( -- * Lazy state effect
+  State (..)
 , get
 , gets
 , put
 , modify
 , modifyLazy
-, StateC(..)
+  -- * Lazy state carrier
 , runState
 , evalState
 , execState
+, StateC(..)
 ) where
 
 import Control.Applicative (Alternative(..))

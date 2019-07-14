@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
 module Control.Effect.Lift
-( Lift(..)
+( -- * Lift effect
+  Lift(..)
 , sendM
+  -- * Lift carrier
 , runM
 , LiftC(..)
 ) where

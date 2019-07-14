@@ -1,6 +1,8 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, EmptyCase, KindSignatures, MultiParamTypeClasses #-}
 module Control.Effect.Pure
-( Pure
+( -- * Pure effect
+  Pure
+  -- * Pure carrier
 , run
 , PureC(..)
 ) where
