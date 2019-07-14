@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Cull
-( Cull(..)
+( -- * Cull effect
+  Cull(..)
 , cull
+  -- * Cull carriers
 , runCull
 , CullC(..)
 , runNonDetOnce

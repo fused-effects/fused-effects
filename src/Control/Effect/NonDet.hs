@@ -1,9 +1,12 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
-( NonDet(..)
-, Alternative(..)
+( -- * NonDet effect
+  NonDet(..)
+  -- * NonDet carrier
 , runNonDet
 , NonDetC(..)
+  -- * Re-exports
+, Alternative(..)
 ) where
 
 import Control.Applicative (Alternative(..))

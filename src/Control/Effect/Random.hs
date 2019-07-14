@@ -1,11 +1,14 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Random
-( Random(..)
+( -- * Random effect
+  Random(..)
+  -- * Random carrier
 , runRandom
 , evalRandom
 , execRandom
 , evalRandomIO
 , RandomC(..)
+  -- * Re-exports
 , MonadRandom(..)
 , MonadInterleave(..)
 ) where

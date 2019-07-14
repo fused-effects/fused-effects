@@ -1,9 +1,12 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Fail
-( Fail(..)
-, MonadFail(..)
+( -- * Fail effect
+  Fail(..)
+  -- * Fail carrier
 , runFail
 , FailC(..)
+  -- * Re-exports
+, MonadFail(..)
 ) where
 
 import Control.Applicative (Alternative(..))

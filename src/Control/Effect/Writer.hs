@@ -1,10 +1,12 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Writer
-( Writer(..)
+( -- * Writer effect
+  Writer(..)
 , tell
 , listen
 , listens
 , censor
+  -- * Writer carrier
 , runWriter
 , execWriter
 , WriterC(..)
