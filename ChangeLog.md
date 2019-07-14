@@ -2,6 +2,8 @@
 
 - Derives `Generic1` instances for all non-existentially-quantified effect datatypes.
 
+- Derives `Foldable` & `Traversable` instances for `:+:`.
+
 - Defines `MonadFix` instances for all of the carriers.
 
 ## Backwards-incompatible changes
