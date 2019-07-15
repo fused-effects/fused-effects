@@ -16,7 +16,6 @@ module Control.Effect.State.Lazy
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
-import Control.Effect.Sum
 import Control.Effect.State.Internal
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail

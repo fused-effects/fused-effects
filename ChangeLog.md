@@ -6,6 +6,8 @@
 
 - Defines `MonadFix` instances for all of the carriers.
 
+- Re-exports `:+:` and `Member` from `Control.Effect.Carrier`, reducing the number of imports needed when defining new effects.
+
 ## Backwards-incompatible changes
 
 - Replaces `runResource` with an equivalent function that uses `MonadUnliftIO` to select the correct unlifting function (a la `withResource`, which is removed in favor of `runResource`).

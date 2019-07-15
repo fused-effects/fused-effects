@@ -6,6 +6,9 @@ module Control.Effect.Carrier
 , send
 , handlePure
 , handleCoercible
+-- * Re-exports
+, (Sum.:+:)(..)
+, Sum.Member(..)
 -- * Generic deriving of 'HFunctor' & 'Effect' instances.
 , GHFunctor(..)
 , GEffect(..)

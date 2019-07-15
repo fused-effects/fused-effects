@@ -17,7 +17,6 @@ module Control.Effect.State.Strict
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.State.Internal
-import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix

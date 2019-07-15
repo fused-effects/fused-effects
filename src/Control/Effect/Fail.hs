@@ -12,7 +12,6 @@ module Control.Effect.Fail
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Error
-import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix

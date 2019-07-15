@@ -9,7 +9,6 @@ module Control.Effect.State.Internal
 ) where
 
 import Control.Effect.Carrier
-import Control.Effect.Sum
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 

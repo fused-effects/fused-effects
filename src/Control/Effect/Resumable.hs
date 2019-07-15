@@ -16,7 +16,6 @@ import Control.DeepSeq
 import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Effect.Reader
-import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix

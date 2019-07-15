@@ -12,7 +12,6 @@ module Control.Effect.Reader
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
-import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix
