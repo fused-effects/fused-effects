@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, DeriveTraversable, DerivingStrategies, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
 module Control.Effect.Sum
 ( (:+:)(..)
 , Member(..)
@@ -11,7 +11,7 @@ import GHC.Generics (Generic1)
 data (f :+: g) (m :: * -> *) k
   = L (f m k)
   | R (g m k)
-  deriving stock (Eq, Functor, Generic1, Ord, Show)
+  deriving stock (Eq, Foldable, Functor, Generic1, Ord, Show, Traversable)
   deriving anyclass (HFunctor, Effect)
 
 infixr 4 :+:
