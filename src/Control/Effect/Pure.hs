@@ -18,6 +18,7 @@ data Pure (m :: * -> *) k
   deriving stock (Functor, Generic1)
   deriving anyclass (HFunctor, Effect)
 
+
 -- | Run an action exhausted of effects to produce its final result value.
 run :: PureC a -> a
 run = runPureC
