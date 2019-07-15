@@ -7,7 +7,6 @@ import Prelude hiding (read)
 import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.State
-import Control.Effect.Sum
 import Control.Effect.Writer
 import Control.Monad.IO.Class
 import Data.Coerce

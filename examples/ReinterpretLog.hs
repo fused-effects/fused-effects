@@ -34,7 +34,6 @@ module ReinterpretLog
 import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.Reader
-import Control.Effect.Sum
 import Control.Effect.Writer
 import Control.Monad.IO.Class (MonadIO(..))
 import Data.Coerce            (coerce)

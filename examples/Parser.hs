@@ -8,7 +8,6 @@ import Control.Effect.Carrier
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import Control.Effect.State
-import Control.Effect.Sum
 import Control.Monad (replicateM)
 import Data.Char
 import Data.Coerce
