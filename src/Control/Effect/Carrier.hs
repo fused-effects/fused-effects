@@ -3,6 +3,7 @@ module Control.Effect.Carrier
 ( HFunctor(..)
 , Effect(..)
 , Carrier(..)
+, send
 , handlePure
 , handleCoercible
 -- * Generic deriving of 'HFunctor' & 'Effect' instances.
@@ -10,8 +11,9 @@ module Control.Effect.Carrier
 , GEffect(..)
 ) where
 
-import Data.Coerce
-import GHC.Generics
+import qualified Control.Effect.Sum as Sum
+import           Data.Coerce
+import           GHC.Generics
 
 -- | Higher-order functors of kind @(* -> *) -> (* -> *)@ map functors to functors.
 --
@@ -53,11 +55,21 @@ class HFunctor sig => Effect sig where
   handle state handler = to1 . ghandle state handler . from1
   {-# INLINE handle #-}
 
+instance (HFunctor f, HFunctor g) => HFunctor (f Sum.:+: g)
+instance (Effect f, Effect g) => Effect (f Sum.:+: g)
+
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   eff :: sig m a -> m a
+
+
+-- | Construct a request for an effect to be interpreted by some handler later on.
+send :: (Sum.Member effect sig, Carrier sig m) => effect m a -> m a
+send = eff . Sum.inj
+{-# INLINE send #-}
+
 
 -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
 handlePure :: (HFunctor sig, Functor f) => (forall x . f x -> g x) -> sig f a -> sig g a

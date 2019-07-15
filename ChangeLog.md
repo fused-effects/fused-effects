@@ -18,7 +18,7 @@
 
 - Replaces the default definitions of `hmap` and `handle` with derivations based on `Generic1` instead of `Coercible`. Therefore, first-order effects wishing to derive these instances will require `Generic1` instances, presumably derived using `-XDeriveGeneric`.
 
-- Removes the re-export of `send` from `Control.Effect`. It can be imported from `Control.Effect.Sum` instead.
+- Moves `send` from `Control.Effect.Sum` to `Control.Effect.Carrier`. Likewise removes the re-export of `send` from `Control.Effect`.
 
 - Deprecates `fmap'` in favour of `fmap`.
 
