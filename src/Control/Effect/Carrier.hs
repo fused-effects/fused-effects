@@ -39,6 +39,10 @@ class HFunctor h where
 
 {-# DEPRECATED fmap' "fmap' has been subsumed by fmap." #-}
 
+instance HFunctor Pure.Pure
+instance (HFunctor f, HFunctor g) => HFunctor (f Sum.:+: g)
+
+
 -- | The class of effect types, which must:
 --
 --   1. Be functorial in their last two arguments, and
@@ -60,11 +64,8 @@ class HFunctor sig => Effect sig where
   handle state handler = to1 . ghandle state handler . from1
   {-# INLINE handle #-}
 
-instance (HFunctor f, HFunctor g) => HFunctor (f Sum.:+: g)
-instance (Effect f, Effect g) => Effect (f Sum.:+: g)
-
-instance HFunctor Pure.Pure
 instance Effect Pure.Pure
+instance (Effect f, Effect g) => Effect (f Sum.:+: g)
 
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
