@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, MultiWayIf, TemplateHaskell, TypeApplications, TypeOperators, UndecidableInstances #-}
 {-# OPTIONS_GHC -O2 -fplugin Test.Inspection.Plugin #-}
-module Control.Effect.Spec where
+module Control.Effect.Spec
+( spec
+) where
 
 import Control.Effect.Carrier
 import Control.Effect.Error

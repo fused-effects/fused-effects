@@ -1,5 +1,7 @@
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
-module Main where
+module Main
+( main
+) where
 
 import Control.Effect.Carrier
 import Control.Effect.Interpret
