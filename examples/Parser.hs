@@ -3,7 +3,6 @@ module Parser
 ( spec
 ) where
 
-import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.Cut
 import Control.Effect.NonDet

@@ -31,8 +31,8 @@ module ReinterpretLog
   ( spec
   ) where
 
-import Control.Effect
 import Control.Effect.Carrier
+import Control.Effect.Lift
 import Control.Effect.Reader
 import Control.Effect.Writer
 import Control.Monad.IO.Class (MonadIO(..))

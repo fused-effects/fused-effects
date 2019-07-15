@@ -4,7 +4,6 @@ module Teletype where
 
 import Prelude hiding (read)
 
-import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Effect.Writer

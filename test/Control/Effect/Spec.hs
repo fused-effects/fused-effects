@@ -2,7 +2,6 @@
 {-# OPTIONS_GHC -O2 -fplugin Test.Inspection.Plugin #-}
 module Control.Effect.Spec where
 
-import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Effect.Fail
