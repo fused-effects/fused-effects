@@ -8,7 +8,6 @@ import Control.Effect.Error
 import Control.Effect.Fail
 import Control.Effect.Reader
 import Control.Effect.State
-import Control.Effect.Sum
 import Prelude hiding (fail)
 import Test.Hspec
 import Test.Inspection as Inspection
@@ -120,4 +119,3 @@ countBoth n = run . runState n . runState (fromIntegral n) $ go where
 throwing :: Int -> Either Int String
 throwing n = run $ runError go
   where go = if n > 10 then throwError @Int 42 else pure "fine"
-
