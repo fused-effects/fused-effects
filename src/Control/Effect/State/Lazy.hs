@@ -1,12 +1,7 @@
 {-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State.Lazy
-( -- * Lazy state effect
-  State (..)
-, get
-, gets
-, put
-, modify
-, modifyLazy
+( -- * State effect
+  module State
   -- * Lazy state carrier
 , runState
 , evalState
@@ -16,7 +11,7 @@ module Control.Effect.State.Lazy
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
-import Control.Effect.State.Internal
+import Control.Effect.State.Internal as State
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix
