@@ -1,10 +1,8 @@
 {-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
 module Main where
 
-import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.Interpret
-import Control.Effect.Pure
 import Control.Effect.Writer
 import Control.Effect.State
 import Control.Monad (ap, replicateM_)
@@ -60,10 +58,10 @@ main = defaultMain
     ]
   ]
 
-tellLoop :: (Applicative m, Carrier sig m, Member (Writer (Sum Int)) sig) => Int -> m ()
+tellLoop :: (Carrier sig m, Member (Writer (Sum Int)) sig) => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
 
-modLoop :: (Applicative m, Carrier sig m, Member (State (Sum Int)) sig) => Int -> m ()
+modLoop :: (Carrier sig m, Member (State (Sum Int)) sig) => Int -> m ()
 modLoop i = replicateM_ i (modify (+ (Sum (1 :: Int))))
 
 newtype Cod m a = Cod { unCod :: forall b . (a -> m b) -> m b }
