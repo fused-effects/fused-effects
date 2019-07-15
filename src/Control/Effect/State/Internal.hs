@@ -1,15 +1,17 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State.Internal
-( State(..)
+( -- * State effect
+  State(..)
 , get
 , gets
 , put
 , modify
 , modifyLazy
+  -- * Re-exports
+, Member
 ) where
 
 import Control.Effect.Carrier
-import Control.Effect.Sum
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 

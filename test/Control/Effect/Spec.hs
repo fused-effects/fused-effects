@@ -1,18 +1,17 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, MultiWayIf, TemplateHaskell, TypeApplications, TypeOperators, UndecidableInstances #-}
 {-# OPTIONS_GHC -O2 -fplugin Test.Inspection.Plugin #-}
-module Control.Effect.Spec where
+module Control.Effect.Spec
+( spec
+) where
 
-import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Effect.Fail
 import Control.Effect.Reader
 import Control.Effect.State
-import Control.Effect.Sum
 import Prelude hiding (fail)
 import Test.Hspec
 import Test.Inspection as Inspection
-import Test.Inspection.Plugin
 
 spec :: Spec
 spec = do
@@ -29,7 +28,7 @@ inference = describe "inference" $ do
 askEnv :: (Member (Reader env) sig, Carrier sig m) => HasEnv env m env
 askEnv = ask
 
-runEnv :: Carrier sig m => env -> HasEnv env (ReaderC env m) a -> HasEnv env m a
+runEnv :: env -> HasEnv env (ReaderC env m) a -> HasEnv env m a
 runEnv r = HasEnv . runReader r . runHasEnv
 
 
@@ -111,13 +110,12 @@ countDown start = run . runState start $ go
 countBoth :: Int -> (Int, (Float, ()))
 countBoth n = run . runState n . runState (fromIntegral n) $ go where
   go = do
-    int <- get @Int
+    n <- get @Int
     if
       | n == 0         -> pure ()
       | n `mod` 2 == 0 -> modify @Float (+ 1) *> modify @Int pred *> go
-      | otherwise     -> modify @Int pred    *> go
+      | otherwise      -> modify @Int pred    *> go
 
 throwing :: Int -> Either Int String
 throwing n = run $ runError go
   where go = if n > 10 then throwError @Int 42 else pure "fine"
-

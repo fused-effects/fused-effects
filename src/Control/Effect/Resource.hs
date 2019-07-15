@@ -14,7 +14,6 @@ module Control.Effect.Resource
 import           Control.Applicative (Alternative(..))
 import           Control.Effect.Carrier
 import           Control.Effect.Reader
-import           Control.Effect.Sum
 import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))
 import           Control.Monad.Fail

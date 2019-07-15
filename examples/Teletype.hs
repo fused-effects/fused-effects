@@ -1,16 +1,16 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
-module Teletype where
+module Teletype
+( spec
+, runTeletypeIO
+) where
 
 import Prelude hiding (read)
 
-import Control.Effect
 import Control.Effect.Carrier
 import Control.Effect.State
-import Control.Effect.Sum
 import Control.Effect.Writer
 import Control.Monad.IO.Class
-import Data.Coerce
 import GHC.Generics (Generic1)
 import Test.Hspec
 import Test.Hspec.QuickCheck

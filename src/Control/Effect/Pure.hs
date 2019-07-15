@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, EmptyCase, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures #-}
 module Control.Effect.Pure
 ( -- * Pure effect
   Pure
@@ -8,15 +8,14 @@ module Control.Effect.Pure
 ) where
 
 import Control.Applicative
-import Control.Effect.Carrier
 import Control.Monad.Fix
 import Data.Coerce
 import Data.Function (fix)
 import GHC.Generics (Generic1)
 
 data Pure (m :: * -> *) k
-  deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving (Functor, Generic1)
+
 
 -- | Run an action exhausted of effects to produce its final result value.
 run :: PureC a -> a
@@ -58,7 +57,3 @@ instance Monad PureC where
 instance MonadFix PureC where
   mfix f = PureC (fix (runPureC . f))
   {-# INLINE mfix #-}
-
-instance Carrier Pure PureC where
-  eff v = case v of {}
-  {-# INLINE eff #-}

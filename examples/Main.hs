@@ -1,4 +1,6 @@
-module Main where
+module Main
+( main
+) where
 
 import qualified Parser
 import qualified ReinterpretLog

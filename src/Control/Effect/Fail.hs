@@ -6,13 +6,15 @@ module Control.Effect.Fail
 , runFail
 , FailC(..)
   -- * Re-exports
+, Carrier
+, Member
 , MonadFail(..)
+, run
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Error
-import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix

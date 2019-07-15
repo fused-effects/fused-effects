@@ -7,12 +7,15 @@ module Control.Effect.Fresh
   -- * Fresh carrier
 , runFresh
 , FreshC(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.State
-import Control.Effect.Sum
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix

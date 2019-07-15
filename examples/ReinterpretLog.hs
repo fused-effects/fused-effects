@@ -29,15 +29,15 @@
 
 module ReinterpretLog
   ( spec
+  , application
+  , runApplication
   ) where
 
-import Control.Effect
 import Control.Effect.Carrier
+import Control.Effect.Lift
 import Control.Effect.Reader
-import Control.Effect.Sum
 import Control.Effect.Writer
 import Control.Monad.IO.Class (MonadIO(..))
-import Data.Coerce            (coerce)
 import Data.Function          ((&))
 import Data.Kind              (Type)
 import GHC.Generics           (Generic1)
