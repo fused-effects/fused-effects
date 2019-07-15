@@ -9,6 +9,10 @@ module Control.Effect.Resumable
 , ResumableC(..)
 , runResumableWith
 , ResumableWithC(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

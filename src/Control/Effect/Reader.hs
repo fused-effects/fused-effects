@@ -8,6 +8,10 @@ module Control.Effect.Reader
   -- * Reader carrier
 , runReader
 , ReaderC(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)

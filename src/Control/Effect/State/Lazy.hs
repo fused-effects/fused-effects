@@ -7,6 +7,9 @@ module Control.Effect.State.Lazy
 , evalState
 , execState
 , StateC(..)
+  -- * Re-exports
+, Carrier
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

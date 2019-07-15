@@ -6,7 +6,10 @@ module Control.Effect.Fail
 , runFail
 , FailC(..)
   -- * Re-exports
+, Carrier
+, Member
 , MonadFail(..)
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

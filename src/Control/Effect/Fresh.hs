@@ -7,6 +7,10 @@ module Control.Effect.Fresh
   -- * Fresh carrier
 , runFresh
 , FreshC(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

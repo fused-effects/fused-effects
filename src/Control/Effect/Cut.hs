@@ -9,6 +9,10 @@ module Control.Effect.Cut
 , runCut
 , runCutAll
 , CutC(..)
+-- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

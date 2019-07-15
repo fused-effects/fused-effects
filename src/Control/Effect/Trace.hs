@@ -10,6 +10,10 @@ module Control.Effect.Trace
 , TraceByIgnoringC(..)
 , runTraceByReturning
 , TraceByReturningC(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

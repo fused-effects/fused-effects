@@ -7,6 +7,9 @@ module Control.Effect.NonDet
 , NonDetC(..)
   -- * Re-exports
 , Alternative(..)
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

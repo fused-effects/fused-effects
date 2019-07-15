@@ -9,8 +9,11 @@ module Control.Effect.Random
 , evalRandomIO
 , RandomC(..)
   -- * Re-exports
+, Carrier
+, Member
 , MonadRandom(..)
 , MonadInterleave(..)
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

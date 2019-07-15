@@ -7,6 +7,8 @@ module Control.Effect.State.Internal
 , put
 , modify
 , modifyLazy
+  -- * Re-exports
+, Member
 ) where
 
 import Control.Effect.Carrier

@@ -10,6 +10,10 @@ module Control.Effect.Writer
 , runWriter
 , execWriter
 , WriterC(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

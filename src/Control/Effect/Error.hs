@@ -7,6 +7,10 @@ module Control.Effect.Error
   -- * Error carrier
 , runError
 , ErrorC(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)

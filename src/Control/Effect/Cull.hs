@@ -8,6 +8,10 @@ module Control.Effect.Cull
 , CullC(..)
 , runNonDetOnce
 , OnceC(..)
+-- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

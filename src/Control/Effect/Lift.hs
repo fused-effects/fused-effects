@@ -6,6 +6,10 @@ module Control.Effect.Lift
   -- * Lift carrier
 , runM
 , LiftC(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))
