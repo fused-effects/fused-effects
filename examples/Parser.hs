@@ -9,7 +9,6 @@ import Control.Effect.NonDet
 import Control.Effect.State
 import Control.Monad (replicateM)
 import Data.Char
-import Data.Coerce
 import Data.List (intercalate)
 import GHC.Generics (Generic1)
 import Test.Hspec

@@ -8,7 +8,6 @@ import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Effect.Writer
 import Control.Monad.IO.Class
-import Data.Coerce
 import GHC.Generics (Generic1)
 import Test.Hspec
 import Test.Hspec.QuickCheck
