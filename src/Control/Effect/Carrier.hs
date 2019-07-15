@@ -6,13 +6,13 @@ module Control.Effect.Carrier
 , send
 , handlePure
 , handleCoercible
+-- * Generic deriving of 'HFunctor' & 'Effect' instances.
+, GHFunctor(..)
+, GEffect(..)
 -- * Re-exports
 , Pure.run
 , (Sum.:+:)(..)
 , Sum.Member(..)
--- * Generic deriving of 'HFunctor' & 'Effect' instances.
-, GHFunctor(..)
-, GEffect(..)
 ) where
 
 import qualified Control.Effect.Pure as Pure
