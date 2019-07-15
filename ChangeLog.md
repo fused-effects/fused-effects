@@ -6,7 +6,7 @@
 
 - Defines `MonadFix` instances for all of the carriers.
 
-- Re-exports `:+:` and `Member` from `Control.Effect.Carrier`, reducing the number of imports needed when defining new effects.
+- Re-exports `run`, `:+:`, and `Member` from `Control.Effect.Carrier`, reducing the number of imports needed when defining new effects.
 
 ## Backwards-incompatible changes
 

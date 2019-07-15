@@ -7,6 +7,7 @@ module Control.Effect.Carrier
 , handlePure
 , handleCoercible
 -- * Re-exports
+, Pure.run
 , (Sum.:+:)(..)
 , Sum.Member(..)
 -- * Generic deriving of 'HFunctor' & 'Effect' instances.
@@ -14,6 +15,7 @@ module Control.Effect.Carrier
 , GEffect(..)
 ) where
 
+import qualified Control.Effect.Pure as Pure
 import qualified Control.Effect.Sum as Sum
 import           Data.Coerce
 import           GHC.Generics
@@ -61,11 +63,19 @@ class HFunctor sig => Effect sig where
 instance (HFunctor f, HFunctor g) => HFunctor (f Sum.:+: g)
 instance (Effect f, Effect g) => Effect (f Sum.:+: g)
 
+instance HFunctor Pure.Pure
+instance Effect Pure.Pure
+
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   eff :: sig m a -> m a
+
+
+instance Carrier Pure.Pure Pure.PureC where
+  eff v = case v of {}
+  {-# INLINE eff #-}
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
