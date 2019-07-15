@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State.Internal
-( State(..)
+( -- * State effect
+  State(..)
 , get
 , gets
 , put
