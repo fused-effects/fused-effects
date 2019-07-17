@@ -23,8 +23,7 @@ newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
 
 
 instance MonadTrans (InterpretC s sig) where
-  lift =
-    InterpretC
+  lift = InterpretC
 
 
 newtype Handler sig m =
