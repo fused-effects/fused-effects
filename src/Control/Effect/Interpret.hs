@@ -17,7 +17,7 @@ import Control.Monad.Trans.Class
 import Unsafe.Coerce (unsafeCoerce)
 
 
-newtype InterpretC (s :: *) (sig :: (* -> *) -> * -> *) m a =
+newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
   InterpretC { runInterpretC :: m a }
   deriving
     (Functor, Applicative, Monad, MonadFix, MonadFail, MonadIO, MonadPlus, Alternative)
