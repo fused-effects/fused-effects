@@ -69,16 +69,16 @@ instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrie
 --   prop> run (runInterpret (\ op -> case op of { Get k -> k a ; Put _ k -> k }) get) === a
 runInterpret
   :: forall eff m a.
-     ( HFunctor eff, Monad m )
-  => ( forall x. eff m x -> m x )
-  -> ( forall s. Reifies s ( Handler eff m ) => InterpretC s eff m a )
+     (HFunctor eff, Monad m)
+  => (forall x. eff m x -> m x)
+  -> (forall s. Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
 runInterpret f m =
   reify (Handler handler) (go m)
 
   where
 
-    handler :: forall s x. eff ( InterpretC s eff m ) x -> InterpretC s eff m x
+    handler :: forall s x. eff (InterpretC s eff m) x -> InterpretC s eff m x
     handler e =
       InterpretC (f (handleCoercible e))
 
