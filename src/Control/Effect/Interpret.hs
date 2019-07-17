@@ -34,7 +34,7 @@ newtype Tagged a b =
   Tagged { unTag :: b }
 
 
-class Reifies (s :: *) a | s -> a where
+class Reifies s a | s -> a where
   reflect :: Tagged s a
 
 
