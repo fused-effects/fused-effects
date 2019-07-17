@@ -1,20 +1,74 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# language FlexibleContexts #-}
+{-# language FlexibleInstances #-}
+{-# language FunctionalDependencies #-}
+{-# language GeneralizedNewtypeDeriving #-}
+{-# language KindSignatures #-}
+{-# language PolyKinds #-}
+{-# language RankNTypes #-}
+{-# language ScopedTypeVariables #-}
+{-# language TypeApplications #-}
+{-# language TypeOperators #-}
+{-# language UndecidableInstances #-}
+
 module Control.Effect.Interpret
 ( runInterpret
-, InterpretC(..)
 , runInterpretState
-, InterpretStateC(..)
+, InterpretC(..)
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
-import Control.Effect.Reader
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Unsafe.Coerce ( unsafeCoerce )
+
+
+newtype InterpretC ( s :: * ) ( sig :: ( * -> * ) -> * -> * ) m a =
+  InterpretC { unInterpretC :: m a }
+  deriving
+    (Functor, Applicative, Monad, MonadFix, MonadFail, MonadIO, MonadPlus, Alternative)
+
+
+instance MonadTrans ( InterpretC s sig ) where
+  lift =
+    InterpretC
+
+
+newtype Handler sig m =
+  Handler { runHandler :: forall s x. sig ( InterpretC s sig m ) x -> InterpretC s sig m x }
+
+
+newtype Tagged a b =
+  Tagged { unTag :: b }
+
+
+class Reifies ( s :: * ) a | s -> a where
+  reflect :: Tagged s a
+
+
+data Skolem
+
+
+newtype Magic a r =
+  Magic ( Reifies Skolem a => Tagged Skolem r )
+
+
+reify :: forall a r. a -> ( forall s. Reifies s a => Tagged s r ) -> r
+reify a k =
+  unsafeCoerce ( Magic @a k ) a
+
+
+instance ( HFunctor eff, HFunctor sig, Reifies s ( Handler eff m ), Monad m, Carrier sig m ) => Carrier ( eff :+: sig ) ( InterpretC s eff m ) where
+  eff ( L eff ) =
+    runHandler ( unTag ( reflect @s ) ) eff
+  eff ( R other ) =
+    InterpretC ( eff ( handleCoercible other ) )
+
+
 
 -- | Interpret an effect using a higher-order function.
 --
@@ -23,27 +77,27 @@ import Control.Monad.Trans.Class
 --   At time of writing, a simple passthrough use of 'runInterpret' to handle a 'State' effect is about five times slower than using 'StateC' directly.
 --
 --   prop> run (runInterpret (\ op -> case op of { Get k -> k a ; Put _ k -> k }) get) === a
-runInterpret :: (forall x . eff m x -> m x) -> InterpretC eff m a -> m a
-runInterpret handler = runReader (Handler handler) . runInterpretC
+runInterpret
+  :: forall eff m a.
+     ( HFunctor eff, Monad m )
+  => ( forall x. eff m x -> m x )
+  -> ( forall s. Reifies s ( Handler eff m ) => InterpretC s eff m a )
+  -> m a
+runInterpret f m =
+  reify ( Handler handler ) ( go m )
 
-newtype InterpretC eff m a = InterpretC { runInterpretC :: ReaderC (Handler eff m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+  where
 
-instance MonadTrans (InterpretC eff) where
-  lift = InterpretC . lift
-  {-# INLINE lift #-}
+    handler :: forall s x. eff ( InterpretC s eff m ) x -> InterpretC s eff m x
+    handler e =
+      InterpretC ( f ( handleCoercible e ) )
 
-newtype Handler eff m = Handler (forall x . eff m x -> m x)
-
-runHandler :: (HFunctor eff, Functor m) => Handler eff m -> eff (InterpretC eff m) a -> m a
-runHandler h@(Handler handler) = handler . hmap (runReader h . runInterpretC)
-
-instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff m) where
-  eff (L op) = do
-    handler <- InterpretC ask
-    lift (runHandler handler op)
-  eff (R other) = InterpretC (eff (R (handleCoercible other)))
-  {-# INLINE eff #-}
+    go
+      :: forall x s.
+         InterpretC s eff m x
+      -> Tagged s ( m x )
+    go m =
+      Tagged ( unInterpretC m )
 
 
 -- | Interpret an effect using a higher-order function with some state variable.
@@ -53,27 +107,18 @@ instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff 
 --   At time of writing, a simple use of 'runInterpretState' to handle a 'State' effect is about four times slower than using 'StateC' directly.
 --
 --   prop> run (runInterpretState (\ s op -> case op of { Get k -> runState s (k s) ; Put s' k -> runState s' k }) a get) === a
-runInterpretState :: (forall x . s -> eff (StateC s m) x -> m (s, x)) -> s -> InterpretStateC eff s m a -> m (s, a)
-runInterpretState handler state = runState state . runReader (HandlerState (\ eff -> StateC (\ s -> handler s eff))) . runInterpretStateC
+runInterpretState
+  :: ( HFunctor eff, Monad m )
+  => ( forall x . s -> eff ( StateC s m ) x -> m ( s, x ) )
+  -> s
+  -> ( forall t. Reifies t ( Handler eff ( StateC s m ) ) => InterpretC t eff ( StateC s m ) a )
+  -> m ( s, a )
+runInterpretState handler state m =
+  runState state $
+  runInterpret
+    ( \e -> StateC ( \s -> handler s e ) )
+    m
 
-newtype InterpretStateC eff s m a = InterpretStateC { runInterpretStateC :: ReaderC (HandlerState eff s m) (StateC s m) a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
-
-instance MonadTrans (InterpretStateC eff s) where
-  lift = InterpretStateC . lift . lift
-  {-# INLINE lift #-}
-
-newtype HandlerState eff s m = HandlerState (forall x . eff (StateC s m) x -> StateC s m x)
-
-runHandlerState :: (HFunctor eff, Functor m) => HandlerState eff s m -> eff (InterpretStateC eff s m) a -> StateC s m a
-runHandlerState h@(HandlerState handler) = handler . hmap (runReader h . runInterpretStateC)
-
-instance (HFunctor eff, Carrier sig m, Effect sig) => Carrier (eff :+: sig) (InterpretStateC eff s m) where
-  eff (L op) = do
-    handler <- InterpretStateC ask
-    InterpretStateC (lift (runHandlerState handler op))
-  eff (R other) = InterpretStateC (eff (R (R (handleCoercible other))))
-  {-# INLINE eff #-}
 
 
 -- $setup
