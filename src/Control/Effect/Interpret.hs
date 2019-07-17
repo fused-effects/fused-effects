@@ -18,7 +18,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 
 newtype InterpretC (s :: *) (sig :: (* -> *) -> * -> *) m a =
-  InterpretC { unInterpretC :: m a }
+  InterpretC { runInterpretC :: m a }
   deriving
     (Functor, Applicative, Monad, MonadFix, MonadFail, MonadIO, MonadPlus, Alternative)
 
@@ -87,7 +87,7 @@ runInterpret f m =
          InterpretC s eff m x
       -> Tagged s (m x)
     go m =
-      Tagged (unInterpretC m)
+      Tagged (runInterpretC m)
 
 
 -- | Interpret an effect using a higher-order function with some state variable.
