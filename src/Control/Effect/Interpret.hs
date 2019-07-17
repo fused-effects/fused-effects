@@ -27,7 +27,7 @@ instance MonadTrans (InterpretC s sig) where
 
 
 newtype Handler sig m =
-  Handler { runHandler :: forall s x. sig (InterpretC s sig m) x -> InterpretC s sig m x }
+  Handler { runHandler :: forall s x . sig (InterpretC s sig m) x -> InterpretC s sig m x }
 
 
 newtype Tagged a b =
@@ -45,7 +45,7 @@ newtype Magic a r =
   Magic (Reifies Skolem a => Tagged Skolem r)
 
 
-reify :: forall a r. a -> (forall s. Reifies s a => Tagged s r) -> r
+reify :: forall a r . a -> (forall s . Reifies s a => Tagged s r) -> r
 reify a k =
   unsafeCoerce (Magic @a k) a
 
@@ -68,20 +68,20 @@ instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrie
 runInterpret
   :: forall eff m a.
      (HFunctor eff, Monad m)
-  => (forall x. eff m x -> m x)
-  -> (forall s. Reifies s (Handler eff m) => InterpretC s eff m a)
+  => (forall x . eff m x -> m x)
+  -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
 runInterpret f m =
   reify (Handler handler) (go m)
 
   where
 
-    handler :: forall s x. eff (InterpretC s eff m) x -> InterpretC s eff m x
+    handler :: forall s x . eff (InterpretC s eff m) x -> InterpretC s eff m x
     handler e =
       InterpretC (f (handleCoercible e))
 
     go
-      :: forall x s.
+      :: forall x s .
          InterpretC s eff m x
       -> Tagged s (m x)
     go m =
