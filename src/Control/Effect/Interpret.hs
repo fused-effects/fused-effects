@@ -5,6 +5,7 @@ module Control.Effect.Interpret
 , runInterpretState
 , InterpretC(..)
 , Reifies
+, Handler
 ) where
 
 import Control.Applicative (Alternative(..))
