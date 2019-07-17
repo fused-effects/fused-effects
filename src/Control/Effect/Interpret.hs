@@ -1,14 +1,4 @@
-{-# language FlexibleContexts #-}
-{-# language FlexibleInstances #-}
-{-# language FunctionalDependencies #-}
-{-# language GeneralizedNewtypeDeriving #-}
-{-# language KindSignatures #-}
-{-# language PolyKinds #-}
-{-# language RankNTypes #-}
-{-# language ScopedTypeVariables #-}
-{-# language TypeApplications #-}
-{-# language TypeOperators #-}
-{-# language UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 
 module Control.Effect.Interpret
 ( runInterpret
@@ -24,29 +14,29 @@ import Control.Monad.Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Unsafe.Coerce ( unsafeCoerce )
+import Unsafe.Coerce (unsafeCoerce)
 
 
-newtype InterpretC ( s :: * ) ( sig :: ( * -> * ) -> * -> * ) m a =
+newtype InterpretC (s :: *) (sig :: (* -> *) -> * -> *) m a =
   InterpretC { unInterpretC :: m a }
   deriving
     (Functor, Applicative, Monad, MonadFix, MonadFail, MonadIO, MonadPlus, Alternative)
 
 
-instance MonadTrans ( InterpretC s sig ) where
+instance MonadTrans (InterpretC s sig) where
   lift =
     InterpretC
 
 
 newtype Handler sig m =
-  Handler { runHandler :: forall s x. sig ( InterpretC s sig m ) x -> InterpretC s sig m x }
+  Handler { runHandler :: forall s x. sig (InterpretC s sig m) x -> InterpretC s sig m x }
 
 
 newtype Tagged a b =
   Tagged { unTag :: b }
 
 
-class Reifies ( s :: * ) a | s -> a where
+class Reifies (s :: *) a | s -> a where
   reflect :: Tagged s a
 
 
@@ -54,19 +44,19 @@ data Skolem
 
 
 newtype Magic a r =
-  Magic ( Reifies Skolem a => Tagged Skolem r )
+  Magic (Reifies Skolem a => Tagged Skolem r)
 
 
-reify :: forall a r. a -> ( forall s. Reifies s a => Tagged s r ) -> r
+reify :: forall a r. a -> (forall s. Reifies s a => Tagged s r) -> r
 reify a k =
-  unsafeCoerce ( Magic @a k ) a
+  unsafeCoerce (Magic @a k) a
 
 
-instance ( HFunctor eff, HFunctor sig, Reifies s ( Handler eff m ), Monad m, Carrier sig m ) => Carrier ( eff :+: sig ) ( InterpretC s eff m ) where
-  eff ( L eff ) =
-    runHandler ( unTag ( reflect @s ) ) eff
-  eff ( R other ) =
-    InterpretC ( eff ( handleCoercible other ) )
+instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrier sig m) => Carrier (eff :+: sig) (InterpretC s eff m) where
+  eff (L eff) =
+    runHandler (unTag (reflect @s)) eff
+  eff (R other) =
+    InterpretC (eff (handleCoercible other))
 
 
 
@@ -84,20 +74,20 @@ runInterpret
   -> ( forall s. Reifies s ( Handler eff m ) => InterpretC s eff m a )
   -> m a
 runInterpret f m =
-  reify ( Handler handler ) ( go m )
+  reify (Handler handler) (go m)
 
   where
 
     handler :: forall s x. eff ( InterpretC s eff m ) x -> InterpretC s eff m x
     handler e =
-      InterpretC ( f ( handleCoercible e ) )
+      InterpretC (f (handleCoercible e))
 
     go
       :: forall x s.
          InterpretC s eff m x
-      -> Tagged s ( m x )
+      -> Tagged s (m x)
     go m =
-      Tagged ( unInterpretC m )
+      Tagged (unInterpretC m)
 
 
 -- | Interpret an effect using a higher-order function with some state variable.
@@ -108,15 +98,15 @@ runInterpret f m =
 --
 --   prop> run (runInterpretState (\ s op -> case op of { Get k -> runState s (k s) ; Put s' k -> runState s' k }) a get) === a
 runInterpretState
-  :: ( HFunctor eff, Monad m )
-  => ( forall x . s -> eff ( StateC s m ) x -> m ( s, x ) )
+  :: (HFunctor eff, Monad m)
+  => (forall x . s -> eff (StateC s m) x -> m (s, x))
   -> s
-  -> ( forall t. Reifies t ( Handler eff ( StateC s m ) ) => InterpretC t eff ( StateC s m ) a )
-  -> m ( s, a )
+  -> (forall t. Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
+  -> m (s, a)
 runInterpretState handler state m =
   runState state $
   runInterpret
-    ( \e -> StateC ( \s -> handler s e ) )
+    (\e -> StateC (\s -> handler s e))
     m
 
 
