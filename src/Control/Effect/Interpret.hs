@@ -19,8 +19,7 @@ import Unsafe.Coerce (unsafeCoerce)
 
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
   InterpretC { runInterpretC :: m a }
-  deriving
-    (Functor, Applicative, Monad, MonadFix, MonadFail, MonadIO, MonadPlus, Alternative)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
 
 instance MonadTrans (InterpretC s sig) where
