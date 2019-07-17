@@ -55,8 +55,6 @@ instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrie
 --
 --   This involves a great deal less boilerplate than defining a custom 'Carrier' instance, at the expense of somewhat less performance. It’s a reasonable starting point for new interpretations, and if more performance or flexibility is required, it’s straightforward to “graduate” by replacing the relevant 'runInterpret' handlers with specialized 'Carrier' instances for the effects.
 --
---   At time of writing, a simple passthrough use of 'runInterpret' to handle a 'State' effect is about five times slower than using 'StateC' directly.
---
 --   prop> run (runInterpret (\ op -> case op of { Get k -> k a ; Put _ k -> k }) get) === a
 runInterpret
   :: forall eff m a.
@@ -84,8 +82,6 @@ runInterpret f m =
 -- | Interpret an effect using a higher-order function with some state variable.
 --
 --   This involves a great deal less boilerplate than defining a custom 'Carrier' instance, at the expense of somewhat less performance. It’s a reasonable starting point for new interpretations, and if more performance or flexibility is required, it’s straightforward to “graduate” by replacing the relevant 'runInterpretState' handlers with specialized 'Carrier' instances for the effects.
---
---   At time of writing, a simple use of 'runInterpretState' to handle a 'State' effect is about four times slower than using 'StateC' directly.
 --
 --   prop> run (runInterpretState (\ s op -> case op of { Get k -> runState s (k s) ; Put s' k -> runState s' k }) a get) === a
 runInterpretState
