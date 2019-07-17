@@ -17,15 +17,6 @@ import Control.Monad.Trans.Class
 import Unsafe.Coerce (unsafeCoerce)
 
 
-newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
-  InterpretC { runInterpretC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
-
-
-instance MonadTrans (InterpretC s sig) where
-  lift = InterpretC
-
-
 newtype Handler sig m =
   Handler { runHandler :: forall s x . sig (InterpretC s sig m) x -> InterpretC s sig m x }
 
@@ -107,6 +98,14 @@ runInterpretState handler state m =
     (\e -> StateC (\s -> handler s e))
     m
 
+
+newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
+  InterpretC { runInterpretC :: m a }
+  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+
+
+instance MonadTrans (InterpretC s sig) where
+  lift = InterpretC
 
 
 -- $setup
