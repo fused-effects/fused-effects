@@ -6,6 +6,10 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        ghc: [8.6.5, 8.4.4, 8.2.2]
+        cabal-install: [2.4]
 
     steps:
     - uses: actions/checkout@master
@@ -13,7 +17,7 @@ jobs:
       run: |
         sudo add-apt-repository ppa:hvr/ghc
         sudo apt-get update
-        sudo apt-get install ghc-8.6.5 cabal-install-2.4
+        sudo apt-get install ghc-${{ matrix.ghc }} cabal-install-${{ matrix.cabal-install }}
         export PATH="/opt/ghc/bin:$PATH"
         cabal --version
         ghc --version
