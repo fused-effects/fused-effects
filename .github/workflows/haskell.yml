@@ -1,0 +1,19 @@
+name: Haskell CI
+
+on: [push]
+
+jobs:
+  build:
+   
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@master
+    - name: Install dependencies
+      run: cabal v2-install --only-dependencies --enable-tests
+    - name: Build
+      run: |
+        cabal v2-configure --enable-tests
+        cabal v2-build
+    - name: Run tests
+      run: cabal v2-test
