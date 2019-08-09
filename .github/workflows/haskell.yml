@@ -18,10 +18,15 @@ jobs:
         cabal --version
         ghc --version
     - name: Install dependencies
-      run: cabal v2-install --only-dependencies --enable-tests
+      run: |
+        export PATH="/opt/ghc/bin:$PATH"
+        cabal v2-install --only-dependencies --enable-tests
     - name: Build
       run: |
+        export PATH="/opt/ghc/bin:$PATH"
         cabal v2-configure --enable-tests
         cabal v2-build
     - name: Run tests
-      run: cabal v2-test
+      run: |
+        export PATH="/opt/ghc/bin:$PATH"
+        cabal v2-test
