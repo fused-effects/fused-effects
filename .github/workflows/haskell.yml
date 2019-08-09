@@ -20,6 +20,7 @@ jobs:
     - name: Install dependencies
       run: |
         export PATH="/opt/ghc/bin:$PATH"
+        cabal v2-update
         cabal v2-install --only-dependencies --enable-tests
     - name: Build
       run: |
