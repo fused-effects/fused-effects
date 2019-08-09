@@ -14,6 +14,7 @@ jobs:
     steps:
     - uses: actions/checkout@master
       if: github.event_name != 'pull_request' || github.event.action == 'opened' || github.event.action == 'synchronize'
+    - uses: robrix/setup-cabal@fddbd9d93254b8c9656696bfcadc870ba3e18221
     - name: Install cabal-install & ghc
       run: |
         sudo add-apt-repository ppa:hvr/ghc
