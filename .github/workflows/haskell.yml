@@ -14,7 +14,8 @@ jobs:
         sudo add-apt-repository ppa:hvr/ghc
         sudo apt-get update
         sudo apt-get install ghc-8.6.5 cabal-install-2.4
-        export PATH="/opt/ghc/bin:$PATH"
+        sudo update-alternatives --config opt-ghc
+        sudo update-alternatives --config opt-cabal
         cabal --version
         ghc --version
     - name: Install dependencies
