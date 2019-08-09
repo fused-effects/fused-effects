@@ -26,7 +26,6 @@ jobs:
     - name: Build
       run: |
         export PATH="/opt/ghc/bin:$PATH"
-        cabal v2-configure --enable-tests
         cabal v2-build
     - name: Run tests
       run: |
