@@ -17,6 +17,7 @@ import Control.Effect.Carrier
 import Control.Monad (MonadPlus (..))
 import Control.Monad.Fail
 import Control.Monad.Fix
+import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
@@ -54,6 +55,9 @@ instance MonadFix m => MonadFix (AbortC m) where
 
 instance MonadFail m => MonadFail (AbortC m) where
   fail = lift . fail
+
+instance MonadIO m => MonadIO (AbortC m) where
+  liftIO = lift . liftIO
 
 instance (Alternative m, Monad m) => MonadPlus (AbortC m)
 
