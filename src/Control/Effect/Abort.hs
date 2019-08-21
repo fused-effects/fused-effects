@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, KindSignatures #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
 module Control.Effect.Abort
 ( -- * Abort effect
   Abort(..)
@@ -14,9 +14,10 @@ module Control.Effect.Abort
 
 import Control.Applicative (liftA2)
 import Control.Effect.Carrier
+import GHC.Generics (Generic1)
 
 data Abort (m :: * -> *) k = Abort
-  deriving (Functor)
+  deriving (Functor, Generic1)
 
 -- | Abort the computation.
 abort :: (Carrier sig m, Member Abort sig) => m a
