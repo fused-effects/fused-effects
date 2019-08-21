@@ -20,6 +20,7 @@ data Abort (m :: * -> *) k = Abort
   deriving (Functor, Generic1)
 
 instance HFunctor Abort
+instance Effect Abort
 
 -- | Abort the computation.
 abort :: (Carrier sig m, Member Abort sig) => m a
