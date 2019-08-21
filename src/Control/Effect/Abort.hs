@@ -36,6 +36,9 @@ abort = send Abort
 
 
 -- | Run an 'Abort' effect, returning 'Nothing' for aborted computations, or 'Just' the result otherwise.
+--
+--   prop> run (runError abort)    === Nothing
+--   prop> run (runError (pure a)) === Just a
 runAbort :: AbortC m a -> m (Maybe a)
 runAbort = runAbortC
 
