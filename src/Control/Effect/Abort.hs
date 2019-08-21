@@ -12,7 +12,7 @@ module Control.Effect.Abort
 , run
 ) where
 
-import Control.Applicative (liftA2)
+import Control.Applicative (Alternative (..), liftA2)
 import Control.Effect.Carrier
 import GHC.Generics (Generic1)
 
@@ -36,6 +36,10 @@ newtype AbortC m a = AbortC { runAbortC :: m (Maybe a) }
 instance Applicative m => Applicative (AbortC m) where
   pure = AbortC . pure . Just
   AbortC f <*> AbortC a = AbortC (liftA2 (<*>) f a)
+
+instance Applicative m => Alternative (AbortC m) where
+  empty = AbortC (pure Nothing)
+  AbortC a <|> AbortC b = AbortC (liftA2 (<|>) a b)
 
 instance Monad m => Monad (AbortC m) where
   AbortC a >>= f = AbortC (a >>= maybe (pure Nothing) (runAbortC . f))
