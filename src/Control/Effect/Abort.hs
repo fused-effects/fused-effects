@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Abort
 ( -- * Abort effect
   Abort(..)
@@ -39,3 +39,7 @@ instance Applicative m => Applicative (AbortC m) where
 
 instance Monad m => Monad (AbortC m) where
   AbortC a >>= f = AbortC (a >>= maybe (pure Nothing) (runAbortC . f))
+
+instance (Carrier sig m, Effect sig) => Carrier (Abort :+: sig) (AbortC m) where
+  eff (L Abort) = AbortC (pure Nothing)
+  eff (R other) = AbortC (eff (handle (Just ()) (maybe (pure Nothing) runAbortC) other))
