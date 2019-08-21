@@ -35,6 +35,7 @@ abort :: (Carrier sig m, Member Abort sig) => m a
 abort = send Abort
 
 
+-- | Run an 'Abort' effect, returning 'Nothing' for aborted computations, or 'Just' the result otherwise.
 runAbort :: AbortC m a -> m (Maybe a)
 runAbort = runAbortC
 
