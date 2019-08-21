@@ -29,6 +29,8 @@ instance HFunctor Abort
 instance Effect Abort
 
 -- | Abort the computation.
+--
+--   prop> run (runAbort abort) === Nothing
 abort :: (Carrier sig m, Member Abort sig) => m a
 abort = send Abort
 
