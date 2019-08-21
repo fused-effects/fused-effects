@@ -3,6 +3,10 @@ module Control.Effect.Abort
 ( -- * Abort effect
   Abort(..)
 , abort
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Effect.Carrier
