@@ -67,3 +67,8 @@ instance MonadTrans AbortC where
 instance (Carrier sig m, Effect sig) => Carrier (Abort :+: sig) (AbortC m) where
   eff (L Abort) = AbortC (pure Nothing)
   eff (R other) = AbortC (eff (handle (Just ()) (maybe (pure Nothing) runAbortC) other))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
