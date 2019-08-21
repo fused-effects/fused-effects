@@ -15,6 +15,7 @@ module Control.Effect.Abort
 import Control.Applicative (Alternative (..), liftA2)
 import Control.Effect.Carrier
 import Control.Monad.Fix
+import Control.Monad.Trans.Class
 import GHC.Generics (Generic1)
 
 data Abort (m :: * -> *) k = Abort
@@ -47,6 +48,9 @@ instance Monad m => Monad (AbortC m) where
 
 instance MonadFix m => MonadFix (AbortC m) where
   mfix f = AbortC (mfix (runAbort . maybe (error "mfix (AbortC): function returned failure") f))
+
+instance MonadTrans AbortC where
+  lift = AbortC . fmap Just
 
 instance (Carrier sig m, Effect sig) => Carrier (Abort :+: sig) (AbortC m) where
   eff (L Abort) = AbortC (pure Nothing)
