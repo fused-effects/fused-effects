@@ -19,6 +19,8 @@ import GHC.Generics (Generic1)
 data Abort (m :: * -> *) k = Abort
   deriving (Functor, Generic1)
 
+instance HFunctor Abort
+
 -- | Abort the computation.
 abort :: (Carrier sig m, Member Abort sig) => m a
 abort = send Abort
