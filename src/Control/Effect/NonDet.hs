@@ -64,7 +64,7 @@ instance Monad (NonDetC m) where
   {-# INLINE (>>=) #-}
 
 instance MonadFail m => MonadFail (NonDetC m) where
-  fail s = NonDetC (\ _ _ -> fail s)
+  fail s = lift (fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (NonDetC m) where
@@ -72,7 +72,7 @@ instance MonadFix m => MonadFix (NonDetC m) where
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
-  liftIO io = NonDetC (\ cons nil -> liftIO io >>= flip cons nil)
+  liftIO io = lift (liftIO io)
   {-# INLINE liftIO #-}
 
 instance MonadPlus (NonDetC m)
