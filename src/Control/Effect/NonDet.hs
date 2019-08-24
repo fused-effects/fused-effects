@@ -94,7 +94,7 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) whe
 
 
 data Bin a = Nil | Leaf a | Fork (Bin a) (Bin a)
-  deriving stock (Foldable, Functor, Traversable)
+  deriving stock (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 instance Applicative Bin where
   pure = Leaf
