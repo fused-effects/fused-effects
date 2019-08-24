@@ -42,6 +42,7 @@ instance Effect Cull where
 -- | Cull nondeterminism in the argument, returning at most one result.
 --
 --   prop> run (runNonDet (runCull (cull (pure a <|> pure b)))) === [a]
+--   prop> run (runNonDet (runCull (cull (empty  <|> pure a)))) === [a]
 --   prop> run (runNonDet (runCull (cull (pure a <|> pure b) <|> pure c))) === [a, c]
 --   prop> run (runNonDet (runCull (cull (asum (map pure (repeat a)))))) === [a]
 cull :: (Carrier sig m, Member Cull sig) => m a -> m a
