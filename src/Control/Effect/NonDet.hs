@@ -5,6 +5,8 @@ module Control.Effect.NonDet
   -- * NonDet carrier
 , runNonDet
 , NonDetC(..)
+  -- * Binary trees
+, Bin(..)
   -- * Re-exports
 , Alternative(..)
 , Carrier
