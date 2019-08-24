@@ -78,12 +78,12 @@ instance MonadFail m => MonadFail (NonDetC m) where
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (NonDetC m) where
-  mfix f = NonDetC $ \ fork' leaf' nil' ->
+  mfix f = NonDetC $ \ fork leaf nil ->
     mfix (\ a -> runNonDetC (f (fromJust (foldBin (<|>) Just Nothing a)))
       (liftA2 Fork)
       (pure . Leaf)
       (pure Nil))
-    >>= foldBin fork' leaf' nil'
+    >>= foldBin fork leaf nil
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
