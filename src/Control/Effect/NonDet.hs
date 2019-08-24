@@ -93,6 +93,9 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) whe
   {-# INLINE eff #-}
 
 
+data B a = Nil | Leaf a | Fork (B a) (B a)
+
+
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
