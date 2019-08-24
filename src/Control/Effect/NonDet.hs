@@ -15,13 +15,14 @@ module Control.Effect.NonDet
 , run
 ) where
 
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus(..), join)
 import Control.Monad.Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Maybe (fromJust)
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 
@@ -39,12 +40,12 @@ data NonDet m k
 --   prop> run (runNonDet (pure a)) === [a]
 --   prop> run (runNonDet (pure a)) === Just a
 runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
-runNonDet (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
+runNonDet (NonDetC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
-  { -- | A higher-order function receiving two parameters: a function to combine each solution with the rest of the solutions, and an action to run when no results are produced.
-    runNonDetC :: forall b . (a -> m b -> m b) -> m b -> m b
+  { -- | A higher-order function receiving three continuations, respectively implementing '<|>',  'pure', and 'empty'.
+    runNonDetC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b
   }
   deriving stock (Functor)
 
@@ -52,24 +53,24 @@ newtype NonDetC m a = NonDetC
 --   prop> run (runNonDet (pure a *> pure b)) === Just b
 --   prop> run (runNonDet (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
-  pure a = NonDetC (\ cons -> cons a)
+  pure a = NonDetC (\ _ pure _ -> pure a)
   {-# INLINE pure #-}
-  NonDetC f <*> NonDetC a = NonDetC $ \ cons ->
-    f (\ f' -> a (cons . f'))
+  NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf nil ->
+    f fork (\ f' -> a fork (leaf . f') nil) nil
   {-# INLINE (<*>) #-}
 
 -- $
 --   prop> run (runNonDet (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
 --   prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
 instance Alternative (NonDetC m) where
-  empty = NonDetC (\ _ nil -> nil)
+  empty = NonDetC (\ _ _ empty -> empty)
   {-# INLINE empty #-}
-  NonDetC l <|> NonDetC r = NonDetC $ \ cons -> l cons . r cons
+  NonDetC l <|> NonDetC r = NonDetC $ \ fork leaf nil -> fork (l fork leaf nil) (r fork leaf nil)
   {-# INLINE (<|>) #-}
 
 instance Monad (NonDetC m) where
-  NonDetC a >>= f = NonDetC $ \ cons ->
-    a (\ a' -> runNonDetC (f a') cons)
+  NonDetC a >>= f = NonDetC $ \ fork leaf nil ->
+    a fork (\ a' -> runNonDetC (f a') fork leaf nil) nil
   {-# INLINE (>>=) #-}
 
 instance MonadFail m => MonadFail (NonDetC m) where
@@ -77,7 +78,12 @@ instance MonadFail m => MonadFail (NonDetC m) where
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (NonDetC m) where
-  mfix f = NonDetC (\ cons nil -> mfix (\ a -> runNonDetC (f (head a)) (fmap . (:)) (pure [])) >>= foldr cons nil)
+  mfix f = NonDetC $ \ fork' leaf' nil' ->
+    mfix (\ a -> runNonDetC (f (fromJust (foldBin (<|>) Just Nothing a)))
+      (liftA2 Fork)
+      (pure . Leaf)
+      (pure Nil))
+    >>= foldBin fork' leaf' nil'
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
@@ -87,13 +93,13 @@ instance MonadIO m => MonadIO (NonDetC m) where
 instance MonadPlus (NonDetC m)
 
 instance MonadTrans NonDetC where
-  lift m = NonDetC (\ cons nil -> m >>= flip cons nil)
+  lift m = NonDetC (\ fork leaf nil -> m >>= flip fork nil . leaf)
   {-# INLINE lift #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L Empty)      = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other)      = NonDetC $ \ cons nil -> eff (handle [()] (fmap concat . traverse runNonDet) other) >>= foldr cons nil
+  eff (R other)      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= foldBin fork leaf nil
   {-# INLINE eff #-}
 
 
