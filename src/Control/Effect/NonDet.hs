@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, DeriveTraversable, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( -- * NonDet effect
   NonDet(..)
@@ -94,6 +94,7 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) whe
 
 
 data B a = Nil | Leaf a | Fork (B a) (B a)
+  deriving stock (Foldable, Functor, Traversable)
 
 
 -- $setup
