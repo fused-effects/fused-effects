@@ -55,6 +55,8 @@ instance Applicative (NonDetC m) where
     f (\ f' -> a (cons . f'))
   {-# INLINE (<*>) #-}
 
+-- $
+--   prop> run (runNonDet (pure a <|> pure b <|> pure c)) === [a, b, c]
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ nil -> nil)
   {-# INLINE empty #-}
