@@ -106,6 +106,11 @@ instance Alternative B where
   empty = Nil
   (<|>) = Fork
 
+instance Monad B where
+  Nil    >>= _   = Nil
+  Leaf a >>= f   = f a
+  Fork a b >>= f = Fork (a >>= f) (b >>= f)
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
