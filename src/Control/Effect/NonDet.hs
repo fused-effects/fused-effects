@@ -45,6 +45,9 @@ newtype NonDetC m a = NonDetC
   }
   deriving stock (Functor)
 
+-- $
+--   prop> run (runNonDet (pure a *> pure b)) === Just b
+--   prop> run (runNonDet (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ cons -> cons a)
   {-# INLINE pure #-}
