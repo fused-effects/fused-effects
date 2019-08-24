@@ -102,6 +102,10 @@ instance Applicative B where
   Leaf f   <*> a = fmap f a
   Fork a b <*> c = Fork (a <*> c) (b <*> c)
 
+instance Alternative B where
+  empty = Nil
+  (<|>) = Fork
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
