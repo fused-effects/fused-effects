@@ -96,6 +96,12 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) whe
 data B a = Nil | Leaf a | Fork (B a) (B a)
   deriving stock (Foldable, Functor, Traversable)
 
+instance Applicative B where
+  pure = Leaf
+  Nil      <*> _ = Nil
+  Leaf f   <*> a = fmap f a
+  Fork a b <*> c = Fork (a <*> c) (b <*> c)
+
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
