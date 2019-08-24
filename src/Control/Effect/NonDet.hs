@@ -93,7 +93,7 @@ instance MonadIO m => MonadIO (NonDetC m) where
 instance MonadPlus (NonDetC m)
 
 instance MonadTrans NonDetC where
-  lift m = NonDetC (\ fork leaf nil -> m >>= flip fork nil . leaf)
+  lift m = NonDetC (\ _ leaf _ -> m >>= leaf)
   {-# INLINE lift #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
