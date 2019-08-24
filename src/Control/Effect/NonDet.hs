@@ -93,20 +93,20 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) whe
   {-# INLINE eff #-}
 
 
-data B a = Nil | Leaf a | Fork (B a) (B a)
+data Bin a = Nil | Leaf a | Fork (Bin a) (Bin a)
   deriving stock (Foldable, Functor, Traversable)
 
-instance Applicative B where
+instance Applicative Bin where
   pure = Leaf
   Nil      <*> _ = Nil
   Leaf f   <*> a = fmap f a
   Fork a b <*> c = Fork (a <*> c) (b <*> c)
 
-instance Alternative B where
+instance Alternative Bin where
   empty = Nil
   (<|>) = Fork
 
-instance Monad B where
+instance Monad Bin where
   Nil    >>= _   = Nil
   Leaf a >>= f   = f a
   Fork a b >>= f = Fork (a >>= f) (b >>= f)
