@@ -7,6 +7,7 @@ module Control.Effect.NonDet
 , NonDetC(..)
   -- * Binary trees
 , Bin(..)
+, foldBin
   -- * Re-exports
 , Alternative(..)
 , Carrier
@@ -112,6 +113,12 @@ instance Monad Bin where
   Nil    >>= _   = Nil
   Leaf a >>= f   = f a
   Fork a b >>= f = Fork (a >>= f) (b >>= f)
+
+foldBin :: (b -> b -> b) -> (a -> b) -> b -> Bin a -> b
+foldBin fork leaf nil = go where
+  go Nil = nil
+  go (Leaf a) = leaf a
+  go (Fork a b) = fork (go a) (go b)
 
 
 -- $setup
