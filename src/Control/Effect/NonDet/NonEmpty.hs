@@ -8,6 +8,7 @@ module Control.Effect.NonDet.NonEmpty
 ) where
 
 import Control.Effect.Carrier
+import Control.Monad.Trans.Class
 import Data.Bool (bool)
 import GHC.Generics (Generic1)
 
@@ -40,3 +41,7 @@ instance Monad (NonDetC m) where
   NonDetC a >>= f = NonDetC $ \ fork leaf ->
     a fork (\ a' -> runNonDetC (f a') fork leaf)
   {-# INLINE (>>=) #-}
+
+instance MonadTrans NonDetC where
+  lift m = NonDetC (\ _ leaf -> m >>= leaf)
+  {-# INLINE lift #-}
