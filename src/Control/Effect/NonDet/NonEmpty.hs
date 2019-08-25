@@ -9,6 +9,7 @@ module Control.Effect.NonDet.NonEmpty
 
 import Control.Effect.Carrier
 import Control.Monad.Fail
+import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Bool (bool)
 import GHC.Generics (Generic1)
@@ -47,6 +48,10 @@ instance Monad (NonDetC m) where
 instance MonadFail m => MonadFail (NonDetC m) where
   fail s = lift (fail s)
   {-# INLINE fail #-}
+
+instance MonadIO m => MonadIO (NonDetC m) where
+  liftIO io = lift (liftIO io)
+  {-# INLINE liftIO #-}
 
 instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf -> m >>= leaf)
