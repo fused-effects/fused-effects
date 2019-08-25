@@ -16,10 +16,10 @@ module Control.Effect.Cull
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier.Class
+import Control.Carrier.Reader
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet
-import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix

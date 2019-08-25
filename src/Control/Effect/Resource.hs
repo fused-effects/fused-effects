@@ -13,7 +13,7 @@ module Control.Effect.Resource
 
 import           Control.Applicative (Alternative(..))
 import           Control.Carrier.Class
-import           Control.Effect.Reader
+import           Control.Carrier.Reader
 import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))
 import           Control.Monad.Fail

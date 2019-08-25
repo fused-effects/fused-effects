@@ -32,6 +32,7 @@ library
                      , Control.Carrier.Class
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
+                     , Control.Carrier.Reader
                      , Control.Carrier.State.Lazy
                      , Control.Carrier.State.Strict
                      , Control.Carrier.Trace.Ignoring

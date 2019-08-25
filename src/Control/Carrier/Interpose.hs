@@ -12,7 +12,7 @@ module Control.Carrier.Interpose
 
 import Control.Applicative
 import Control.Carrier.Class
-import Control.Effect.Reader
+import Control.Carrier.Reader
 import Control.Monad (MonadPlus (..))
 import Control.Monad.Fail
 import Control.Monad.Fix
