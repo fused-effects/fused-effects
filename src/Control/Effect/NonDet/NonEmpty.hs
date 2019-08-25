@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, RankNTypes #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, RankNTypes #-}
 module Control.Effect.NonDet.NonEmpty
 ( -- * NonDet effect
   NonDet(..)
@@ -60,3 +60,7 @@ instance MonadIO m => MonadIO (NonDetC m) where
 instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf -> m >>= leaf)
   {-# INLINE lift #-}
+
+
+data BinaryTree a = Leaf a | Fork (BinaryTree a) (BinaryTree a)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
