@@ -69,3 +69,7 @@ instance Applicative BinaryTree where
   pure = Leaf
   Leaf f   <*> a = fmap f a
   Fork a b <*> c = Fork (a <*> c) (b <*> c)
+
+instance Monad BinaryTree where
+  Leaf a   >>= f = f a
+  Fork a b >>= f = Fork (a >>= f) (b >>= f)
