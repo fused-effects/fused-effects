@@ -28,7 +28,8 @@ common common
 
 library
   import:              common
-  exposed-modules:     Control.Carrier.Class
+  exposed-modules:     Control.Carrier
+                     , Control.Carrier.Class
                      , Control.Carrier.Interpret
                      , Control.Carrier.State.Lazy
                      , Control.Carrier.State.Strict
