@@ -1,13 +1,10 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, DeriveTraversable, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( -- * NonDet effect
   NonDet(..)
   -- * NonDet carrier
 , runNonDet
 , NonDetC(..)
-  -- * Binary trees
-, Bin(..)
-, foldBin
   -- * Re-exports
 , Alternative(..)
 , Carrier
@@ -22,6 +19,7 @@ import Control.Monad.Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.BinaryTree
 import Data.Maybe (fromJust)
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
@@ -101,31 +99,6 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) whe
   eff (L (Choose k)) = k True <|> k False
   eff (R other)      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= foldBin fork leaf nil
   {-# INLINE eff #-}
-
-
-data Bin a = Nil | Leaf a | Fork (Bin a) (Bin a)
-  deriving stock (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-instance Applicative Bin where
-  pure = Leaf
-  Nil      <*> _ = Nil
-  Leaf f   <*> a = fmap f a
-  Fork a b <*> c = Fork (a <*> c) (b <*> c)
-
-instance Alternative Bin where
-  empty = Nil
-  (<|>) = Fork
-
-instance Monad Bin where
-  Nil    >>= _   = Nil
-  Leaf a >>= f   = f a
-  Fork a b >>= f = Fork (a >>= f) (b >>= f)
-
-foldBin :: (b -> b -> b) -> (a -> b) -> b -> Bin a -> b
-foldBin fork leaf nil = go where
-  go Nil = nil
-  go (Leaf a) = leaf a
-  go (Fork a b) = fork (go a) (go b)
 
 
 -- $setup
