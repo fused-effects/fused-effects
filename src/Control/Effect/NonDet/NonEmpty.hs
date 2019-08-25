@@ -64,3 +64,8 @@ instance MonadTrans NonDetC where
 
 data BinaryTree a = Leaf a | Fork (BinaryTree a) (BinaryTree a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+instance Applicative BinaryTree where
+  pure = Leaf
+  Leaf f   <*> a = fmap f a
+  Fork a b <*> c = Fork (a <*> c) (b <*> c)
