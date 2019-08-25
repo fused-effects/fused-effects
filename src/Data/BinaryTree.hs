@@ -28,6 +28,6 @@ instance Monad BinaryTree where
 
 fold :: (b -> b -> b) -> (a -> b) -> b -> BinaryTree a -> b
 fold fork leaf nil = go where
-  go Nil = nil
-  go (Leaf a) = leaf a
+  go Nil        = nil
+  go (Leaf a)   = leaf a
   go (Fork a b) = fork (go a) (go b)
