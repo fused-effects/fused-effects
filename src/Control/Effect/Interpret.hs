@@ -10,7 +10,7 @@ module Control.Effect.Interpret
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.State
+import Control.Carrier.State.Strict
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix

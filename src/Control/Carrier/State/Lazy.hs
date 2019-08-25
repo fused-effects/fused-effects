@@ -14,7 +14,7 @@ module Control.Carrier.State.Lazy
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.State.Internal as State
+import Control.Effect.State as State
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix
