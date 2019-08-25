@@ -5,9 +5,14 @@ module Control.Effect.Error.CPS
   -- * Error carrier
 , runError
 , ErrorC(..)
+-- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative (..))
+import Control.Effect.Carrier
 import Control.Effect.Error (Error, throwError, catchError)
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail
