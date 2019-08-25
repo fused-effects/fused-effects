@@ -9,6 +9,7 @@ module Control.Effect.Error.CPS
 
 import Control.Effect.Error (Error, throwError, catchError)
 import Control.Monad.Fail
+import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
@@ -27,6 +28,9 @@ instance Monad (ErrorC e m) where
 
 instance MonadFail m => MonadFail (ErrorC e m) where
   fail s = lift (fail s)
+
+instance MonadIO m => MonadIO (ErrorC e m) where
+  liftIO io = lift (liftIO io)
 
 instance MonadTrans (ErrorC e) where
   lift m = ErrorC $ \ _ k -> m >>= k
