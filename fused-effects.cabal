@@ -40,7 +40,6 @@ library
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
                      , Control.Effect.Pure
-                     , Control.Effect.Random
                      , Control.Effect.Reader
                      , Control.Effect.Resource
                      , Control.Effect.Resumable
