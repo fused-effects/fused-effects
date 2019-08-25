@@ -35,3 +35,8 @@ instance Applicative (NonDetC m) where
   NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf ->
     f fork (\ f' -> a fork (leaf . f'))
   {-# INLINE (<*>) #-}
+
+instance Monad (NonDetC m) where
+  NonDetC a >>= f = NonDetC $ \ fork leaf ->
+    a fork (\ a' -> runNonDetC (f a') fork leaf)
+  {-# INLINE (>>=) #-}
