@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 module Control.Effect.NonDet.NonEmpty
 ( -- * NonDet effect
   NonDet(..)
@@ -5,3 +6,4 @@ module Control.Effect.NonDet.NonEmpty
 
 data NonDet m k
   = Choose (Bool -> m k)
+  deriving (Functor)
