@@ -52,7 +52,6 @@ library
                      , Control.Effect.Writer
   build-depends:       base >=4.9 && <4.13
                      , deepseq >=1.4.3 && <1.5
-                     , MonadRandom >=0.5 && <0.6
                      , unliftio-core >= 0.1.2
                      , transformers
   hs-source-dirs:      src
