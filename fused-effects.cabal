@@ -54,7 +54,6 @@ library
                      , deepseq >=1.4.3 && <1.5
                      , MonadRandom >=0.5 && <0.6
                      , unliftio-core >= 0.1.2
-                     , random
                      , transformers
   hs-source-dirs:      src
 
