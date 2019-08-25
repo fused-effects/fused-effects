@@ -36,6 +36,7 @@ library
                      , Control.Carrier.State.Strict
                      , Control.Carrier.Trace.Ignoring
                      , Control.Carrier.Trace.Printing
+                     , Control.Carrier.Trace.Returning
                      , Control.Effect
                      , Control.Effect.Choose
                      , Control.Effect.Cull
