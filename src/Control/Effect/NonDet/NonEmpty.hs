@@ -1,2 +1,7 @@
 module Control.Effect.NonDet.NonEmpty
-() where
+( -- * NonDet effect
+  NonDet(..)
+) where
+
+data NonDet m k
+  = Choose (Bool -> m k)
