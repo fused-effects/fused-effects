@@ -2,11 +2,11 @@ module Control.Effect
 ( module X
 ) where
 
-import Control.Effect.Abort     as X (Abort, AbortC)
 import Control.Effect.Carrier   as X ((:+:), Carrier, Effect, Member)
 import Control.Effect.Choose    as X (Choose, ChooseC)
 import Control.Effect.Cull      as X (Cull, CullC, OnceC)
 import Control.Effect.Cut       as X (Cut, CutC)
+import Control.Effect.Empty     as X (Empty, EmptyC)
 import Control.Effect.Error     as X (Error, ErrorC)
 import Control.Effect.Fail      as X (Fail, FailC)
 import Control.Effect.Fresh     as X (Fresh, FreshC)

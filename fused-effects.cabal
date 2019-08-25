@@ -29,11 +29,11 @@ common common
 library
   import:              common
   exposed-modules:     Control.Effect
-                     , Control.Effect.Abort
                      , Control.Effect.Carrier
                      , Control.Effect.Choose
                      , Control.Effect.Cull
                      , Control.Effect.Cut
+                     , Control.Effect.Empty
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.Fresh
