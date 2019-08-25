@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, DeriveTraversable, DerivingStrategies, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( -- * NonDet effect
   NonDet(..)
@@ -26,8 +26,10 @@ import Prelude hiding (fail)
 data NonDet m k
   = Empty
   | Choose (Bool -> m k)
-  deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving (Functor, Generic1)
+
+instance HFunctor NonDet
+instance Effect   NonDet
 
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
@@ -44,7 +46,7 @@ newtype NonDetC m a = NonDetC
   { -- | A higher-order function receiving three continuations, respectively implementing '<|>',  'pure', and 'empty'.
     runNonDetC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b
   }
-  deriving stock (Functor)
+  deriving (Functor)
 
 -- $
 --   prop> run (runNonDet (pure a *> pure b)) === Just b
