@@ -25,6 +25,7 @@ instance Monad BinaryTree where
   Leaf a >>= f   = f a
   Fork a b >>= f = Fork (a >>= f) (b >>= f)
 
+
 fold :: (b -> b -> b) -> (a -> b) -> b -> BinaryTree a -> b
 fold fork leaf nil = go where
   go Nil = nil
