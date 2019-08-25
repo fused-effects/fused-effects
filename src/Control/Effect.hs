@@ -2,7 +2,7 @@ module Control.Effect
 ( module X
 ) where
 
-import Control.Carrier          as X ((:+:), Carrier, Effect, Member)
+import Control.Carrier          as X ((:+:), Carrier, Effect, HFunctor, Member)
 import Control.Effect.Choose    as X (Choose, ChooseC)
 import Control.Effect.Cull      as X (Cull, CullC, OnceC)
 import Control.Effect.Cut       as X (Cut, CutC)
