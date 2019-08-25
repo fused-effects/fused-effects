@@ -4,7 +4,7 @@ module Control.Carrier.Trace.Returning
   Trace
 , trace
   -- * Trace carrier
-, runTraceByReturning
+, runTrace
 , TraceC(..)
 -- * Re-exports
 , Carrier
@@ -25,9 +25,9 @@ import Data.Bifunctor (first)
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
---   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) === ([a, b], c)
-runTraceByReturning :: Functor m => TraceC m a -> m ([String], a)
-runTraceByReturning = fmap (first reverse) . runState [] . runTraceC
+--   prop> run (runTrace (trace a *> trace b *> pure c)) === ([a, b], c)
+runTrace :: Functor m => TraceC m a -> m ([String], a)
+runTrace = fmap (first reverse) . runState [] . runTraceC
 
 newtype TraceC m a = TraceC { runTraceC :: StateC [String] m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
