@@ -9,6 +9,7 @@ module Control.Effect.Error.CPS
 
 import Control.Applicative (Alternative (..))
 import Control.Effect.Error (Error, throwError, catchError)
+import Control.Monad (MonadPlus)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -36,6 +37,8 @@ instance MonadFail m => MonadFail (ErrorC e m) where
 
 instance MonadIO m => MonadIO (ErrorC e m) where
   liftIO io = lift (liftIO io)
+
+instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance MonadTrans (ErrorC e) where
   lift m = ErrorC $ \ _ k -> m >>= k
