@@ -30,6 +30,7 @@ library
   import:              common
   exposed-modules:     Control.Carrier
                      , Control.Carrier.Class
+                     , Control.Carrier.Error
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
                      , Control.Carrier.Reader
