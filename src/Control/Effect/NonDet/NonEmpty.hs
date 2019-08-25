@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, RankNTypes #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet.NonEmpty
 ( -- * NonDet effect
   NonDet(..)
@@ -8,7 +8,9 @@ module Control.Effect.NonDet.NonEmpty
 , NonDetC(..)
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Effect.Carrier
+import Control.Monad (join)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -60,6 +62,11 @@ instance MonadIO m => MonadIO (NonDetC m) where
 instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf -> m >>= leaf)
   {-# INLINE lift #-}
+
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
+  eff (L (Choose k)) = NonDetC $ \ fork leaf -> fork (runNonDetC (k True) fork leaf) (runNonDetC (k False) fork leaf)
+  eff (R other)      = NonDetC $ \ fork leaf -> eff (handle (Leaf ()) (fmap join . traverse (runNonDet (liftA2 Fork) (pure . Leaf))) other) >>= fold fork leaf
+  {-# INLINE eff #-}
 
 
 data BinaryTree a = Leaf a | Fork (BinaryTree a) (BinaryTree a)
