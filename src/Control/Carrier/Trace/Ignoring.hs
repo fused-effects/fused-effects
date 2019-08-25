@@ -38,3 +38,8 @@ instance Carrier sig m => Carrier (Trace :+: sig) (TraceC m) where
   eff (L trace) = traceCont trace
   eff (R other) = TraceC (eff (handleCoercible other))
   {-# INLINE eff #-}
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck

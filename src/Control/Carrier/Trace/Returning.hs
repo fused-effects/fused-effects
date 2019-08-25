@@ -35,3 +35,8 @@ newtype TraceC m a = TraceC { runTraceC :: StateC [String] m a }
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceC m) where
   eff (L (Trace m k)) = TraceC (modify (m :)) *> k
   eff (R other)       = TraceC (eff (R (handleCoercible other)))
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
