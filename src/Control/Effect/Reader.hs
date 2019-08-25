@@ -15,7 +15,7 @@ module Control.Effect.Reader
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix

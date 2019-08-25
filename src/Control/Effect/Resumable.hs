@@ -17,7 +17,7 @@ module Control.Effect.Resumable
 
 import Control.Applicative (Alternative(..))
 import Control.DeepSeq
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Error
 import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))

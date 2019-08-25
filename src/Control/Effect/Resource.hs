@@ -12,7 +12,7 @@ module Control.Effect.Resource
 ) where
 
 import           Control.Applicative (Alternative(..))
-import           Control.Carrier
+import           Control.Carrier.Class
 import           Control.Effect.Reader
 import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))

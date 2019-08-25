@@ -13,7 +13,7 @@ module Control.Effect.State
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 

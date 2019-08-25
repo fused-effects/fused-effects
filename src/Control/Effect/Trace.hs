@@ -17,7 +17,7 @@ module Control.Effect.Trace
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Carrier.State.Strict
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail

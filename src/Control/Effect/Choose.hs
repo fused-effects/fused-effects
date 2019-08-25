@@ -9,7 +9,7 @@ module Control.Effect.Choose
 ) where
 
 import Control.Applicative ((<|>), liftA2)
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Monad (join)
 import Control.Monad.Fail
 import Control.Monad.Fix
