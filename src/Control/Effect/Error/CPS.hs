@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, RankNTypes #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Error.CPS
 ( -- * Error effect
   module Control.Effect.Error
@@ -13,7 +13,7 @@ module Control.Effect.Error.CPS
 
 import Control.Applicative (Alternative (..))
 import Control.Effect.Carrier
-import Control.Effect.Error (Error, throwError, catchError)
+import Control.Effect.Error (Error (..), throwError, catchError)
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail
 import Control.Monad.Fix
@@ -51,3 +51,8 @@ instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance MonadTrans (ErrorC e) where
   lift m = ErrorC $ \ _ k -> m >>= k
+
+instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
+  eff (L (Throw e))     = ErrorC $ \ h _ -> h e
+  eff (L (Catch m h k)) = ErrorC $ \ h' k' -> runError (runError h' (runError h' k' . k) . h) (runError h' k' . k) m
+  eff (R other)         = ErrorC $ \ h k -> eff (handle (Right ()) (either (pure . Left) (runError (pure . Left) (pure . Right))) other) >>= either h k
