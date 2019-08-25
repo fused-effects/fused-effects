@@ -5,7 +5,7 @@ module Control.Carrier.Trace.Printing
 , trace
   -- * Trace carrier
 , runTraceByPrinting
-, TraceByPrintingC(..)
+, TraceC(..)
 -- * Re-exports
 , Carrier
 , Member
@@ -23,17 +23,17 @@ import Control.Monad.Trans.Class
 import System.IO
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
-runTraceByPrinting :: TraceByPrintingC m a -> m a
-runTraceByPrinting = runTraceByPrintingC
+runTraceByPrinting :: TraceC m a -> m a
+runTraceByPrinting = runTraceC
 
-newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
+newtype TraceC m a = TraceC { runTraceC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
-instance MonadTrans TraceByPrintingC where
-  lift = TraceByPrintingC
+instance MonadTrans TraceC where
+  lift = TraceC
   {-# INLINE lift #-}
 
-instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
+instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceC m) where
   eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
-  eff (R other)       = TraceByPrintingC (eff (handleCoercible other))
+  eff (R other)       = TraceC (eff (handleCoercible other))
   {-# INLINE eff #-}
