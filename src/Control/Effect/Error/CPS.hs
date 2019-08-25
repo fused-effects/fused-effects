@@ -1,8 +1,11 @@
+{-# LANGUAGE RankNTypes #-}
 module Control.Effect.Error.CPS
 ( -- * Error effect
-  Error
-, throwError
-, catchError
+  module Control.Effect.Error
+  -- * Error carrier
+, ErrorC(..)
 ) where
 
-import Control.Effect.Error
+import Control.Effect.Error (Error, throwError, catchError)
+
+newtype ErrorC e m a = ErrorC { runErrorC :: forall b . (e -> m b) -> (a -> m b) -> m b }
