@@ -20,4 +20,4 @@ instance Applicative (ErrorC e m) where
   ErrorC f <*> ErrorC a = ErrorC $ \ h k -> f h (\ f' -> a h (k . f'))
 
 instance Monad (ErrorC e m) where
-  ErrorC a >>= f = ErrorC $ \ h k -> a h (\ a' -> runErrorC (f a') h k)
+  ErrorC a >>= f = ErrorC $ \ h k -> a h (runError h k . f)
