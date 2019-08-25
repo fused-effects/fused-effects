@@ -11,6 +11,7 @@ import Control.Applicative (Alternative (..))
 import Control.Effect.Error (Error, throwError, catchError)
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
@@ -34,6 +35,9 @@ instance Monad (ErrorC e m) where
 
 instance MonadFail m => MonadFail (ErrorC e m) where
   fail s = lift (fail s)
+
+instance MonadFix m => MonadFix (ErrorC e m) where
+  mfix f = ErrorC $ \ h k -> mfix (runError (pure . Left) (pure . Right) . either (const (error "mfix (ErrorC): function returned failure")) f) >>= either h k
 
 instance MonadIO m => MonadIO (ErrorC e m) where
   liftIO io = lift (liftIO io)
