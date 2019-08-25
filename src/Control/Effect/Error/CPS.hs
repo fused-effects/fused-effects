@@ -1,2 +1,8 @@
 module Control.Effect.Error.CPS
-() where
+( -- * Error effect
+  Error
+, throwError
+, catchError
+) where
+
+import Control.Effect.Error
