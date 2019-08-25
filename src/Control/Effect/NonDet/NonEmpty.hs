@@ -8,9 +8,11 @@ module Control.Effect.NonDet.NonEmpty
 ) where
 
 import Control.Effect.Carrier
+import Control.Monad.Fail
 import Control.Monad.Trans.Class
 import Data.Bool (bool)
 import GHC.Generics (Generic1)
+import Prelude hiding (fail)
 
 data NonDet m k
   = Choose (Bool -> m k)
@@ -41,6 +43,10 @@ instance Monad (NonDetC m) where
   NonDetC a >>= f = NonDetC $ \ fork leaf ->
     a fork (\ a' -> runNonDetC (f a') fork leaf)
   {-# INLINE (>>=) #-}
+
+instance MonadFail m => MonadFail (NonDetC m) where
+  fail s = lift (fail s)
+  {-# INLINE fail #-}
 
 instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf -> m >>= leaf)
