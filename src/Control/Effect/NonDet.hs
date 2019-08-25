@@ -19,7 +19,7 @@ import Control.Monad.Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.BinaryTree
+import Data.BinaryTree as BinaryTree
 import Data.Maybe (fromJust)
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
@@ -77,11 +77,11 @@ instance MonadFail m => MonadFail (NonDetC m) where
 
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
-    mfix (\ a -> runNonDetC (f (fromJust (foldBin (<|>) Just Nothing a)))
+    mfix (\ a -> runNonDetC (f (fromJust (BinaryTree.fold (<|>) Just Nothing a)))
       (liftA2 Fork)
       (pure . Leaf)
       (pure Nil))
-    >>= foldBin fork leaf nil
+    >>= BinaryTree.fold fork leaf nil
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
@@ -97,7 +97,7 @@ instance MonadTrans NonDetC where
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L Empty)      = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other)      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= foldBin fork leaf nil
+  eff (R other)      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= BinaryTree.fold fork leaf nil
   {-# INLINE eff #-}
 
 
