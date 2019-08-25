@@ -39,6 +39,7 @@ library
                      , Control.Effect.Interpret
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
+                     , Control.Effect.NonDet.NonEmpty
                      , Control.Effect.Pure
                      , Control.Effect.Random
                      , Control.Effect.Reader
