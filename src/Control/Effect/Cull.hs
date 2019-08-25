@@ -16,6 +16,8 @@ module Control.Effect.Cull
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
+import Control.Effect.Choose
+import Control.Effect.Empty
 import Control.Effect.NonDet
 import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))
@@ -75,11 +77,11 @@ instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
-  eff (L (Cull m k))     = CullC (local (const True) (runCullC m)) >>= k
-  eff (R (L Empty))      = empty
-  eff (R (L (Choose k))) = k True <|> k False
-  eff (R (R other))      = CullC (eff (R (R (handleCoercible other))))
+instance (Carrier sig m, Effect sig) => Carrier (Cull :+: Empty :+: Choose :+: sig) (CullC m) where
+  eff (L (Cull m k))         = CullC (local (const True) (runCullC m)) >>= k
+  eff (R (L Empty))          = empty
+  eff (R (R (L (Choose k)))) = k True <|> k False
+  eff (R (R (R other)))      = CullC (eff (R (R (R (handleCoercible other)))))
   {-# INLINE eff #-}
 
 
@@ -95,8 +97,8 @@ runNonDetOnce = runNonDet . runCull . cull . runOnceC
 newtype OnceC m a = OnceC { runOnceC :: CullC (NonDetC m) a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (OnceC m) where
-  eff = OnceC . eff . R . R . handleCoercible
+instance (Carrier sig m, Effect sig) => Carrier (Empty :+: Choose :+: sig) (OnceC m) where
+  eff = OnceC . eff . R . R . R . handleCoercible
   {-# INLINE eff #-}
 
 

@@ -1,9 +1,7 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
-( -- * NonDet effect
-  NonDet(..)
-  -- * NonDet carrier
-, runNonDet
+( -- * NonDet carrier
+  runNonDet
 , NonDetC(..)
   -- * Re-exports
 , Alternative(..)
@@ -14,23 +12,15 @@ module Control.Effect.NonDet
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
+import Control.Effect.Choose
+import Control.Effect.Empty
 import Control.Monad (MonadPlus(..), join)
 import Control.Monad.Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (fromJust)
-import GHC.Generics (Generic1)
 import Prelude hiding (fail)
-
-data NonDet m k
-  = Empty
-  | Choose (Bool -> m k)
-  deriving (Functor, Generic1)
-
-instance HFunctor NonDet
-instance Effect   NonDet
-
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
@@ -95,10 +85,10 @@ instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf _ -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
-  eff (L Empty)      = empty
-  eff (L (Choose k)) = k True <|> k False
-  eff (R other)      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= fold fork leaf nil
+instance (Carrier sig m, Effect sig) => Carrier (Empty :+: Choose :+: sig) (NonDetC m) where
+  eff (L Empty)          = empty
+  eff (R (L (Choose k))) = k True <|> k False
+  eff (R (R other))      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= fold fork leaf nil
   {-# INLINE eff #-}
 
 
