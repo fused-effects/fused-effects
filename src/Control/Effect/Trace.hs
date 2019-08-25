@@ -6,8 +6,6 @@ module Control.Effect.Trace
   -- * Trace carriers
 , runTraceByPrinting
 , TraceByPrintingC(..)
-, runTraceByIgnoring
-, TraceByIgnoringC(..)
 , runTraceByReturning
 , TraceByReturningC(..)
   -- * Re-exports
@@ -54,25 +52,6 @@ instance MonadTrans TraceByPrintingC where
 instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
   eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
   eff (R other)       = TraceByPrintingC (eff (handleCoercible other))
-  {-# INLINE eff #-}
-
-
--- | Run a 'Trace' effect, ignoring all traces.
---
---   prop> run (runTraceByIgnoring (trace a *> pure b)) === b
-runTraceByIgnoring :: TraceByIgnoringC m a -> m a
-runTraceByIgnoring = runTraceByIgnoringC
-
-newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
-
-instance MonadTrans TraceByIgnoringC where
-  lift = TraceByIgnoringC
-  {-# INLINE lift #-}
-
-instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
-  eff (L trace) = traceCont trace
-  eff (R other) = TraceByIgnoringC (eff (handleCoercible other))
   {-# INLINE eff #-}
 
 
