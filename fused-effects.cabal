@@ -34,6 +34,7 @@ library
                      , Control.Carrier.Interpret
                      , Control.Carrier.State.Lazy
                      , Control.Carrier.State.Strict
+                     , Control.Carrier.Trace.Ignoring
                      , Control.Effect
                      , Control.Effect.Choose
                      , Control.Effect.Cull
