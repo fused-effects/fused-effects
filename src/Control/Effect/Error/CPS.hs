@@ -3,10 +3,14 @@ module Control.Effect.Error.CPS
 ( -- * Error effect
   module Control.Effect.Error
   -- * Error carrier
+, runError
 , ErrorC(..)
 ) where
 
 import Control.Effect.Error (Error, throwError, catchError)
+
+runError :: (e -> m b) -> (a -> m b) -> ErrorC e m a -> m b
+runError h k m = runErrorC m h k
 
 newtype ErrorC e m a = ErrorC { runErrorC :: forall b . (e -> m b) -> (a -> m b) -> m b }
   deriving (Functor)
