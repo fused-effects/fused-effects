@@ -43,7 +43,7 @@ runNonDet (NonDetC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
-  { -- | A higher-order function receiving three continuations, respectively implementing '<|>',  'pure', and 'empty'.
+  { -- | A higher-order function receiving three continuations, respectively implementing '<|>', 'pure', and 'empty'.
     runNonDetC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b
   }
   deriving (Functor)
