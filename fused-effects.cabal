@@ -29,6 +29,7 @@ common common
 library
   import:              common
   exposed-modules:     Control.Carrier
+                     , Control.Carrier.Interpret
                      , Control.Carrier.State.Lazy
                      , Control.Carrier.State.Strict
                      , Control.Effect
@@ -40,7 +41,6 @@ library
                      , Control.Effect.Fail
                      , Control.Effect.Fresh
                      , Control.Effect.Interpose
-                     , Control.Effect.Interpret
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
                      , Control.Effect.Pure

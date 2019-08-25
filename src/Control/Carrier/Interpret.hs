@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 
-module Control.Effect.Interpret
+module Control.Carrier.Interpret
 ( runInterpret
 , runInterpretState
 , InterpretC(..)
