@@ -5,7 +5,7 @@ This module provides an 'InterposeC' carrier capable of "eavesdropping" on reque
 made to other carriers. This is a useful capability for dynamism in deeply-nested
 effect stacks, but can lead to complicated control flow. Be careful.
 -}
-module Control.Effect.Interpose
+module Control.Carrier.Interpose
   ( InterposeC (..)
   , runInterpose
   ) where
