@@ -73,3 +73,9 @@ instance Applicative BinaryTree where
 instance Monad BinaryTree where
   Leaf a   >>= f = f a
   Fork a b >>= f = Fork (a >>= f) (b >>= f)
+
+
+fold :: (b -> b -> b) -> (a -> b) -> BinaryTree a -> b
+fold fork leaf = go where
+  go (Leaf a)   = leaf a
+  go (Fork a b) = fork (go a) (go b)
