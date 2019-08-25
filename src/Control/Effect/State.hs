@@ -1,5 +1,5 @@
 module Control.Effect.State
-( module Control.Effect.State.Strict
+( module Control.Carrier.State.Strict
 ) where
 
-import Control.Effect.State.Strict
+import Control.Carrier.State.Strict
