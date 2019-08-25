@@ -7,6 +7,7 @@ module Control.Effect.Error.CPS
 , ErrorC(..)
 ) where
 
+import Control.Applicative (Alternative (..))
 import Control.Effect.Error (Error, throwError, catchError)
 import Control.Monad.Fail
 import Control.Monad.IO.Class
@@ -22,6 +23,10 @@ newtype ErrorC e m a = ErrorC { runErrorC :: forall b . (e -> m b) -> (a -> m b)
 instance Applicative (ErrorC e m) where
   pure a = ErrorC $ \ _ k -> k a
   ErrorC f <*> ErrorC a = ErrorC $ \ h k -> f h (\ f' -> a h (k . f'))
+
+instance Alternative m => Alternative (ErrorC e m) where
+  empty = ErrorC $ \ _ _ -> empty
+  ErrorC a <|> ErrorC b = ErrorC $ \ h k -> a h k <|> b h k
 
 instance Monad (ErrorC e m) where
   ErrorC a >>= f = ErrorC $ \ h k -> a h (runError h k . f)
