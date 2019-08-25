@@ -13,7 +13,7 @@ module Control.Effect.State.Lazy
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Effect.Carrier
+import Control.Carrier
 import Control.Effect.State.Internal as State
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail

@@ -1,5 +1,5 @@
 {-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances #-}
-module Control.Effect.Carrier
+module Control.Carrier
 ( HFunctor(..)
 , Effect(..)
 , Carrier(..)

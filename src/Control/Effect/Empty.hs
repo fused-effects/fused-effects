@@ -12,7 +12,7 @@ module Control.Effect.Empty
 ) where
 
 import Control.Applicative (Alternative (..), liftA2)
-import Control.Effect.Carrier
+import Control.Carrier
 import Control.Monad (MonadPlus (..))
 import Control.Monad.Fail
 import Control.Monad.Fix

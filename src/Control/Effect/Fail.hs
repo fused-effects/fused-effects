@@ -13,7 +13,7 @@ module Control.Effect.Fail
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Effect.Carrier
+import Control.Carrier
 import Control.Effect.Error
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail

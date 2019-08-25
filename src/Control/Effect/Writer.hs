@@ -17,7 +17,7 @@ module Control.Effect.Writer
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Effect.Carrier
+import Control.Carrier
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail

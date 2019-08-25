@@ -11,7 +11,7 @@ module Control.Effect.State.Internal
 , Member
 ) where
 
-import Control.Effect.Carrier
+import Control.Carrier
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 

@@ -28,8 +28,8 @@ common common
 
 library
   import:              common
-  exposed-modules:     Control.Effect
-                     , Control.Effect.Carrier
+  exposed-modules:     Control.Carrier
+                     , Control.Effect
                      , Control.Effect.Choose
                      , Control.Effect.Cull
                      , Control.Effect.Cut

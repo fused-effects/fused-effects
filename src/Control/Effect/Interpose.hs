@@ -11,7 +11,7 @@ module Control.Effect.Interpose
   ) where
 
 import Control.Applicative
-import Control.Effect.Carrier
+import Control.Carrier
 import Control.Effect.Reader
 import Control.Monad (MonadPlus (..))
 import Control.Monad.Fail

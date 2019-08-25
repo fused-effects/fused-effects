@@ -11,7 +11,7 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Effect.Carrier
+import Control.Carrier
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Monad (MonadPlus(..), join)

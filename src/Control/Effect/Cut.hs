@@ -16,7 +16,7 @@ module Control.Effect.Cut
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Effect.Carrier
+import Control.Carrier
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Monad (MonadPlus(..))
