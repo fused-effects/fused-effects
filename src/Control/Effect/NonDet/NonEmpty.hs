@@ -28,3 +28,10 @@ newtype NonDetC m a = NonDetC
     runNonDetC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b
   }
   deriving (Functor)
+
+instance Applicative (NonDetC m) where
+  pure a = NonDetC (\ _ pure -> pure a)
+  {-# INLINE pure #-}
+  NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf ->
+    f fork (\ f' -> a fork (leaf . f'))
+  {-# INLINE (<*>) #-}
