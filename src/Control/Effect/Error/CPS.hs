@@ -8,7 +8,9 @@ module Control.Effect.Error.CPS
 ) where
 
 import Control.Effect.Error (Error, throwError, catchError)
+import Control.Monad.Fail
 import Control.Monad.Trans.Class
+import Prelude hiding (fail)
 
 runError :: (e -> m b) -> (a -> m b) -> ErrorC e m a -> m b
 runError h k m = runErrorC m h k
@@ -22,6 +24,9 @@ instance Applicative (ErrorC e m) where
 
 instance Monad (ErrorC e m) where
   ErrorC a >>= f = ErrorC $ \ h k -> a h (runError h k . f)
+
+instance MonadFail m => MonadFail (ErrorC e m) where
+  fail s = lift (fail s)
 
 instance MonadTrans (ErrorC e) where
   lift m = ErrorC $ \ _ k -> m >>= k
