@@ -4,8 +4,6 @@ module Control.Effect.Trace
   Trace(..)
 , trace
   -- * Trace carriers
-, runTraceByPrinting
-, TraceByPrintingC(..)
 , runTraceByReturning
 , TraceByReturningC(..)
   -- * Re-exports
@@ -24,7 +22,6 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Bifunctor (first)
 import GHC.Generics (Generic1)
-import System.IO
 
 data Trace m k = Trace
   { traceMessage :: String
@@ -36,23 +33,6 @@ data Trace m k = Trace
 -- | Append a message to the trace log.
 trace :: (Member Trace sig, Carrier sig m) => String -> m ()
 trace message = send (Trace message (pure ()))
-
-
--- | Run a 'Trace' effect, printing traces to 'stderr'.
-runTraceByPrinting :: TraceByPrintingC m a -> m a
-runTraceByPrinting = runTraceByPrintingC
-
-newtype TraceByPrintingC m a = TraceByPrintingC { runTraceByPrintingC :: m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
-
-instance MonadTrans TraceByPrintingC where
-  lift = TraceByPrintingC
-  {-# INLINE lift #-}
-
-instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceByPrintingC m) where
-  eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
-  eff (R other)       = TraceByPrintingC (eff (handleCoercible other))
-  {-# INLINE eff #-}
 
 
 -- | Run a 'Trace' effect, returning all traces as a list.
