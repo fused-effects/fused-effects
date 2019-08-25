@@ -8,13 +8,15 @@ module Control.Effect.NonDet.NonEmpty
 , NonDetC(..)
 ) where
 
-import Control.Applicative (liftA2)
+import Control.Applicative ((<|>), liftA2)
 import Control.Effect.Carrier
 import Control.Monad (join)
 import Control.Monad.Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Bool (bool)
+import Data.Maybe (fromJust)
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 
@@ -54,6 +56,14 @@ instance Monad (NonDetC m) where
 instance MonadFail m => MonadFail (NonDetC m) where
   fail s = lift (fail s)
   {-# INLINE fail #-}
+
+instance MonadFix m => MonadFix (NonDetC m) where
+  mfix f = NonDetC $ \ fork leaf ->
+    mfix (\ a -> runNonDetC (f (fromJust (fold (<|>) Just a)))
+      (liftA2 Fork)
+      (pure . Leaf))
+    >>= fold fork leaf
+  {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
   liftIO io = lift (liftIO io)
