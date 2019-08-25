@@ -5,7 +5,7 @@ module Control.Carrier.Trace.Returning
 , trace
   -- * Trace carrier
 , runTraceByReturning
-, TraceByReturningC(..)
+, TraceC(..)
 -- * Re-exports
 , Carrier
 , Member
@@ -26,12 +26,12 @@ import Data.Bifunctor (first)
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
 --   prop> run (runTraceByReturning (trace a *> trace b *> pure c)) === ([a, b], c)
-runTraceByReturning :: Functor m => TraceByReturningC m a -> m ([String], a)
-runTraceByReturning = fmap (first reverse) . runState [] . runTraceByReturningC
+runTraceByReturning :: Functor m => TraceC m a -> m ([String], a)
+runTraceByReturning = fmap (first reverse) . runState [] . runTraceC
 
-newtype TraceByReturningC m a = TraceByReturningC { runTraceByReturningC :: StateC [String] m a }
+newtype TraceC m a = TraceC { runTraceC :: StateC [String] m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceByReturningC m) where
-  eff (L (Trace m k)) = TraceByReturningC (modify (m :)) *> k
-  eff (R other)       = TraceByReturningC (eff (R (handleCoercible other)))
+instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceC m) where
+  eff (L (Trace m k)) = TraceC (modify (m :)) *> k
+  eff (R other)       = TraceC (eff (R (handleCoercible other)))
