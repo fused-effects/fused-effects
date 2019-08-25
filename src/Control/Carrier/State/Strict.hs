@@ -7,9 +7,6 @@ module Control.Carrier.State.Strict
 , evalState
 , execState
 , StateC(..)
-  -- * Re-exports
-, Carrier
-, run
 ) where
 
 import Control.Applicative (Alternative(..))

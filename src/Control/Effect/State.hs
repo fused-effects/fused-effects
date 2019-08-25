@@ -8,7 +8,9 @@ module Control.Effect.State
 , modify
 , modifyLazy
   -- * Re-exports
+, Carrier
 , Member
+, run
 ) where
 
 import Control.Carrier
