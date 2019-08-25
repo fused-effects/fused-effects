@@ -5,7 +5,7 @@ module Control.Carrier.Trace.Ignoring
 , trace
   -- * Trace carrier
 , runTrace
-, TraceByIgnoringC(..)
+, TraceC(..)
 -- * Re-exports
 , Carrier
 , Member
@@ -24,17 +24,17 @@ import Control.Monad.Trans.Class
 -- | Run a 'Trace' effect, ignoring all traces.
 --
 --   prop> run (runTrace (trace a *> pure b)) === b
-runTrace :: TraceByIgnoringC m a -> m a
-runTrace = runTraceByIgnoringC
+runTrace :: TraceC m a -> m a
+runTrace = runTraceC
 
-newtype TraceByIgnoringC m a = TraceByIgnoringC { runTraceByIgnoringC :: m a }
+newtype TraceC m a = TraceC { runTraceC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
 
-instance MonadTrans TraceByIgnoringC where
-  lift = TraceByIgnoringC
+instance MonadTrans TraceC where
+  lift = TraceC
   {-# INLINE lift #-}
 
-instance Carrier sig m => Carrier (Trace :+: sig) (TraceByIgnoringC m) where
+instance Carrier sig m => Carrier (Trace :+: sig) (TraceC m) where
   eff (L trace) = traceCont trace
-  eff (R other) = TraceByIgnoringC (eff (handleCoercible other))
+  eff (R other) = TraceC (eff (handleCoercible other))
   {-# INLINE eff #-}
