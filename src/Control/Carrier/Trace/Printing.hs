@@ -4,7 +4,7 @@ module Control.Carrier.Trace.Printing
   Trace
 , trace
   -- * Trace carrier
-, runTraceByPrinting
+, runTrace
 , TraceC(..)
 -- * Re-exports
 , Carrier
@@ -23,8 +23,8 @@ import Control.Monad.Trans.Class
 import System.IO
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
-runTraceByPrinting :: TraceC m a -> m a
-runTraceByPrinting = runTraceC
+runTrace :: TraceC m a -> m a
+runTrace = runTraceC
 
 newtype TraceC m a = TraceC { runTraceC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
