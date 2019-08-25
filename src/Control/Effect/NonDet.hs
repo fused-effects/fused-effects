@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, DeriveTraversable, DerivingStrategies, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
 ( -- * NonDet effect
   NonDet(..)
@@ -19,7 +19,6 @@ import Control.Monad.Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.BinaryTree as BinaryTree
 import Data.Maybe (fromJust)
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
@@ -77,11 +76,11 @@ instance MonadFail m => MonadFail (NonDetC m) where
 
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
-    mfix (\ a -> runNonDetC (f (fromJust (BinaryTree.fold (<|>) Just Nothing a)))
+    mfix (\ a -> runNonDetC (f (fromJust (fold (<|>) Just Nothing a)))
       (liftA2 Fork)
       (pure . Leaf)
       (pure Nil))
-    >>= BinaryTree.fold fork leaf nil
+    >>= fold fork leaf nil
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
@@ -97,8 +96,34 @@ instance MonadTrans NonDetC where
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L Empty)      = empty
   eff (L (Choose k)) = k True <|> k False
-  eff (R other)      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= BinaryTree.fold fork leaf nil
+  eff (R other)      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= fold fork leaf nil
   {-# INLINE eff #-}
+
+
+data BinaryTree a = Nil | Leaf a | Fork (BinaryTree a) (BinaryTree a)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+instance Applicative BinaryTree where
+  pure = Leaf
+  Nil      <*> _ = Nil
+  Leaf f   <*> a = fmap f a
+  Fork a b <*> c = Fork (a <*> c) (b <*> c)
+
+instance Alternative BinaryTree where
+  empty = Nil
+  (<|>) = Fork
+
+instance Monad BinaryTree where
+  Nil      >>= _ = Nil
+  Leaf a   >>= f = f a
+  Fork a b >>= f = Fork (a >>= f) (b >>= f)
+
+
+fold :: (b -> b -> b) -> (a -> b) -> b -> BinaryTree a -> b
+fold fork leaf nil = go where
+  go Nil        = nil
+  go (Leaf a)   = leaf a
+  go (Fork a b) = fork (go a) (go b)
 
 
 -- $setup

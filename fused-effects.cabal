@@ -51,7 +51,6 @@ library
                      , Control.Effect.Sum
                      , Control.Effect.Trace
                      , Control.Effect.Writer
-                     , Data.BinaryTree
   build-depends:       base >=4.9 && <4.13
                      , deepseq >=1.4.3 && <1.5
                      , MonadRandom >=0.5 && <0.6
