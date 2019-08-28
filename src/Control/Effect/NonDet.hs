@@ -5,6 +5,7 @@ module Control.Effect.NonDet
   -- * NonDet carrier
 , runNonDet
 , NonDetC(..)
+, choose
   -- * Re-exports
 , Alternative(..)
 , Carrier
@@ -19,6 +20,7 @@ import Control.Monad.Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Monoid
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 
@@ -37,6 +39,20 @@ data NonDet m k
 --   prop> run (runNonDet (pure a)) === Just a
 runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDet (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
+
+-- | Nondeterministically choose an element from a 'Foldable' collection.
+-- This can be used to emulate the style of nondeterminism associated with
+-- programming in the list monad:
+-- @
+--   pythagoreanTriples = do
+--     a <- choose [1..10]
+--     b <- choose [1..10]
+--     c <- choose [1..10]
+--     guard (a^2 + b^2 == c^2)
+--     pure (a, b, c)
+-- @
+choose :: (Foldable t, Alternative m) => t a -> m a
+choose = getAlt . foldMap (Alt . pure)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
