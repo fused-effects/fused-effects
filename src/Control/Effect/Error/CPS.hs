@@ -21,6 +21,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
+-- | Run an 'Error' effect, applying the first continuation to uncaught errors and the second continuation to successful computations’ results.
 runError :: (e -> m b) -> (a -> m b) -> ErrorC e m a -> m b
 runError h k m = runErrorC m h k
 
