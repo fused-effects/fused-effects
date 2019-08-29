@@ -36,6 +36,8 @@ instance Applicative (ErrorC e m) where
   {-# INLINE pure #-}
   ErrorC f <*> ErrorC a = ErrorC $ \ h k -> f h (\ f' -> a h (k . f'))
   {-# INLINE (<*>) #-}
+  ErrorC a1 *> ErrorC a2 = ErrorC $ \ h k -> a1 h (const (a2 h k))
+  {-# INLINE (*>) #-}
 
 instance Alternative m => Alternative (ErrorC e m) where
   empty = ErrorC $ \ _ _ -> empty
