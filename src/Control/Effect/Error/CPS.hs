@@ -22,6 +22,8 @@ import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 -- | Run an 'Error' effect, applying the first continuation to uncaught errors and the second continuation to successful computations’ results.
+--
+--   prop> run (runError (pure . Left) (pure . Right) (pure a)) === Right @Int @Int a
 runError :: (e -> m b) -> (a -> m b) -> ErrorC e m a -> m b
 runError h k m = runErrorC m h k
 
