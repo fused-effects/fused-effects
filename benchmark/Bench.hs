@@ -77,6 +77,7 @@ main = defaultMain
 
 errorLoop :: (Carrier sig m, Member (Error Int) sig) => Int -> m ()
 errorLoop i = replicateM_ i (throwError i `catchError` pure @_ @Int)
+{-# INLINE errorLoop #-}
 
 tellLoop :: (Carrier sig m, Member (Writer (Sum Int)) sig) => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
