@@ -26,6 +26,7 @@ import Prelude hiding (fail)
 --   prop> run (runError (pure . Left) (pure . Right) (pure a)) === Right @Int @Int a
 runError :: (e -> m b) -> (a -> m b) -> ErrorC e m a -> m b
 runError h k m = runErrorC m h k
+{-# INLINE runError #-}
 
 newtype ErrorC e m a = ErrorC { runErrorC :: forall b . (e -> m b) -> (a -> m b) -> m b }
   deriving (Functor)
