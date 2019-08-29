@@ -57,3 +57,9 @@ instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) w
   eff (L (Throw e))     = ErrorC $ \ h _ -> h e
   eff (L (Catch m h k)) = ErrorC $ \ h' k' -> runError (runError h' (runError h' k' . k) . h) (runError h' k' . k) m
   eff (R other)         = ErrorC $ \ h k -> eff (handle (Right ()) (either (pure . Left) (runError (pure . Left) (pure . Right))) other) >>= either h k
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
+-- >>> import Test.QuickCheck
