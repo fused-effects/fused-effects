@@ -4,6 +4,8 @@ module Main
 ) where
 
 import Control.Effect.Carrier
+import Control.Effect.Error as Either
+import Control.Effect.Error.CPS as CPS
 import Control.Effect.Interpret
 import Control.Effect.Writer
 import Control.Effect.State
@@ -58,7 +60,23 @@ main = defaultMain
       , bench "10000" $ whnf (run . evalState @(Sum Int) 0 . modLoop) 10000
       ]
     ]
+  ,
+    bgroup "Error"
+    [ bgroup "Either"
+      [ bench "100"   $ whnf (run . Either.runError @Int . errorLoop) 100
+      , bench "1000"  $ whnf (run . Either.runError @Int . errorLoop) 1000
+      , bench "10000" $ whnf (run . Either.runError @Int . errorLoop) 10000
+      ]
+    , bgroup "CPS"
+      [ bench "100"   $ whnf (run . CPS.runError @Int (pure . Left) (pure . Right) . errorLoop) 100
+      , bench "1000"  $ whnf (run . CPS.runError @Int (pure . Left) (pure . Right) . errorLoop) 1000
+      , bench "10000" $ whnf (run . CPS.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
+      ]
+    ]
   ]
+
+errorLoop :: (Carrier sig m, Member (Error Int) sig) => Int -> m ()
+errorLoop i = replicateM_ i (throwError i `catchError` pure @_ @Int)
 
 tellLoop :: (Carrier sig m, Member (Writer (Sum Int)) sig) => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
