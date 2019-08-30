@@ -113,6 +113,9 @@ instance MonadTrans (ErrorC e) where
   lift = ErrorC . fmap Right
   {-# INLINE lift #-}
 
+-- |
+-- prop> (throwError e >>= applyFun f) ~= throwError e
+-- prop> (throwError e `catchError` applyFun f) ~= applyFun f e
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
   eff (L (Throw e))     = ErrorC (pure (Left e))
   eff (L (Catch m h k)) = ErrorC (runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k))
@@ -122,6 +125,14 @@ instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) w
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XFlexibleInstances
 -- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Pure
+-- >>> import Data.Function (on)
+-- >>> instance (Show e, Show a) => Show (ErrorC e PureC a) where show = show . run . runError
+-- >>> instance (Arbitrary e, Arbitrary a) => Arbitrary (ErrorC e PureC a) where arbitrary = ErrorC . pure <$> arbitrary ; shrink = map (ErrorC . PureC) . shrink . run . runError
+-- >>> :{
+-- infix 4 ~=
+-- (~=) = (===) `on` run . runError @Integer
+-- :}
