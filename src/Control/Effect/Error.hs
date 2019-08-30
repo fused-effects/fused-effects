@@ -26,9 +26,13 @@ import Prelude hiding (fail)
 --
 --   Laws:
 --
+--   'throwError' right-annihilates '>>=':
+--
 -- @
 -- 'throwError' e '>>' k = 'throwError' e
 -- @
+--
+--   'catchError' substitutes 'throwError':
 --
 -- @
 -- 'throwError' e \``catchError`\` f = f e
