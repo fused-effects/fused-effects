@@ -6,7 +6,6 @@ module Control.Effect.Error
 , catchError
   -- * Properties
 , prop_annihilation
-, prop_substitution
   -- * Error carrier
 , runError
 , ErrorC(..)
@@ -77,9 +76,6 @@ catchError m h = send (Catch m h pure)
 
 prop_annihilation :: (Carrier sig m, Member (Error e) sig) => (m a -> m a -> b) -> e -> m a -> b
 prop_annihilation (==) e k = (throwError e >> k) == throwError e
-
-prop_substitution :: (Carrier sig m, Member (Error e) sig) => (m a -> m a -> b) -> e -> (e -> m a) -> b
-prop_substitution (==) e f = (throwError e `catchError` f) == f e
 
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
