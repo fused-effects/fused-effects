@@ -23,20 +23,6 @@ import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 -- | An effect modelling “pure” exceptions (i.e. exceptions catchable outside of 'IO').
---
---   Laws:
---
---   'throwError' right-annihilates '>>=':
---
--- @
--- 'throwError' e '>>=' k = 'throwError' e
--- @
---
---   'catchError' substitutes 'throwError':
---
--- @
--- 'throwError' e \``catchError`\` f = f e
--- @
 data Error exc m k
   = Throw exc
   | forall b . Catch (m b) (exc -> m b) (b -> m k)
@@ -53,11 +39,23 @@ instance Effect (Error exc) where
 
 -- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
 --
+-- 'throwError' right-annihilates '>>=':
+--
+-- @
+-- 'throwError' e '>>=' k = 'throwError' e
+-- @
+--
 --   prop> run (runError (throwError a)) === Left @Int @Int a
 throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
 throwError = send . Throw
 
 -- | Run a computation which can throw errors with a handler to run on error.
+--
+-- 'catchError' substitutes 'throwError':
+--
+-- @
+-- 'throwError' e \``catchError`\` f = f e
+-- @
 --
 -- Errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
 -- Note that this effect does /not/ handle errors thrown from impure contexts such as IO,
