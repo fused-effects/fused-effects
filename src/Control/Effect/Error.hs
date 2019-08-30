@@ -29,7 +29,7 @@ import Prelude hiding (fail)
 --   'throwError' right-annihilates '>>=':
 --
 -- @
--- 'throwError' e '>>' k = 'throwError' e
+-- 'throwError' e '>>=' k = 'throwError' e
 -- @
 --
 --   'catchError' substitutes 'throwError':
