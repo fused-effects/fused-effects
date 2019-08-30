@@ -23,6 +23,16 @@ import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
 -- | An effect modelling “pure” exceptions (i.e. exceptions catchable outside of 'IO').
+--
+--   Laws:
+--
+-- @
+-- 'throwError' e '>>' k = 'throwError' e
+-- @
+--
+-- @
+-- 'throwError' e \``catchError`\` f = f e
+-- @
 data Error exc m k
   = Throw exc
   | forall b . Catch (m b) (exc -> m b) (b -> m k)
