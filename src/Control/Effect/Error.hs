@@ -4,8 +4,6 @@ module Control.Effect.Error
   Error(..)
 , throwError
 , catchError
-  -- * Properties
-, prop_annihilation
   -- * Error carrier
 , runError
 , ErrorC(..)
@@ -72,10 +70,6 @@ throwError = send . Throw
 --   prop> run (runError (throwError a `catchError` (throwError @Int))) === Left @Int @Int a
 catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h pure)
-
-
-prop_annihilation :: (Carrier sig m, Member (Error e) sig) => (m a -> m a -> b) -> e -> m a -> b
-prop_annihilation (==) e k = (throwError e >> k) == throwError e
 
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
