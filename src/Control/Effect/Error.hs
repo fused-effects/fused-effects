@@ -55,7 +55,8 @@ throwError = send . Throw
 -- 'throwError' e \``catchError`\` f = f e
 -- @
 --
--- Errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
+-- Once consequence of this law is that errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
+--
 -- Note that this effect does /not/ handle errors thrown from impure contexts such as IO,
 -- nor will it handle exceptions thrown from pure code. If you need to handle IO-based errors,
 -- consider if 'Control.Effect.Resource' fits your use case; if not, use 'liftIO' with
