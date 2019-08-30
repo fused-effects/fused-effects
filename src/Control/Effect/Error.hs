@@ -44,8 +44,6 @@ instance Effect (Error exc) where
 -- @
 -- 'throwError' e '>>=' k = 'throwError' e
 -- @
---
---   prop> run (runError (throwError a)) === Left @Int @Int a
 throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
 throwError = send . Throw
 
@@ -72,6 +70,7 @@ catchError m h = send (Catch m h pure)
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
+--   prop> run (runError (throwError a)) === Left @Int @Int a
 --   prop> run (runError (pure a)) === Right @Int @Int a
 runError :: ErrorC exc m a -> m (Either exc a)
 runError = runErrorC
