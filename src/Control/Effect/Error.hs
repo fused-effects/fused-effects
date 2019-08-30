@@ -61,10 +61,6 @@ throwError = send . Throw
 -- nor will it handle exceptions thrown from pure code. If you need to handle IO-based errors,
 -- consider if 'Control.Effect.Resource' fits your use case; if not, use 'liftIO' with
 -- 'Control.Exception.try' or use 'Control.Exception.Catch' from outside the effect invocation.
---
---   prop> run (runError (pure a `catchError` pure)) === Right a
---   prop> run (runError (throwError a `catchError` pure)) === Right @Int @Int a
---   prop> run (runError (throwError a `catchError` (throwError @Int))) === Left @Int @Int a
 catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h pure)
 
