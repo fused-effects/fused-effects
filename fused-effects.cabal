@@ -34,6 +34,7 @@ library
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
                      , Control.Carrier.Reader
+                     , Control.Carrier.Resumable.Either
                      , Control.Carrier.State.Lazy
                      , Control.Carrier.State.Strict
                      , Control.Carrier.Trace.Ignoring
