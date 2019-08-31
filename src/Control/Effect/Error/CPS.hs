@@ -70,7 +70,7 @@ instance MonadTrans (ErrorC e) where
   lift m = ErrorC $ \ _ k -> m >>= k
   {-# INLINE lift #-}
 
--- |
+-- $
 -- prop> (throwError e >>= applyFun f) ~= throwError e
 -- prop> (throwError e `catchError` applyFun f) ~= applyFun f e
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
