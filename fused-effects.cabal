@@ -39,6 +39,7 @@ library
                      , Control.Carrier.Trace.Ignoring
                      , Control.Carrier.Trace.Printing
                      , Control.Carrier.Trace.Returning
+                     , Control.Carrier.Writer.Strict
                      , Control.Effect
                      , Control.Effect.Choose
                      , Control.Effect.Cull
