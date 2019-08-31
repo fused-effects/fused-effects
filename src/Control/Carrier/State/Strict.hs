@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.State.Strict
 ( -- * State effect
-  module State
+  module Control.Effect.State
   -- * Strict state carrier
 , runState
 , evalState
@@ -11,7 +11,7 @@ module Control.Carrier.State.Strict
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier.Class
-import Control.Effect.State as State
+import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix
