@@ -10,7 +10,7 @@ module Control.Carrier.Resumable.Either
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier.Class
-import Control.Carrier.Error
+import Control.Carrier.Error.Either
 import Control.DeepSeq
 import Control.Effect.Resumable
 import Control.Monad (MonadPlus(..))

@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Carrier.Error
+module Control.Carrier.Error.Either
 ( -- * Error effect
   Error(..)
 , throwError
