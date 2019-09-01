@@ -54,6 +54,7 @@ library
                      , Control.Carrier.Writer.Strict
                      , Control.Effect
                      , Control.Effect.Choose
+                     , Control.Effect.Class
                      , Control.Effect.Cull
                      , Control.Effect.Cut
                      , Control.Effect.Empty

@@ -4,6 +4,7 @@ module Control.Effect.Sum
 , Member(..)
 ) where
 
+import Control.Effect.Class
 import GHC.Generics (Generic1)
 
 data (f :+: g) (m :: * -> *) k
@@ -12,6 +13,9 @@ data (f :+: g) (m :: * -> *) k
   deriving (Eq, Foldable, Functor, Generic1, Ord, Show, Traversable)
 
 infixr 4 :+:
+
+instance (HFunctor f, HFunctor g) => HFunctor (f :+: g)
+instance (Effect f, Effect g)     => Effect   (f :+: g)
 
 
 class Member (sub :: (* -> *) -> (* -> *)) sup where
