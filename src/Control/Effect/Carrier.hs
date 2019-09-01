@@ -4,7 +4,6 @@ module Control.Effect.Carrier
 , Effect(..)
 , Carrier(..)
 , send
-, handlePure
 , handleCoercible
 -- * Generic deriving of 'HFunctor' & 'Effect' instances.
 , GHFunctor(..)
@@ -84,12 +83,6 @@ send :: (Sum.Member effect sig, Carrier sig m) => effect m a -> m a
 send = eff . Sum.inj
 {-# INLINE send #-}
 
-
--- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
-handlePure :: (HFunctor sig, Functor f) => (forall x . f x -> g x) -> sig f a -> sig g a
-handlePure = hmap
-{-# INLINE handlePure #-}
-{-# DEPRECATED handlePure "handlePure has been subsumed by hmap." #-}
 
 -- | Thread a 'Coercible' carrier through an 'HFunctor'.
 --
