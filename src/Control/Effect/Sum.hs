@@ -13,6 +13,7 @@ data (f :+: g) (m :: * -> *) k
 
 infixr 4 :+:
 
+
 class Member (sub :: (* -> *) -> (* -> *)) sup where
   inj :: sub m a -> sup m a
   prj :: sup m a -> Maybe (sub m a)
