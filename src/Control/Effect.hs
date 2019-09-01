@@ -3,7 +3,7 @@ module Control.Effect
 ) where
 
 import Control.Carrier.Class    as X ((:+:), Carrier, Effect, HFunctor, Member)
-import Control.Effect.Choose    as X (Choose, ChooseC)
+import Control.Effect.Choose    as X (Choose)
 import Control.Effect.Cull      as X (Cull, CullC, OnceC)
 import Control.Effect.Cut       as X (Cut, CutC)
 import Control.Effect.Empty     as X (Empty, EmptyC)

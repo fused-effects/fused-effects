@@ -29,6 +29,7 @@ common common
 library
   import:              common
   exposed-modules:     Control.Carrier
+                     , Control.Carrier.Choose.Church
                      , Control.Carrier.Class
                      , Control.Carrier.Error.Either
                      , Control.Carrier.Interpose
