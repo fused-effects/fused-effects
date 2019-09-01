@@ -15,7 +15,7 @@ module Control.Carrier.Class
 , Sum.Member(..)
 ) where
 
-import qualified Control.Effect.Pure as Pure
+import qualified Control.Carrier.Pure as Pure
 import qualified Control.Effect.Sum as Sum
 import           Data.Coerce
 import           GHC.Generics
