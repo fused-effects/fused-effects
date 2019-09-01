@@ -34,6 +34,7 @@ library
                      , Control.Carrier.Error.Either
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
+                     , Control.Carrier.NonDet.Church
                      , Control.Carrier.Reader
                      , Control.Carrier.Resumable.Either
                      , Control.Carrier.State.Lazy
@@ -51,7 +52,6 @@ library
                      , Control.Effect.Fail
                      , Control.Effect.Fresh
                      , Control.Effect.Lift
-                     , Control.Effect.NonDet
                      , Control.Effect.Pure
                      , Control.Effect.Reader
                      , Control.Effect.Resource
