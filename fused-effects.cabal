@@ -39,6 +39,7 @@ library
                      , Control.Carrier.Fresh.Strict
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
+                     , Control.Carrier.Lift
                      , Control.Carrier.NonDet.Church
                      , Control.Carrier.Reader
                      , Control.Carrier.Resource
