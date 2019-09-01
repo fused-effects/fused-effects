@@ -36,6 +36,7 @@ library
                      , Control.Carrier.Empty.Maybe
                      , Control.Carrier.Error.Either
                      , Control.Carrier.Fail
+                     , Control.Carrier.Fresh.Strict
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
                      , Control.Carrier.NonDet.Church
