@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
-module Control.Effect.Error.CPS
+module Control.Effect.Error.Church
 ( -- * Error effect
   module Control.Effect.Error
   -- * Error carrier

@@ -5,7 +5,7 @@ module Main
 
 import Control.Effect.Carrier
 import Control.Effect.Error as Either
-import Control.Effect.Error.CPS as CPS
+import Control.Effect.Error.Church as Church
 import Control.Effect.Interpret
 import Control.Effect.Writer
 import Control.Effect.State
@@ -67,10 +67,10 @@ main = defaultMain
       , bench "1000"  $ whnf (run . Either.runError @Int . errorLoop) 1000
       , bench "10000" $ whnf (run . Either.runError @Int . errorLoop) 10000
       ]
-    , bgroup "CPS"
-      [ bench "100"   $ whnf (run . CPS.runError @Int (pure . Left) (pure . Right) . errorLoop) 100
-      , bench "1000"  $ whnf (run . CPS.runError @Int (pure . Left) (pure . Right) . errorLoop) 1000
-      , bench "10000" $ whnf (run . CPS.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
+    , bgroup "Church"
+      [ bench "100"   $ whnf (run . Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 100
+      , bench "1000"  $ whnf (run . Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 1000
+      , bench "10000" $ whnf (run . Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
       ]
     ]
   ]

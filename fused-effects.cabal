@@ -33,7 +33,7 @@ library
                      , Control.Effect.Cull
                      , Control.Effect.Cut
                      , Control.Effect.Error
-                     , Control.Effect.Error.CPS
+                     , Control.Effect.Error.Church
                      , Control.Effect.Fail
                      , Control.Effect.Fresh
                      , Control.Effect.Interpose
