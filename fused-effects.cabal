@@ -41,7 +41,7 @@ library
                      , Control.Carrier.Interpret
                      , Control.Carrier.NonDet.Church
                      , Control.Carrier.Reader
-                     , Control.Carrier.Resumable.Either
+                     , Control.Carrier.Resumable.Abort
                      , Control.Carrier.State.Lazy
                      , Control.Carrier.State.Strict
                      , Control.Carrier.Trace.Ignoring
