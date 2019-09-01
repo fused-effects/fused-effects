@@ -23,11 +23,6 @@ import           GHC.Generics
 --
 --   All effects must be 'HFunctor's.
 class HFunctor h where
-  -- | Apply a handler specified as a natural transformation to both higher-order and continuation positions within an 'HFunctor'.
-  fmap' :: Functor (h f) => (a -> b) -> h f a -> h f b
-  fmap' = fmap
-  {-# INLINE fmap' #-}
-
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   --
   -- A definition for 'hmap' over first-order effects can be derived automatically provided a 'Generic1' instance is available.
@@ -35,8 +30,6 @@ class HFunctor h where
   default hmap :: (Functor m, Generic1 (h m), Generic1 (h n), GHFunctor m n (Rep1 (h m)) (Rep1 (h n))) => (forall x . m x -> n x) -> (h m a -> h n a)
   hmap f = to1 . ghmap f . from1
   {-# INLINE hmap #-}
-
-{-# DEPRECATED fmap' "fmap' has been subsumed by fmap." #-}
 
 instance HFunctor Pure.Pure
 instance (HFunctor f, HFunctor g) => HFunctor (f Sum.:+: g)
