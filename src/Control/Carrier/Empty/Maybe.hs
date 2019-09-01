@@ -23,7 +23,7 @@ import Prelude hiding (fail)
 
 -- | Run an 'Empty' effect, returning 'Nothing' for aborted computations, or 'Just' the result otherwise.
 --
---   prop> run (runError abort)    === Nothing
+--   prop> run (runError empty)    === Nothing
 --   prop> run (runError (pure a)) === Just a
 runEmpty :: EmptyC m a -> m (Maybe a)
 runEmpty = runEmptyC
