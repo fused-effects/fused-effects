@@ -33,6 +33,7 @@ library
                      , Control.Carrier.Class
                      , Control.Carrier.Cull
                      , Control.Carrier.Cut.Church
+                     , Control.Carrier.Empty.Maybe
                      , Control.Carrier.Error.Either
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
