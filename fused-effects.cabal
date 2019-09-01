@@ -42,6 +42,7 @@ library
                      , Control.Carrier.NonDet.Church
                      , Control.Carrier.Reader
                      , Control.Carrier.Resumable.Abort
+                     , Control.Carrier.Resumable.Resume
                      , Control.Carrier.State.Lazy
                      , Control.Carrier.State.Strict
                      , Control.Carrier.Trace.Ignoring
