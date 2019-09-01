@@ -1,9 +1,7 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Error.Either
 ( -- * Error effect
-  Error(..)
-, throwError
-, catchError
+  module Control.Effect.Error
   -- * Error carrier
 , runError
 , ErrorC(..)

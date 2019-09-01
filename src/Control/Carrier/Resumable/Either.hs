@@ -6,6 +6,10 @@ module Control.Carrier.Resumable.Either
 , runResumable
 , ResumableC(..)
 , SomeError(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

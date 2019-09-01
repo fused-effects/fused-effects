@@ -5,10 +5,6 @@ module Control.Effect.Reader
 , ask
 , asks
 , local
-  -- * Re-exports
-, Carrier
-, Member
-, run
 ) where
 
 import Control.Carrier.Class

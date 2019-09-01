@@ -6,6 +6,10 @@ module Control.Carrier.Interpret
 , InterpretC(..)
 , Reifies
 , Handler
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

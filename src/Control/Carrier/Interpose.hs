@@ -6,9 +6,13 @@ made to other carriers. This is a useful capability for dynamism in deeply-neste
 effect stacks, but can lead to complicated control flow. Be careful.
 -}
 module Control.Carrier.Interpose
-  ( InterposeC (..)
-  , runInterpose
-  ) where
+( InterposeC (..)
+, runInterpose
+  -- * Re-exports
+, Carrier
+, Member
+, run
+) where
 
 import Control.Applicative
 import Control.Carrier.Class

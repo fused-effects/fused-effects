@@ -1,10 +1,7 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Reader
 ( -- * Reader effect
-  Reader(..)
-, ask
-, asks
-, local
+  module Control.Effect.Reader
   -- * Reader carrier
 , runReader
 , ReaderC(..)

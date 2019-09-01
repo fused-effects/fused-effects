@@ -5,6 +5,10 @@ module Control.Carrier.Choose.Church
   -- * Choose carrier
 , runChoose
 , ChooseC(..)
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative ((<|>), liftA2)

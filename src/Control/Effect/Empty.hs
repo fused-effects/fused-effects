@@ -5,10 +5,6 @@ module Control.Effect.Empty
   -- * Empty carrier
 , runEmpty
 , EmptyC(..)
-  -- * Re-exports
-, Carrier
-, Member
-, run
 ) where
 
 import Control.Applicative (Alternative (..), liftA2)

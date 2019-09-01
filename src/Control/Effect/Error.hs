@@ -4,10 +4,6 @@ module Control.Effect.Error
   Error(..)
 , throwError
 , catchError
-  -- * Re-exports
-, Carrier
-, Member
-, run
 ) where
 
 import Control.Carrier.Class

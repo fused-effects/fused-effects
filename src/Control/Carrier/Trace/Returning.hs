@@ -1,8 +1,7 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Trace.Returning
 ( -- * Trace effect
-  Trace
-, trace
+  module Control.Effect.Trace
   -- * Trace carrier
 , runTrace
 , TraceC(..)

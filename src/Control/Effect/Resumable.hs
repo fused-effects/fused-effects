@@ -6,10 +6,6 @@ module Control.Effect.Resumable
   -- * Resumable carriers
 , runResumableWith
 , ResumableWithC(..)
-  -- * Re-exports
-, Carrier
-, Member
-, run
 ) where
 
 import Control.Applicative (Alternative(..))

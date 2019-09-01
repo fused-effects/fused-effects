@@ -18,8 +18,6 @@ import Control.Applicative (Alternative(..))
 import Control.Carrier.Class
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
-import Control.Effect.Choose
-import Control.Effect.Empty
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail
 import Control.Monad.Fix

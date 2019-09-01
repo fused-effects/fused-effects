@@ -1,7 +1,10 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.NonDet.Church
-( -- * NonDet carrier
-  runNonDet
+( -- * NonDet effect
+  module Control.Effect.Choose
+, module Control.Effect.Empty
+  -- * NonDet carrier
+, runNonDet
 , NonDetC(..)
   -- * Re-exports
 , Alternative(..)

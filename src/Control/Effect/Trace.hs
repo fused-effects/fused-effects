@@ -3,10 +3,6 @@ module Control.Effect.Trace
 ( -- * Trace effect
   Trace(..)
 , trace
-  -- * Re-exports
-, Carrier
-, Member
-, run
 ) where
 
 import Control.Carrier.Class
