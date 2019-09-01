@@ -31,6 +31,7 @@ library
   exposed-modules:     Control.Carrier
                      , Control.Carrier.Choose.Church
                      , Control.Carrier.Class
+                     , Control.Carrier.Cull
                      , Control.Carrier.Error.Either
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
