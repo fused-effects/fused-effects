@@ -3,11 +3,9 @@ module Control.Effect.Cull
 ( -- * Cull effect
   Cull(..)
 , cull
-  -- * Cull carriers
+  -- * Cull carrier
 , runCull
 , CullC(..)
-, runNonDetOnce
-, OnceC(..)
 -- * Re-exports
 , Carrier
 , Member
@@ -80,23 +78,6 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: Empty :+: Choose :+: s
   eff (R (L Empty))          = empty
   eff (R (R (L (Choose k)))) = k True <|> k False
   eff (R (R (R other)))      = CullC (eff (R (R (R (handleCoercible other)))))
-  {-# INLINE eff #-}
-
-
--- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
---
---   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
---
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) === [a]
---   prop> run (runNonDetOnce (asum (map pure (repeat a)))) === Just a
-runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig) => OnceC m a -> m (f a)
-runNonDetOnce = runNonDet . runCull . cull . runOnceC
-
-newtype OnceC m a = OnceC { runOnceC :: CullC (NonDetC m) a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
-
-instance (Carrier sig m, Effect sig) => Carrier (Empty :+: Choose :+: sig) (OnceC m) where
-  eff = OnceC . eff . R . R . R . handleCoercible
   {-# INLINE eff #-}
 
 
