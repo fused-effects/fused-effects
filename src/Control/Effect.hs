@@ -5,7 +5,7 @@ module Control.Effect
 import Control.Carrier.Class    as X ((:+:), Carrier, Effect, HFunctor, Member)
 import Control.Effect.Choose    as X (Choose)
 import Control.Effect.Cull      as X (Cull)
-import Control.Effect.Cut       as X (Cut, CutC)
+import Control.Effect.Cut       as X (Cut)
 import Control.Effect.Empty     as X (Empty, EmptyC)
 import Control.Effect.Error     as X (Error)
 import Control.Effect.Fail      as X (Fail, FailC)

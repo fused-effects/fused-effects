@@ -32,6 +32,7 @@ library
                      , Control.Carrier.Choose.Church
                      , Control.Carrier.Class
                      , Control.Carrier.Cull
+                     , Control.Carrier.Cut.Church
                      , Control.Carrier.Error.Either
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
