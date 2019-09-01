@@ -35,6 +35,7 @@ library
                      , Control.Carrier.Cut.Church
                      , Control.Carrier.Empty.Maybe
                      , Control.Carrier.Error.Either
+                     , Control.Carrier.Fail
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
                      , Control.Carrier.NonDet.Church
