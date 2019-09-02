@@ -14,12 +14,11 @@ module Control.Effect.Empty
 import Control.Applicative (Alternative (..), liftA2)
 import Control.Effect.Carrier
 import Control.Monad (MonadPlus (..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import GHC.Generics (Generic1)
-import Prelude hiding (fail)
 
 data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
@@ -49,8 +48,8 @@ instance Applicative m => Alternative (EmptyC m) where
 instance Monad m => Monad (EmptyC m) where
   EmptyC a >>= f = EmptyC (a >>= maybe (pure Nothing) (runEmptyC . f))
 
-instance MonadFail m => MonadFail (EmptyC m) where
-  fail = lift . fail
+instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
+  fail = lift . Fail.fail
 
 instance MonadFix m => MonadFix (EmptyC m) where
   mfix f = EmptyC (mfix (runEmpty . maybe (error "mfix (EmptyC): function returned failure") f))
