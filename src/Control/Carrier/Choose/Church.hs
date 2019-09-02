@@ -45,7 +45,7 @@ instance Applicative (ChooseC m) where
 
 instance Monad (ChooseC m) where
   ChooseC a >>= f = ChooseC $ \ fork leaf ->
-    a fork (\ a' -> runChooseC (f a') fork leaf)
+    a fork (runChoose fork leaf . f)
   {-# INLINE (>>=) #-}
 
 instance MonadFail m => MonadFail (ChooseC m) where
@@ -54,9 +54,10 @@ instance MonadFail m => MonadFail (ChooseC m) where
 
 instance MonadFix m => MonadFix (ChooseC m) where
   mfix f = ChooseC $ \ fork leaf ->
-    mfix (\ a -> runChooseC (f (fromJust (fold (<|>) Just a)))
+    mfix (runChoose
       (liftA2 Fork)
-      (pure . Leaf))
+      (pure . Leaf)
+      . f . fromJust . fold (<|>) Just)
     >>= fold fork leaf
   {-# INLINE mfix #-}
 
