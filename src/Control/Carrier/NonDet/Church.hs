@@ -4,7 +4,7 @@ module Control.Carrier.NonDet.Church
   module Control.Effect.Choose
 , module Control.Effect.Empty
   -- * NonDet carrier
-, runNonDet
+, runNonDetAlt
 , NonDetC(..)
   -- * Re-exports
 , Alternative(..)
@@ -31,8 +31,8 @@ import Prelude hiding (fail)
 --
 --   prop> run (runNonDet (pure a)) === [a]
 --   prop> run (runNonDet (pure a)) === Just a
-runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
-runNonDet (NonDetC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
+runNonDetAlt :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
+runNonDetAlt (NonDetC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
@@ -91,7 +91,7 @@ instance MonadTrans NonDetC where
 instance (Carrier sig m, Effect sig) => Carrier (Empty :+: Choose :+: sig) (NonDetC m) where
   eff (L Empty)          = empty
   eff (R (L (Choose k))) = k True <|> k False
-  eff (R (R other))      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= fold fork leaf nil
+  eff (R (R other))      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDetAlt) other) >>= fold fork leaf nil
   {-# INLINE eff #-}
 
 
