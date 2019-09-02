@@ -1,3 +1,7 @@
+# v0.5.0.1
+
+- Adds support for ghc 8.8.1.
+
 # v0.5.0.0
 
 - Derives `Generic1` instances for all non-existentially-quantified effect datatypes.
