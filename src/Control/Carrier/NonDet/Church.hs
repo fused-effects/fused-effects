@@ -66,7 +66,7 @@ instance Alternative (NonDetC m) where
 
 instance Monad (NonDetC m) where
   NonDetC a >>= f = NonDetC $ \ fork leaf nil ->
-    a fork (\ a' -> runNonDetC (f a') fork leaf nil) nil
+    a fork (runNonDet fork leaf nil . f) nil
   {-# INLINE (>>=) #-}
 
 instance MonadFail m => MonadFail (NonDetC m) where
@@ -75,10 +75,11 @@ instance MonadFail m => MonadFail (NonDetC m) where
 
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
-    mfix (\ a -> runNonDetC (f (fromJust (fold (<|>) Just Nothing a)))
+    mfix (runNonDet
       (liftA2 Fork)
       (pure . Leaf)
-      (pure Nil))
+      (pure Nil)
+      . f . fromJust . fold (<|>) Just Nothing)
     >>= fold fork leaf nil
   {-# INLINE mfix #-}
 
