@@ -12,6 +12,7 @@ module Control.Carrier.Class
 import qualified Control.Carrier.Pure as Pure
 import           Control.Effect.Class
 import           Control.Effect.Error
+import           Control.Effect.Reader
 import qualified Control.Effect.Sum as Sum
 import           Control.Monad ((<=<))
 
@@ -35,3 +36,7 @@ send = eff . Sum.inj
 instance Carrier (Error e) (Either e) where
   eff (Throw e)     = Left e
   eff (Catch m h k) = either (k <=< h) k m
+
+instance Carrier (Reader r) ((->) r) where
+  eff (Ask       k) r = k r r
+  eff (Local f m k) r = k (m (f r)) r

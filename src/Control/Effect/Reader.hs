@@ -7,7 +7,7 @@ module Control.Effect.Reader
 , local
 ) where
 
-import Control.Carrier.Class
+import {-# SOURCE #-} Control.Carrier.Class
 
 data Reader r m k
   = Ask (r -> m k)
