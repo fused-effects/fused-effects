@@ -43,7 +43,6 @@ library
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
                      , Control.Effect.Pure
-                     , Control.Effect.Random
                      , Control.Effect.Reader
                      , Control.Effect.Resource
                      , Control.Effect.Resumable
@@ -56,9 +55,7 @@ library
                      , Control.Effect.Writer
   build-depends:       base           >= 4.9 && < 4.14
                      , deepseq       ^>= 1.4.3
-                     , MonadRandom   ^>= 0.5
                      , unliftio-core ^>= 0.1.2
-                     , random
                      , transformers
   hs-source-dirs:      src
 
