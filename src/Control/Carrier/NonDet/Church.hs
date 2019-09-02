@@ -5,7 +5,7 @@ module Control.Carrier.NonDet.Church
 , module Control.Effect.Empty
   -- * NonDet carrier
 , runNonDet
-, runNonDetAlt
+, runNonDetA
 , runNonDetM
 , NonDetC(..)
   -- * Re-exports
@@ -34,10 +34,10 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 --
 --   Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unlike 'Control.Effect.Cull.runNonDetOnce', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
 --
---   prop> run (runNonDetAlt (pure a)) === [a]
---   prop> run (runNonDetAlt (pure a)) === Just a
-runNonDetAlt :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
-runNonDetAlt = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
+--   prop> run (runNonDetA (pure a)) === [a]
+--   prop> run (runNonDetA (pure a)) === Just a
+runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
+runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
 
 runNonDetM :: (Applicative m, Monoid b) => (a -> b) -> NonDetC m a -> m b
 runNonDetM leaf = runNonDet (liftA2 (<>)) (pure . leaf) (pure mempty)
@@ -50,8 +50,8 @@ newtype NonDetC m a = NonDetC
   deriving (Functor)
 
 -- $
---   prop> run (runNonDetAlt (pure a *> pure b)) === Just b
---   prop> run (runNonDetAlt (pure a <* pure b)) === Just a
+--   prop> run (runNonDetA (pure a *> pure b)) === Just b
+--   prop> run (runNonDetA (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ _ pure _ -> pure a)
   {-# INLINE pure #-}
@@ -60,8 +60,8 @@ instance Applicative (NonDetC m) where
   {-# INLINE (<*>) #-}
 
 -- $
---   prop> run (runNonDetAlt (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
---   prop> run (runNonDetAlt ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
+--   prop> run (runNonDetA (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
+--   prop> run (runNonDetA ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ _ empty -> empty)
   {-# INLINE empty #-}
@@ -100,7 +100,7 @@ instance MonadTrans NonDetC where
 instance (Carrier sig m, Effect sig) => Carrier (Empty :+: Choose :+: sig) (NonDetC m) where
   eff (L Empty)          = empty
   eff (R (L (Choose k))) = k True <|> k False
-  eff (R (R other))      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDetAlt) other) >>= fold fork leaf nil
+  eff (R (R other))      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDetA) other) >>= fold fork leaf nil
   {-# INLINE eff #-}
 
 
