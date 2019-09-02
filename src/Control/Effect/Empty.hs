@@ -25,7 +25,7 @@ data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
 instance HFunctor Empty
-instance Effect Empty
+instance Effect   Empty
 
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
