@@ -16,11 +16,10 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.State.Internal as State
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
@@ -51,8 +50,8 @@ instance (Alternative m, Monad m) => Alternative (StateC s m) where
   StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
   {-# INLINE (<|>) #-}
 
-instance MonadFail m => MonadFail (StateC s m) where
-  fail s = StateC (const (fail s))
+instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
+  fail s = StateC (const (Fail.fail s))
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (StateC s m) where
