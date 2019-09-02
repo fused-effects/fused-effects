@@ -1,3 +1,7 @@
+## Backwards-incompatible changes
+
+- Removes `Control.Effect.Random` (and the dependencies on `random` & `MonadRandom`) in favour of a new [`fused-effects-random` package](https://github.com/fused-effects/fused-effects-random).
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
