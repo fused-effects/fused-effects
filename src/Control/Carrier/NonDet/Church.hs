@@ -36,7 +36,7 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 --   prop> run (runNonDet (pure a)) === [a]
 --   prop> run (runNonDet (pure a)) === Just a
 runNonDetAlt :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
-runNonDetAlt (NonDetC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
+runNonDetAlt = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
