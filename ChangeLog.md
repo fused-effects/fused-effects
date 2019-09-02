@@ -4,6 +4,8 @@
 
 - Removes `Control.Effect.Random` (and the dependencies on `random` & `MonadRandom`) in favour of a new [`fused-effects-random` package](https://github.com/fused-effects/fused-effects-random) ([#200](https://github.com/fused-effects/fused-effects/pull/200)).
 
+- Removes `fmap'` and `handlePure`, both deprecated in 0.5.0.0 ([#205](https://github.com/fused-effects/fused-effects/pull/205)).
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
