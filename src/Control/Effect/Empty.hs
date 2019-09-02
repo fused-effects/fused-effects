@@ -31,7 +31,7 @@ instance Effect   Empty
 --
 --   prop> run (runEmpty abort) === Nothing
 abort :: (Carrier sig m, Member Empty sig) => m a
-abort = send Abort
+abort = send Empty
 
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
