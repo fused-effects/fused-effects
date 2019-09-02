@@ -15,7 +15,6 @@ module Control.Effect.Cut
 , run
 ) where
 
-import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Monad (MonadPlus(..))
