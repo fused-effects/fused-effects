@@ -4,6 +4,7 @@ module Control.Carrier.Choose.Church
   module Control.Effect.Choose
   -- * Choose carrier
 , runChoose
+, runChooseS
 , ChooseC(..)
   -- * Re-exports
 , Carrier
@@ -24,6 +25,9 @@ import Prelude hiding (fail)
 
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf m = runChooseC m fork leaf
+
+runChooseS :: (Applicative m, Semigroup b) => (a -> m b) -> ChooseC m a -> m b
+runChooseS leaf = runChoose (liftA2 (<>)) leaf
 
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype ChooseC m a = ChooseC
