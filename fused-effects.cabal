@@ -54,7 +54,7 @@ library
                      , Control.Effect.Sum
                      , Control.Effect.Trace
                      , Control.Effect.Writer
-  build-depends:       base          ^>= 4.9
+  build-depends:       base           >= 4.9 && < 4.14
                      , deepseq       ^>= 1.4.3
                      , MonadRandom   ^>= 0.5
                      , unliftio-core ^>= 0.1.2
@@ -70,7 +70,7 @@ test-suite examples
   other-modules:       Parser
                      , ReinterpretLog
                      , Teletype
-  build-depends:       base       ^>= 4.9
+  build-depends:       base        >= 4.9 && < 4.14
                      , fused-effects
                      , hspec      ^>= 2.4.1
                      , QuickCheck ^>= 2.7
@@ -83,7 +83,7 @@ test-suite test
   main-is:             Spec.hs
   other-modules:       Control.Effect.Spec
                      , Control.Effect.NonDet.Spec
-  build-depends:       base               ^>= 4.9
+  build-depends:       base                >= 4.9 && < 4.14
                      , fused-effects
                      , hspec              ^>= 2.4.1
                      , inspection-testing ^>= 0.4
@@ -93,7 +93,7 @@ test-suite doctest
   import:              common
   type:                exitcode-stdio-1.0
   main-is:             Doctest.hs
-  build-depends:       base    ^>= 4.9
+  build-depends:       base     >= 4.9 && < 4.14
                      , doctest ^>= 0.7
                      , fused-effects
   hs-source-dirs:      test
@@ -103,7 +103,7 @@ benchmark benchmark
   import:             common
   type:               exitcode-stdio-1.0
   main-is:            Bench.hs
-  build-depends:      base ^>= 4.9
+  build-depends:      base >= 4.9 && < 4.14
                     , fused-effects
                     , gauge
   hs-source-dirs:     benchmark
