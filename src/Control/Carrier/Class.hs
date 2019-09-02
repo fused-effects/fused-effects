@@ -11,6 +11,7 @@ module Control.Carrier.Class
 
 import qualified Control.Carrier.Pure as Pure
 import           Control.Effect.Class
+import           Control.Effect.Empty
 import           Control.Effect.Error
 import           Control.Effect.Reader
 import qualified Control.Effect.Sum as Sum
@@ -32,6 +33,9 @@ send :: (Sum.Member effect sig, Carrier sig m) => effect m a -> m a
 send = eff . Sum.inj
 {-# INLINE send #-}
 
+
+instance Carrier Empty Maybe where
+  eff Empty = Nothing
 
 instance Carrier (Error e) (Either e) where
   eff (Throw e)     = Left e

@@ -4,7 +4,7 @@ module Control.Effect.Empty
   Empty(..)
 ) where
 
-import Control.Carrier.Class
+import {-# SOURCE #-} Control.Carrier.Class
 import GHC.Generics (Generic1)
 
 data Empty (m :: * -> *) k = Empty
