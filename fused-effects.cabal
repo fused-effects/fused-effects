@@ -72,8 +72,8 @@ test-suite examples
                      , Teletype
   build-depends:       base        >= 4.9 && < 4.14
                      , fused-effects
-                     , hspec      ^>= 2.4.1
-                     , QuickCheck ^>= 2.7
+                     , hspec      ^>= 2.7
+                     , QuickCheck ^>= 2.13
                      , transformers
   hs-source-dirs:      examples
 
@@ -85,7 +85,7 @@ test-suite test
                      , Control.Effect.NonDet.Spec
   build-depends:       base                >= 4.9 && < 4.14
                      , fused-effects
-                     , hspec              ^>= 2.4.1
+                     , hspec              ^>= 2.7
                      , inspection-testing ^>= 0.4
   hs-source-dirs:      test
 
@@ -94,7 +94,7 @@ test-suite doctest
   type:                exitcode-stdio-1.0
   main-is:             Doctest.hs
   build-depends:       base     >= 4.9 && < 4.14
-                     , doctest ^>= 0.7
+                     , doctest ^>= 0.16
                      , fused-effects
   hs-source-dirs:      test
 
