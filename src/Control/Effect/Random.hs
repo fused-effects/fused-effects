@@ -20,7 +20,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.Random.Class (MonadInterleave(..), MonadRandom(..))
 import Control.Monad.IO.Class (MonadIO(..))
@@ -69,7 +69,7 @@ evalRandomIO :: MonadIO m => RandomC R.StdGen m a -> m a
 evalRandomIO m = liftIO R.newStdGen >>= flip evalRandom m
 
 newtype RandomC g m a = RandomC { runRandomC :: StateC g m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig, R.RandomGen g) => MonadRandom (RandomC g m) where
   getRandom = RandomC $ do

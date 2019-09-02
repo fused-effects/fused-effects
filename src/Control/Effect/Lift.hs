@@ -15,7 +15,7 @@ module Control.Effect.Lift
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
@@ -37,7 +37,7 @@ sendM :: (Member (Lift n) sig, Carrier sig m, Functor n) => n a -> m a
 sendM = send . Lift . fmap pure
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans LiftC where
   lift = LiftC
