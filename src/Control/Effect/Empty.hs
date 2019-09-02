@@ -49,11 +49,11 @@ instance Applicative m => Alternative (EmptyC m) where
 instance Monad m => Monad (EmptyC m) where
   EmptyC a >>= f = EmptyC (a >>= maybe (pure Nothing) (runEmptyC . f))
 
-instance MonadFix m => MonadFix (EmptyC m) where
-  mfix f = EmptyC (mfix (runEmpty . maybe (error "mfix (EmptyC): function returned failure") f))
-
 instance MonadFail m => MonadFail (EmptyC m) where
   fail = lift . fail
+
+instance MonadFix m => MonadFix (EmptyC m) where
+  mfix f = EmptyC (mfix (runEmpty . maybe (error "mfix (EmptyC): function returned failure") f))
 
 instance MonadIO m => MonadIO (EmptyC m) where
   liftIO = lift . liftIO
