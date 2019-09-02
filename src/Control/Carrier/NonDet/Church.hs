@@ -4,6 +4,7 @@ module Control.Carrier.NonDet.Church
   module Control.Effect.Choose
 , module Control.Effect.Empty
   -- * NonDet carrier
+, runNonDet
 , runNonDetAlt
 , NonDetC(..)
   -- * Re-exports
@@ -24,6 +25,9 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (fromJust)
 import Prelude hiding (fail)
+
+runNonDet :: (m b -> m b -> m b) -> (a -> m b) -> m b -> NonDetC m a -> m b
+runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
