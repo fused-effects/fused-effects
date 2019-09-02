@@ -33,8 +33,8 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 --
 --   Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unlike 'Control.Effect.Cull.runNonDetOnce', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
 --
---   prop> run (runNonDet (pure a)) === [a]
---   prop> run (runNonDet (pure a)) === Just a
+--   prop> run (runNonDetAlt (pure a)) === [a]
+--   prop> run (runNonDetAlt (pure a)) === Just a
 runNonDetAlt :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDetAlt = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
 
@@ -46,8 +46,8 @@ newtype NonDetC m a = NonDetC
   deriving (Functor)
 
 -- $
---   prop> run (runNonDet (pure a *> pure b)) === Just b
---   prop> run (runNonDet (pure a <* pure b)) === Just a
+--   prop> run (runNonDetAlt (pure a *> pure b)) === Just b
+--   prop> run (runNonDetAlt (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ _ pure _ -> pure a)
   {-# INLINE pure #-}
@@ -56,8 +56,8 @@ instance Applicative (NonDetC m) where
   {-# INLINE (<*>) #-}
 
 -- $
---   prop> run (runNonDet (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
---   prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
+--   prop> run (runNonDetAlt (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
+--   prop> run (runNonDetAlt ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ _ empty -> empty)
   {-# INLINE empty #-}
