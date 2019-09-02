@@ -101,8 +101,8 @@ benchmark benchmark
   type:               exitcode-stdio-1.0
   main-is:            Bench.hs
   build-depends:      base >=4.9 && <4.13
-                    , criterion
                     , fused-effects
+                    , gauge
   hs-source-dirs:     benchmark
   ghc-options:        -threaded -rtsopts "-with-rtsopts=-N -A4m -n2m"
 
