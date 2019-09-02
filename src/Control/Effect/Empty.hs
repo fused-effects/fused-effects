@@ -2,6 +2,7 @@
 module Control.Effect.Empty
 ( -- * Empty effect
   Empty(..)
+, abort
   -- * Empty carrier
 , runEmpty
 , EmptyC(..)
@@ -25,6 +26,12 @@ data Empty (m :: * -> *) k = Empty
 
 instance HFunctor Empty
 instance Effect   Empty
+
+-- | Abort the computation.
+--
+--   prop> run (runEmpty abort) === Nothing
+abort :: (Carrier sig m, Member Empty sig) => m a
+abort = send Abort
 
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
