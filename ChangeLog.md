@@ -1,3 +1,13 @@
+## Backwards-incompatible changes
+
+- Improves the performance of `runInterpret` using reflection, changing its signature slightly ([#193](https://github.com/fused-effects/fused-effects/pull/193), h/t [@ocharles](https://github.com/ocharles)).
+
+- Removes `Control.Effect.Random` (and the dependencies on `random` & `MonadRandom`) in favour of a new [`fused-effects-random` package](https://github.com/fused-effects/fused-effects-random) ([#200](https://github.com/fused-effects/fused-effects/pull/200)).
+
+# v0.5.0.1
+
+- Adds support for ghc 8.8.1.
+
 # v0.5.0.0
 
 - Derives `Generic1` instances for all non-existentially-quantified effect datatypes.
