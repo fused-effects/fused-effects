@@ -1,79 +1,111 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
+
 module Control.Effect.Interpret
 ( runInterpret
-, InterpretC(..)
 , runInterpretState
-, InterpretStateC(..)
+, InterpretC(..)
+, Reifies
+, Handler
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
-import Control.Effect.Reader
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Unsafe.Coerce (unsafeCoerce)
+
+
+-- | A @Handler@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
+newtype Handler sig m =
+  Handler { runHandler :: forall s x . sig (InterpretC s sig m) x -> InterpretC s sig m x }
+
+
+newtype Tagged a b =
+  Tagged { unTag :: b }
+
+
+class Reifies s a | s -> a where
+  reflect :: Tagged s a
+
+
+data Skolem
+
+
+-- | @Magic@ captures the GHC implementation detail of how single method type classes are implemented.
+newtype Magic a r =
+  Magic (Reifies Skolem a => Tagged Skolem r)
+
+
+-- For more information on this technique, see the @reflection@ library. We use the formulation described in https://github.com/ekmett/reflection/issues/31 for better inlining.
+--
+-- Essentially we can view @k@ as internally a function of type @Reifies s a -> Tagged s r@, whch we can again view as just @a -> Tagged s r@ through @unsafeCoerce@. After this coercion, we just apply the function to @a@.
+reify :: forall a r . a -> (forall s . Reifies s a => Tagged s r) -> r
+reify a k =
+  unsafeCoerce (Magic @a k) a
+
 
 -- | Interpret an effect using a higher-order function.
 --
---   This involves a great deal less boilerplate than defining a custom 'Carrier' instance, at the expense of somewhat less performance. It’s a reasonable starting point for new interpretations, and if more performance or flexibility is required, it’s straightforward to “graduate” by replacing the relevant 'runInterpret' handlers with specialized 'Carrier' instances for the effects.
---
---   At time of writing, a simple passthrough use of 'runInterpret' to handle a 'State' effect is about five times slower than using 'StateC' directly.
+-- Note that due to the higher-rank type, you have to use either '$' or explicit application when applying this interpreter. That is, you will need to write @runInterpret f (runInterpret g myPrgram)@ or @runInterpret f $ runInterpret g $ myProgram@. If you try and write @runInterpret f . runInterpret g@, you will unfortunately get a rather scary type error!
 --
 --   prop> run (runInterpret (\ op -> case op of { Get k -> k a ; Put _ k -> k }) get) === a
-runInterpret :: (forall x . eff m x -> m x) -> InterpretC eff m a -> m a
-runInterpret handler = runReader (Handler handler) . runInterpretC
+runInterpret
+  :: forall eff m a.
+     (HFunctor eff, Monad m)
+  => (forall x . eff m x -> m x)
+  -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
+  -> m a
+runInterpret f m =
+  reify (Handler handler) (go m)
 
-newtype InterpretC eff m a = InterpretC { runInterpretC :: ReaderC (Handler eff m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
+  where
 
-instance MonadTrans (InterpretC eff) where
-  lift = InterpretC . lift
-  {-# INLINE lift #-}
+    handler :: forall s x . eff (InterpretC s eff m) x -> InterpretC s eff m x
+    handler e =
+      InterpretC (f (handleCoercible e))
 
-newtype Handler eff m = Handler (forall x . eff m x -> m x)
-
-runHandler :: (HFunctor eff, Functor m) => Handler eff m -> eff (InterpretC eff m) a -> m a
-runHandler h@(Handler handler) = handler . hmap (runReader h . runInterpretC)
-
-instance (HFunctor eff, Carrier sig m) => Carrier (eff :+: sig) (InterpretC eff m) where
-  eff (L op) = do
-    handler <- InterpretC ask
-    lift (runHandler handler op)
-  eff (R other) = InterpretC (eff (R (handleCoercible other)))
-  {-# INLINE eff #-}
+    go
+      :: forall x s .
+         InterpretC s eff m x
+      -> Tagged s (m x)
+    go m =
+      Tagged (runInterpretC m)
 
 
 -- | Interpret an effect using a higher-order function with some state variable.
 --
---   This involves a great deal less boilerplate than defining a custom 'Carrier' instance, at the expense of somewhat less performance. It’s a reasonable starting point for new interpretations, and if more performance or flexibility is required, it’s straightforward to “graduate” by replacing the relevant 'runInterpretState' handlers with specialized 'Carrier' instances for the effects.
---
---   At time of writing, a simple use of 'runInterpretState' to handle a 'State' effect is about four times slower than using 'StateC' directly.
---
 --   prop> run (runInterpretState (\ s op -> case op of { Get k -> runState s (k s) ; Put s' k -> runState s' k }) a get) === a
-runInterpretState :: (forall x . s -> eff (StateC s m) x -> m (s, x)) -> s -> InterpretStateC eff s m a -> m (s, a)
-runInterpretState handler state = runState state . runReader (HandlerState (\ eff -> StateC (\ s -> handler s eff))) . runInterpretStateC
+runInterpretState
+  :: (HFunctor eff, Monad m)
+  => (forall x . s -> eff (StateC s m) x -> m (s, x))
+  -> s
+  -> (forall t. Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
+  -> m (s, a)
+runInterpretState handler state m =
+  runState state $
+  runInterpret
+    (\e -> StateC (\s -> handler s e))
+    m
 
-newtype InterpretStateC eff s m a = InterpretStateC { runInterpretStateC :: ReaderC (HandlerState eff s m) (StateC s m) a }
+
+newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
+  InterpretC { runInterpretC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
-instance MonadTrans (InterpretStateC eff s) where
-  lift = InterpretStateC . lift . lift
-  {-# INLINE lift #-}
 
-newtype HandlerState eff s m = HandlerState (forall x . eff (StateC s m) x -> StateC s m x)
+instance MonadTrans (InterpretC s sig) where
+  lift = InterpretC
 
-runHandlerState :: (HFunctor eff, Functor m) => HandlerState eff s m -> eff (InterpretStateC eff s m) a -> StateC s m a
-runHandlerState h@(HandlerState handler) = handler . hmap (runReader h . runInterpretStateC)
 
-instance (HFunctor eff, Carrier sig m, Effect sig) => Carrier (eff :+: sig) (InterpretStateC eff s m) where
-  eff (L op) = do
-    handler <- InterpretStateC ask
-    InterpretStateC (lift (runHandlerState handler op))
-  eff (R other) = InterpretStateC (eff (R (R (handleCoercible other))))
-  {-# INLINE eff #-}
+instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrier sig m) => Carrier (eff :+: sig) (InterpretC s eff m) where
+  eff (L eff) =
+    runHandler (unTag (reflect @s)) eff
+  eff (R other) =
+    InterpretC (eff (handleCoercible other))
 
 
 -- $setup
