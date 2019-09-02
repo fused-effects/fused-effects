@@ -15,12 +15,11 @@ module Control.Effect.NonDet
 import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import GHC.Generics (Generic1)
-import Prelude hiding (fail)
 
 data NonDet m k
   = Empty
@@ -63,8 +62,8 @@ instance Monad (NonDetC m) where
     a (\ a' -> runNonDetC (f a') cons)
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (NonDetC m) where
-  fail s = NonDetC (\ _ _ -> fail s)
+instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
+  fail s = NonDetC (\ _ _ -> Fail.fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (NonDetC m) where
