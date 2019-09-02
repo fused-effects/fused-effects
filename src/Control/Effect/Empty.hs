@@ -27,6 +27,7 @@ data Empty (m :: * -> *) k = Empty
 instance HFunctor Empty
 instance Effect Empty
 
+
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --
 --   prop> run (runError empty)    === Nothing
