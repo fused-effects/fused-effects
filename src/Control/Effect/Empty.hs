@@ -2,6 +2,7 @@
 module Control.Effect.Empty
 ( -- * Empty effect
   Empty(..)
+, abort
   -- * Empty carrier
 , runEmpty
 , EmptyC(..)
@@ -14,23 +15,28 @@ module Control.Effect.Empty
 import Control.Applicative (Alternative (..), liftA2)
 import Control.Effect.Carrier
 import Control.Monad (MonadPlus (..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import GHC.Generics (Generic1)
-import Prelude hiding (fail)
 
 data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
 instance HFunctor Empty
-instance Effect Empty
+instance Effect   Empty
 
-
--- | Run an 'Empty' effect, returning 'Nothing' for aborted computations, or 'Just' the result otherwise.
+-- | Abort the computation.
 --
---   prop> run (runError abort)    === Nothing
+--   prop> run (runEmpty abort) === Nothing
+abort :: (Carrier sig m, Member Empty sig) => m a
+abort = send Empty
+
+
+-- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
+--
+--   prop> run (runError empty)    === Nothing
 --   prop> run (runError (pure a)) === Just a
 runEmpty :: EmptyC m a -> m (Maybe a)
 runEmpty = runEmptyC
@@ -51,11 +57,11 @@ instance Applicative m => Alternative (EmptyC m) where
 instance Monad m => Monad (EmptyC m) where
   EmptyC a >>= f = EmptyC (a >>= maybe (pure Nothing) (runEmptyC . f))
 
+instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
+  fail = lift . Fail.fail
+
 instance MonadFix m => MonadFix (EmptyC m) where
   mfix f = EmptyC (mfix (runEmpty . maybe (error "mfix (EmptyC): function returned failure") f))
-
-instance MonadFail m => MonadFail (EmptyC m) where
-  fail = lift . fail
 
 instance MonadIO m => MonadIO (EmptyC m) where
   liftIO = lift . liftIO

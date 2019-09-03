@@ -14,14 +14,13 @@ module Control.Effect.Cull
 , run
 ) where
 
-import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet
 import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -58,7 +57,7 @@ runCull :: Alternative m => CullC m a -> m a
 runCull (CullC m) = runNonDetC (runReader False m) (<|>) pure empty
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
+  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO)
 
 instance Alternative (CullC m) where
   empty = CullC empty
@@ -95,7 +94,7 @@ runNonDetOnce :: (Alternative f, Carrier sig m, Effect sig) => OnceC m a -> m (f
 runNonDetOnce = runNonDet . runCull . cull . runOnceC
 
 newtype OnceC m a = OnceC { runOnceC :: CullC (NonDetC m) a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance (Carrier sig m, Effect sig) => Carrier (Empty :+: Choose :+: sig) (OnceC m) where
   eff = OnceC . eff . R . R . R . handleCoercible

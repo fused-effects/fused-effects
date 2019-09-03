@@ -15,12 +15,11 @@ import Control.Effect.Carrier
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Monad (MonadPlus(..), join)
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (fromJust)
-import Prelude hiding (fail)
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
@@ -62,8 +61,8 @@ instance Monad (NonDetC m) where
     a fork (\ a' -> runNonDetC (f a') fork leaf nil) nil
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (NonDetC m) where
-  fail s = lift (fail s)
+instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
+  fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (NonDetC m) where
