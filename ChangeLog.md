@@ -12,6 +12,8 @@
 
 - Redefines `NonDetC` as a Church-encoded binary tree instead of a Church-encoded list ([#197](https://github.com/fused-effects/fused-effects/pull/197)).
 
+- Removes the `NonDet` effect, replacing it with the combination of the new `Choose` and `Empty` effects ([#199](https://github.com/fused-effects/fused-effects/pull/199)).
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
