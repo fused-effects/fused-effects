@@ -51,7 +51,7 @@ newtype NonDetC m a = NonDetC
 --   prop> run (runNonDet (pure a *> pure b)) === Just b
 --   prop> run (runNonDet (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
-  pure a = NonDetC (\ _ pure _ -> pure a)
+  pure a = NonDetC (\ _ leaf _ -> leaf a)
   {-# INLINE pure #-}
   NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf nil ->
     f fork (\ f' -> a fork (leaf . f') nil) nil
