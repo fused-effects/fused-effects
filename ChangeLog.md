@@ -1,4 +1,4 @@
-- Adds an `Empty` effect, modelling nondeterminism without choice.
+- Adds an `Empty` effect, modelling nondeterminism without choice ([#196](https://github.com/fused-effects/fused-effects/pull/196)).
 
 - Adds a `Choose` effect, modelling nondeterminism without failure.
 
