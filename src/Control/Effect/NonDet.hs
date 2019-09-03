@@ -15,13 +15,12 @@ module Control.Effect.NonDet
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Monad (MonadPlus(..), join)
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (fromJust)
 import GHC.Generics (Generic1)
-import Prelude hiding (fail)
 
 data NonDet m k
   = Empty
@@ -72,8 +71,8 @@ instance Monad (NonDetC m) where
     a fork (\ a' -> runNonDetC (f a') fork leaf nil) nil
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (NonDetC m) where
-  fail s = lift (fail s)
+instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
+  fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (NonDetC m) where

@@ -15,15 +15,13 @@ module Control.Effect.Cut
 , run
 ) where
 
-import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.NonDet
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
 -- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
 data Cut m k
@@ -103,8 +101,8 @@ instance Monad (CutC m) where
     a (\ a' as -> runCutC (f a') cons as fail) nil fail
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (CutC m) where
-  fail s = lift (fail s)
+instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
+  fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (CutC m) where

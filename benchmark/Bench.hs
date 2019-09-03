@@ -8,9 +8,9 @@ import Control.Effect.Interpret
 import Control.Effect.Writer
 import Control.Effect.State
 import Control.Monad (ap, replicateM_)
-import Criterion.Main
 import Data.Functor.Identity
 import Data.Monoid (Sum(..))
+import Gauge
 
 main :: IO ()
 main = defaultMain

@@ -17,7 +17,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -57,7 +57,7 @@ runFresh :: Functor m => FreshC m a -> m a
 runFresh = evalState 0 . runFreshC
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
   eff (L (Fresh   k)) = FreshC $ do

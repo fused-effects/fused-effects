@@ -17,12 +17,11 @@ module Control.Effect.Reader
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
 data Reader r m k
   = Ask (r -> m k)
@@ -88,8 +87,8 @@ instance Monad m => Monad (ReaderC r m) where
   ReaderC a >>= f = ReaderC (\ r -> a r >>= runReader r . f)
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (ReaderC r m) where
-  fail = ReaderC . const . fail
+instance Fail.MonadFail m => Fail.MonadFail (ReaderC r m) where
+  fail = ReaderC . const . Fail.fail
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (ReaderC s m) where

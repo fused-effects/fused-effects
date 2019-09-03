@@ -10,7 +10,6 @@ module Control.Effect.Pure
 import Control.Applicative
 import Control.Monad.Fix
 import Data.Coerce
-import Data.Function (fix)
 import GHC.Generics (Generic1)
 
 data Pure (m :: * -> *) k
