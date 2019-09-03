@@ -8,7 +8,6 @@ module Control.Effect.Choose
 import Control.Carrier.Class
 import Data.Bool (bool)
 import GHC.Generics (Generic1)
-import Prelude hiding (fail)
 
 data Choose m k
   = Choose (Bool -> m k)
@@ -17,5 +16,6 @@ data Choose m k
 instance HFunctor Choose
 instance Effect   Choose
 
+-- | Nondeterministically choose between two computations.
 choose :: (Carrier sig m, Member Choose sig) => m a -> m a -> m a
 choose a b = send (Choose (bool b a))

@@ -10,7 +10,6 @@ import Control.Applicative
 import Control.Effect.Pure
 import Control.Monad.Fix
 import Data.Coerce
-import Data.Function (fix)
 
 -- | Run an action exhausted of effects to produce its final result value.
 run :: PureC a -> a

@@ -15,11 +15,10 @@ import Control.Applicative (Alternative(..), liftA2)
 import Control.Carrier.Class
 import Control.Effect.Error
 import Control.Monad (MonadPlus(..), (<=<))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
@@ -54,8 +53,8 @@ instance MonadIO m => MonadIO (ErrorC e m) where
   liftIO io = ErrorC (Right <$> liftIO io)
   {-# INLINE liftIO #-}
 
-instance MonadFail m => MonadFail (ErrorC e m) where
-  fail s = ErrorC (fail s)
+instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
+  fail s = ErrorC (Fail.fail s)
   {-# INLINE fail #-}
 
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)

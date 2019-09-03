@@ -15,7 +15,7 @@ import Control.Applicative (Alternative(..))
 import Control.Carrier.Class
 import Control.Effect.Lift
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
@@ -26,7 +26,7 @@ runM :: LiftC m a -> m a
 runM = runLiftC
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving newtype (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans LiftC where
   lift = LiftC

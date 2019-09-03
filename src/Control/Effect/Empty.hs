@@ -2,6 +2,7 @@
 module Control.Effect.Empty
 ( -- * Empty effect
   Empty(..)
+, abort
 ) where
 
 import Control.Carrier.Class
@@ -11,4 +12,4 @@ data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
 instance HFunctor Empty
-instance Effect Empty
+instance Effect   Empty

@@ -17,11 +17,10 @@ import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
 import Control.Effect.Cull
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
 -- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
 --
@@ -30,7 +29,7 @@ runCull :: Alternative m => CullC m a -> m a
 runCull (CullC m) = runNonDetC (runReader False m) (<|>) pure empty
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
+  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO)
 
 instance Alternative (CullC m) where
   empty = CullC empty

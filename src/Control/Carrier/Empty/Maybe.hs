@@ -15,13 +15,12 @@ import Control.Applicative (Alternative (..), liftA2)
 import Control.Carrier.Class
 import Control.Effect.Empty
 import Control.Monad (MonadPlus (..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
--- | Run an 'Empty' effect, returning 'Nothing' for aborted computations, or 'Just' the result otherwise.
+-- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --
 --   prop> run (runError empty)    === Nothing
 --   prop> run (runError (pure a)) === Just a
@@ -44,11 +43,11 @@ instance Applicative m => Alternative (EmptyC m) where
 instance Monad m => Monad (EmptyC m) where
   EmptyC a >>= f = EmptyC (a >>= maybe (pure Nothing) (runEmptyC . f))
 
+instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
+  fail = lift . Fail.fail
+
 instance MonadFix m => MonadFix (EmptyC m) where
   mfix f = EmptyC (mfix (runEmpty . maybe (error "mfix (EmptyC): function returned failure") f))
-
-instance MonadFail m => MonadFail (EmptyC m) where
-  fail = lift . fail
 
 instance MonadIO m => MonadIO (EmptyC m) where
   liftIO = lift . liftIO

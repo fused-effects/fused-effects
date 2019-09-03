@@ -15,7 +15,7 @@ import Control.Applicative (Alternative(..))
 import Control.Carrier.Class
 import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -27,7 +27,7 @@ runTrace :: TraceC m a -> m a
 runTrace = runTraceC
 
 newtype TraceC m a = TraceC { runTraceC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans TraceC where
   lift = TraceC

@@ -27,13 +27,13 @@ runChoose fork leaf m = runChooseC m fork leaf
 
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype ChooseC m a = ChooseC
-  { -- | A higher-order function receiving three continuations, respectively implementing choice and 'pure'.
+  { -- | A higher-order function receiving two continuations, respectively implementing choice and 'pure'.
     runChooseC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b
   }
   deriving (Functor)
 
 instance Applicative (ChooseC m) where
-  pure a = ChooseC (\ _ pure -> pure a)
+  pure a = ChooseC (\ _ leaf -> leaf a)
   {-# INLINE pure #-}
   ChooseC f <*> ChooseC a = ChooseC $ \ fork leaf ->
     f fork (\ f' -> a fork (leaf . f'))
@@ -41,18 +41,17 @@ instance Applicative (ChooseC m) where
 
 instance Monad (ChooseC m) where
   ChooseC a >>= f = ChooseC $ \ fork leaf ->
-    a fork (\ a' -> runChooseC (f a') fork leaf)
+    a fork (runChoose fork leaf . f)
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (ChooseC m) where
-  fail s = lift (fail s)
+instance Fail.MonadFail m => Fail.MonadFail (ChooseC m) where
+  fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (ChooseC m) where
   mfix f = ChooseC $ \ fork leaf ->
-    mfix (\ a -> runChooseC (f (fromJust (fold (<|>) Just a)))
-      (liftA2 Fork)
-      (pure . Leaf))
+    mfix (runChoose (liftA2 Fork) (pure . Leaf)
+      . f . fromJust . fold (<|>) Just)
     >>= fold fork leaf
   {-# INLINE mfix #-}
 
@@ -75,12 +74,10 @@ data BinaryTree a = Leaf a | Fork (BinaryTree a) (BinaryTree a)
 
 instance Applicative BinaryTree where
   pure = Leaf
-  Leaf f   <*> a = fmap f a
-  Fork a b <*> c = Fork (a <*> c) (b <*> c)
+  f <*> a = fold Fork (<$> a) f
 
 instance Monad BinaryTree where
-  Leaf a   >>= f = f a
-  Fork a b >>= f = Fork (a >>= f) (b >>= f)
+  a >>= f = fold Fork f a
 
 
 fold :: (b -> b -> b) -> (a -> b) -> BinaryTree a -> b
