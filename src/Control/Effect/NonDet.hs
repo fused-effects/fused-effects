@@ -106,9 +106,7 @@ data BinaryTree a = Nil | Leaf a | Fork (BinaryTree a) (BinaryTree a)
 
 instance Applicative BinaryTree where
   pure = Leaf
-  Nil      <*> _ = Nil
-  Leaf f   <*> a = fmap f a
-  Fork a b <*> c = Fork (a <*> c) (b <*> c)
+  f <*> a = fold Fork (<$> a) Nil f
 
 instance Alternative BinaryTree where
   empty = Nil
