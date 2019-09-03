@@ -1,5 +1,7 @@
 - Adds an `Empty` effect, modelling nondeterminism without choice.
 
+- Adds a `Choose` effect, modelling nondeterminism without failure.
+
 ## Backwards-incompatible changes
 
 - Improves the performance of `runInterpret` using reflection, changing its signature slightly ([#193](https://github.com/fused-effects/fused-effects/pull/193), h/t [@ocharles](https://github.com/ocharles)).
