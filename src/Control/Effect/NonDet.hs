@@ -61,7 +61,7 @@ instance Applicative (NonDetC m) where
 --   prop> run (runNonDet (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
 --   prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
 instance Alternative (NonDetC m) where
-  empty = NonDetC (\ _ _ empty -> empty)
+  empty = NonDetC (\ _ _ nil -> nil)
   {-# INLINE empty #-}
   NonDetC l <|> NonDetC r = NonDetC $ \ fork leaf nil -> fork (l fork leaf nil) (r fork leaf nil)
   {-# INLINE (<|>) #-}
