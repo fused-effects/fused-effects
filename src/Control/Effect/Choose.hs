@@ -49,7 +49,7 @@ instance Applicative (ChooseC m) where
 
 instance Monad (ChooseC m) where
   ChooseC a >>= f = ChooseC $ \ fork leaf ->
-    a fork (\ a' -> runChooseC (f a') fork leaf)
+    a fork (runChoose fork leaf . f)
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (ChooseC m) where
