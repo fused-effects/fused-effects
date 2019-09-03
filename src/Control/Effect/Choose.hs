@@ -26,6 +26,7 @@ data Choose m k
 instance HFunctor Choose
 instance Effect   Choose
 
+-- | Nondeterministically choose between two computations.
 choose :: (Carrier sig m, Member Choose sig) => m a -> m a -> m a
 choose a b = send (Choose (bool b a))
 
