@@ -58,9 +58,7 @@ instance Fail.MonadFail m => Fail.MonadFail (ChooseC m) where
 
 instance MonadFix m => MonadFix (ChooseC m) where
   mfix f = ChooseC $ \ fork leaf ->
-    mfix (runChoose
-      (liftA2 Fork)
-      (pure . Leaf)
+    mfix (runChoose (liftA2 Fork) (pure . Leaf)
       . f . fromJust . fold (<|>) Just)
     >>= fold fork leaf
   {-# INLINE mfix #-}
