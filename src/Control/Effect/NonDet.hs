@@ -113,9 +113,7 @@ instance Alternative BinaryTree where
   (<|>) = Fork
 
 instance Monad BinaryTree where
-  Nil      >>= _ = Nil
-  Leaf a   >>= f = f a
-  Fork a b >>= f = Fork (a >>= f) (b >>= f)
+  a >>= f = fold Fork f Nil a
 
 
 fold :: (b -> b -> b) -> (a -> b) -> b -> BinaryTree a -> b
