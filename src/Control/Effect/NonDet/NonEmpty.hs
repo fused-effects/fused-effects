@@ -1,11 +1,11 @@
 {-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet.NonEmpty
-( -- * NonDet effect
-  NonDet(..)
+( -- * Choose effect
+  Choose(..)
 , choose
-  -- * NonDet carrier
-, runNonDet
-, NonDetC(..)
+  -- * Choose carrier
+, runChoose
+, ChooseC(..)
 ) where
 
 import Control.Applicative ((<|>), liftA2)
@@ -19,62 +19,62 @@ import Data.Bool (bool)
 import Data.Maybe (fromJust)
 import GHC.Generics (Generic1)
 
-data NonDet m k
+data Choose m k
   = Choose (Bool -> m k)
   deriving (Functor, Generic1)
 
-instance HFunctor NonDet
-instance Effect   NonDet
+instance HFunctor Choose
+instance Effect   Choose
 
-choose :: (Carrier sig m, Member NonDet sig) => m a -> m a -> m a
+choose :: (Carrier sig m, Member Choose sig) => m a -> m a -> m a
 choose a b = send (Choose (bool b a))
 
 
-runNonDet :: (m b -> m b -> m b) -> (a -> m b) -> NonDetC m a -> m b
-runNonDet fork leaf m = runNonDetC m fork leaf
+runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
+runChoose fork leaf m = runChooseC m fork leaf
 
--- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
-newtype NonDetC m a = NonDetC
+-- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
+newtype ChooseC m a = ChooseC
   { -- | A higher-order function receiving two continuations, respectively implementing choice and 'pure'.
-    runNonDetC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b
+    runChooseC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b
   }
   deriving (Functor)
 
-instance Applicative (NonDetC m) where
-  pure a = NonDetC (\ _ leaf -> leaf a)
+instance Applicative (ChooseC m) where
+  pure a = ChooseC (\ _ leaf -> leaf a)
   {-# INLINE pure #-}
-  NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf ->
+  ChooseC f <*> ChooseC a = ChooseC $ \ fork leaf ->
     f fork (\ f' -> a fork (leaf . f'))
   {-# INLINE (<*>) #-}
 
-instance Monad (NonDetC m) where
-  NonDetC a >>= f = NonDetC $ \ fork leaf ->
-    a fork (\ a' -> runNonDetC (f a') fork leaf)
+instance Monad (ChooseC m) where
+  ChooseC a >>= f = ChooseC $ \ fork leaf ->
+    a fork (\ a' -> runChooseC (f a') fork leaf)
   {-# INLINE (>>=) #-}
 
-instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
+instance Fail.MonadFail m => Fail.MonadFail (ChooseC m) where
   fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
-instance MonadFix m => MonadFix (NonDetC m) where
-  mfix f = NonDetC $ \ fork leaf ->
-    mfix (\ a -> runNonDetC (f (fromJust (fold (<|>) Just a)))
+instance MonadFix m => MonadFix (ChooseC m) where
+  mfix f = ChooseC $ \ fork leaf ->
+    mfix (\ a -> runChooseC (f (fromJust (fold (<|>) Just a)))
       (liftA2 Fork)
       (pure . Leaf))
     >>= fold fork leaf
   {-# INLINE mfix #-}
 
-instance MonadIO m => MonadIO (NonDetC m) where
+instance MonadIO m => MonadIO (ChooseC m) where
   liftIO io = lift (liftIO io)
   {-# INLINE liftIO #-}
 
-instance MonadTrans NonDetC where
-  lift m = NonDetC (\ _ leaf -> m >>= leaf)
+instance MonadTrans ChooseC where
+  lift m = ChooseC (\ _ leaf -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
-  eff (L (Choose k)) = NonDetC $ \ fork leaf -> fork (runNonDetC (k True) fork leaf) (runNonDetC (k False) fork leaf)
-  eff (R other)      = NonDetC $ \ fork leaf -> eff (handle (Leaf ()) (fmap join . traverse (runNonDet (liftA2 Fork) (pure . Leaf))) other) >>= fold fork leaf
+instance (Carrier sig m, Effect sig) => Carrier (Choose :+: sig) (ChooseC m) where
+  eff (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChooseC (k True) fork leaf) (runChooseC (k False) fork leaf)
+  eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (Leaf ()) (fmap join . traverse (runChoose (liftA2 Fork) (pure . Leaf))) other) >>= fold fork leaf
   {-# INLINE eff #-}
 
 
