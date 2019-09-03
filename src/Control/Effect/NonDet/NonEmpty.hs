@@ -86,8 +86,7 @@ instance Applicative BinaryTree where
   f <*> a = fold Fork (<$> a) f
 
 instance Monad BinaryTree where
-  Leaf a   >>= f = f a
-  Fork a b >>= f = Fork (a >>= f) (b >>= f)
+  a >>= f = fold Fork f a
 
 
 fold :: (b -> b -> b) -> (a -> b) -> BinaryTree a -> b
