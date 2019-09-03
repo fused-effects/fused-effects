@@ -41,7 +41,7 @@ newtype NonDetC m a = NonDetC
 --   prop> run (runNonDet (pure a *> pure b)) === Just b
 --   prop> run (runNonDet (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
-  pure a = NonDetC (\ _ pure _ -> pure a)
+  pure a = NonDetC (\ _ leaf _ -> leaf a)
   {-# INLINE pure #-}
   NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf nil ->
     f fork (\ f' -> a fork (leaf . f') nil) nil
@@ -51,7 +51,7 @@ instance Applicative (NonDetC m) where
 --   prop> run (runNonDet (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
 --   prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
 instance Alternative (NonDetC m) where
-  empty = NonDetC (\ _ _ empty -> empty)
+  empty = NonDetC (\ _ _ nil -> nil)
   {-# INLINE empty #-}
   NonDetC l <|> NonDetC r = NonDetC $ \ fork leaf nil -> fork (l fork leaf nil) (r fork leaf nil)
   {-# INLINE (<|>) #-}
@@ -96,18 +96,14 @@ data BinaryTree a = Nil | Leaf a | Fork (BinaryTree a) (BinaryTree a)
 
 instance Applicative BinaryTree where
   pure = Leaf
-  Nil      <*> _ = Nil
-  Leaf f   <*> a = fmap f a
-  Fork a b <*> c = Fork (a <*> c) (b <*> c)
+  f <*> a = fold Fork (<$> a) Nil f
 
 instance Alternative BinaryTree where
   empty = Nil
   (<|>) = Fork
 
 instance Monad BinaryTree where
-  Nil      >>= _ = Nil
-  Leaf a   >>= f = f a
-  Fork a b >>= f = Fork (a >>= f) (b >>= f)
+  a >>= f = fold Fork f Nil a
 
 
 fold :: (b -> b -> b) -> (a -> b) -> b -> BinaryTree a -> b
