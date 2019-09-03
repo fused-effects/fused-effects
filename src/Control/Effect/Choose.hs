@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
-module Control.Effect.NonDet.NonEmpty
+module Control.Effect.Choose
 ( -- * Choose effect
   Choose(..)
 , choose
