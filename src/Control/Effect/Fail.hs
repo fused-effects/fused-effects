@@ -8,7 +8,7 @@ module Control.Effect.Fail
   -- * Re-exports
 , Carrier
 , Member
-, MonadFail(..)
+, Fail.MonadFail(..)
 , run
 ) where
 
@@ -16,12 +16,11 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
 import Control.Effect.Error
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import GHC.Generics (Generic1)
-import Prelude hiding (fail)
 
 newtype Fail (m :: * -> *) k = Fail String
   deriving stock (Functor, Generic1)
@@ -36,12 +35,12 @@ runFail = runError . runFailC
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
   deriving newtype (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
+instance (Carrier sig m, Effect sig) => Fail.MonadFail (FailC m) where
   fail s = FailC (throwError s)
   {-# INLINE fail #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
-  eff (L (Fail s)) = fail s
+  eff (L (Fail s)) = Fail.fail s
   eff (R other)    = FailC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
 
