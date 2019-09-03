@@ -13,3 +13,9 @@ data Empty (m :: * -> *) k = Empty
 
 instance HFunctor Empty
 instance Effect   Empty
+
+-- | Abort the computation.
+--
+--   prop> run (runEmpty abort) === Nothing
+abort :: (Carrier sig m, Member Empty sig) => m a
+abort = send Empty
