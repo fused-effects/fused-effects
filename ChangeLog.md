@@ -1,4 +1,4 @@
-- Adds a `Choose` effect, modelling nondeterminism without failure.
+- Adds a `Choose` effect, modelling nondeterminism without failure ([#198](https://github.com/fused-effects/fused-effects/pull/198)).
 
 ## Backwards-incompatible changes
 
