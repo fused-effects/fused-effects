@@ -6,6 +6,8 @@
 
 - Removes `fmap'` and `handlePure`, both deprecated in 0.5.0.0 ([#205](https://github.com/fused-effects/fused-effects/pull/205)).
 
+- Redefines `NonDetC` as a Church-encoded binary tree instead of a Church-encoded list ([#197](https://github.com/fused-effects/fused-effects/pull/197)).
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
