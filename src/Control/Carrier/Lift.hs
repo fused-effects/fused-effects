@@ -26,7 +26,7 @@ runM :: LiftC m a -> m a
 runM = runLiftC
 
 newtype LiftC m a = LiftC { runLiftC :: m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans LiftC where
   lift = LiftC

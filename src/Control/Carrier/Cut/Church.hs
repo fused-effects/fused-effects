@@ -18,7 +18,7 @@ import Control.Effect.Choose
 import Control.Effect.Cut
 import Control.Effect.Empty
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class

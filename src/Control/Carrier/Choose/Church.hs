@@ -15,7 +15,7 @@ import Control.Applicative ((<|>), liftA2)
 import Control.Carrier.Class
 import Control.Effect.Choose
 import Control.Monad (join)
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class

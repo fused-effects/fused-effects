@@ -15,9 +15,9 @@ module Control.Carrier.Fail
 import Control.Applicative (Alternative(..))
 import Control.Carrier.Class
 import Control.Carrier.Error.Either
-import qualified Control.Effect.Fail as Fail
+import Control.Effect.Fail
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -29,7 +29,7 @@ runFail :: FailC m a -> m (Either String a)
 runFail = runError . runFailC
 
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Fail.MonadFail (FailC m) where
   fail s = FailC (throwError s)
