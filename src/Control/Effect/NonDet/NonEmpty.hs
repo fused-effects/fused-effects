@@ -42,7 +42,7 @@ newtype NonDetC m a = NonDetC
   deriving (Functor)
 
 instance Applicative (NonDetC m) where
-  pure a = NonDetC (\ _ pure -> pure a)
+  pure a = NonDetC (\ _ leaf -> leaf a)
   {-# INLINE pure #-}
   NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf ->
     f fork (\ f' -> a fork (leaf . f'))
