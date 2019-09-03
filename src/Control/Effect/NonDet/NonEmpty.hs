@@ -83,8 +83,7 @@ data BinaryTree a = Leaf a | Fork (BinaryTree a) (BinaryTree a)
 
 instance Applicative BinaryTree where
   pure = Leaf
-  Leaf f   <*> a = fmap f a
-  Fork a b <*> c = Fork (a <*> c) (b <*> c)
+  f <*> a = fold Fork (<$> a) f
 
 instance Monad BinaryTree where
   Leaf a   >>= f = f a
