@@ -1,13 +1,14 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
-( -- * NonDet carrier
-  runNonDet
+( -- * Choose effect
+  module Control.Effect.Choose
+  -- * Empty effect
+, module Control.Effect.Empty
+  -- * NonDet carrier
+, runNonDet
 , NonDetC(..)
   -- * Re-exports
 , Alternative(..)
-, Carrier
-, Member
-, run
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
