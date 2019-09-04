@@ -37,5 +37,4 @@ instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceC m) where
 
 
 -- $setup
--- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck

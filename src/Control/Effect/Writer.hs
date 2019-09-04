@@ -60,8 +60,6 @@ censor f m = send (Censor f m pure)
 
 
 -- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XTypeApplications
 -- >>> import Control.Carrier.Writer.Strict
 -- >>> import Test.QuickCheck
 -- >>> import Data.Semigroup (Semigroup(..), Sum(..))

@@ -44,7 +44,5 @@ local f m = send (Local f m pure)
 
 
 -- $setup
--- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
 -- >>> import Control.Carrier.Reader

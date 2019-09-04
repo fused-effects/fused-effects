@@ -51,10 +51,5 @@ instance Carrier sig m => Carrier (Resumable err :+: sig) (ResumableC err m) whe
 
 
 -- $setup
--- >>> :seti -XFlexibleContexts
 -- >>> :seti -XGADTs
--- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Data.Functor.Const
--- >>> import Data.Functor.Identity

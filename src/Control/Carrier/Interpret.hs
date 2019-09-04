@@ -114,5 +114,3 @@ instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrie
 
 -- $setup
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Control.Effect.State

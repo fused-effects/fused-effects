@@ -55,7 +55,6 @@ cut = pure () <|> cutfail
 
 
 -- $setup
--- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Carrier.Cut.Church
 -- >>> import Control.Carrier.NonDet.Church

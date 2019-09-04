@@ -48,6 +48,4 @@ instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) w
 
 
 -- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck

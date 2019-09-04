@@ -31,6 +31,5 @@ guard False = empty
 
 
 -- $setup
--- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Carrier.Empty.Maybe

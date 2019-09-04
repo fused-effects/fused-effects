@@ -27,10 +27,6 @@ throwResumable err = send (Resumable err pure)
 
 
 -- $setup
--- >>> :seti -XFlexibleContexts
 -- >>> :seti -XGADTs
--- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Data.Functor.Const
 -- >>> import Data.Functor.Identity

@@ -98,6 +98,4 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) w
 
 
 -- $setup
--- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure

@@ -100,6 +100,4 @@ execState s = fmap fst . runState s
 {-# INLINE[3] execState #-}
 
 -- $setup
--- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
