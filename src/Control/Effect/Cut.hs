@@ -25,7 +25,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
+-- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
 data Cut m k
   = Cutfail
   | forall a . Call (m a) (a -> m k)
@@ -69,7 +69,7 @@ cut = pure () <|> cutfail
 {-# INLINE cut #-}
 
 
--- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for a 'NonDet' effect).
+-- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for 'Choose' & 'Empty' effects).
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) === Just a
 runCut :: Alternative m => CutC m a -> m a

@@ -26,7 +26,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
--- | 'Cull' effects are used with 'NonDet' to provide control over branching.
+-- | 'Cull' effects are used with 'Choose' to provide control over branching.
 data Cull m k
   = forall a . Cull (m a) (a -> m k)
 
@@ -84,7 +84,7 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: Empty :+: Choose :+: s
   {-# INLINE eff #-}
 
 
--- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
+-- | Run 'Choose' & 'Empty' effects, returning the first successful result in an 'Alternative' functor.
 --
 --   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
 --
