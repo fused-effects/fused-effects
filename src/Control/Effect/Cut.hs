@@ -134,4 +134,5 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: Empty :+: Choose :+: si
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Cull
+-- >>> import Control.Effect.NonDet
 -- >>> import Control.Effect.Pure
