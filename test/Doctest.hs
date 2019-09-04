@@ -6,6 +6,8 @@ import System.Environment
 import Test.DocTest
 
 main :: IO ()
-main = do
-  args <- getArgs
-  doctest ("-isrc" : "--fast" : if null args then ["src"] else args)
+main = getArgs >>= doctest . build where
+  build args
+    = "-isrc"
+    : "--fast"
+    : if null args then ["src"] else args
