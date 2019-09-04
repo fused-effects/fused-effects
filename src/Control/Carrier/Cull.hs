@@ -11,7 +11,6 @@ module Control.Carrier.Cull
 , run
 ) where
 
-import Control.Applicative (Alternative(..))
 import Control.Carrier.Class
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
