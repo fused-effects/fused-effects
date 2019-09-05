@@ -36,7 +36,7 @@ abort = send Empty
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --
---   prop> run (runError empty)    === Nothing
+--   prop> run (runError abort)    === Nothing
 --   prop> run (runError (pure a)) === Just a
 runEmpty :: EmptyC m a -> m (Maybe a)
 runEmpty = runEmptyC
