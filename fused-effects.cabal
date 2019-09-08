@@ -101,6 +101,7 @@ benchmark benchmark
   import:             common
   type:               exitcode-stdio-1.0
   main-is:            Bench.hs
+  other-modules:      NQueens
   build-depends:      base >= 4.9 && < 4.14
                     , fused-effects
                     , gauge
