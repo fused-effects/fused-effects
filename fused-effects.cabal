@@ -36,6 +36,7 @@ library
                      , Control.Effect.Choose
                      , Control.Effect.Cull
                      , Control.Effect.Cut
+                     , Control.Effect.Empty
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.Fresh
