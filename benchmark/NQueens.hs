@@ -10,9 +10,9 @@ module NQueens (runQueens, toplevel) where
 import Control.Applicative
 import Control.Effect
 import Control.Effect.NonDet
-import Data.Foldable
 import Control.Monad
-import Data.List (foldl', intersect)
+import Data.Foldable
+import Data.List
 import Gauge
 
 type Square = (Int,Int)
