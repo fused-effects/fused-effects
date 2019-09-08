@@ -42,7 +42,7 @@ addOne n curr = do
   let choose = asum . fmap pure
   j <- choose [1..n]
   guard ((i, j) `isSafeIn` curr)
-  pure (curr <> [j])
+  pure (curr ++ [j])
 
 queens :: (Member NonDet sig, Carrier sig m, Alternative m) => Int -> m Board
 queens n = foldl' (>>=) (pure empty) (replicate n (addOne n))
