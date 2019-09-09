@@ -5,7 +5,7 @@ module Control.Effect.NonDet
   -- * NonDet carrier
 , runNonDet
 , NonDetC(..)
-, choose
+, oneOf
   -- * Re-exports
 , Alternative(..)
 , Carrier
@@ -44,14 +44,14 @@ runNonDet (NonDetC m) = m (fmap . (<|>) . pure) (pure empty)
 -- programming in the list monad:
 -- @
 --   pythagoreanTriples = do
---     a <- choose [1..10]
---     b <- choose [1..10]
---     c <- choose [1..10]
+--     a <- oneOf [1..10]
+--     b <- oneOf [1..10]
+--     c <- oneOf [1..10]
 --     guard (a^2 + b^2 == c^2)
 --     pure (a, b, c)
 -- @
-choose :: (Foldable t, Alternative m) => t a -> m a
-choose = getAlt . foldMap (Alt . pure)
+oneOf :: (Foldable t, Alternative m) => t a -> m a
+oneOf = getAlt . foldMap (Alt . pure)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
