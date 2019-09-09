@@ -12,10 +12,14 @@ import Data.Functor.Identity
 import Data.Monoid (Sum(..))
 import Gauge
 
+import qualified NonDet.NQueens as NQueens
+
 main :: IO ()
 main = defaultMain
-  [
-    bgroup "WriterC"
+  [ bgroup "NonDet"
+    [ NQueens.benchmark
+    ]
+  , bgroup "WriterC"
     [ bgroup "Cod"
       [ bench "100"   $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 100
       , bench "1000"  $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 1000
