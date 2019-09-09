@@ -5,7 +5,7 @@
 -- Based largely on the implementation by Sreekar Shastry,
 -- available at https://github.com/sshastry/queenslogic
 
-module NQueens (runQueens, toplevel) where
+module NonDet.NQueens (runQueens, benchmark) where
 
 import Control.Applicative
 import Control.Effect
@@ -13,7 +13,7 @@ import Control.Effect.NonDet
 import Control.Monad
 import Data.Foldable
 import Data.List
-import Gauge
+import Gauge hiding (benchmark)
 
 type Square = (Int,Int)
 type Board = [Int]
@@ -50,8 +50,8 @@ queens n = foldl' (>>=) (pure empty) (replicate n (addOne n))
 runQueens :: Int -> [Board]
 runQueens = run . runNonDet . queens
 
-toplevel :: Gauge.Benchmark
-toplevel = bgroup "N-queens problem"
+benchmark :: Gauge.Benchmark
+benchmark = bgroup "N-queens problem"
   [ bench "4"  $ whnf runQueens 4
   , bench "8"  $ whnf runQueens 8
   , bench "16" $ whnf runQueens 16

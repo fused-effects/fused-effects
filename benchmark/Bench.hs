@@ -12,12 +12,12 @@ import Data.Functor.Identity
 import Data.Monoid (Sum(..))
 import Gauge
 
-import qualified NQueens
+import qualified NonDet.NQueens as NQueens
 
 main :: IO ()
 main = defaultMain
   [ bgroup "NonDet"
-    [ NQueens.toplevel
+    [ NQueens.benchmark
     ]
   , bgroup "WriterC"
     [ bgroup "Cod"
