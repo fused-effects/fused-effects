@@ -41,6 +41,7 @@ instance Effect Cull where
 -- | Cull nondeterminism in the argument, returning at most one result.
 --
 --   prop> run (runNonDet (runCull (cull (pure a <|> pure b)))) === [a]
+--   prop> run (runNonDet (runCull (cull (empty  <|> pure a)))) === [a]
 --   prop> run (runNonDet (runCull (cull (pure a <|> pure b) <|> pure c))) === [a, c]
 --   prop> run (runNonDet (runCull (cull (asum (map pure (repeat a)))))) === [a]
 cull :: (Carrier sig m, Member Cull sig) => m a -> m a
@@ -51,7 +52,7 @@ cull m = send (Cull m pure)
 --
 --   prop> run (runNonDet (runCull (pure a <|> pure b))) === [a, b]
 runCull :: Alternative m => CullC m a -> m a
-runCull (CullC m) = runNonDetC (runReader False m) ((<|>) . pure) empty
+runCull (CullC m) = runNonDetC (runReader False m) (<|>) pure empty
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO)
@@ -59,10 +60,12 @@ newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
 instance Alternative (CullC m) where
   empty = CullC empty
   {-# INLINE empty #-}
-  l <|> r = CullC $ ReaderC $ \ cull -> NonDetC $ \ cons nil -> do
-    runNonDetC (runReader cull (runCullC l))
-      (\ a as -> cons a (if cull then nil else as))
-      (runNonDetC (runReader cull (runCullC r)) cons nil)
+  l <|> r = CullC $ ReaderC $ \ cull ->
+    if cull then
+      NonDetC $ \ fork leaf nil ->
+        runNonDetC (runReader cull (runCullC l)) fork leaf (runNonDetC (runReader cull (runCullC r)) fork leaf nil)
+    else
+      runReader cull (runCullC l) <|> runReader cull (runCullC r)
   {-# INLINE (<|>) #-}
 
 instance MonadPlus (CullC m)

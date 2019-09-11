@@ -102,7 +102,7 @@ instance Monad (CutC m) where
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
-  fail s = CutC (\ _ _ _ -> Fail.fail s)
+  fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (CutC m) where
@@ -110,7 +110,7 @@ instance MonadFix m => MonadFix (CutC m) where
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (CutC m) where
-  liftIO io = CutC (\ cons nil _ -> liftIO io >>= flip cons nil)
+  liftIO io = lift (liftIO io)
   {-# INLINE liftIO #-}
 
 instance MonadPlus (CutC m)
