@@ -4,6 +4,7 @@ module Control.Effect.Choose
   Choose(..)
 , choose
 , optional
+, many
   -- * Choose carrier
 , runChoose
 , ChooseC(..)
@@ -34,6 +35,10 @@ choose a b = send (Choose (bool b a))
 -- | Select between 'Just' the result of an operation, and 'Nothing'.
 optional :: (Carrier sig m, Member Choose sig) => m a -> m (Maybe a)
 optional a = choose (Just <$> a) (pure Nothing)
+
+-- | Zero or more.
+many :: (Carrier sig m, Member Choose sig) => m a -> m [a]
+many a = go where go = choose ((:) <$> a <*> go) (pure [])
 
 
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
