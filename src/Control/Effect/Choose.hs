@@ -5,6 +5,7 @@ module Control.Effect.Choose
 , choose
 , optional
 , many
+, some
   -- * Choose carrier
 , runChoose
 , ChooseC(..)
@@ -39,6 +40,10 @@ optional a = choose (Just <$> a) (pure Nothing)
 -- | Zero or more.
 many :: (Carrier sig m, Member Choose sig) => m a -> m [a]
 many a = go where go = choose ((:) <$> a <*> go) (pure [])
+
+-- | One or more.
+some :: (Carrier sig m, Member Choose sig) => m a -> m [a]
+some a = (:) <$> a <*> many a
 
 
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
