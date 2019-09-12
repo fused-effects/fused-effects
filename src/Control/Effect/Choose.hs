@@ -31,6 +31,7 @@ instance Effect   Choose
 choose :: (Carrier sig m, Member Choose sig) => m a -> m a -> m a
 choose a b = send (Choose (bool b a))
 
+-- | Select between 'Just' the result of an operation, and 'Nothing'.
 optional :: (Carrier sig m, Member Choose sig) => m a -> m (Maybe a)
 optional a = choose (Just <$> a) (pure Nothing)
 
