@@ -3,6 +3,7 @@ module Control.Effect.Choose
 ( -- * Choose effect
   Choose(..)
 , choose
+, optional
   -- * Choose carrier
 , runChoose
 , ChooseC(..)
@@ -29,6 +30,9 @@ instance Effect   Choose
 -- | Nondeterministically choose between two computations.
 choose :: (Carrier sig m, Member Choose sig) => m a -> m a -> m a
 choose a b = send (Choose (bool b a))
+
+optional :: (Carrier sig m, Member Choose sig) => m a -> m (Maybe a)
+optional a = choose (Just <$> a) (pure Nothing)
 
 
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
