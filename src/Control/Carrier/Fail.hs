@@ -8,7 +8,7 @@ module Control.Carrier.Fail
   -- * Re-exports
 , Carrier
 , Member
-, MonadFail(..)
+, Fail.MonadFail(..)
 , run
 ) where
 
