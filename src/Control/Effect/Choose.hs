@@ -3,6 +3,10 @@ module Control.Effect.Choose
 ( -- * Choose effect
   Choose(..)
 , choose
+, optional
+, many
+, some
+, some1
   -- * Choose carrier
 , runChoose
 , ChooseC(..)
@@ -16,6 +20,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Bool (bool)
+import Data.List.NonEmpty (NonEmpty (..))
 import Data.Maybe (fromJust)
 import GHC.Generics (Generic1)
 
@@ -29,6 +34,22 @@ instance Effect   Choose
 -- | Nondeterministically choose between two computations.
 choose :: (Carrier sig m, Member Choose sig) => m a -> m a -> m a
 choose a b = send (Choose (bool b a))
+
+-- | Select between 'Just' the result of an operation, and 'Nothing'.
+optional :: (Carrier sig m, Member Choose sig) => m a -> m (Maybe a)
+optional a = choose (Just <$> a) (pure Nothing)
+
+-- | Zero or more.
+many :: (Carrier sig m, Member Choose sig) => m a -> m [a]
+many a = go where go = choose ((:) <$> a <*> go) (pure [])
+
+-- | One or more.
+some :: (Carrier sig m, Member Choose sig) => m a -> m [a]
+some a = (:) <$> a <*> many a
+
+-- | One or more, returning a 'NonEmpty' list of the results.
+some1 :: (Carrier sig m, Member Choose sig) => m a -> m (NonEmpty a)
+some1 a = (:|) <$> a <*> many a
 
 
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
@@ -83,13 +104,17 @@ data BinaryTree a = Leaf a | Fork (BinaryTree a) (BinaryTree a)
 
 instance Applicative BinaryTree where
   pure = Leaf
+  {-# INLINE pure #-}
   f <*> a = fold Fork (<$> a) f
+  {-# INLINE (<*>) #-}
 
 instance Monad BinaryTree where
   a >>= f = fold Fork f a
+  {-# INLINE (>>=) #-}
 
 
 fold :: (b -> b -> b) -> (a -> b) -> BinaryTree a -> b
 fold fork leaf = go where
   go (Leaf a)   = leaf a
   go (Fork a b) = fork (go a) (go b)
+{-# INLINE fold #-}
