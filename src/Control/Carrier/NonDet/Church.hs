@@ -7,6 +7,7 @@ module Control.Carrier.NonDet.Church
   -- * NonDet carrier
 , runNonDet
 , NonDetC(..)
+, oneOf
   -- * Re-exports
 , Alternative(..)
 , Carrier
@@ -16,7 +17,7 @@ module Control.Carrier.NonDet.Church
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Carrier.Class
-import Control.Effect.Choose
+import Control.Effect.Choose hiding (many, some)
 import Control.Effect.Empty
 import Control.Monad (MonadPlus(..), join)
 import qualified Control.Monad.Fail as Fail
@@ -24,6 +25,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (fromJust)
+import Data.Monoid
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
@@ -33,6 +35,20 @@ import Data.Maybe (fromJust)
 --   prop> run (runNonDet (pure a)) === Just a
 runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDet (NonDetC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
+
+-- | Nondeterministically choose an element from a 'Foldable' collection.
+-- This can be used to emulate the style of nondeterminism associated with
+-- programming in the list monad:
+-- @
+--   pythagoreanTriples = do
+--     a <- oneOf [1..10]
+--     b <- oneOf [1..10]
+--     c <- oneOf [1..10]
+--     guard (a^2 + b^2 == c^2)
+--     pure (a, b, c)
+-- @
+oneOf :: (Foldable t, Alternative m) => t a -> m a
+oneOf = getAlt . foldMap (Alt . pure)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
@@ -100,14 +116,19 @@ data BinaryTree a = Nil | Leaf a | Fork (BinaryTree a) (BinaryTree a)
 
 instance Applicative BinaryTree where
   pure = Leaf
+  {-# INLINE pure #-}
   f <*> a = fold Fork (<$> a) Nil f
+  {-# INLINE (<*>) #-}
 
 instance Alternative BinaryTree where
   empty = Nil
+  {-# INLINE empty #-}
   (<|>) = Fork
+  {-# INLINE (<|>) #-}
 
 instance Monad BinaryTree where
   a >>= f = fold Fork f Nil a
+  {-# INLINE (>>=) #-}
 
 
 fold :: (b -> b -> b) -> (a -> b) -> b -> BinaryTree a -> b
@@ -115,6 +136,7 @@ fold fork leaf nil = go where
   go Nil        = nil
   go (Leaf a)   = leaf a
   go (Fork a b) = fork (go a) (go b)
+{-# INLINE fold #-}
 
 
 -- $setup

@@ -7,7 +7,7 @@ module Control.Effect.Cull
 
 import Control.Carrier.Class
 
--- | 'Cull' effects are used with 'NonDet' to provide control over branching.
+-- | 'Cull' effects are used with 'Choose' to provide control over branching.
 data Cull m k
   = forall a . Cull (m a) (a -> m k)
 

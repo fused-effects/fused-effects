@@ -24,7 +24,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
--- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for a 'NonDet' effect).
+-- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for 'Choose' & 'Empty' effects).
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) === Just a
 runCut :: Alternative m => CutC m a -> m a

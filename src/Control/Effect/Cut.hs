@@ -10,7 +10,7 @@ module Control.Effect.Cut
 import Control.Applicative (Alternative(..))
 import Control.Carrier.Class
 
--- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
+-- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
 data Cut m k
   = Cutfail
   | forall a . Call (m a) (a -> m k)
@@ -58,4 +58,5 @@ cut = pure () <|> cutfail
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Cull
+-- >>> import Control.Effect.NonDet
 -- >>> import Control.Effect.Pure
