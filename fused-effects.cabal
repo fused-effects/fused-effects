@@ -33,6 +33,7 @@ library
   import:              common
   exposed-modules:     Control.Effect
                      , Control.Effect.Carrier
+                     , Control.Effect.Choose
                      , Control.Effect.Cull
                      , Control.Effect.Cut
                      , Control.Effect.Empty

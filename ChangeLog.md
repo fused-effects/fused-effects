@@ -1,5 +1,7 @@
 - Adds an `Empty` effect, modelling nondeterminism without choice ([#196](https://github.com/fused-effects/fused-effects/pull/196)).
 
+- Adds a `Choose` effect, modelling nondeterminism without failure ([#198](https://github.com/fused-effects/fused-effects/pull/198)).
+
 - Adds a `oneOf` function to `Control.Effect.NonDet` to provide an idiom for the common case of nondeterministically selecting from a container. ([#201](https://github.com/fused-effects/fused-effects/pull/201))
 
 ## Backwards-incompatible changes
