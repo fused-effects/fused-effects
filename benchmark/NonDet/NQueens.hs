@@ -36,7 +36,7 @@ isSafeIn (i,j) qs = null (diags (i,j) `intersect` underThreat)
     qs' = zip [1..length qs] qs
     underThreat = qs' >>= diags
 
-addOne :: (Member NonDet sig, Carrier sig m, Alternative m) => Int -> Board -> m Board
+addOne :: (Carrier sig m, Alternative m) => Int -> Board -> m Board
 addOne n curr = do
   let i = length curr + 1
   let choose = asum . fmap pure
@@ -44,7 +44,7 @@ addOne n curr = do
   guard ((i, j) `isSafeIn` curr)
   pure (curr ++ [j])
 
-queens :: (Member NonDet sig, Carrier sig m, Alternative m) => Int -> m Board
+queens :: (Carrier sig m, Alternative m) => Int -> m Board
 queens n = foldl' (>>=) (pure empty) (replicate n (addOne n))
 
 runQueens :: Int -> [Board]
@@ -56,4 +56,3 @@ benchmark = bgroup "N-queens problem"
   , bench "8"  $ whnf runQueens 8
   , bench "16" $ whnf runQueens 16
   ]
-
