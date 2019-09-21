@@ -1,4 +1,3 @@
--- | 'Alternative'-based nondeterminism interfaces.
 module Control.Effect.Alternative
 ( -- * NonDet effects
   module Control.Effect.Choose
