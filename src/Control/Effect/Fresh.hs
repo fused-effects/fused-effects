@@ -33,3 +33,12 @@ fresh = send (Fresh pure)
 --   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) === run (runFresh (replicateM n fresh))
 resetFresh :: (Member Fresh sig, Carrier sig m) => m a -> m a
 resetFresh m = send (Reset m pure)
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Carrier.Fresh.Strict
+-- >>> import Control.Carrier.Pure
+-- >>> import Control.Monad (replicateM)
+-- >>> import Data.List (nub)

@@ -57,6 +57,6 @@ cut = pure () <|> cutfail
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Cull
--- >>> import Control.Effect.NonDet
--- >>> import Control.Effect.Pure
+-- >>> import Control.Carrier.Cut.Church
+-- >>> import Control.Carrier.NonDet.Church
+-- >>> import Control.Carrier.Pure

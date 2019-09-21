@@ -34,6 +34,7 @@ cull m = send (Cull m pure)
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.NonDet
--- >>> import Control.Effect.Pure
+-- >>> import Control.Carrier.Cull
+-- >>> import Control.Carrier.NonDet.Church
+-- >>> import Control.Carrier.Pure
 -- >>> import Data.Foldable (asum)

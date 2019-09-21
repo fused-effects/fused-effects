@@ -62,3 +62,11 @@ instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (Wr
     runWriterC (k a)
   eff (R other)          = WriterC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
+-- >>> import Test.QuickCheck
+-- >>> import Control.Effect.Pure
+-- >>> import Data.Semigroup (Semigroup(..), Sum(..))

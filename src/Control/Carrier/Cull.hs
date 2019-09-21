@@ -53,3 +53,10 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: Empty :+: Choose :+: s
   eff (R (R (L (Choose k)))) = k True <|> k False
   eff (R (R (R other)))      = CullC (eff (R (R (R (handleCoercible other)))))
   {-# INLINE eff #-}
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Carrier.NonDet.Church
+-- >>> import Control.Carrier.Pure

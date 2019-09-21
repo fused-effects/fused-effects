@@ -10,7 +10,7 @@ import GHC.Generics (Generic1)
 
 -- | An effect modelling nondeterminism without choice.
 --
---   This can be seen as similar to 'Control.Effect.Fail', but without an error message.
+--   This can be seen as similar to 'Control.Effect.Fail.Fail', but without an error message.
 data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
@@ -22,3 +22,9 @@ instance Effect   Empty
 --   prop> run (runEmpty abort) === Nothing
 abort :: (Carrier sig m, Member Empty sig) => m a
 abort = send Empty
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Carrier.Empty.Maybe

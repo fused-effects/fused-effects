@@ -26,7 +26,7 @@ import Prelude hiding (fail)
 
 -- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for 'Choose' & 'Empty' effects).
 --
---   prop> run (runNonDetOnce (runCut (pure a))) === Just a
+--   prop> run (runNonDet (runCut (pure a))) === Just a
 runCut :: Alternative m => CutC m a -> m a
 runCut m = runCutC m ((<|>) . pure) empty empty
 
@@ -83,3 +83,10 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: Empty :+: Choose :+: si
   eff (R (R (L (Choose k)))) = k True <|> k False
   eff (R (R (R other)))      = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
   {-# INLINE eff #-}
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Carrier.NonDet.Church
+-- >>> import Control.Carrier.Pure

@@ -47,4 +47,4 @@ catchError m h = send (Catch m h pure)
 -- >>> :seti -XFlexibleContexts
 -- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Error
+-- >>> import Control.Carrier.Error.Either

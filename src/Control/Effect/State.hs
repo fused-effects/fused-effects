@@ -58,8 +58,9 @@ modifyLazy :: (Member (State s) sig, Carrier sig m) => (s -> s) -> m ()
 modifyLazy f = get >>= put . f
 {-# INLINEABLE modifyLazy #-}
 
+
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Control.Effect.State.Strict
+-- >>> import Control.Carrier.Pure
+-- >>> import Control.Carrier.State.Strict
