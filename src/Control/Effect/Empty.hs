@@ -27,4 +27,4 @@ abort = send Empty
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Empty.Maybe
+-- >>> import Control.Carrier.Empty.Direct

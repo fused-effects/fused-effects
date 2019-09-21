@@ -36,7 +36,7 @@ library
                      , Control.Carrier.Class
                      , Control.Carrier.Cull.Church
                      , Control.Carrier.Cut.Church
-                     , Control.Carrier.Empty.Maybe
+                     , Control.Carrier.Empty.Direct
                      , Control.Carrier.Error.Either
                      , Control.Carrier.Fail
                      , Control.Carrier.Fresh.Strict
