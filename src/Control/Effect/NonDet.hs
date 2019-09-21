@@ -10,6 +10,7 @@ module Control.Effect.NonDet
 import Control.Applicative (Alternative(..))
 import Control.Effect.Choose hiding ((<|>), many, some)
 import Control.Effect.Empty hiding (empty)
+import Data.Coerce
 import Data.Monoid (Alt(..))
 
 -- | Nondeterministically choose an element from a 'Foldable' collection.
@@ -24,4 +25,9 @@ import Data.Monoid (Alt(..))
 --     pure (a, b, c)
 -- @
 oneOf :: (Foldable t, Alternative m) => t a -> m a
-oneOf = getAlt . foldMap (Alt . pure)
+oneOf = getAlt #. foldMap (Alt #. pure)
+
+
+(#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
+(#.) _ = coerce
+{-# INLINE (#.) #-}
