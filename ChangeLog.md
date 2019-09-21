@@ -4,6 +4,8 @@
 
 - Adds a `oneOf` function to `Control.Effect.NonDet` to provide an idiom for the common case of nondeterministically selecting from a container. ([#201](https://github.com/fused-effects/fused-effects/pull/201))
 
+- Adds a `foldMapA` function to `Control.Effect.NonDet` mapping containers into nondeterministic computations using a supplied function. ([#204](https://github.com/fused-effects/fused-effects/pull/204))
+
 ## Backwards-incompatible changes
 
 - Improves the performance of `runInterpret` using reflection, changing its signature slightly ([#193](https://github.com/fused-effects/fused-effects/pull/193), h/t [@ocharles](https://github.com/ocharles)).
