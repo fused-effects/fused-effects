@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Carrier.Empty.Direct
+module Control.Carrier.Empty.Maybe
 ( -- * Empty effect
   module Control.Effect.Empty
   -- * Empty carrier
