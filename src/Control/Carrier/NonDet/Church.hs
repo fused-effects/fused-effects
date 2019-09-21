@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.NonDet.Church
 ( -- * NonDet effects
-  module Control.Effect.Alternative
+  module Control.Effect.NonDet
   -- * NonDet carrier
 , runNonDet
 , NonDetC(..)
@@ -13,7 +13,7 @@ module Control.Carrier.NonDet.Church
 
 import Control.Applicative (liftA2)
 import Control.Carrier
-import Control.Effect.Alternative
+import Control.Effect.NonDet
 import Control.Monad (MonadPlus(..), join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

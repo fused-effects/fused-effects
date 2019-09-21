@@ -3,7 +3,7 @@ module Control.Carrier.Cull.Church
 ( -- * Cull effect
   module Control.Effect.Cull
   -- * NonDet effects
-, module Control.Effect.Alternative
+, module Control.Effect.NonDet
   -- * Cull carrier
 , runCull
 , CullC(..)
@@ -16,8 +16,8 @@ module Control.Carrier.Cull.Church
 import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
-import Control.Effect.Alternative
 import Control.Effect.Cull
+import Control.Effect.NonDet
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
