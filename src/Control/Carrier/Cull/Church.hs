@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Carrier.Cull
+module Control.Carrier.Cull.Church
 ( -- * Cull effect
   module Control.Effect.Cull
   -- * Cull carrier
