@@ -24,6 +24,7 @@ instance Effect   Empty
 empty :: (Carrier sig m, Member Empty sig) => m a
 empty = send Empty
 
+-- | Conditional failure, returning only if the condition is 'True'.
 guard :: (Carrier sig m, Member Empty sig) => Bool -> m ()
 guard True  = pure ()
 guard False = empty
