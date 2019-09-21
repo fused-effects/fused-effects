@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
 module Control.Carrier.Class
 ( Carrier(..)
 , send
