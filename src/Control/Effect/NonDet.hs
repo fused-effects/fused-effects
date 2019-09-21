@@ -1,7 +1,6 @@
 module Control.Effect.NonDet
-( -- * Choose effect
+( -- * NonDet effects
   module Control.Effect.Choose
-  -- * Empty effect
 , module Control.Effect.Empty
   -- * Re-exports
 , Alternative(..)
