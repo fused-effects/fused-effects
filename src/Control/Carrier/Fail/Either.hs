@@ -43,4 +43,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
