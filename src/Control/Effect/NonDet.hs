@@ -3,6 +3,7 @@ module Control.Effect.NonDet
   module Control.Effect.Choose
 , module Control.Effect.Empty
 , oneOf
+, foldMapA
   -- * Re-exports
 , Alternative(..)
 ) where
@@ -26,6 +27,9 @@ import Data.Monoid (Alt(..))
 -- @
 oneOf :: (Foldable t, Alternative m) => t a -> m a
 oneOf = getAlt #. foldMap (Alt #. pure)
+
+foldMapA :: (Foldable t, Alternative m) => (a -> m b) -> t a -> m b
+foldMapA f = getAlt #. foldMap (Alt #. f)
 
 
 -- | Compose a function operationally equivalent to 'id' on the left.
