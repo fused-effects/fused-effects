@@ -8,7 +8,6 @@ module Control.Carrier.Fail.Either
   -- * Re-exports
 , Carrier
 , Member
-, Fail.MonadFail(..)
 , run
 ) where
 
