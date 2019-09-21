@@ -55,3 +55,4 @@ instance (Carrier sig m, Member Choose sig) => S.Semigroup (Choosing m a) where
 
 instance (Carrier sig m, Member Choose sig, Member Empty sig) => Monoid (Choosing m a) where
   mempty = Choosing empty
+  mappend = (S.<>)
