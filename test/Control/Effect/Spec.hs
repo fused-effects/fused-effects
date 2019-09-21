@@ -6,7 +6,7 @@ module Control.Effect.Spec
 
 import Control.Carrier.Class
 import Control.Carrier.Error.Either
-import Control.Carrier.Fail
+import Control.Carrier.Fail.Either
 import Control.Carrier.Reader
 import Control.Carrier.State.Strict
 import Prelude hiding (fail)

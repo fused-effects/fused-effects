@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Carrier.Fail
+module Control.Carrier.Fail.Either
 ( -- * Fail effect
   module Control.Effect.Fail
   -- * Fail carrier

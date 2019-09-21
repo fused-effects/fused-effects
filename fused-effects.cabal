@@ -38,7 +38,7 @@ library
                      , Control.Carrier.Cut.Church
                      , Control.Carrier.Empty.Maybe
                      , Control.Carrier.Error.Either
-                     , Control.Carrier.Fail
+                     , Control.Carrier.Fail.Either
                      , Control.Carrier.Fresh.Strict
                      , Control.Carrier.Interpose
                      , Control.Carrier.Interpret
