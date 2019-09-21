@@ -2,11 +2,6 @@
 module Control.Carrier.Class
 ( Carrier(..)
 , send
--- * Re-exports
-, module Control.Effect.Class
-, Pure.run
-, (Sum.:+:)(..)
-, Sum.Member(..)
 ) where
 
 import qualified Control.Carrier.Pure as Pure
