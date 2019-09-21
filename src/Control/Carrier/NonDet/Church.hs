@@ -1,24 +1,20 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.NonDet.Church
-( -- * Choose effect
-  module Control.Effect.Choose
-  -- * Empty effect
-, module Control.Effect.Empty
+( -- * NonDet effects
+  module Control.Effect.NonDet
   -- * NonDet carrier
 , runNonDet
 , NonDetC(..)
 , oneOf
   -- * Re-exports
-, Alternative(..)
 , Carrier
 , Member
 , run
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (liftA2)
 import Control.Carrier
-import Control.Effect.Choose hiding (many, some)
-import Control.Effect.Empty
+import Control.Effect.NonDet
 import Control.Monad (MonadPlus(..), join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

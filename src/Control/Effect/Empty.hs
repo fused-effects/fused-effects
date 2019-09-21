@@ -2,7 +2,7 @@
 module Control.Effect.Empty
 ( -- * Empty effect
   Empty(..)
-, abort
+, empty
 ) where
 
 import Control.Carrier
@@ -19,9 +19,9 @@ instance Effect   Empty
 
 -- | Abort the computation.
 --
---   prop> run (runEmpty abort) === Nothing
-abort :: (Carrier sig m, Member Empty sig) => m a
-abort = send Empty
+--   prop> run (runEmpty empty) === Nothing
+empty :: (Carrier sig m, Member Empty sig) => m a
+empty = send Empty
 
 
 -- $setup
