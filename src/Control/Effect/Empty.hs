@@ -53,6 +53,8 @@ instance Applicative m => Applicative (EmptyC m) where
   EmptyC f <*> EmptyC a = EmptyC (liftA2 (<*>) f a)
   {-# INLINE (<*>) #-}
 
+-- $
+--   prop> run (runEmpty empty) === Nothing
 instance Applicative m => Alternative (EmptyC m) where
   empty = EmptyC (pure Nothing)
   {-# INLINE empty #-}

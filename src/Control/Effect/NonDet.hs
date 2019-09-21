@@ -1,20 +1,21 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Effect.NonDet
-( -- * NonDet effect
-  NonDet(..)
+( -- * Choose effect
+  module Control.Effect.Choose
+  -- * Empty effect
+, module Control.Effect.Empty
   -- * NonDet carrier
 , runNonDet
 , NonDetC(..)
 , oneOf
   -- * Re-exports
 , Alternative(..)
-, Carrier
-, Member
-, run
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Carrier
+import Control.Effect.Choose hiding (many, some)
+import Control.Effect.Empty
 import Control.Monad (MonadPlus(..), join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
@@ -22,16 +23,6 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (fromJust)
 import Data.Monoid
-import GHC.Generics (Generic1)
-
-data NonDet m k
-  = Empty
-  | Choose (Bool -> m k)
-  deriving (Functor, Generic1)
-
-instance HFunctor NonDet
-instance Effect   NonDet
-
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
@@ -110,10 +101,10 @@ instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf _ -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
-  eff (L Empty)      = empty
-  eff (L (Choose k)) = k True <|> k False
-  eff (R other)      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= fold fork leaf nil
+instance (Carrier sig m, Effect sig) => Carrier (Empty :+: Choose :+: sig) (NonDetC m) where
+  eff (L Empty)          = empty
+  eff (R (L (Choose k))) = k True <|> k False
+  eff (R (R other))      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= fold fork leaf nil
   {-# INLINE eff #-}
 
 

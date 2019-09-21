@@ -15,15 +15,17 @@ module Control.Effect.Cut
 , run
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.Carrier
-import Control.Effect.NonDet
+import Control.Effect.Choose
+import Control.Effect.Empty
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
+-- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
 data Cut m k
   = Cutfail
   | forall a . Call (m a) (a -> m k)
@@ -67,7 +69,7 @@ cut = pure () <|> cutfail
 {-# INLINE cut #-}
 
 
--- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for a 'NonDet' effect).
+-- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for 'Choose' & 'Empty' effects).
 --
 --   prop> run (runNonDetOnce (runCut (pure a))) === Just a
 runCut :: Alternative m => CutC m a -> m a
@@ -119,12 +121,12 @@ instance MonadTrans CutC where
   lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
+instance (Carrier sig m, Effect sig) => Carrier (Cut :+: Empty :+: Choose :+: sig) (CutC m) where
   eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
   eff (L (Call m k)) = CutC $ \ cons nil fail -> runCutC m (\ a as -> runCutC (k a) cons as fail) nil nil
-  eff (R (L Empty))      = empty
-  eff (R (L (Choose k))) = k True <|> k False
-  eff (R (R other)) = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
+  eff (R (L Empty))          = empty
+  eff (R (R (L (Choose k)))) = k True <|> k False
+  eff (R (R (R other)))      = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
   {-# INLINE eff #-}
 
 
@@ -132,4 +134,5 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Cull
+-- >>> import Control.Effect.NonDet
 -- >>> import Control.Effect.Pure

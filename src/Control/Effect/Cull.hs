@@ -15,6 +15,8 @@ module Control.Effect.Cull
 ) where
 
 import Control.Effect.Carrier
+import Control.Effect.Choose
+import Control.Effect.Empty
 import Control.Effect.NonDet
 import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))
@@ -24,7 +26,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
--- | 'Cull' effects are used with 'NonDet' to provide control over branching.
+-- | 'Cull' effects are used with 'Choose' to provide control over branching.
 data Cull m k
   = forall a . Cull (m a) (a -> m k)
 
@@ -74,15 +76,15 @@ instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
-  eff (L (Cull m k))     = CullC (local (const True) (runCullC m)) >>= k
-  eff (R (L Empty))      = empty
-  eff (R (L (Choose k))) = k True <|> k False
-  eff (R (R other))      = CullC (eff (R (R (handleCoercible other))))
+instance (Carrier sig m, Effect sig) => Carrier (Cull :+: Empty :+: Choose :+: sig) (CullC m) where
+  eff (L (Cull m k))         = CullC (local (const True) (runCullC m)) >>= k
+  eff (R (L Empty))          = empty
+  eff (R (R (L (Choose k)))) = k True <|> k False
+  eff (R (R (R other)))      = CullC (eff (R (R (R (handleCoercible other)))))
   {-# INLINE eff #-}
 
 
--- | Run a 'NonDet' effect, returning the first successful result in an 'Alternative' functor.
+-- | Run 'Choose' & 'Empty' effects, returning the first successful result in an 'Alternative' functor.
 --
 --   Unlike 'runNonDet', this will terminate immediately upon finding a solution.
 --
@@ -94,8 +96,8 @@ runNonDetOnce = runNonDet . runCull . cull . runOnceC
 newtype OnceC m a = OnceC { runOnceC :: CullC (NonDetC m) a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
-instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (OnceC m) where
-  eff = OnceC . eff . R . R . handleCoercible
+instance (Carrier sig m, Effect sig) => Carrier (Empty :+: Choose :+: sig) (OnceC m) where
+  eff = OnceC . eff . R . R . R . handleCoercible
   {-# INLINE eff #-}
 
 
