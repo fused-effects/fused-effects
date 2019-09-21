@@ -4,7 +4,6 @@ module Control.Carrier.Class
 , send
 ) where
 
-import qualified Control.Carrier.Pure as Pure
 import           Control.Effect.Class
 import qualified Control.Effect.Sum as Sum
 
@@ -12,11 +11,6 @@ import qualified Control.Effect.Sum as Sum
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   eff :: sig m a -> m a
-
-
-instance Carrier Pure.Pure Pure.PureC where
-  eff v = case v of {}
-  {-# INLINE eff #-}
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
