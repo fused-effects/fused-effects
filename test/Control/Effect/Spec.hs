@@ -4,11 +4,11 @@ module Control.Effect.Spec
 ( spec
 ) where
 
-import Control.Effect.Carrier
-import Control.Effect.Error
-import Control.Effect.Fail
-import Control.Effect.Reader
-import Control.Effect.State
+import Control.Carrier.Class
+import Control.Carrier.Error.Either
+import Control.Carrier.Fail
+import Control.Carrier.Reader
+import Control.Carrier.State.Strict
 import Prelude hiding (fail)
 import Test.Hspec
 import Test.Inspection as Inspection
