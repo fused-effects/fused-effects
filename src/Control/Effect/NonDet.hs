@@ -26,7 +26,7 @@ import Data.Monoid (Alt(..))
 --     pure (a, b, c)
 -- @
 oneOf :: (Foldable t, Alternative m) => t a -> m a
-oneOf = getAlt #. foldMap (Alt #. pure)
+oneOf = foldMapA pure
 
 foldMapA :: (Foldable t, Alternative m) => (a -> m b) -> t a -> m b
 foldMapA f = getAlt #. foldMap (Alt #. f)
