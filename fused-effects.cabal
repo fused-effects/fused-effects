@@ -47,7 +47,7 @@ library
                      , Control.Carrier.Pure
                      , Control.Carrier.Reader
                      , Control.Carrier.Resource
-                     , Control.Carrier.Resumable.Abort
+                     , Control.Carrier.Resumable.Either
                      , Control.Carrier.Resumable.Resume
                      , Control.Carrier.State.Lazy
                      , Control.Carrier.State.Strict

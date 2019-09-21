@@ -1,5 +1,5 @@
 {-# LANGUAGE ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Carrier.Resumable.Abort
+module Control.Carrier.Resumable.Either
 ( -- * Resumable effect
   module Control.Effect.Resumable
   -- * Resumable carrier
