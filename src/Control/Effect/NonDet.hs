@@ -6,11 +6,13 @@ module Control.Effect.NonDet
 , foldMapA
   -- * Re-exports
 , Alternative(..)
+, guard
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.Choose hiding ((<|>), many, some)
-import Control.Effect.Empty hiding (empty)
+import Control.Effect.Empty hiding (empty, guard)
+import Control.Monad (guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))
 
