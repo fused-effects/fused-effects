@@ -1,5 +1,10 @@
 module Control.Carrier
-( module X
+( -- * Re-exports
+  module Control.Carrier.Class
+, module Control.Effect.Class
+, module Control.Effect.Sum
 ) where
 
-import Control.Carrier.Class as X ((:+:), Carrier, Effect, HFunctor, Member)
+import Control.Carrier.Class
+import Control.Effect.Class
+import Control.Effect.Sum
