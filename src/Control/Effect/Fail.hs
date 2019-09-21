@@ -5,7 +5,7 @@ module Control.Effect.Fail
 , Fail.MonadFail(..)
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 import qualified Control.Monad.Fail as Fail
 import GHC.Generics (Generic1)
 

@@ -9,7 +9,7 @@ module Control.Effect.Choose
 , some1
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 import Data.Bool (bool)
 import Data.List.NonEmpty (NonEmpty (..))
 import GHC.Generics (Generic1)

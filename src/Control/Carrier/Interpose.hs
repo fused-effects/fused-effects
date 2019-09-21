@@ -15,7 +15,7 @@ module Control.Carrier.Interpose
 ) where
 
 import Control.Applicative
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.Reader
 import Control.Monad (MonadPlus (..))
 import qualified Control.Monad.Fail as Fail

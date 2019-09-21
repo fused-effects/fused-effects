@@ -16,7 +16,7 @@ module Control.Carrier.NonDet.Church
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Effect.Choose hiding (many, some)
 import Control.Effect.Empty
 import Control.Monad (MonadPlus(..), join)

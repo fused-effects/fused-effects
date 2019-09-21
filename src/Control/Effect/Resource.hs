@@ -8,7 +8,7 @@ module Control.Effect.Resource
 , onException
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 
 data Resource m k
   = forall resource any output . Resource (m resource) (resource -> m any) (resource -> m output) (output -> m k)

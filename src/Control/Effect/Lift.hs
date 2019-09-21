@@ -5,7 +5,7 @@ module Control.Effect.Lift
 , sendM
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 import GHC.Generics
 
 newtype Lift sig m k = Lift { unLift :: sig (m k) }

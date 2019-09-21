@@ -11,7 +11,7 @@ module Control.Carrier.Cull.Church
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
 import Control.Effect.Cull

@@ -8,7 +8,7 @@ module Control.Effect.Writer
 , censor
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 
 data Writer w m k
   = Tell w (m k)

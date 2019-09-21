@@ -13,7 +13,7 @@ module Control.Carrier.Interpret
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.State.Strict
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

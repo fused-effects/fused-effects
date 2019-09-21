@@ -4,7 +4,7 @@ module Control.Effect.Spec
 ( spec
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.Carrier.Fail.Either
 import Control.Carrier.Reader

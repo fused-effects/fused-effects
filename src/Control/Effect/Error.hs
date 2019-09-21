@@ -6,7 +6,7 @@ module Control.Effect.Error
 , catchError
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 
 data Error exc m k
   = Throw exc

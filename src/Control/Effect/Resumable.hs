@@ -5,7 +5,7 @@ module Control.Effect.Resumable
 , throwResumable
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 
 -- | Errors which can be resumed with values of some existentially-quantified type.
 data Resumable err m k

@@ -12,7 +12,7 @@ module Control.Carrier.Resource
 ) where
 
 import           Control.Applicative (Alternative(..))
-import           Control.Carrier.Class
+import           Control.Carrier
 import           Control.Carrier.Reader
 import           Control.Effect.Resource
 import qualified Control.Exception as Exc

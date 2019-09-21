@@ -12,7 +12,7 @@ module Control.Carrier.Choose.Church
 ) where
 
 import Control.Applicative ((<|>), liftA2)
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Effect.Choose
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail

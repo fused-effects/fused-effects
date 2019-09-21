@@ -12,7 +12,7 @@ module Control.Carrier.Resumable.Resume
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.Reader
 import Control.Effect.Resumable
 import Control.Monad (MonadPlus(..))

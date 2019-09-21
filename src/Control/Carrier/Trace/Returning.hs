@@ -12,7 +12,7 @@ module Control.Carrier.Trace.Returning
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.State.Strict
 import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))

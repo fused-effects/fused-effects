@@ -6,7 +6,7 @@ module Control.Effect.Fresh
 , resetFresh
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 
 data Fresh m k
   = Fresh (Int -> m k)

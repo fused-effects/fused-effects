@@ -13,7 +13,7 @@ module Control.Carrier.Writer.Strict
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.State.Strict
 import Control.Effect.Writer
 import Control.Monad (MonadPlus(..))

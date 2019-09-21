@@ -13,7 +13,7 @@ module Control.Carrier.Resumable.Abort
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.DeepSeq
 import Control.Effect.Resumable

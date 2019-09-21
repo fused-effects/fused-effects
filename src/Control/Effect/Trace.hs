@@ -5,7 +5,7 @@ module Control.Effect.Trace
 , trace
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 import GHC.Generics (Generic1)
 
 data Trace m k = Trace

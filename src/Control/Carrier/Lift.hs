@@ -12,7 +12,7 @@ module Control.Carrier.Lift
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Effect.Lift
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

@@ -12,7 +12,7 @@ module Control.Carrier.Trace.Printing
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

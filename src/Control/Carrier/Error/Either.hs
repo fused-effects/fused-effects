@@ -12,7 +12,7 @@ module Control.Carrier.Error.Either
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Effect.Error
 import Control.Monad (MonadPlus(..), (<=<))
 import qualified Control.Monad.Fail as Fail

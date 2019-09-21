@@ -13,7 +13,7 @@ module Control.Carrier.Cut.Church
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Effect.Choose
 import Control.Effect.Cut
 import Control.Effect.Empty
