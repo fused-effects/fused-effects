@@ -47,3 +47,6 @@ some1 a = (:|) <$> a <*> many a
 
 
 newtype Choosing m a = Choosing { getChoosing :: m a }
+
+instance (Carrier sig m, Member Choose sig) => Semigroup (Choosing m a) where
+  Choosing m1 <> Choosing m2 = Choosing (m1 <|> m2)
