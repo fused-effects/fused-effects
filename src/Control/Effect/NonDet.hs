@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleContexts #-}
 -- | 'Choose' & 'Empty'-based nondeterminism interfaces.
 module Control.Effect.NonDet
 ( -- * NonDet effects
@@ -5,17 +6,12 @@ module Control.Effect.NonDet
 , module Control.Effect.Empty
 , oneOf
 , foldMapA
-  -- * Re-exports
-, Alternative(..)
-, guard
 ) where
 
-import Control.Applicative (Alternative(..))
-import Control.Effect.Choose hiding ((<|>), many, some)
-import Control.Effect.Empty hiding (empty, guard)
-import Control.Monad (guard)
+import Control.Carrier
+import Control.Effect.Choose
+import Control.Effect.Empty
 import Data.Coerce
-import Data.Monoid (Alt(..))
 
 -- | Nondeterministically choose an element from a 'Foldable' collection.
 -- This can be used to emulate the style of nondeterminism associated with
@@ -28,12 +24,12 @@ import Data.Monoid (Alt(..))
 --     guard (a^2 + b^2 == c^2)
 --     pure (a, b, c)
 -- @
-oneOf :: (Foldable t, Alternative m) => t a -> m a
+oneOf :: (Foldable t, Carrier sig m, Member Choose sig, Member Empty sig) => t a -> m a
 oneOf = foldMapA pure
 
 -- | Map a 'Foldable' collection of values into a nondeterministic computation using the supplied action.
-foldMapA :: (Foldable t, Alternative m) => (a -> m b) -> t a -> m b
-foldMapA f = getAlt #. foldMap (Alt #. f)
+foldMapA :: (Foldable t, Carrier sig m, Member Choose sig, Member Empty sig) => (a -> m b) -> t a -> m b
+foldMapA f = getChoosing #. foldMap (Choosing #. f)
 
 
 -- | Compose a function operationally equivalent to 'id' on the left.

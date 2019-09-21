@@ -3,7 +3,7 @@ module Control.Carrier.Cut.Church
 ( -- * Cut effect
   module Control.Effect.Cut
   -- * NonDet effects
-, module Control.Effect.NonDet
+, module Control.Effect.Alternative
   -- * Cut carrier
 , runCut
 , runCutAll
@@ -15,8 +15,8 @@ module Control.Carrier.Cut.Church
 ) where
 
 import Control.Carrier
+import Control.Effect.Alternative
 import Control.Effect.Cut
-import Control.Effect.NonDet
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
