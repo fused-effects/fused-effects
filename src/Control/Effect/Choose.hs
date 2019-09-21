@@ -12,6 +12,7 @@ module Control.Effect.Choose
 ) where
 
 import Control.Carrier
+import Control.Effect.Empty
 import Data.Bool (bool)
 import Data.List.NonEmpty (NonEmpty (..))
 import GHC.Generics (Generic1)
@@ -50,3 +51,6 @@ newtype Choosing m a = Choosing { getChoosing :: m a }
 
 instance (Carrier sig m, Member Choose sig) => Semigroup (Choosing m a) where
   Choosing m1 <> Choosing m2 = Choosing (m1 <|> m2)
+
+instance (Carrier sig m, Member Choose sig, Member Empty sig) => Monoid (Choosing m a) where
+  mempty = Choosing empty
