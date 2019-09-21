@@ -28,6 +28,7 @@ import Data.Monoid (Alt(..))
 oneOf :: (Foldable t, Alternative m) => t a -> m a
 oneOf = foldMapA pure
 
+-- | Map a 'Foldable' collection of values into a nondeterministic computation using the supplied action.
 foldMapA :: (Foldable t, Alternative m) => (a -> m b) -> t a -> m b
 foldMapA f = getAlt #. foldMap (Alt #. f)
 
