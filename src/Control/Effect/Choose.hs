@@ -7,6 +7,8 @@ module Control.Effect.Choose
 , many
 , some
 , some1
+  -- * Choosing semigroup
+, Choosing(..)
 ) where
 
 import Control.Carrier
@@ -42,3 +44,6 @@ some a = (:) <$> a <*> many a
 -- | One or more, returning a 'NonEmpty' list of the results.
 some1 :: (Carrier sig m, Member Choose sig) => m a -> m (NonEmpty a)
 some1 a = (:|) <$> a <*> many a
+
+
+newtype Choosing m a = Choosing { getChoosing :: m a }
