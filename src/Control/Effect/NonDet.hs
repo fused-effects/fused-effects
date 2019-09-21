@@ -1,4 +1,3 @@
--- | 'Choose' & 'Empty'-based nondeterminism interfaces.
 module Control.Effect.NonDet
 ( -- * NonDet effects
   module Control.Effect.Choose
