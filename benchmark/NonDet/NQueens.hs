@@ -8,8 +8,7 @@
 module NonDet.NQueens (runQueens, benchmark) where
 
 import Control.Applicative
-import Control.Effect
-import Control.Effect.NonDet
+import Control.Carrier.NonDet.Church
 import Control.Monad
 import Data.Foldable
 import Data.List

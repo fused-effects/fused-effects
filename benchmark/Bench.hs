@@ -3,10 +3,10 @@ module Main
 ( main
 ) where
 
-import Control.Effect.Carrier
-import Control.Effect.Interpret
-import Control.Effect.Writer
-import Control.Effect.State
+import Control.Carrier.Class
+import Control.Carrier.Interpret
+import Control.Carrier.State.Strict
+import Control.Carrier.Writer.Strict
 import Control.Monad (ap, replicateM_)
 import Data.Functor.Identity
 import Data.Monoid (Sum(..))
