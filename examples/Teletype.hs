@@ -7,9 +7,9 @@ module Teletype
 
 import Prelude hiding (read)
 
-import Control.Effect.Carrier
-import Control.Effect.State
-import Control.Effect.Writer
+import Control.Carrier.Class
+import Control.Carrier.State.Strict
+import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class
 import GHC.Generics (Generic1)
 import Test.Hspec
