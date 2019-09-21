@@ -11,7 +11,7 @@ module Control.Carrier.Choose.Church
 , run
 ) where
 
-import Control.Applicative ((<|>), liftA2)
+import Control.Applicative as Alt ((<|>), liftA2)
 import Control.Carrier
 import Control.Effect.Choose
 import Control.Monad (join)
@@ -51,7 +51,7 @@ instance Fail.MonadFail m => Fail.MonadFail (ChooseC m) where
 instance MonadFix m => MonadFix (ChooseC m) where
   mfix f = ChooseC $ \ fork leaf ->
     mfix (runChoose (liftA2 Fork) (pure . Leaf)
-      . f . fromJust . fold (<|>) Just)
+      . f . fromJust . fold (Alt.<|>) Just)
     >>= fold fork leaf
   {-# INLINE mfix #-}
 
