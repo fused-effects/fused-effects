@@ -3,6 +3,7 @@ module Control.Effect.Empty
 ( -- * Empty effect
   Empty(..)
 , empty
+, guard
 ) where
 
 import Control.Carrier
@@ -22,6 +23,10 @@ instance Effect   Empty
 --   prop> run (runEmpty empty) === Nothing
 empty :: (Carrier sig m, Member Empty sig) => m a
 empty = send Empty
+
+guard :: (Carrier sig m, Member Empty sig) => Bool -> m ()
+guard True  = pure ()
+guard False = empty
 
 
 -- $setup
