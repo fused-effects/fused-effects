@@ -18,6 +18,8 @@
 
 - Removes the `NonDet` effect, replacing it with the combination of the new `Choose` and `Empty` effects ([#199](https://github.com/fused-effects/fused-effects/pull/199)).
 
+- Exports `Choose`- & `Empty`-based interfaces from `Control.Effect.NonDet`. `Alternative`-based interfaces are exported via `Control.Effect.Alternative` instead ([#204](https://github.com/fused-effects/fused-effects/pull/204)).
+
 - Removes the `OnceC` carrier for `Cull` effects, replacing it with the composition of `CullC` on some other `Alternative` carrier, e.g. `NonDetC` ([#204](https://github.com/fused-effects/fused-effects/pull/204)).
 
 - Moves all the carriers into their own modules in the `Control.Carrier` namespace. Several have also been renamed, e.g. the various `Trace` carriers are all named `TraceC` within their separate modules, and should be imported qualified if disambiguation is required. This simplifies naming schemes, and ensures that the choice of e.g. strict or lazy carrier is always made consciously and expliclty, instead of defaulting to whichever is exported by the effect module ([#204](https://github.com/fused-effects/fused-effects/pull/204)).
