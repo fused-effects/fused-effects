@@ -28,6 +28,9 @@ oneOf :: (Foldable t, Alternative m) => t a -> m a
 oneOf = getAlt #. foldMap (Alt #. pure)
 
 
+-- | Compose a function operationally equivalent to 'id' on the left.
+--
+--   cf https://github.com/fused-effects/diffused-effects/pull/1#discussion_r323560758
 (#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
 (#.) _ = coerce
 {-# INLINE (#.) #-}
