@@ -53,7 +53,7 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC
   eff (L (Cull m k))         = CullC (local (const True) (runCullC m)) >>= k
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CullC (eff (R (R (R (handleCoercible other)))))
+  eff (R (R other))          = CullC (eff (R (R (handleCoercible other))))
   {-# INLINE eff #-}
 
 
