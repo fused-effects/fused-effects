@@ -39,7 +39,7 @@ instance {-# OVERLAPPABLE #-}
 
 instance {-# OVERLAPPABLE #-}
          Inject l (l :+: r) where
-  inj = L . inj
+  inj = L
 
 instance {-# OVERLAPPABLE #-}
          Inject l r
