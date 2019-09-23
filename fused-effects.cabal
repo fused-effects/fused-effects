@@ -28,11 +28,11 @@ common common
     -Weverything
     -Wno-all-missed-specialisations
     -Wno-implicit-prelude
-    -Wno-missed-specialisation
-    -Wno-missing-import-list
+    -Wno-missed-specialisations
+    -Wno-missing-import-lists
     -Wno-missing-local-signatures
     -Wno-monomorphism-restriction
-    -Wno-name-shadowin
+    -Wno-name-shadowing
     -Wno-safe
     -Wno-unsafe
   if (impl(ghc >= 8.6))
