@@ -145,7 +145,9 @@ benchmark benchmark
     , fused-effects
     , gauge
   hs-source-dirs:     benchmark
-  ghc-options:        -threaded -rtsopts "-with-rtsopts=-N -A4m -n2m"
+  ghc-options:
+    -threaded
+    -rtsopts "-with-rtsopts=-N -A4m -n2m"
 
 
 source-repository head
