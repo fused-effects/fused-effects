@@ -8,6 +8,8 @@
 
 - Defines new `Inject` and `Project` typeclasses, each providing half of `Member`, and redefines `Member` as a constraint synonym for both of them.
 
+- Defines a new `Has` constraint synonym, conveniently combining `Carrier` and `Member` constraints and used for all effect constructors.
+
 ## Backwards-incompatible changes
 
 - Improves the performance of `runInterpret` using reflection, changing its signature slightly ([#193](https://github.com/fused-effects/fused-effects/pull/193), h/t [@ocharles](https://github.com/ocharles)).
