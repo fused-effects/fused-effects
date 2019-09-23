@@ -64,10 +64,7 @@ renderLogMessage = \case
   Info  message -> "[info] "  ++ message
 
 -- The application: it logs two messages, then quits.
-application ::
-     ( Carrier sig m
-     , Member (Log Message) sig
-     )
+application :: Has (Log Message) sig m
   => m ()
 application = do
   log (Debug "debug message")
@@ -113,10 +110,7 @@ data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   deriving anyclass (HFunctor, Effect)
 
 -- Log an 'a'.
-log ::
-     ( Carrier sig m
-     , Member (Log a) sig
-     )
+log :: Has (Log a) sig m
   => a
   -> m ()
 log x =
@@ -168,9 +162,7 @@ newtype ReinterpretLogC s t m a
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects, one of which
      -- is 'Log t'...
-     ( Carrier sig m
-     , Member (Log t) sig
-     )
+     Has (Log t) sig m
      -- ... the 'ReinterpretLogC s t m' monad can interpret 'Log s :+: sig'
      -- effects
   => Carrier (Log s :+: sig) (ReinterpretLogC s t m) where

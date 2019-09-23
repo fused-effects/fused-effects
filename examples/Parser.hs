@@ -76,16 +76,16 @@ data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
   deriving stock (Functor, Generic1)
   deriving anyclass (HFunctor, Effect)
 
-satisfy :: (Carrier sig m, Member Symbol sig) => (Char -> Bool) -> m Char
+satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char
 satisfy p = send (Satisfy p pure)
 
-char :: (Carrier sig m, Member Symbol sig) => Char -> m Char
+char :: Has Symbol sig m => Char -> m Char
 char = satisfy . (==)
 
-digit :: (Carrier sig m, Member Symbol sig) => m Char
+digit :: Has Symbol sig m => m Char
 digit = satisfy isDigit
 
-parens :: (Carrier sig m, Member Symbol sig) => m a -> m a
+parens :: Has Symbol sig m => m a -> m a
 parens m = char '(' *> m <* char ')'
 
 
@@ -107,19 +107,19 @@ instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) 
   {-# INLINE eff #-}
 
 
-expr :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig) => m Int
+expr :: (Alternative m, Has Cut sig m, Has Symbol sig m) => m Int
 expr = do
   i <- term
   call ((i +) <$ char '+' <* cut <*> expr
     <|> pure i)
 
-term :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig) => m Int
+term :: (Alternative m, Has Cut sig m, Has Symbol sig m) => m Int
 term = do
   i <- factor
   call ((i *) <$ char '*' <* cut <*> term
     <|> pure i)
 
-factor :: (Alternative m, Carrier sig m, Member Cut sig, Member Symbol sig) => m Int
+factor :: (Alternative m, Has Cut sig m, Has Symbol sig m) => m Int
 factor
   =   read <$> some digit
   <|> parens expr

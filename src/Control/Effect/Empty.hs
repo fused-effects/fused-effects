@@ -21,11 +21,11 @@ instance Effect   Empty
 -- | Abort the computation.
 --
 --   prop> run (runEmpty empty) === Nothing
-empty :: (Carrier sig m, Member Empty sig) => m a
+empty :: Has Empty sig m => m a
 empty = send Empty
 
 -- | Conditional failure, returning only if the condition is 'True'.
-guard :: (Carrier sig m, Member Empty sig) => Bool -> m ()
+guard :: Has Empty sig m => Bool -> m ()
 guard True  = pure ()
 guard False = empty
 
