@@ -45,7 +45,7 @@ newtype Handler eff m = Handler (forall x . eff m x -> m x)
 runHandler :: (HFunctor eff, Functor m) => Handler eff m -> eff (ReaderC (Handler eff m) m) a -> m a
 runHandler h@(Handler handler) = handler . hmap (runReader h)
 
-instance (HFunctor eff, Carrier sig m, Member eff sig) => Carrier sig (InterposeC eff m) where
+instance (HFunctor eff, Carrier sig m, Project eff sig) => Carrier sig (InterposeC eff m) where
   eff (op :: sig (InterposeC eff m) a)
     | Just (op' :: eff (InterposeC eff m) a) <- prj op = do
       handler <- InterposeC ask
