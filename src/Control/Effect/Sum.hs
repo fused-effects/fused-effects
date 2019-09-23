@@ -53,10 +53,13 @@ class Project (sub :: (* -> *) -> (* -> *)) sup where
 instance Project t t where
   prj = Just
 
-instance {-# OVERLAPPABLE #-} Project l (l :+: r) where
+instance {-# OVERLAPPABLE #-}
+         Project l (l :+: r) where
   prj (L f) = Just f
   prj _     = Nothing
 
-instance {-# OVERLAPPABLE #-} Project l r => Project l (l' :+: r) where
+instance {-# OVERLAPPABLE #-}
+         Project l r
+      => Project l (l' :+: r) where
   prj (R g) = prj g
   prj _     = Nothing
