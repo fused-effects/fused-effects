@@ -34,7 +34,7 @@ isSafeIn (i,j) qs = null (diags (i,j) `intersect` underThreat)
     qs' = zip [1..length qs] qs
     underThreat = qs' >>= diags
 
-addOne :: (Carrier sig m, Alternative m) => Int -> Board -> m Board
+addOne :: (Alternative m, Monad m) => Int -> Board -> m Board
 addOne n curr = do
   let i = length curr + 1
   let choose = asum . fmap pure
@@ -42,7 +42,7 @@ addOne n curr = do
   guard ((i, j) `isSafeIn` curr)
   pure (curr ++ [j])
 
-queens :: (Carrier sig m, Alternative m) => Int -> m Board
+queens :: (Alternative m, Monad m) => Int -> m Board
 queens n = foldl' (>>=) (pure empty) (replicate n (addOne n))
 
 runQueens :: Int -> [Board]
