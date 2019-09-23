@@ -42,6 +42,7 @@ common common
 
 library
   import:              common
+  hs-source-dirs:      src
   exposed-modules:
     Control.Carrier
     Control.Carrier.Choose.Church
@@ -91,12 +92,12 @@ library
     , deepseq       ^>= 1.4.3
     , unliftio-core ^>= 0.1.2
     , transformers
-  hs-source-dirs:      src
 
 
 test-suite examples
   import:              common
   type:                exitcode-stdio-1.0
+  hs-source-dirs:      examples
   main-is:             Main.hs
   other-modules:
     Parser
@@ -108,11 +109,11 @@ test-suite examples
     , hspec       >= 2.4.1
     , QuickCheck  >= 2.7 && < 3
     , transformers
-  hs-source-dirs:      examples
 
 test-suite test
   import:              common
   type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
   main-is:             Spec.hs
   other-modules:
     Control.Effect.Spec
@@ -122,29 +123,28 @@ test-suite test
     , fused-effects
     , hspec               >= 2.4.1
     , inspection-testing ^>= 0.4
-  hs-source-dirs:      test
 
 test-suite doctest
   import:              common
   type:                exitcode-stdio-1.0
+  hs-source-dirs:      test
   main-is:             Doctest.hs
   build-depends:
       base
     , doctest  >= 0.7 && < 1
     , fused-effects
-  hs-source-dirs:      test
 
 
 benchmark benchmark
   import:             common
   type:               exitcode-stdio-1.0
+  hs-source-dirs:     benchmark
   main-is:            Bench.hs
   other-modules:      NonDet.NQueens
   build-depends:
       base
     , fused-effects
     , gauge
-  hs-source-dirs:     benchmark
   ghc-options:
     -threaded
     -rtsopts "-with-rtsopts=-N -A4m -n2m"
