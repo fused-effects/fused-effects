@@ -6,9 +6,9 @@
 
 - Adds a `foldMapA` function to `Control.Effect.NonDet` mapping containers into nondeterministic computations using a supplied function. ([#204](https://github.com/fused-effects/fused-effects/pull/204))
 
-- Defines new `Inject` and `Project` typeclasses, each providing half of `Member`, and redefines `Member` as a constraint synonym for both of them.
+- Defines new `Inject` and `Project` typeclasses, each providing half of `Member`, and redefines `Member` as a constraint synonym for both of them. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
-- Defines a new `Has` constraint synonym, conveniently combining `Carrier` and `Member` constraints and used for all effect constructors.
+- Defines a new `Has` constraint synonym, conveniently combining `Carrier` and `Member` constraints and used for all effect constructors. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
 ## Backwards-incompatible changes
 
@@ -26,7 +26,7 @@
 
 - Moves all the carriers into their own modules in the `Control.Carrier` namespace. Several have also been renamed, e.g. the various `Trace` carriers are all named `TraceC` within their separate modules, and should be imported qualified if disambiguation is required. This simplifies naming schemes, and ensures that the choice of e.g. strict or lazy carrier is always made consciously and expliclty, instead of defaulting to whichever is exported by the effect module ([#204](https://github.com/fused-effects/fused-effects/pull/204)).
 
-- Removes the re-exports of `Carrier` and `Member` from all carrier modules, re-exporting `Has` in their place. `Has` constraints should generally be used instead of these, and specialist cases can import `Control.Carrier` for `Carrier` and `Control.Effect.Sum` for `Member`.
+- Removes the re-exports of `Carrier` and `Member` from all carrier modules, re-exporting `Has` in their place. `Has` constraints should generally be used instead of these, and specialist cases can import `Control.Carrier` for `Carrier` and `Control.Effect.Sum` for `Member`. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
 # v0.5.0.1
 
