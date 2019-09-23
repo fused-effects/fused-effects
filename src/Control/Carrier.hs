@@ -1,9 +1,9 @@
 module Control.Carrier
 ( -- * Re-exports
   module Control.Carrier.Class
+, module Control.Carrier.Pure
 , module Control.Effect.Class
 , module Control.Effect.Sum
-, run
 ) where
 
 import Control.Carrier.Class
