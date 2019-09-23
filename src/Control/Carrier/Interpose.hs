@@ -5,14 +5,18 @@ This module provides an 'InterposeC' carrier capable of "eavesdropping" on reque
 made to other carriers. This is a useful capability for dynamism in deeply-nested
 effect stacks, but can lead to complicated control flow. Be careful.
 -}
-module Control.Effect.Interpose
-  ( InterposeC (..)
-  , runInterpose
-  ) where
+module Control.Carrier.Interpose
+( InterposeC (..)
+, runInterpose
+  -- * Re-exports
+, Carrier
+, Member
+, run
+) where
 
 import Control.Applicative
-import Control.Effect.Carrier
-import Control.Effect.Reader
+import Control.Carrier
+import Control.Carrier.Reader
 import Control.Monad (MonadPlus (..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

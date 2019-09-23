@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Effect.State.Strict
+module Control.Carrier.State.Strict
 ( -- * State effect
-  module State
+  module Control.Effect.State
   -- * Strict state carrier
 , runState
 , evalState
@@ -9,12 +9,13 @@ module Control.Effect.State.Strict
 , StateC(..)
   -- * Re-exports
 , Carrier
+, Member
 , run
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Effect.Carrier
-import Control.Effect.State.Internal as State
+import Control.Carrier
+import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

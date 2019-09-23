@@ -31,17 +31,39 @@ common common
 
 library
   import:              common
-  exposed-modules:     Control.Effect
-                     , Control.Effect.Carrier
+  exposed-modules:     Control.Carrier
+                     , Control.Carrier.Choose.Church
+                     , Control.Carrier.Class
+                     , Control.Carrier.Cull.Church
+                     , Control.Carrier.Cut.Church
+                     , Control.Carrier.Empty.Maybe
+                     , Control.Carrier.Error.Either
+                     , Control.Carrier.Fail.Either
+                     , Control.Carrier.Fresh.Strict
+                     , Control.Carrier.Interpose
+                     , Control.Carrier.Interpret
+                     , Control.Carrier.Lift
+                     , Control.Carrier.NonDet.Church
+                     , Control.Carrier.Pure
+                     , Control.Carrier.Reader
+                     , Control.Carrier.Resource
+                     , Control.Carrier.Resumable.Either
+                     , Control.Carrier.Resumable.Resume
+                     , Control.Carrier.State.Lazy
+                     , Control.Carrier.State.Strict
+                     , Control.Carrier.Trace.Ignoring
+                     , Control.Carrier.Trace.Printing
+                     , Control.Carrier.Trace.Returning
+                     , Control.Carrier.Writer.Strict
+                     , Control.Effect
                      , Control.Effect.Choose
+                     , Control.Effect.Class
                      , Control.Effect.Cull
                      , Control.Effect.Cut
                      , Control.Effect.Empty
                      , Control.Effect.Error
                      , Control.Effect.Fail
                      , Control.Effect.Fresh
-                     , Control.Effect.Interpose
-                     , Control.Effect.Interpret
                      , Control.Effect.Lift
                      , Control.Effect.NonDet
                      , Control.Effect.Pure
@@ -49,9 +71,6 @@ library
                      , Control.Effect.Resource
                      , Control.Effect.Resumable
                      , Control.Effect.State
-                     , Control.Effect.State.Internal
-                     , Control.Effect.State.Lazy
-                     , Control.Effect.State.Strict
                      , Control.Effect.Sum
                      , Control.Effect.Trace
                      , Control.Effect.Writer

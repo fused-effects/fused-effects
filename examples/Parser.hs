@@ -3,10 +3,10 @@ module Parser
 ( spec
 ) where
 
-import Control.Effect.Carrier
-import Control.Effect.Cut
-import Control.Effect.NonDet
-import Control.Effect.State
+import Control.Carrier
+import Control.Carrier.Cut.Church
+import Control.Carrier.NonDet.Church
+import Control.Carrier.State.Strict
 import Control.Monad (replicateM)
 import Data.Char
 import Data.List (intercalate)

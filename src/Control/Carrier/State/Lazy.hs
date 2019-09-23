@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Effect.State.Lazy
+module Control.Carrier.State.Lazy
 ( -- * State effect
   module State
   -- * Lazy state carrier
@@ -9,12 +9,13 @@ module Control.Effect.State.Lazy
 , StateC(..)
   -- * Re-exports
 , Carrier
+, Member
 , run
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Effect.Carrier
-import Control.Effect.State.Internal as State
+import Control.Carrier
+import Control.Effect.State as State
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

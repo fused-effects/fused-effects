@@ -4,6 +4,8 @@
 
 - Adds a `oneOf` function to `Control.Effect.NonDet` to provide an idiom for the common case of nondeterministically selecting from a container. ([#201](https://github.com/fused-effects/fused-effects/pull/201))
 
+- Adds a `foldMapA` function to `Control.Effect.NonDet` mapping containers into nondeterministic computations using a supplied function. ([#204](https://github.com/fused-effects/fused-effects/pull/204))
+
 ## Backwards-incompatible changes
 
 - Improves the performance of `runInterpret` using reflection, changing its signature slightly ([#193](https://github.com/fused-effects/fused-effects/pull/193), h/t [@ocharles](https://github.com/ocharles)).
@@ -15,6 +17,10 @@
 - Redefines `NonDetC` as a Church-encoded binary tree instead of a Church-encoded list ([#197](https://github.com/fused-effects/fused-effects/pull/197)).
 
 - Removes the `NonDet` effect, replacing it with the combination of the new `Choose` and `Empty` effects ([#199](https://github.com/fused-effects/fused-effects/pull/199)).
+
+- Removes the `OnceC` carrier for `Cull` effects, replacing it with the composition of `CullC` on some other `Alternative` carrier, e.g. `NonDetC` ([#204](https://github.com/fused-effects/fused-effects/pull/204)).
+
+- Moves all the carriers into their own modules in the `Control.Carrier` namespace. Several have also been renamed, e.g. the various `Trace` carriers are all named `TraceC` within their separate modules, and should be imported qualified if disambiguation is required. This simplifies naming schemes, and ensures that the choice of e.g. strict or lazy carrier is always made consciously and expliclty, instead of defaulting to whichever is exported by the effect module ([#204](https://github.com/fused-effects/fused-effects/pull/204)).
 
 # v0.5.0.1
 

@@ -1,16 +1,20 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 
-module Control.Effect.Interpret
+module Control.Carrier.Interpret
 ( runInterpret
 , runInterpretState
 , InterpretC(..)
 , Reifies
 , Handler
+  -- * Re-exports
+, Carrier
+, Member
+, run
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Effect.Carrier
-import Control.Effect.State
+import Control.Carrier
+import Control.Carrier.State.Strict
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

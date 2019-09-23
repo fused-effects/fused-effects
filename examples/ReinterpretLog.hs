@@ -33,10 +33,10 @@ module ReinterpretLog
   , runApplication
   ) where
 
-import Control.Effect.Carrier
-import Control.Effect.Lift
-import Control.Effect.Reader
-import Control.Effect.Writer
+import Control.Carrier
+import Control.Carrier.Lift
+import Control.Carrier.Reader
+import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class (MonadIO(..))
 import Data.Function          ((&))
 import Data.Kind              (Type)

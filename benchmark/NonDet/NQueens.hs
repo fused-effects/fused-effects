@@ -8,9 +8,7 @@
 module NonDet.NQueens (runQueens, benchmark) where
 
 import Control.Applicative
-import Control.Effect
-import Control.Effect.NonDet
-import Control.Monad
+import Control.Carrier.NonDet.Church
 import Data.Foldable
 import Data.List
 import Gauge hiding (benchmark)
