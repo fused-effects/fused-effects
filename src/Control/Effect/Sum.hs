@@ -26,7 +26,7 @@ type Member sub sup = (Inject sub sup, Project sub sup)
 class Inject (sub :: (* -> *) -> (* -> *)) sup where
   inj :: sub m a -> sup m a
 
-instance Inject sub sub where
+instance Inject t t where
   inj = id
 
 instance {-# OVERLAPPABLE #-} Inject sub (sub :+: sup) where
