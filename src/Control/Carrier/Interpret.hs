@@ -7,8 +7,6 @@ module Control.Carrier.Interpret
 , Reifies
 , Handler
   -- * Re-exports
-, Carrier
-, Member
 , Has
 , run
 ) where

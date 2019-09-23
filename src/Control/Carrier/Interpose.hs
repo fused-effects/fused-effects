@@ -9,8 +9,6 @@ module Control.Carrier.Interpose
 ( InterposeC (..)
 , runInterpose
   -- * Re-exports
-, Carrier
-, Member
 , Has
 , run
 ) where
@@ -18,6 +16,7 @@ module Control.Carrier.Interpose
 import Control.Applicative
 import Control.Carrier
 import Control.Carrier.Reader
+import Control.Effect.Sum
 import Control.Monad (MonadPlus (..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

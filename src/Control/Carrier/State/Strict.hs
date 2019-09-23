@@ -8,8 +8,6 @@ module Control.Carrier.State.Strict
 , execState
 , StateC(..)
   -- * Re-exports
-, Carrier
-, Member
 , Has
 , run
 ) where

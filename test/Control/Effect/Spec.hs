@@ -9,6 +9,7 @@ import Control.Carrier.Error.Either
 import Control.Carrier.Fail.Either
 import Control.Carrier.Reader
 import Control.Carrier.State.Strict
+import Control.Effect.Sum
 import Prelude hiding (fail)
 import Test.Hspec
 import Test.Inspection as Inspection

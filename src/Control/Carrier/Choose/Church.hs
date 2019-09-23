@@ -6,8 +6,6 @@ module Control.Carrier.Choose.Church
 , runChoose
 , ChooseC(..)
   -- * Re-exports
-, Carrier
-, Member
 , Has
 , run
 ) where

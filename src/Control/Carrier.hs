@@ -4,7 +4,7 @@ module Control.Carrier
   module Control.Carrier.Class
 , module Control.Carrier.Pure
 , module Control.Effect.Class
-, module Control.Effect.Sum
+, (:+:)(..)
 , Has
 , send
 ) where

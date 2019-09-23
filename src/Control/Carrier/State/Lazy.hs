@@ -8,8 +8,6 @@ module Control.Carrier.State.Lazy
 , execState
 , StateC(..)
   -- * Re-exports
-, Carrier
-, Member
 , Has
 , run
 ) where
