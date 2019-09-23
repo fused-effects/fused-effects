@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveGeneric, DeriveTraversable, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
+{-# LANGUAGE ConstraintKinds, DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Sum
 ( (:+:)(..)
 , Member
@@ -29,10 +29,21 @@ class Inject (sub :: (* -> *) -> (* -> *)) sup where
 instance Inject t t where
   inj = id
 
-instance {-# OVERLAPPABLE #-} Inject sub (sub :+: sup) where
+instance {-# OVERLAPPABLE #-}
+         Inject t (l1 :+: l2 :+: r)
+      => Inject t ((l1 :+: l2) :+: r) where
+  inj = reassoc . inj where
+    reassoc (L l)     = L (L l)
+    reassoc (R (L l)) = L (R l)
+    reassoc (R (R r)) = R r
+
+instance {-# OVERLAPPABLE #-}
+         Inject l (l :+: r) where
   inj = L . inj
 
-instance {-# OVERLAPPABLE #-} Inject sub sup => Inject sub (sub' :+: sup) where
+instance {-# OVERLAPPABLE #-}
+         Inject l r
+      => Inject l (l' :+: r) where
   inj = R . inj
 
 
