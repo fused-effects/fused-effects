@@ -17,6 +17,6 @@ import Control.Effect.Sum
 type Has eff sig m = (Inject eff sig, Carrier sig m)
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
-send :: (Inject eff sig, Carrier sig m) => eff m a -> m a
+send :: Has eff sig m => eff m a -> m a
 send = eff . inj
 {-# INLINE send #-}
