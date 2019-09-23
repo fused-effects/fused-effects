@@ -103,7 +103,7 @@ test-suite examples
     ReinterpretLog
     Teletype
   build-depends:
-      base        >= 4.9 && < 4.14
+      base
     , fused-effects
     , hspec       >= 2.4.1
     , QuickCheck  >= 2.7 && < 3
@@ -118,7 +118,7 @@ test-suite test
     Control.Effect.Spec
     Control.Effect.NonDet.Spec
   build-depends:
-      base                >= 4.9 && < 4.14
+      base
     , fused-effects
     , hspec               >= 2.4.1
     , inspection-testing ^>= 0.4
@@ -129,7 +129,7 @@ test-suite doctest
   type:                exitcode-stdio-1.0
   main-is:             Doctest.hs
   build-depends:
-      base     >= 4.9 && < 4.14
+      base
     , doctest  >= 0.7 && < 1
     , fused-effects
   hs-source-dirs:      test
@@ -141,7 +141,7 @@ benchmark benchmark
   main-is:            Bench.hs
   other-modules:      NonDet.NQueens
   build-depends:
-      base >= 4.9 && < 4.14
+      base
     , fused-effects
     , gauge
   hs-source-dirs:     benchmark
