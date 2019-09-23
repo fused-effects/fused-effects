@@ -4,10 +4,8 @@ module Control.Effect.Sum
 , Member
 , Inject(..)
 , Project(..)
-, send
 ) where
 
-import Control.Carrier.Class
 import Control.Effect.Class
 import GHC.Generics (Generic1)
 
@@ -51,9 +49,3 @@ instance {-# OVERLAPPABLE #-} Project sub (sub :+: sup) where
 instance {-# OVERLAPPABLE #-} Project sub sup => Project sub (sub' :+: sup) where
   prj (R g) = prj g
   prj _     = Nothing
-
-
--- | Construct a request for an effect to be interpreted by some handler later on.
-send :: (Inject effect sig, Carrier sig m) => effect m a -> m a
-send = eff . inj
-{-# INLINE send #-}
