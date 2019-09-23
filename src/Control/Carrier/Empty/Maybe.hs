@@ -21,7 +21,7 @@ import Control.Monad.Trans.Class
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --
---   prop> run (runEmpty abort)    === Nothing
+--   prop> run (runEmpty empty)    === Nothing
 --   prop> run (runEmpty (pure a)) === Just a
 runEmpty :: EmptyC m a -> m (Maybe a)
 runEmpty = runEmptyC
