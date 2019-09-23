@@ -8,6 +8,7 @@ module Control.Carrier.Empty.Maybe
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

@@ -8,6 +8,7 @@ module Control.Carrier.Resumable.Resume
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

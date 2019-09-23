@@ -8,6 +8,7 @@ module Control.Carrier.Lift
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

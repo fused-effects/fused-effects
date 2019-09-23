@@ -8,6 +8,7 @@ module Control.Carrier.Error.Either
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

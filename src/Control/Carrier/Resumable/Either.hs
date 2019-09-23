@@ -9,6 +9,7 @@ module Control.Carrier.Resumable.Either
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

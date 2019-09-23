@@ -8,6 +8,7 @@ module Control.Carrier.Trace.Returning
 -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

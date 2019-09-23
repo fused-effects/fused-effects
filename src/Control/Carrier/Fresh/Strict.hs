@@ -8,6 +8,7 @@ module Control.Carrier.Fresh.Strict
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

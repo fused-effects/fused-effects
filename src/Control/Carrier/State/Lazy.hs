@@ -10,6 +10,7 @@ module Control.Carrier.State.Lazy
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

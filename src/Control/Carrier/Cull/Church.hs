@@ -10,6 +10,7 @@ module Control.Carrier.Cull.Church
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

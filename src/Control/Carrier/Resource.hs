@@ -8,6 +8,7 @@ module Control.Carrier.Resource
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 

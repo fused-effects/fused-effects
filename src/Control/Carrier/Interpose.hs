@@ -11,6 +11,7 @@ module Control.Carrier.Interpose
   -- * Re-exports
 , Carrier
 , Member
+, Has
 , run
 ) where
 
