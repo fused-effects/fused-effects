@@ -80,15 +80,13 @@ Finally, since the fusion of carrier algebras occurs as a result of the selectio
 
 ### Using built-in effects
 
-Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `fused-effects`, this is done by means of a `Member` constraint to require the effect’s presence in a _signature_, and a `Carrier` constraint to relate the signature to the `Monad`. For example, to use a `State` effect managing a `String`, one would write:
+Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `fused-effects`, this is done by means of a `Has` constraint to require the effect’s presence in a _signature_, and to relate the signature to the _carrier_ you’re computing in. For example, to use a `State` effect managing a `String`, one would write:
 
 ```haskell
 action :: Has (State String) sig m => m ()
 ```
 
-(Additional constraints may be necessary depending on the precise operations required, e.g. to make the `Monad` methods available.)
-
-Multiple effects can be required simply by adding their corresponding `Member` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
+Multiple effects can be required simply by adding more `Has` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
 
 ```haskell
 action :: (Has (State String) sig m, Has (Reader Int) sig m) => m ()
@@ -108,7 +106,7 @@ myFunction :: Shared sig m => Int -> m ()
 
 ### Running effects
 
-Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) invoking some specific `Carrier` instance. For example, we can run a `State` computation using `runState`:
+Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`:
 
 ```haskell
 example1 :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
