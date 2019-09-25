@@ -39,8 +39,7 @@ isSafeIn (i,j) qs = null (diags (i,j) `intersect` underThreat)
 addOne :: (Member NonDet sig, Carrier sig m, Alternative m) => Int -> Board -> m Board
 addOne n curr = do
   let i = length curr + 1
-  let choose = asum . fmap pure
-  j <- choose [1..n]
+  j <- oneOf [1..n]
   guard ((i, j) `isSafeIn` curr)
   pure (curr ++ [j])
 

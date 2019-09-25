@@ -20,6 +20,7 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce
 import Data.Maybe (fromJust)
 import Data.Monoid
 import GHC.Generics (Generic1)
@@ -54,7 +55,9 @@ runNonDet (NonDetC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
 --     pure (a, b, c)
 -- @
 oneOf :: (Foldable t, Alternative m) => t a -> m a
-oneOf = getAlt . foldMap (Alt . pure)
+oneOf = getAlt #. foldMap (Alt #. pure)
+  where (#.) :: Coercible b c => (b -> c) -> (a -> b) -> (a -> c)
+        (#.) _ = coerce
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
