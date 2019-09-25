@@ -83,7 +83,7 @@ Finally, since the fusion of carrier algebras occurs as a result of the selectio
 Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `fused-effects`, this is done by means of a `Member` constraint to require the effect’s presence in a _signature_, and a `Carrier` constraint to relate the signature to the `Monad`. For example, to use a `State` effect managing a `String`, one would write:
 
 ```haskell
-action :: (Member (State String) sig, Carrier sig m) => m ()
+action :: Has (State String) sig m => m ()
 ```
 
 (Additional constraints may be necessary depending on the precise operations required, e.g. to make the `Monad` methods available.)
@@ -91,18 +91,19 @@ action :: (Member (State String) sig, Carrier sig m) => m ()
 Multiple effects can be required simply by adding their corresponding `Member` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
 
 ```haskell
-action :: (Member (State String) sig, Member (Reader Int) sig, Carrier sig m) => m ()
+action :: (Has (State String) sig m, Has (Reader Int) sig m) => m ()
 ```
 
 Different effects make different operations available; see the documentation for individual effects for more information about their operations. Note that we generally don't program against an explicit list of effect components: we take the typeclass-oriented approach, adding new constraints to `sig` as new capabilities become necessary. If you want to name and share some predefined list of effects, it's best to use the `-XConstraintKinds` extension to GHC, capturing the elements of `sig` as a type synonym of kind `Constraint`:
 
 ```haskell
-type Shared sig = ( Member (State String) sig
-                  , Member (Reader Int)   sig
-                  , Member (Writer Graph) sig
-                  )
+type Shared sig m
+  = ( Has (State String) sig m
+    , Has (Reader Int)   sig m
+    , Has (Writer Graph) sig m
+    )
 
-myFunction :: (Shared sig, Carrier sig m) => Int -> m ()
+myFunction :: Shared sig m => Int -> m ()
 ```
 
 ### Running effects
@@ -251,14 +252,14 @@ newtype Wrapper s m a = Wrapper { runWrapper :: m a }
 
 instance Carrier sig m => Carrier sig (Wrapper s m) where …
 
-getState :: (Carrier sig m, Member (State s) m) => Wrapper m s
+getState :: Has (State s) sig m => Wrapper s m s
 getState = get
 ```
 
 Indeed, `Wrapper` can now be made an instance of `MonadState`:
 
 ```haskell
-instance (Carrier sig m, Member (State s) sig, Monad m) => MTL.MonadState s (Wrapper s m) where
+instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
   get = Control.Effect.State.get
   put = Control.Effect.State.put
 ```
