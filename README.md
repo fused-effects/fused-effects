@@ -193,11 +193,11 @@ Finally, this project is licensed under the BSD 3-clause [license][].
 
 ### Development
 
-Development of `fused-effects` is typically done using `cabal new-build`:
+Development of `fused-effects` is typically done using `cabal v2-build`:
 
 ```shell
-cabal new-build # build the library
-cabal new-test  # build and run the examples, unit tests, and doctests
+cabal v2-build # build the library
+cabal v2-test  # build and run the examples, unit tests, and doctests
 ```
 
 The package is available on [hackage][], and can be used by adding it to a component’s `build-depends` field in your `.cabal` file.
@@ -212,7 +212,7 @@ Though `fused-effects` is suitable for production work, it is currently in a pre
 
 ## Benchmarks
 
-To run the provided benchmark suite, use `cabal new-bench`. You may wish to provide the `-O2` compiler option to view performance under aggressive optimizations. `fused-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
+To run the provided benchmark suite, use `cabal v2-bench`. You may wish to provide the `-O2` compiler option to view performance under aggressive optimizations. `fused-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
 
 
 ## Related work
