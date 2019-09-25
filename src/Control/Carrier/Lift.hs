@@ -6,6 +6,7 @@ module Control.Carrier.Lift
 , runM
 , LiftC(..)
   -- * Re-exports
+, Carrier
 , Has
 , run
 ) where

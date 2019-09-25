@@ -9,6 +9,7 @@ module Control.Carrier.Cut.Church
 , runCutAll
 , CutC(..)
 -- * Re-exports
+, Carrier
 , Has
 , run
 ) where
