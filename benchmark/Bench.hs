@@ -64,10 +64,10 @@ main = defaultMain
     ]
   ]
 
-tellLoop :: (Carrier sig m, Member (Writer (Sum Int)) sig) => Int -> m ()
+tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
 
-modLoop :: (Carrier sig m, Member (State (Sum Int)) sig) => Int -> m ()
+modLoop :: Has (State (Sum Int)) sig m => Int -> m ()
 modLoop i = replicateM_ i (modify (+ (Sum (1 :: Int))))
 
 newtype Cod m a = Cod { unCod :: forall b . (a -> m b) -> m b }

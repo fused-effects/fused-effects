@@ -7,7 +7,7 @@ module Control.Carrier.Trace.Returning
 , TraceC(..)
 -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

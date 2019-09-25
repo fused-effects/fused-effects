@@ -8,7 +8,7 @@ module Control.Carrier.Resumable.Either
 , SomeError(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

@@ -18,5 +18,5 @@ instance HFunctor Trace
 instance Effect   Trace
 
 -- | Append a message to the trace log.
-trace :: (Member Trace sig, Carrier sig m) => String -> m ()
+trace :: Has Trace sig m => String -> m ()
 trace message = send (Trace message (pure ()))

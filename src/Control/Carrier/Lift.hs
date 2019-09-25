@@ -7,7 +7,7 @@ module Control.Carrier.Lift
 , LiftC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

@@ -10,13 +10,14 @@ module Control.Carrier.Interpose
 , runInterpose
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 
 import Control.Applicative
 import Control.Carrier
 import Control.Carrier.Reader
+import Control.Effect.Sum
 import Control.Monad (MonadPlus (..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
@@ -45,7 +46,7 @@ newtype Handler eff m = Handler (forall x . eff m x -> m x)
 runHandler :: (HFunctor eff, Functor m) => Handler eff m -> eff (ReaderC (Handler eff m) m) a -> m a
 runHandler h@(Handler handler) = handler . hmap (runReader h)
 
-instance (HFunctor eff, Carrier sig m, Member eff sig) => Carrier sig (InterposeC eff m) where
+instance (HFunctor eff, Carrier sig m, Project eff sig) => Carrier sig (InterposeC eff m) where
   eff (op :: sig (InterposeC eff m) a)
     | Just (op' :: eff (InterposeC eff m) a) <- prj op = do
       handler <- InterposeC ask

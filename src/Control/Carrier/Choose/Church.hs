@@ -7,7 +7,7 @@ module Control.Carrier.Choose.Church
 , ChooseC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

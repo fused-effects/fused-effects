@@ -10,7 +10,7 @@ module Control.Carrier.Cut.Church
 , CutC(..)
 -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

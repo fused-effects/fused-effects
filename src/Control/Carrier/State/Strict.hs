@@ -9,7 +9,7 @@ module Control.Carrier.State.Strict
 , StateC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

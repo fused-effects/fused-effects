@@ -7,7 +7,7 @@ module Control.Carrier.Resumable.Resume
 , ResumableC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

@@ -9,7 +9,7 @@ module Control.Carrier.Cull.Church
 , CullC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

@@ -7,7 +7,7 @@ module Control.Carrier.NonDet.Church
 , NonDetC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

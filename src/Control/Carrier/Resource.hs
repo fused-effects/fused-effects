@@ -7,7 +7,7 @@ module Control.Carrier.Resource
 , ResourceC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

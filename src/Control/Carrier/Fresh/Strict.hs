@@ -7,7 +7,7 @@ module Control.Carrier.Fresh.Strict
 , FreshC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 

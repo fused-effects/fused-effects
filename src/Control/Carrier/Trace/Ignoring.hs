@@ -7,7 +7,7 @@ module Control.Carrier.Trace.Ignoring
 , TraceC(..)
 -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 
