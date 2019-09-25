@@ -26,7 +26,7 @@
 
 - Moves all the carriers into their own modules in the `Control.Carrier` namespace. Several have also been renamed, e.g. the various `Trace` carriers are all named `TraceC` within their separate modules, and should be imported qualified if disambiguation is required. This simplifies naming schemes, and ensures that the choice of e.g. strict or lazy carrier is always made consciously and expliclty, instead of defaulting to whichever is exported by the effect module ([#204](https://github.com/fused-effects/fused-effects/pull/204)).
 
-- Removes the re-export `Member` from all carrier modules, re-exporting `Has` in its place. `Has` constraints should generally be used instead, and specialist cases can import `Control.Effect.Sum` for `Member`. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
+- Removes the re-export of `Member` from all carrier modules, re-exporting `Has` in its place. `Has` constraints should generally be used instead, and specialist cases can import `Control.Effect.Sum` for `Member`. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
 # v0.5.0.1
 
