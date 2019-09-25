@@ -6,6 +6,7 @@ module Control.Carrier.Trace.Returning
 , runTrace
 , TraceC(..)
 -- * Re-exports
+, Carrier
 , Has
 , run
 ) where

@@ -9,6 +9,7 @@ module Control.Carrier.Interpose
 ( InterposeC (..)
 , runInterpose
   -- * Re-exports
+, Carrier
 , Has
 , run
 ) where

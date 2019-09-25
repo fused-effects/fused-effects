@@ -6,6 +6,7 @@ module Control.Carrier.Resumable.Resume
 , runResumable
 , ResumableC(..)
   -- * Re-exports
+, Carrier
 , Has
 , run
 ) where
