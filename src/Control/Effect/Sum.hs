@@ -1,8 +1,7 @@
-{-# LANGUAGE ConstraintKinds, DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Sum
 ( (:+:)(..)
-, Member
-, Inject(..)
+, Member(..)
 ) where
 
 import Control.Effect.Class
@@ -19,28 +18,25 @@ instance (HFunctor f, HFunctor g) => HFunctor (f :+: g)
 instance (Effect f, Effect g)     => Effect   (f :+: g)
 
 
-type Member sub sup = (Inject sub sup)
-
-
-class Inject (sub :: (* -> *) -> (* -> *)) sup where
+class Member (sub :: (* -> *) -> (* -> *)) sup where
   inj :: sub m a -> sup m a
 
-instance Inject t t where
+instance Member t t where
   inj = id
 
 instance {-# OVERLAPPABLE #-}
-         Inject t (l1 :+: l2 :+: r)
-      => Inject t ((l1 :+: l2) :+: r) where
+         Member t (l1 :+: l2 :+: r)
+      => Member t ((l1 :+: l2) :+: r) where
   inj = reassoc . inj where
     reassoc (L l)     = L (L l)
     reassoc (R (L l)) = L (R l)
     reassoc (R (R r)) = R r
 
 instance {-# OVERLAPPABLE #-}
-         Inject l (l :+: r) where
+         Member l (l :+: r) where
   inj = L
 
 instance {-# OVERLAPPABLE #-}
-         Inject l r
-      => Inject l (l' :+: r) where
+         Member l r
+      => Member l (l' :+: r) where
   inj = R . inj
