@@ -3,7 +3,6 @@ module Control.Effect.Sum
 ( (:+:)(..)
 , Member
 , Inject(..)
-, Project(..)
 ) where
 
 import Control.Effect.Class
@@ -20,7 +19,7 @@ instance (HFunctor f, HFunctor g) => HFunctor (f :+: g)
 instance (Effect f, Effect g)     => Effect   (f :+: g)
 
 
-type Member sub sup = (Inject sub sup, Project sub sup)
+type Member sub sup = (Inject sub sup)
 
 
 class Inject (sub :: (* -> *) -> (* -> *)) sup where
@@ -45,29 +44,3 @@ instance {-# OVERLAPPABLE #-}
          Inject l r
       => Inject l (l' :+: r) where
   inj = R . inj
-
-
-class Project (sub :: (* -> *) -> (* -> *)) sup where
-  prj :: sup m a -> Maybe (sub m a)
-
-instance Project t t where
-  prj = Just
-
-instance {-# OVERLAPPABLE #-}
-         Project t (l1 :+: l2 :+: r)
-      => Project t ((l1 :+: l2) :+: r) where
-  prj = prj . reassoc where
-    reassoc (L (L l)) = L l
-    reassoc (L (R l)) = R (L l)
-    reassoc (R r)     = R (R r)
-
-instance {-# OVERLAPPABLE #-}
-         Project l (l :+: r) where
-  prj (L f) = Just f
-  prj _     = Nothing
-
-instance {-# OVERLAPPABLE #-}
-         Project l r
-      => Project l (l' :+: r) where
-  prj (R g) = prj g
-  prj _     = Nothing
