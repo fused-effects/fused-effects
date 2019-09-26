@@ -28,6 +28,8 @@
 
 - Removes `InterposeC` & `runInterpose` due to their inefficiency. They can be replaced with use of `InterpretC`/`runInterpret` for the desired effect. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
 
+- Removes `prj` from `Member`, as it was only used in `InterposeC` (see above), and was generally inadvisable due to its lack of modularity. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
