@@ -28,6 +28,8 @@
 
 - Removes the re-export of `Member` from all carrier modules, re-exporting `Has` in its place. `Has` constraints should generally be used instead, and specialist cases can import `Control.Effect.Sum` for `Member`. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
+- Removes `InterposeC` & `runInterpose` due to their inefficiency. They can be replaced with use of `InterpretC`/`runInterpret` for the desired effect. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
