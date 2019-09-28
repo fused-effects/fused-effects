@@ -11,10 +11,8 @@ module Control.Carrier.Empty.Maybe
 , run
 ) where
 
-import Control.Applicative as Alt (Alternative (..))
 import Control.Carrier
 import Control.Effect.Empty
-import Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -31,17 +29,9 @@ runEmpty = runMaybeT . runEmptyC
 newtype EmptyC m a = EmptyC { runEmptyC :: MaybeT m a }
   deriving (Applicative, Functor, Monad, MonadFix, MonadIO, MonadTrans)
 
-instance (Alternative m, Monad m) => Alternative (EmptyC m) where
-  empty = EmptyC (MaybeT Alt.empty)
-  {-# INLINE empty #-}
-  EmptyC (MaybeT a) <|> EmptyC (MaybeT b) = EmptyC (MaybeT (a <|> b))
-  {-# INLINE (<|>) #-}
-
 instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
-
-instance (Alternative m, Monad m) => MonadPlus (EmptyC m)
 
 instance (Carrier sig m, Effect sig) => Carrier (Empty :+: sig) (EmptyC m) where
   eff (L Empty) = EmptyC (MaybeT (pure Nothing))
