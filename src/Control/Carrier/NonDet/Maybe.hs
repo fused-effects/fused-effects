@@ -16,6 +16,7 @@ import Control.Carrier
 import Control.Effect.NonDet
 import Control.Monad (MonadPlus (..))
 import qualified Control.Monad.Fail as Fail
+import Control.Monad.Fix
 import Control.Monad.Trans.Class
 
 runNonDet :: NonDetC m a -> m (Maybe a)
@@ -45,6 +46,10 @@ instance Monad m => Monad (NonDetC m) where
 instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
+
+instance MonadFix m => MonadFix (NonDetC m) where
+  mfix f = NonDetC (mfix (runNonDet . maybe (error "mfix (NonDetC): function returned failure") f))
+  {-# INLINE mfix #-}
 
 instance (Alternative m, Monad m) => MonadPlus (NonDetC m)
 
