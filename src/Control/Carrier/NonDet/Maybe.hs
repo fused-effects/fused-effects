@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 module Control.Carrier.NonDet.Maybe
 ( -- * NonDet effects
   module Control.Effect.NonDet
@@ -17,3 +18,4 @@ runNonDet :: NonDetC m a -> m (Maybe a)
 runNonDet = runNonDetC
 
 newtype NonDetC m a = NonDetC { runNonDetC :: m (Maybe a) }
+  deriving (Functor)
