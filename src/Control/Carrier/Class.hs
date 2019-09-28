@@ -12,7 +12,7 @@ import Control.Effect.Reader (Reader(..))
 import Control.Effect.Sum ((:+:)(..))
 import Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
-import qualified Control.Monad.Trans.Reader as T
+import qualified Control.Monad.Trans.Reader as Reader
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
@@ -43,7 +43,7 @@ instance Monoid w => Carrier (Writer w) ((,) w) where
 
 -- transformers
 
-instance Carrier sig m => Carrier (Reader r :+: sig) (T.ReaderT r m) where
-  eff (L (Ask       k)) = T.ReaderT $ \ r -> T.runReaderT (k r) r
-  eff (L (Local f m k)) = T.ReaderT $ \ r -> T.runReaderT m (f r) >>= flip T.runReaderT r . k
-  eff (R other)         = T.ReaderT $ \ r -> eff (hmap (flip T.runReaderT r) other)
+instance Carrier sig m => Carrier (Reader r :+: sig) (Reader.ReaderT r m) where
+  eff (L (Ask       k)) = Reader.ReaderT $ \ r -> Reader.runReaderT (k r) r
+  eff (L (Local f m k)) = Reader.ReaderT $ \ r -> Reader.runReaderT m (f r) >>= flip Reader.runReaderT r . k
+  eff (R other)         = Reader.ReaderT $ \ r -> eff (hmap (flip Reader.runReaderT r) other)
