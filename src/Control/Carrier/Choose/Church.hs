@@ -21,13 +21,14 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (fromJust)
+import qualified Data.Semigroup as S
 import Prelude hiding (fail)
 
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf m = runChooseC m fork leaf
 
-runChooseS :: (Applicative m, Semigroup b) => (a -> m b) -> ChooseC m a -> m b
-runChooseS leaf = runChoose (liftA2 (<>)) leaf
+runChooseS :: (Applicative m, S.Semigroup b) => (a -> m b) -> ChooseC m a -> m b
+runChooseS leaf = runChoose (liftA2 (S.<>)) leaf
 
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype ChooseC m a = ChooseC
