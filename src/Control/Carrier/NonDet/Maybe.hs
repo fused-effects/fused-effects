@@ -15,6 +15,7 @@ import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Effect.NonDet
 import Control.Monad (MonadPlus (..))
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Trans.Class
 
 runNonDet :: NonDetC m a -> m (Maybe a)
@@ -40,6 +41,10 @@ instance Applicative m => Alternative (NonDetC m) where
 instance Monad m => Monad (NonDetC m) where
   NonDetC a >>= f = NonDetC (a >>= maybe (pure Nothing) (runNonDet . f))
   {-# INLINE (>>=) #-}
+
+instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
+  fail = lift . Fail.fail
+  {-# INLINE fail #-}
 
 instance (Alternative m, Monad m) => MonadPlus (NonDetC m)
 
