@@ -34,10 +34,10 @@ instance Applicative m => Applicative (NonDetC m) where
 
 -- $
 --   prop> run (runNonDet empty) === Nothing
-instance Applicative m => Alternative (NonDetC m) where
+instance Monad m => Alternative (NonDetC m) where
   empty = NonDetC (pure Nothing)
   {-# INLINE empty #-}
-  NonDetC a <|> NonDetC b = NonDetC (liftA2 (<|>) a b)
+  NonDetC a <|> NonDetC b = NonDetC $ a >>= maybe b (pure . Just)
   {-# INLINE (<|>) #-}
 
 instance Monad m => Monad (NonDetC m) where
