@@ -11,6 +11,7 @@ module Control.Carrier.NonDet.Maybe
 , run
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Effect.NonDet
 
@@ -19,3 +20,9 @@ runNonDet = runNonDetC
 
 newtype NonDetC m a = NonDetC { runNonDetC :: m (Maybe a) }
   deriving (Functor)
+
+instance Applicative m => Applicative (NonDetC m) where
+  pure = NonDetC . pure . Just
+  {-# INLINE pure #-}
+  NonDetC f <*> NonDetC a = NonDetC (liftA2 (<*>) f a)
+  {-# INLINE (<*>) #-}
