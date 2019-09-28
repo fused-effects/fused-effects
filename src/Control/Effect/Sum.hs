@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveGeneric, DeriveTraversable, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators #-}
+{-# LANGUAGE ConstraintKinds, DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.Sum
 ( (:+:)(..)
 , Member
@@ -26,26 +26,48 @@ type Member sub sup = (Inject sub sup, Project sub sup)
 class Inject (sub :: (* -> *) -> (* -> *)) sup where
   inj :: sub m a -> sup m a
 
-instance Inject sub sub where
+instance Inject t t where
   inj = id
 
-instance {-# OVERLAPPABLE #-} Inject sub (sub :+: sup) where
-  inj = L . inj
+instance {-# OVERLAPPABLE #-}
+         Inject t (l1 :+: l2 :+: r)
+      => Inject t ((l1 :+: l2) :+: r) where
+  inj = reassoc . inj where
+    reassoc (L l)     = L (L l)
+    reassoc (R (L l)) = L (R l)
+    reassoc (R (R r)) = R r
 
-instance {-# OVERLAPPABLE #-} Inject sub sup => Inject sub (sub' :+: sup) where
+instance {-# OVERLAPPABLE #-}
+         Inject l (l :+: r) where
+  inj = L
+
+instance {-# OVERLAPPABLE #-}
+         Inject l r
+      => Inject l (l' :+: r) where
   inj = R . inj
 
 
 class Project (sub :: (* -> *) -> (* -> *)) sup where
   prj :: sup m a -> Maybe (sub m a)
 
-instance Project sub sub where
+instance Project t t where
   prj = Just
 
-instance {-# OVERLAPPABLE #-} Project sub (sub :+: sup) where
+instance {-# OVERLAPPABLE #-}
+         Project t (l1 :+: l2 :+: r)
+      => Project t ((l1 :+: l2) :+: r) where
+  prj = prj . reassoc where
+    reassoc (L (L l)) = L l
+    reassoc (L (R l)) = R (L l)
+    reassoc (R r)     = R (R r)
+
+instance {-# OVERLAPPABLE #-}
+         Project l (l :+: r) where
   prj (L f) = Just f
   prj _     = Nothing
 
-instance {-# OVERLAPPABLE #-} Project sub sup => Project sub (sub' :+: sup) where
+instance {-# OVERLAPPABLE #-}
+         Project l r
+      => Project l (l' :+: r) where
   prj (R g) = prj g
   prj _     = Nothing
