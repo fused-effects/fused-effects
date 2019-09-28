@@ -15,6 +15,7 @@ import Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Control.Monad.Trans.State.Strict as State.Strict
+import qualified Control.Monad.Trans.State.Lazy as State.Lazy
 import Data.Tuple (swap)
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
@@ -55,3 +56,8 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Strict.
   eff (L (Get   k)) = State.Strict.StateT $ \ s -> State.Strict.runStateT (k s) s
   eff (L (Put s k)) = State.Strict.StateT $ \ _ -> State.Strict.runStateT k s
   eff (R other)     = State.Strict.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
+
+instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Lazy.StateT s m) where
+  eff (L (Get   k)) = State.Lazy.StateT $ \ s -> State.Lazy.runStateT (k s) s
+  eff (L (Put s k)) = State.Lazy.StateT $ \ _ -> State.Lazy.runStateT k s
+  eff (R other)     = State.Lazy.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s) other)
