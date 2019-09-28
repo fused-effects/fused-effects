@@ -9,7 +9,7 @@ module Control.Carrier.Cut.Church
 , runCutA
 , runCutM
 , CutC(..)
--- * Re-exports
+  -- * Re-exports
 , Carrier
 , Has
 , run
