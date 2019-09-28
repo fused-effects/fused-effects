@@ -7,6 +7,7 @@ module Control.Carrier.Cut.Church
   -- * Cut carrier
 , runCut
 , runCutA
+, runCutM
 , CutC(..)
 -- * Re-exports
 , Carrier
@@ -33,6 +34,9 @@ runCut cons nil fail m = runCutC m cons nil fail
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
 runCutA (CutC m) = m (fmap . (<|>) . pure) (pure empty) (pure empty)
+
+runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
+runCutM leaf = runCut (fmap . (<>) . leaf) (pure mempty) (pure mempty)
 
 newtype CutC m a = CutC
   { -- | A higher-order function receiving three parameters: a function to combine each solution with the rest of the solutions, an action to run when no results are produced (e.g. on 'empty'), and an action to run when no results are produced and backtrcking should not be attempted (e.g. on 'cutfail').
