@@ -28,6 +28,12 @@
 
 - Removes the re-export of `Member` from all carrier modules, re-exporting `Has` in its place. `Has` constraints should generally be used instead, and specialist cases can import `Control.Effect.Sum` for `Member`. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
+- Redesigns & renames the handlers for church-encoded nondeterminism carriers to standardize naming and usage patterns. ([#207](https://github.com/fused-effects/fused-effects/pull/207))
+  - The primary handlers (`runChoose`, `runNonDet`, `runCut`, `runCull`) take multiple continuations.
+  - Handlers which return an `Alternative` are suffixed with `A`, e.g. `runNonDetA`.
+  - Handlers which return a `Monoid` are suffixed with `M`, e.g. `runNonDetM`.
+  - Handlers which return a `Semigroup` are suffixed with `S`, e.g. `runChooseS`.
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
