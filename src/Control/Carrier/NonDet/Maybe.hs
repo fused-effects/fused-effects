@@ -20,6 +20,10 @@ import Control.Monad.Trans.Class
 import Control.Monad.Trans.Maybe
 
 -- | Run 'NonDet' effects, returning 'Nothing' for empty computations, or 'Just' the result otherwise. Note that this will terminate on the first successful result.
+--
+--   prop> run (runNonDet empty)    === Nothing
+--   prop> run (runNonDet (pure a)) === Just a
+--   prop> run (runNonDet (let f x = pure x <|> f x in f a)) === Just a
 runNonDet :: NonDetC m a -> m (Maybe a)
 runNonDet = runMaybeT . runNonDetC
 
