@@ -8,9 +8,9 @@ module Control.Effect.Cut
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 
--- | 'Cut' effects are used with 'NonDet' to provide control over backtracking.
+-- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
 data Cut m k
   = Cutfail
   | forall a . Call (m a) (a -> m k)
@@ -33,14 +33,14 @@ instance Effect Cut where
 --
 --   prop> run (runNonDet (runCut (cutfail <|> pure a))) === []
 --   prop> run (runNonDet (runCut (pure a <|> cutfail))) === [a]
-cutfail :: (Carrier sig m, Member Cut sig) => m a
+cutfail :: Has Cut sig m => m a
 cutfail = send Cutfail
 {-# INLINE cutfail #-}
 
 -- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
 --
 --   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) === [b]
-call :: (Carrier sig m, Member Cut sig) => m a -> m a
+call :: Has Cut sig m => m a -> m a
 call m = send (Call m pure)
 {-# INLINE call #-}
 
@@ -49,7 +49,7 @@ call m = send (Call m pure)
 --   prop> run (runNonDet (runCut (pure a <|> cut *> pure b))) === [a, b]
 --   prop> run (runNonDet (runCut (cut *> pure a <|> pure b))) === [a]
 --   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) === []
-cut :: (Alternative m, Carrier sig m, Member Cut sig) => m ()
+cut :: (Alternative m, Has Cut sig m) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}
 
@@ -57,5 +57,6 @@ cut = pure () <|> cutfail
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Cull
--- >>> import Control.Effect.Pure
+-- >>> import Control.Carrier.Cut.Church
+-- >>> import Control.Carrier.NonDet.Church
+-- >>> import Control.Carrier.Pure

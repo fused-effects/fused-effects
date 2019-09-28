@@ -5,7 +5,7 @@ module Control.Effect.Trace
 , trace
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 import GHC.Generics (Generic1)
 
 data Trace m k = Trace
@@ -18,5 +18,5 @@ instance HFunctor Trace
 instance Effect   Trace
 
 -- | Append a message to the trace log.
-trace :: (Member Trace sig, Carrier sig m) => String -> m ()
+trace :: Has Trace sig m => String -> m ()
 trace message = send (Trace message (pure ()))

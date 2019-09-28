@@ -2,31 +2,31 @@
 module Control.Carrier.Cut.Church
 ( -- * Cut effect
   module Control.Effect.Cut
+  -- * NonDet effects
+, module Control.Effect.NonDet
   -- * Cut carrier
 , runCut
 , runCutAll
 , CutC(..)
 -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 
-import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
-import Control.Effect.Choose
+import Control.Carrier
 import Control.Effect.Cut
-import Control.Effect.Empty
+import Control.Effect.NonDet
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
--- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for a 'NonDet' effect).
+-- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for 'Choose' & 'Empty' effects).
 --
---   prop> run (runNonDetOnce (runCut (pure a))) === Just a
+--   prop> run (runNonDet (runCut (pure a))) === Just a
 runCut :: Alternative m => CutC m a -> m a
 runCut m = runCutC m ((<|>) . pure) empty empty
 
@@ -58,8 +58,8 @@ instance Monad (CutC m) where
     a (\ a' as -> runCutC (f a') cons as fail) nil fail
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (CutC m) where
-  fail s = lift (fail s)
+instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
+  fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (CutC m) where
@@ -83,3 +83,10 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: Empty :+: Choose :+: si
   eff (R (R (L (Choose k)))) = k True <|> k False
   eff (R (R (R other)))      = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
   {-# INLINE eff #-}
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Carrier.NonDet.Church
+-- >>> import Control.Carrier.Pure

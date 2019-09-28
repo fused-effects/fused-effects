@@ -5,9 +5,9 @@ module Control.Effect.Cull
 , cull
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 
--- | 'Cull' effects are used with 'NonDet' to provide control over branching.
+-- | 'Cull' effects are used with 'Choose' to provide control over branching.
 data Cull m k
   = forall a . Cull (m a) (a -> m k)
 
@@ -27,13 +27,14 @@ instance Effect Cull where
 --   prop> run (runNonDet (runCull (cull (empty  <|> pure a)))) === [a]
 --   prop> run (runNonDet (runCull (cull (pure a <|> pure b) <|> pure c))) === [a, c]
 --   prop> run (runNonDet (runCull (cull (asum (map pure (repeat a)))))) === [a]
-cull :: (Carrier sig m, Member Cull sig) => m a -> m a
+cull :: Has Cull sig m => m a -> m a
 cull m = send (Cull m pure)
 
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.NonDet
--- >>> import Control.Effect.Pure
+-- >>> import Control.Carrier.Cull.Church
+-- >>> import Control.Carrier.NonDet.Church
+-- >>> import Control.Carrier.Pure
 -- >>> import Data.Foldable (asum)

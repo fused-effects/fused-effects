@@ -6,7 +6,7 @@ module Control.Effect.Error
 , catchError
 ) where
 
-import {-# SOURCE #-} Control.Carrier.Class
+import {-# SOURCE #-} Control.Carrier
 
 data Error exc m k
   = Throw exc
@@ -25,7 +25,7 @@ instance Effect (Error exc) where
 -- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
 --
 --   prop> run (runError (throwError a)) === Left @Int @Int a
-throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
+throwError :: Has (Error exc) sig m => exc -> m a
 throwError = send . Throw
 
 -- | Run a computation which can throw errors with a handler to run on error.
@@ -39,7 +39,7 @@ throwError = send . Throw
 --   prop> run (runError (pure a `catchError` pure)) === Right a
 --   prop> run (runError (throwError a `catchError` pure)) === Right @Int @Int a
 --   prop> run (runError (throwError a `catchError` (throwError @Int))) === Left @Int @Int a
-catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
+catchError :: Has (Error exc) sig m => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h pure)
 
 
@@ -47,4 +47,4 @@ catchError m h = send (Catch m h pure)
 -- >>> :seti -XFlexibleContexts
 -- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Error
+-- >>> import Control.Carrier.Error.Either

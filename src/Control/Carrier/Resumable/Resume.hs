@@ -7,16 +7,16 @@ module Control.Carrier.Resumable.Resume
 , ResumableC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.Reader
 import Control.Effect.Resumable
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -36,7 +36,7 @@ runResumable
 runResumable with = runReader (Handler with) . runResumableC
 
 newtype ResumableC err m a = ResumableC { runResumableC :: ReaderC (Handler err m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (ResumableC err) where
   lift = ResumableC . lift
