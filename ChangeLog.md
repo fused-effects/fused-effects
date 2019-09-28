@@ -14,6 +14,8 @@
 
 - Allows effects to be defined and handled as sums of other effects, while still using the constructors for the component effects. This has been used to redefine `NonDet` as a sum of `Empty` and `Choose`. ([#199](https://github.com/fused-effects/fused-effects/pull/199), [#219](https://github.com/fused-effects/fused-effects/pull/219))
 
+- Adds a `NonDetC` carrier for `NonDet` in `Control.Effect.NonDet.Maybe`. ([#227](https://github.com/fused-effects/fused-effects/pull/227))
+
 ## Backwards-incompatible changes
 
 - Improves the performance of `runInterpret` using reflection, changing its signature slightly ([#193](https://github.com/fused-effects/fused-effects/pull/193), h/t [@ocharles](https://github.com/ocharles)).
