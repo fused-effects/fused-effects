@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Error.Either
 ( -- * Error effect
   module Control.Effect.Error
@@ -14,59 +14,34 @@ module Control.Carrier.Error.Either
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Effect.Error
-import Control.Monad (MonadPlus(..), (<=<), ap)
+import Control.Monad (MonadPlus(..), (<=<))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.Trans.Except
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runError (pure a)) === Right @Int @Int a
 runError :: ErrorC exc m a -> m (Either exc a)
-runError = runErrorC
+runError = runExceptT . runErrorC
 
-newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
-  deriving (Functor)
-
-instance Monad m => Applicative (ErrorC e m) where
-  pure a = ErrorC (pure (Right a))
-  {-# INLINE pure #-}
-  (<*>) = ap
-  {-# INLINE (<*>) #-}
+newtype ErrorC e m a = ErrorC { runErrorC :: ExceptT e m a }
+  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadTrans)
 
 instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
-  empty = ErrorC empty
+  empty = ErrorC (ExceptT empty)
   {-# INLINE empty #-}
-  ErrorC l <|> ErrorC r = ErrorC (l <|> r)
+  ErrorC (ExceptT l) <|> ErrorC (ExceptT r) = ErrorC (ExceptT (l <|> r))
   {-# INLINE (<|>) #-}
-
-instance Monad m => Monad (ErrorC e m) where
-  ErrorC a >>= f = ErrorC (a >>= either (pure . Left) (runError . f))
-  {-# INLINE (>>=) #-}
-
-instance MonadFix m => MonadFix (ErrorC e m) where
-  mfix f = ErrorC (mfix (runError . either (error "mfix (ErrorC): function returned failure") f))
-  {-# INLINE mfix #-}
-
-instance MonadIO m => MonadIO (ErrorC e m) where
-  liftIO io = ErrorC (Right <$> liftIO io)
-  {-# INLINE liftIO #-}
-
-instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
-  fail s = ErrorC (Fail.fail s)
-  {-# INLINE fail #-}
 
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
-instance MonadTrans (ErrorC e) where
-  lift = ErrorC . fmap Right
-  {-# INLINE lift #-}
-
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  eff (L (Throw e))     = ErrorC (pure (Left e))
-  eff (L (Catch m h k)) = ErrorC (runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k))
-  eff (R other)         = ErrorC (eff (handle (Right ()) (either (pure . Left) runError) other))
+  eff (L (Throw e))     = ErrorC (ExceptT (pure (Left e)))
+  eff (L (Catch m h k)) = ErrorC (ExceptT (runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k)))
+  eff (R other)         = ErrorC (ExceptT (eff (handle (Right ()) (either (pure . Left) runError) other)))
   {-# INLINE eff #-}
 
 
