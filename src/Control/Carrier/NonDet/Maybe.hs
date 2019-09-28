@@ -14,6 +14,7 @@ module Control.Carrier.NonDet.Maybe
 import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Effect.NonDet
+import Control.Monad (MonadPlus (..))
 import Control.Monad.Trans.Class
 
 runNonDet :: NonDetC m a -> m (Maybe a)
@@ -39,6 +40,8 @@ instance Applicative m => Alternative (NonDetC m) where
 instance Monad m => Monad (NonDetC m) where
   NonDetC a >>= f = NonDetC (a >>= maybe (pure Nothing) (runNonDet . f))
   {-# INLINE (>>=) #-}
+
+instance (Alternative m, Monad m) => MonadPlus (NonDetC m)
 
 instance MonadTrans NonDetC where
   lift = NonDetC . fmap Just
