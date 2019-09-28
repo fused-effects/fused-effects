@@ -7,6 +7,7 @@ module Control.Carrier.Cull.Church
   -- * Cull carrier
 , runCull
 , runCullA
+, runCullM
 , CullC(..)
   -- * Re-exports
 , Carrier
@@ -34,6 +35,9 @@ runCull fork leaf nil = runNonDet fork leaf nil . runReader False . runCullC
 
 runCullA :: (Alternative f, Applicative m) => CullC m a -> m (f a)
 runCullA = runCull (liftA2 (<|>)) (pure . pure) (pure empty)
+
+runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
+runCullM leaf = runCull (liftA2 (<>)) (pure . leaf) (pure mempty)
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO)
