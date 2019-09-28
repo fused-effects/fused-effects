@@ -35,6 +35,6 @@ instance Carrier NonDet [] where
   eff (R (Choose k)) = k True ++ k False
 
 instance Monoid w => Carrier (Writer w) ((,) w) where
-  eff (Tell w (w', k))    = (w <> w', k)
+  eff (Tell w (w', k))    = (mappend w w', k)
   eff (Listen m k)        = uncurry k m
-  eff (Censor f (w, a) k) = let (w', a') = k a in (f w <> w', a')
+  eff (Censor f (w, a) k) = let (w', a') = k a in (mappend (f w) w', a')
