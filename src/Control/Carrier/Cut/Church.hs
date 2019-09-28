@@ -6,7 +6,7 @@ module Control.Carrier.Cut.Church
 , module Control.Effect.NonDet
   -- * Cut carrier
 , runCut
-, runCutAll
+, runCutA
 , CutC(..)
 -- * Re-exports
 , Carrier
@@ -31,8 +31,8 @@ runCut :: Alternative m => CutC m a -> m a
 runCut m = runCutC m ((<|>) . pure) empty empty
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
-runCutAll :: (Alternative f, Applicative m) => CutC m a -> m (f a)
-runCutAll (CutC m) = m (fmap . (<|>) . pure) (pure empty) (pure empty)
+runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
+runCutA (CutC m) = m (fmap . (<|>) . pure) (pure empty) (pure empty)
 
 newtype CutC m a = CutC
   { -- | A higher-order function receiving three parameters: a function to combine each solution with the rest of the solutions, an action to run when no results are produced (e.g. on 'empty'), and an action to run when no results are produced and backtrcking should not be attempted (e.g. on 'cutfail').
@@ -81,7 +81,7 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
   eff (L (Call m k)) = CutC $ \ cons nil fail -> runCutC m (\ a as -> runCutC (k a) cons as fail) nil nil
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
+  eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutA) other) >>= foldr cons nil
   {-# INLINE eff #-}
 
 
