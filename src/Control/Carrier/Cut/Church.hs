@@ -36,7 +36,7 @@ runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
 runCutA = runCut (fmap . (<|>) . pure) (pure empty) (pure empty)
 
 runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
-runCutM leaf = runCut (fmap . (<>) . leaf) (pure mempty) (pure mempty)
+runCutM leaf = runCut (fmap . mappend . leaf) (pure mempty) (pure mempty)
 
 newtype CutC m a = CutC
   { -- | A higher-order function receiving three parameters: a function to combine each solution with the rest of the solutions, an action to run when no results are produced (e.g. on 'empty'), and an action to run when no results are produced and backtrcking should not be attempted (e.g. on 'cutfail').

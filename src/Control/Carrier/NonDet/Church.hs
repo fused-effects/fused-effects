@@ -36,7 +36,7 @@ runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
 
 runNonDetM :: (Applicative m, Monoid b) => (a -> b) -> NonDetC m a -> m b
-runNonDetM leaf = runNonDet (liftA2 (<>)) (pure . leaf) (pure mempty)
+runNonDetM leaf = runNonDet (liftA2 mappend) (pure . leaf) (pure mempty)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
