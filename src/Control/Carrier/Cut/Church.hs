@@ -24,11 +24,11 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Prelude hiding (fail)
 
--- | Run a 'Cut' effect within an underlying 'Alternative' instance (typically another 'Carrier' for 'Choose' & 'Empty' effects).
+-- | Run a 'Cut' effect with the supplied continuations for 'pure'/'<|>', 'empty', and 'cutfail'.
 --
---   prop> run (runNonDet (runCut (pure a))) === Just a
-runCut :: Alternative m => CutC m a -> m a
-runCut m = runCutC m ((<|>) . pure) empty empty
+--   prop> run (runCut (fmap . (:)) (pure []) (pure []) (pure a)) === [a]
+runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
+runCut cons nil fail m = runCutC m cons nil fail
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
