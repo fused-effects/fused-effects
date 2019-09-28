@@ -9,7 +9,7 @@ module Control.Effect.State
 , modifyLazy
 ) where
 
-import Control.Carrier
+import {-# SOURCE #-} Control.Carrier
 import GHC.Generics (Generic1)
 import Prelude hiding (fail)
 

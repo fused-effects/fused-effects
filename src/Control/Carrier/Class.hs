@@ -9,10 +9,13 @@ import Control.Effect.Empty (Empty(..))
 import Control.Effect.Error (Error(..))
 import Control.Effect.NonDet (NonDet)
 import Control.Effect.Reader (Reader(..))
+import Control.Effect.State (State(..))
 import Control.Effect.Sum ((:+:)(..))
 import Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
 import qualified Control.Monad.Trans.Reader as Reader
+import qualified Control.Monad.Trans.State.Strict as State.Strict
+import Data.Tuple (swap)
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
@@ -47,3 +50,8 @@ instance Carrier sig m => Carrier (Reader r :+: sig) (Reader.ReaderT r m) where
   eff (L (Ask       k)) = Reader.ReaderT $ \ r -> Reader.runReaderT (k r) r
   eff (L (Local f m k)) = Reader.ReaderT $ \ r -> Reader.runReaderT m (f r) >>= flip Reader.runReaderT r . k
   eff (R other)         = Reader.ReaderT $ \ r -> eff (hmap (flip Reader.runReaderT r) other)
+
+instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Strict.StateT s m) where
+  eff (L (Get   k)) = State.Strict.StateT $ \ s -> State.Strict.runStateT (k s) s
+  eff (L (Put s k)) = State.Strict.StateT $ \ _ -> State.Strict.runStateT k s
+  eff (R other)     = State.Strict.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
