@@ -69,5 +69,4 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
--- >>> import Control.Carrier.Pure
 -- >>> import Test.QuickCheck

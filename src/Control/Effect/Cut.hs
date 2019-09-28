@@ -59,4 +59,3 @@ cut = pure () <|> cutfail
 -- >>> import Test.QuickCheck
 -- >>> import Control.Carrier.Cut.Church
 -- >>> import Control.Carrier.NonDet.Church
--- >>> import Control.Carrier.Pure

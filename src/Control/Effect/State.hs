@@ -62,5 +62,4 @@ modifyLazy f = get >>= put . f
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Pure
 -- >>> import Control.Carrier.State.Strict
