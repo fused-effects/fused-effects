@@ -14,7 +14,7 @@ module Control.Carrier.Error.Either
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Effect.Error
-import Control.Monad (MonadPlus(..), (<=<))
+import Control.Monad (MonadPlus(..), (<=<), ap)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -32,7 +32,7 @@ newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
 instance Monad m => Applicative (ErrorC e m) where
   pure a = ErrorC (pure (Right a))
   {-# INLINE pure #-}
-  ErrorC f <*> ErrorC a = ErrorC $ f >>= either (pure . Left) ((`fmap` a) . fmap)
+  (<*>) = ap
   {-# INLINE (<*>) #-}
 
 instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
