@@ -10,6 +10,7 @@ import Control.Effect.Error (Error(..))
 import Control.Effect.NonDet (NonDet)
 import Control.Effect.Reader (Reader(..))
 import Control.Effect.Sum ((:+:)(..))
+import Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
@@ -32,3 +33,8 @@ instance Carrier (Reader r) ((->) r) where
 instance Carrier NonDet [] where
   eff (L Empty)      = []
   eff (R (Choose k)) = k True ++ k False
+
+instance Monoid w => Carrier (Writer w) ((,) w) where
+  eff (Tell w (w', k))    = (w <> w', k)
+  eff (Listen m k)        = uncurry k m
+  eff (Censor f (w, a) k) = let (w', a') = k a in (f w <> w', a')
