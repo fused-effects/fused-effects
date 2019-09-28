@@ -11,7 +11,7 @@ module Control.Carrier.Empty.Maybe
 , run
 ) where
 
-import Control.Applicative (Alternative (..), liftA2)
+import Control.Applicative as Alt (Alternative (..), liftA2)
 import Control.Carrier
 import Control.Effect.Empty
 import Control.Monad (MonadPlus (..))
@@ -36,12 +36,10 @@ instance Applicative m => Applicative (EmptyC m) where
   EmptyC f <*> EmptyC a = EmptyC (liftA2 (<*>) f a)
   {-# INLINE (<*>) #-}
 
--- $
---   prop> run (runEmpty empty) === Nothing
-instance Applicative m => Alternative (EmptyC m) where
-  empty = EmptyC (pure Nothing)
+instance Alternative m => Alternative (EmptyC m) where
+  empty = EmptyC Alt.empty
   {-# INLINE empty #-}
-  EmptyC a <|> EmptyC b = EmptyC (liftA2 (<|>) a b)
+  EmptyC a <|> EmptyC b = EmptyC (a <|> b)
   {-# INLINE (<|>) #-}
 
 instance Monad m => Monad (EmptyC m) where
