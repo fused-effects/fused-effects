@@ -26,3 +26,7 @@ instance Applicative m => Applicative (NonDetC m) where
   {-# INLINE pure #-}
   NonDetC f <*> NonDetC a = NonDetC (liftA2 (<*>) f a)
   {-# INLINE (<*>) #-}
+
+instance Monad m => Monad (NonDetC m) where
+  NonDetC a >>= f = NonDetC (a >>= maybe (pure Nothing) (runNonDet . f))
+  {-# INLINE (>>=) #-}
