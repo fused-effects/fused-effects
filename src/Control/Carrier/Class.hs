@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, FunctionalDependencies #-}
+{-# LANGUAGE FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Class
 ( Carrier(..)
 ) where
@@ -12,6 +12,7 @@ import Control.Effect.Reader (Reader(..))
 import Control.Effect.Sum ((:+:)(..))
 import Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
+import qualified Control.Monad.Trans.Reader as T
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
@@ -38,3 +39,11 @@ instance Monoid w => Carrier (Writer w) ((,) w) where
   eff (Tell w (w', k))    = (w <> w', k)
   eff (Listen m k)        = uncurry k m
   eff (Censor f (w, a) k) = let (w', a') = k a in (f w <> w', a')
+
+
+-- transformers
+
+instance Carrier sig m => Carrier (Reader r :+: sig) (T.ReaderT r m) where
+  eff (L (Ask       k)) = T.ReaderT $ \ r -> T.runReaderT (k r) r
+  eff (L (Local f m k)) = T.ReaderT $ \ r -> T.runReaderT m (f r) >>= flip T.runReaderT r . k
+  eff (R other)         = T.ReaderT $ \ r -> eff (hmap (flip T.runReaderT r) other)
