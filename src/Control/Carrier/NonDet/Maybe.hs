@@ -19,6 +19,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Maybe
 
+-- | Run 'NonDet' effects, returning 'Nothing' for empty computations, or 'Just' the result otherwise. Note that this will terminate on the first successful result.
 runNonDet :: NonDetC m a -> m (Maybe a)
 runNonDet = runMaybeT . runNonDetC
 
