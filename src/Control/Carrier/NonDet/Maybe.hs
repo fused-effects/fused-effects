@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.NonDet.Maybe
 ( -- * NonDet effects
   module Control.Effect.NonDet
@@ -61,3 +61,9 @@ instance (Alternative m, Monad m) => MonadPlus (NonDetC m)
 instance MonadTrans NonDetC where
   lift = NonDetC . fmap Just
   {-# INLINE lift #-}
+
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
+  eff (L (L Empty))      = empty
+  eff (L (R (Choose k))) = k True <|> k False
+  eff (R other) = NonDetC (eff (handle (Just ()) (maybe (pure Nothing) runNonDet) other))
+  {-# INLINE eff #-}
