@@ -63,7 +63,12 @@ instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (CutC m) where
-  mfix f = CutC (\ cons nil _ -> mfix (\ a -> runCutC (f (head a)) (fmap . (:)) (pure []) (pure [])) >>= foldr cons nil)
+  mfix f = CutC (\ cons nil _ ->
+    mfix (runCut
+      (fmap . (:))
+      (pure [])
+      (pure [])
+      . f . head) >>= foldr cons nil)
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (CutC m) where
