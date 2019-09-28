@@ -14,7 +14,7 @@ module Control.Carrier.Empty.Maybe
 import Control.Applicative as Alt (Alternative (..))
 import Control.Carrier
 import Control.Effect.Empty
-import Control.Monad (MonadPlus (..))
+import Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

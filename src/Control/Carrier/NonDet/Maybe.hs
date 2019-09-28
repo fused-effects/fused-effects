@@ -13,7 +13,7 @@ module Control.Carrier.NonDet.Maybe
 
 import Control.Carrier
 import Control.Effect.NonDet
-import Control.Monad (MonadPlus (..))
+import Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
