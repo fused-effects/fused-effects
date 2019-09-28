@@ -46,7 +46,7 @@ queens :: (Alternative m, Monad m) => Int -> m Board
 queens n = foldl' (>>=) (pure empty) (replicate n (addOne n))
 
 runQueens :: Int -> [Board]
-runQueens = run . runNonDet . queens
+runQueens = run . runNonDetA . queens
 
 benchmark :: Gauge.Benchmark
 benchmark = bgroup "N-queens problem"
