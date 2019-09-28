@@ -11,7 +11,7 @@ module Control.Carrier.Error.Either
 , run
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Effect.Error
 import Control.Monad (MonadPlus(..), (<=<))
@@ -29,13 +29,13 @@ runError = runErrorC
 newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
   deriving (Functor)
 
-instance Applicative m => Applicative (ErrorC e m) where
+instance Monad m => Applicative (ErrorC e m) where
   pure a = ErrorC (pure (Right a))
   {-# INLINE pure #-}
-  ErrorC f <*> ErrorC a = ErrorC (liftA2 (<*>) f a)
+  ErrorC f <*> ErrorC a = ErrorC $ f >>= either (pure . Left) ((`fmap` a) . fmap)
   {-# INLINE (<*>) #-}
 
-instance Alternative m => Alternative (ErrorC e m) where
+instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
   empty = ErrorC empty
   {-# INLINE empty #-}
   ErrorC l <|> ErrorC r = ErrorC (l <|> r)
