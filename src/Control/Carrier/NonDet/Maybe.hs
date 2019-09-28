@@ -1,2 +1,11 @@
 module Control.Carrier.NonDet.Maybe
-() where
+( -- * NonDet effects
+  module Control.Effect.NonDet
+  -- * Re-exports
+, Carrier
+, Has
+, run
+) where
+
+import Control.Carrier
+import Control.Effect.NonDet
