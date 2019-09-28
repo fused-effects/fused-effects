@@ -1,7 +1,9 @@
+{-# LANGUAGE TypeOperators #-}
 module Control.Effect.NonDet
 ( -- * NonDet effects
   module Control.Effect.Choose
 , module Control.Effect.Empty
+, NonDet
 , oneOf
 , foldMapA
   -- * Re-exports
@@ -12,9 +14,12 @@ module Control.Effect.NonDet
 import Control.Applicative (Alternative(..))
 import Control.Effect.Choose hiding ((<|>), many, some)
 import Control.Effect.Empty hiding (empty, guard)
+import Control.Effect.Sum
 import Control.Monad (guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))
+
+type NonDet = Empty :+: Choose
 
 -- | Nondeterministically choose an element from a 'Foldable' collection.
 -- This can be used to emulate the style of nondeterminism associated with

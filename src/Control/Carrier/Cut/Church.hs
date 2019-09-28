@@ -76,12 +76,12 @@ instance MonadTrans CutC where
   lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Cut :+: Empty :+: Choose :+: sig) (CutC m) where
+instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
   eff (L (Call m k)) = CutC $ \ cons nil fail -> runCutC m (\ a as -> runCutC (k a) cons as fail) nil nil
-  eff (R (L Empty))          = empty
-  eff (R (R (L (Choose k)))) = k True <|> k False
-  eff (R (R (R other)))      = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
+  eff (R (L (L Empty)))      = empty
+  eff (R (L (R (Choose k)))) = k True <|> k False
+  eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutAll) other) >>= foldr cons nil
   {-# INLINE eff #-}
 
 
