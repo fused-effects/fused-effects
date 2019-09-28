@@ -67,3 +67,8 @@ instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) whe
   eff (L (R (Choose k))) = k True <|> k False
   eff (R other) = NonDetC (eff (handle (Just ()) (maybe (pure Nothing) runNonDet) other))
   {-# INLINE eff #-}
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
