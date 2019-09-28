@@ -1,7 +1,7 @@
 cabal-version:       2.2
 
 name:                fused-effects
-version:             0.5.0.0
+version:             0.5.0.1
 synopsis:            A fast, flexible, fused effect system.
 description:         A fast, flexible, fused effect system, à la Effect Handlers in Scope, Monad Transformers and Modular Algebraic Effects: What Binds Them Together, and Fusion for Free—Efficient Algebraic Effect Handlers.
 homepage:            https://github.com/fused-effects/fused-effects
@@ -16,112 +16,138 @@ extra-source-files:
   README.md
   ChangeLog.md
 
-tested-with:         GHC == 8.2.2
-                   , GHC == 8.4.4
-                   , GHC == 8.6.2
+tested-with:
+  GHC == 8.2.2
+  GHC == 8.4.4
+  GHC == 8.6.2
+  GHC == 8.8.1
 
 common common
-  default-language:    Haskell2010
-  ghc-options:         -Weverything -Wno-missing-local-signatures -Wno-missing-import-lists -Wno-implicit-prelude -Wno-safe -Wno-unsafe -Wno-name-shadowing -Wno-monomorphism-restriction -Wno-missed-specialisations -Wno-all-missed-specialisations
+  default-language: Haskell2010
+  ghc-options:
+    -Weverything
+    -Wno-all-missed-specialisations
+    -Wno-implicit-prelude
+    -Wno-missed-specialisations
+    -Wno-missing-import-lists
+    -Wno-missing-local-signatures
+    -Wno-monomorphism-restriction
+    -Wno-name-shadowing
+    -Wno-safe
+    -Wno-unsafe
   if (impl(ghc >= 8.6))
-    ghc-options:       -Wno-star-is-type
+    ghc-options: -Wno-star-is-type
+  if (impl(ghc >= 8.8))
+    ghc-options: -Wno-missing-deriving-strategies
 
 library
   import:              common
-  exposed-modules:     Control.Carrier
-                     , Control.Carrier.Choose.Church
-                     , Control.Carrier.Class
-                     , Control.Carrier.Cull
-                     , Control.Carrier.Cut.Church
-                     , Control.Carrier.Empty.Maybe
-                     , Control.Carrier.Error.Either
-                     , Control.Carrier.Fail
-                     , Control.Carrier.Fresh.Strict
-                     , Control.Carrier.Interpose
-                     , Control.Carrier.Interpret
-                     , Control.Carrier.Lift
-                     , Control.Carrier.NonDet.Church
-                     , Control.Carrier.Pure
-                     , Control.Carrier.Reader
-                     , Control.Carrier.Resource
-                     , Control.Carrier.Resumable.Abort
-                     , Control.Carrier.Resumable.Resume
-                     , Control.Carrier.State.Lazy
-                     , Control.Carrier.State.Strict
-                     , Control.Carrier.Trace.Ignoring
-                     , Control.Carrier.Trace.Printing
-                     , Control.Carrier.Trace.Returning
-                     , Control.Carrier.Writer.Strict
-                     , Control.Effect
-                     , Control.Effect.Choose
-                     , Control.Effect.Class
-                     , Control.Effect.Cull
-                     , Control.Effect.Cut
-                     , Control.Effect.Empty
-                     , Control.Effect.Error
-                     , Control.Effect.Fail
-                     , Control.Effect.Fresh
-                     , Control.Effect.Lift
-                     , Control.Effect.Pure
-                     , Control.Effect.Reader
-                     , Control.Effect.Resource
-                     , Control.Effect.Resumable
-                     , Control.Effect.State
-                     , Control.Effect.Sum
-                     , Control.Effect.Trace
-                     , Control.Effect.Writer
-  build-depends:       base >=4.9 && <4.13
-                     , deepseq >=1.4.3 && <1.5
-                     , unliftio-core >= 0.1.2
-                     , transformers
   hs-source-dirs:      src
+  exposed-modules:
+    Control.Carrier
+    Control.Carrier.Choose.Church
+    Control.Carrier.Class
+    Control.Carrier.Cull.Church
+    Control.Carrier.Cut.Church
+    Control.Carrier.Empty.Maybe
+    Control.Carrier.Error.Either
+    Control.Carrier.Fail.Either
+    Control.Carrier.Fresh.Strict
+    Control.Carrier.Interpose
+    Control.Carrier.Interpret
+    Control.Carrier.Lift
+    Control.Carrier.NonDet.Church
+    Control.Carrier.Pure
+    Control.Carrier.Reader
+    Control.Carrier.Resource
+    Control.Carrier.Resumable.Either
+    Control.Carrier.Resumable.Resume
+    Control.Carrier.State.Lazy
+    Control.Carrier.State.Strict
+    Control.Carrier.Trace.Ignoring
+    Control.Carrier.Trace.Printing
+    Control.Carrier.Trace.Returning
+    Control.Carrier.Writer.Strict
+    Control.Effect
+    Control.Effect.Choose
+    Control.Effect.Class
+    Control.Effect.Cull
+    Control.Effect.Cut
+    Control.Effect.Empty
+    Control.Effect.Error
+    Control.Effect.Fail
+    Control.Effect.Fresh
+    Control.Effect.Lift
+    Control.Effect.NonDet
+    Control.Effect.Pure
+    Control.Effect.Reader
+    Control.Effect.Resource
+    Control.Effect.Resumable
+    Control.Effect.State
+    Control.Effect.Sum
+    Control.Effect.Trace
+    Control.Effect.Writer
+  build-depends:
+      base           >= 4.9 && < 4.14
+    , deepseq       ^>= 1.4.3
+    , unliftio-core ^>= 0.1.2
+    , transformers
 
 
 test-suite examples
   import:              common
   type:                exitcode-stdio-1.0
-  main-is:             Main.hs
-  other-modules:       Parser
-                     , ReinterpretLog
-                     , Teletype
-  build-depends:       base >=4.9 && <4.13
-                     , fused-effects
-                     , hspec >=2.4.1
-                     , QuickCheck >= 2.7 && < 3
-                     , transformers
   hs-source-dirs:      examples
+  main-is:             Main.hs
+  other-modules:
+    Parser
+    ReinterpretLog
+    Teletype
+  build-depends:
+      base
+    , fused-effects
+    , hspec       >= 2.4.1
+    , QuickCheck  >= 2.7 && < 3
+    , transformers
 
 test-suite test
   import:              common
   type:                exitcode-stdio-1.0
-  main-is:             Spec.hs
-  other-modules:       Control.Effect.Spec
-                     , Control.Effect.NonDet.Spec
-  build-depends:       base >=4.9 && <4.13
-                     , fused-effects
-                     , hspec >=2.4.1
-                     , inspection-testing >= 0.4 && <1
   hs-source-dirs:      test
+  main-is:             Spec.hs
+  other-modules:
+    Control.Effect.Spec
+    Control.Effect.NonDet.Spec
+  build-depends:
+      base
+    , fused-effects
+    , hspec               >= 2.4.1
+    , inspection-testing ^>= 0.4
 
 test-suite doctest
   import:              common
   type:                exitcode-stdio-1.0
-  main-is:             Doctest.hs
-  build-depends:       base >=4.9 && <4.13
-                     , doctest >=0.7 && <1.0
-                     , fused-effects
   hs-source-dirs:      test
+  main-is:             Doctest.hs
+  build-depends:
+      base
+    , doctest  >= 0.7 && < 1
+    , fused-effects
 
 
 benchmark benchmark
   import:             common
   type:               exitcode-stdio-1.0
-  main-is:            Bench.hs
-  build-depends:      base >=4.9 && <4.13
-                    , criterion
-                    , fused-effects
   hs-source-dirs:     benchmark
-  ghc-options:        -threaded -rtsopts "-with-rtsopts=-N -A4m -n2m"
+  main-is:            Bench.hs
+  other-modules:      NonDet.NQueens
+  build-depends:
+      base
+    , fused-effects
+    , gauge
+  ghc-options:
+    -threaded
+    -rtsopts "-with-rtsopts=-N -A4m -n2m"
 
 
 source-repository head

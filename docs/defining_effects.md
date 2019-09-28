@@ -6,8 +6,8 @@ It’s often helpful to start by specifying the types of the desired operations.
 
 ```haskell
 data Teletype (m :: * -> *) k
-read :: (Member Teletype sig, Carrier sig m) => m String
-write :: (Member Teletype sig, Carrier sig m) => String -> m ()
+read :: Has Teletype sig m => m String
+write :: Has Teletype sig m => String -> m ()
 ```
 
 Effect types must have two type parameters: `m`, denoting any computations which the effect embeds, and `k`, denoting the remainder of the computation after the effect. Note that since `Teletype` doesn’t use `m`, the compiler will infer it as being of kind `*` by default. The explicit kind annotation on `m` corrects that.
@@ -39,10 +39,10 @@ data Teletype (m :: * -> *) k
 Now that we have our effect datatype, we can give definitions for `read` and `write`:
 
 ```haskell
-read :: (Member Teletype sig, Carrier sig m) => m String
+read :: Has Teletype sig m => m String
 read = send (Read pure)
 
-write :: (Member Teletype sig, Carrier sig m) => String -> m ()
+write :: Has Teletype sig m => String -> m ()
 write s = send (Write s (pure ()))
 ```
 

@@ -1,31 +1,27 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.NonDet.Church
-( -- * NonDet effect
-  module Control.Effect.Choose
-, module Control.Effect.Empty
+( -- * NonDet effects
+  module Control.Effect.NonDet
   -- * NonDet carrier
 , runNonDet
 , runNonDetA
 , runNonDetM
 , NonDetC(..)
   -- * Re-exports
-, Alternative(..)
 , Carrier
-, Member
+, Has
 , run
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier.Class
-import Control.Effect.Choose
-import Control.Effect.Empty
+import Control.Applicative (liftA2)
+import Control.Carrier
+import Control.Effect.NonDet
 import Control.Monad (MonadPlus(..), join)
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (fromJust)
-import Prelude hiding (fail)
 
 runNonDet :: (m b -> m b -> m b) -> (a -> m b) -> m b -> NonDetC m a -> m b
 runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
@@ -53,7 +49,7 @@ newtype NonDetC m a = NonDetC
 --   prop> run (runNonDetA (pure a *> pure b)) === Just b
 --   prop> run (runNonDetA (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
-  pure a = NonDetC (\ _ pure _ -> pure a)
+  pure a = NonDetC (\ _ leaf _ -> leaf a)
   {-# INLINE pure #-}
   NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf nil ->
     f fork (\ f' -> a fork (leaf . f') nil) nil
@@ -63,7 +59,7 @@ instance Applicative (NonDetC m) where
 --   prop> run (runNonDetA (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
 --   prop> run (runNonDetA ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
 instance Alternative (NonDetC m) where
-  empty = NonDetC (\ _ _ empty -> empty)
+  empty = NonDetC (\ _ _ nil -> nil)
   {-# INLINE empty #-}
   NonDetC l <|> NonDetC r = NonDetC $ \ fork leaf nil -> fork (l fork leaf nil) (r fork leaf nil)
   {-# INLINE (<|>) #-}
@@ -73,8 +69,8 @@ instance Monad (NonDetC m) where
     a fork (runNonDet fork leaf nil . f) nil
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (NonDetC m) where
-  fail s = lift (fail s)
+instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
+  fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (NonDetC m) where
@@ -109,18 +105,19 @@ data BinaryTree a = Nil | Leaf a | Fork (BinaryTree a) (BinaryTree a)
 
 instance Applicative BinaryTree where
   pure = Leaf
-  Nil      <*> _ = Nil
-  Leaf f   <*> a = fmap f a
-  Fork a b <*> c = Fork (a <*> c) (b <*> c)
+  {-# INLINE pure #-}
+  f <*> a = fold Fork (<$> a) Nil f
+  {-# INLINE (<*>) #-}
 
 instance Alternative BinaryTree where
   empty = Nil
+  {-# INLINE empty #-}
   (<|>) = Fork
+  {-# INLINE (<|>) #-}
 
 instance Monad BinaryTree where
-  Nil      >>= _ = Nil
-  Leaf a   >>= f = f a
-  Fork a b >>= f = Fork (a >>= f) (b >>= f)
+  a >>= f = fold Fork f Nil a
+  {-# INLINE (>>=) #-}
 
 
 fold :: (b -> b -> b) -> (a -> b) -> b -> BinaryTree a -> b
@@ -128,6 +125,7 @@ fold fork leaf nil = go where
   go Nil        = nil
   go (Leaf a)   = leaf a
   go (Fork a b) = fork (go a) (go b)
+{-# INLINE fold #-}
 
 
 -- $setup

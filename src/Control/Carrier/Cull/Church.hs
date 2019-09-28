@@ -1,27 +1,28 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Carrier.Cull
+module Control.Carrier.Cull.Church
 ( -- * Cull effect
   module Control.Effect.Cull
+  -- * NonDet effects
+, module Control.Effect.NonDet
   -- * Cull carrier
 , runCull
 , CullC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 
-import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
 import Control.Effect.Cull
+import Control.Effect.NonDet
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
 -- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
 --
@@ -30,7 +31,7 @@ runCull :: Alternative m => CullC m a -> m a
 runCull (CullC m) = runNonDetC (runReader False m) (<|>) pure empty
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO)
+  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO)
 
 instance Alternative (CullC m) where
   empty = CullC empty
@@ -55,3 +56,10 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: Empty :+: Choose :+: s
   eff (R (R (L (Choose k)))) = k True <|> k False
   eff (R (R (R other)))      = CullC (eff (R (R (R (handleCoercible other)))))
   {-# INLINE eff #-}
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> import Test.QuickCheck
+-- >>> import Control.Carrier.NonDet.Church
+-- >>> import Control.Carrier.Pure

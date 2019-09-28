@@ -1,3 +1,4 @@
+{-# LANGUAGE EmptyCase, MultiParamTypeClasses #-}
 module Control.Carrier.Pure
 ( -- * Pure effect
   module Control.Effect.Pure
@@ -7,10 +8,10 @@ module Control.Carrier.Pure
 ) where
 
 import Control.Applicative
+import Control.Carrier.Class
 import Control.Effect.Pure
 import Control.Monad.Fix
 import Data.Coerce
-import Data.Function (fix)
 
 -- | Run an action exhausted of effects to produce its final result value.
 run :: PureC a -> a
@@ -52,3 +53,7 @@ instance Monad PureC where
 instance MonadFix PureC where
   mfix f = PureC (fix (runPureC . f))
   {-# INLINE mfix #-}
+
+instance Carrier Pure PureC where
+  eff v = case v of {}
+  {-# INLINE eff #-}

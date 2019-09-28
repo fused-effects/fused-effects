@@ -8,7 +8,7 @@ module Control.Effect.Resource
 , onException
 ) where
 
-import Control.Carrier.Class
+import Control.Carrier
 
 data Resource m k
   = forall resource any output . Resource (m resource) (resource -> m any) (resource -> m output) (output -> m k)
@@ -34,7 +34,7 @@ instance Effect Resource where
 -- if @op@ throws an exception.
 --
 -- 'bracket' is safe in the presence of asynchronous exceptions.
-bracket :: (Member Resource sig, Carrier sig m)
+bracket :: Has Resource sig m
         => m resource           -- ^ computation to run first ("acquire resource")
         -> (resource -> m any)  -- ^ computation to run last ("release resource")
         -> (resource -> m a)    -- ^ computation to run in-between
@@ -43,7 +43,7 @@ bracket acquire release use = send (Resource acquire release use pure)
 
 -- | Like 'bracket', but only performs the final action if there was an
 -- exception raised by the in-between computation.
-bracketOnError :: (Member Resource sig, Carrier sig m)
+bracketOnError :: Has Resource sig m
                => m resource           -- ^ computation to run first ("acquire resource")
                -> (resource -> m any)  -- ^ computation to run last ("release resource")
                -> (resource -> m a)    -- ^ computation to run in-between
@@ -51,14 +51,14 @@ bracketOnError :: (Member Resource sig, Carrier sig m)
 bracketOnError acquire release use = send (OnError acquire release use pure)
 
 -- | Like 'bracket', but for the simple case of one computation to run afterward.
-finally :: (Member Resource sig, Carrier sig m)
+finally :: Has Resource sig m
         => m a -- ^ computation to run first
         -> m b -- ^ computation to run afterward (even if an exception was raised)
         -> m a
 finally act end = bracket (pure ()) (const end) (const act)
 
 -- | Like 'bracketOnError', but for the simple case of one computation to run afterward.
-onException :: (Member Resource sig, Carrier sig m)
+onException :: Has Resource sig m
         => m a -- ^ computation to run first
         -> m b -- ^ computation to run afterward if an exception was raised
         -> m a

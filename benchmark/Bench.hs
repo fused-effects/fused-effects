@@ -3,19 +3,23 @@ module Main
 ( main
 ) where
 
-import Control.Effect.Carrier
-import Control.Effect.Interpret
-import Control.Effect.Writer
-import Control.Effect.State
+import Control.Carrier
+import Control.Carrier.Interpret
+import Control.Carrier.State.Strict
+import Control.Carrier.Writer.Strict
 import Control.Monad (ap, replicateM_)
-import Criterion.Main
 import Data.Functor.Identity
 import Data.Monoid (Sum(..))
+import Gauge
+
+import qualified NonDet.NQueens as NQueens
 
 main :: IO ()
 main = defaultMain
-  [
-    bgroup "WriterC"
+  [ bgroup "NonDet"
+    [ NQueens.benchmark
+    ]
+  , bgroup "WriterC"
     [ bgroup "Cod"
       [ bench "100"   $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 100
       , bench "1000"  $ whnf (run . runCod pure . execWriter @(Sum Int) . runCod pure . tellLoop) 1000
@@ -60,10 +64,10 @@ main = defaultMain
     ]
   ]
 
-tellLoop :: (Carrier sig m, Member (Writer (Sum Int)) sig) => Int -> m ()
+tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
 
-modLoop :: (Carrier sig m, Member (State (Sum Int)) sig) => Int -> m ()
+modLoop :: Has (State (Sum Int)) sig m => Int -> m ()
 modLoop i = replicateM_ i (modify (+ (Sum (1 :: Int))))
 
 newtype Cod m a = Cod { unCod :: forall b . (a -> m b) -> m b }

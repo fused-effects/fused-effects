@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-module Control.Carrier.Fail
+module Control.Carrier.Fail.Either
 ( -- * Fail effect
   module Control.Effect.Fail
   -- * Fail carrier
@@ -7,21 +7,19 @@ module Control.Carrier.Fail
 , FailC(..)
   -- * Re-exports
 , Carrier
-, Member
-, MonadFail(..)
+, Has
 , run
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.Effect.Fail
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
@@ -32,12 +30,12 @@ runFail = runError . runFailC
 newtype FailC m a = FailC { runFailC :: ErrorC String m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Carrier sig m, Effect sig) => MonadFail (FailC m) where
-  fail s = FailC (throwError s)
+instance (Carrier sig m, Effect sig) => Fail.MonadFail (FailC m) where
+  fail = send . Fail
   {-# INLINE fail #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
-  eff (L (Fail s)) = fail s
+  eff (L (Fail s)) = FailC (throwError s)
   eff (R other)    = FailC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
 
@@ -45,4 +43,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure

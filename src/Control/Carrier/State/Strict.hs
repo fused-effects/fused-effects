@@ -9,19 +9,18 @@ module Control.Carrier.State.Strict
 , StateC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
+import Control.Carrier
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
 -- | Run a 'State' effect starting from the passed value.
 --
@@ -73,8 +72,8 @@ instance Monad m => Monad (StateC s m) where
     fa `seq` runState s' fa
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (StateC s m) where
-  fail s = StateC (const (fail s))
+instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
+  fail s = StateC (const (Fail.fail s))
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (StateC s m) where

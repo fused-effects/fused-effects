@@ -7,17 +7,17 @@ module Control.Carrier.Resource
 , ResourceC(..)
   -- * Re-exports
 , Carrier
-, Member
+, Has
 , run
 ) where
 
 import           Control.Applicative (Alternative(..))
-import           Control.Carrier.Class
+import           Control.Carrier
 import           Control.Carrier.Reader
 import           Control.Effect.Resource
 import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))
-import           Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class
 import           Control.Monad.IO.Unlift
@@ -46,7 +46,7 @@ runResource :: MonadUnliftIO m
 runResource r = withRunInIO (\f -> runUnlifting (UnliftIO f) r)
 
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (UnliftIO m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadUnliftIO m => MonadUnliftIO (ResourceC m) where
   askUnliftIO = ResourceC . ReaderC $ \(UnliftIO h) ->
