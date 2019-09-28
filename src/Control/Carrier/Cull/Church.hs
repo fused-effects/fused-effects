@@ -6,6 +6,7 @@ module Control.Carrier.Cull.Church
 , module Control.Effect.NonDet
   -- * Cull carrier
 , runCull
+, runCullA
 , CullC(..)
   -- * Re-exports
 , Carrier
@@ -13,6 +14,7 @@ module Control.Carrier.Cull.Church
 , run
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
@@ -29,6 +31,9 @@ import Control.Monad.Trans.Class
 --   prop> run (runCull (liftA2 (<|>)) (pure . pure) (pure empty) (pure a <|> pure b)) === [a, b]
 runCull :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CullC m a -> m b
 runCull fork leaf nil = runNonDet fork leaf nil . runReader False . runCullC
+
+runCullA :: (Alternative f, Applicative m) => CullC m a -> m (f a)
+runCullA = runCull (liftA2 (<|>)) (pure . pure) (pure empty)
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO)
@@ -60,6 +65,5 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
--- >>> import Control.Applicative (liftA2)
 -- >>> import Control.Carrier.Pure
 -- >>> import Test.QuickCheck
