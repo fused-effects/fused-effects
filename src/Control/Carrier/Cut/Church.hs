@@ -33,7 +33,7 @@ runCut cons nil fail m = runCutC m cons nil fail
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
-runCutA (CutC m) = m (fmap . (<|>) . pure) (pure empty) (pure empty)
+runCutA = runCut (fmap . (<|>) . pure) (pure empty) (pure empty)
 
 runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
 runCutM leaf = runCut (fmap . (<>) . leaf) (pure mempty) (pure mempty)
