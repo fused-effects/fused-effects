@@ -39,8 +39,7 @@ install:
 - cabal v2-build --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2 --only-dependencies
 
 script:
-- cabal v2-build -j2
-- cabal v2-build -j2 benchmark
+- cabal v2-build --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
 - cabal v2-run -j2 test
 - cabal v2-run -j2 examples
 - cabal v2-run -j2 doctest
