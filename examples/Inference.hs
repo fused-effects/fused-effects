@@ -1,20 +1,20 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Inference
-( spec
+( example
 ) where
 
 import Control.Carrier
 import Control.Carrier.Reader
-import Test.Hspec
+import Test.Tasty
+import Test.Tasty.HUnit
 
-spec :: Spec
-spec = do
-  inference
+example :: TestTree
+example = testGroup "inference"
+  [ testCase "can be wrapped for better type inference" $
+    run (runHasEnv (runEnv "i" ((++) <$> askEnv <*> askEnv)))
+    @?= "ii"
+  ]
 
-inference :: Spec
-inference = describe "inference" $ do
-  it "can be wrapped for better type inference" $
-    run (runHasEnv (runEnv "i" ((++) <$> askEnv <*> askEnv))) `shouldBe` "ii"
 
 askEnv :: Has (Reader env) sig m => HasEnv env m env
 askEnv = ask

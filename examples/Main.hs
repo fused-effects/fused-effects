@@ -12,9 +12,9 @@ import Test.Tasty
 main :: IO ()
 main = do
   hspec $ do
-    Inference.spec
     Parser.spec
     ReinterpretLog.spec
   defaultMain $ testGroup "examples"
-    [ Teletype.example
+    [ Inference.example
+    , Teletype.example
     ]
