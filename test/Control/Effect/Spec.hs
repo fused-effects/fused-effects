@@ -14,6 +14,7 @@ import Prelude hiding (fail)
 import Test.Hspec
 import Test.Inspection as Inspection
 import Test.Tasty
+import Test.Tasty.HUnit
 
 tests :: TestTree
 tests = testGroup "Effect"
@@ -72,8 +73,16 @@ shouldSucceed :: Inspection.Result -> Expectation
 shouldSucceed (Success _) = pure ()
 shouldSucceed (Failure f) = expectationFailure f
 
+failureOf :: Inspection.Result -> Maybe String
+failureOf (Success _) = Nothing
+failureOf (Failure f) = Just f
+
 fusion' :: TestTree
-fusion' = testGroup "fusion" []
+fusion' = testGroup "fusion"
+  [ testCase "eliminates StateCs" $
+    failureOf $(inspectTest $ 'countDown `doesNotUse` ''StateC)
+    @?= Nothing
+  ]
 
 fusion :: Spec
 fusion = describe "fusion" $ do
