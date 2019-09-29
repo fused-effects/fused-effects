@@ -13,16 +13,16 @@ import Test.Tasty.HUnit
 tests :: TestTree
 tests = testGroup "NonDet"
   [ testCase "collects results of effects run inside it" $
-    run (runNonDet (runState 'a' state))
+    run (runNonDetA (runState 'a' state))
     @?= [('a', 'z'), ('b', 'b'), ('a', 'a')]
   , testCase "collapses results of effects run outside it" $
-    run (runState 'a' (runNonDet state))
+    run (runState 'a' (runNonDetA state))
     @?= ('b', "zbb")
   , testCase "collects results from higher-order effects run inside it" $
-    run (runNonDet (runError error))
+    run (runNonDetA (runError error))
     @?= [Right 'z', Right 'a' :: Either Char Char]
   , testCase "collapses results of higher-order effects run outside it" $
-    run (runError (runNonDet error))
+    run (runError (runNonDetA error))
     @?= (Right "a" :: Either Char String)
   ]
 

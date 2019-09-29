@@ -18,54 +18,54 @@ example :: TestTree
 example = testGroup "parser"
   [ testGroup "parse"
     [ testProperty "returns pure values at the end of input" $
-      \ a -> run (runNonDet (parse "" (pure a))) === [a :: Integer]
+      \ a -> run (runNonDetA (parse "" (pure a))) === [a :: Integer]
 
     , testProperty "fails if input remains" $
-      \ c cs a -> run (runNonDet (parse (c:cs) (pure (a :: Integer)))) === []
+      \ c cs a -> run (runNonDetA (parse (c:cs) (pure (a :: Integer)))) === []
     ]
 
   , testGroup "satisfy"
     [ testProperty "matches with a predicate" $
-      \ c f -> run (runNonDet (parse [c] (satisfy (applyFun f)))) === if applyFun f c then [c] else []
+      \ c f -> run (runNonDetA (parse [c] (satisfy (applyFun f)))) === if applyFun f c then [c] else []
 
     , testProperty "fails at end of input" $
-      \ f -> run (runNonDet (parse "" (satisfy (applyFun f)))) === []
+      \ f -> run (runNonDetA (parse "" (satisfy (applyFun f)))) === []
 
     , testProperty "fails if input remains" $
-      \ c1 c2 f -> run (runNonDet (parse [c1, c2] (satisfy (applyFun f)))) === []
+      \ c1 c2 f -> run (runNonDetA (parse [c1, c2] (satisfy (applyFun f)))) === []
 
     , testProperty "consumes input" $
-      \ c1 c2 f -> run (runNonDet (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) === if applyFun f c1 && applyFun f c2 then [(c1, c2)] else []
+      \ c1 c2 f -> run (runNonDetA (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) === if applyFun f c1 && applyFun f c2 then [(c1, c2)] else []
     ]
 
   , testGroup "factor"
     [ testProperty "matches positive integers" $
-      \ a -> run (runNonDet (runCut (parse (show (abs a)) factor))) === [abs a]
+      \ a -> run (runCutA (parse (show (abs a)) factor)) === [abs a]
 
     , testProperty "matches parenthesized expressions" . forAll (sized arbNested) $
-      \ as -> run (runNonDet (runCut (parse ('(' : intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as) ++ ")") factor))) === [sum (map (product . map abs) as)]
+      \ as -> run (runCutA (parse ('(' : intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as) ++ ")") factor)) === [sum (map (product . map abs) as)]
     ]
 
   , testGroup "term"
     [ testProperty "matches factors" $
-      \ a -> run (runNonDet (runCut (parse (show (abs a)) term))) === [abs a]
+      \ a -> run (runCutA (parse (show (abs a)) term)) === [abs a]
 
     , testProperty "matches multiplication" $
-      \ as -> run (runNonDet (runCut (parse (intercalate "*" (show . abs <$> 1:as)) term))) === [product (map abs as)]
+      \ as -> run (runCutA (parse (intercalate "*" (show . abs <$> 1:as)) term)) === [product (map abs as)]
     ]
 
   , testGroup "expr"
     [ testProperty "matches factors" $
-      \ a -> run (runNonDet (runCut (parse (show (abs a)) expr))) === [abs a]
+      \ a -> run (runCutA (parse (show (abs a)) expr)) === [abs a]
 
     , testProperty "matches multiplication" $
-      \ as -> run (runNonDet (runCut (parse (intercalate "*" (show . abs <$> 1:as)) expr))) === [product (map abs as)]
+      \ as -> run (runCutA (parse (intercalate "*" (show . abs <$> 1:as)) expr)) === [product (map abs as)]
 
     , testProperty "matches addition" $
-      \ as -> run (runNonDet (runCut (parse (intercalate "+" (show . abs <$> 0:as)) expr))) === [sum (map abs as)]
+      \ as -> run (runCutA (parse (intercalate "+" (show . abs <$> 0:as)) expr)) === [sum (map abs as)]
 
     , testProperty "respects order of operations" . forAll (sized arbNested) $
-      \ as -> run (runNonDet (runCut (parse (intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as)) expr))) === [sum (map (product . map abs) as)]
+      \ as -> run (runCutA (parse (intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as)) expr)) === [sum (map (product . map abs) as)]
     ]
   ]
 
