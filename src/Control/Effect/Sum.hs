@@ -20,6 +20,7 @@ instance (Effect f, Effect g)     => Effect   (f :+: g)
 
 -- | The class of types present in a signature.
 class Member (sub :: (* -> *) -> (* -> *)) sup where
+  -- | Inject a member of a signature into the signature.
   inj :: sub m a -> sup m a
 
 instance Member t t where
