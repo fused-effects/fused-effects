@@ -41,7 +41,9 @@ install:
 script:
 - cabal v2-build -j2
 - cabal v2-build -j2 benchmark
-- cabal v2-test -j2
+- cabal v2-run -j2 test
+- cabal v2-run -j2 examples
+- cabal v2-run -j2 doctest
 - cabal v2-haddock -j2
 - cabal v2-sdist
 - cabal check
