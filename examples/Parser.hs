@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveAnyClass, DeriveGeneric, DeriveTraversable, DerivingStrategies, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Parser
-( spec
+( example
 ) where
 
 import Control.Carrier
@@ -11,58 +11,63 @@ import Control.Monad (replicateM)
 import Data.Char
 import Data.List (intercalate)
 import GHC.Generics (Generic1)
-import Test.Hspec
-import Test.Hspec.QuickCheck
-import Test.QuickCheck
+import Test.Tasty
+import Test.Tasty.QuickCheck
 
-spec :: Spec
-spec = describe "parser" $ do
-  describe "parse" $ do
-    prop "returns pure values at the end of input" $
-      \ a -> run (runNonDetA (parse "" (pure a))) == [a :: Integer]
+example :: TestTree
+example = testGroup "parser"
+  [ testGroup "parse"
+    [ testProperty "returns pure values at the end of input" $
+      \ a -> run (runNonDetA (parse "" (pure a))) === [a :: Integer]
 
-    prop "fails if input remains" $
-      \ c cs a -> run (runNonDetA (parse (c:cs) (pure (a :: Integer)))) == []
+    , testProperty "fails if input remains" $
+      \ c cs a -> run (runNonDetA (parse (c:cs) (pure (a :: Integer)))) === []
+    ]
 
-  describe "satisfy" $ do
-    prop "matches with a predicate" $
-      \ c f -> run (runNonDetA (parse [c] (satisfy (applyFun f)))) == if applyFun f c then [c] else []
+  , testGroup "satisfy"
+    [ testProperty "matches with a predicate" $
+      \ c f -> run (runNonDetA (parse [c] (satisfy (applyFun f)))) === if applyFun f c then [c] else []
 
-    prop "fails at end of input" $
-      \ f -> run (runNonDetA (parse "" (satisfy (applyFun f)))) == []
+    , testProperty "fails at end of input" $
+      \ f -> run (runNonDetA (parse "" (satisfy (applyFun f)))) === []
 
-    prop "fails if input remains" $
-      \ c1 c2 f -> run (runNonDetA (parse [c1, c2] (satisfy (applyFun f)))) == []
+    , testProperty "fails if input remains" $
+      \ c1 c2 f -> run (runNonDetA (parse [c1, c2] (satisfy (applyFun f)))) === []
 
-    prop "consumes input" $
-      \ c1 c2 f -> run (runNonDetA (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) == if applyFun f c1 && applyFun f c2 then [(c1, c2)] else []
+    , testProperty "consumes input" $
+      \ c1 c2 f -> run (runNonDetA (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) === if applyFun f c1 && applyFun f c2 then [(c1, c2)] else []
+    ]
 
-  describe "factor" $ do
-    prop "matches positive integers" $
-      \ a -> run (runCutA (parse (show (abs a)) factor)) == [abs a]
+  , testGroup "factor"
+    [ testProperty "matches positive integers" $
+      \ a -> run (runCutA (parse (show (abs a)) factor)) === [abs a]
 
-    prop "matches parenthesized expressions" . forAll (sized arbNested) $
-      \ as -> run (runCutA (parse ('(' : intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as) ++ ")") factor)) == [sum (map (product . map abs) as)]
+    , testProperty "matches parenthesized expressions" . forAll (sized arbNested) $
+      \ as -> run (runCutA (parse ('(' : intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as) ++ ")") factor)) === [sum (map (product . map abs) as)]
+    ]
 
-  describe "term" $ do
-    prop "matches factors" $
-      \ a -> run (runCutA (parse (show (abs a)) term)) == [abs a]
+  , testGroup "term"
+    [ testProperty "matches factors" $
+      \ a -> run (runCutA (parse (show (abs a)) term)) === [abs a]
 
-    prop "matches multiplication" $
-      \ as -> run (runCutA (parse (intercalate "*" (show . abs <$> 1:as)) term)) == [product (map abs as)]
+    , testProperty "matches multiplication" $
+      \ as -> run (runCutA (parse (intercalate "*" (show . abs <$> 1:as)) term)) === [product (map abs as)]
+    ]
 
-  describe "expr" $ do
-    prop "matches factors" $
-      \ a -> run (runCutA (parse (show (abs a)) expr)) == [abs a]
+  , testGroup "expr"
+    [ testProperty "matches factors" $
+      \ a -> run (runCutA (parse (show (abs a)) expr)) === [abs a]
 
-    prop "matches multiplication" $
-      \ as -> run (runCutA (parse (intercalate "*" (show . abs <$> 1:as)) expr)) == [product (map abs as)]
+    , testProperty "matches multiplication" $
+      \ as -> run (runCutA (parse (intercalate "*" (show . abs <$> 1:as)) expr)) === [product (map abs as)]
 
-    prop "matches addition" $
-      \ as -> run (runCutA (parse (intercalate "+" (show . abs <$> 0:as)) expr)) == [sum (map abs as)]
+    , testProperty "matches addition" $
+      \ as -> run (runCutA (parse (intercalate "+" (show . abs <$> 0:as)) expr)) === [sum (map abs as)]
 
-    prop "respects order of operations" . forAll (sized arbNested) $
-      \ as -> run (runCutA (parse (intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as)) expr)) == [sum (map (product . map abs) as)]
+    , testProperty "respects order of operations" . forAll (sized arbNested) $
+      \ as -> run (runCutA (parse (intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as)) expr)) === [sum (map (product . map abs) as)]
+    ]
+  ]
 
     where arbNested :: Arbitrary a => Int -> Gen [[a]]
           arbNested 0 = pure []
