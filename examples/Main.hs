@@ -15,6 +15,6 @@ main = do
     Inference.spec
     Parser.spec
     ReinterpretLog.spec
-    Teletype.spec
   defaultMain $ testGroup "examples"
-    []
+    [ Teletype.example
+    ]
