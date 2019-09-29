@@ -23,6 +23,11 @@ example = testGroup "inference"
   ]
 
 
+-- | A constrained wrapper around 'ask'.
+--
+--   Like 'ask', 'askEnv' uses the same type parameter for both the 'Reader' and return types. Unlike 'ask'—which doesn’t impose any extra structure on the monad—it’s specialized to 'HasEnv', and uses the /same/ type parameter as its phantom type parameter.
+--
+--   Thus, any two calls to 'askEnv' occurring in the same 'HasEnv' context will be required to have their @env@ type parameters unify, allowing them to be inferred from context more often.
 askEnv :: Has (Reader env) sig m => HasEnv env m env
 askEnv = ask
 
