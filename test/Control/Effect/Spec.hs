@@ -13,16 +13,6 @@ import Test.Tasty.HUnit
 
 tests :: TestTree
 tests = testGroup "Effect"
-  [ fusion
-  ]
-
-
-failureOf :: Inspection.Result -> Maybe String
-failureOf (Success _) = Nothing
-failureOf (Failure f) = Just f
-
-fusion :: TestTree
-fusion = testGroup "fusion"
   [ testCase "eliminates StateCs" $
     failureOf $(inspectTest $ 'countDown `doesNotUse` ''StateC)
     @?= Nothing
@@ -36,6 +26,12 @@ fusion = testGroup "fusion"
     failureOf $(inspectTest $ 'countDown `doesNotUse` 'eff)
     @?= Nothing
   ]
+
+
+failureOf :: Inspection.Result -> Maybe String
+failureOf (Success _) = Nothing
+failureOf (Failure f) = Just f
+
 
 countDown :: Int -> (Int, Int)
 countDown start = run . runState start $ go
