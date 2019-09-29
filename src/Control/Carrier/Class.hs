@@ -3,8 +3,8 @@ module Control.Carrier.Class
 ( Carrier(..)
 ) where
 
-import Control.Effect.Class
 import Control.Effect.Choose (Choose(..))
+import Control.Effect.Class
 import Control.Effect.Empty (Empty(..))
 import Control.Effect.Error (Error(..))
 import Control.Effect.NonDet (NonDet)
