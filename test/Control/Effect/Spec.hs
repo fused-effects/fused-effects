@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -O2 -fplugin Test.Inspection.Plugin #-}
 module Control.Effect.Spec
 ( spec
+, tests
 ) where
 
 import Control.Carrier
@@ -12,6 +13,13 @@ import Control.Carrier.State.Strict
 import Prelude hiding (fail)
 import Test.Hspec
 import Test.Inspection as Inspection
+import Test.Tasty
+
+tests :: TestTree
+tests = testGroup "Effect"
+  [
+  ]
+
 
 spec :: Spec
 spec = do
