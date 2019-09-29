@@ -7,10 +7,14 @@ import qualified Parser
 import qualified ReinterpretLog
 import qualified Teletype
 import Test.Hspec
+import Test.Tasty
 
 main :: IO ()
-main = hspec $ do
-  Inference.spec
-  Parser.spec
-  ReinterpretLog.spec
-  Teletype.spec
+main = do
+  hspec $ do
+    Inference.spec
+    Parser.spec
+    ReinterpretLog.spec
+    Teletype.spec
+  defaultMain $ testGroup "examples"
+    []
