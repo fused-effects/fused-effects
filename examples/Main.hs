@@ -11,10 +11,10 @@ import Test.Tasty
 
 main :: IO ()
 main = do
-  hspec $ do
-    Parser.spec
+  hspec $ pure ()
   defaultMain $ testGroup "examples"
     [ Inference.example
+    , Parser.example
     , ReinterpretLog.example
     , Teletype.example
     ]
