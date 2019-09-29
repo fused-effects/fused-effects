@@ -12,6 +12,11 @@ import Test.Tasty.HUnit
 
 tests :: TestTree
 tests = testGroup "NonDet"
+  [ interactions "Church"
+  ]
+
+interactions :: String -> TestTree
+interactions title = testGroup title
   [ testCase "collects results of effects run inside it" $
     run (runNonDet (runState 'a' state))
     @?= [('a', 'z'), ('b', 'b'), ('a', 'a')]
