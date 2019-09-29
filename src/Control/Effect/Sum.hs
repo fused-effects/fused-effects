@@ -23,6 +23,8 @@ instance (Effect f, Effect g)     => Effect   (f :+: g)
 -- | The class of types present in a signature.
 --
 --   This is based on Wouter Swierstra’s design described in [Data types à la carte](http://www.cs.ru.nl/~W.Swierstra/Publications/DataTypesALaCarte.pdf). As described therein, overlapping instances are required in order to distinguish e.g. left-occurrence from right-recursion.
+--
+--   It should not generally be necessary for you to define new 'Member' instances, but these are not specifically prohibited if you wish to get creative.
 class Member (sub :: (* -> *) -> (* -> *)) sup where
   -- | Inject a member of a signature into the signature.
   inj :: sub m a -> sup m a
