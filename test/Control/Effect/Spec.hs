@@ -82,6 +82,9 @@ fusion' = testGroup "fusion"
   [ testCase "eliminates StateCs" $
     failureOf $(inspectTest $ 'countDown `doesNotUse` ''StateC)
     @?= Nothing
+  , testCase "eliminates nested StateCs" $
+    failureOf $(inspectTest $ 'countBoth `doesNotUse` ''StateC)
+    @?= Nothing
   ]
 
 fusion :: Spec
