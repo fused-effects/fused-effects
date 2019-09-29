@@ -20,6 +20,9 @@ interactions = testGroup "interactions"
   [ testCase "collects results of effects run before it" $
     run (runNonDet (runState 'a' (pure 'z' <|> put 'b' *> get <|> get)))
     @?= [('a', 'z'), ('b', 'b'), ('a', 'a')]
+  , testCase "collapses results of effects run after it" $
+    run (runState 'a' (runNonDet (pure 'z' <|> put 'b' *> get <|> get)))
+    @?= ('b', "zbb")
   ]
 
 spec :: Spec
