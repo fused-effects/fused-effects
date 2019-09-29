@@ -31,6 +31,7 @@ runNonDet = runMaybeT . runNonDetC
 newtype NonDetC m a = NonDetC { runNonDetC :: MaybeT m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
+-- | 'NonDetC' passes 'Fail.MonadFail' operations along to the underlying monad @m@, rather than interpreting it as a synonym for 'empty' à la 'MaybeT'.
 instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
