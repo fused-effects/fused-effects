@@ -29,7 +29,7 @@ jobs:
       run: |
         export PATH="/opt/ghc/bin:$PATH"
         cabal v2-update
-        cabal v2-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always
+        cabal v2-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
         cabal v2-build --only-dependencies
     - name: Build
       run: |
