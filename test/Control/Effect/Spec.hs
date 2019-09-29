@@ -1,14 +1,12 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, MultiWayIf, TemplateHaskell, TypeApplications, TypeOperators, UndecidableInstances #-}
 {-# OPTIONS_GHC -O2 -fplugin Test.Inspection.Plugin #-}
 module Control.Effect.Spec
-( spec
-, tests
+( tests
 ) where
 
 import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.Carrier.State.Strict
-import Test.Hspec
 import Test.Inspection as Inspection
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -17,10 +15,6 @@ tests :: TestTree
 tests = testGroup "Effect"
   [ fusion
   ]
-
-
-spec :: Spec
-spec = pure ()
 
 
 failureOf :: Inspection.Result -> Maybe String

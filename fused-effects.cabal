@@ -122,7 +122,6 @@ test-suite test
   build-depends:
       base
     , fused-effects
-    , hspec               >= 2.4.1
     , inspection-testing ^>= 0.4
     , tasty              ^>= 1.2
     , tasty-hunit        ^>= 0.10
