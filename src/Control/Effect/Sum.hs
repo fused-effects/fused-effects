@@ -7,6 +7,7 @@ module Control.Effect.Sum
 import Control.Effect.Class
 import GHC.Generics (Generic1)
 
+-- | Higher-order sums are used to combine multiple effects into a signature, typically by chaining on the right.
 data (f :+: g) (m :: * -> *) k
   = L (f m k)
   | R (g m k)
