@@ -26,6 +26,9 @@ interactions = testGroup "interactions"
   , testCase "collects results from higher-order effects run before it" $
     run (runNonDet (runError ((pure 'z' <|> throwError 'a') `catchError` pure)))
     @?= [Right 'z', Right 'a' :: Either Char Char]
+  , testCase "collapses results of higher-order effects run after it" $
+    run (runError (runNonDet ((pure 'z' <|> throwError 'a') `catchError` pure)))
+    @?= (Right "a" :: Either Char String)
   ]
 
 spec :: Spec
