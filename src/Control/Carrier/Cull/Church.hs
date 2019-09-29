@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Cull.Church
 ( -- * Cull effect
   module Control.Effect.Cull
@@ -40,7 +40,7 @@ runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
 runCullM leaf = runCull (liftA2 mappend) (pure . leaf) (pure mempty)
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
-  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO)
+  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
 instance Alternative (CullC m) where
   empty = CullC empty
@@ -52,6 +52,8 @@ instance Alternative (CullC m) where
     else
       runReader cull (runCullC l) <|> runReader cull (runCullC r)
   {-# INLINE (<|>) #-}
+
+deriving instance MonadFix m => MonadFix (CullC m)
 
 instance MonadPlus (CullC m)
 
