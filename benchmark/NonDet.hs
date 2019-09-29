@@ -11,7 +11,7 @@ import qualified NonDet.NQueens
 benchmark :: Gauge.Benchmark
 benchmark = bgroup "NonDet"
   [ bgroup "N-queens problem"
-    [ NonDet.NQueens.benchmark (run . NonDet.Church.runNonDet)
-    , NonDet.NQueens.benchmark (id @[_])
+    [ NonDet.NQueens.benchmark "NonDet.Church" (run . NonDet.Church.runNonDet)
+    , NonDet.NQueens.benchmark "[]"            (id @[_])
     ]
   ]
