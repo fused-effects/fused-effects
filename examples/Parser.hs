@@ -13,7 +13,6 @@ import Data.List (intercalate)
 import GHC.Generics (Generic1)
 import Test.Tasty
 import Test.Tasty.QuickCheck
--- import Test.QuickCheck
 
 example :: TestTree
 example = testGroup "parser"
