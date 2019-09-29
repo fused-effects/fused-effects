@@ -24,6 +24,7 @@ import Data.Maybe (fromJust)
 import qualified Data.Semigroup as S
 import Prelude hiding (fail)
 
+-- | Run a 'Choose' effect, passing branches and results to the supplied continuations.
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf m = runChooseC m fork leaf
 
