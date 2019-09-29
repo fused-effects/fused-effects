@@ -7,10 +7,8 @@ module Control.Effect.Spec
 
 import Control.Carrier
 import Control.Carrier.Error.Either
-import Control.Carrier.Fail.Either
 import Control.Carrier.Reader
 import Control.Carrier.State.Strict
-import Prelude hiding (fail)
 import Test.Hspec
 import Test.Inspection as Inspection
 import Test.Tasty
@@ -25,7 +23,6 @@ tests = testGroup "Effect"
 spec :: Spec
 spec = do
   inference
-  reinterpretation
 
 inference :: Spec
 inference = describe "inference" $ do
@@ -44,28 +41,6 @@ newtype HasEnv env m a = HasEnv { runHasEnv :: m a }
 
 instance Carrier sig m => Carrier sig (HasEnv env m) where
   eff = HasEnv . eff . handleCoercible
-
-
-reinterpretation :: Spec
-reinterpretation = describe "reinterpretation" $ do
-  it "can reinterpret effects into other effects" $
-    run (runState "a" ((++) <$> reinterpretReader (local ('b':) ask) <*> get)) `shouldBe` ("a", "baa")
-
-reinterpretReader :: ReinterpretReaderC r m a -> StateC r m a
-reinterpretReader = runReinterpretReaderC
-
-newtype ReinterpretReaderC r m a = ReinterpretReaderC { runReinterpretReaderC :: StateC r m a }
-  deriving (Applicative, Functor, Monad, MonadFail)
-
-instance (Carrier sig m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretReaderC r m) where
-  eff (L (Ask       k)) = ReinterpretReaderC get >>= k
-  eff (L (Local f m k)) = do
-    a <- ReinterpretReaderC get
-    ReinterpretReaderC (put (f a))
-    v <- m
-    ReinterpretReaderC (put a)
-    k v
-  eff (R other)         = ReinterpretReaderC (eff (R (handleCoercible other)))
 
 
 failureOf :: Inspection.Result -> Maybe String
