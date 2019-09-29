@@ -85,6 +85,9 @@ fusion' = testGroup "fusion"
   , testCase "eliminates nested StateCs" $
     failureOf $(inspectTest $ 'countBoth `doesNotUse` ''StateC)
     @?= Nothing
+  , testCase "eliminates catch and throw" $
+    failureOf $(inspectTest $ 'throwing `doesNotUse` ''ErrorC)
+    @?= Nothing
   ]
 
 fusion :: Spec
