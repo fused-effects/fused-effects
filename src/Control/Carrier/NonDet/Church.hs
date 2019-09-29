@@ -129,5 +129,3 @@ fold fork leaf nil = go where
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Data.Foldable (asum)
