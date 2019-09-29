@@ -15,9 +15,9 @@ Effect types must have two type parameters: `m`, denoting any computations which
 Next, we can flesh out the definition of the `Teletype` effect by providing constructors for each primitive operation:
 
 ```haskell
-data Teletype (m :: * -> *) k
-  = Read (String -> k)
-  | Write String k
+data Teletype m k
+  = Read (String -> m k)
+  | Write String (m k)
   deriving (Functor)
 ```
 
