@@ -123,6 +123,7 @@ test-suite test
     , fused-effects
     , hspec               >= 2.4.1
     , inspection-testing ^>= 0.4
+    , tasty              ^>= 1.2
 
 test-suite doctest
   import:              common
