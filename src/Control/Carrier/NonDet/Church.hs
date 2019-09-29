@@ -72,6 +72,10 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
   fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
+-- | Separate fixpoints are computed for each branch.
+--
+-- >>> run (runNonDetA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
+-- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
     mfix (runNonDetA . f . head)
@@ -128,4 +132,5 @@ fold fork leaf nil = go where
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
