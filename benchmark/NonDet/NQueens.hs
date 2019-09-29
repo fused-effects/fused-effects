@@ -5,11 +5,10 @@
 -- Based largely on the implementation by Sreekar Shastry,
 -- available at https://github.com/sshastry/queenslogic
 
-module NonDet.NQueens (runQueens, benchmark) where
+module NonDet.NQueens (benchmark) where
 
 import Control.Applicative
-import Control.Carrier.NonDet.Church
-import Control.Carrier.Pure
+import Control.Monad (guard)
 import Data.Foldable
 import Data.List
 import Gauge hiding (benchmark)
@@ -46,11 +45,8 @@ addOne n curr = do
 queens :: (Alternative m, Monad m) => Int -> m Board
 queens n = foldl' (>>=) (pure empty) (replicate n (addOne n))
 
-runQueens :: NonDetC PureC Board -> [Board]
-runQueens = run . runNonDet
-
-benchmark :: Gauge.Benchmark
-benchmark = bgroup "N-queens problem"
+benchmark :: (Alternative m, Monad m) => (m Board -> [Board]) -> Gauge.Benchmark
+benchmark runQueens = bgroup "N-queens problem"
   [ bench "4"  $ whnf (runQueens . queens) 4
   , bench "8"  $ whnf (runQueens . queens) 8
   , bench "16" $ whnf (runQueens . queens) 16
