@@ -53,6 +53,10 @@ instance Alternative (CullC m) where
       runReader cull (runCullC l) <|> runReader cull (runCullC r)
   {-# INLINE (<|>) #-}
 
+-- | Separate fixpoints are computed for each branch.
+--
+-- >>> run (runCullA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
+-- [[0,1,2],[0,-1,-2]]
 deriving instance MonadFix m => MonadFix (CullC m)
 
 instance MonadPlus (CullC m)
@@ -71,4 +75,5 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
