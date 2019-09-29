@@ -13,5 +13,6 @@ main = do
     describe "Control.Effect.Spec" Control.Effect.Spec.spec
 
   defaultMain $ testGroup "unit tests"
-    [ Control.Effect.NonDet.Spec.tests
+    [ Control.Effect.Spec.tests
+    , Control.Effect.NonDet.Spec.tests
     ]
