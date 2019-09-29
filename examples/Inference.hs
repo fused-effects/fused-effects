@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, TypeOperators, UndecidableInstances #-}
 module Inference
 ( example
 ) where
@@ -12,6 +12,9 @@ example :: TestTree
 example = testGroup "inference"
   [ testCase "can be wrapped for better type inference" $
     run (runHasEnv (runEnv "i" ((++) <$> askEnv <*> askEnv)))
+    @?= "ii"
+  , testCase "allows unwrapped accessors" $
+    run (runHasEnv (runEnv "i" ((++) <$> ask @String <*> ask @String)))
     @?= "ii"
   ]
 
