@@ -24,6 +24,7 @@ class Member (sub :: (* -> *) -> (* -> *)) sup where
   -- | Inject a member of a signature into the signature.
   inj :: sub m a -> sup m a
 
+-- | Reflexivity: @t@ is a member of itself.
 instance Member t t where
   inj = id
 
