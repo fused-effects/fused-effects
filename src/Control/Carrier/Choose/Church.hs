@@ -20,9 +20,9 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.List.NonEmpty (NonEmpty(..), head)
+import Data.List.NonEmpty (NonEmpty(..), head, tail)
 import qualified Data.Semigroup as S
-import Prelude hiding (head)
+import Prelude hiding (head, tail)
 
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf m = runChooseC m fork leaf
