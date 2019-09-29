@@ -20,7 +20,11 @@ instance Effect   Empty
 
 -- | Abort the computation.
 --
---   prop> run (runEmpty empty) === Nothing
+-- 'empty' annihilates '>>=':
+--
+-- @
+-- 'abort' '>>=' k = 'abort'
+-- @
 empty :: Has Empty sig m => m a
 empty = send Empty
 
