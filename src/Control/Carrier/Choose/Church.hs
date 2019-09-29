@@ -95,3 +95,9 @@ fold fork leaf = go where
   go (Leaf a)   = leaf a
   go (Fork a b) = fork (go a) (go b)
 {-# INLINE fold #-}
+
+
+-- $setup
+-- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
+-- >>> import Test.QuickCheck
