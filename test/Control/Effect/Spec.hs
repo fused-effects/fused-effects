@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, MultiWayIf, TemplateHaskell, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE MultiWayIf, TemplateHaskell, TypeApplications #-}
 {-# OPTIONS_GHC -O2 -fplugin Test.Inspection.Plugin #-}
 module Control.Effect.Spec
 ( tests
