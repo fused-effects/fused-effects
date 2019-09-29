@@ -17,7 +17,7 @@ import Test.Tasty
 
 tests :: TestTree
 tests = testGroup "Effect"
-  [
+  [ fusion'
   ]
 
 
@@ -71,6 +71,9 @@ instance (Carrier sig m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretR
 shouldSucceed :: Inspection.Result -> Expectation
 shouldSucceed (Success _) = pure ()
 shouldSucceed (Failure f) = expectationFailure f
+
+fusion' :: TestTree
+fusion' = testGroup "fusion" []
 
 fusion :: Spec
 fusion = describe "fusion" $ do
