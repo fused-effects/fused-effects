@@ -1,4 +1,4 @@
-module Control.Effect.NonDet.Spec
+module NonDet
 ( tests
 ) where
 

@@ -118,7 +118,7 @@ test-suite test
   main-is:             Spec.hs
   other-modules:
     Fusion
-    Control.Effect.NonDet.Spec
+    NonDet
   build-depends:
       base
     , fused-effects
