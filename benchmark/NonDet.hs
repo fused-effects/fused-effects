@@ -1,3 +1,4 @@
+{-# LANGUAGE TypeApplications #-}
 module NonDet
 ( benchmark
 ) where
@@ -10,4 +11,5 @@ import qualified NonDet.NQueens
 benchmark :: Gauge.Benchmark
 benchmark = bgroup "NonDet"
   [ NonDet.NQueens.benchmark (run . NonDet.Church.runNonDet)
+  , NonDet.NQueens.benchmark (id @[_])
   ]
