@@ -66,6 +66,10 @@ instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
   fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
+-- | Separate fixpoints are computed for each branch.
+--
+-- >>> run (runCutA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
+-- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (CutC m) where
   mfix f = CutC (\ cons nil _ ->
     mfix (runCut
@@ -96,4 +100,5 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
