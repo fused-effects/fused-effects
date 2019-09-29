@@ -45,7 +45,7 @@ instance {-# OVERLAPPABLE #-}
          Member l (l :+: r) where
   inj = L
 
--- | Right-recursion: if @t@ is a member of @r@, we can inject it into @r@ in O(n), followed by lifting that into @l :+: r@ in O(1).
+-- | Right-recursion: if @t@ is a member of @r@, we can inject it into @r@ in O(n), followed by lifting that into @l ':+:' r@ in O(1).
 instance {-# OVERLAPPABLE #-}
          Member l r
       => Member l (l' :+: r) where
