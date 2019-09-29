@@ -32,8 +32,3 @@ empty = send Empty
 guard :: Has Empty sig m => Bool -> m ()
 guard True  = pure ()
 guard False = empty
-
-
--- $setup
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Empty.Maybe
