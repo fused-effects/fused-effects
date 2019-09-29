@@ -13,8 +13,8 @@ main :: IO ()
 main = do
   hspec $ do
     Parser.spec
-    ReinterpretLog.spec
   defaultMain $ testGroup "examples"
     [ Inference.example
+    , ReinterpretLog.example
     , Teletype.example
     ]

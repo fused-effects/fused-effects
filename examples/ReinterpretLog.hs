@@ -28,7 +28,7 @@
 {-# LANGUAGE UndecidableInstances       #-}
 
 module ReinterpretLog
-  ( spec
+  ( example
   , application
   , runApplication
   ) where
@@ -42,7 +42,8 @@ import Data.Function          ((&))
 import Data.Kind              (Type)
 import GHC.Generics           (Generic1)
 import Prelude                hiding (log)
-import Test.Hspec
+import Test.Tasty
+import Test.Tasty.HUnit
 
 
 --------------------------------------------------------------------------------
@@ -226,14 +227,14 @@ collectLogMessages =
 
 
 -- Test spec.
-spec :: Spec
-spec =
-  describe "reinterpret log" $
-    it "reinterprets logs" $
-      ((do
-          log (Debug "foo")
-          log (Info "bar"))
-        & reinterpretLog renderLogMessage
-        & collectLogMessages
-        & run)
-      `shouldBe` (["[debug] foo", "[info] bar"], ())
+example :: TestTree
+example = testGroup "reinterpret log"
+  [ testCase "reinterprets logs" $
+    ((do
+        log (Debug "foo")
+        log (Info "bar"))
+      & reinterpretLog renderLogMessage
+      & collectLogMessages
+      & run)
+    @?= (["[debug] foo", "[info] bar"], ())
+  ]
