@@ -51,3 +51,4 @@ benchmark runQueens = bgroup "N-queens problem"
   , bench "8"  $ whnf (runQueens . queens) 8
   , bench "16" $ whnf (runQueens . queens) 16
   ]
+{-# INLINE benchmark #-}
