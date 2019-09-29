@@ -18,7 +18,7 @@ import Test.Tasty.HUnit
 
 tests :: TestTree
 tests = testGroup "Effect"
-  [ fusion'
+  [ fusion
   ]
 
 
@@ -26,7 +26,6 @@ spec :: Spec
 spec = do
   inference
   reinterpretation
-  fusion
 
 inference :: Spec
 inference = describe "inference" $ do
@@ -69,16 +68,12 @@ instance (Carrier sig m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretR
   eff (R other)         = ReinterpretReaderC (eff (R (handleCoercible other)))
 
 
-shouldSucceed :: Inspection.Result -> Expectation
-shouldSucceed (Success _) = pure ()
-shouldSucceed (Failure f) = expectationFailure f
-
 failureOf :: Inspection.Result -> Maybe String
 failureOf (Success _) = Nothing
 failureOf (Failure f) = Just f
 
-fusion' :: TestTree
-fusion' = testGroup "fusion"
+fusion :: TestTree
+fusion = testGroup "fusion"
   [ testCase "eliminates StateCs" $
     failureOf $(inspectTest $ 'countDown `doesNotUse` ''StateC)
     @?= Nothing
@@ -92,20 +87,6 @@ fusion' = testGroup "fusion"
     failureOf $(inspectTest $ 'countDown `doesNotUse` 'eff)
     @?= Nothing
   ]
-
-fusion :: Spec
-fusion = describe "fusion" $ do
-  it "eliminates StateCs" $ do
-    shouldSucceed $(inspectTest $ 'countDown `doesNotUse` ''StateC)
-
-  it "eliminates nested StateCs" $ do
-    shouldSucceed $(inspectTest $ 'countBoth `doesNotUse` ''StateC)
-
-  it "eliminates catch and throw" $ do
-    shouldSucceed $(inspectTest $ 'throwing `doesNotUse` ''ErrorC)
-
-  it "eliminates calls to eff" $ do
-    shouldSucceed $(inspectTest $ 'countDown `doesNotUse` 'eff)
 
 countDown :: Int -> (Int, Int)
 countDown start = run . runState start $ go
