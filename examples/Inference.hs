@@ -31,6 +31,9 @@ example = testGroup "inference"
 askEnv :: Has (Reader env) sig m => HasEnv env m env
 askEnv = ask
 
+-- | A handler for 'HasEnv' & 'ReaderC' with the same @env@ parameter.
+--
+--   Any 'askEnv's occurring in the second argument will have to unify not only with each other, but also with the first argument. Thus, if @ghc@ can infer the type of the any of these, it can infer all of them.
 runEnv :: env -> HasEnv env (ReaderC env m) a -> m a
 runEnv r = runReader r . runHasEnv
 
