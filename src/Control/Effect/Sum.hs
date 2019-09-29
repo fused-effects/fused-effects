@@ -40,7 +40,7 @@ instance {-# OVERLAPPABLE #-}
     reassoc (R (L l)) = L (R l)
     reassoc (R (R r)) = R r
 
--- | Left occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
+-- | Left-occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
 instance {-# OVERLAPPABLE #-}
          Member l (l :+: r) where
   inj = L
