@@ -10,6 +10,8 @@
 
 - Defines a new `Has` constraint synonym, conveniently combining `Carrier` and `Member` constraints and used for all effect constructors. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
+- Allows effects to be defined and handled as sums of other effects, while still using the constructors for the component effects. This has been used to redefine `NonDet` as a sum of `Empty` and `Choose`. ([#199](https://github.com/fused-effects/fused-effects/pull/199), [#219](https://github.com/fused-effects/fused-effects/pull/219))
+
 ## Backwards-incompatible changes
 
 - Fixes unlawful behaviour in the `Applicative` instance for `ErrorC`, which had different behaviour between `<*>` and `ap` in the presence of a divergent rhs. In order to accomplish this, `ErrorC` has been defined as a wrapper around `Control.Monad.Trans.Except.ExceptT`. ([#228](https://github.com/fused-effects/fused-effects/pull/228))
@@ -21,8 +23,6 @@
 - Removes `fmap'` and `handlePure`, both deprecated in 0.5.0.0 ([#205](https://github.com/fused-effects/fused-effects/pull/205)).
 
 - Redefines `NonDetC` as a Church-encoded binary tree instead of a Church-encoded list ([#197](https://github.com/fused-effects/fused-effects/pull/197)).
-
-- Removes the `NonDet` effect, replacing it with the combination of the new `Choose` and `Empty` effects ([#199](https://github.com/fused-effects/fused-effects/pull/199)).
 
 - Removes the `OnceC` carrier for `Cull` effects, replacing it with the composition of `CullC` on some other `Alternative` carrier, e.g. `NonDetC` ([#204](https://github.com/fused-effects/fused-effects/pull/204)).
 

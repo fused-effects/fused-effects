@@ -84,10 +84,10 @@ instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf _ -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Empty :+: Choose :+: sig) (NonDetC m) where
-  eff (L Empty)          = empty
-  eff (R (L (Choose k))) = k True <|> k False
-  eff (R (R other))      = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= fold fork leaf nil
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
+  eff (L (L Empty))      = empty
+  eff (L (R (Choose k))) = k True <|> k False
+  eff (R other)          = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= fold fork leaf nil
   {-# INLINE eff #-}
 
 

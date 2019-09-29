@@ -50,11 +50,11 @@ instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Cull :+: Empty :+: Choose :+: sig) (CullC m) where
+instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
   eff (L (Cull m k))         = CullC (local (const True) (runCullC m)) >>= k
-  eff (R (L Empty))          = empty
-  eff (R (R (L (Choose k)))) = k True <|> k False
-  eff (R (R (R other)))      = CullC (eff (R (R (R (handleCoercible other)))))
+  eff (R (L (L Empty)))      = empty
+  eff (R (L (R (Choose k)))) = k True <|> k False
+  eff (R (R other))          = CullC (eff (R (R (handleCoercible other))))
   {-# INLINE eff #-}
 
 
