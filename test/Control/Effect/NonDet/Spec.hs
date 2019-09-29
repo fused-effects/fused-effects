@@ -1,11 +1,26 @@
 module Control.Effect.NonDet.Spec
 ( spec
+, tests
 ) where
 
 import Control.Carrier.Error.Either
 import Control.Carrier.NonDet.Church
 import Control.Carrier.State.Strict
 import Test.Hspec
+import Test.Tasty
+import Test.Tasty.HUnit
+
+tests :: TestTree
+tests = testGroup "NonDet"
+  [ interactions
+  ]
+
+interactions :: TestTree
+interactions = testGroup "interactions"
+  [ testCase "collects results of effects run before it" $
+    run (runNonDet (runState 'a' (pure 'z' <|> put 'b' *> get <|> get)))
+    @?= [('a', 'z'), ('b', 'b'), ('a', 'a')]
+  ]
 
 spec :: Spec
 spec = do
