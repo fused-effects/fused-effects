@@ -139,7 +139,9 @@ benchmark benchmark
   type:               exitcode-stdio-1.0
   hs-source-dirs:     benchmark
   main-is:            Bench.hs
-  other-modules:      NonDet.NQueens
+  other-modules:
+    NonDet
+    NonDet.NQueens
   build-depends:
       base
     , fused-effects
