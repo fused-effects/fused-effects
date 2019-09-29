@@ -25,6 +25,7 @@ import Control.Monad.Trans.Maybe
 --   prop> run (runEmpty (pure a)) === Just a
 runEmpty :: EmptyC m a -> m (Maybe a)
 runEmpty = runMaybeT . runEmptyC
+{-# INLINE runEmpty #-}
 
 newtype EmptyC m a = EmptyC { runEmptyC :: MaybeT m a }
   deriving (Applicative, Functor, Monad, MonadFix, MonadIO, MonadTrans)
