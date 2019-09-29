@@ -38,6 +38,7 @@ runEnv :: env -> HasEnv env (ReaderC env m) a -> m a
 runEnv r = runReader r . runHasEnv
 
 
+-- | The identity monad transformer, with an extra phantom type parameter.
 newtype HasEnv env m a = HasEnv { runHasEnv :: m a }
   deriving (Applicative, Functor, Monad)
 
