@@ -53,7 +53,6 @@ library
     Control.Carrier.Error.Either
     Control.Carrier.Fail.Either
     Control.Carrier.Fresh.Strict
-    Control.Carrier.Interpose
     Control.Carrier.Interpret
     Control.Carrier.Lift
     Control.Carrier.NonDet.Church

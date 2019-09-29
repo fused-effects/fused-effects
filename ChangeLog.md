@@ -6,8 +6,6 @@
 
 - Adds a `foldMapA` function to `Control.Effect.NonDet` mapping containers into nondeterministic computations using a supplied function. ([#204](https://github.com/fused-effects/fused-effects/pull/204))
 
-- Defines new `Inject` and `Project` typeclasses, each providing half of `Member`, and redefines `Member` as a constraint synonym for both of them. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
-
 - Defines a new `Has` constraint synonym, conveniently combining `Carrier` and `Member` constraints and used for all effect constructors. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
 - Allows effects to be defined and handled as sums of other effects, while still using the constructors for the component effects. This has been used to redefine `NonDet` as a sum of `Empty` and `Choose`. ([#199](https://github.com/fused-effects/fused-effects/pull/199), [#219](https://github.com/fused-effects/fused-effects/pull/219))
@@ -35,6 +33,10 @@
   - Handlers which return an `Alternative` are suffixed with `A`, e.g. `runNonDetA`.
   - Handlers which return a `Monoid` are suffixed with `M`, e.g. `runNonDetM`.
   - Handlers which return a `Semigroup` are suffixed with `S`, e.g. `runChooseS`.
+
+- Removes `InterposeC` & `runInterpose` due to their inefficiency. They can be replaced with use of `InterpretC`/`runInterpret` for the desired effect. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
+
+- Removes `prj` from `Member`, as it was only used in `InterposeC` (see above), and was generally inadvisable due to its lack of modularity. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
 
 # v0.5.0.1
 
