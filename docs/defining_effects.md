@@ -5,7 +5,7 @@ Effects are a powerful mechanism for abstraction, and so defining new effects is
 It’s often helpful to start by specifying the types of the desired operations. For our example, we’re going to define a `Teletype` effect, with `read` and `write` operations, which read a string from some input and write a string to some output, respectively:
 
 ```haskell
-data Teletype (m :: * -> *) k
+data Teletype m k
 read :: Has Teletype sig m => m String
 write :: Has Teletype sig m => String -> m ()
 ```
