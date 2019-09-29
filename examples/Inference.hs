@@ -7,6 +7,7 @@ import Control.Carrier
 import Control.Carrier.Reader
 import Test.Tasty
 import Test.Tasty.HUnit
+import Test.Tasty.QuickCheck
 
 example :: TestTree
 example = testGroup "inference"
@@ -17,9 +18,9 @@ example = testGroup "inference"
   -- However, when the type is polymorphic, this can require contortions: @-XScopedTypeVariables@ and @forall@ annotations just to bring the type variables into scope, etc., and can be especially inconvenient in @ghci.
   --
   -- Sometimes we would like to be able to constrain the type by context instead. In these cases, we can use a @newtype@ with a phantom type parameter, plus a wrapper around 'ask' which uses that type parameter to constrain its return type, to provide enough context for the types to be inferred without annotation or @-XTypeApplications@.
-  , testCase "phantom type parameters constrain inference" $
-    run (runHasEnv (runEnv "i" ((++) <$> askEnv <*> askEnv)))
-    @?= "ii"
+  , testProperty "phantom type parameters constrain inference" $
+    \ x -> run (runHasEnv (runEnv [x] ((++) <$> askEnv <*> askEnv)))
+    === [x, x :: Integer]
   ]
 
 
