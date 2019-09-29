@@ -6,12 +6,12 @@ module NonDet
 import qualified Control.Carrier.NonDet.Church as NonDet.Church
 import           Control.Carrier.Pure
 import           Gauge hiding (benchmark)
-import qualified NonDet.NQueens
+import qualified NonDet.NQueens as NQueens
 
 benchmark :: Gauge.Benchmark
 benchmark = bgroup "NonDet"
   [ bgroup "N-queens problem"
-    [ NonDet.NQueens.benchmark "NonDet.Church" (run . NonDet.Church.runNonDet)
-    , NonDet.NQueens.benchmark "[]"            (id @[_])
+    [ NQueens.benchmark "NonDet.Church" (run . NonDet.Church.runNonDet)
+    , NQueens.benchmark "[]"            (id @[_])
     ]
   ]
