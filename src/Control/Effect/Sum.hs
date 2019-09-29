@@ -18,6 +18,7 @@ instance (HFunctor f, HFunctor g) => HFunctor (f :+: g)
 instance (Effect f, Effect g)     => Effect   (f :+: g)
 
 
+-- | The class of types present in a signature.
 class Member (sub :: (* -> *) -> (* -> *)) sup where
   inj :: sub m a -> sup m a
 
