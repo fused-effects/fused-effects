@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Choose.Church
 ( -- * Choose effect
   module Control.Effect.Choose
@@ -12,7 +12,7 @@ module Control.Carrier.Choose.Church
 , run
 ) where
 
-import Control.Applicative as Alt ((<|>), liftA2)
+import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Effect.Choose
 import Control.Monad (join)
@@ -20,9 +20,9 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Maybe (fromJust)
+import Data.List.NonEmpty (NonEmpty(..), head)
 import qualified Data.Semigroup as S
-import Prelude hiding (fail)
+import Prelude hiding (head)
 
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf m = runChooseC m fork leaf
@@ -55,15 +55,16 @@ instance Fail.MonadFail m => Fail.MonadFail (ChooseC m) where
 
 -- | Separate fixpoints are computed for each branch.
 --
--- >>> run (runChooseS @[[Integer]] (pure . pure) (take 3 <$> mfix (\ as -> pure (0 : map succ as) Control.Effect.Choose.<|> pure (0 : map pred as))))
+-- >>> run (runChooseS @[[Integer]] (pure . pure) (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
 -- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (ChooseC m) where
   mfix f = ChooseC $ \ fork leaf ->
-    mfix (runChoose
-      (liftA2 Fork)
-      (pure . Leaf)
-      . f . fromJust . fold (Alt.<|>) Just)
-    >>= fold fork leaf
+    mfix (runChooseS (pure . pure) . f . head)
+    >>= \case
+      a:|[] -> leaf a
+      a:|_  -> leaf a `fork` runChoose fork leaf (mfix (liftAll . fmap tail . runChooseS (pure . pure) . f))
+      where
+    liftAll m = ChooseC $ \ fork leaf -> m >>= foldr1 fork . fmap leaf
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (ChooseC m) where
