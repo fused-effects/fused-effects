@@ -75,10 +75,7 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
 
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
-    mfix (runNonDet
-      (liftA2 Fork)
-      (pure . Leaf)
-      (pure Nil)
+    mfix (runNonDetA
       . f . fromJust . fold (<|>) Just Nothing)
     >>= fold fork leaf nil
   {-# INLINE mfix #-}
