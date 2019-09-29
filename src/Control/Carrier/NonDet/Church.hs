@@ -76,7 +76,7 @@ instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
     mfix (runNonDetA . f . head)
     >>= foldr
-      (\ a _ -> leaf a `fork` runNonDet fork leaf nil (mfix (liftAll . fmap tail . runNonDetA . f)))
+      (\ a _ -> runNonDet fork leaf nil (pure a <|> mfix (liftAll . fmap tail . runNonDetA . f)))
       nil where
     liftAll m = NonDetC $ \ fork leaf nil -> m >>= foldr (fork . leaf) nil
   {-# INLINE mfix #-}
