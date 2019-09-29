@@ -19,50 +19,50 @@ spec :: Spec
 spec = describe "parser" $ do
   describe "parse" $ do
     prop "returns pure values at the end of input" $
-      \ a -> run (runNonDet (parse "" (pure a))) == [a :: Integer]
+      \ a -> run (runNonDetA (parse "" (pure a))) == [a :: Integer]
 
     prop "fails if input remains" $
-      \ c cs a -> run (runNonDet (parse (c:cs) (pure (a :: Integer)))) == []
+      \ c cs a -> run (runNonDetA (parse (c:cs) (pure (a :: Integer)))) == []
 
   describe "satisfy" $ do
     prop "matches with a predicate" $
-      \ c f -> run (runNonDet (parse [c] (satisfy (applyFun f)))) == if applyFun f c then [c] else []
+      \ c f -> run (runNonDetA (parse [c] (satisfy (applyFun f)))) == if applyFun f c then [c] else []
 
     prop "fails at end of input" $
-      \ f -> run (runNonDet (parse "" (satisfy (applyFun f)))) == []
+      \ f -> run (runNonDetA (parse "" (satisfy (applyFun f)))) == []
 
     prop "fails if input remains" $
-      \ c1 c2 f -> run (runNonDet (parse [c1, c2] (satisfy (applyFun f)))) == []
+      \ c1 c2 f -> run (runNonDetA (parse [c1, c2] (satisfy (applyFun f)))) == []
 
     prop "consumes input" $
-      \ c1 c2 f -> run (runNonDet (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) == if applyFun f c1 && applyFun f c2 then [(c1, c2)] else []
+      \ c1 c2 f -> run (runNonDetA (parse [c1, c2] ((,) <$> satisfy (applyFun f) <*> satisfy (applyFun f)))) == if applyFun f c1 && applyFun f c2 then [(c1, c2)] else []
 
   describe "factor" $ do
     prop "matches positive integers" $
-      \ a -> run (runNonDet (runCut (parse (show (abs a)) factor))) == [abs a]
+      \ a -> run (runCutA (parse (show (abs a)) factor)) == [abs a]
 
     prop "matches parenthesized expressions" . forAll (sized arbNested) $
-      \ as -> run (runNonDet (runCut (parse ('(' : intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as) ++ ")") factor))) == [sum (map (product . map abs) as)]
+      \ as -> run (runCutA (parse ('(' : intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as) ++ ")") factor)) == [sum (map (product . map abs) as)]
 
   describe "term" $ do
     prop "matches factors" $
-      \ a -> run (runNonDet (runCut (parse (show (abs a)) term))) == [abs a]
+      \ a -> run (runCutA (parse (show (abs a)) term)) == [abs a]
 
     prop "matches multiplication" $
-      \ as -> run (runNonDet (runCut (parse (intercalate "*" (show . abs <$> 1:as)) term))) == [product (map abs as)]
+      \ as -> run (runCutA (parse (intercalate "*" (show . abs <$> 1:as)) term)) == [product (map abs as)]
 
   describe "expr" $ do
     prop "matches factors" $
-      \ a -> run (runNonDet (runCut (parse (show (abs a)) expr))) == [abs a]
+      \ a -> run (runCutA (parse (show (abs a)) expr)) == [abs a]
 
     prop "matches multiplication" $
-      \ as -> run (runNonDet (runCut (parse (intercalate "*" (show . abs <$> 1:as)) expr))) == [product (map abs as)]
+      \ as -> run (runCutA (parse (intercalate "*" (show . abs <$> 1:as)) expr)) == [product (map abs as)]
 
     prop "matches addition" $
-      \ as -> run (runNonDet (runCut (parse (intercalate "+" (show . abs <$> 0:as)) expr))) == [sum (map abs as)]
+      \ as -> run (runCutA (parse (intercalate "+" (show . abs <$> 0:as)) expr)) == [sum (map abs as)]
 
     prop "respects order of operations" . forAll (sized arbNested) $
-      \ as -> run (runNonDet (runCut (parse (intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as)) expr))) == [sum (map (product . map abs) as)]
+      \ as -> run (runCutA (parse (intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as)) expr)) == [sum (map (product . map abs) as)]
 
     where arbNested :: Arbitrary a => Int -> Gen [[a]]
           arbNested 0 = pure []

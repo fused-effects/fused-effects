@@ -39,6 +39,5 @@ resetFresh m = send (Reset m pure)
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Carrier.Fresh.Strict
--- >>> import Control.Carrier.Pure
 -- >>> import Control.Monad (replicateM)
 -- >>> import Data.List (nub)
