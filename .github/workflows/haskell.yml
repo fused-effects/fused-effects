@@ -9,7 +9,7 @@ jobs:
     strategy:
       matrix:
         ghc: [8.8.1, 8.6.5, 8.4.4, 8.2.2]
-        cabal-install: [2.4]
+        cabal-install: [3.0]
 
     steps:
     - uses: actions/checkout@master
