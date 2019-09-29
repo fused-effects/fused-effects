@@ -14,6 +14,6 @@ import Control.Carrier.Pure
 import Control.Effect.Class
 import Control.Effect.Sum
 
-type Has eff sig m = (Inject eff sig, Carrier sig m)
+type Has eff sig m = (Member eff sig, Carrier sig m)
 
 send :: Has eff sig m => eff m a -> m a
