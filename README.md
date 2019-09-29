@@ -80,34 +80,33 @@ Finally, since the fusion of carrier algebras occurs as a result of the selectio
 
 ### Using built-in effects
 
-Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `fused-effects`, this is done by means of a `Member` constraint to require the effect’s presence in a _signature_, and a `Carrier` constraint to relate the signature to the `Monad`. For example, to use a `State` effect managing a `String`, one would write:
+Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `fused-effects`, this is done by means of a `Has` constraint to require the effect’s presence in a _signature_, and to relate the signature to the _carrier_ you’re computing in. For example, to use a `State` effect managing a `String`, one would write:
 
 ```haskell
-action :: (Member (State String) sig, Carrier sig m) => m ()
+action :: Has (State String) sig m => m ()
 ```
 
-(Additional constraints may be necessary depending on the precise operations required, e.g. to make the `Monad` methods available.)
-
-Multiple effects can be required simply by adding their corresponding `Member` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
+Multiple effects can be required simply by adding more `Has` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
 
 ```haskell
-action :: (Member (State String) sig, Member (Reader Int) sig, Carrier sig m) => m ()
+action :: (Has (State String) sig m, Has (Reader Int) sig m) => m ()
 ```
 
 Different effects make different operations available; see the documentation for individual effects for more information about their operations. Note that we generally don't program against an explicit list of effect components: we take the typeclass-oriented approach, adding new constraints to `sig` as new capabilities become necessary. If you want to name and share some predefined list of effects, it's best to use the `-XConstraintKinds` extension to GHC, capturing the elements of `sig` as a type synonym of kind `Constraint`:
 
 ```haskell
-type Shared sig = ( Member (State String) sig
-                  , Member (Reader Int)   sig
-                  , Member (Writer Graph) sig
-                  )
+type Shared sig m
+  = ( Has (State String) sig m
+    , Has (Reader Int)   sig m
+    , Has (Writer Graph) sig m
+    )
 
-myFunction :: (Shared sig, Carrier sig m) => Int -> m ()
+myFunction :: Shared sig m => Int -> m ()
 ```
 
 ### Running effects
 
-Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) invoking some specific `Carrier` instance. For example, we can run a `State` computation using `runState`:
+Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`:
 
 ```haskell
 example1 :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
@@ -121,7 +120,7 @@ example1 list = runState 0 $ do
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
 ```haskell
-example2 :: (Carrier sig m, Effect sig, Monad m) => m (Int, ())
+example2 :: (Carrier sig m, Effect sig) => m (Int, ())
 example2 = runReader "hello" . runState 0 $ do
   list <- ask
   put (length (list :: String))
@@ -192,11 +191,11 @@ Finally, this project is licensed under the BSD 3-clause [license][].
 
 ### Development
 
-Development of `fused-effects` is typically done using `cabal new-build`:
+Development of `fused-effects` is typically done using `cabal v2-build`:
 
 ```shell
-cabal new-build # build the library
-cabal new-test  # build and run the examples, unit tests, and doctests
+cabal v2-build # build the library
+cabal v2-test  # build and run the examples, unit tests, and doctests
 ```
 
 The package is available on [hackage][], and can be used by adding it to a component’s `build-depends` field in your `.cabal` file.
@@ -211,7 +210,7 @@ Though `fused-effects` is suitable for production work, it is currently in a pre
 
 ## Benchmarks
 
-To run the provided benchmark suite, use `cabal new-bench`. You may wish to provide the `-O2` compiler option to view performance under aggressive optimizations. `fused-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
+To run the provided benchmark suite, use `cabal v2-bench`. You may wish to provide the `-O2` compiler option to view performance under aggressive optimizations. `fused-effects` has been [benchmarked against a number of other effect systems](https://github.com/joshvera/freemonad-benchmark). See also [@patrickt’s benchmarks](https://github.com/patrickt/effects-benchmarks).
 
 
 ## Related work
@@ -228,9 +227,11 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 
 * [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computations.
 * [`fused-effects-exceptions`][exc] provides handlers for exceptions thrown in the `IO` monad.
+* [`fused-effects-random`][] provides a `Random` effect integrated into a `fused-effects` stack.
 
 [exc]: https://github.com/fused-effects/fused-effects-exceptions
 [felens]: http://hackage.haskell.org/package/fused-effects-lens
+[`fused-effects-random`]: https://github.com/fused-effects/fused-effects-random
 [lens]: http://hackage.haskell.org/package/lens
 
 ### Comparison to `mtl`
@@ -249,14 +250,14 @@ newtype Wrapper s m a = Wrapper { runWrapper :: m a }
 
 instance Carrier sig m => Carrier sig (Wrapper s m) where …
 
-getState :: (Carrier sig m, Member (State s) m) => Wrapper m s
+getState :: Has (State s) sig m => Wrapper s m s
 getState = get
 ```
 
 Indeed, `Wrapper` can now be made an instance of `MonadState`:
 
 ```haskell
-instance (Carrier sig m, Member (State s) sig, Monad m) => MTL.MonadState s (Wrapper s m) where
+instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
   get = Control.Effect.State.get
   put = Control.Effect.State.put
 ```

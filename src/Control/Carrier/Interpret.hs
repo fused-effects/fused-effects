@@ -1,18 +1,22 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
 
-module Control.Effect.Interpret
+module Control.Carrier.Interpret
 ( runInterpret
 , runInterpretState
 , InterpretC(..)
 , Reifies
 , Handler
+  -- * Re-exports
+, Carrier
+, Has
+, run
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Effect.Carrier
-import Control.Effect.State
+import Control.Carrier
+import Control.Carrier.State.Strict
 import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -94,7 +98,7 @@ runInterpretState handler state m =
 
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
   InterpretC { runInterpretC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 
 instance MonadTrans (InterpretC s sig) where

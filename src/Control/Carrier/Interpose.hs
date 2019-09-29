@@ -5,16 +5,21 @@ This module provides an 'InterposeC' carrier capable of "eavesdropping" on reque
 made to other carriers. This is a useful capability for dynamism in deeply-nested
 effect stacks, but can lead to complicated control flow. Be careful.
 -}
-module Control.Effect.Interpose
-  ( InterposeC (..)
-  , runInterpose
-  ) where
+module Control.Carrier.Interpose
+( InterposeC (..)
+, runInterpose
+  -- * Re-exports
+, Carrier
+, Has
+, run
+) where
 
 import Control.Applicative
-import Control.Effect.Carrier
-import Control.Effect.Reader
+import Control.Carrier
+import Control.Carrier.Reader
+import Control.Effect.Sum
 import Control.Monad (MonadPlus (..))
-import Control.Monad.Fail
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -31,7 +36,7 @@ runInterpose :: (forall x . eff m x -> m x) -> InterposeC eff m a -> m a
 runInterpose handler = runReader (Handler handler) . runInterposeC
 
 newtype InterposeC eff m a = InterposeC { runInterposeC :: ReaderC (Handler eff m) m a }
-  deriving (Alternative, Applicative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (InterposeC eff) where
   lift = InterposeC . lift
@@ -41,7 +46,7 @@ newtype Handler eff m = Handler (forall x . eff m x -> m x)
 runHandler :: (HFunctor eff, Functor m) => Handler eff m -> eff (ReaderC (Handler eff m) m) a -> m a
 runHandler h@(Handler handler) = handler . hmap (runReader h)
 
-instance (HFunctor eff, Carrier sig m, Member eff sig) => Carrier sig (InterposeC eff m) where
+instance (HFunctor eff, Carrier sig m, Project eff sig) => Carrier sig (InterposeC eff m) where
   eff (op :: sig (InterposeC eff m) a)
     | Just (op' :: eff (InterposeC eff m) a) <- prj op = do
       handler <- InterposeC ask
