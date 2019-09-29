@@ -21,7 +21,6 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Maybe (fromJust)
 
 runNonDet :: (m b -> m b -> m b) -> (a -> m b) -> m b -> NonDetC m a -> m b
 runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
@@ -75,9 +74,9 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
 
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
-    mfix (runNonDetA
-      . f . fromJust . fold (<|>) Just Nothing)
-    >>= fold fork leaf nil
+    mfix (runNonDetA . f . head)
+    >>= foldr (\ a _ -> leaf a `fork` runNonDet fork leaf nil (mfix (liftAll . fmap tail . runNonDetA . f))) nil where
+    liftAll m = NonDetC $ \ fork leaf nil -> m >>= foldr (fork . leaf) nil
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
