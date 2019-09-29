@@ -5,8 +5,14 @@ module Main
 import qualified Control.Effect.Spec
 import qualified Control.Effect.NonDet.Spec
 import Test.Hspec
+import Test.Tasty
 
 main :: IO ()
-main = hspec . parallel $ do
-  describe "Control.Effect.Spec" Control.Effect.Spec.spec
-  describe "Control.Effect.NonDet.Spec" Control.Effect.NonDet.Spec.spec
+main = do
+  hspec . parallel $ do
+    describe "Control.Effect.Spec" Control.Effect.Spec.spec
+    describe "Control.Effect.NonDet.Spec" Control.Effect.NonDet.Spec.spec
+
+  defaultMain $ testGroup "unit tests"
+    [ Control.Effect.NonDet.Spec.tests
+    ]
