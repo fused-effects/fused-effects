@@ -11,7 +11,6 @@ main :: IO ()
 main = do
   hspec . parallel $ do
     describe "Control.Effect.Spec" Control.Effect.Spec.spec
-    describe "Control.Effect.NonDet.Spec" Control.Effect.NonDet.Spec.spec
 
   defaultMain $ testGroup "unit tests"
     [ Control.Effect.NonDet.Spec.tests
