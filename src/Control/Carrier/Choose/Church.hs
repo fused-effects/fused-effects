@@ -4,6 +4,7 @@ module Control.Carrier.Choose.Church
   module Control.Effect.Choose
   -- * Choose carrier
 , runChoose
+, runChooseS
 , ChooseC(..)
   -- * Re-exports
 , Carrier
@@ -20,10 +21,16 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Maybe (fromJust)
+import qualified Data.Semigroup as S
 import Prelude hiding (fail)
 
+-- | Run a 'Choose' effect, passing branches and results to the supplied continuations.
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf m = runChooseC m fork leaf
+
+-- | Run a 'Choose' effect, passing results to the supplied function, and merging branches together using 'S.<>'.
+runChooseS :: (Applicative m, S.Semigroup b) => (a -> m b) -> ChooseC m a -> m b
+runChooseS leaf = runChoose (liftA2 (S.<>)) leaf
 
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype ChooseC m a = ChooseC
@@ -50,7 +57,9 @@ instance Fail.MonadFail m => Fail.MonadFail (ChooseC m) where
 
 instance MonadFix m => MonadFix (ChooseC m) where
   mfix f = ChooseC $ \ fork leaf ->
-    mfix (runChoose (liftA2 Fork) (pure . Leaf)
+    mfix (runChoose
+      (liftA2 Fork)
+      (pure . Leaf)
       . f . fromJust . fold (Alt.<|>) Just)
     >>= fold fork leaf
   {-# INLINE mfix #-}
