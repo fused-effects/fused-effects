@@ -5,7 +5,7 @@ module Control.Carrier.Trace.Returning
   -- * Trace carrier
 , runTrace
 , TraceC(..)
--- * Re-exports
+  -- * Re-exports
 , Carrier
 , Has
 , run

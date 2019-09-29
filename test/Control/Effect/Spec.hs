@@ -9,7 +9,6 @@ import Control.Carrier.Error.Either
 import Control.Carrier.Fail.Either
 import Control.Carrier.Reader
 import Control.Carrier.State.Strict
-import Control.Effect.Sum
 import Prelude hiding (fail)
 import Test.Hspec
 import Test.Inspection as Inspection
@@ -18,7 +17,6 @@ spec :: Spec
 spec = do
   inference
   reinterpretation
-  interposition
   fusion
 
 inference :: Spec
@@ -60,30 +58,6 @@ instance (Carrier sig m, Effect sig) => Carrier (Reader r :+: sig) (ReinterpretR
     ReinterpretReaderC (put a)
     k v
   eff (R other)         = ReinterpretReaderC (eff (R (handleCoercible other)))
-
-
-interposition :: Spec
-interposition = describe "interposition" $ do
-  it "can interpose handlers without changing the available effects" $
-    run (runFail (interposeFail (fail "world"))) `shouldBe` (Left "hello, world" :: Either String Int)
-
-  it "interposition only intercepts effects in its scope" $ do
-    run (runFail (fail "world" *> interposeFail (pure (0 :: Int)))) `shouldBe` Left "world"
-    run (runFail (interposeFail (pure (0 :: Int)) <* fail "world")) `shouldBe` Left "world"
-
-interposeFail :: InterposeC m a -> m a
-interposeFail = runInterposeC
-
-newtype InterposeC m a = InterposeC { runInterposeC :: m a }
-  deriving (Applicative, Functor, Monad)
-
-instance (Carrier sig m, Member Fail sig) => MonadFail (InterposeC m) where
-  fail s = send (Fail s)
-
-instance (Carrier sig m, Member Fail sig) => Carrier sig (InterposeC m) where
-  eff op
-    | Just (Fail s) <- prj op = InterposeC (send (Fail ("hello, " ++ s)))
-    | otherwise               = InterposeC (eff (handleCoercible op))
 
 
 shouldSucceed :: Inspection.Result -> Expectation
