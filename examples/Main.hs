@@ -9,6 +9,6 @@ import Test.Hspec
 
 main :: IO ()
 main = hspec $ do
-  Teletype.spec
-  ReinterpretLog.spec
   Parser.spec
+  ReinterpretLog.spec
+  Teletype.spec
