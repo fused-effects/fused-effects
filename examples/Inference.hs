@@ -6,15 +6,14 @@ module Inference
 import Control.Carrier
 import Control.Carrier.Reader
 import Test.Tasty
-import Test.Tasty.HUnit
 import Test.Tasty.QuickCheck
 
 example :: TestTree
 example = testGroup "inference"
-  [ testCase "type applications instantiate types" $
+  [ testProperty "type applications instantiate types" $
   -- Without @-XTypeApplications@ or some other constraint on the type, 'ask' would error: all @ghc@ would be able to prove about type of the 'Reader' effect, and thus the return type of 'ask', is that it’s a list of some kind. The type application allows us to specify it.
-    run (runHasEnv (runEnv "i" ((++) <$> ask @String <*> ask @String)))
-    @?= "ii"
+    \ x -> run (runHasEnv (runEnv [x] ((++) <$> ask @String <*> ask @String)))
+    === [x, x]
   -- However, when the type is polymorphic, this can require contortions: @-XScopedTypeVariables@ and @forall@ annotations just to bring the type variables into scope, etc., and can be especially inconvenient in @ghci.
   --
   -- Sometimes we would like to be able to constrain the type by context instead. In these cases, we can use a @newtype@ with a phantom type parameter, plus a wrapper around 'ask' which uses that type parameter to constrain its return type, to provide enough context for the types to be inferred without annotation or @-XTypeApplications@.
