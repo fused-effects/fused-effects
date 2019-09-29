@@ -37,6 +37,7 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
   ErrorC (ExceptT l) <|> ErrorC (ExceptT r) = ErrorC (ExceptT (l <|> r))
   {-# INLINE (<|>) #-}
 
+-- | 'ErrorC' passes 'MonadPlus' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
