@@ -141,6 +141,7 @@ benchmark benchmark
   hs-source-dirs:     benchmark
   main-is:            Bench.hs
   other-modules:
+    NonDet
     NonDet.NQueens
   build-depends:
       base
