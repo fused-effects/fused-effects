@@ -75,9 +75,9 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
     mfix (runNonDetA . f . head)
-    >>= foldr
-      (\ a _ -> runNonDet fork leaf nil (pure a <|> mfix (liftAll . fmap tail . runNonDetA . f)))
-      nil where
+    >>= runNonDet fork leaf nil . foldr
+      (\ a _ -> pure a <|> mfix (liftAll . fmap tail . runNonDetA . f))
+      empty where
     liftAll m = NonDetC $ \ fork leaf nil -> m >>= foldr (fork . leaf) nil
   {-# INLINE mfix #-}
 
