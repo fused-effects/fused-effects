@@ -107,7 +107,6 @@ test-suite examples
   build-depends:
       base
     , fused-effects
-    , hspec       >= 2.4.1
     , QuickCheck  >= 2.7 && < 3
     , tasty              ^>= 1.2
     , tasty-hunit        ^>= 0.10
