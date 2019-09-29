@@ -26,6 +26,7 @@ import Control.Monad.Trans.Maybe
 --   prop> run (runNonDet (let f x = pure x <|> f x in f a)) === Just a
 runNonDet :: NonDetC m a -> m (Maybe a)
 runNonDet = runMaybeT . runNonDetC
+{-# INLINE runNonDet #-}
 
 newtype NonDetC m a = NonDetC { runNonDetC :: MaybeT m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
