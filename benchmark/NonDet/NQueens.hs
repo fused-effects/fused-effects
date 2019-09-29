@@ -9,6 +9,7 @@ module NonDet.NQueens (runQueens, benchmark) where
 
 import Control.Applicative
 import Control.Carrier.NonDet.Church
+import Control.Carrier.Pure
 import Data.Foldable
 import Data.List
 import Gauge hiding (benchmark)
@@ -45,12 +46,12 @@ addOne n curr = do
 queens :: (Alternative m, Monad m) => Int -> m Board
 queens n = foldl' (>>=) (pure empty) (replicate n (addOne n))
 
-runQueens :: Int -> [Board]
-runQueens = run . runNonDet . queens
+runQueens :: NonDetC PureC Board -> [Board]
+runQueens = run . runNonDet
 
 benchmark :: Gauge.Benchmark
 benchmark = bgroup "N-queens problem"
-  [ bench "4"  $ whnf runQueens 4
-  , bench "8"  $ whnf runQueens 8
-  , bench "16" $ whnf runQueens 16
+  [ bench "4"  $ whnf (runQueens . queens) 4
+  , bench "8"  $ whnf (runQueens . queens) 8
+  , bench "16" $ whnf (runQueens . queens) 16
   ]
