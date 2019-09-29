@@ -40,9 +40,9 @@ install:
 
 script:
 - cabal v2-build --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
-- cabal v2-run -j2 test
-- cabal v2-run -j2 examples
-- cabal v2-run -j2 doctest
-- cabal v2-haddock -j2
+- cabal v2-run --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2 test
+- cabal v2-run --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2 examples
+- cabal v2-run --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2 doctest
+- cabal v2-haddock --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
 - cabal v2-sdist
 - cabal check
