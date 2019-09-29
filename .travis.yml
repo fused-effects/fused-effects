@@ -36,13 +36,14 @@ before_install:
 
 install:
 - cabal v2-update
-- cabal v2-build --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2 --only-dependencies
+- cabal v2-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
+- cabal build --only-dependencies
 
 script:
-- cabal v2-build --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
-- cabal v2-run --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2 test
-- cabal v2-run --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2 examples
-- cabal v2-run --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2 doctest
-- cabal v2-haddock --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
+- cabal v2-build
+- cabal v2-run test
+- cabal v2-run examples
+- cabal v2-run doctest
+- cabal v2-haddock
 - cabal v2-sdist
 - cabal check
