@@ -28,6 +28,7 @@ class Member (sub :: (* -> *) -> (* -> *)) sup where
 instance Member t t where
   inj = id
 
+-- | Left-recursion: if @t@ is a member of @l1 ':+:' l2 ':+:' r@, then we can inject it into @(l1 ':+:' l2) ':+:' r@ by injection into a right-recursive signature, followed by left-association.
 instance {-# OVERLAPPABLE #-}
          Member t (l1 :+: l2 :+: r)
       => Member t ((l1 :+: l2) :+: r) where
