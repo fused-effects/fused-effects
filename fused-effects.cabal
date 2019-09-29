@@ -99,29 +99,32 @@ test-suite examples
   hs-source-dirs:      examples
   main-is:             Main.hs
   other-modules:
+    Inference
     Parser
     ReinterpretLog
     Teletype
   build-depends:
       base
     , fused-effects
-    , hspec       >= 2.4.1
-    , QuickCheck  >= 2.7 && < 3
+    , tasty              ^>= 1.2
+    , tasty-hunit        ^>= 0.10
+    , tasty-quickcheck   ^>= 0.10
     , transformers
 
 test-suite test
   import:              common
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
-  main-is:             Spec.hs
+  main-is:             Test.hs
   other-modules:
-    Control.Effect.Spec
-    Control.Effect.NonDet.Spec
+    Fusion
+    NonDet
   build-depends:
       base
     , fused-effects
-    , hspec               >= 2.4.1
     , inspection-testing ^>= 0.4
+    , tasty              ^>= 1.2
+    , tasty-hunit        ^>= 0.10
 
 test-suite doctest
   import:              common
