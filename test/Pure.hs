@@ -4,6 +4,10 @@ module Pure
 import Control.Carrier.Pure
 import Test.QuickCheck
 
+instance Arbitrary1 PureC where
+  liftArbitrary genA = PureC <$> genA
+  liftShrink shrinkA = map PureC . shrinkA . run
+
 instance Arbitrary a => Arbitrary (PureC a) where
-  arbitrary = PureC <$> arbitrary
-  shrink = map PureC . shrink . run
+  arbitrary = arbitrary1
+  shrink = shrink1
