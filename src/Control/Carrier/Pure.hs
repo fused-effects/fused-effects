@@ -19,6 +19,7 @@ run = runPureC
 {-# INLINE run #-}
 
 newtype PureC a = PureC { runPureC :: a }
+  deriving (Eq, Ord, Show)
 
 instance Functor PureC where
   fmap = coerce
