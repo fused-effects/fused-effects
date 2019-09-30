@@ -117,26 +117,18 @@ test-suite test
   hs-source-dirs:      test
   main-is:             Test.hs
   other-modules:
+    Error
+    Error.Either
     Fusion
     NonDet
+    Pure
   build-depends:
       base
     , fused-effects
     , inspection-testing ^>= 0.4
     , tasty              ^>= 1.2
     , tasty-hunit        ^>= 0.10
-
-library fused-effects-arbitrary
-  import: common
-  hs-source-dirs: test
-  exposed-modules:
-    Error
-    Error.Either
-    Pure
-  build-depends:
-      base
-    , fused-effects
-    , QuickCheck
+    , tasty-quickcheck   ^>= 0.10
     , transformers
   ghc-options: -Wno-orphans
 

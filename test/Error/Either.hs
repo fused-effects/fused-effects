@@ -4,7 +4,7 @@ module Error.Either
 
 import Control.Carrier.Error.Either
 import Control.Monad.Trans.Except
-import Test.QuickCheck
+import Test.Tasty.QuickCheck
 
 instance (Arbitrary e, Arbitrary1 m, Arbitrary a) => Arbitrary (ErrorC e m a) where
   arbitrary = arbitrary1

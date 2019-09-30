@@ -2,7 +2,7 @@ module Pure
 () where
 
 import Control.Carrier.Pure
-import Test.QuickCheck
+import Test.Tasty.QuickCheck
 
 instance Arbitrary1 PureC where
   liftArbitrary genA = PureC <$> genA

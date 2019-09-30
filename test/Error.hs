@@ -6,7 +6,7 @@ module Error
 
 import Control.Carrier
 import Control.Effect.Error
-import Test.QuickCheck
+import Test.Tasty.QuickCheck
 
 throwError_annihilation :: (Eq (m b), Has (Error e) sig m, Show (m b)) => e -> (a -> m b) -> Property
 throwError_annihilation e f = (throwError e >>= f) === throwError e
