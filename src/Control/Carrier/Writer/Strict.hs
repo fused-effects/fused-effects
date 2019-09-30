@@ -8,7 +8,6 @@ module Control.Carrier.Writer.Strict
 , WriterC(..)
   -- * Re-exports
 , Carrier
-, Has
 , run
 ) where
 

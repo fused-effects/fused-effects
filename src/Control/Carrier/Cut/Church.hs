@@ -11,7 +11,6 @@ module Control.Carrier.Cut.Church
 , CutC(..)
   -- * Re-exports
 , Carrier
-, Has
 , run
 ) where
 
@@ -23,7 +22,6 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Prelude hiding (fail)
 
 -- | Run a 'Cut' effect with the supplied continuations for 'pure'/'<|>', 'empty', and 'cutfail'.
 --
