@@ -24,25 +24,27 @@ instance Effect (Error exc) where
 
 -- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
 --
---   prop> run (runError (throwError a)) === Left @Int @Int a
+-- 'throwError' annihilates '>>=':
+--
+-- @
+-- 'throwError' e '>>=' k = 'throwError' e
+-- @
 throwError :: Has (Error exc) sig m => exc -> m a
 throwError = send . Throw
 
 -- | Run a computation which can throw errors with a handler to run on error.
 --
--- Errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
+-- 'catchError' substitutes 'throwError':
+--
+-- @
+-- 'throwError' e \``catchError`\` f = f e
+-- @
+--
+-- Once consequence of this law is that errors thrown by the handler will escape up to the nearest enclosing 'catchError' (if any).
+--
 -- Note that this effect does /not/ handle errors thrown from impure contexts such as IO,
 -- nor will it handle exceptions thrown from pure code. If you need to handle IO-based errors,
 -- consider if 'Control.Effect.Resource' fits your use case; if not, use 'liftIO' with
 -- 'Control.Exception.try' or use 'Control.Exception.Catch' from outside the effect invocation.
---
---   prop> run (runError (pure a `catchError` pure)) === Right a
---   prop> run (runError (throwError a `catchError` pure)) === Right @Int @Int a
---   prop> run (runError (throwError a `catchError` (throwError @Int))) === Left @Int @Int a
 catchError :: Has (Error exc) sig m => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h pure)
-
-
--- $setup
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Error.Either
