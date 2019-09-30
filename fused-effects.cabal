@@ -126,6 +126,18 @@ test-suite test
     , tasty              ^>= 1.2
     , tasty-hunit        ^>= 0.10
 
+library fused-effects-arbitrary
+  import: common
+  hs-source-dirs: test
+  exposed-modules:
+    Pure
+  build-depends:
+      base
+    , fused-effects
+    , QuickCheck
+    , transformers
+  ghc-options: -Wno-orphans
+
 test-suite doctest
   import:              common
   type:                exitcode-stdio-1.0
