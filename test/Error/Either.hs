@@ -14,7 +14,7 @@ import Test.Tasty.QuickCheck
 tests :: TestTree
 tests = testGroup "Error.Either"
   [ testProperty "throwError annihilation" $
-    \ e k -> throwError_annihilation @(ErrorC Integer PureC) @Integer @Integer e (applyFun @Integer @(ErrorC Integer PureC Integer) k)
+    \ e k -> throwError_annihilation @E ((~=) @E @B) e (applyFun @A k)
   , testProperty "catchError substitution" $
     \ e f -> catchError_substitution @(ErrorC Integer PureC) @Integer @Integer e (applyFun @Integer f)
   ]
