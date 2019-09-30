@@ -16,7 +16,7 @@ tests = testGroup "Error.Either"
   [ testProperty "throwError annihilation" $
     \ e k -> throwError_annihilation @E ((~=) @E @B) e (applyFun @A k)
   , testProperty "catchError substitution" $
-    \ e f -> catchError_substitution @(ErrorC Integer PureC) @Integer @Integer e (applyFun @Integer f)
+    \ e f -> catchError_substitution @E ((~=) @E @A) e (applyFun f)
   ]
 
 (~=) :: (Eq e, Eq a, Show e, Show a) => ErrorC e PureC a -> ErrorC e PureC a -> Property

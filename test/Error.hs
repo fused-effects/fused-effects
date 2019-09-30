@@ -6,10 +6,9 @@ module Error
 
 import Control.Carrier
 import Control.Effect.Error
-import Test.Tasty.QuickCheck
 
 throwError_annihilation :: Has (Error e) sig m => (m b -> m b -> prop) -> e -> (a -> m b) -> prop
 throwError_annihilation (===) e k = (throwError e >>= k) === throwError e
 
-catchError_substitution :: (Eq (m a), Has (Error e) sig m, Show (m a)) => e -> (e -> m a) -> Property
-catchError_substitution e f = (throwError e `catchError` f) === f e
+catchError_substitution :: Has (Error e) sig m => (m a -> m a -> prop) -> e -> (e -> m a) -> prop
+catchError_substitution (===) e f = (throwError e `catchError` f) === f e
