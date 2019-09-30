@@ -130,6 +130,7 @@ library fused-effects-arbitrary
   import: common
   hs-source-dirs: test
   exposed-modules:
+    Error
     Error.Either
     Pure
   build-depends:
