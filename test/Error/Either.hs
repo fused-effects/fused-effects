@@ -19,6 +19,9 @@ tests = testGroup "Error.Either"
     \ e f -> catchError_substitution @(ErrorC Integer PureC) @Integer @Integer e (applyFun @Integer f)
   ]
 
+(~=) :: (Eq e, Eq a, Show e, Show a) => ErrorC e PureC a -> ErrorC e PureC a -> Property
+m1 ~= m2 = run (runError m1) === run (runError m2)
+
 
 newtype E = E Integer
   deriving (Arbitrary, Eq, Generic, Ord, Show)
