@@ -1,0 +1,31 @@
+name: Build
+
+on: [push]
+
+jobs:
+  matrix-test:
+    runs-on: ubuntu-18.04
+    strategy:
+      matrix:
+        ghc:
+          - '8.2.2'
+          - '8.4.4'
+          - '8.6.5'
+          - '8.8.1'
+        cabal:
+          - '2.4'
+          - '3.0'
+
+    name: Build fused-effects ghc ${{ matrix.ghc }}, cabal ${{ matrix.cabal }}
+    steps:
+      - uses: actions/checkout@master
+      - uses: actions/setup-haskell@v1
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
+          architecture: 'x64'
+      - run: |
+         cabal v2-update -v
+         cabal v2-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
+         cabal v2-build --only-dependencies
+         cabal v2-build
