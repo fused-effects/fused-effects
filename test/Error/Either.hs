@@ -5,12 +5,18 @@ module Error.Either
 
 import Control.Carrier.Error.Either
 import Control.Monad.Trans.Except
+import Error
+import Pure
 import Test.Tasty
 import Test.Tasty.QuickCheck
 
 tests :: TestTree
 tests = testGroup "Error.Either"
-  []
+  [ testProperty "throwError annihilation" $
+    \ e k -> throwError_annihilation @(ErrorC Integer PureC) @Integer @Integer e (applyFun @Integer @(ErrorC Integer PureC Integer) k)
+  , testProperty "catchError substitution" $
+    \ e f -> throwError_annihilation @(ErrorC Integer PureC) @Integer @Integer e (applyFun @Integer f)
+  ]
 
 
 instance (Arbitrary e, Arbitrary1 m, Arbitrary a) => Arbitrary (ErrorC e m a) where
