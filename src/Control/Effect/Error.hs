@@ -25,7 +25,7 @@ instance Effect (Error exc) where
 
 -- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
 --
--- 'throwError' right-annihilates '>>=':
+-- 'throwError' annihilates '>>=':
 --
 -- @
 -- 'throwError' e '>>=' k = 'throwError' e
