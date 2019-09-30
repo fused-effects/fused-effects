@@ -1,30 +1,31 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 module Teletype
-( spec
+( example
 , runTeletypeIO
 ) where
 
 import Prelude hiding (read)
 
-import Control.Effect.Carrier
-import Control.Effect.State
-import Control.Effect.Writer
+import Control.Carrier
+import Control.Carrier.State.Strict
+import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class
 import GHC.Generics (Generic1)
-import Test.Hspec
-import Test.Hspec.QuickCheck
+import Test.Tasty
+import Test.Tasty.QuickCheck
 
-spec :: Spec
-spec = describe "teletype" $ do
-  prop "reads" $
-    \ line -> run (runTeletypeRet [line] read) `shouldBe` ([], ([], line))
+example :: TestTree
+example = testGroup "teletype"
+  [ testProperty "reads" $
+    \ line -> run (runTeletypeRet [line] read) === ([], ([], line))
 
-  prop "writes" $
-    \ input output -> run (runTeletypeRet input (write output)) `shouldBe` ([output], (input, ()))
+  , testProperty "writes" $
+    \ input output -> run (runTeletypeRet input (write output)) === ([output], (input, ()))
 
-  prop "writes multiple things" $
-    \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) `shouldBe` ([output1, output2], (input, ()))
+  , testProperty "writes multiple things" $
+    \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) === ([output1, output2], (input, ()))
+  ]
 
 data Teletype m k
   = Read (String -> m k)
@@ -32,10 +33,10 @@ data Teletype m k
   deriving stock (Functor, Generic1)
   deriving anyclass (HFunctor, Effect)
 
-read :: (Member Teletype sig, Carrier sig m) => m String
+read :: Has Teletype sig m => m String
 read = send (Read pure)
 
-write :: (Member Teletype sig, Carrier sig m) => String -> m ()
+write :: Has Teletype sig m => String -> m ()
 write s = send (Write s (pure ()))
 
 

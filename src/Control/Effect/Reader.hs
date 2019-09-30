@@ -1,28 +1,13 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
 module Control.Effect.Reader
 ( -- * Reader effect
   Reader(..)
 , ask
 , asks
 , local
-  -- * Reader carrier
-, runReader
-, ReaderC(..)
-  -- * Re-exports
-, Carrier
-, Member
-, run
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
-import Control.Effect.Carrier
-import Control.Monad (MonadPlus(..))
-import Control.Monad.Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.IO.Unlift
-import Control.Monad.Trans.Class
-import Prelude hiding (fail)
+import Control.Carrier
 
 data Reader r m k
   = Ask (r -> m k)
@@ -41,85 +26,25 @@ instance Effect (Reader r) where
 -- | Retrieve the environment value.
 --
 --   prop> run (runReader a ask) === a
-ask :: (Member (Reader r) sig, Carrier sig m) => m r
+ask :: Has (Reader r) sig m => m r
 ask = send (Ask pure)
 
 -- | Project a function out of the current environment value.
 --
 --   prop> snd (run (runReader a (asks (applyFun f)))) === applyFun f a
-asks :: (Member (Reader r) sig, Carrier sig m) => (r -> a) -> m a
+asks :: Has (Reader r) sig m => (r -> a) -> m a
 asks f = send (Ask (pure . f))
 
 -- | Run a computation with an environment value locally modified by the passed function.
 --
 --   prop> run (runReader a (local (applyFun f) ask)) === applyFun f a
 --   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) === (a, applyFun f a, a)
-local :: (Member (Reader r) sig, Carrier sig m) => (r -> r) -> m a -> m a
+local :: Has (Reader r) sig m => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
-
-
--- | Run a 'Reader' effect with the passed environment value.
---
---   prop> run (runReader a (pure b)) === b
-runReader :: r -> ReaderC r m a -> m a
-runReader r c = runReaderC c r
-{-# INLINE runReader #-}
-
-newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
-  deriving (Functor)
-
-instance Applicative m => Applicative (ReaderC r m) where
-  pure = ReaderC . const . pure
-  {-# INLINE pure #-}
-  ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
-  {-# INLINE (<*>) #-}
-  ReaderC u *> ReaderC v = ReaderC $ \ r -> u r *> v r
-  {-# INLINE (*>) #-}
-  ReaderC u <* ReaderC v = ReaderC $ \ r -> u r <* v r
-  {-# INLINE (<*) #-}
-
-instance Alternative m => Alternative (ReaderC r m) where
-  empty = ReaderC (const empty)
-  {-# INLINE empty #-}
-  ReaderC l <|> ReaderC r = ReaderC (liftA2 (<|>) l r)
-  {-# INLINE (<|>) #-}
-
-instance Monad m => Monad (ReaderC r m) where
-  ReaderC a >>= f = ReaderC (\ r -> a r >>= runReader r . f)
-  {-# INLINE (>>=) #-}
-
-instance MonadFail m => MonadFail (ReaderC r m) where
-  fail = ReaderC . const . fail
-  {-# INLINE fail #-}
-
-instance MonadFix m => MonadFix (ReaderC s m) where
-  mfix f = ReaderC (\ r -> mfix (runReader r . f))
-  {-# INLINE mfix #-}
-
-instance MonadIO m => MonadIO (ReaderC r m) where
-  liftIO = ReaderC . const . liftIO
-  {-# INLINE liftIO #-}
-
-instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
-
-instance MonadTrans (ReaderC r) where
-  lift = ReaderC . const
-  {-# INLINE lift #-}
-
-instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
-  askUnliftIO = ReaderC $ \r -> withUnliftIO $ \u -> pure (UnliftIO (\(ReaderC x) -> unliftIO u (x r)))
-  {-# INLINE askUnliftIO #-}
-  withRunInIO inner = ReaderC $ \r -> withRunInIO $ \go -> inner (go . runReader r)
-  {-# INLINE withRunInIO #-}
-
-instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
-  eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
-  eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
-  eff (R other)         = ReaderC (\ r -> eff (hmap (runReader r) other))
-  {-# INLINE eff #-}
 
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
 -- >>> import Control.Effect.Pure
+-- >>> import Control.Carrier.Reader

@@ -1,26 +1,12 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
 module Control.Effect.Error
 ( -- * Error effect
   Error(..)
 , throwError
 , catchError
-  -- * Error carrier
-, runError
-, ErrorC(..)
-  -- * Re-exports
-, Carrier
-, Member
-, run
 ) where
 
-import Control.Applicative (Alternative(..), liftA2)
-import Control.Effect.Carrier
-import Control.Monad (MonadPlus(..), (<=<))
-import Control.Monad.Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Prelude hiding (fail)
+import Control.Carrier
 
 -- | An effect modelling “pure” exceptions (i.e. exceptions catchable outside of 'IO').
 data Error exc m k
@@ -44,7 +30,7 @@ instance Effect (Error exc) where
 -- @
 -- 'throwError' e '>>=' k = 'throwError' e
 -- @
-throwError :: (Member (Error exc) sig, Carrier sig m) => exc -> m a
+throwError :: Has (Error exc) sig m => exc -> m a
 throwError = send . Throw
 
 -- | Run a computation which can throw errors with a handler to run on error.
@@ -61,62 +47,8 @@ throwError = send . Throw
 -- nor will it handle exceptions thrown from pure code. If you need to handle IO-based errors,
 -- consider if 'Control.Effect.Resource' fits your use case; if not, use 'liftIO' with
 -- 'Control.Exception.try' or use 'Control.Exception.Catch' from outside the effect invocation.
-catchError :: (Member (Error exc) sig, Carrier sig m) => m a -> (exc -> m a) -> m a
+catchError :: Has (Error exc) sig m => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h pure)
-
-
--- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
---
---   prop> run (runError (throwError a)) === Left @Int @Int a
---   prop> run (runError (pure a)) === Right @Int @Int a
-runError :: ErrorC exc m a -> m (Either exc a)
-runError = runErrorC
-
-newtype ErrorC e m a = ErrorC { runErrorC :: m (Either e a) }
-  deriving (Functor)
-
-instance Applicative m => Applicative (ErrorC e m) where
-  pure a = ErrorC (pure (Right a))
-  {-# INLINE pure #-}
-  ErrorC f <*> ErrorC a = ErrorC (liftA2 (<*>) f a)
-  {-# INLINE (<*>) #-}
-
-instance Alternative m => Alternative (ErrorC e m) where
-  empty = ErrorC empty
-  {-# INLINE empty #-}
-  ErrorC l <|> ErrorC r = ErrorC (l <|> r)
-  {-# INLINE (<|>) #-}
-
-instance Monad m => Monad (ErrorC e m) where
-  ErrorC a >>= f = ErrorC (a >>= either (pure . Left) (runError . f))
-  {-# INLINE (>>=) #-}
-
-instance MonadFix m => MonadFix (ErrorC e m) where
-  mfix f = ErrorC (mfix (runError . either (error "mfix (ErrorC): function returned failure") f))
-  {-# INLINE mfix #-}
-
-instance MonadIO m => MonadIO (ErrorC e m) where
-  liftIO io = ErrorC (Right <$> liftIO io)
-  {-# INLINE liftIO #-}
-
-instance MonadFail m => MonadFail (ErrorC e m) where
-  fail s = ErrorC (fail s)
-  {-# INLINE fail #-}
-
-instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
-
-instance MonadTrans (ErrorC e) where
-  lift = ErrorC . fmap Right
-  {-# INLINE lift #-}
-
--- $
--- prop> (throwError e >>= applyFun f) ~= throwError e
--- prop> (throwError e `catchError` applyFun f) ~= applyFun f e
-instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  eff (L (Throw e))     = ErrorC (pure (Left e))
-  eff (L (Catch m h k)) = ErrorC (runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k))
-  eff (R other)         = ErrorC (eff (handle (Right ()) (either (pure . Left) runError) other))
-  {-# INLINE eff #-}
 
 
 -- $setup

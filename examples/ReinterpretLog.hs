@@ -28,21 +28,22 @@
 {-# LANGUAGE UndecidableInstances       #-}
 
 module ReinterpretLog
-  ( spec
+  ( example
   , application
   , runApplication
   ) where
 
-import Control.Effect.Carrier
-import Control.Effect.Lift
-import Control.Effect.Reader
-import Control.Effect.Writer
+import Control.Carrier
+import Control.Carrier.Lift
+import Control.Carrier.Reader
+import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class (MonadIO(..))
 import Data.Function          ((&))
 import Data.Kind              (Type)
 import GHC.Generics           (Generic1)
 import Prelude                hiding (log)
-import Test.Hspec
+import Test.Tasty
+import Test.Tasty.HUnit
 
 
 --------------------------------------------------------------------------------
@@ -64,10 +65,7 @@ renderLogMessage = \case
   Info  message -> "[info] "  ++ message
 
 -- The application: it logs two messages, then quits.
-application ::
-     ( Carrier sig m
-     , Member (Log Message) sig
-     )
+application :: Has (Log Message) sig m
   => m ()
 application = do
   log (Debug "debug message")
@@ -113,10 +111,7 @@ data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   deriving anyclass (HFunctor, Effect)
 
 -- Log an 'a'.
-log ::
-     ( Carrier sig m
-     , Member (Log a) sig
-     )
+log :: Has (Log a) sig m
   => a
   -> m ()
 log x =
@@ -168,9 +163,7 @@ newtype ReinterpretLogC s t m a
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects, one of which
      -- is 'Log t'...
-     ( Carrier sig m
-     , Member (Log t) sig
-     )
+     Has (Log t) sig m
      -- ... the 'ReinterpretLogC s t m' monad can interpret 'Log s :+: sig'
      -- effects
   => Carrier (Log s :+: sig) (ReinterpretLogC s t m) where
@@ -234,14 +227,14 @@ collectLogMessages =
 
 
 -- Test spec.
-spec :: Spec
-spec =
-  describe "reinterpret log" $
-    it "reinterprets logs" $
-      ((do
-          log (Debug "foo")
-          log (Info "bar"))
-        & reinterpretLog renderLogMessage
-        & collectLogMessages
-        & run)
-      `shouldBe` (["[debug] foo", "[info] bar"], ())
+example :: TestTree
+example = testGroup "reinterpret log"
+  [ testCase "reinterprets logs" $
+    ((do
+        log (Debug "foo")
+        log (Info "bar"))
+      & reinterpretLog renderLogMessage
+      & collectLogMessages
+      & run)
+    @?= (["[debug] foo", "[info] bar"], ())
+  ]

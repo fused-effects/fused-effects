@@ -4,6 +4,7 @@ cache:
   directories:
     - $HOME/.cabal/packages
     - $HOME/.cabal/store
+    - $TRAVIS_BUILD_DIR/dist-newstyle
 
 before_cache:
   - rm -fv $HOME/.cabal/packages/hackage.haskell.org/build-reports.log
@@ -18,8 +19,10 @@ before_cache:
 
 matrix:
   include:
-    - compiler: "ghc-8.6.2"
-      addons: {apt: {packages: [cabal-install-2.4,ghc-8.6.2], sources: [hvr-ghc]}}
+    - compiler: "ghc-8.8.1"
+      addons: {apt: {packages: [cabal-install-3.0,ghc-8.8.1], sources: [hvr-ghc]}}
+    - compiler: "ghc-8.6.5"
+      addons: {apt: {packages: [cabal-install-2.4,ghc-8.6.5], sources: [hvr-ghc]}}
     - compiler: "ghc-8.4.4"
       addons: {apt: {packages: [cabal-install-2.4,ghc-8.4.4], sources: [hvr-ghc]}}
     - compiler: "ghc-8.2.2"
@@ -32,14 +35,15 @@ before_install:
 - cabal --version
 
 install:
-- cabal new-update
-- cabal new-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always
-- cabal new-build --only-dependencies
+- cabal v2-update -v
+- cabal v2-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
+- cabal v2-build --only-dependencies
 
 script:
-- cabal new-build
-- cabal new-build benchmark
-- cabal new-test
-- cabal new-haddock
-- cabal new-sdist
+- cabal v2-build
+- cabal v2-run test
+- cabal v2-run examples
+- cabal v2-run doctest
+- cabal v2-haddock
+- cabal v2-sdist
 - cabal check
