@@ -1,10 +1,17 @@
 {-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
 module Error.Either
-() where
+( tests
+) where
 
 import Control.Carrier.Error.Either
 import Control.Monad.Trans.Except
+import Test.Tasty
 import Test.Tasty.QuickCheck
+
+tests :: TestTree
+tests = testGroup "Error.Either"
+  []
+
 
 instance (Arbitrary e, Arbitrary1 m, Arbitrary a) => Arbitrary (ErrorC e m a) where
   arbitrary = arbitrary1
