@@ -9,6 +9,8 @@ module Control.Effect.Choose
 , some1
   -- * Choosing semigroup
 , Choosing(..)
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier
