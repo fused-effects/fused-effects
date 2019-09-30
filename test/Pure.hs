@@ -1,5 +1,6 @@
 module Pure
-() where
+( module Control.Carrier.Pure
+) where
 
 import Control.Carrier.Pure
 import Test.Tasty.QuickCheck
