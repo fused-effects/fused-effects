@@ -12,6 +12,7 @@ import Control.Carrier.Class
 import Control.Effect.Pure
 import Control.Monad.Fix
 import Data.Coerce
+import Data.Functor.Classes
 
 -- | Run an action exhausted of effects to produce its final result value.
 run :: PureC a -> a
@@ -58,3 +59,13 @@ instance MonadFix PureC where
 instance Carrier Pure PureC where
   eff v = case v of {}
   {-# INLINE eff #-}
+
+
+instance Eq1 PureC where
+  liftEq eq (PureC a1) (PureC a2) = a1 `eq` a2
+
+instance Ord1 PureC where
+  liftCompare compare (PureC a1) (PureC a2) = a1 `compare` a2
+
+instance Show1 PureC where
+  liftShowsPrec sp _ d = showsUnaryWith sp "PureC" d . run
