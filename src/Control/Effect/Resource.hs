@@ -6,6 +6,8 @@ module Control.Effect.Resource
 , bracketOnError
 , finally
 , onException
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier

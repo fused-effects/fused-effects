@@ -7,7 +7,6 @@ module Control.Carrier.Reader
 , ReaderC(..)
   -- * Re-exports
 , Carrier
-, Has
 , run
 ) where
 

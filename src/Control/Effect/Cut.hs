@@ -5,6 +5,8 @@ module Control.Effect.Cut
 , cutfail
 , call
 , cut
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Applicative (Alternative(..))

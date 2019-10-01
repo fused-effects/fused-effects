@@ -6,6 +6,8 @@ module Control.Effect.Writer
 , listen
 , listens
 , censor
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier

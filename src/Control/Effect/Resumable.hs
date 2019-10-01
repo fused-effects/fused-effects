@@ -3,6 +3,8 @@ module Control.Effect.Resumable
 ( -- * Resumable effect
   Resumable(..)
 , throwResumable
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier
