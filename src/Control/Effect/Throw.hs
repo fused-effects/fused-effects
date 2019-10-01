@@ -1,4 +1,4 @@
-{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE DeriveFunctor, KindSignatures #-}
 module Control.Effect.Throw
 ( -- * Throw effect
   Throw(..)
@@ -6,3 +6,4 @@ module Control.Effect.Throw
 
 data Throw e (m :: * -> *) k
   = Throw e
+  deriving (Functor)
