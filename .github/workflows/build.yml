@@ -1,4 +1,4 @@
-name: Build
+name: Build fused-effects
 
 on: [push]
 
@@ -19,7 +19,7 @@ jobs:
     name: ghc ${{ matrix.ghc }}, cabal ${{ matrix.cabal }}
     steps:
       - uses: actions/checkout@master
-      - uses: actions/setup-haskell@master
+      - uses: actions/setup-haskell@v1
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
