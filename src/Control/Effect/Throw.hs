@@ -2,6 +2,8 @@
 module Control.Effect.Throw
 ( -- * Throw effect
   Throw(..)
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier
