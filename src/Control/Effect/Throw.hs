@@ -12,3 +12,4 @@ data Throw e (m :: * -> *) k
   deriving (Functor, Generic1)
 
 instance HFunctor (Throw e)
+instance Effect   (Throw e)
