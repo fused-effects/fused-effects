@@ -1,9 +1,11 @@
-{-# LANGUAGE DeriveFunctor, KindSignatures #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures #-}
 module Control.Effect.Throw
 ( -- * Throw effect
   Throw(..)
 ) where
 
+import GHC.Generics (Generic1)
+
 data Throw e (m :: * -> *) k
   = Throw e
-  deriving (Functor)
+  deriving (Functor, Generic1)
