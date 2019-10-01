@@ -1,2 +1,8 @@
+{-# LANGUAGE KindSignatures #-}
 module Control.Effect.Throw
-() where
+( -- * Throw effect
+  Throw(..)
+) where
+
+data Throw e (m :: * -> *) k
+  = Throw e
