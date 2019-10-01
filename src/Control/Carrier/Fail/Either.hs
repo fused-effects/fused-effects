@@ -7,7 +7,6 @@ module Control.Carrier.Fail.Either
 , FailC(..)
   -- * Re-exports
 , Carrier
-, Has
 , run
 ) where
 

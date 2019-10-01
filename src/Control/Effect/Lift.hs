@@ -3,6 +3,8 @@ module Control.Effect.Lift
 ( -- * Lift effect
   Lift(..)
 , sendM
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier
