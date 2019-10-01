@@ -67,6 +67,7 @@ library
     Control.Carrier.Trace.Printing
     Control.Carrier.Trace.Returning
     Control.Carrier.Writer.Strict
+    Control.Effect.Catch
     Control.Effect.Choose
     Control.Effect.Class
     Control.Effect.Cull
@@ -83,6 +84,7 @@ library
     Control.Effect.Resumable
     Control.Effect.State
     Control.Effect.Sum
+    Control.Effect.Throw
     Control.Effect.Trace
     Control.Effect.Writer
   build-depends:
