@@ -7,11 +7,12 @@ module Control.Effect.State
 , put
 , modify
 , modifyLazy
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier
 import GHC.Generics (Generic1)
-import Prelude hiding (fail)
 
 data State s m k
   = Get (s -> m k)
