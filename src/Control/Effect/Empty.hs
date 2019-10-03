@@ -4,6 +4,8 @@ module Control.Effect.Empty
   Empty(..)
 , empty
 , guard
+  -- * Re-exports
+, Has
 ) where
 
 import {-# SOURCE #-} Control.Carrier
