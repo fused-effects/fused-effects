@@ -56,6 +56,7 @@ library
     Control.Carrier.Interpret
     Control.Carrier.Lift
     Control.Carrier.NonDet.Church
+    Control.Carrier.NonDet.Maybe
     Control.Carrier.Pure
     Control.Carrier.Reader
     Control.Carrier.Resource
