@@ -20,7 +20,6 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Maybe (fromJust)
 
 runNonDet :: (m b -> m b -> m b) -> (a -> m b) -> m b -> NonDetC m a -> m b
 runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
@@ -72,14 +71,17 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
   fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
+-- | Separate fixpoints are computed for each branch.
+--
+-- >>> run (runNonDetA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
+-- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
-    mfix (runNonDet
-      (liftA2 Fork)
-      (pure . Leaf)
-      (pure Nil)
-      . f . fromJust . fold (<|>) Just Nothing)
-    >>= fold fork leaf nil
+    mfix (runNonDetA . f . head)
+    >>= runNonDet fork leaf nil . foldr
+      (\ a _ -> pure a <|> mfix (liftAll . fmap tail . runNonDetA . f))
+      empty where
+    liftAll m = NonDetC $ \ fork leaf nil -> m >>= foldr (fork . leaf) nil
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
@@ -129,6 +131,5 @@ fold fork leaf nil = go where
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Data.Foldable (asum)
