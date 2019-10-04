@@ -15,7 +15,7 @@ module Control.Carrier.NonDet.Church
 import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Effect.NonDet
-import Control.Monad (MonadPlus(..), join)
+import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

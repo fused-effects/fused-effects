@@ -8,6 +8,7 @@ module Control.Effect.NonDet
 , foldMapA
   -- * Re-exports
 , Alternative(..)
+, MonadPlus(..)
 , guard
 ) where
 
@@ -15,7 +16,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.Choose hiding ((<|>), many, some)
 import Control.Effect.Empty hiding (empty, guard)
 import Control.Effect.Sum
-import Control.Monad (guard)
+import Control.Monad (MonadPlus(..), guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))
 
