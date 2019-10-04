@@ -1,30 +1,40 @@
 {-# LANGUAGE TypeOperators #-}
 module Control.Effect.NonDet
 ( -- * NonDet effects
-  module Control.Effect.Choose
-, module Control.Effect.Empty
-, NonDet
+  NonDet
 , oneOf
 , foldMapA
   -- * Re-exports
 , Alternative(..)
-, MonadPlus(..)
 , guard
+, optional
+, MonadPlus(..)
+  -- * Constituent effects
+, Control.Effect.Choose.Choose (..)
+, Control.Effect.Empty.Empty (..)
 ) where
 
-import Control.Applicative (Alternative(..))
-import Control.Effect.Choose hiding ((<|>), many, some)
+import Control.Applicative (Alternative(..), optional)
+import Control.Effect.Choose hiding ((<|>), many, some, optional)
 import Control.Effect.Empty hiding (empty, guard)
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))
 
+-- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
+-- Nondeterministic operations are encapsulated by the 'Control.Applicative.Alternative'
+-- class, where 'Control.Applicative.empty' represents failure and 'Control.Applicative.<|>'
+-- represents choice. This module reexports the 'Alternative' interface. If you can't or
+-- don't want to use 'Alternative', you can use the 'Control.Effect.Empty.empty' and
+-- 'Control.Effect.Choose.<|>' effects (from 'Control.Effect.Empty' and 'Control.Effect.Choose')
+-- directly.
 type NonDet = Empty :+: Choose
 
 -- | Nondeterministically choose an element from a 'Foldable' collection.
 -- This can be used to emulate the style of nondeterminism associated with
 -- programming in the list monad:
+--
 -- @
 --   pythagoreanTriples = do
 --     a <- oneOf [1..10]
@@ -33,6 +43,7 @@ type NonDet = Empty :+: Choose
 --     guard (a^2 + b^2 == c^2)
 --     pure (a, b, c)
 -- @
+--
 oneOf :: (Foldable t, Alternative m) => t a -> m a
 oneOf = foldMapA pure
 
