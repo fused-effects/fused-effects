@@ -20,6 +20,11 @@ import Control.Monad (MonadPlus(..), guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))
 
+-- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
+-- Nondeterministic operations can be performed with the 'Control.Effect.Choose.<|>' operator
+-- for nondeterministic choice and 'Control.Effect.Empty.empty' for failure. If the
+-- carrier type for your monad has an 'Alternative' instance, you can program directly
+-- against the 'Alternative' typeclass and hide the operators provided by @fused-effects@.
 type NonDet = Empty :+: Choose
 
 -- | Nondeterministically choose an element from a 'Foldable' collection.
