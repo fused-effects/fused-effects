@@ -7,7 +7,6 @@ module Control.Carrier.NonDet.Maybe
 , NonDetC(..)
   -- * Re-exports
 , Carrier
-, Has
 , run
 ) where
 
