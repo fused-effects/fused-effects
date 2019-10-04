@@ -4,6 +4,8 @@ module Control.Effect.Fresh
   Fresh(..)
 , fresh
 , resetFresh
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier

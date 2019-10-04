@@ -7,7 +7,6 @@ module Control.Carrier.Trace.Printing
 , TraceC(..)
   -- * Re-exports
 , Carrier
-, Has
 , run
 ) where
 

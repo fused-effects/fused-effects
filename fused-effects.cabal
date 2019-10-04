@@ -68,7 +68,6 @@ library
     Control.Carrier.Trace.Printing
     Control.Carrier.Trace.Returning
     Control.Carrier.Writer.Strict
-    Control.Effect
     Control.Effect.Choose
     Control.Effect.Class
     Control.Effect.Cull

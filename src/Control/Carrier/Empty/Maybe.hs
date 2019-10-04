@@ -7,7 +7,6 @@ module Control.Carrier.Empty.Maybe
 , EmptyC(..)
   -- * Re-exports
 , Carrier
-, Has
 , run
 ) where
 

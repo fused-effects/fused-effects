@@ -3,6 +3,8 @@ module Control.Effect.Cull
 ( -- * Cull effect
   Cull(..)
 , cull
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier
