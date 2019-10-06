@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+-- | Provides a carrier for a 'Resource' effect. This carrier is implemented atop 'Control.Exception.catch'
+-- from "Control.Exception" and is thus safe in the presence of asynchronous exceptions.
 module Control.Carrier.Resource
 ( -- * Resource effect
   module Control.Effect.Resource
