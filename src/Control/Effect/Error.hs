@@ -9,7 +9,7 @@
 --
 -- Predefined carriers:
 --
--- * 'Control.Carrier.Error.Either.ErrorC', from @Control.Carrier.Error.Either@.
+-- * "Control.Carrier.Error.Either.ErrorC".
 -- * If 'Error' @e@ is the last effect in a stack, it can be interpreted directly to an 'Either' @e@.
 --
 module Control.Effect.Error

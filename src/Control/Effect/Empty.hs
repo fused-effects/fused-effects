@@ -7,7 +7,7 @@
 --
 -- Predefined carriers:
 --
--- * 'Control.Carrier.Empty.Maybe.EmptyC', from @Control.Carrier.Empty.Maybe@.
+-- * "Control.Carrier.Empty.Maybe.EmptyC".
 -- * If 'Empty' is the last effect in a stack, it can be interpreted directly to a 'Maybe'.
 --
 module Control.Effect.Empty

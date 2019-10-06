@@ -2,6 +2,10 @@
 -- | This effect provides source to an infinite source of 'Int' values, suitable
 -- for generating "fresh" values to uniquely identify data without needing to invoke
 -- random numbers or impure IO.
+--
+-- Predefined carriers:
+--
+-- * "Control.Carrier.Fresh.Strict".
 module Control.Effect.Fresh
 ( -- * Fresh effect
   Fresh(..)

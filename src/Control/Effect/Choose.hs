@@ -6,7 +6,7 @@
 --
 -- Predefined carriers:
 --
--- * 'Control.Carrier.Choose.Church.ChooseC', from @Control.Carrier.Choose.Church@.
+-- * "Control.Carrier.Choose.Church.ChooseC".
 -- * If 'Choose' is the last effect in a stack, it can be interpreted directly to a 'NonEmpty'.
 --
 module Control.Effect.Choose

@@ -7,7 +7,7 @@
 --
 -- Predefined carriers:
 --
--- * 'Control.Carrier.Reader.ReaderC', from @Control.Carrier.Reader@.
+-- * "Control.Carrier.Reader.ReaderC".
 -- * If 'Reader' @r@ is the last effect in a stack, it can be interpreted directly to @(-> r)@ (a function taking an @r@).
 --
 module Control.Effect.Reader
