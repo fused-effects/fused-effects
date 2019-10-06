@@ -1,6 +1,11 @@
 {-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 -- | A carrier for the 'Control.Effect.State.State' effect. It evaluates its inner state
 -- strictly, which is the correct choice for the majority of use cases.
+--
+-- Note that the parameter order in 'runState', 'evalState', and 'execState'
+-- is reversed compared the equivalent functions provided by @transformers@.
+-- This is an intentional decision made to enable the composition of effect
+-- handlers with '.' without invoking 'flip'.
 module Control.Carrier.State.Strict
 ( -- * State effect
   module Control.Effect.State
