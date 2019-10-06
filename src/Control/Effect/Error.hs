@@ -1,7 +1,7 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
 -- | An effect modelling failure with a descriptive error message.
 --
--- This effect is spiritually similar to the traditional @MonadError@ typeclass, though it allows
+-- This effect is similar to the traditional @MonadError@ typeclass, though it allows
 -- the presence of multiple @Error@ effects in a given effect stack. It offers precise exception
 -- handling, rather than the dynamic exception hierarchy provided by the @exceptions@ package.
 -- The 'Control.Effect.Resource' effect or the @fused-effects-exceptions@ package may be more
