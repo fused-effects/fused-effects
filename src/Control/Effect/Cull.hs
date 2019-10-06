@@ -1,4 +1,11 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
+-- | Provides an effect to cull choices in a given nondeterministic context.
+-- This effect is used in concert with 'Control.Effect.Choose.Choose' or 'Control.Effect.NonDet.NonDet'.
+-- Computations run inside a call to 'cull' will return at most one result.
+--
+-- Predefined carriers:
+--
+-- * "Control.Carrier.Cull.Church"
 module Control.Effect.Cull
 ( -- * Cull effect
   Cull(..)
@@ -25,10 +32,10 @@ instance Effect Cull where
 
 -- | Cull nondeterminism in the argument, returning at most one result.
 --
---   prop> run (runNonDet (runCull (cull (pure a <|> pure b)))) === [a]
---   prop> run (runNonDet (runCull (cull (empty  <|> pure a)))) === [a]
---   prop> run (runNonDet (runCull (cull (pure a <|> pure b) <|> pure c))) === [a, c]
---   prop> run (runNonDet (runCull (cull (asum (map pure (repeat a)))))) === [a]
+--   prop> run (runNonDetA (runCullA (cull (pure a <|> pure b)))) === [a]
+--   prop> run (runNonDetA (runCullA (cull (empty  <|> pure a)))) === [a]
+--   prop> run (runNonDetA (runCullA (cull (pure a <|> pure b) <|> pure c))) === [a, c]
+--   prop> run (runNonDetA (runCullA (cull (asum (map pure (repeat a)))))) === [a]
 cull :: Has Cull sig m => m a -> m a
 cull m = send (Cull m pure)
 
