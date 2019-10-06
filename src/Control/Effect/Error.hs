@@ -1,4 +1,17 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
+-- | An effect modelling failure with a descriptive error message.
+--
+-- This effect is spiritually similar to the traditional @MonadError@ typeclass, though it allows
+-- the presence of multiple @Error@ effects in a given effect stack. It offers precise exception
+-- handling, rather than the dynamic exception hierarchy provided by the @exceptions@ package.
+-- The 'Control.Effect.Resource' effect or the @fused-effects-exceptions@ package may be more
+-- suitable for handling dynamic/impure effect handling.
+--
+-- Predefined carriers:
+--
+-- * 'Control.Carrier.Error.Either.ErrorC', from @Control.Carrier.Error.Either@.
+-- * If 'Error' @e@ is the last effect in a stack, it can be interpreted directly to an 'Either' @e@.
+--
 module Control.Effect.Error
 ( -- * Error effect
   Error(..)
@@ -36,7 +49,7 @@ throwError = send . Throw
 -- Note that this effect does /not/ handle errors thrown from impure contexts such as IO,
 -- nor will it handle exceptions thrown from pure code. If you need to handle IO-based errors,
 -- consider if 'Control.Effect.Resource' fits your use case; if not, use 'liftIO' with
--- 'Control.Exception.try' or use 'Control.Exception.Catch' from outside the effect invocation.
+-- 'Control.Exception.try' or use 'Control.Exception.catch' from outside the effect invocation.
 --
 --   prop> run (runError (pure a `catchError` pure)) === Right a
 --   prop> run (runError (throwError a `catchError` pure)) === Right @Int @Int a
