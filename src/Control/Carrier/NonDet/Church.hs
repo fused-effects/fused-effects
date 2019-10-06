@@ -1,4 +1,14 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+-- | Provides 'NonDetC', a carrier for 'NonDet' effects providing choice and failure.
+--
+-- It can be invoked with custom functions for choice, success, and failure ('runNonDet'), or it can delegate
+-- said operations to an 'Control.Applicative.Alternative' instance ('runNonDetA') or an underlying monoidal
+-- result ('runNonDetM'). Under the hood, it uses a Church-encoded structure and a binary tree to prevent
+-- the problems associated with a naïve list-based implementation.
+--
+-- This design is based on that detailed in Ralf Hinze's [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
+--
+-- The carrier provided by "Control.Carrier.NonDet.Maybe" is similar, but can handle infinite search spaces at the cost of being able to return only one result.
 module Control.Carrier.NonDet.Church
 ( -- * NonDet effects
   module Control.Effect.NonDet
@@ -21,7 +31,13 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
-runNonDet :: (m b -> m b -> m b) -> (a -> m b) -> m b -> NonDetC m a -> m b
+-- | Run a 'NonDet' effect, using the provided functions to interpret
+-- choice, leaf results, and failure.
+runNonDet :: (m b -> m b -> m b) -- ^ Handles choice ('Control.Effect.Choose.<|>')
+          -> (a -> m b)          -- ^ Handles embedding results ('pure')
+          -> m b                 -- ^ Handles failure ('Control.Effect.Empty.empty')
+          -> NonDetC m a         -- ^ A nondeterministic
+          -> m b
 runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
@@ -33,6 +49,8 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
 
+-- | Run a 'NonDet' effect, collecting branches' results with 'mappend' and representing failure
+-- with 'mempty'. The given function parameter converts successful results of type @a@ to monoidal @b@ values.
 runNonDetM :: (Applicative m, Monoid b) => (a -> b) -> NonDetC m a -> m b
 runNonDetM leaf = runNonDet (liftA2 mappend) (pure . leaf) (pure mempty)
 
