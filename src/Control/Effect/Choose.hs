@@ -13,7 +13,7 @@ module Control.Effect.Choose
 , Has
 ) where
 
-import Control.Carrier
+import {-# SOURCE #-} Control.Carrier
 import Control.Effect.Empty
 import Data.Bool (bool)
 import Data.List.NonEmpty (NonEmpty (..))

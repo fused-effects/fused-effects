@@ -9,7 +9,7 @@ module Control.Effect.Reader
 , Has
 ) where
 
-import Control.Carrier
+import {-# SOURCE #-} Control.Carrier
 
 data Reader r m k
   = Ask (r -> m k)

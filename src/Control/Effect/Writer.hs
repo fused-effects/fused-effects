@@ -10,7 +10,7 @@ module Control.Effect.Writer
 , Has
 ) where
 
-import Control.Carrier
+import {-# SOURCE #-} Control.Carrier
 
 data Writer w m k
   = Tell w (m k)
