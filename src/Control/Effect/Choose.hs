@@ -1,4 +1,14 @@
 {-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+-- | An effect modelling nondeterminism without failure (one or more successful results).
+--
+-- The 'Control.Effect.NonDet.NonDet' effect is the composition of 'Choose' and
+-- 'Control.Effect.Empty.Empty'.
+--
+-- Predefined carriers:
+--
+-- * 'Control.Carrier.Choose.Church.ChooseC', from @Control.Carrier.Choose.Church@.
+-- * If 'Choose' is the last effect in a stack, it can be interpreted directly to a 'NonEmpty'.
+--
 module Control.Effect.Choose
 ( -- * Choose effect
   Choose(..)
