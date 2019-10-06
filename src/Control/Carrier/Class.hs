@@ -12,12 +12,16 @@ import Control.Effect.Reader (Reader(..))
 import Control.Effect.Sum ((:+:)(..))
 import Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
+import Data.List.NonEmpty (NonEmpty)
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   eff :: sig m a -> m a
 
+
+instance Carrier Choose NonEmpty where
+  eff (Choose m) = m True <> m False
 
 instance Carrier Empty Maybe where
   eff Empty = Nothing
