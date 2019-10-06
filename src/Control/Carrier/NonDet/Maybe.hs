@@ -1,4 +1,12 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+-- | Provides a carrier for 'NonDet' effects providing choice and failure.
+--
+-- This is similar to the 'Control.Carrier.NonDet.Church.NonDetC' in "Control.Carrier.NonDet.Church",
+-- but terminates immediately upon finding a successful result. This allows us to search a
+-- potentially-infinite search space, as long as said space eventually returns a result, in contrast
+-- with the Church-encoded carrier, which needs to enumerate the entire space before returning.
+--
+-- In previous versions of this package, this function was called @runNonDetOnce@.
 module Control.Carrier.NonDet.Maybe
 ( -- * NonDet effects
   module Control.Effect.NonDet
