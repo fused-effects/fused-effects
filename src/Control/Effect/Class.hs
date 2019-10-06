@@ -1,4 +1,6 @@
 {-# LANGUAGE DefaultSignatures, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators #-}
+-- | Provides the 'HFunctor' and 'Effect' classes that an effect type implements
+-- so that a carrier monad can provide an instance of 'Carrier' for that type.
 module Control.Effect.Class
 ( HFunctor(..)
 , handleCoercible
