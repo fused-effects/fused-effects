@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
--- | An effect modelling nondeterminism without choice.
+-- | An effect modelling nondeterminism without choice (success or failure).
 --
 -- This can be seen as similar to 'Control.Effect.Fail.Fail', but without an error message.
 -- The 'Control.Effect.NonDet.NonDet' effect is the composition of 'Empty' and
