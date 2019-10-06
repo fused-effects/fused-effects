@@ -1,4 +1,7 @@
 {-# LANGUAGE ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+-- | Provides a carrier for 'Resumable' that disallows resumption of exceptions.
+-- This can be useful when debugging or intercepting the behavior of a computation
+-- that invokes resumability.
 module Control.Carrier.Resumable.Either
 ( -- * Resumable effect
   module Control.Effect.Resumable
