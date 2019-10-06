@@ -1,4 +1,11 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
+-- | An effect that provides a "bracket"-style function to acquire, use, and automatically release
+-- resources, in the manner of the @resourcet@ package. The 'Control.Carrier.Resource.ResourceC'
+-- carrier ensures that resources are properly released in the presence of asynchronous exceptions.
+--
+-- Predefined carriers:
+--
+-- * "Control.Carrier.Resource".
 module Control.Effect.Resource
 ( -- * Resource effect
   Resource(..)
