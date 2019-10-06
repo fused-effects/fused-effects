@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP, FlexibleInstances, FunctionalDependencies #-}
+{-# LANGUAGE FlexibleInstances, FunctionalDependencies #-}
 module Control.Carrier.Class
 ( Carrier(..)
 ) where
@@ -13,10 +13,7 @@ import Control.Effect.Sum ((:+:)(..))
 import Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
 import Data.List.NonEmpty (NonEmpty)
-
-#if __GLASGOW_HASKELL__ < 840
-import Data.Semigroup ((<>))
-#endif
+import qualified Data.Semigroup as S
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
@@ -25,7 +22,7 @@ class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
 
 
 instance Carrier Choose NonEmpty where
-  eff (Choose m) = m True <> m False
+  eff (Choose m) = m True S.<> m False
 
 instance Carrier Empty Maybe where
   eff Empty = Nothing
