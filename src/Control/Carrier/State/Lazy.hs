@@ -1,4 +1,7 @@
 {-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+-- | A carrier for the 'Control.Effect.State.State' effect that refrains from evaluating
+-- its state until necessary. This is less efficient than "Control.Carrier.State.Strict" but
+-- allows some cyclic computations to terminate that would loop infinitely in a strict state carrier.
 module Control.Carrier.State.Lazy
 ( -- * State effect
   module State

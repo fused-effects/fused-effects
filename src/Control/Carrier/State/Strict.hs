@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+-- | A carrier for the 'Control.Effect.State.State' effect. It evaluates its inner state
+-- strictly, which is the correct choice for the majority of use cases.
 module Control.Carrier.State.Strict
 ( -- * State effect
   module Control.Effect.State
