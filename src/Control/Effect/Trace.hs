@@ -4,7 +4,7 @@
 --
 -- Predefined carriers:
 --
--- * "Control.Carrier.Trace.Printing", which logs to stdout in a 'MonadIO' context.
+-- * "Control.Carrier.Trace.Printing", which logs to stderr in a 'MonadIO' context.
 -- * "Control.Carrier.Trace.Returning", which aggregates all traces in a @[String].
 -- * "Control.Carrier.Trace.Ignoring", which discards all traced values.
 module Control.Effect.Trace
