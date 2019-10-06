@@ -42,7 +42,8 @@ instance Effect Resource where
 -- ensures that @release@ is run on the value returned from @acquire@ even
 -- if @op@ throws an exception.
 --
--- 'bracket' is safe in the presence of asynchronous exceptions.
+-- Carriers for 'bracket' must ensure that it is safe in the presence of
+-- asynchronous exceptions.
 bracket :: Has Resource sig m
         => m resource           -- ^ computation to run first ("acquire resource")
         -> (resource -> m any)  -- ^ computation to run last ("release resource")
