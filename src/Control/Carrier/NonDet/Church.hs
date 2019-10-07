@@ -30,11 +30,12 @@ import Control.Monad.Trans.Class
 -- | Run a 'NonDet' effect, using the provided functions to interpret choice, leaf results, and failure.
 --
 -- @since 1.0.0.0
-runNonDet :: (m b -> m b -> m b) -- ^ Handles choice ('Control.Effect.Choose.<|>')
-          -> (a -> m b)          -- ^ Handles embedding results ('pure')
-          -> m b                 -- ^ Handles failure ('Control.Effect.Empty.empty')
-          -> NonDetC m a         -- ^ A nondeterministic
-          -> m b
+runNonDet
+  :: (m b -> m b -> m b) -- ^ Handles choice ('<|>')
+  -> (a -> m b)          -- ^ Handles embedding results ('pure')
+  -> m b                 -- ^ Handles failure ('empty')
+  -> NonDetC m a         -- ^ A nondeterministic computation to execute
+  -> m b
 runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
