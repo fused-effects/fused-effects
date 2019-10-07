@@ -1,8 +1,10 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
--- | Provides 'WriterC', a monadic carrier for 'Control.Effect.Writer' effects. This carrier
--- performs its append operations strictly and thus avoids the space leaks inherent in lazy
--- writer monads. This is based on a post Gabriel Gonzalez made to the Haskell mailing list:
--- <https://mail.haskell.org/pipermail/libraries/2013-March/019528.html>
+
+{- | A carrier for 'Writer' effects. This carrier performs its append operations strictly and thus avoids the space leaks inherent in lazy writer monads.
+
+This implementation is based on a post Gabriel Gonzalez made to the Haskell mailing list: <https://mail.haskell.org/pipermail/libraries/2013-March/019528.html>
+-}
+
 module Control.Carrier.Writer.Strict
 ( -- * Writer effect
   module Control.Effect.Writer
