@@ -37,13 +37,13 @@ import Control.Monad.Trans.Class
 runCull :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CullC m a -> m b
 runCull fork leaf nil = runNonDet fork leaf nil . runReader False . runCullC
 
--- | Run a 'Cull' effect, interpreting the result into an 'Alternative' functor. Choice is handled with 'Control.Applicative.<|>', embedding with 'pure', and failure with 'Control.Applicative.empty'.
+-- | Run a 'Cull' effect, interpreting the result into an 'Alternative' functor. Choice is handled with '<|>', embedding with 'pure', and failure with 'Control.Applicative.empty'.
 --
 -- @since 1.0.0.0
 runCullA :: (Alternative f, Applicative m) => CullC m a -> m (f a)
 runCullA = runCull (liftA2 (<|>)) (pure . pure) (pure empty)
 
--- | Run a 'Cull' effect, interpreting the result into a 'Monoid'. Choice is handled with 'mappend', failure with 'Control.Applicative.empty', and embedding with the composition of 'pure' and the provided function returning a monoid.
+-- | Run a 'Cull' effect, interpreting the result into a 'Monoid'. Choice is handled with 'mappend', failure with 'empty', and embedding with the composition of 'pure' and the provided function returning a monoid.
 --
 -- @since 1.0.0.0
 runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
