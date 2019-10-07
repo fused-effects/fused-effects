@@ -1,8 +1,8 @@
 {-# LANGUAGE FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
--- | Provides an 'InterpretC' carrier capable of interpreting an arbitrary effect using
--- a passed-in higher order function to interpret that effect. The resulting code will be
--- less efficient than using a carrier monad and 'Carrier' instance directly, but this
--- module is suitable for prototyping new effects quickly, or when efficiency is not a concern.
+
+{- | Provides an 'InterpretC' carrier capable of interpreting an arbitrary effect using a passed-in higher order function to interpret that effect. The resulting code will be less efficient than using a carrier monad and 'Carrier' instance directly, but this module is suitable for prototyping new effects quickly, or when efficiency is not a concern.
+-}
+
 module Control.Carrier.Interpret
 ( runInterpret
 , runInterpretState
