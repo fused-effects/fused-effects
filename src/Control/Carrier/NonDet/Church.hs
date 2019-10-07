@@ -49,8 +49,7 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
 
--- | Run a 'NonDet' effect, collecting branches' results with 'mappend' and representing failure
--- with 'mempty'. The given function parameter converts successful results of type @a@ to monoidal @b@ values.
+-- | Run a 'NonDet' effect, collecting results into a 'Monoid'.
 runNonDetM :: (Applicative m, Monoid b) => (a -> b) -> NonDetC m a -> m b
 runNonDetM leaf = runNonDet (liftA2 mappend) (pure . leaf) (pure mempty)
 
