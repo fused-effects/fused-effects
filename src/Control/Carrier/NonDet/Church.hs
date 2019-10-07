@@ -2,7 +2,7 @@
 
 {- | Provides 'NonDetC', a carrier for 'NonDet' effects providing choice and failure.
 
-Under the hood, it uses a Church-encoded structure and a binary tree to prevent the problems associated with a naïve list-based implementation. This design is based on that detailed in Ralf Hinze's [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
+Under the hood, it uses a Church-encoded structure and a binary tree to prevent the problems associated with a naïve list-based implementation.
 -}
 
 module Control.Carrier.NonDet.Church
