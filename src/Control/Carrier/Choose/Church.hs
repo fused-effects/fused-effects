@@ -1,4 +1,10 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+-- | Provides 'ChooseC', a carrier for 'Choose' effects (nondeterminism via choice).
+--
+-- It can be invoked with custom functions for choice, success, and failure
+ -- ('runChoose'), or it can delegate said operations to an 'S.Semigroup' instance
+ -- ('runChooseS'). Under the hood, it uses a Church-encoded structure and a binary
+ -- tree to prevent the problems associated with a naïve list-based implementation.
 module Control.Carrier.Choose.Church
 ( -- * Choose effect
   module Control.Effect.Choose
