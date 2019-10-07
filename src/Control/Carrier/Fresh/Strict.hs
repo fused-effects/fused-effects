@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
--- | A carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
+
+{- | A carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
+-}
 module Control.Carrier.Fresh.Strict
 ( -- * Fresh effect
   module Control.Effect.Fresh
