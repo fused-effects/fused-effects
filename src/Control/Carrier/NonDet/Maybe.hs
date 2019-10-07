@@ -1,12 +1,9 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
--- | Provides a carrier for 'NonDet' effects providing choice and failure.
---
--- This is similar to the 'Control.Carrier.NonDet.Church.NonDetC' in "Control.Carrier.NonDet.Church",
--- but terminates immediately upon finding a successful result. This allows us to search a
--- potentially-infinite search space, as long as said space eventually returns a result, in contrast
--- with the Church-encoded carrier, which needs to enumerate the entire space before returning.
---
--- In previous versions of this package, this function was called @runNonDetOnce@.
+{- | A carrier for 'NonDet' effects providing choice and failure.
+
+Unlike the Church-encoded 'NonDet' carrier, this carrier terminates immediately upon finding a successful result.
+-}
+
 module Control.Carrier.NonDet.Maybe
 ( -- * NonDet effects
   module Control.Effect.NonDet
@@ -31,6 +28,8 @@ import Control.Monad.Trans.Maybe
 --   prop> run (runNonDet empty)    === Nothing
 --   prop> run (runNonDet (pure a)) === Just a
 --   prop> run (runNonDet (let f x = pure x <|> f x in f a)) === Just a
+--
+-- @since 1.0.0.0
 runNonDet :: NonDetC m a -> m (Maybe a)
 runNonDet = runMaybeT . runNonDetC
 {-# INLINE runNonDet #-}
@@ -39,6 +38,8 @@ newtype NonDetC m a = NonDetC { runNonDetC :: MaybeT m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 -- | 'NonDetC' passes 'Fail.MonadFail' operations along to the underlying monad @m@, rather than interpreting it as a synonym for 'empty' à la 'MaybeT'.
+--
+-- @since 1.0.0.0
 instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}

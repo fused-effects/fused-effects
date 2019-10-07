@@ -1,14 +1,10 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
--- | Provides 'NonDetC', a carrier for 'NonDet' effects providing choice and failure.
---
--- It can be invoked with custom functions for choice, success, and failure ('runNonDet'), or it can delegate
--- said operations to an 'Control.Applicative.Alternative' instance ('runNonDetA') or an underlying monoidal
--- result ('runNonDetM'). Under the hood, it uses a Church-encoded structure and a binary tree to prevent
--- the problems associated with a naïve list-based implementation.
---
--- This design is based on that detailed in Ralf Hinze's [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
---
--- The carrier provided by "Control.Carrier.NonDet.Maybe" is similar, but can handle infinite search spaces at the cost of being able to return only one result.
+
+{- | Provides 'NonDetC', a carrier for 'NonDet' effects providing choice and failure.
+
+Under the hood, it uses a Church-encoded structure and a binary tree to prevent the problems associated with a naïve list-based implementation. This design is based on that detailed in Ralf Hinze's [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
+-}
+
 module Control.Carrier.NonDet.Church
 ( -- * NonDet effects
   module Control.Effect.NonDet
@@ -31,8 +27,9 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | Run a 'NonDet' effect, using the provided functions to interpret
--- choice, leaf results, and failure.
+-- | Run a 'NonDet' effect, using the provided functions to interpret choice, leaf results, and failure.
+--
+-- @since 1.0.0.0
 runNonDet :: (m b -> m b -> m b) -- ^ Handles choice ('Control.Effect.Choose.<|>')
           -> (a -> m b)          -- ^ Handles embedding results ('pure')
           -> m b                 -- ^ Handles failure ('Control.Effect.Empty.empty')
@@ -42,10 +39,12 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
---   Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unless used with 'Control.Effect.Cull.cull', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
+-- Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unless used with 'Control.Effect.Cull.cull', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
 --
 --   prop> run (runNonDetA (pure a)) === [a]
 --   prop> run (runNonDetA (pure a)) === Just a
+--
+-- @since 1.0.0.0
 runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
 
