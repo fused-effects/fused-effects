@@ -34,17 +34,20 @@ import Control.Monad.Trans.Class
 -- | Run a 'Cull' effect with the supplied continuations for '<|>', 'pure', and 'empty'. Branches outside of any 'cull' block will not be pruned.
 --
 --   prop> run (runCull (liftA2 (<|>)) (pure . pure) (pure empty) (pure a <|> pure b)) === [a, b]
+--
+-- @since 1.0.0.0
 runCull :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CullC m a -> m b
 runCull fork leaf nil = runNonDet fork leaf nil . runReader False . runCullC
 
--- | Run a 'Cull' effect, interpreting the result into an 'Alternative' functor. Choice is handled
--- with 'Control.Applicative.<|>', embedding with 'pure', and failure with 'Control.Applicative.empty'.
+-- | Run a 'Cull' effect, interpreting the result into an 'Alternative' functor. Choice is handled with 'Control.Applicative.<|>', embedding with 'pure', and failure with 'Control.Applicative.empty'.
+--
+-- @since 1.0.0.0
 runCullA :: (Alternative f, Applicative m) => CullC m a -> m (f a)
 runCullA = runCull (liftA2 (<|>)) (pure . pure) (pure empty)
 
--- | Run a 'Cull' effect, interpreting the result into a 'Monoid'. Choice is handled
--- with 'mappend', failure with 'Control.Applicative.empty', and embedding with the composition of
--- 'pure' and the provided function returning a monoid.
+-- | Run a 'Cull' effect, interpreting the result into a 'Monoid'. Choice is handled with 'mappend', failure with 'Control.Applicative.empty', and embedding with the composition of 'pure' and the provided function returning a monoid.
+--
+-- @since 1.0.0.0
 runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
 runCullM leaf = runCull (liftA2 mappend) (pure . leaf) (pure mempty)
 
