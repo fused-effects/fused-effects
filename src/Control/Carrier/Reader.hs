@@ -1,4 +1,8 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+{- | A carrier for 'Reader' effects.
+-}
+
 module Control.Carrier.Reader
 ( -- * Reader effect
   module Control.Effect.Reader
@@ -23,6 +27,8 @@ import Control.Monad.Trans.Class
 -- | Run a 'Reader' effect with the passed environment value.
 --
 --   prop> run (runReader a (pure b)) === b
+--
+-- @since 1.0.0.0
 runReader :: r -> ReaderC r m a -> m a
 runReader r c = runReaderC c r
 {-# INLINE runReader #-}
