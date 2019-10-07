@@ -24,6 +24,7 @@ run :: PureC a -> a
 run = runPureC
 {-# INLINE run #-}
 
+-- | @since 1.0.0.0
 newtype PureC a = PureC { runPureC :: a }
 
 instance Functor PureC where

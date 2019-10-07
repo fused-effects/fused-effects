@@ -30,6 +30,7 @@ import Control.Monad.Trans.Class
 runFresh :: Functor m => FreshC m a -> m a
 runFresh = evalState 0 . runFreshC
 
+-- | @since 1.0.0.0
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

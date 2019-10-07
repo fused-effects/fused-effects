@@ -31,6 +31,7 @@ import Data.Bifunctor (first)
 runTrace :: Functor m => TraceC m a -> m ([String], a)
 runTrace = fmap (first reverse) . runState [] . runTraceC
 
+-- | @since 1.0.0.0
 newtype TraceC m a = TraceC { runTraceC :: StateC [String] m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

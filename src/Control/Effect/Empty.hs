@@ -22,6 +22,7 @@ module Control.Effect.Empty
 import {-# SOURCE #-} Control.Carrier
 import GHC.Generics (Generic1)
 
+-- | @since 1.0.0.0
 data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
@@ -31,10 +32,14 @@ instance Effect   Empty
 -- | Abort the computation.
 --
 --   prop> run (runEmpty empty) === Nothing
+--
+-- @since 1.0.0.0
 empty :: Has Empty sig m => m a
 empty = send Empty
 
 -- | Conditional failure, returning only if the condition is 'True'.
+--
+-- @since 1.0.0.0
 guard :: Has Empty sig m => Bool -> m ()
 guard True  = pure ()
 guard False = empty

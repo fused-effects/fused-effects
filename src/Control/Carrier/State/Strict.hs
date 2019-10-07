@@ -54,6 +54,7 @@ execState s = fmap fst . runState s
 {-# INLINE[3] execState #-}
 
 
+-- | @since 1.0.0.0
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
   deriving (Functor)
 

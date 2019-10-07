@@ -28,6 +28,7 @@ import Control.Monad.Trans.Class
 runM :: LiftC m a -> m a
 runM = runLiftC
 
+-- | @since 1.0.0.0
 newtype LiftC m a = LiftC { runLiftC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 

@@ -27,6 +27,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
+-- | @since 1.0.0.0
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
 instance Functor m => Functor (StateC s m) where

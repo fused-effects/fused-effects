@@ -33,6 +33,7 @@ runReader :: r -> ReaderC r m a -> m a
 runReader r c = runReaderC c r
 {-# INLINE runReader #-}
 
+-- | @since 1.0.0.0
 newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
   deriving (Functor)
 

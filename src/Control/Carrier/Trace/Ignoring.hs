@@ -31,6 +31,7 @@ import Control.Monad.Trans.Class
 runTrace :: TraceC m a -> m a
 runTrace = runTraceC
 
+-- | @since 1.0.0.0
 newtype TraceC m a = TraceC { runTraceC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 

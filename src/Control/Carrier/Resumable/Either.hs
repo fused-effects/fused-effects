@@ -35,6 +35,7 @@ import Data.Functor.Classes
 runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
 runResumable = runError . runResumableC
 
+-- | @since 1.0.0.0
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
