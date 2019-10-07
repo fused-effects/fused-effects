@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
-{- | Provides a carrier over a monad @m@ that allows monadic actions to be lifted into a larger context with 'Control.Effect.Lift.sendM'.
+{- | A carrier for 'Lift' allowing monadic actions to be lifted into a larger context with 'sendM'.
 -}
 module Control.Carrier.Lift
 ( -- * Lift effect
