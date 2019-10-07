@@ -1,15 +1,16 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
--- | An effect providing access to an immutable (but locally-modifiable) context value.
--- This
---
--- This effect is similar to the traditional @MonadReader@ typeclass, though it allows the
--- presence of multiple @Reader t@ effects, as long as the values of @t@ are distinct.
---
--- Predefined carriers:
---
--- * "Control.Carrier.Reader.ReaderC".
--- * If 'Reader' @r@ is the last effect in a stack, it can be interpreted directly to @(-> r)@ (a function taking an @r@).
---
+
+{- | An effect providing access to an immutable (but locally-modifiable) context value.
+
+This effect is similar to the traditional @MonadReader@ typeclass, though it allows the
+presence of multiple @Reader t@ effects, as long as the values of @t@ are distinct.
+
+Predefined carriers:
+
+* "Control.Carrier.Reader.ReaderC".
+* If 'Reader' @r@ is the last effect in a stack, it can be interpreted directly to @(-> r)@ (a function taking an @r@).
+-}
+
 module Control.Effect.Reader
 ( -- * Reader effect
   Reader(..)

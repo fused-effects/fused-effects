@@ -1,16 +1,15 @@
 {-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
--- | An effect that adds a mutable, updatable state value to a given computation.
---
--- Not all computations require a full-fledged state effect: read-only state is better served
--- by 'Control.Effect.Reader.Reader', and append-only state without reads is better served
--- by 'Control.Effect.Writer.Writer'.
---
--- Predefined carriers:
---
--- * "Control.Carrier.State.Strict", which is strict in its updates.
--- * "Control.Carrier.State.Lazy", which is lazy in its updates. This enables more
---   programs to terminate, such as cyclic computations expressed with @MonadFix@ or
---   @-XRecursiveDo@, at the cost of efficiency.
+
+{- | An effect that adds a mutable, updatable state value to a given computation.
+
+Not all computations require a full-fledged state effect: read-only state is better served by 'Control.Effect.Reader.Reader', and append-only state without reads is better served by 'Control.Effect.Writer.Writer'.
+
+Predefined carriers:
+
+* "Control.Carrier.State.Strict", which is strict in its updates.
+* "Control.Carrier.State.Lazy", which is lazy in its updates. This enables more programs to terminate, such as cyclic computations expressed with @MonadFix@ or @-XRecursiveDo@, at the cost of efficiency.
+-}
+
 module Control.Effect.State
 ( -- * State effect
   State(..)

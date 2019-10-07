@@ -1,10 +1,10 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts #-}
--- | Provides a mechanism to kick off the evaluation of an effect stack that
--- takes place in a monadic context.
---
--- 'Lift' effects are always the last effect in a given effect stack.
--- These stacks are invoked with 'Control.Effect.Lift.runM'.
--- The 'Control.Effect.Pure.Pure' effect is equivalent to @Lift Identity@.
+
+{- | Provides a mechanism to kick off the evaluation of an effect stack that takes place in a monadic context.
+
+'Lift' effects are always the last effect in a given effect stack. These stacks are invoked with 'Control.Effect.Lift.runM'. The 'Control.Effect.Pure.Pure' effect is equivalent to @Lift Identity@.
+-}
+
 module Control.Effect.Lift
 ( -- * Lift effect
   Lift(..)

@@ -1,12 +1,14 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts #-}
--- | An effect that provides a record of 'String' values ("traces") aggregate during
--- the execution of a given computation.
---
--- Predefined carriers:
---
--- * "Control.Carrier.Trace.Printing", which logs to stderr in a 'MonadIO' context.
--- * "Control.Carrier.Trace.Returning", which aggregates all traces in a @[String].
--- * "Control.Carrier.Trace.Ignoring", which discards all traced values.
+
+{- | An effect that provides a record of 'String' values ("traces") aggregate during the execution of a given computation.
+
+Predefined carriers:
+
+* "Control.Carrier.Trace.Printing", which logs to stderr in a 'MonadIO' context.
+* "Control.Carrier.Trace.Returning", which aggregates all traces in a @[String].
+* "Control.Carrier.Trace.Ignoring", which discards all traced values.
+-}
+
 module Control.Effect.Trace
 ( -- * Trace effect
   Trace(..)

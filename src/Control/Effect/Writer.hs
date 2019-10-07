@@ -1,16 +1,13 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
--- | An effect allowing writes to an accumulated quantity alongside a computed value.
--- A 'Writer' @w@ effect keeps track of a monoidal datum of type @w@ and strictly appends
--- to that monoidal value with the 'tell' effect. Writes to that value can be detected and
--- intercepted with the 'listen' and 'censor' effects.
---
--- Predefined carriers:
---
--- * "Control.Carrier.Writer.Strict.WriterC".
---   (A lazy carrier is not provided due to the inherent space leaks associated with lazy writer monads.)
--- * If 'Writer' @w@ is the last effect in a stack, it can be interpreted to a
---   tuple @(w, a)@ given some result type @a@ and the presence of a 'Monoid' instance for @w@.
---
+
+{- | An effect allowing writes to an accumulated quantity alongside a computed value. A 'Writer' @w@ effect keeps track of a monoidal datum of type @w@ and strictly appends to that monoidal value with the 'tell' effect. Writes to that value can be detected and intercepted with the 'listen' and 'censor' effects.
+
+Predefined carriers:
+
+* "Control.Carrier.Writer.Strict.WriterC". (A lazy carrier is not provided due to the inherent space leaks associated with lazy writer monads.)
+* If 'Writer' @w@ is the last effect in a stack, it can be interpreted to a tuple @(w, a)@ given some result type @a@ and the presence of a 'Monoid' instance for @w@.
+-}
+
 module Control.Effect.Writer
 ( -- * Writer effect
   Writer(..)

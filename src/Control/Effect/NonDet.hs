@@ -1,20 +1,16 @@
 {-# LANGUAGE TypeOperators #-}
--- | An effect modelling nondeterminism with choice and failure.
---
--- Nondeterministic operations are encapsulated by the 'Control.Applicative.Alternative'
--- class, where 'Control.Applicative.empty' represents failure and 'Control.Applicative.<|>'
--- represents choice. This module reexports the 'Alternative' interface. If you can't or
--- don't want to use 'Alternative', you can use the 'Control.Effect.Empty.empty' and
--- 'Control.Effect.Choose.<|>' effects (from 'Control.Effect.Empty' and 'Control.Effect.Choose')
--- directly, as the 'NonDet' effect is the composition of 'Control.Effect.Choose.Choose' and
--- 'Control.Effect.Empty.Empty'.
---
--- Predefined carriers:
---
--- * "Control.Carrier.NonDet.Church", which collects all branches' results using an @Alternative@ functor.
--- * "Control.Carrier.NonDet.Maybe", which terminates upon encountering the first successful result.
--- * If 'NonDet' is the last effect in a stack, it can be interpreted directly to an @[]@ value.
---
+
+{- | An effect modelling nondeterminism with choice and failure.
+
+Nondeterministic operations are encapsulated by the 'Alternative' class, where 'empty' represents failure and '<|>' represents choice. This module reexports the 'Alternative' interface. If you can't or don't want to use 'Alternative', you can use the 'Control.Effect.Empty.empty' and 'Control.Effect.Choose.<|>' effects (from 'Control.Effect.Empty' and 'Control.Effect.Choose') directly, as the 'NonDet' effect is the composition of 'Choose' and 'Empty'.
+
+Predefined carriers:
+
+* "Control.Carrier.NonDet.Church", which collects all branches' results using an @Alternative@ functor.
+* "Control.Carrier.NonDet.Maybe", which terminates upon encountering the first successful result.
+* If 'NonDet' is the last effect in a stack, it can be interpreted directly to an @[]@ value.
+-}
+
 module Control.Effect.NonDet
 ( -- * NonDet effects
   NonDet
