@@ -18,6 +18,7 @@ module Control.Effect.Fresh
 
 import Control.Carrier
 
+-- | @since 1.0.0.0
 data Fresh m k
   = Fresh (Int -> m k)
   | forall b . Reset (m b) (b -> m k)
@@ -35,12 +36,16 @@ instance Effect Fresh where
 -- | Produce a fresh (i.e. unique) 'Int'.
 --
 --   prop> run (runFresh (replicateM n fresh)) === nub (run (runFresh (replicateM n fresh)))
+--
+-- @since 1.0.0.0
 fresh :: Has Fresh sig m => m Int
 fresh = send (Fresh pure)
 
 -- | Reset the fresh counter after running a computation.
 --
 --   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) === run (runFresh (replicateM n fresh))
+--
+-- @since 1.0.0.0
 resetFresh :: Has Fresh sig m => m a -> m a
 resetFresh m = send (Reset m pure)
 

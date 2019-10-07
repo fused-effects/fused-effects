@@ -23,6 +23,7 @@ module Control.Effect.Reader
 
 import {-# SOURCE #-} Control.Carrier
 
+-- | @since 1.0.0.0
 data Reader r m k
   = Ask (r -> m k)
   | forall b . Local (r -> r) (m b) (b -> m k)
@@ -40,12 +41,16 @@ instance Effect (Reader r) where
 -- | Retrieve the environment value.
 --
 --   prop> run (runReader a ask) === a
+--
+-- @since 1.0.0.0
 ask :: Has (Reader r) sig m => m r
 ask = send (Ask pure)
 
 -- | Project a function out of the current environment value.
 --
 --   prop> snd (run (runReader a (asks (applyFun f)))) === applyFun f a
+--
+-- @since 1.0.0.0
 asks :: Has (Reader r) sig m => (r -> a) -> m a
 asks f = send (Ask (pure . f))
 
@@ -53,6 +58,8 @@ asks f = send (Ask (pure . f))
 --
 --   prop> run (runReader a (local (applyFun f) ask)) === applyFun f a
 --   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) === (a, applyFun f a, a)
+--
+-- @since 1.0.0.0
 local :: Has (Reader r) sig m => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
 

@@ -34,6 +34,7 @@ runEmpty :: EmptyC m a -> m (Maybe a)
 runEmpty = runMaybeT . runEmptyC
 {-# INLINE runEmpty #-}
 
+-- | @since 1.0.0.0
 newtype EmptyC m a = EmptyC { runEmptyC :: MaybeT m a }
   deriving (Applicative, Functor, Monad, MonadFix, MonadIO, MonadTrans)
 

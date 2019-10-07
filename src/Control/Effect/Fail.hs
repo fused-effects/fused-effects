@@ -21,6 +21,7 @@ import Control.Carrier
 import qualified Control.Monad.Fail as Fail
 import GHC.Generics (Generic1)
 
+-- | @since 1.0.0.0
 newtype Fail (m :: * -> *) k = Fail String
   deriving (Functor, Generic1)
 

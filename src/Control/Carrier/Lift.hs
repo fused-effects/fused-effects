@@ -23,6 +23,8 @@ import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
+--
+-- @since 1.0.0.0
 runM :: LiftC m a -> m a
 runM = runLiftC
 

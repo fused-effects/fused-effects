@@ -18,6 +18,8 @@ import GHC.Generics
 -- | Higher-order functors of kind @(* -> *) -> (* -> *)@ map functors to functors.
 --
 --   All effects must be 'HFunctor's.
+--
+-- @since 1.0.0.0
 class HFunctor h where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   --
@@ -31,6 +33,8 @@ class HFunctor h where
 -- | Thread a 'Coercible' carrier through an 'HFunctor'.
 --
 --   This is applicable whenever @f@ is 'Coercible' to @g@, e.g. simple @newtype@s.
+--
+-- @since 1.0.0.0
 handleCoercible :: (HFunctor sig, Functor f, Coercible f g) => sig f a -> sig g a
 handleCoercible = hmap coerce
 {-# INLINE handleCoercible #-}
@@ -42,6 +46,8 @@ handleCoercible = hmap coerce
 --   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
 --
 -- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'handle' provided a 'Generic1' instance is available for the effect.
+--
+-- @since 1.0.0.0
 class HFunctor sig => Effect sig where
   -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
   handle :: (Functor f, Monad m)

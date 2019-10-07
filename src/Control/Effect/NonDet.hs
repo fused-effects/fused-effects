@@ -35,6 +35,8 @@ import Data.Coerce
 import Data.Monoid (Alt(..))
 
 -- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
+--
+-- @since 1.0.0.0
 type NonDet = Empty :+: Choose
 
 -- | Nondeterministically choose an element from a 'Foldable' collection.
@@ -50,10 +52,13 @@ type NonDet = Empty :+: Choose
 --     pure (a, b, c)
 -- @
 --
+-- @since 1.0.0.0
 oneOf :: (Foldable t, Alternative m) => t a -> m a
 oneOf = foldMapA pure
 
 -- | Map a 'Foldable' collection of values into a nondeterministic computation using the supplied action.
+--
+-- @since 1.0.0.0
 foldMapA :: (Foldable t, Alternative m) => (a -> m b) -> t a -> m b
 foldMapA f = getAlt #. foldMap (Alt #. f)
 

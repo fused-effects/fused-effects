@@ -17,6 +17,7 @@ module Control.Effect.Pure
 import Control.Effect.Class
 import GHC.Generics (Generic1)
 
+-- | @since 1.0.0.0
 data Pure (m :: * -> *) k
   deriving (Functor, Generic1)
 
