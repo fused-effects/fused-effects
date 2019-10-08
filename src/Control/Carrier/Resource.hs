@@ -32,10 +32,8 @@ import           Control.Monad.Trans.Class
 --   . runState @Int 1
 --   $ myComputation
 -- @
-runResource :: MonadUnliftIO m
-            => ResourceC m a
-            -> m a
-runResource r = withRunInIO (\f -> f (runResourceC r))
+runResource :: ResourceC m a -> m a
+runResource = runResourceC
 
 newtype ResourceC m a = ResourceC { runResourceC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
