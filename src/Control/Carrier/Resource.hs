@@ -38,11 +38,11 @@ runResource = runResourceC
 newtype ResourceC m a = ResourceC { runResourceC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
-instance MonadUnliftIO m => MonadUnliftIO (ResourceC m) where
-  withRunInIO f = ResourceC (withRunInIO (\ runInIO -> f (runInIO . runResourceC)))
-
 instance MonadTrans ResourceC where
   lift = ResourceC
+
+instance MonadUnliftIO m => MonadUnliftIO (ResourceC m) where
+  withRunInIO f = ResourceC (withRunInIO (\ runInIO -> f (runInIO . runResourceC)))
 
 instance (Carrier sig m, MonadUnliftIO m) => Carrier (Resource :+: sig) (ResourceC m) where
   eff (L (Resource acquire release use k)) = do
