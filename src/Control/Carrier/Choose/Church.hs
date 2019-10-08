@@ -29,7 +29,7 @@ runChoose fork leaf m = runChooseC m fork leaf
 
 -- | Run a 'Choose' effect, passing results to the supplied function, and merging branches together using 'S.<>'.
 runChooseS :: (S.Semigroup b, Applicative m) => (a -> m b) -> ChooseC m a -> m b
-runChooseS leaf = runChoose (liftA2 (S.<>)) leaf
+runChooseS = runChoose (liftA2 (S.<>))
 
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype ChooseC m a = ChooseC
