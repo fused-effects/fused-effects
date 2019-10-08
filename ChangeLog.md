@@ -42,6 +42,8 @@
 
 - Removes `prj` from `Member`, as it was only used in `InterposeC` (see above), and was generally inadvisable due to its lack of modularity. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
 
+- Simplifies `ResourceC` by moving the `MonadUnliftIO` constraint on its `Carrier` instance instead of on the `runResource` handler, obviating the need for it to wrap a `ReaderC` carrier. This should not impact usage except in code manually constructing/eliminating `ResourceC` values. ([#254](https://github.com/fused-effects/fused-effects/pull/254))
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
