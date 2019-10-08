@@ -42,7 +42,7 @@ unliftResource handler = runReader (UnliftIO handler) . runResourceC
 runResource :: MonadUnliftIO m
             => ResourceC m a
             -> m a
-runResource r = withRunInIO (\f -> runUnlifting (UnliftIO (f . runReader (UnliftIO f) . runResourceC)) r)
+runResource r = withRunInIO (\f -> f (runReader (UnliftIO f) (runResourceC r)))
 
 newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (UnliftIO m) m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
@@ -54,22 +54,19 @@ instance MonadUnliftIO m => MonadUnliftIO (ResourceC m) where
 instance MonadTrans ResourceC where
   lift = ResourceC . lift
 
-runUnlifting :: UnliftIO (ResourceC m) -> ResourceC m a -> IO a
-runUnlifting (UnliftIO handler) = handler
-
 instance (Carrier sig m, MonadUnliftIO m) => Carrier (Resource :+: sig) (ResourceC m) where
   eff (L (Resource acquire release use k)) = do
     handler <- askUnliftIO
     a <- liftIO (Exc.bracket
-      (runUnlifting handler acquire)
-      (runUnlifting handler . release)
-      (runUnlifting handler . use))
+      (unliftIO handler acquire)
+      (unliftIO handler . release)
+      (unliftIO handler . use))
     k a
   eff (L (OnError  acquire release use k)) = do
     handler <- askUnliftIO
     a <- liftIO (Exc.bracketOnError
-      (runUnlifting handler acquire)
-      (runUnlifting handler . release)
-      (runUnlifting handler . use))
+      (unliftIO handler acquire)
+      (unliftIO handler . release)
+      (unliftIO handler . use))
     k a
   eff (R other) = ResourceC (eff (R (handleCoercible other)))
