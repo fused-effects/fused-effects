@@ -32,7 +32,7 @@ import qualified Data.Semigroup as S
 import GHC.Generics (Generic1)
 
 -- | @since 1.0.0.0
-data Choose m k
+newtype Choose m k
   = Choose (Bool -> m k)
   deriving (Functor, Generic1)
 
