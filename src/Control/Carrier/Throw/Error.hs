@@ -1,2 +1,6 @@
 module Control.Carrier.Throw.Error
-() where
+( -- * Throw effect
+  module Control.Effect.Throw
+) where
+
+import Control.Effect.Throw
