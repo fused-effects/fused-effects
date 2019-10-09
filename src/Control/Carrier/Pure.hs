@@ -20,7 +20,7 @@ run = runPureC
 {-# INLINE run #-}
 
 newtype PureC a = PureC { runPureC :: a }
-  deriving (Eq, Ord, Show)
+  deriving (Show)
 
 instance Functor PureC where
   fmap = coerce
@@ -60,12 +60,6 @@ instance Carrier Pure PureC where
   eff v = case v of {}
   {-# INLINE eff #-}
 
-
-instance Eq1 PureC where
-  liftEq eq (PureC a1) (PureC a2) = a1 `eq` a2
-
-instance Ord1 PureC where
-  liftCompare compare (PureC a1) (PureC a2) = a1 `compare` a2
 
 instance Show1 PureC where
   liftShowsPrec sp _ d = showsUnaryWith sp "PureC" d . run
