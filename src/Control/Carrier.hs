@@ -17,12 +17,12 @@ import Control.Effect.Sum
 import Data.Kind (Constraint)
 
 -- | The @m@ is a carrier for @sig@ containing @eff@.
-type Has eff sig m = (Has' eff sig, Carrier sig m)
+type Has eff sig m = (Members eff sig, Carrier sig m)
 
 -- | Decompose sums on the left into multiple 'Member' constraints.
-type family Has' sub sup :: Constraint where
-  Has' (l :+: r) u = (Has' l u, Has' r u)
-  Has' t         u = Member t u
+type family Members sub sup :: Constraint where
+  Members (l :+: r) u = (Members l u, Members r u)
+  Members t         u = Member t u
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
