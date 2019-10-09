@@ -19,6 +19,7 @@ import Data.Kind (Constraint)
 -- | The @m@ is a carrier for @sig@ containing @eff@.
 type Has eff sig m = (Has' eff sig, Carrier sig m)
 
+-- | Decompose sums on the left into multiple 'Member' constraints.
 type family Has' sub sup :: Constraint where
   Has' (l :+: r) u = (Has' l u, Has' r u)
   Has' t         u = Member t u
