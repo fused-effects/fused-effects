@@ -22,7 +22,9 @@ import Control.Monad.Trans.Except
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
---   prop> run (runError (pure a)) === Right @Int @Int a
+-- prop> run (runError (pure a)) === Right @Int @Int a
+-- prop> run (runError (throwError e)) === Left @Int @Int e
+-- prop> run (runError (throwError e `catchError` pure)) === Right @Int @Int e
 runError :: ErrorC exc m a -> m (Either exc a)
 runError = runExceptT . runErrorC
 
