@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
-{- | Provides an effect to cull choices in a given nondeterministic context. This effect is used in concert with 'Control.Effect.Choose.Choose' or 'Control.Effect.NonDet.NonDet'.
+{- | Provides an effect to cull choices in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
 
 Computations run inside a call to 'cull' will return at most one result.
 
