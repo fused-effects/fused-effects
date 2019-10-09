@@ -1,13 +1,15 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
 -- | Operations on /sums/, combining effects into a /signature/.
 module Control.Effect.Sum
 ( -- * Membership
   Member(..)
+, Members
   -- * Sums
 , (:+:)(..)
 ) where
 
 import Control.Effect.Class
+import Data.Kind (Constraint)
 import GHC.Generics (Generic1)
 
 -- | Higher-order sums are used to combine multiple effects into a signature, typically by chaining on the right.
@@ -54,3 +56,9 @@ instance {-# OVERLAPPABLE #-}
          Member l r
       => Member l (l' :+: r) where
   inj = R . inj
+
+
+-- | Decompose sums on the left into multiple 'Member' constraints.
+type family Members sub sup :: Constraint where
+  Members (l :+: r) u = (Members l u, Members r u)
+  Members t         u = Member t u
