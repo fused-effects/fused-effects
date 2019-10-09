@@ -11,7 +11,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 tests :: TestTree
-tests = testGroup "NonDet"
+tests = testGroup "NonDet.Church"
   [ testCase "collects results of effects run inside it" $
     run (runNonDetA (runState 'a' state))
     @?= [('a', 'z'), ('b', 'b'), ('a', 'a')]
