@@ -15,7 +15,7 @@ import Control.Carrier.Pure
 import Control.Effect.Class
 import Control.Effect.Sum
 
--- | The @m@ is a carrier for @sig@ containing @eff@.
+-- | @m@ is a carrier for @sig@ containing @eff@.
 type Has eff sig m = (Members eff sig, Carrier sig m)
 
 
