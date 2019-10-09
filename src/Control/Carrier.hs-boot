@@ -1,12 +1,13 @@
-{-# LANGUAGE ConstraintKinds, TypeFamilies, TypeOperators #-}
+{-# LANGUAGE ConstraintKinds #-}
 module Control.Carrier
-( -- * Re-exports
-  module Control.Carrier.Class
+( -- * Effect requests
+  Has
+, send
+  -- * Re-exports
+, module Control.Carrier.Class
 , module Control.Carrier.Pure
 , module Control.Effect.Class
 , (:+:)(..)
-, Has
-, send
 ) where
 
 import {-# SOURCE #-} Control.Carrier.Class
