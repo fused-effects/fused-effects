@@ -4,6 +4,8 @@ module Control.Effect.Empty
   Empty(..)
 , empty
 , guard
+  -- * Laws
+, empty_annihilation
   -- * Re-exports
 , Has
 ) where
@@ -34,3 +36,9 @@ empty = send Empty
 guard :: Has Empty sig m => Bool -> m ()
 guard True  = pure ()
 guard False = empty
+
+
+-- Laws
+
+empty_annihilation :: Has Empty sig m => (m b -> m b -> prop) -> (a -> m b) -> prop
+empty_annihilation (===) k = (empty >>= k) === empty
