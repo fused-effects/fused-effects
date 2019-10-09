@@ -71,6 +71,7 @@ some a = (:) <$> a <*> many a
 some1 :: Has Choose sig m => m a -> m (NonEmpty a)
 some1 a = (:|) <$> a <*> many a
 
+
 -- | @since 1.0.0.0
 newtype Choosing m a = Choosing { getChoosing :: m a }
 

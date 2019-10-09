@@ -2,7 +2,7 @@
 
 {- | An effect providing access to an immutable (but locally-modifiable) context value.
 
-This effect is similar to the traditional @MonadReader@ typeclass, though it allows the presence of multiple @Reader t@ effects, as long as the values of @t@ are distinct.
+This effect is similar to the traditional @MonadReader@ typeclass, though it allows the presence of multiple @Reader t@ effects.
 
 Predefined carriers:
 

@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
-{- | A carrier for an 'Error' effect.
--}
+-- | A carrier for an 'Error' effect.
 module Control.Carrier.Error.Either
 ( -- * Error effect
   module Control.Effect.Error

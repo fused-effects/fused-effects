@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 {- | A carrier for 'NonDet' effects providing choice and failure.
 
-Unlike the Church-encoded 'NonDet' carrier, this carrier terminates immediately upon finding a successful result.
+This carrier terminates immediately upon finding a successful result.
 -}
 
 module Control.Carrier.NonDet.Maybe
