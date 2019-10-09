@@ -48,6 +48,8 @@
 
 - Simplifies `ResourceC` by moving the `MonadUnliftIO` constraint on its `Carrier` instance instead of on the `runResource` handler, obviating the need for it to wrap a `ReaderC` carrier. This should not impact usage except in code manually constructing/eliminating `ResourceC` values. ([#254](https://github.com/fused-effects/fused-effects/pull/254))
 
+- Redefines `Fail` as a synonym for `Throw String`. ([#247](https://github.com/fused-effects/fused-effects/pull/247))
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
