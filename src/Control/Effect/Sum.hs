@@ -31,41 +31,46 @@ class Member (sub :: (* -> *) -> (* -> *)) sup where
   -- | Inject a member of a signature into the signature.
   inj :: sub m a -> sup m a
 
-instance (Member' side sub sup, Find sub sup ~ side) => Member sub sup where
-  inj = inj' @side
+instance {-# OVERLAPPABLE #-} Member sub sub where
+  inj = id
+
+instance (Member' elem sub sup, Elem sub sup ~ elem) => Member sub sup where
+  inj = inj' @elem
 
 
-data Where = None | Here | LL | RR
+type family Elem (sub :: (* -> *) -> (* -> *)) sup :: Bool where
+  Elem t t         = 'True
+  Elem t (l :+: r) = Elem t l || Elem t r
+  Elem _ _         = 'False
 
-type family Find (sub :: (* -> *) -> (* -> *)) sup :: Where where
-  Find t t         = 'Here
-  Find t (l :+: r) = Find' 'LL t l <> Find' 'RR t r
-  Find _ _         = 'None
-
-type family Find' (side :: Where) (sub :: (* -> *) -> (* -> *)) sup :: Where where
-  Find' s t t         = s
-  Find' s t (l :+: r) = Find' s t l <> Find' s t r
-  Find' _ _ _         = 'None
+type family (a :: Bool) || (b :: Bool) where
+  'False || 'False = 'False
+  _      || _      = 'True
 
 
-type family (a :: Where) <> (b :: Where) where
-  'None <> b = b
-  a     <> _ = a
-
-
-class Member' (side :: Where) (sub :: (* -> *) -> (* -> *)) sup where
+class Member' (elem :: Bool) (sub :: (* -> *) -> (* -> *)) sup where
   inj' :: sub m a -> sup m a
 
 -- | Reflexivity: @t@ is a member of itself.
-instance Member' 'Here t t where
+instance Member' 'True t t where
   inj' = id
 
 -- | Left-recursion: if @t@ is a member of @l1 ':+:' l2 ':+:' r@, then we can inject it into @(l1 ':+:' l2) ':+:' r@ by injection into a right-recursive signature, followed by left-association.
-instance Member t l
-      => Member' 'LL t (l :+: r) where
-  inj' = L . inj
+instance {-# OVERLAPPABLE #-}
+         Member' 'True t (l1 :+: l2 :+: r)
+      => Member' 'True t ((l1 :+: l2) :+: r) where
+  inj' = reassoc . inj' @'True where
+    reassoc (L l)     = L (L l)
+    reassoc (R (L l)) = L (R l)
+    reassoc (R (R r)) = R r
+
+-- | Left-occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
+instance {-# OVERLAPPABLE #-}
+         Member' 'True l (l :+: r) where
+  inj' = L
 
 -- | Right-recursion: if @t@ is a member of @r@, we can inject it into @r@ in O(n), followed by lifting that into @l ':+:' r@ in O(1).
-instance Member t r
-      => Member' 'RR t (l :+: r) where
-  inj' = R . inj
+instance {-# OVERLAPPABLE #-}
+         Member' 'True l r
+      => Member' 'True l (l' :+: r) where
+  inj' = R . inj' @'True
