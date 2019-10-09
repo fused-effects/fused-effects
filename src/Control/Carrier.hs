@@ -15,6 +15,7 @@ import Control.Effect.Class
 import Control.Effect.Sum
 import Data.Kind (Constraint)
 
+-- | The @m@ is a carrier for @sig@ containing @eff@.
 type Has eff sig m = (Has' eff sig, Carrier sig m)
 
 type family Has' sub sup :: Constraint where
