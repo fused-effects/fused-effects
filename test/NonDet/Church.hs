@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-module NonDet
+module NonDet.Church
 ( tests
 ) where
 

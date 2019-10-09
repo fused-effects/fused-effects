@@ -119,7 +119,7 @@ test-suite test
   other-modules:
     Error.Either
     Fusion
-    NonDet
+    NonDet.Church
     Pure
   build-depends:
       base
