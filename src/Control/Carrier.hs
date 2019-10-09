@@ -15,11 +15,9 @@ import Control.Effect.Class
 import Control.Effect.Sum
 import Data.Kind (Constraint)
 
-type Has eff sig m = (Has' eff sig, Carrier sig m)
-
-type family Has' sub sup :: Constraint where
-  Has' (l :+: r) u = (Has' l u, Has' r u)
-  Has' t         u = Member t u
+type family Has sub sup m :: Constraint where
+  Has (l :+: r) u m = (Has l u m, Has r u m)
+  Has t         u m = (Member t u, Carrier u m)
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
