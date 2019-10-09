@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, GeneralizedNewtypeDeriving, StandaloneDeriving #-}
 
-{- | Provides an effect to delimit backtracking in a given nondeterministic context. This effect is used in concert with 'Control.Effect.Choose.Choose' or 'Control.Effect.NonDet.NonDet'.
+{- | Provides an effect to delimit backtracking in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
 
 Computations that signal failure with 'cutfail' prevent backtracking within the nearest enclosing 'call'.
 
