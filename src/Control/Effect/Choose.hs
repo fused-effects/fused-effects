@@ -6,7 +6,7 @@ The 'Control.Effect.NonDet.NonDet' effect is the composition of 'Choose' and 'Co
 
 Predefined carriers:
 
-* "Control.Carrier.Choose.Church.ChooseC".
+* "Control.Carrier.Choose.Church".
 * If 'Choose' is the last effect in a stack, it can be interpreted directly to a 'NonEmpty'.
 -}
 
