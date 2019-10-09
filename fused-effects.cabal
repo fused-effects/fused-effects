@@ -117,6 +117,7 @@ test-suite test
   hs-source-dirs:      test
   main-is:             Test.hs
   other-modules:
+    Empty.Maybe
     Error.Either
     Fusion
     NonDet.Church
