@@ -4,7 +4,7 @@
 
 Predefined carriers:
 
-* "Control.Carrier.Writer.Strict.WriterC". (A lazy carrier is not provided due to the inherent space leaks associated with lazy writer monads.)
+* "Control.Carrier.Writer.Strict". (A lazy carrier is not provided due to the inherent space leaks associated with lazy writer monads.)
 * If 'Writer' @w@ is the last effect in a stack, it can be interpreted to a tuple @(w, a)@ given some result type @a@ and the presence of a 'Monoid' instance for @w@.
 -}
 
