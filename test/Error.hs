@@ -1,6 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 module Error
-( throwError_annihilation
+( -- * Laws
+  throwError_annihilation
 , catchError_substitution
 ) where
 
