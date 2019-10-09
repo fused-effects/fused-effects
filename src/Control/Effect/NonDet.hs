@@ -7,7 +7,7 @@ Nondeterministic operations are encapsulated by the 'Alternative' class, where '
 Predefined carriers:
 
 * "Control.Carrier.NonDet.Church", which collects all branches' results using an @Alternative@ functor.
-* "Control.Carrier.NonDet.Maybe", which terminates upon encountering the first successful result.
+* "Control.Carrier.NonDet.Maybe", which returns at most one result, in `Maybe`.
 * If 'NonDet' is the last effect in a stack, it can be interpreted directly into a @[]@.
 -}
 
