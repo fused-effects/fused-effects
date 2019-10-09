@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, GeneralizedNewtypeDeriving, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
 module Error.Either
 ( tests
 ) where
@@ -6,7 +6,6 @@ module Error.Either
 import Control.Carrier.Error.Either
 import Control.Monad.Trans.Except
 import Error
-import GHC.Generics (Generic)
 import Pure
 import Test.Tasty
 import Test.Tasty.QuickCheck
@@ -21,25 +20,6 @@ tests = testGroup "Error.Either"
 
 (~=) :: (Eq e, Eq a, Show e, Show a) => ErrorC e PureC a -> ErrorC e PureC a -> Property
 m1 ~= m2 = run (runError m1) === run (runError m2)
-
-
-newtype E = E Integer
-  deriving (Arbitrary, Eq, Generic, Ord, Show)
-
-instance CoArbitrary E
-instance Function    E
-
-newtype A = A Integer
-  deriving (Arbitrary, Eq, Generic, Ord, Show)
-
-instance CoArbitrary A
-instance Function    A
-
-newtype B = B Integer
-  deriving (Arbitrary, Eq, Generic, Ord, Show)
-
-instance CoArbitrary B
-instance Function    B
 
 
 instance (Arbitrary e, Arbitrary1 m, Arbitrary a) => Arbitrary (ErrorC e m a) where
