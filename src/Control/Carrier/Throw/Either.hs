@@ -1,2 +1,6 @@
 module Control.Carrier.Throw.Either
-() where
+( -- * Throw effect
+  module Control.Effect.Throw
+) where
+
+import Control.Effect.Throw
