@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Cull.Church
 ( -- * Cull effect
   module Control.Effect.Cull
@@ -6,32 +6,39 @@ module Control.Carrier.Cull.Church
 , module Control.Effect.NonDet
   -- * Cull carrier
 , runCull
+, runCullA
+, runCullM
 , CullC(..)
   -- * Re-exports
 , Carrier
-, Has
 , run
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
 import Control.Effect.Cull
 import Control.Effect.NonDet
-import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | Run a 'Cull' effect. Branches outside of any 'cull' block will not be pruned.
+-- | Run a 'Cull' effect with the supplied continuations for '<|>', 'pure', and 'empty'. Branches outside of any 'cull' block will not be pruned.
 --
---   prop> run (runNonDet (runCull (pure a <|> pure b))) === [a, b]
-runCull :: Alternative m => CullC m a -> m a
-runCull (CullC m) = runNonDetC (runReader False m) (<|>) pure empty
+--   prop> run (runCull (liftA2 (<|>)) (pure . pure) (pure empty) (pure a <|> pure b)) === [a, b]
+runCull :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CullC m a -> m b
+runCull fork leaf nil = runNonDet fork leaf nil . runReader False . runCullC
+
+runCullA :: (Alternative f, Applicative m) => CullC m a -> m (f a)
+runCullA = runCull (liftA2 (<|>)) (pure . pure) (pure empty)
+
+runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
+runCullM leaf = runCull (liftA2 mappend) (pure . leaf) (pure mempty)
 
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
-  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO)
+  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
 instance Alternative (CullC m) where
   empty = CullC empty
@@ -43,6 +50,12 @@ instance Alternative (CullC m) where
     else
       runReader cull (runCullC l) <|> runReader cull (runCullC r)
   {-# INLINE (<|>) #-}
+
+-- | Separate fixpoints are computed for each branch.
+--
+-- >>> run (runCullA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
+-- [[0,1,2],[0,-1,-2]]
+deriving instance MonadFix m => MonadFix (CullC m)
 
 instance MonadPlus (CullC m)
 
@@ -60,6 +73,5 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Carrier.NonDet.Church
--- >>> import Control.Carrier.Pure

@@ -9,6 +9,8 @@ module Control.Effect.Choose
 , some1
   -- * Choosing semigroup
 , Choosing(..)
+  -- * Re-exports
+, Has
 ) where
 
 import {-# SOURCE #-} Control.Carrier
@@ -18,7 +20,7 @@ import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Semigroup as S
 import GHC.Generics (Generic1)
 
-data Choose m k
+newtype Choose m k
   = Choose (Bool -> m k)
   deriving (Functor, Generic1)
 

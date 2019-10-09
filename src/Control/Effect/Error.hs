@@ -4,6 +4,8 @@ module Control.Effect.Error
   Error(..)
 , throwError
 , catchError
+  -- * Re-exports
+, Has
 ) where
 
 import {-# SOURCE #-} Control.Carrier

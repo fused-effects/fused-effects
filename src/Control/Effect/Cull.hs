@@ -3,6 +3,8 @@ module Control.Effect.Cull
 ( -- * Cull effect
   Cull(..)
 , cull
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Carrier
@@ -36,5 +38,4 @@ cull m = send (Cull m pure)
 -- >>> import Test.QuickCheck
 -- >>> import Control.Carrier.Cull.Church
 -- >>> import Control.Carrier.NonDet.Church
--- >>> import Control.Carrier.Pure
 -- >>> import Data.Foldable (asum)

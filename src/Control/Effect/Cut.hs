@@ -5,6 +5,8 @@ module Control.Effect.Cut
 , cutfail
 , call
 , cut
+  -- * Re-exports
+, Has
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -59,4 +61,3 @@ cut = pure () <|> cutfail
 -- >>> import Test.QuickCheck
 -- >>> import Control.Carrier.Cut.Church
 -- >>> import Control.Carrier.NonDet.Church
--- >>> import Control.Carrier.Pure

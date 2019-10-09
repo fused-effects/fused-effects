@@ -1,16 +1,18 @@
 - Adds an `Empty` effect, modelling nondeterminism without choice ([#196](https://github.com/fused-effects/fused-effects/pull/196)).
 
+- Adds an `EmptyC` carrier for `Empty`. ([#196](https://github.com/fused-effects/fused-effects/pull/196))
+
 - Adds a `Choose` effect, modelling nondeterminism without failure ([#198](https://github.com/fused-effects/fused-effects/pull/198)).
 
 - Adds a `oneOf` function to `Control.Effect.NonDet` to provide an idiom for the common case of nondeterministically selecting from a container. ([#201](https://github.com/fused-effects/fused-effects/pull/201))
 
 - Adds a `foldMapA` function to `Control.Effect.NonDet` mapping containers into nondeterministic computations using a supplied function. ([#204](https://github.com/fused-effects/fused-effects/pull/204))
 
-- Defines new `Inject` and `Project` typeclasses, each providing half of `Member`, and redefines `Member` as a constraint synonym for both of them. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
-
 - Defines a new `Has` constraint synonym, conveniently combining `Carrier` and `Member` constraints and used for all effect constructors. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
 - Allows effects to be defined and handled as sums of other effects, while still using the constructors for the component effects. This has been used to redefine `NonDet` as a sum of `Empty` and `Choose`. ([#199](https://github.com/fused-effects/fused-effects/pull/199), [#219](https://github.com/fused-effects/fused-effects/pull/219))
+
+- Adds a `NonDetC` carrier for `NonDet` in `Control.Effect.NonDet.Maybe`. ([#227](https://github.com/fused-effects/fused-effects/pull/227))
 
 ## Backwards-incompatible changes
 
@@ -29,6 +31,18 @@
 - Moves all the carriers into their own modules in the `Control.Carrier` namespace. Several have also been renamed, e.g. the various `Trace` carriers are all named `TraceC` within their separate modules, and should be imported qualified if disambiguation is required. This simplifies naming schemes, and ensures that the choice of e.g. strict or lazy carrier is always made consciously and expliclty, instead of defaulting to whichever is exported by the effect module ([#204](https://github.com/fused-effects/fused-effects/pull/204)).
 
 - Removes the re-export of `Member` from all carrier modules, re-exporting `Has` in its place. `Has` constraints should generally be used instead, and specialist cases can import `Control.Effect.Sum` for `Member`. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
+
+- Redesigns & renames the handlers for church-encoded nondeterminism carriers to standardize naming and usage patterns. ([#207](https://github.com/fused-effects/fused-effects/pull/207))
+  - The primary handlers (`runChoose`, `runNonDet`, `runCut`, `runCull`) take multiple continuations.
+  - Handlers which return an `Alternative` are suffixed with `A`, e.g. `runNonDetA`.
+  - Handlers which return a `Monoid` are suffixed with `M`, e.g. `runNonDetM`.
+  - Handlers which return a `Semigroup` are suffixed with `S`, e.g. `runChooseS`.
+
+- Removes `InterposeC` & `runInterpose` due to their inefficiency. They can be replaced with use of `InterpretC`/`runInterpret` for the desired effect. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
+
+- Removes `prj` from `Member`, as it was only used in `InterposeC` (see above), and was generally inadvisable due to its lack of modularity. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
+
+- Simplifies `ResourceC` by moving the `MonadUnliftIO` constraint on its `Carrier` instance instead of on the `runResource` handler, obviating the need for it to wrap a `ReaderC` carrier. This should not impact usage except in code manually constructing/eliminating `ResourceC` values. ([#254](https://github.com/fused-effects/fused-effects/pull/254))
 
 # v0.5.0.1
 

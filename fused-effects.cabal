@@ -53,10 +53,10 @@ library
     Control.Carrier.Error.Either
     Control.Carrier.Fail.Either
     Control.Carrier.Fresh.Strict
-    Control.Carrier.Interpose
     Control.Carrier.Interpret
     Control.Carrier.Lift
     Control.Carrier.NonDet.Church
+    Control.Carrier.NonDet.Maybe
     Control.Carrier.Pure
     Control.Carrier.Reader
     Control.Carrier.Resource
@@ -68,7 +68,6 @@ library
     Control.Carrier.Trace.Printing
     Control.Carrier.Trace.Returning
     Control.Carrier.Writer.Strict
-    Control.Effect
     Control.Effect.Choose
     Control.Effect.Class
     Control.Effect.Cull
@@ -100,29 +99,32 @@ test-suite examples
   hs-source-dirs:      examples
   main-is:             Main.hs
   other-modules:
+    Inference
     Parser
     ReinterpretLog
     Teletype
   build-depends:
       base
     , fused-effects
-    , hspec       >= 2.4.1
-    , QuickCheck  >= 2.7 && < 3
+    , tasty              ^>= 1.2
+    , tasty-hunit        ^>= 0.10
+    , tasty-quickcheck   ^>= 0.10
     , transformers
 
 test-suite test
   import:              common
   type:                exitcode-stdio-1.0
   hs-source-dirs:      test
-  main-is:             Spec.hs
+  main-is:             Test.hs
   other-modules:
-    Control.Effect.Spec
-    Control.Effect.NonDet.Spec
+    Fusion
+    NonDet
   build-depends:
       base
     , fused-effects
-    , hspec               >= 2.4.1
     , inspection-testing ^>= 0.4
+    , tasty              ^>= 1.2
+    , tasty-hunit        ^>= 0.10
 
 test-suite doctest
   import:              common
@@ -140,7 +142,9 @@ benchmark benchmark
   type:               exitcode-stdio-1.0
   hs-source-dirs:     benchmark
   main-is:            Bench.hs
-  other-modules:      NonDet.NQueens
+  other-modules:
+    NonDet
+    NonDet.NQueens
   build-depends:
       base
     , fused-effects

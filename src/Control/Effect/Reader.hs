@@ -5,6 +5,8 @@ module Control.Effect.Reader
 , ask
 , asks
 , local
+  -- * Re-exports
+, Has
 ) where
 
 import {-# SOURCE #-} Control.Carrier

@@ -5,7 +5,7 @@ Effects are a powerful mechanism for abstraction, and so defining new effects is
 It’s often helpful to start by specifying the types of the desired operations. For our example, we’re going to define a `Teletype` effect, with `read` and `write` operations, which read a string from some input and write a string to some output, respectively:
 
 ```haskell
-data Teletype (m :: * -> *) k
+data Teletype m k
 read :: Has Teletype sig m => m String
 write :: Has Teletype sig m => String -> m ()
 ```
@@ -15,9 +15,9 @@ Effect types must have two type parameters: `m`, denoting any computations which
 Next, we can flesh out the definition of the `Teletype` effect by providing constructors for each primitive operation:
 
 ```haskell
-data Teletype (m :: * -> *) k
-  = Read (String -> k)
-  | Write String k
+data Teletype m k
+  = Read (String -> m k)
+  | Write String (m k)
   deriving (Functor)
 ```
 
@@ -25,15 +25,24 @@ The `Read` operation returns a `String`, and hence its continuation is represent
 
 On the other hand, the `Write` operation returns `()`. Since a function `() -> k` is equivalent to a (non-strict) `k`, we can omit the function parameter.
 
-In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need two other instances: `HFunctor` and `Effect`. `HFunctor`, named for “higher-order functor,” has one non-default operation, `hmap`, which applies a function to any embedded computations inside an effect. `Effect` plays a similar role to the combination of `Functor` (which operates on continuations) and `HFunctor` (which operates on embedded computations). It’s used by `Carrier` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `handle` takes an initial state parameter (encoded as some arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping state functors containing unhandled computations to handled computations producing the state functor alongside any results.
+In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need two other instances: `HFunctor` and `Effect`. `HFunctor`, named for “higher-order functor,” has one operation, `hmap`, which applies a function to any embedded computations inside an effect. `Effect` is used by `Carrier` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `handle` takes an initial state parameter (encoded as some arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping state functors containing unhandled computations to handled computations producing the state functor alongside any results.
 
-Since `Teletype` is a first-order effect (i.e., its operations don’t have any embedded computations), we can derive instances both of `HFunctor` and `Effect`:
+Since `Teletype` is a first-order effect (i.e., its operations don’t have any embedded computations), we can derive instances both of `HFunctor` and `Effect` by first deriving a `Generic1` instance (using `-XDeriveGeneric`):
 
 ```haskell
-data Teletype (m :: * -> *) k
-  = Read (String -> k)
-  | Write String k
-  deriving (Functor, HFunctor, Effect)
+import GHC.Generics (Generic1)
+
+data Teletype m k
+  = Read (String -> m k)
+  | Write String (m k)
+  deriving (Functor, Generic1)
+```
+
+and then defining `HFunctor` & `Effect`, leaving their methods to use the default definitions:
+
+```haskell
+instance HFunctor Teletype
+instance Effect   Teletype
 ```
 
 Now that we have our effect datatype, we can give definitions for `read` and `write`:

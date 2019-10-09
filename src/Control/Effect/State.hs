@@ -7,11 +7,12 @@ module Control.Effect.State
 , put
 , modify
 , modifyLazy
+  -- * Re-exports
+, Has
 ) where
 
 import {-# SOURCE #-} Control.Carrier
 import GHC.Generics (Generic1)
-import Prelude hiding (fail)
 
 data State s m k
   = Get (s -> m k)
@@ -62,5 +63,4 @@ modifyLazy f = get >>= put . f
 -- $setup
 -- >>> :seti -XFlexibleContexts
 -- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Pure
 -- >>> import Control.Carrier.State.Strict

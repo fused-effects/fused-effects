@@ -4,31 +4,37 @@ module Control.Carrier.NonDet.Church
   module Control.Effect.NonDet
   -- * NonDet carrier
 , runNonDet
+, runNonDetA
+, runNonDetM
 , NonDetC(..)
   -- * Re-exports
 , Carrier
-, Has
 , run
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Effect.NonDet
-import Control.Monad (MonadPlus(..), join)
+import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Maybe (fromJust)
+
+runNonDet :: (m b -> m b -> m b) -> (a -> m b) -> m b -> NonDetC m a -> m b
+runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
---   Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unlike 'Control.Effect.Cull.runNonDetOnce', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
+--   Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unless used with 'Control.Effect.Cull.cull', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
 --
---   prop> run (runNonDet (pure a)) === [a]
---   prop> run (runNonDet (pure a)) === Just a
-runNonDet :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
-runNonDet (NonDetC m) = m (liftA2 (<|>)) (pure . pure) (pure empty)
+--   prop> run (runNonDetA (pure a)) === [a]
+--   prop> run (runNonDetA (pure a)) === Just a
+runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
+runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
+
+runNonDetM :: (Applicative m, Monoid b) => (a -> b) -> NonDetC m a -> m b
+runNonDetM leaf = runNonDet (liftA2 mappend) (pure . leaf) (pure mempty)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 newtype NonDetC m a = NonDetC
@@ -38,8 +44,8 @@ newtype NonDetC m a = NonDetC
   deriving (Functor)
 
 -- $
---   prop> run (runNonDet (pure a *> pure b)) === Just b
---   prop> run (runNonDet (pure a <* pure b)) === Just a
+--   prop> run (runNonDetA (pure a *> pure b)) === Just b
+--   prop> run (runNonDetA (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ _ leaf _ -> leaf a)
   {-# INLINE pure #-}
@@ -48,8 +54,8 @@ instance Applicative (NonDetC m) where
   {-# INLINE (<*>) #-}
 
 -- $
---   prop> run (runNonDet (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
---   prop> run (runNonDet ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
+--   prop> run (runNonDetA (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
+--   prop> run (runNonDetA ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ _ nil -> nil)
   {-# INLINE empty #-}
@@ -58,20 +64,24 @@ instance Alternative (NonDetC m) where
 
 instance Monad (NonDetC m) where
   NonDetC a >>= f = NonDetC $ \ fork leaf nil ->
-    a fork (\ a' -> runNonDetC (f a') fork leaf nil) nil
+    a fork (runNonDet fork leaf nil . f) nil
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
   fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
+-- | Separate fixpoints are computed for each branch.
+--
+-- >>> run (runNonDetA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
+-- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
-    mfix (\ a -> runNonDetC (f (fromJust (fold (<|>) Just Nothing a)))
-      (liftA2 Fork)
-      (pure . Leaf)
-      (pure Nil))
-    >>= fold fork leaf nil
+    mfix (runNonDetA . f . head)
+    >>= runNonDet fork leaf nil . foldr
+      (\ a _ -> pure a <|> mfix (liftAll . fmap tail . runNonDetA . f))
+      empty where
+    liftAll m = NonDetC $ \ fork leaf nil -> m >>= foldr (fork . leaf) nil
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (NonDetC m) where
@@ -87,7 +97,7 @@ instance MonadTrans NonDetC where
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff (L (L Empty))      = empty
   eff (L (R (Choose k))) = k True <|> k False
-  eff (R other)          = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDet) other) >>= fold fork leaf nil
+  eff (R other)          = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDetA) other) >>= fold fork leaf nil
   {-# INLINE eff #-}
 
 
@@ -121,6 +131,5 @@ fold fork leaf nil = go where
 
 -- $setup
 -- >>> :seti -XFlexibleContexts
+-- >>> :seti -XTypeApplications
 -- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Data.Foldable (asum)
