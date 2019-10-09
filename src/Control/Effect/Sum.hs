@@ -59,6 +59,8 @@ instance {-# OVERLAPPABLE #-}
 
 
 -- | Decompose sums on the left into multiple 'Member' constraints.
+--
+-- Note that while this, and by extension 'Control.Carrier.Has', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
 type family Members sub sup :: Constraint where
   Members (l :+: r) u = (Members l u, Members r u)
   Members t         u = Member t u
