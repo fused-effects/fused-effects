@@ -66,6 +66,7 @@ library
     Control.Carrier.State.Lazy
     Control.Carrier.State.Strict
     Control.Carrier.Throw.Either
+    Control.Carrier.Throw.Error
     Control.Carrier.Trace.Ignoring
     Control.Carrier.Trace.Printing
     Control.Carrier.Trace.Returning
