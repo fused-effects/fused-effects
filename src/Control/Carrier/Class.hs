@@ -16,6 +16,7 @@ import Control.Monad ((<=<))
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Control.Monad.Trans.RWS.CPS as RWS.CPS
+import qualified Control.Monad.Trans.RWS.Lazy as RWS.Lazy
 import qualified Control.Monad.Trans.State.Lazy as State.Lazy
 import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.CPS as Writer.CPS
@@ -82,6 +83,16 @@ instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Reader r :+: Writer w
   eff (R (R (L (Get   k))))  = RWS.CPS.get >>= k
   eff (R (R (L (Put s k))))  = RWS.CPS.put s *> k
   eff (R (R (R other)))      = RWS.CPS.rwsT $ \ r s -> unRWSTF <$> eff (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.CPS.runRWST x r s) other)
+
+instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
+  eff (L (Ask       k))      = RWS.Lazy.ask >>= k
+  eff (L (Local f m k))      = RWS.Lazy.local f m >>= k
+  eff (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
+  eff (R (L (Listen m k)))   = RWS.Lazy.listen m >>= uncurry (flip k)
+  eff (R (L (Censor f m k))) = RWS.Lazy.censor f m >>= k
+  eff (R (R (L (Get   k))))  = RWS.Lazy.get >>= k
+  eff (R (R (L (Put s k))))  = RWS.Lazy.put s *> k
+  eff (R (R (R other)))      = RWS.Lazy.RWST $ \ r s -> unRWSTF <$> eff (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s) other)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Lazy.StateT s m) where
   eff (L (Get   k)) = State.Lazy.get >>= k
