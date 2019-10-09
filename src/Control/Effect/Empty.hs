@@ -25,7 +25,7 @@ instance Effect   Empty
 -- 'empty' annihilates '>>=':
 --
 -- @
--- 'abort' '>>=' k = 'abort'
+-- 'empty' '>>=' k = 'empty'
 -- @
 empty :: Has Empty sig m => m a
 empty = send Empty
