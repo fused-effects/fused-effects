@@ -70,8 +70,8 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Strict.
   eff (R other)     = State.Strict.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Lazy.StateT s m) where
-  eff (L (Get   k)) = State.Lazy.StateT $ \ s -> State.Lazy.runStateT (k s) s
-  eff (L (Put s k)) = State.Lazy.StateT $ \ _ -> State.Lazy.runStateT k s
+  eff (L (Get   k)) = State.Lazy.get >>= k
+  eff (L (Put s k)) = State.Lazy.put s *> k
   eff (R other)     = State.Lazy.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s) other)
 
 instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Writer w :+: sig) (Writer.CPS.WriterT w m) where
