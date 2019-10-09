@@ -65,8 +65,8 @@ instance Carrier sig m => Carrier (Reader r :+: sig) (Reader.ReaderT r m) where
   eff (R other)         = Reader.ReaderT $ \ r -> eff (hmap (flip Reader.runReaderT r) other)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Strict.StateT s m) where
-  eff (L (Get   k)) = State.Strict.StateT $ \ s -> State.Strict.runStateT (k s) s
-  eff (L (Put s k)) = State.Strict.StateT $ \ _ -> State.Strict.runStateT k s
+  eff (L (Get   k)) = State.Strict.get >>= k
+  eff (L (Put s k)) = State.Strict.put s *> k
   eff (R other)     = State.Strict.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Lazy.StateT s m) where
