@@ -14,8 +14,8 @@ tests :: TestTree
 tests = testGroup "Error.Either"
   [ testProperty "throwError annihilation" $
     \ e k -> throwError_annihilation @C ((~=) @C @B) e (applyFun @A k)
-  , testProperty "catchError substitution" $
-    \ e f -> catchError_substitution @C ((~=) @C @A) e (applyFun f)
+  , testProperty "catchError interception" $
+    \ e f -> catchError_interception @C ((~=) @C @A) e (applyFun f)
   ]
 
 (~=) :: (Eq e, Eq a, Show e, Show a) => ErrorC e PureC a -> ErrorC e PureC a -> Property

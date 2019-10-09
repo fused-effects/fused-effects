@@ -6,7 +6,7 @@ module Control.Effect.Error
 , catchError
   -- * Properties
 , throwError_annihilation
-, catchError_substitution
+, catchError_interception
   -- * Re-exports
 , Has
 ) where
@@ -39,7 +39,7 @@ throwError = send . Throw
 
 -- | Run a computation which can throw errors with a handler to run on error.
 --
--- 'catchError' substitutes 'throwError':
+-- 'catchError' intercepts 'throwError':
 --
 -- @
 -- 'throwError' e \``catchError`\` f = f e
@@ -61,6 +61,6 @@ catchError m h = send (Catch m h pure)
 throwError_annihilation :: Has (Error e) sig m => (m b -> m b -> prop) -> e -> (a -> m b) -> prop
 throwError_annihilation (===) e k = (throwError e >>= k) === throwError e
 
--- | 'catchError' substitutes 'throwError'.
-catchError_substitution :: Has (Error e) sig m => (m a -> m a -> prop) -> e -> (e -> m a) -> prop
-catchError_substitution (===) e f = (throwError e `catchError` f) === f e
+-- | 'catchError' intercepts 'throwError'.
+catchError_interception :: Has (Error e) sig m => (m a -> m a -> prop) -> e -> (e -> m a) -> prop
+catchError_interception (===) e f = (throwError e `catchError` f) === f e
