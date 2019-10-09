@@ -131,7 +131,6 @@ test-suite test
     , tasty-hunit        ^>= 0.10
     , tasty-quickcheck   ^>= 0.10
     , transformers
-  ghc-options: -Wno-orphans
 
 test-suite doctest
   import:              common

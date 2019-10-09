@@ -1,3 +1,4 @@
+{-# OPTIONS_GHC -Wno-orphans #-}
 module Pure
 ( module Control.Carrier.Pure
 ) where

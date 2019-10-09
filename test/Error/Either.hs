@@ -1,4 +1,5 @@
 {-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
+{-# OPTIONS_GHC -Wno-orphans #-}
 module Error.Either
 ( tests
 ) where
@@ -22,10 +23,10 @@ tests = testGroup "Error.Either"
 m1 ~= m2 = run (runError m1) === run (runError m2)
 
 
-instance (Arbitrary e, Arbitrary1 m, Arbitrary a) => Arbitrary (ErrorC e m a) where
-  arbitrary = arbitrary1
-  shrink = shrink1
-
 instance (Arbitrary e, Arbitrary1 m) => Arbitrary1 (ErrorC e m) where
   liftArbitrary genA = ErrorC . ExceptT <$> liftArbitrary @m (liftArbitrary2 @Either (arbitrary @e) genA)
   liftShrink shrinkA = map (ErrorC . ExceptT) . liftShrink (liftShrink2 shrink shrinkA) . runError
+
+instance (Arbitrary e, Arbitrary1 m, Arbitrary a) => Arbitrary (ErrorC e m a) where
+  arbitrary = arbitrary1
+  shrink = shrink1
