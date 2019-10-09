@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE ConstraintKinds, TypeFamilies, TypeOperators #-}
 module Control.Carrier
 ( -- * Re-exports
   module Control.Carrier.Class
@@ -13,7 +13,13 @@ import {-# SOURCE #-} Control.Carrier.Class
 import Control.Carrier.Pure
 import Control.Effect.Class
 import Control.Effect.Sum
+import Data.Kind (Constraint)
 
-type Has eff sig m = (Member eff sig, Carrier sig m)
+type Has eff sig m = (Has' eff sig, Carrier sig m)
 
-send :: Has eff sig m => eff m a -> m a
+type family Has' sub sup :: Constraint where
+  Has' (l :+: r) u = (Has' l u, Has' r u)
+  Has' t         u = Member t u
+
+
+send :: (Member eff sig, Carrier sig m) => eff m a -> m a
