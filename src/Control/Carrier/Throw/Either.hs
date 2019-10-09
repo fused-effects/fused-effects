@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Throw.Either
 ( -- * Throw effect
   module Control.Effect.Throw
@@ -25,3 +25,7 @@ runThrow = runError . runThrowC
 
 newtype ThrowC e m a = ThrowC { runThrowC :: ErrorC e m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
+
+instance (Carrier sig m, Effect sig) => Carrier (Throw e :+: sig) (ThrowC e m) where
+  eff (L (Throw e)) = ThrowC (throwError e)
+  eff (R other)     = ThrowC (eff (R (handleCoercible other)))
