@@ -8,7 +8,7 @@ Predefined carriers:
 
 * "Control.Carrier.NonDet.Church", which collects all branches' results using an @Alternative@ functor.
 * "Control.Carrier.NonDet.Maybe", which terminates upon encountering the first successful result.
-* If 'NonDet' is the last effect in a stack, it can be interpreted directly to an @[]@ value.
+* If 'NonDet' is the last effect in a stack, it can be interpreted directly into a @[]@.
 -}
 
 module Control.Effect.NonDet
