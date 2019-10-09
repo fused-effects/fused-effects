@@ -20,6 +20,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
+-- | Run a 'Throw' effect, returning failures in 'Left' and successful computations’ results in 'Right'.
 runThrow :: ThrowC e m a -> m (Either e a)
 runThrow = runError . runThrowC
 
