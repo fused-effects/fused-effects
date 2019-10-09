@@ -42,7 +42,7 @@ execWriter = fmap fst . runWriter
 {-# INLINE execWriter #-}
 
 
--- | A space-efficient carrier for 'Writer' effects, implemented atop 'Control.Carrier.State.Strict'.
+-- | A space-efficient carrier for 'Writer' effects, implemented atop "Control.Carrier.State.Strict".
 newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
