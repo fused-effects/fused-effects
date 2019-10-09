@@ -60,8 +60,8 @@ instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (Except.Except
   eff (R other)         = Except.ExceptT $ eff (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (Reader.ReaderT r m) where
-  eff (L (Ask       k)) = Reader.ReaderT $ \ r -> Reader.runReaderT (k r) r
-  eff (L (Local f m k)) = Reader.ReaderT $ \ r -> Reader.runReaderT m (f r) >>= flip Reader.runReaderT r . k
+  eff (L (Ask       k)) = Reader.ask >>= k
+  eff (L (Local f m k)) = Reader.local f m >>= k
   eff (R other)         = Reader.ReaderT $ \ r -> eff (hmap (flip Reader.runReaderT r) other)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Strict.StateT s m) where
