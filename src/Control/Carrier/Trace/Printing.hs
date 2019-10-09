@@ -1,8 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
-{- | A carrier for the 'Control.Effect.Trace' effect that prints all traced results to stderr.
--}
-
+-- | A carrier for the 'Control.Effect.Trace' effect that prints all traced results to stderr.
 module Control.Carrier.Trace.Printing
 ( -- * Trace effect
   module Control.Effect.Trace

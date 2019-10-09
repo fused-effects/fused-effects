@@ -1,8 +1,6 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 
-{- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
--}
-
+-- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
 module Control.Carrier.Cut.Church
 ( -- * Cut effect
   module Control.Effect.Cut

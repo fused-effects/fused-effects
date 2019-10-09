@@ -1,7 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 
-{- | Provides a carrier for 'Resumable' that can, given a handler function, resume the computation that threw an exception.
--}
+-- | Provides a carrier for 'Resumable' that can, given a handler function, resume the computation that threw an exception.
 module Control.Carrier.Resumable.Resume
 ( -- * Resumable effect
   module Control.Effect.Resumable
