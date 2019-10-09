@@ -1,8 +1,6 @@
 {-# LANGUAGE TypeOperators #-}
 module Control.Effect.NonDet
 ( NonDet
-, module Control.Effect.Choose
-, module Control.Effect.Empty
 ) where
 
 import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
