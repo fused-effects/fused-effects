@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 module Control.Carrier.Throw.Error
 ( -- * Throw effect
   module Control.Effect.Throw
@@ -12,7 +12,6 @@ module Control.Carrier.Throw.Error
 
 import Control.Applicative (Alternative)
 import Control.Carrier
-import Control.Effect.Error
 import Control.Effect.Throw
 import Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
@@ -25,7 +24,3 @@ newtype ThrowC e m a = ThrowC { runThrow :: m a }
 
 instance MonadTrans (ThrowC e) where
   lift = ThrowC
-
-instance (Has (Error e) sig m) => Carrier (Throw e :+: sig) (ThrowC e m) where
-  eff (L (Throw e)) = ThrowC (throwError e)
-  eff (R other)     = ThrowC (eff (handleCoercible other))
