@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Class
 ( Carrier(..)
 ) where
@@ -15,6 +15,7 @@ import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Reader as Reader
+import qualified Control.Monad.Trans.RWS.CPS as RWS.CPS
 import qualified Control.Monad.Trans.State.Lazy as State.Lazy
 import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.CPS as Writer.CPS
@@ -65,6 +66,22 @@ instance Carrier sig m => Carrier (Reader r :+: sig) (Reader.ReaderT r m) where
   eff (L (Ask       k)) = Reader.ask >>= k
   eff (L (Local f m k)) = Reader.local f m >>= k
   eff (R other)         = Reader.ReaderT $ \ r -> eff (hmap (flip Reader.runReaderT r) other)
+
+newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
+  deriving (Functor)
+
+toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
+toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
+
+instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Reader r :+: Writer w :+: State s :+: sig) (RWS.CPS.RWST r w s m) where
+  eff (L (Ask       k))      = RWS.CPS.ask >>= k
+  eff (L (Local f m k))      = RWS.CPS.local f m >>= k
+  eff (R (L (Tell w k)))     = RWS.CPS.tell w *> k
+  eff (R (L (Listen m k)))   = RWS.CPS.listen m >>= uncurry (flip k)
+  eff (R (L (Censor f m k))) = RWS.CPS.censor f m >>= k
+  eff (R (R (L (Get   k))))  = RWS.CPS.get >>= k
+  eff (R (R (L (Put s k))))  = RWS.CPS.put s *> k
+  eff (R (R (R other)))      = RWS.CPS.rwsT $ \ r s -> unRWSTF <$> eff (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.CPS.runRWST x r s) other)
 
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Lazy.StateT s m) where
   eff (L (Get   k)) = State.Lazy.get >>= k
