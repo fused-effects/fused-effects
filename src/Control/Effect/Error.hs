@@ -21,7 +21,7 @@ module Control.Effect.Error
 
 import {-# SOURCE #-} Control.Carrier
 
--- | @since 1.0.0.0
+-- | @since 0.1.0.0
 data Error exc m k
   = Throw exc
   | forall b . Catch (m b) (exc -> m b) (b -> m k)
@@ -39,6 +39,8 @@ instance Effect (Error exc) where
 -- | Throw an error, escaping the current computation up to the nearest 'catchError' (if any).
 --
 --   prop> run (runError (throwError a)) === Left @Int @Int a
+--
+-- @since 0.1.0.0
 throwError :: Has (Error exc) sig m => exc -> m a
 throwError = send . Throw
 
@@ -53,6 +55,8 @@ throwError = send . Throw
 --   prop> run (runError (pure a `catchError` pure)) === Right a
 --   prop> run (runError (throwError a `catchError` pure)) === Right @Int @Int a
 --   prop> run (runError (throwError a `catchError` (throwError @Int))) === Left @Int @Int a
+--
+-- @since 0.1.0.0
 catchError :: Has (Error exc) sig m => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h pure)
 

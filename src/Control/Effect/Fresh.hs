@@ -18,7 +18,7 @@ module Control.Effect.Fresh
 
 import Control.Carrier
 
--- | @since 1.0.0.0
+-- | @since 0.1.0.0
 data Fresh m k
   = Fresh (Int -> m k)
   | forall b . Reset (m b) (b -> m k)
@@ -37,7 +37,7 @@ instance Effect Fresh where
 --
 --   prop> run (runFresh (replicateM n fresh)) === nub (run (runFresh (replicateM n fresh)))
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 fresh :: Has Fresh sig m => m Int
 fresh = send (Fresh pure)
 
@@ -45,7 +45,7 @@ fresh = send (Fresh pure)
 --
 --   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) === run (runFresh (replicateM n fresh))
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 resetFresh :: Has Fresh sig m => m a -> m a
 resetFresh m = send (Reset m pure)
 

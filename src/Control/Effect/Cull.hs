@@ -18,6 +18,8 @@ module Control.Effect.Cull
 import Control.Carrier
 
 -- | 'Cull' effects are used with 'Choose' to provide control over branching.
+--
+-- @since 0.1.2.0
 data Cull m k
   = forall a . Cull (m a) (a -> m k)
 
@@ -37,6 +39,8 @@ instance Effect Cull where
 --   prop> run (runNonDetA (runCullA (cull (empty  <|> pure a)))) === [a]
 --   prop> run (runNonDetA (runCullA (cull (pure a <|> pure b) <|> pure c))) === [a, c]
 --   prop> run (runNonDetA (runCullA (cull (asum (map pure (repeat a)))))) === [a]
+--
+-- @since 0.1.2.0
 cull :: Has Cull sig m => m a -> m a
 cull m = send (Cull m pure)
 

@@ -36,7 +36,7 @@ import Data.Monoid (Alt(..))
 
 -- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 type NonDet = Empty :+: Choose
 
 -- | Nondeterministically choose an element from a 'Foldable' collection.

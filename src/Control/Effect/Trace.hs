@@ -20,7 +20,7 @@ module Control.Effect.Trace
 import Control.Carrier
 import GHC.Generics (Generic1)
 
--- | @since 1.0.0.0
+-- | @since 0.1.0.0
 data Trace m k = Trace
   { traceMessage :: String
   , traceCont    :: m k
@@ -32,6 +32,6 @@ instance Effect   Trace
 
 -- | Append a message to the trace log.
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 trace :: Has Trace sig m => String -> m ()
 trace message = send (Trace message (pure ()))

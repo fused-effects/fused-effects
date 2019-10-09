@@ -18,6 +18,8 @@ module Control.Effect.Resumable
 import Control.Carrier
 
 -- | Errors which can be resumed with values of some existentially-quantified type.
+--
+-- @since 0.1.0.0
 data Resumable err m k
   = forall a . Resumable (err a) (a -> m k)
 
@@ -35,6 +37,8 @@ instance Effect (Resumable err) where
 -- expected in the success case.
 --
 --   prop> run (runResumable (throwResumable (Identity a))) === Left (SomeError (Identity a))
+--
+-- @since 0.1.0.0
 throwResumable :: Has (Resumable err) sig m => err a -> m a
 throwResumable err = send (Resumable err pure)
 

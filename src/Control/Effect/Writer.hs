@@ -21,7 +21,7 @@ module Control.Effect.Writer
 
 import {-# SOURCE #-} Control.Carrier
 
--- | @since 1.0.0.0
+-- | @since 0.1.0.0
 data Writer w m k
   = Tell w (m k)
   | forall a . Listen (m a) (w -> a -> m k)
@@ -45,7 +45,7 @@ instance Effect (Writer w) where
 --
 --   prop> fst (run (runWriter (mapM_ (tell . Sum) (0 : ws)))) === foldMap Sum ws
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 tell :: Has (Writer w) sig m => w -> m ()
 tell w = send (Tell w (pure ()))
 {-# INLINE tell #-}
@@ -54,7 +54,7 @@ tell w = send (Tell w (pure ()))
 --
 --   prop> run (runWriter (fst <$ tell (Sum a) <*> listen @(Sum Integer) (tell (Sum b)))) === (Sum a <> Sum b, Sum b)
 --
--- @since 1.0.0.0
+-- @since 0.2.0.0
 listen :: Has (Writer w) sig m => m a -> m (w, a)
 listen m = send (Listen m (curry pure))
 {-# INLINE listen #-}
@@ -63,7 +63,7 @@ listen m = send (Listen m (curry pure))
 --
 --   prop> run (runWriter (fst <$ tell (Sum a) <*> listens @(Sum Integer) (applyFun f) (tell (Sum b)))) === (Sum a <> Sum b, applyFun f (Sum b))
 --
--- @since 1.0.0.0
+-- @since 0.2.0.0
 listens :: Has (Writer w) sig m => (w -> b) -> m a -> m (b, a)
 listens f m = send (Listen m (curry pure . f))
 {-# INLINE listens #-}
@@ -73,7 +73,7 @@ listens f m = send (Listen m (curry pure . f))
 --   prop> run (execWriter (censor (applyFun f) (tell (Sum a)))) === applyFun f (Sum a)
 --   prop> run (execWriter (tell (Sum a) *> censor (applyFun f) (tell (Sum b)) *> tell (Sum c))) === (Sum a <> applyFun f (Sum b) <> Sum c)
 --
--- @since 1.0.0.0
+-- @since 0.2.0.0
 censor :: Has (Writer w) sig m => (w -> w) -> m a -> m a
 censor f m = send (Censor f m pure)
 {-# INLINE censor #-}

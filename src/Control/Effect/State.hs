@@ -25,7 +25,7 @@ module Control.Effect.State
 import Control.Carrier
 import GHC.Generics (Generic1)
 
--- | @since 1.0.0.0
+-- | @since 0.1.0.0
 data State s m k
   = Get (s -> m k)
   | Put s (m k)
@@ -36,7 +36,7 @@ data State s m k
 --
 --   prop> snd (run (runState a get)) === a
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 get :: Has (State s) sig m => m s
 get = send (Get pure)
 {-# INLINEABLE get #-}
@@ -45,7 +45,7 @@ get = send (Get pure)
 --
 --   prop> snd (run (runState a (gets (applyFun f)))) === applyFun f a
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 gets :: Has (State s) sig m => (s -> a) -> m a
 gets f = send (Get (pure . f))
 {-# INLINEABLE gets #-}
@@ -56,7 +56,7 @@ gets f = send (Get (pure . f))
 --   prop> snd (run (runState a (get <* put b))) === a
 --   prop> snd (run (runState a (put b *> get))) === b
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 put :: Has (State s) sig m => s -> m ()
 put s = send (Put s (pure ()))
 {-# INLINEABLE put #-}
@@ -66,7 +66,7 @@ put s = send (Put s (pure ()))
 --
 --   prop> fst (run (runState a (modify (+1)))) === (1 + a :: Integer)
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 modify :: Has (State s) sig m => (s -> s) -> m ()
 modify f = do
   a <- get
@@ -76,7 +76,7 @@ modify f = do
 -- | Replace the state value with the result of applying a function to the current state value.
 --   This is lazy in the new state; injudicious use of this function may lead to space leaks.
 --
--- @since 1.0.0.0
+-- @since 0.1.0.0
 modifyLazy :: Has (State s) sig m => (s -> s) -> m ()
 modifyLazy f = get >>= put . f
 {-# INLINEABLE modifyLazy #-}

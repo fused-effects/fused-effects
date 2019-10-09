@@ -24,7 +24,7 @@ import Control.Carrier
 
 -- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
 --
--- @since 1.0.0.0
+-- @since 0.1.2.0
 data Cut m k
   = Cutfail
   | forall a . Call (m a) (a -> m k)
@@ -48,7 +48,7 @@ instance Effect Cut where
 --   prop> run (runNonDet (runCut (cutfail <|> pure a))) === []
 --   prop> run (runNonDet (runCut (pure a <|> cutfail))) === [a]
 --
--- @since 1.0.0.0
+-- @since 0.1.2.0
 cutfail :: Has Cut sig m => m a
 cutfail = send Cutfail
 {-# INLINE cutfail #-}
@@ -57,7 +57,7 @@ cutfail = send Cutfail
 --
 --   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) === [b]
 --
--- @since 1.0.0.0
+-- @since 0.1.2.0
 call :: Has Cut sig m => m a -> m a
 call m = send (Call m pure)
 {-# INLINE call #-}
@@ -68,7 +68,7 @@ call m = send (Call m pure)
 --   prop> run (runNonDet (runCut (cut *> pure a <|> pure b))) === [a]
 --   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) === []
 --
--- @since 1.0.0.0
+-- @since 0.1.2.0
 cut :: (Alternative m, Has Cut sig m) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}
