@@ -3,15 +3,15 @@ module Control.Carrier.Class
 ( Carrier(..)
 ) where
 
-import Control.Effect.Choose (Choose(..))
+import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
-import Control.Effect.Empty (Empty(..))
-import Control.Effect.Error (Error(..))
-import Control.Effect.NonDet (NonDet)
-import Control.Effect.Reader (Reader(..))
-import Control.Effect.State (State(..))
+import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
+import {-# SOURCE #-} Control.Effect.Error (Error(..))
+import {-# SOURCE #-} Control.Effect.NonDet (NonDet)
+import {-# SOURCE #-} Control.Effect.Reader (Reader(..))
+import {-# SOURCE #-} Control.Effect.State (State(..))
 import Control.Effect.Sum ((:+:)(..))
-import Control.Effect.Writer (Writer(..))
+import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Reader as Reader

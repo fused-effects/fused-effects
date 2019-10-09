@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures, StandaloneDeriving #-}
 module Control.Effect.Empty
 ( -- * Empty effect
   Empty(..)
@@ -8,15 +8,16 @@ module Control.Effect.Empty
 , Has
 ) where
 
-import {-# SOURCE #-} Control.Carrier
+import Control.Carrier
 import GHC.Generics (Generic1)
 
 -- | An effect modelling nondeterminism without choice.
 --
 --   This can be seen as similar to 'Control.Effect.Fail.Fail', but without an error message.
 data Empty (m :: * -> *) k = Empty
-  deriving (Functor, Generic1)
+  deriving (Generic1)
 
+deriving instance Functor m => Functor (Empty m)
 instance HFunctor Empty
 instance Effect   Empty
 

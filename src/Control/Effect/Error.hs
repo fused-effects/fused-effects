@@ -8,7 +8,7 @@ module Control.Effect.Error
 , Has
 ) where
 
-import {-# SOURCE #-} Control.Carrier
+import Control.Carrier
 
 data Error exc m k
   = Throw exc
