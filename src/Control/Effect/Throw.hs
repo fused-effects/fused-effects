@@ -7,7 +7,7 @@ module Control.Effect.Throw
 , Has
 ) where
 
-import Control.Carrier
+import {-# SOURCE #-} Control.Carrier
 import GHC.Generics (Generic1)
 
 data Throw e (m :: * -> *) k

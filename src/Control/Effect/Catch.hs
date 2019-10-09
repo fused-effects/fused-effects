@@ -4,7 +4,7 @@ module Control.Effect.Catch
 , catchError
 ) where
 
-import Control.Carrier
+import {-# SOURCE #-} Control.Carrier
 
 -- | 'Catch' effects can be used alongside 'Control.Effect.Throw.Throw' to provide recoverable exceptions.
 data Catch e m k
