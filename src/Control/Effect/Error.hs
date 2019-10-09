@@ -4,6 +4,9 @@ module Control.Effect.Error
   Error(..)
 , throwError
 , catchError
+  -- * Properties
+, throwError_annihilation
+, catchError_substitution
   -- * Re-exports
 , Has
 ) where
@@ -50,3 +53,12 @@ throwError = send . Throw
 -- 'Control.Exception.try' or use 'Control.Exception.Catch' from outside the effect invocation.
 catchError :: Has (Error exc) sig m => m a -> (exc -> m a) -> m a
 catchError m h = send (Catch m h pure)
+
+
+-- Properties
+
+throwError_annihilation :: Has (Error e) sig m => (m b -> m b -> prop) -> e -> (a -> m b) -> prop
+throwError_annihilation (===) e k = (throwError e >>= k) === throwError e
+
+catchError_substitution :: Has (Error e) sig m => (m a -> m a -> prop) -> e -> (e -> m a) -> prop
+catchError_substitution (===) e f = (throwError e `catchError` f) === f e
