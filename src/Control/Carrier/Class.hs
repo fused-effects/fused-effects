@@ -15,8 +15,8 @@ import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Reader as Reader
-import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.State.Lazy as State.Lazy
+import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.CPS as Writer.CPS
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Semigroup as S
@@ -64,15 +64,15 @@ instance Carrier sig m => Carrier (Reader r :+: sig) (Reader.ReaderT r m) where
   eff (L (Local f m k)) = Reader.local f m >>= k
   eff (R other)         = Reader.ReaderT $ \ r -> eff (hmap (flip Reader.runReaderT r) other)
 
-instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Strict.StateT s m) where
-  eff (L (Get   k)) = State.Strict.get >>= k
-  eff (L (Put s k)) = State.Strict.put s *> k
-  eff (R other)     = State.Strict.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
-
 instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Lazy.StateT s m) where
   eff (L (Get   k)) = State.Lazy.get >>= k
   eff (L (Put s k)) = State.Lazy.put s *> k
   eff (R other)     = State.Lazy.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s) other)
+
+instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Strict.StateT s m) where
+  eff (L (Get   k)) = State.Strict.get >>= k
+  eff (L (Put s k)) = State.Strict.put s *> k
+  eff (R other)     = State.Strict.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
 
 instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Writer w :+: sig) (Writer.CPS.WriterT w m) where
   eff (L (Tell w k))     = Writer.CPS.tell w *> k
