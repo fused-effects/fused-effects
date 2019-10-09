@@ -126,6 +126,7 @@ test-suite test
       base
     , fused-effects
     , inspection-testing ^>= 0.4
+    , QuickCheck         ^>= 2.13
     , tasty              ^>= 1.2
     , tasty-hunit        ^>= 0.10
     , tasty-quickcheck   ^>= 0.10

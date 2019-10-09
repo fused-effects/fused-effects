@@ -7,15 +7,16 @@ import Control.Carrier.Error.Either
 import Control.Monad.Trans.Except
 import Error
 import Pure
+import Test.QuickCheck.Poly
 import Test.Tasty
 import Test.Tasty.QuickCheck
 
 tests :: TestTree
 tests = testGroup "Error.Either"
   [ testProperty "throwError annihilation" $
-    \ e k -> throwError_annihilation @E ((~=) @E @B) e (applyFun @A k)
+    \ e k -> throwError_annihilation @C ((~=) @C @B) e (applyFun @A k)
   , testProperty "catchError substitution" $
-    \ e f -> catchError_substitution @E ((~=) @E @A) e (applyFun f)
+    \ e f -> catchError_substitution @C ((~=) @C @A) e (applyFun f)
   ]
 
 (~=) :: (Eq e, Eq a, Show e, Show a) => ErrorC e PureC a -> ErrorC e PureC a -> Property
