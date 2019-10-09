@@ -33,6 +33,8 @@ class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   eff :: sig m a -> m a
 
 
+-- base
+
 instance Carrier Choose NonEmpty where
   eff (Choose m) = m True S.<> m False
 
