@@ -19,6 +19,7 @@ import qualified Control.Monad.Trans.State.Lazy as State.Lazy
 import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.CPS as Writer.CPS
 import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
+import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Semigroup as S
 import Data.Tuple (swap)
@@ -86,3 +87,9 @@ instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Writer w :+: sig) (Wr
   eff (L (Listen m k))   = Writer.Lazy.listen m >>= uncurry (flip k)
   eff (L (Censor f m k)) = Writer.Lazy.censor f m >>= k
   eff (R other)          = Writer.Lazy.WriterT $ swap <$> eff (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Lazy.runWriterT x) other)
+
+instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Writer w :+: sig) (Writer.Strict.WriterT w m) where
+  eff (L (Tell w k))     = Writer.Strict.tell w *> k
+  eff (L (Listen m k))   = Writer.Strict.listen m >>= uncurry (flip k)
+  eff (L (Censor f m k)) = Writer.Strict.censor f m >>= k
+  eff (R other)          = Writer.Strict.WriterT $ swap <$> eff (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Strict.runWriterT x) other)
