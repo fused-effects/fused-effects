@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Effect.State
 ( -- * State effect
   State(..)
@@ -17,9 +17,7 @@ import GHC.Generics (Generic1)
 data State s m k
   = Get (s -> m k)
   | Put s (m k)
-  deriving (Generic1)
-
-deriving instance Functor m => Functor (State s m)
+  deriving (Functor, Generic1)
 
 instance HFunctor (State s)
 instance Effect   (State s)

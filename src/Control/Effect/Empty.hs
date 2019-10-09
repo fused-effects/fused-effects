@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
 module Control.Effect.Empty
 ( -- * Empty effect
   Empty(..)
@@ -15,9 +15,8 @@ import GHC.Generics (Generic1)
 --
 --   This can be seen as similar to 'Control.Effect.Fail.Fail', but without an error message.
 data Empty (m :: * -> *) k = Empty
-  deriving (Generic1)
+  deriving (Functor, Generic1)
 
-deriving instance Functor m => Functor (Empty m)
 instance HFunctor Empty
 instance Effect   Empty
 
