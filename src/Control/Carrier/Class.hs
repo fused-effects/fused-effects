@@ -55,8 +55,8 @@ instance Monoid w => Carrier (Writer w) ((,) w) where
 -- transformers
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (Except.ExceptT e m) where
-  eff (L (Throw e))     = Except.ExceptT $ pure (Left e)
-  eff (L (Catch m h k)) = Except.ExceptT $ Except.runExceptT m >>= either (either (pure . Left) (Except.runExceptT . k) <=< Except.runExceptT . h) (Except.runExceptT . k)
+  eff (L (Throw e))     = Except.throwE e
+  eff (L (Catch m h k)) = Except.catchE m h >>= k
   eff (R other)         = Except.ExceptT $ eff (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (Reader.ReaderT r m) where
