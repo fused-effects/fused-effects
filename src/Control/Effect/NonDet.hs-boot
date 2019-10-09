@@ -1,12 +1,12 @@
 {-# LANGUAGE TypeOperators #-}
 module Control.Effect.NonDet
 ( NonDet
-, Control.Effect.Choose.Choose (..)
-, Control.Effect.Empty.Empty (..)
+, module Control.Effect.Choose
+, module Control.Effect.Empty
 ) where
 
-import {-# SOURCE #-} Control.Effect.Choose
-import {-# SOURCE #-} Control.Effect.Empty
+import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
+import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
 import Control.Effect.Sum
 
 type NonDet = Empty :+: Choose
