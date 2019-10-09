@@ -17,7 +17,6 @@ module Control.Carrier.Cut.Church
 import Control.Carrier
 import Control.Effect.Cut
 import Control.Effect.NonDet
-import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -64,13 +63,17 @@ instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
   fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
+-- | Separate fixpoints are computed for each branch.
+--
+-- >>> run (runCutA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
+-- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (CutC m) where
-  mfix f = CutC (\ cons nil _ ->
-    mfix (runCut
-      (fmap . (:))
-      (pure [])
-      (pure [])
-      . f . head) >>= foldr cons nil)
+  mfix f = CutC $ \ cons nil fail ->
+    mfix (runCutA . f . head)
+    >>= runCut cons nil fail . foldr
+      (\ a _ -> pure a <|> mfix (liftAll . fmap tail . runCutA . f))
+      empty where
+    liftAll m = CutC $ \ cons nil _ -> m >>= foldr cons nil
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (CutC m) where
@@ -94,4 +97,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
 
 -- $setup
 -- >>> import Test.QuickCheck
--- >>> import Control.Carrier.NonDet.Church

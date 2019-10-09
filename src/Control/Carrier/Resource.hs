@@ -12,7 +12,6 @@ module Control.Carrier.Resource
 
 import           Control.Applicative (Alternative(..))
 import           Control.Carrier
-import           Control.Carrier.Reader
 import           Control.Effect.Resource
 import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))
@@ -21,12 +20,6 @@ import           Control.Monad.Fix
 import           Control.Monad.IO.Class
 import           Control.Monad.IO.Unlift
 import           Control.Monad.Trans.Class
-
--- Not exposed due to its potential to silently drop effects (#180).
-unliftResource :: (forall x . m x -> IO x) -- ^ "unlifting" function to run the carrier in 'IO'
-            -> ResourceC m a
-            -> m a
-unliftResource handler = runReader (UnliftIO handler) . runResourceC
 
 -- | Executes a 'Resource' effect. Because this runs using 'MonadUnliftIO',
 -- invocations of 'runResource' must happen at the "bottom" of a stack of
@@ -39,37 +32,31 @@ unliftResource handler = runReader (UnliftIO handler) . runResourceC
 --   . runState @Int 1
 --   $ myComputation
 -- @
-runResource :: MonadUnliftIO m
-            => ResourceC m a
-            -> m a
-runResource r = withRunInIO (\f -> runUnlifting (UnliftIO f) r)
+runResource :: ResourceC m a -> m a
+runResource = runResourceC
 
-newtype ResourceC m a = ResourceC { runResourceC :: ReaderC (UnliftIO m) m a }
+newtype ResourceC m a = ResourceC { runResourceC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
-instance MonadUnliftIO m => MonadUnliftIO (ResourceC m) where
-  askUnliftIO = ResourceC . ReaderC $ \(UnliftIO h) ->
-    withUnliftIO $ \u -> pure (UnliftIO $ \r -> unliftIO u (unliftResource h r))
-
 instance MonadTrans ResourceC where
-  lift = ResourceC . lift
+  lift = ResourceC
 
-runUnlifting :: UnliftIO m -> ResourceC m a -> IO a
-runUnlifting h@(UnliftIO handler) = handler . runReader h . runResourceC
+instance MonadUnliftIO m => MonadUnliftIO (ResourceC m) where
+  withRunInIO f = ResourceC (withRunInIO (\ runInIO -> f (runInIO . runResourceC)))
 
-instance (Carrier sig m, MonadIO m) => Carrier (Resource :+: sig) (ResourceC m) where
+instance (Carrier sig m, MonadUnliftIO m) => Carrier (Resource :+: sig) (ResourceC m) where
   eff (L (Resource acquire release use k)) = do
-    handler <- ResourceC ask
+    handler <- askUnliftIO
     a <- liftIO (Exc.bracket
-      (runUnlifting handler acquire)
-      (runUnlifting handler . release)
-      (runUnlifting handler . use))
+      (unliftIO handler acquire)
+      (unliftIO handler . release)
+      (unliftIO handler . use))
     k a
   eff (L (OnError  acquire release use k)) = do
-    handler <- ResourceC ask
+    handler <- askUnliftIO
     a <- liftIO (Exc.bracketOnError
-      (runUnlifting handler acquire)
-      (runUnlifting handler . release)
-      (runUnlifting handler . use))
+      (unliftIO handler acquire)
+      (unliftIO handler . release)
+      (unliftIO handler . use))
     k a
-  eff (R other) = ResourceC (eff (R (handleCoercible other)))
+  eff (R other) = ResourceC (eff (handleCoercible other))
