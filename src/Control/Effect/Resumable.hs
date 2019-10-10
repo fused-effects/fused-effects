@@ -31,10 +31,7 @@ instance HFunctor (Resumable err) where
 instance Effect (Resumable err) where
   handle state handler (Resumable err k) = Resumable err (handler . (<$ state) . k)
 
--- | Throw an error which can be resumed with a value of its result type.
--- Note that the type parameters in the @err a@ paramater and @m a@ parameter must match
--- up; this is so that the calling context knows what type of value this computation
--- expected in the success case.
+-- | Throw an error which can be resumed with a value of its result type. Note that the type parameters in the @err a@ paramater and @m a@ parameter must match up; this indicates the type with which the error must be resumed.
 --
 --   prop> run (runResumable (throwResumable (Identity a))) === Left (SomeError (Identity a))
 --
