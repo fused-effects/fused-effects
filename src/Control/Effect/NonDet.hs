@@ -2,7 +2,7 @@
 
 {- | An effect modelling nondeterminism with choice and failure.
 
-Nondeterministic operations are encapsulated by the 'Alternative' class, where 'empty' represents failure and '<|>' represents choice. This module reexports the 'Alternative' interface. If you can't or don't want to use 'Alternative', you can use the 'Control.Effect.Empty.empty' and 'Control.Effect.Choose.<|>' effects (from "Control.Effect.Empty" and "Control.Effect.Choose" respectively) directly, as the 'NonDet' effect is the composition of 'Choose' and 'Empty'.
+Nondeterministic operations are encapsulated by the 'Alternative' class, where 'empty' represents failure and '<|>' represents choice. This module re-exports the 'Alternative' interface. If you can't or don't want to use 'Alternative', you can use the 'Control.Effect.Empty.empty' and 'Control.Effect.Choose.<|>' operations (from "Control.Effect.Empty" and "Control.Effect.Choose" respectively) directly, as the 'NonDet' effect is the composition of 'Choose' and 'Empty'.
 
 Predefined carriers:
 
