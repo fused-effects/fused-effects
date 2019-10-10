@@ -1,4 +1,10 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+
+{- | A carrier for 'Choose' effects (nondeterminism without failure).
+
+Under the hood, it uses a Church-encoded binary tree to avoid the problems associated with a naïve list-based implementation (see ["ListT done right"](http://wiki.haskell.org/ListT_done_right)).
+-}
+
 module Control.Carrier.Choose.Church
 ( -- * Choose effect
   module Control.Effect.Choose
@@ -24,14 +30,20 @@ import qualified Data.Semigroup as S
 import Prelude hiding (head, tail)
 
 -- | Run a 'Choose' effect, passing branches and results to the supplied continuations.
+--
+-- @since 1.0.0.0
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf m = runChooseC m fork leaf
 
 -- | Run a 'Choose' effect, passing results to the supplied function, and merging branches together using 'S.<>'.
+--
+-- @since 1.0.0.0
 runChooseS :: (S.Semigroup b, Applicative m) => (a -> m b) -> ChooseC m a -> m b
 runChooseS = runChoose (liftA2 (S.<>))
 
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
+--
+-- @since 1.0.0.0
 newtype ChooseC m a = ChooseC
   { -- | A higher-order function receiving two continuations, respectively implementing choice and 'pure'.
     runChooseC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b

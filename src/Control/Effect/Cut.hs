@@ -1,4 +1,14 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, GeneralizedNewtypeDeriving, StandaloneDeriving #-}
+
+{- | Provides an effect to delimit backtracking in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
+
+Computations that signal failure with 'cutfail' prevent backtracking within the nearest enclosing 'call'.
+
+Predefined carriers:
+
+* "Control.Carrier.Cut.Church"
+-}
+
 module Control.Effect.Cut
 ( -- * Cut effect
   Cut(..)
@@ -13,6 +23,8 @@ import Control.Applicative (Alternative(..))
 import Control.Carrier
 
 -- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
+--
+-- @since 0.1.2.0
 data Cut m k
   = Cutfail
   | forall a . Call (m a) (a -> m k)
@@ -35,6 +47,8 @@ instance Effect Cut where
 --
 --   prop> run (runNonDet (runCut (cutfail <|> pure a))) === []
 --   prop> run (runNonDet (runCut (pure a <|> cutfail))) === [a]
+--
+-- @since 0.1.2.0
 cutfail :: Has Cut sig m => m a
 cutfail = send Cutfail
 {-# INLINE cutfail #-}
@@ -42,6 +56,8 @@ cutfail = send Cutfail
 -- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
 --
 --   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) === [b]
+--
+-- @since 0.1.2.0
 call :: Has Cut sig m => m a -> m a
 call m = send (Call m pure)
 {-# INLINE call #-}
@@ -51,6 +67,8 @@ call m = send (Call m pure)
 --   prop> run (runNonDet (runCut (pure a <|> cut *> pure b))) === [a, b]
 --   prop> run (runNonDet (runCut (cut *> pure a <|> pure b))) === [a]
 --   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) === []
+--
+-- @since 0.1.2.0
 cut :: (Alternative m, Has Cut sig m) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}

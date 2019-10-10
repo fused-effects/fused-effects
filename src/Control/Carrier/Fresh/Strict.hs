@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+-- | A carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
 module Control.Carrier.Fresh.Strict
 ( -- * Fresh effect
   module Control.Effect.Fresh
@@ -27,6 +29,7 @@ import Control.Monad.Trans.Class
 runFresh :: Functor m => FreshC m a -> m a
 runFresh = evalState 0 . runFreshC
 
+-- | @since 1.0.0.0
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

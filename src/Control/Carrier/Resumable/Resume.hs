@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+
+-- | Provides a carrier for 'Resumable' that can, given a handler function, resume the computation that threw an exception.
 module Control.Carrier.Resumable.Resume
 ( -- * Resumable effect
   module Control.Effect.Resumable
@@ -28,12 +30,15 @@ import Control.Monad.Trans.Class
 --
 --   prop> run (runResumable (\ (Err b) -> pure (1 + b)) (pure a)) === a
 --   prop> run (runResumable (\ (Err b) -> pure (1 + b)) (throwResumable (Err a))) === 1 + a
+--
+-- @since 1.0.0.0
 runResumable
   :: (forall x . err x -> m x)
   -> ResumableC err m a
   -> m a
 runResumable with = runReader (Handler with) . runResumableC
 
+-- | @since 1.0.0.0
 newtype ResumableC err m a = ResumableC { runResumableC :: ReaderC (Handler err m) m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
