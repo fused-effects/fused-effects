@@ -44,6 +44,7 @@ library
   import:              common
   hs-source-dirs:      src
   exposed-modules:
+    -- Carriers
     Control.Carrier
     Control.Carrier.Choose.Church
     Control.Carrier.Class
@@ -64,10 +65,13 @@ library
     Control.Carrier.Resumable.Resume
     Control.Carrier.State.Lazy
     Control.Carrier.State.Strict
+    Control.Carrier.Throw.Either
     Control.Carrier.Trace.Ignoring
     Control.Carrier.Trace.Printing
     Control.Carrier.Trace.Returning
     Control.Carrier.Writer.Strict
+    -- Effects
+    Control.Effect.Catch
     Control.Effect.Choose
     Control.Effect.Class
     Control.Effect.Cull
@@ -84,6 +88,7 @@ library
     Control.Effect.Resumable
     Control.Effect.State
     Control.Effect.Sum
+    Control.Effect.Throw
     Control.Effect.Trace
     Control.Effect.Writer
   build-depends:

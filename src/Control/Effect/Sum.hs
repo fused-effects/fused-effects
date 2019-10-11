@@ -1,14 +1,16 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
 
 -- | Operations on /sums/, combining effects into a /signature/.
 module Control.Effect.Sum
 ( -- * Membership
   Member(..)
+, Members
   -- * Sums
 , (:+:)(..)
 ) where
 
 import Control.Effect.Class
+import Data.Kind (Constraint)
 import GHC.Generics (Generic1)
 
 -- | Higher-order sums are used to combine multiple effects into a signature, typically by chaining on the right.
@@ -55,3 +57,11 @@ instance {-# OVERLAPPABLE #-}
          Member l r
       => Member l (l' :+: r) where
   inj = R . inj
+
+
+-- | Decompose sums on the left into multiple 'Member' constraints.
+--
+-- Note that while this, and by extension 'Control.Carrier.Has', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
+type family Members sub sup :: Constraint where
+  Members (l :+: r) u = (Members l u, Members r u)
+  Members t         u = Member t u

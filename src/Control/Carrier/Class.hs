@@ -3,13 +3,15 @@ module Control.Carrier.Class
 ( Carrier(..)
 ) where
 
+import Control.Effect.Catch (Catch(..))
 import Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
 import Control.Effect.Empty (Empty(..))
-import Control.Effect.Error (Error(..))
+import Control.Effect.Error (Error)
 import Control.Effect.NonDet (NonDet)
 import Control.Effect.Reader (Reader(..))
 import Control.Effect.Sum ((:+:)(..))
+import Control.Effect.Throw (Throw(..))
 import Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
 import Data.List.NonEmpty (NonEmpty)
@@ -28,8 +30,8 @@ instance Carrier Empty Maybe where
   eff Empty = Nothing
 
 instance Carrier (Error e) (Either e) where
-  eff (Throw e)     = Left e
-  eff (Catch m h k) = either (k <=< h) k m
+  eff (L (Throw e))     = Left e
+  eff (R (Catch m h k)) = either (k <=< h) k m
 
 instance Carrier (Reader r) ((->) r) where
   eff (Ask       k) r = k r r

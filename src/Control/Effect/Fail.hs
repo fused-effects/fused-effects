@@ -11,19 +11,14 @@ Predefined carriers:
 
 module Control.Effect.Fail
 ( -- * Fail effect
-  Fail(..)
+  Fail
 , Fail.MonadFail(..)
   -- * Re-exports
 , Has
 ) where
 
-import Control.Carrier
+import Control.Effect.Throw
 import qualified Control.Monad.Fail as Fail
-import GHC.Generics (Generic1)
 
 -- | @since 1.0.0.0
-newtype Fail (m :: * -> *) k = Fail String
-  deriving (Functor, Generic1)
-
-instance HFunctor Fail
-instance Effect   Fail
+type Fail = Throw String
