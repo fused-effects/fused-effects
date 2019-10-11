@@ -18,6 +18,7 @@ module Control.Effect.Reader
 , local
   -- * Properties
 , ask_environment
+, local_modification
   -- * Re-exports
 , Has
 ) where
@@ -77,3 +78,9 @@ local f m = send (Local f m pure)
 -- @since 1.0.0.0
 ask_environment :: Has (Reader r) sig m => (b -> b -> prop) -> (r -> m a -> b) -> r -> (r -> m a) -> prop
 ask_environment (===) runReader a k = runReader a (ask >>= k) === runReader a (k a)
+
+-- | 'local' modifies the environment variable.
+--
+-- @since 1.0.0.0
+local_modification :: Has (Reader r) sig m => (b -> b -> prop) -> (r -> m a -> b) -> r -> (r -> r) -> m a -> prop
+local_modification (===) runReader a f m = runReader a (local f m) === runReader (f a) m
