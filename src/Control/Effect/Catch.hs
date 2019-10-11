@@ -5,6 +5,8 @@ module Control.Effect.Catch
 ( -- * Catch effect
   Catch(..)
 , catchError
+  -- * Re-exports
+, Has
 ) where
 
 import {-# SOURCE #-} Control.Carrier
