@@ -59,7 +59,7 @@ library
     Control.Carrier.NonDet.Church
     Control.Carrier.NonDet.Maybe
     Control.Carrier.Pure
-    Control.Carrier.Reader
+    Control.Carrier.Reader.Function
     Control.Carrier.Resource
     Control.Carrier.Resumable.Either
     Control.Carrier.Resumable.Resume

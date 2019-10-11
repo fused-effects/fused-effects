@@ -19,7 +19,7 @@ module Control.Carrier.Cull.Church
 import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Carrier.NonDet.Church
-import Control.Carrier.Reader
+import Control.Carrier.Reader.Function
 import Control.Effect.Cull
 import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail

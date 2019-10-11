@@ -2,7 +2,7 @@
 
 -- | A carrier for 'Reader' effects.
 
-module Control.Carrier.Reader
+module Control.Carrier.Reader.Function
 ( -- * Reader effect
   module Control.Effect.Reader
   -- * Reader carrier

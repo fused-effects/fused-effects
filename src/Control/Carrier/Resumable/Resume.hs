@@ -14,7 +14,7 @@ module Control.Carrier.Resumable.Resume
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Carrier.Reader
+import Control.Carrier.Reader.Function
 import Control.Effect.Resumable
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
