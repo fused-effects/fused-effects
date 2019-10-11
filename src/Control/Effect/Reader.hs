@@ -47,7 +47,9 @@ ask = send (Ask pure)
 
 -- | Project a function out of the current environment value.
 --
---   prop> snd (run (runReader a (asks (applyFun f)))) === applyFun f a
+-- @
+-- 'asks' f = 'fmap' f 'ask'
+-- @
 --
 -- @since 0.1.0.0
 asks :: Has (Reader r) sig m => (r -> a) -> m a
