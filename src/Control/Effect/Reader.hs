@@ -16,6 +16,8 @@ module Control.Effect.Reader
 , ask
 , asks
 , local
+  -- * Properties
+, ask_environment
   -- * Re-exports
 , Has
 ) where
@@ -66,3 +68,12 @@ asks f = send (Ask (pure . f))
 -- @since 0.1.0.0
 local :: Has (Reader r) sig m => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
+
+
+-- Properties
+
+-- | 'ask' returns the environment variable.
+--
+-- @since 1.0.0.0
+ask_environment :: Has (Reader r) sig m => (b -> b -> prop) -> (r -> m a -> b) -> r -> (r -> m a) -> prop
+ask_environment (===) runReader a k = runReader a (ask >>= k) === runReader a (k a)
