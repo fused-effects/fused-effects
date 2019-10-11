@@ -1,4 +1,8 @@
 {-# LANGUAGE ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{- | A carrier for 'Resumable' that disallows resumption of exceptions.
+
+This can be useful when debugging or intercepting the behavior of a computation that invokes resumability.
+-}
 module Control.Carrier.Resumable.Either
 ( -- * Resumable effect
   module Control.Effect.Resumable
@@ -26,9 +30,12 @@ import Data.Functor.Classes
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
 --   prop> run (runResumable (pure a)) === Right @(SomeError Identity) @Int a
+--
+-- @since 1.0.0.0
 runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
 runResumable = runError . runResumableC
 
+-- | @since 1.0.0.0
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

@@ -1,4 +1,6 @@
 {-# LANGUAGE EmptyCase, MultiParamTypeClasses #-}
+
+-- | A carrier for pure effects, used to kick off a stack of effects with 'run'.
 module Control.Carrier.Pure
 ( -- * Pure effect
   module Control.Effect.Pure
@@ -8,17 +10,20 @@ module Control.Carrier.Pure
 ) where
 
 import Control.Applicative
-import {-# SOURCE #-} Control.Carrier.Class
+import Control.Carrier.Class
 import Control.Effect.Pure
 import Control.Monad.Fix
 import Data.Coerce
 import Data.Functor.Classes
 
 -- | Run an action exhausted of effects to produce its final result value.
+--
+-- @since 1.0.0.0
 run :: PureC a -> a
 run = runPureC
 {-# INLINE run #-}
 
+-- | @since 1.0.0.0
 newtype PureC a = PureC { runPureC :: a }
   deriving (Show)
 

@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+
+-- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
 module Control.Carrier.Cut.Church
 ( -- * Cut effect
   module Control.Effect.Cut
@@ -22,19 +24,27 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | Run a 'Cut' effect with the supplied continuations for 'pure'/'<|>', 'empty', and 'cutfail'.
+-- | Run a 'Cut' effect with the supplied continuations for 'pure' / '<|>', 'empty', and 'cutfail'.
 --
 --   prop> run (runCut (fmap . (:)) (pure []) (pure []) (pure a)) === [a]
+--
+-- @since 1.0.0.0
 runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
 runCut cons nil fail m = runCutC m cons nil fail
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
+--
+-- @since 1.0.0.0
 runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
 runCutA = runCut (fmap . (<|>) . pure) (pure empty) (pure empty)
 
+-- | Run a 'Cut' effect, modeling choice and failure with '<>' and 'mempty' and embedding results with the passed function.
+--
+-- @since 1.0.0.0
 runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
 runCutM leaf = runCut (fmap . mappend . leaf) (pure mempty) (pure mempty)
 
+-- | @since 1.0.0.0
 newtype CutC m a = CutC
   { -- | A higher-order function receiving three parameters: a function to combine each solution with the rest of the solutions, an action to run when no results are produced (e.g. on 'empty'), and an action to run when no results are produced and backtrcking should not be attempted (e.g. on 'cutfail').
     runCutC :: forall b . (a -> m b -> m b) -> m b -> m b -> m b

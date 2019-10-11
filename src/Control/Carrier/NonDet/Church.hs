@@ -1,4 +1,10 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+
+{- | Provides 'NonDetC', a carrier for 'NonDet' effects providing choice and failure.
+
+Under the hood, it uses a Church-encoded structure and a binary tree to prevent the problems associated with a naïve list-based implementation.
+-}
+
 module Control.Carrier.NonDet.Church
 ( -- * NonDet effects
   module Control.Effect.NonDet
@@ -21,22 +27,37 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
-runNonDet :: (m b -> m b -> m b) -> (a -> m b) -> m b -> NonDetC m a -> m b
+-- | Run a 'NonDet' effect, using the provided functions to interpret choice, leaf results, and failure.
+--
+-- @since 1.0.0.0
+runNonDet
+  :: (m b -> m b -> m b) -- ^ Handles choice ('<|>')
+  -> (a -> m b)          -- ^ Handles embedding results ('pure')
+  -> m b                 -- ^ Handles failure ('empty')
+  -> NonDetC m a         -- ^ A nondeterministic computation to execute
+  -> m b
 runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
---   Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unless used with 'Control.Effect.Cull.cull', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
+-- Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unless used with 'Control.Effect.Cull.cull', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
 --
 --   prop> run (runNonDetA (pure a)) === [a]
 --   prop> run (runNonDetA (pure a)) === Just a
+--
+-- @since 1.0.0.0
 runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
 
+-- | Run a 'NonDet' effect, collecting results into a 'Monoid'.
+--
+-- @since 1.0.0.0
 runNonDetM :: (Applicative m, Monoid b) => (a -> b) -> NonDetC m a -> m b
 runNonDetM leaf = runNonDet (liftA2 mappend) (pure . leaf) (pure mempty)
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
+--
+-- @since 1.0.0.0
 newtype NonDetC m a = NonDetC
   { -- | A higher-order function receiving three continuations, respectively implementing '<|>', 'pure', and 'empty'.
     runNonDetC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b

@@ -1,4 +1,12 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
+
+{- | An effect that provides a "bracket"-style function to acquire, use, and automatically release resources, in the manner of the @resourcet@ package. The 'Control.Carrier.Resource.ResourceC' carrier ensures that resources are properly released in the presence of asynchronous exceptions.
+
+Predefined carriers:
+
+* "Control.Carrier.Resource".
+-}
+
 module Control.Effect.Resource
 ( -- * Resource effect
   Resource(..)
@@ -12,6 +20,7 @@ module Control.Effect.Resource
 
 import Control.Carrier
 
+-- | @since 0.1.0.0
 data Resource m k
   = forall resource any output . Resource (m resource) (resource -> m any) (resource -> m output) (output -> m k)
   | forall resource any output . OnError  (m resource) (resource -> m any) (resource -> m output) (output -> m k)
@@ -35,7 +44,10 @@ instance Effect Resource where
 -- ensures that @release@ is run on the value returned from @acquire@ even
 -- if @op@ throws an exception.
 --
--- 'bracket' is safe in the presence of asynchronous exceptions.
+-- Carriers for 'bracket' must ensure that it is safe in the presence of
+-- asynchronous exceptions.
+--
+-- @since 0.1.0.0
 bracket :: Has Resource sig m
         => m resource           -- ^ computation to run first ("acquire resource")
         -> (resource -> m any)  -- ^ computation to run last ("release resource")
@@ -45,6 +57,8 @@ bracket acquire release use = send (Resource acquire release use pure)
 
 -- | Like 'bracket', but only performs the final action if there was an
 -- exception raised by the in-between computation.
+--
+-- @since 0.2.0.0
 bracketOnError :: Has Resource sig m
                => m resource           -- ^ computation to run first ("acquire resource")
                -> (resource -> m any)  -- ^ computation to run last ("release resource")
@@ -53,6 +67,8 @@ bracketOnError :: Has Resource sig m
 bracketOnError acquire release use = send (OnError acquire release use pure)
 
 -- | Like 'bracket', but for the simple case of one computation to run afterward.
+--
+-- @since 0.2.0.0
 finally :: Has Resource sig m
         => m a -- ^ computation to run first
         -> m b -- ^ computation to run afterward (even if an exception was raised)
@@ -60,6 +76,8 @@ finally :: Has Resource sig m
 finally act end = bracket (pure ()) (const end) (const act)
 
 -- | Like 'bracketOnError', but for the simple case of one computation to run afterward.
+--
+-- @since 0.2.0.0
 onException :: Has Resource sig m
         => m a -- ^ computation to run first
         -> m b -- ^ computation to run afterward if an exception was raised

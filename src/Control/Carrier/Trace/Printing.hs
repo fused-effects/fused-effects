@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+-- | A carrier for the 'Control.Effect.Trace' effect that prints all traced results to stderr.
 module Control.Carrier.Trace.Printing
 ( -- * Trace effect
   module Control.Effect.Trace
@@ -24,6 +26,7 @@ import System.IO
 runTrace :: TraceC m a -> m a
 runTrace = runTraceC
 
+-- | @since 1.0.0.0
 newtype TraceC m a = TraceC { runTraceC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 

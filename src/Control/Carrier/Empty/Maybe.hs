@@ -1,4 +1,10 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+{- | A carrier for an 'Empty' effect, indicating failure with a 'Nothing' value. Users that need access to an error message should use the 'Control.Effect.Fail.Fail' effect.
+
+Note that 'Empty' effects can, when they are the last effect in a stack, be interpreted directly to a 'Maybe' without a call to 'runEmpty'.
+-}
+
 module Control.Carrier.Empty.Maybe
 ( -- * Empty effect
   module Control.Effect.Empty
@@ -22,10 +28,13 @@ import Control.Monad.Trans.Maybe
 --
 --   prop> run (runEmpty empty)    === Nothing
 --   prop> run (runEmpty (pure a)) === Just a
+--
+-- @since 1.0.0.0
 runEmpty :: EmptyC m a -> m (Maybe a)
 runEmpty = runMaybeT . runEmptyC
 {-# INLINE runEmpty #-}
 
+-- | @since 1.0.0.0
 newtype EmptyC m a = EmptyC { runEmptyC :: MaybeT m a }
   deriving (Applicative, Functor, Monad, MonadFix, MonadIO, MonadTrans, Show)
 

@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+-- | A carrier for an 'Error' effect.
 module Control.Carrier.Error.Either
 ( -- * Error effect
   module Control.Effect.Error
@@ -13,7 +15,7 @@ module Control.Carrier.Error.Either
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Effect.Error
-import Control.Monad (MonadPlus(..), (<=<))
+import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -42,9 +44,7 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  eff (L (Throw e))     = ErrorC (ExceptT (pure (Left e)))
-  eff (L (Catch m h k)) = ErrorC (ExceptT (runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k)))
-  eff (R other)         = ErrorC (ExceptT (eff (handle (Right ()) (either (pure . Left) runError) other)))
+  eff = ErrorC . eff . handleCoercible
   {-# INLINE eff #-}
 
 
