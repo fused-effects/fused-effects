@@ -3,16 +3,18 @@ module Control.Carrier.Class
 ( Carrier(..)
 ) where
 
+import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
 import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
-import {-# SOURCE #-} Control.Effect.Error (Error(..))
+import {-# SOURCE #-} Control.Effect.Error (Error)
 import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
 import {-# SOURCE #-} Control.Effect.NonDet (NonDet)
 import Control.Effect.Pure
 import {-# SOURCE #-} Control.Effect.Reader (Reader(..))
 import {-# SOURCE #-} Control.Effect.State (State(..))
 import Control.Effect.Sum ((:+:)(..))
+import {-# SOURCE #-} Control.Effect.Throw (Throw(..))
 import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity
@@ -49,8 +51,8 @@ instance Carrier Empty Maybe where
   eff Empty = Nothing
 
 instance Carrier (Error e) (Either e) where
-  eff (Throw e)     = Left e
-  eff (Catch m h k) = either (k <=< h) k m
+  eff (L (Throw e))     = Left e
+  eff (R (Catch m h k)) = either (k <=< h) k m
 
 instance Carrier (Reader r) ((->) r) where
   eff (Ask       k) r = k r r
@@ -69,9 +71,9 @@ instance Monoid w => Carrier (Writer w) ((,) w) where
 -- transformers
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (Except.ExceptT e m) where
-  eff (L (Throw e))     = Except.throwE e
-  eff (L (Catch m h k)) = Except.catchE m h >>= k
-  eff (R other)         = Except.ExceptT $ eff (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
+  eff (L (L (Throw e)))     = Except.throwE e
+  eff (L (R (Catch m h k))) = Except.catchE m h >>= k
+  eff (R other)             = Except.ExceptT $ eff (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (Reader.ReaderT r m) where
   eff (L (Ask       k)) = Reader.ask >>= k

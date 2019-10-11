@@ -1,12 +1,10 @@
-{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE TypeOperators #-}
 module Control.Effect.Error
-( Error(..)
+( Error
 ) where
 
-import Control.Effect.Class
+import {-# SOURCE #-} Control.Effect.Catch (Catch)
+import Control.Effect.Sum
+import {-# SOURCE #-} Control.Effect.Throw (Throw)
 
-data Error exc m k
-  = Throw exc
-  | forall b . Catch (m b) (exc -> m b) (b -> m k)
-
-instance HFunctor (Error exc)
+type Error e = Throw e :+: Catch e
