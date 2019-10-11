@@ -85,6 +85,7 @@ newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
 
 toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
+{-# INLINE toRWSTF #-}
 
 instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Reader r :+: Writer w :+: State s :+: sig) (RWS.CPS.RWST r w s m) where
   eff (L (Ask       k))      = RWS.CPS.ask >>= k
