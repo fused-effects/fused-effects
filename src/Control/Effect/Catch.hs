@@ -1,6 +1,11 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
 
--- | An effect modelling catchable failure when used with 'Control.Effect.Throw.Throw'.
+{- | An effect modelling catchable failure when used with 'Control.Effect.Throw.Throw'.
+
+Predefined carriers:
+
+* "Control.Carrier.Error.Either" (with 'Control.Effect.Throw.Throw')
+-}
 module Control.Effect.Catch
 ( -- * Catch effect
   Catch(..)
