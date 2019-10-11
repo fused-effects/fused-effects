@@ -6,6 +6,7 @@ import qualified Empty.Maybe
 import qualified Error.Either
 import qualified Fusion
 import qualified NonDet.Church
+import qualified Reader.Function
 import Test.Tasty
 
 main :: IO ()
@@ -14,4 +15,5 @@ main = defaultMain $ testGroup "unit tests"
   , Error.Either.tests
   , Fusion.tests
   , NonDet.Church.tests
+  , Reader.Function.tests
   ]

@@ -1,2 +1,9 @@
 module Reader.Function
-() where
+( tests
+) where
+
+import Test.Tasty
+
+tests :: TestTree
+tests = testGroup "Reader.Function"
+  []
