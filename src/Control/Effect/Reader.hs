@@ -66,8 +66,3 @@ asks f = send (Ask (pure . f))
 -- @since 0.1.0.0
 local :: Has (Reader r) sig m => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
-
-
--- $setup
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Reader
