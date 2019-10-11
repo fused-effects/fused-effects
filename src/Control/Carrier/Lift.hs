@@ -1,4 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+
+-- | A carrier for 'Lift' allowing monadic actions to be lifted into a larger context with 'sendM'.
 module Control.Carrier.Lift
 ( -- * Lift effect
   module Control.Effect.Lift
@@ -21,9 +23,12 @@ import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
+--
+-- @since 1.0.0.0
 runM :: LiftC m a -> m a
 runM = runLiftC
 
+-- | @since 1.0.0.0
 newtype LiftC m a = LiftC { runLiftC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 

@@ -1,4 +1,5 @@
 {-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
 -- | Operations on /sums/, combining effects into a /signature/.
 module Control.Effect.Sum
 ( -- * Membership
