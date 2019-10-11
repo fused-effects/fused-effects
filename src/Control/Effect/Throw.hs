@@ -19,5 +19,7 @@ instance Effect   (Throw e)
 
 
 -- | Throw an error, escaping the current computation up to the nearest 'Control.Effect.Catch.catchError' (if any).
+--
+-- @since 0.1.0.0
 throwError :: Has (Throw e) sig m => e -> m a
 throwError = send . Throw
