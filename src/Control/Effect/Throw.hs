@@ -1,6 +1,12 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
 
--- | An effect for polymorphic failure.
+{- | An effect for polymorphic failure.
+
+Predefined carriers:
+
+* "Control.Carrier.Throw.Either"
+* "Control.Carrier.Error.Either" (with 'Control.Effect.Catch.Catch')
+-}
 module Control.Effect.Throw
 ( -- * Throw effect
   Throw(..)
