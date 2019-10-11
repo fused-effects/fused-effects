@@ -1,4 +1,6 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
+
+-- | An effect for polymorphic failure.
 module Control.Effect.Throw
 ( -- * Throw effect
   Throw(..)
