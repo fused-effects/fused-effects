@@ -1,4 +1,15 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving, TypeOperators #-}
+
+{- | An effect modelling catchable failure with a polymorphic error type.
+
+This effect is similar to the traditional @MonadError@ typeclass, though it allows the presence of multiple @Error@ effects in a given effect stack. It offers precise exception handling, rather than the dynamic exception hierarchy provided by the @exceptions@ package. The 'Control.Effect.Resource' effect or the @fused-effects-exceptions@ package may be more suitable for handling dynamic/impure effect handling.
+
+Predefined carriers:
+
+* "Control.Carrier.Error.Either".
+* If 'Error' @e@ is the last effect in a stack, it can be interpreted directly to an 'Either' @e@.
+-}
+
 module Control.Effect.Error
 ( -- * Error effect
   Error
@@ -10,4 +21,5 @@ import Control.Effect.Catch
 import Control.Effect.Sum
 import Control.Effect.Throw
 
+-- | @since 0.1.0.0
 type Error e = Throw e :+: Catch e

@@ -1,4 +1,10 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
+
+{- | A carrier for 'Writer' effects. This carrier performs its append operations strictly and thus avoids the space leaks inherent in lazy writer monads.
+
+This implementation is based on a post Gabriel Gonzalez made to the Haskell mailing list: <https://mail.haskell.org/pipermail/libraries/2013-March/019528.html>
+-}
+
 module Control.Carrier.Writer.Strict
 ( -- * Writer effect
   module Control.Effect.Writer
@@ -36,9 +42,7 @@ execWriter = fmap fst . runWriter
 {-# INLINE execWriter #-}
 
 
--- | A space-efficient carrier for 'Writer' effects.
---
---   This is based on a post Gabriel Gonzalez made to the Haskell mailing list: https://mail.haskell.org/pipermail/libraries/2013-March/019528.html
+-- | A space-efficient carrier for 'Writer' effects, implemented atop "Control.Carrier.State.Strict".
 newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

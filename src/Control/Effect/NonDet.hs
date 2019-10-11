@@ -1,4 +1,16 @@
 {-# LANGUAGE TypeOperators #-}
+
+{- | An effect modelling nondeterminism with choice and failure.
+
+Nondeterministic operations are encapsulated by the 'Alternative' class, where 'empty' represents failure and '<|>' represents choice. This module re-exports the 'Alternative' interface. If you can't or don't want to use 'Alternative', you can use the 'Control.Effect.Empty.empty' and 'Control.Effect.Choose.<|>' operations (from "Control.Effect.Empty" and "Control.Effect.Choose" respectively) directly, as the 'NonDet' effect is the composition of 'Choose' and 'Empty'.
+
+Predefined carriers:
+
+* "Control.Carrier.NonDet.Church", which collects all branches' results using an @Alternative@ functor.
+* "Control.Carrier.NonDet.Maybe", which returns at most one result, in `Maybe`.
+* If 'NonDet' is the last effect in a stack, it can be interpreted directly into a @[]@.
+-}
+
 module Control.Effect.NonDet
 ( -- * NonDet effects
   NonDet
@@ -23,12 +35,8 @@ import Data.Coerce
 import Data.Monoid (Alt(..))
 
 -- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
--- Nondeterministic operations are encapsulated by the 'Control.Applicative.Alternative'
--- class, where 'Control.Applicative.empty' represents failure and 'Control.Applicative.<|>'
--- represents choice. This module reexports the 'Alternative' interface. If you can't or
--- don't want to use 'Alternative', you can use the 'Control.Effect.Empty.empty' and
--- 'Control.Effect.Choose.<|>' effects (from 'Control.Effect.Empty' and 'Control.Effect.Choose')
--- directly.
+--
+-- @since 0.1.0.0
 type NonDet = Empty :+: Choose
 
 -- | Nondeterministically choose an element from a 'Foldable' collection.
@@ -44,10 +52,13 @@ type NonDet = Empty :+: Choose
 --     pure (a, b, c)
 -- @
 --
+-- @since 1.0.0.0
 oneOf :: (Foldable t, Alternative m) => t a -> m a
 oneOf = foldMapA pure
 
 -- | Map a 'Foldable' collection of values into a nondeterministic computation using the supplied action.
+--
+-- @since 1.0.0.0
 foldMapA :: (Foldable t, Alternative m) => (a -> m b) -> t a -> m b
 foldMapA f = getAlt #. foldMap (Alt #. f)
 
