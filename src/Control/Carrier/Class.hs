@@ -18,12 +18,10 @@ import Control.Monad ((<=<), join)
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Reader as Reader
-import qualified Control.Monad.Trans.RWS.CPS as RWS.CPS
 import qualified Control.Monad.Trans.RWS.Lazy as RWS.Lazy
 import qualified Control.Monad.Trans.RWS.Strict as RWS.Strict
 import qualified Control.Monad.Trans.State.Lazy as State.Lazy
 import qualified Control.Monad.Trans.State.Strict as State.Strict
-import qualified Control.Monad.Trans.Writer.CPS as Writer.CPS
 import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
 import Data.List.NonEmpty (NonEmpty)
@@ -87,16 +85,6 @@ toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
-instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Reader r :+: Writer w :+: State s :+: sig) (RWS.CPS.RWST r w s m) where
-  eff (L (Ask       k))      = RWS.CPS.ask >>= k
-  eff (L (Local f m k))      = RWS.CPS.local f m >>= k
-  eff (R (L (Tell w k)))     = RWS.CPS.tell w *> k
-  eff (R (L (Listen m k)))   = RWS.CPS.listen m >>= uncurry (flip k)
-  eff (R (L (Censor f m k))) = RWS.CPS.censor f m >>= k
-  eff (R (R (L (Get   k))))  = RWS.CPS.get >>= k
-  eff (R (R (L (Put s k))))  = RWS.CPS.put s *> k
-  eff (R (R (R other)))      = RWS.CPS.rwsT $ \ r s -> unRWSTF <$> eff (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.CPS.runRWST x r s) other)
-
 instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
   eff (L (Ask       k))      = RWS.Lazy.ask >>= k
   eff (L (Local f m k))      = RWS.Lazy.local f m >>= k
@@ -126,12 +114,6 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (State.Strict.
   eff (L (Get   k)) = State.Strict.get >>= k
   eff (L (Put s k)) = State.Strict.put s *> k
   eff (R other)     = State.Strict.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
-
-instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Writer w :+: sig) (Writer.CPS.WriterT w m) where
-  eff (L (Tell w k))     = Writer.CPS.tell w *> k
-  eff (L (Listen m k))   = Writer.CPS.listen m >>= uncurry (flip k)
-  eff (L (Censor f m k)) = Writer.CPS.censor f m >>= k
-  eff (R other)          = Writer.CPS.writerT $ swap <$> eff (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.CPS.runWriterT x) other)
 
 instance (Carrier sig m, Effect sig, Monoid w) => Carrier (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
   eff (L (Tell w k))     = Writer.Lazy.tell w *> k
