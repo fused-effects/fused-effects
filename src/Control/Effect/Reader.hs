@@ -39,7 +39,9 @@ instance Effect (Reader r) where
 
 -- | Retrieve the environment value.
 --
---   prop> run (runReader a ask) === a
+-- @
+-- runReader a 'ask' = a
+-- @
 --
 -- @since 0.1.0.0
 ask :: Has (Reader r) sig m => m r
