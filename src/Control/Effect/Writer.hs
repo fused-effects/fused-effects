@@ -19,7 +19,7 @@ module Control.Effect.Writer
 , Has
 ) where
 
-import {-# SOURCE #-} Control.Carrier
+import Control.Carrier
 
 -- | @since 0.1.0.0
 data Writer w m k

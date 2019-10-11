@@ -22,13 +22,13 @@ module Control.Effect.NonDet
 , optional
 , MonadPlus(..)
   -- * Constituent effects
-, Control.Effect.Choose.Choose (..)
-, Control.Effect.Empty.Empty (..)
+, module Control.Effect.Choose
+, module Control.Effect.Empty
 ) where
 
 import Control.Applicative (Alternative(..), optional)
-import Control.Effect.Choose hiding ((<|>), many, some, optional)
-import Control.Effect.Empty hiding (empty, guard)
+import Control.Effect.Choose (Choose(..))
+import Control.Effect.Empty (Empty(..))
 import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), guard)
 import Data.Coerce

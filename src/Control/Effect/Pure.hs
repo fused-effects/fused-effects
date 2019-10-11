@@ -7,6 +7,7 @@ This is generally the last effect in an effect stack, unless that stack needs to
 Predefined carriers:
 
 * "Control.Carrier.Pure"
+* 'Data.Functor.Identity.Identity'
 -}
 
 module Control.Effect.Pure

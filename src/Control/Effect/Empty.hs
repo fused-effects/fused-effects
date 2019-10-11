@@ -19,7 +19,7 @@ module Control.Effect.Empty
 , Has
 ) where
 
-import {-# SOURCE #-} Control.Carrier
+import Control.Carrier
 import GHC.Generics (Generic1)
 
 -- | @since 1.0.0.0

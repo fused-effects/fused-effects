@@ -18,6 +18,10 @@
 
 - Adds a `NonDetC` carrier for `NonDet` in `Control.Effect.NonDet.Maybe`. ([#227](https://github.com/fused-effects/fused-effects/pull/227))
 
+- Defines `Carrier` instances for a number of types in `base`, including `Either`, `Maybe`, `[]`, and `IO`. ([#206](https://github.com/fused-effects/fused-effects/pull/206))
+
+- Defines `Carrier` instances for a number of types in `transformers`. ([#226](https://github.com/fused-effects/fused-effects/pull/226))
+
 ## Backwards-incompatible changes
 
 - Fixes unlawful behaviour in the `Applicative` instance for `ErrorC`, which had different behaviour between `<*>` and `ap` in the presence of a divergent rhs. In order to accomplish this, `ErrorC` has been defined as a wrapper around `Control.Monad.Trans.Except.ExceptT`. ([#228](https://github.com/fused-effects/fused-effects/pull/228))

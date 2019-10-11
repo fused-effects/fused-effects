@@ -10,7 +10,7 @@ module Control.Carrier.Pure
 ) where
 
 import Control.Applicative
-import {-# SOURCE #-} Control.Carrier.Class
+import Control.Carrier.Class
 import Control.Effect.Pure
 import Control.Monad.Fix
 import Data.Coerce

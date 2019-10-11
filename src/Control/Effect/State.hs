@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 {- | An effect that adds a mutable, updatable state value to a given computation.
 
@@ -29,8 +29,11 @@ import GHC.Generics (Generic1)
 data State s m k
   = Get (s -> m k)
   | Put s (m k)
-  deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving (Functor, Generic1)
+
+instance HFunctor (State s)
+instance Effect   (State s)
+
 
 -- | Get the current state value.
 --

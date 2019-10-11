@@ -10,7 +10,7 @@ module Control.Carrier
 , (:+:)(..)
 ) where
 
-import {-# SOURCE #-} Control.Carrier.Class
+import Control.Carrier.Class
 import Control.Carrier.Pure
 import Control.Effect.Class
 import Control.Effect.Sum
