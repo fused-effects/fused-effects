@@ -2,7 +2,8 @@
 
 -- | An effect modelling catchable failure when used with 'Control.Effect.Throw.Throw'.
 module Control.Effect.Catch
-( Catch(..)
+( -- * Catch effect
+  Catch(..)
 , catchError
 ) where
 
