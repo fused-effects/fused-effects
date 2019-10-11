@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Class
 ( Carrier(..)
 ) where
@@ -8,11 +8,13 @@ import Control.Effect.Class
 import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
 import {-# SOURCE #-} Control.Effect.Error (Error(..))
 import {-# SOURCE #-} Control.Effect.NonDet (NonDet)
+import Control.Effect.Pure
 import {-# SOURCE #-} Control.Effect.Reader (Reader(..))
 import {-# SOURCE #-} Control.Effect.State (State(..))
 import Control.Effect.Sum ((:+:)(..))
 import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<))
+import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Control.Monad.Trans.RWS.CPS as RWS.CPS
@@ -34,6 +36,9 @@ class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
 
 
 -- base
+
+instance Carrier Pure Identity where
+  eff v = case v of {}
 
 instance Carrier Choose NonEmpty where
   eff (Choose m) = m True S.<> m False
