@@ -57,8 +57,9 @@ asks f = send (Ask (pure . f))
 
 -- | Run a computation with an environment value locally modified by the passed function.
 --
---   prop> run (runReader a (local (applyFun f) ask)) === applyFun f a
---   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) === (a, applyFun f a, a)
+-- @
+-- runReader a ('local' f m) = runReader (f a) m
+-- @
 --
 -- @since 0.1.0.0
 local :: Has (Reader r) sig m => (r -> r) -> m a -> m a
