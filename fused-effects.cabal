@@ -127,6 +127,7 @@ test-suite test
     Fusion
     NonDet.Church
     Pure
+    Reader.Function
   build-depends:
       base
     , fused-effects
