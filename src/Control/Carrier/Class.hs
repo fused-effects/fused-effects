@@ -7,13 +7,14 @@ import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
 import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
 import {-# SOURCE #-} Control.Effect.Error (Error(..))
+import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
 import {-# SOURCE #-} Control.Effect.NonDet (NonDet)
 import Control.Effect.Pure
 import {-# SOURCE #-} Control.Effect.Reader (Reader(..))
 import {-# SOURCE #-} Control.Effect.State (State(..))
 import Control.Effect.Sum ((:+:)(..))
 import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
-import Control.Monad ((<=<))
+import Control.Monad ((<=<), join)
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Reader as Reader
@@ -36,6 +37,9 @@ class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
 
 
 -- base
+
+instance Carrier (Lift IO) IO where
+  eff = join . unLift
 
 instance Carrier Pure Identity where
   eff v = case v of {}
