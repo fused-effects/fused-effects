@@ -1,5 +1,5 @@
 {-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
-{-# OPTIONS_GHC -Wno-orphans #-}
+{-# OPTIONS_GHC -Wno-identities #-}
 module Pure
 ( module Control.Carrier.Pure
 , gen
@@ -16,10 +16,9 @@ module Pure
 
 import Control.Carrier.Pure
 import Hedgehog
-import qualified Hedgehog.Function as Function
+import Hedgehog.Function hiding (C)
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import Test.QuickCheck.Poly
 
 gen :: Gen a -> Gen (PureC a)
 gen = fmap PureC
@@ -28,21 +27,26 @@ gen = fmap PureC
 genA :: Gen A
 genA = A <$> Gen.integral (Range.linear 0 10)
 
+newtype A = A { unA :: Integer }
+  deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
+
+instance Arg A
+
 genB :: Gen B
 genB = B <$> Gen.integral (Range.linear 0 10)
+
+newtype B = B { unB :: Integer }
+  deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
+
+instance Arg B
 
 genC :: Gen C
 genC = C <$> Gen.integral (Range.linear 0 10)
 
-instance Function.Arg A
-instance Function.Arg B
-instance Function.Arg C
-deriving instance Function.Generic A
-deriving instance Function.Generic B
-deriving instance Function.Generic C
-deriving instance Function.Vary A
-deriving instance Function.Vary B
-deriving instance Function.Vary C
+newtype C = C { unC :: Integer }
+  deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
+
+instance Arg C
 
 
 infixr 5 :.
