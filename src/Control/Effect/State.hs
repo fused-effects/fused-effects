@@ -69,7 +69,9 @@ put s = send (Put s (pure ()))
 -- | Replace the state value with the result of applying a function to the current state value.
 --   This is strict in the new state.
 --
---   prop> fst (run (runState a (modify (+1)))) === (1 + a :: Integer)
+-- @
+-- 'modify' f = 'get' '>>=' 'put' . f
+-- @
 --
 -- @since 0.1.0.0
 modify :: Has (State s) sig m => (s -> s) -> m ()
