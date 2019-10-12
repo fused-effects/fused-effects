@@ -97,8 +97,3 @@ modify f = do
 modifyLazy :: Has (State s) sig m => (s -> s) -> m ()
 modifyLazy f = get >>= put . f
 {-# INLINEABLE modifyLazy #-}
-
-
--- $setup
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.State.Strict
