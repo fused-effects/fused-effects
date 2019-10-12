@@ -8,6 +8,8 @@ Predefined carriers:
 
 * "Control.Carrier.Reader.Function".
 * "Control.Monad.Trans.Reader".
+* "Control.Monad.Trans.RWS.Lazy"
+* "Control.Monad.Trans.RWS.Strict"
 * If 'Reader' @r@ is the last effect in a stack, it can be interpreted directly to @(-> r)@ (a function taking an @r@).
 -}
 
