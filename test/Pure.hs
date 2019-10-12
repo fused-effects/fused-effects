@@ -11,6 +11,7 @@ module Pure
 , C(..)
 , Rec(..)
 , forall
+, Blind(..)
 ) where
 
 import Control.Carrier.Pure
@@ -19,7 +20,7 @@ import qualified Hedgehog.Function as Function
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import Test.QuickCheck.Poly
-import Test.Tasty.QuickCheck hiding (Gen)
+import Test.Tasty.QuickCheck hiding (Blind, Gen)
 
 instance Arbitrary1 PureC where
   liftArbitrary genA = PureC <$> genA
@@ -72,3 +73,10 @@ instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) wher
   forall' (g :. gs) f = do
     a <- Hedgehog.forAll g
     forall' gs (f a)
+
+
+newtype Blind a = Blind { getBlind :: a }
+  deriving (Eq, Ord)
+
+instance Show (Blind a) where
+  show _ = "_"
