@@ -6,10 +6,10 @@ module Empty.Maybe
 
 import Control.Carrier
 import Control.Carrier.Empty.Maybe
-import Pure hiding (gen)
 import Hedgehog
 import Hedgehog.Function
 import qualified Hedgehog.Gen as Gen
+import Pure hiding (gen)
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
