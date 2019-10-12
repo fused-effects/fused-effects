@@ -6,6 +6,7 @@ import qualified Empty.Base
 import qualified Empty.Maybe
 import qualified Error.Base
 import qualified Error.Either
+import qualified Error.ExceptT
 import qualified Fusion
 import qualified NonDet.Church
 import qualified Reader.Base
@@ -19,6 +20,7 @@ main = defaultMain $ testGroup "unit tests"
   , Empty.Maybe.tests
   , Error.Base.tests
   , Error.Either.tests
+  , Error.ExceptT.tests
   , Fusion.tests
   , NonDet.Church.tests
   , Reader.Base.tests

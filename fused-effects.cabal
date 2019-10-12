@@ -126,6 +126,7 @@ test-suite test
     Empty.Maybe
     Error.Base
     Error.Either
+    Error.ExceptT
     Fusion
     NonDet.Church
     Pure
