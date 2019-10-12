@@ -45,9 +45,7 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
   {-# INLINE fail #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
-  eff (L (L Empty))      = empty
-  eff (L (R (Choose k))) = k True <|> k False
-  eff (R other) = NonDetC (MaybeT (eff (handle (Just ()) (maybe (pure Nothing) runNonDet) other)))
+  eff = NonDetC . eff . handleCoercible
   {-# INLINE eff #-}
 
 
