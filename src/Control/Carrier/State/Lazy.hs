@@ -34,7 +34,7 @@ instance Functor m => Functor (StateC s m) where
   fmap f m = StateC $ \ s -> fmap (\ ~(s', a) -> (s', f a)) $ runStateC m s
   {-# INLINE fmap #-}
 
-instance (Functor m, Monad m) => Applicative (StateC s m) where
+instance Monad m => Applicative (StateC s m) where
   pure a = StateC $ \ s -> pure (s, a)
   {-# INLINE pure #-}
   StateC mf <*> StateC mx = StateC $ \ s -> do
