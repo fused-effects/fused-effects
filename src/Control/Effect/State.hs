@@ -37,7 +37,9 @@ instance Effect   (State s)
 
 -- | Get the current state value.
 --
---   prop> snd (run (runState a get)) === a
+-- @
+-- runState a ('get' '>>=' k) = runState a (k a)
+-- @
 --
 -- @since 0.1.0.0
 get :: Has (State s) sig m => m s
