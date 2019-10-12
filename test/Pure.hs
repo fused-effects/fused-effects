@@ -6,6 +6,7 @@ module Pure
 , genA
 , genB
 , genC
+, genK
 , A(..)
 , B(..)
 , C(..)
@@ -49,3 +50,7 @@ deriving instance Function.Generic C
 deriving instance Function.Vary A
 deriving instance Function.Vary B
 deriving instance Function.Vary C
+
+
+genK :: (Function.Arg a, Function.Vary a) => Gen (m b) -> Gen (a -> m b)
+genK mb = Function.apply <$> Function.fn mb
