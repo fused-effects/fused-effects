@@ -5,12 +5,19 @@ module Reader.Function
 ) where
 
 import Control.Carrier.Reader.Function
+import Pure
+import Test.QuickCheck.Poly
 import Test.Tasty
 import Test.Tasty.QuickCheck
 
 tests :: TestTree
 tests = testGroup "Reader.Function"
-  []
+  [ testProperty "ask environment" $
+    \ a k -> ask_environment @A ((~=) @B) runReader a (getBlind k)
+  ]
+
+(~=) :: (Eq a, Show a) => PureC a -> PureC a -> Property
+m1 ~= m2 = run m1 === run m2
 
 
 instance (Arbitrary1 m, CoArbitrary r) => Arbitrary1 (ReaderC r m) where
