@@ -43,7 +43,7 @@ instance Effect (Reader r) where
 -- | Retrieve the environment value.
 --
 -- @
--- runReader a ('ask' >>= k) = runReader a (k a)
+-- runReader a ('ask' '>>=' k) = runReader a (k a)
 -- @
 --
 -- @since 0.1.0.0
