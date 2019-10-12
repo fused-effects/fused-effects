@@ -12,7 +12,7 @@ import Test.Tasty
 import Test.Tasty.HUnit
 
 tests :: TestTree
-tests = testGroup "Effect"
+tests = testGroup "fusion"
   [ testCase "eliminates StateCs" $
     failureOf $(inspectTest $ 'countDown `doesNotUse` ''StateC)
     @?= Nothing
