@@ -10,6 +10,7 @@ import qualified Fusion
 import qualified NonDet.Church
 import qualified Reader.Base
 import qualified Reader.Function
+import qualified Reader.Trans
 import Test.Tasty
 
 main :: IO ()
@@ -22,4 +23,5 @@ main = defaultMain $ testGroup "unit tests"
   , NonDet.Church.tests
   , Reader.Base.tests
   , Reader.Function.tests
+  , Reader.Trans.tests
   ]

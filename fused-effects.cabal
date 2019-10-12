@@ -131,6 +131,7 @@ test-suite test
     Pure
     Reader.Base
     Reader.Function
+    Reader.Trans
   build-depends:
       base
     , fused-effects
