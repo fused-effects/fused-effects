@@ -12,6 +12,7 @@ module Control.Carrier.Resumable.Either
 , SomeError(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
@@ -19,7 +20,7 @@ import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.DeepSeq
-import Control.Effect.Resumable
+import Control.Effect.Resumable hiding (Carrier, Has)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

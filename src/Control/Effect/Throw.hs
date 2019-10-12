@@ -14,6 +14,7 @@ module Control.Effect.Throw
   -- * Properties
 , throwError_annihilation
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

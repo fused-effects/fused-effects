@@ -9,13 +9,14 @@ module Control.Carrier.Fail.Either
 , FailC(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.Error.Either
-import Control.Effect.Fail
+import Control.Effect.Fail hiding (Carrier, Has)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

@@ -10,12 +10,13 @@ module Control.Carrier.Reader.Function
 , ReaderC(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Carrier
-import Control.Effect.Reader
+import Control.Effect.Reader hiding (Carrier, Has)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

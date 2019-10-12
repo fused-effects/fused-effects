@@ -14,6 +14,7 @@ module Control.Effect.Fail
   Fail
 , Fail.MonadFail(..)
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

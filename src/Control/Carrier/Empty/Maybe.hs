@@ -13,11 +13,12 @@ module Control.Carrier.Empty.Maybe
 , EmptyC(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
 import Control.Carrier
-import Control.Effect.Empty
+import Control.Effect.Empty hiding (Carrier, Has)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

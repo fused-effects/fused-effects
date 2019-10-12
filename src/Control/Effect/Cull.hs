@@ -12,6 +12,7 @@ module Control.Effect.Cull
   Cull(..)
 , cull
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

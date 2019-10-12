@@ -18,6 +18,7 @@ module Control.Effect.Empty
   -- * Properties
 , empty_annihilation
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

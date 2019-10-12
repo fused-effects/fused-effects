@@ -12,6 +12,7 @@ module Control.Effect.Resumable
   Resumable(..)
 , throwResumable
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

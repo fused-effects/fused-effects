@@ -10,6 +10,7 @@ module Control.Carrier.Interpret
 , Handler
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 

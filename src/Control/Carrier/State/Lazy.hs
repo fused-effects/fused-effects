@@ -15,12 +15,13 @@ module Control.Carrier.State.Lazy
 , StateC(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.State as State
+import Control.Effect.State as State hiding (Carrier, Has)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

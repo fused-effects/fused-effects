@@ -9,12 +9,13 @@ module Control.Carrier.Resource
 , ResourceC(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
 import           Control.Applicative (Alternative(..))
 import           Control.Carrier
-import           Control.Effect.Resource
+import           Control.Effect.Resource hiding (Carrier, Has)
 import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

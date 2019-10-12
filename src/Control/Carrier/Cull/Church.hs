@@ -13,6 +13,7 @@ module Control.Carrier.Cull.Church
 , CullC(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
@@ -20,8 +21,8 @@ import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader.Function
-import Control.Effect.Cull
-import Control.Effect.NonDet
+import Control.Effect.Cull hiding (Carrier, Has)
+import Control.Effect.NonDet hiding (Carrier, Has)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

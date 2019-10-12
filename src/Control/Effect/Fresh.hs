@@ -13,6 +13,7 @@ module Control.Effect.Fresh
 , fresh
 , resetFresh
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

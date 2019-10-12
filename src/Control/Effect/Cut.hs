@@ -16,6 +16,7 @@ module Control.Effect.Cut
 , call
 , cut
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

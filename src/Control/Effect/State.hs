@@ -23,6 +23,7 @@ module Control.Effect.State
 , modify
 , modifyLazy
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

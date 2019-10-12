@@ -15,6 +15,7 @@ module Control.Effect.Resource
 , finally
 , onException
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

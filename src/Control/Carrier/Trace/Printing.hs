@@ -9,12 +9,13 @@ module Control.Carrier.Trace.Printing
 , TraceC(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.Trace
+import Control.Effect.Trace hiding (Carrier, Has)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

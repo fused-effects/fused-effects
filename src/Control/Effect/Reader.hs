@@ -23,6 +23,7 @@ module Control.Effect.Reader
 , ask_environment
 , local_modification
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

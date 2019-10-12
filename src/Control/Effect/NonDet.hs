@@ -15,22 +15,23 @@ Predefined carriers:
 module Control.Effect.NonDet
 ( -- * NonDet effects
   NonDet
+, module Control.Effect.Choose
+, module Control.Effect.Empty
 , oneOf
 , foldMapA
   -- * Re-exports
 , Alternative(..)
+, Carrier
+, Has
+, MonadPlus(..)
 , guard
 , optional
-, MonadPlus(..)
-  -- * Constituent effects
-, module Control.Effect.Choose
-, module Control.Effect.Empty
 ) where
 
 import Control.Applicative (Alternative(..), optional)
+import Control.Carrier
 import Control.Effect.Choose (Choose(..))
 import Control.Effect.Empty (Empty(..))
-import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))

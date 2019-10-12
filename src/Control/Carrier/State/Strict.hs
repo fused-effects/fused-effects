@@ -14,12 +14,13 @@ module Control.Carrier.State.Strict
 , StateC(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.State
+import Control.Effect.State hiding (Carrier, Has)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

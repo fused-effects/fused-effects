@@ -15,12 +15,13 @@ module Control.Carrier.NonDet.Church
 , NonDetC(..)
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Carrier
-import Control.Effect.NonDet
+import Control.Effect.NonDet hiding (Carrier, Has)
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

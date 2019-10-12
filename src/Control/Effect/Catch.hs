@@ -13,6 +13,7 @@ module Control.Effect.Catch
   -- * Properties
 , catchError_interception
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

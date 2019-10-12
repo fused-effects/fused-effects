@@ -21,6 +21,7 @@ module Control.Effect.Choose
   -- * Choosing semigroup
 , Choosing(..)
   -- * Re-exports
+, Carrier
 , Has
 ) where
 

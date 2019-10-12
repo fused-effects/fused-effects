@@ -17,12 +17,13 @@ module Control.Effect.Error
 , module Control.Effect.Throw
 , module Control.Effect.Catch
   -- * Re-exports
+, Carrier
 , Has
 ) where
 
 import Control.Carrier
-import Control.Effect.Catch hiding (Has)
-import Control.Effect.Throw hiding (Has)
+import Control.Effect.Catch hiding (Carrier, Has)
+import Control.Effect.Throw hiding (Carrier, Has)
 
 -- | @since 0.1.0.0
 type Error e = Throw e :+: Catch e

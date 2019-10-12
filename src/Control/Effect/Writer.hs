@@ -20,6 +20,7 @@ module Control.Effect.Writer
 , listens
 , censor
   -- * Re-exports
+, Carrier
 , Has
 ) where
 
