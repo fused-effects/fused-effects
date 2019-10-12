@@ -14,7 +14,7 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
-tests = testGroup "Empty.Maybe"
+tests = testGroup "Empty.Maybe.EmptyC"
   [ testProperty "empty annihilation" . forall (fn @A (gen genB) :. Nil) $
     \ k -> empty_annihilation (~=) (apply k)
   ]

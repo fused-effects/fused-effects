@@ -14,7 +14,7 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
-tests = testGroup "Reader.Function"
+tests = testGroup "Reader.Function.ReaderC"
   [ testProperty "ask environment" . forall (genA :. fn @A (Blind <$> gen genA) :. Nil) $
     \ a k -> ask_environment (~=) runReader a (getBlind . apply k)
   , testProperty "local modification" . forall (genA :. fn @A genA :. fmap Blind (gen genA) :. Nil) $

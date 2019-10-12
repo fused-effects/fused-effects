@@ -14,7 +14,7 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
-tests = testGroup "Error.Either"
+tests = testGroup "Error.Either.ErrorC"
   [ testProperty "throwError annihilation" . forall (genC :. fn @A (gen genC genB) :. Nil) $
     \ e k -> throwError_annihilation (~=) e (apply k)
   , testProperty "catchError interception" . forall (genC :. fn @C (gen genC genA) :. Nil) $
