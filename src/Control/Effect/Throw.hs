@@ -16,6 +16,7 @@ module Control.Effect.Throw
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

@@ -25,6 +25,7 @@ module Control.Effect.State
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

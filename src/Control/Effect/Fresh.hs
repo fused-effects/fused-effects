@@ -15,6 +15,7 @@ module Control.Effect.Fresh
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

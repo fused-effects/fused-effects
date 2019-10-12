@@ -21,8 +21,8 @@ import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader.Function
-import Control.Effect.Cull hiding (Carrier, Has)
-import Control.Effect.NonDet hiding (Carrier, Has)
+import Control.Effect.Cull hiding (Carrier, Has, run)
+import Control.Effect.NonDet hiding (Carrier, Has, run)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

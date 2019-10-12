@@ -15,7 +15,7 @@ module Control.Carrier.Lift
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.Lift hiding (Carrier, Has)
+import Control.Effect.Lift hiding (Carrier, Has, run)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

@@ -19,11 +19,12 @@ module Control.Effect.Error
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier
-import Control.Effect.Catch hiding (Carrier, Has)
-import Control.Effect.Throw hiding (Carrier, Has)
+import Control.Effect.Catch hiding (Carrier, Has, run)
+import Control.Effect.Throw hiding (Carrier, Has, run)
 
 -- | @since 0.1.0.0
 type Error e = Throw e :+: Catch e

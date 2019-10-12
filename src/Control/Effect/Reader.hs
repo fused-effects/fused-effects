@@ -25,6 +25,7 @@ module Control.Effect.Reader
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

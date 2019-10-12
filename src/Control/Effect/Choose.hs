@@ -23,6 +23,7 @@ module Control.Effect.Choose
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

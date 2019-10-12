@@ -15,7 +15,7 @@ module Control.Carrier.Error.Either
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.Error hiding (Carrier, Has)
+import Control.Effect.Error hiding (Carrier, Has, run)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

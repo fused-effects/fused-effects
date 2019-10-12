@@ -15,6 +15,7 @@ module Control.Effect.Catch
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

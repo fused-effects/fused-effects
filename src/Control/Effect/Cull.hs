@@ -14,6 +14,7 @@ module Control.Effect.Cull
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

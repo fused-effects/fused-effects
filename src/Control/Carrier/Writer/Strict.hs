@@ -21,7 +21,7 @@ module Control.Carrier.Writer.Strict
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.State.Strict
-import Control.Effect.Writer hiding (Carrier, Has)
+import Control.Effect.Writer hiding (Carrier, Has, run)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

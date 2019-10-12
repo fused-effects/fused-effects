@@ -18,7 +18,7 @@ module Control.Carrier.Empty.Maybe
 ) where
 
 import Control.Carrier
-import Control.Effect.Empty hiding (Carrier, Has)
+import Control.Effect.Empty hiding (Carrier, Has, run)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

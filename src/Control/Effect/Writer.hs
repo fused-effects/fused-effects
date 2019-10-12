@@ -22,6 +22,7 @@ module Control.Effect.Writer
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

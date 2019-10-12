@@ -18,6 +18,7 @@ module Control.Effect.Cut
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Applicative (Alternative(..))

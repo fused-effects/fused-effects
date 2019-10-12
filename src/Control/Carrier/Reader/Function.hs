@@ -16,7 +16,7 @@ module Control.Carrier.Reader.Function
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Carrier
-import Control.Effect.Reader hiding (Carrier, Has)
+import Control.Effect.Reader hiding (Carrier, Has, run)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

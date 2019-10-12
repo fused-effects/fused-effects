@@ -21,7 +21,7 @@ module Control.Carrier.State.Lazy
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.State as State hiding (Carrier, Has)
+import Control.Effect.State as State hiding (Carrier, Has, run)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

@@ -20,6 +20,7 @@ module Control.Effect.Empty
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

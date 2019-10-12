@@ -20,7 +20,7 @@ module Control.Carrier.Choose.Church
 
 import Control.Applicative (liftA2)
 import Control.Carrier
-import Control.Effect.Choose hiding (Carrier, Has)
+import Control.Effect.Choose hiding (Carrier, Has, run)
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

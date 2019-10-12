@@ -26,6 +26,7 @@ module Control.Effect.NonDet
 , MonadPlus(..)
 , guard
 , optional
+, run
 ) where
 
 import Control.Applicative (Alternative(..), optional)

@@ -14,6 +14,7 @@ module Control.Effect.Resumable
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

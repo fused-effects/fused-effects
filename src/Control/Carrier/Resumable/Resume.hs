@@ -16,7 +16,7 @@ module Control.Carrier.Resumable.Resume
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.Reader.Function
-import Control.Effect.Resumable hiding (Carrier, Has)
+import Control.Effect.Resumable hiding (Carrier, Has, run)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

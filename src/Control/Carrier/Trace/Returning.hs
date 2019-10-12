@@ -16,7 +16,7 @@ module Control.Carrier.Trace.Returning
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.State.Strict
-import Control.Effect.Trace hiding (Carrier, Has)
+import Control.Effect.Trace hiding (Carrier, Has, run)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

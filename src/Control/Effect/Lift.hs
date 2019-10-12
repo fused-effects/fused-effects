@@ -17,6 +17,7 @@ module Control.Effect.Lift
   -- * Re-exports
 , Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

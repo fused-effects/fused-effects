@@ -15,7 +15,7 @@ module Control.Carrier.Resource
 
 import           Control.Applicative (Alternative(..))
 import           Control.Carrier
-import           Control.Effect.Resource hiding (Carrier, Has)
+import           Control.Effect.Resource hiding (Carrier, Has, run)
 import qualified Control.Exception as Exc
 import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

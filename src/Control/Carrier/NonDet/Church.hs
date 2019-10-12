@@ -21,7 +21,7 @@ module Control.Carrier.NonDet.Church
 
 import Control.Applicative (liftA2)
 import Control.Carrier
-import Control.Effect.NonDet hiding (Carrier, Has)
+import Control.Effect.NonDet hiding (Carrier, Has, run)
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
