@@ -14,6 +14,8 @@ tests :: TestTree
 tests = testGroup "Reader.Function"
   [ testProperty "ask environment" $
     \ a k -> ask_environment @A ((~=) @B) runReader a (getBlind k)
+  , testProperty "local modification" $
+    \ a f m -> local_modification @A ((~=) @B) runReader a (applyFun f) (getBlind m)
   ]
 
 (~=) :: (Eq a, Show a) => PureC a -> PureC a -> Property
