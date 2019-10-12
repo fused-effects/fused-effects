@@ -46,7 +46,9 @@ get = send (Get pure)
 
 -- | Project a function out of the current state value.
 --
---   prop> snd (run (runState a (gets (applyFun f)))) === applyFun f a
+-- @
+-- 'gets' f = 'fmap' f 'get'
+-- @
 --
 -- @since 0.1.0.0
 gets :: Has (State s) sig m => (s -> a) -> m a
