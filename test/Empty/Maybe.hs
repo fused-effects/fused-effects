@@ -2,14 +2,18 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Empty.Maybe
 ( tests
+, gen
 ) where
 
+import Control.Carrier
 import Control.Carrier.Empty.Maybe
 import Control.Monad.Trans.Maybe
-import Pure
+import Pure ()
+import Hedgehog hiding (Property, (===))
+import qualified Hedgehog.Gen as Gen
 import Test.QuickCheck.Poly
 import Test.Tasty
-import Test.Tasty.QuickCheck
+import Test.Tasty.QuickCheck hiding (Gen)
 
 tests :: TestTree
 tests = testGroup "Empty.Maybe"
@@ -28,3 +32,7 @@ instance Arbitrary1 m => Arbitrary1 (EmptyC m) where
 instance (Arbitrary1 m, Arbitrary a) => Arbitrary (EmptyC m a) where
   arbitrary = arbitrary1
   shrink = shrink1
+
+
+gen :: (Carrier sig m, Effect sig) => Gen a -> Gen (EmptyC m a)
+gen a = Gen.choice [ pure empty, pure <$> a ]
