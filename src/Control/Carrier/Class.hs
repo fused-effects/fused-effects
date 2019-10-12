@@ -3,6 +3,7 @@ module Control.Carrier.Class
 ( Carrier(..)
 ) where
 
+import Control.Applicative
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
@@ -19,6 +20,7 @@ import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
+import qualified Control.Monad.Trans.Maybe as Maybe
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Control.Monad.Trans.RWS.Lazy as RWS.Lazy
 import qualified Control.Monad.Trans.RWS.Strict as RWS.Strict
@@ -74,6 +76,11 @@ instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (Except.Except
   eff (L (L (Throw e)))     = Except.throwE e
   eff (L (R (Catch m h k))) = Except.catchE m h >>= k
   eff (R other)             = Except.ExceptT $ eff (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
+
+instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (Maybe.MaybeT m) where
+  eff (L (L Empty))      = empty
+  eff (L (R (Choose k))) = k True <|> k False
+  eff (R other)          = Maybe.MaybeT (eff (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT) other))
 
 instance Carrier sig m => Carrier (Reader r :+: sig) (Reader.ReaderT r m) where
   eff (L (Ask       k)) = Reader.ask >>= k
