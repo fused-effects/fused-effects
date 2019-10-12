@@ -20,16 +20,6 @@ import qualified Hedgehog.Function as Function
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 import Test.QuickCheck.Poly
-import Test.Tasty.QuickCheck hiding (Blind, Gen)
-
-instance Arbitrary1 PureC where
-  liftArbitrary genA = PureC <$> genA
-  liftShrink shrinkA = map PureC . shrinkA . run
-
-instance Arbitrary a => Arbitrary (PureC a) where
-  arbitrary = arbitrary1
-  shrink = shrink1
-
 
 gen :: Gen a -> Gen (PureC a)
 gen = fmap PureC
