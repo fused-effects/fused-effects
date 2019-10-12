@@ -1,5 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
-{-# OPTIONS_GHC -Wno-orphans #-}
+{-# LANGUAGE DataKinds, FlexibleContexts, FlexibleInstances, FunctionalDependencies, GADTs, TypeOperators, TypeApplications, UndecidableInstances #-}
 module Error.Either
 ( tests
 , gen
@@ -7,33 +6,42 @@ module Error.Either
 
 import Control.Carrier
 import Control.Carrier.Error.Either
-import Control.Monad.Trans.Except
-import Hedgehog hiding (Property, (===))
+import Hedgehog
+import Hedgehog.Function hiding (C)
 import qualified Hedgehog.Gen as Gen
 import Pure hiding (gen)
 import Test.Tasty
-import Test.Tasty.QuickCheck hiding (Gen)
+import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Error.Either"
-  [ testProperty "throwError annihilation" $
-    \ e k -> throwError_annihilation @C ((~=) @C @B) e (applyFun @A k)
-  , testProperty "catchError interception" $
-    \ e f -> catchError_interception @C ((~=) @C @A) e (applyFun f)
+  [ testProperty "throwError annihilation" . property . forall (genC ::: fn @A (gen genC genB) ::: Nil) $
+    \ e k -> throwError_annihilation (~=) e (apply k)
+  , testProperty "catchError interception" . property . forall (genC ::: fn @C (gen genC genA) ::: Nil) $
+    \ e f -> catchError_interception (~=) e (apply f)
   ]
 
-(~=) :: (Eq e, Eq a, Show e, Show a) => ErrorC e PureC a -> ErrorC e PureC a -> Property
+(~=) :: (Eq e, Eq a, Show e, Show a) => ErrorC e PureC a -> ErrorC e PureC a -> PropertyT IO ()
 m1 ~= m2 = run (runError m1) === run (runError m2)
-
-
-instance (Arbitrary e, Arbitrary1 m) => Arbitrary1 (ErrorC e m) where
-  liftArbitrary genA = ErrorC . ExceptT <$> liftArbitrary @m (liftArbitrary2 @Either (arbitrary @e) genA)
-  liftShrink shrinkA = map (ErrorC . ExceptT) . liftShrink (liftShrink2 shrink shrinkA) . runError
-
-instance (Arbitrary e, Arbitrary1 m, Arbitrary a) => Arbitrary (ErrorC e m a) where
-  arbitrary = arbitrary1
-  shrink = shrink1
 
 
 gen :: (Carrier sig m, Effect sig) => Gen e -> Gen a -> Gen (ErrorC e m a)
 gen e a = Gen.choice [ throwError <$> e, pure <$> a ]
+
+
+infixr 5 :::
+
+data Rec as where
+  Nil :: Rec '[]
+  (:::) :: a -> Rec as -> Rec (a ': as)
+
+class Forall g f | g -> f, f -> g where
+  forall :: g -> f -> PropertyT IO ()
+
+instance Forall (Rec '[]) (PropertyT IO ()) where
+  forall Nil = id
+
+instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) where
+  forall (g ::: gs) f = do
+    a <- forAll g
+    forall gs (f a)
