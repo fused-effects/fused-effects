@@ -2,13 +2,17 @@
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Error.Either
 ( tests
+, gen
 ) where
 
+import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.Monad.Trans.Except
-import Pure
+import Hedgehog hiding (Property, (===))
+import qualified Hedgehog.Gen as Gen
+import Pure hiding (gen)
 import Test.Tasty
-import Test.Tasty.QuickCheck
+import Test.Tasty.QuickCheck hiding (Gen)
 
 tests :: TestTree
 tests = testGroup "Error.Either"
@@ -29,3 +33,7 @@ instance (Arbitrary e, Arbitrary1 m) => Arbitrary1 (ErrorC e m) where
 instance (Arbitrary e, Arbitrary1 m, Arbitrary a) => Arbitrary (ErrorC e m a) where
   arbitrary = arbitrary1
   shrink = shrink1
+
+
+gen :: (Carrier sig m, Effect sig) => Gen e -> Gen a -> Gen (ErrorC e m a)
+gen e a = Gen.choice [ throwError <$> e, pure <$> a ]
