@@ -127,6 +127,7 @@ test-suite test
     Fusion
     NonDet.Church
     Pure
+    Reader.Base
     Reader.Function
   build-depends:
       base
