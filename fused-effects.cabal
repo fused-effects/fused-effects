@@ -122,6 +122,7 @@ test-suite test
   hs-source-dirs:      test
   main-is:             Test.hs
   other-modules:
+    Empty.Base
     Empty.Maybe
     Error.Either
     Fusion
