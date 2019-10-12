@@ -24,6 +24,7 @@ module Control.Effect.State
 , modifyLazy
   -- * Properties
 , get_state
+, put_update
   -- * Re-exports
 , Carrier
 , Has
@@ -114,3 +115,9 @@ modifyLazy f = get >>= put . f
 -- @since 1.0.0.0
 get_state :: Has (State s) sig m => (b -> b -> prop) -> (s -> m a -> b) -> s -> (s -> m a) -> prop
 get_state (===) runState a k = runState a (get >>= k) === runState a (k a)
+
+-- | 'put' updates the state variable.
+--
+-- @since 1.0.0.0
+put_update :: Has (State s) sig m => (b -> b -> prop) -> (s -> m a -> b) -> s -> s -> m a -> prop
+put_update (===) runState a b m = runState a (put b >> m) === runState b m
