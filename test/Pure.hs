@@ -24,6 +24,7 @@ import Test.QuickCheck.Poly
 gen :: Gen a -> Gen (PureC a)
 gen = fmap PureC
 
+
 genA :: Gen A
 genA = A <$> Gen.integral (Range.linear 0 10)
 
