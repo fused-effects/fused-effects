@@ -2,21 +2,17 @@
 
 -- | A carrier for a 'Fail' effect, returning the result as an 'Either' 'String'. Failed computations will return a 'Left' containing the 'String' value passed to 'Fail.fail'.
 module Control.Carrier.Fail.Either
-( -- * Fail effect
-  module Control.Effect.Fail
-  -- * Fail carrier
-, runFail
+( -- * Fail carrier
+  runFail
 , FailC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Fail effect
+, module Control.Effect.Fail
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.Error.Either
-import Control.Effect.Fail hiding (Carrier, Has, run)
+import Control.Effect.Fail
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

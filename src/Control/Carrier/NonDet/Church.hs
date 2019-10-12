@@ -6,22 +6,18 @@ Under the hood, it uses a Church-encoded structure and a binary tree to prevent 
 -}
 
 module Control.Carrier.NonDet.Church
-( -- * NonDet effects
-  module Control.Effect.NonDet
-  -- * NonDet carrier
-, runNonDet
+( -- * NonDet carrier
+  runNonDet
 , runNonDetA
 , runNonDetM
 , NonDetC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * NonDet effects
+, module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Carrier
-import Control.Effect.NonDet hiding (Carrier, Has, run)
+import Control.Effect.NonDet
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

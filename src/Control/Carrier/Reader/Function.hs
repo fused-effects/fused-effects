@@ -3,20 +3,16 @@
 -- | A carrier for 'Reader' effects.
 
 module Control.Carrier.Reader.Function
-( -- * Reader effect
-  module Control.Effect.Reader
-  -- * Reader carrier
-, runReader
+( -- * Reader carrier
+  runReader
 , ReaderC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Reader effect
+, module Control.Effect.Reader
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Carrier
-import Control.Effect.Reader hiding (Carrier, Has, run)
+import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

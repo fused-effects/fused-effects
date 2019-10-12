@@ -2,24 +2,20 @@
 
 -- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
 module Control.Carrier.Cut.Church
-( -- * Cut effect
-  module Control.Effect.Cut
-  -- * NonDet effects
-, module Control.Effect.NonDet
-  -- * Cut carrier
-, runCut
+( -- * Cut carrier
+  runCut
 , runCutA
 , runCutM
 , CutC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Cut effect
+, module Control.Effect.Cut
+  -- * NonDet effects
+, module Control.Effect.NonDet
 ) where
 
 import Control.Carrier
-import Control.Effect.Cut hiding (Carrier, Has, run)
-import Control.Effect.NonDet hiding (Carrier, Has, run)
+import Control.Effect.Cut
+import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

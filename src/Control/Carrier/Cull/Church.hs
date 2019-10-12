@@ -2,27 +2,23 @@
 
 -- | A carrier for 'Cull' and 'NonDet' effects used in tandem (@Cull :+: NonDet@).
 module Control.Carrier.Cull.Church
-( -- * Cull effect
-  module Control.Effect.Cull
-  -- * NonDet effects
-, module Control.Effect.NonDet
-  -- * Cull carrier
-, runCull
+( -- * Cull carrier
+  runCull
 , runCullA
 , runCullM
 , CullC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Cull effect
+, module Control.Effect.Cull
+  -- * NonDet effects
+, module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader.Function
-import Control.Effect.Cull hiding (Carrier, Has, run)
-import Control.Effect.NonDet hiding (Carrier, Has, run)
+import Control.Effect.Cull
+import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

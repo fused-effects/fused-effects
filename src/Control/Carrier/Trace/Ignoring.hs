@@ -2,20 +2,16 @@
 
 -- | A carrier for the 'Control.Effect.Trace' effect that ignores all traced results. Useful when you wish to disable tracing without removing all trace statements.
 module Control.Carrier.Trace.Ignoring
-( -- * Trace effect
-  module Control.Effect.Trace
-  -- * Trace carrier
-, runTrace
+( -- * Trace carrier
+  runTrace
 , TraceC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Trace effect
+, module Control.Effect.Trace
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.Trace hiding (Carrier, Has, run)
+import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

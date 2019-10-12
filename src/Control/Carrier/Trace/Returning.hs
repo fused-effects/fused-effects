@@ -2,21 +2,17 @@
 
 -- | A carrier for the 'Control.Effect.Trace' effect that aggregates and returns all traced values.
 module Control.Carrier.Trace.Returning
-( -- * Trace effect
-  module Control.Effect.Trace
-  -- * Trace carrier
-, runTrace
+( -- * Trace carrier
+  runTrace
 , TraceC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Trace effect
+, module Control.Effect.Trace
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.State.Strict
-import Control.Effect.Trace hiding (Carrier, Has, run)
+import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

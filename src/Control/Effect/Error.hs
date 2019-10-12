@@ -12,19 +12,15 @@ Predefined carriers:
 -}
 
 module Control.Effect.Error
-( -- * Error effect
+( -- * Error effects
   Error
 , module Control.Effect.Throw
 , module Control.Effect.Catch
-  -- * Re-exports
-, Carrier
-, Has
-, run
 ) where
 
 import Control.Carrier
-import Control.Effect.Catch hiding (Carrier, Has, run)
-import Control.Effect.Throw hiding (Carrier, Has, run)
+import Control.Effect.Catch
+import Control.Effect.Throw
 
 -- | @since 0.1.0.0
 type Error e = Throw e :+: Catch e

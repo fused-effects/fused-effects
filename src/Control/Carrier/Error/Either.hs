@@ -2,20 +2,16 @@
 
 -- | A carrier for an 'Error' effect.
 module Control.Carrier.Error.Either
-( -- * Error effect
-  module Control.Effect.Error
-  -- * Error carrier
-, runError
+( -- * Error carrier
+  runError
 , ErrorC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Error effect
+, module Control.Effect.Error
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.Error hiding (Carrier, Has, run)
+import Control.Effect.Error
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

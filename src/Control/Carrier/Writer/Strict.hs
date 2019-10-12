@@ -6,22 +6,18 @@ This implementation is based on a post Gabriel Gonzalez made to the Haskell mail
 -}
 
 module Control.Carrier.Writer.Strict
-( -- * Writer effect
-  module Control.Effect.Writer
-  -- * Writer carrier
-, runWriter
+( -- * Writer carrier
+  runWriter
 , execWriter
 , WriterC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Writer effect
+, module Control.Effect.Writer
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.State.Strict
-import Control.Effect.Writer hiding (Carrier, Has, run)
+import Control.Effect.Writer
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

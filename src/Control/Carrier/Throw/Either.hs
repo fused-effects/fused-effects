@@ -1,20 +1,16 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Throw.Either
-( -- * Throw effect
-  module Control.Effect.Throw
-  -- * Throw carrier
-, runThrow
+( -- * Throw carrier
+  runThrow
 , ThrowC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Throw effect
+, module Control.Effect.Throw
 ) where
 
 import Control.Applicative (Alternative)
 import Control.Carrier
 import Control.Carrier.Error.Either
-import Control.Effect.Throw hiding (Carrier, Has, run)
+import Control.Effect.Throw
 import Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

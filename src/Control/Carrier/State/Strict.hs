@@ -5,22 +5,18 @@
 Note that the parameter order in 'runState', 'evalState', and 'execState' is reversed compared the equivalent functions provided by @transformers@. This is an intentional decision made to enable the composition of effect handlers with '.' without invoking 'flip'.
 -}
 module Control.Carrier.State.Strict
-( -- * State effect
-  module Control.Effect.State
-  -- * Strict state carrier
-, runState
+( -- * Strict state carrier
+  runState
 , evalState
 , execState
 , StateC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * State effect
+, module Control.Effect.State
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.State hiding (Carrier, Has, run)
+import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

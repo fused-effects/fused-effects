@@ -2,20 +2,16 @@
 
 -- | A carrier for 'Lift' allowing monadic actions to be lifted into a larger context with 'sendM'.
 module Control.Carrier.Lift
-( -- * Lift effect
-  module Control.Effect.Lift
-  -- * Lift carrier
-, runM
+( -- * Lift carrier
+  runM
 , LiftC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Lift effect
+, module Control.Effect.Lift
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.Lift hiding (Carrier, Has, run)
+import Control.Effect.Lift
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

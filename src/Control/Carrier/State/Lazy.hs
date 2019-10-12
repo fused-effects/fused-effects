@@ -6,22 +6,18 @@ Note that the parameter order in 'runState', 'evalState', and 'execState' is rev
 -}
 
 module Control.Carrier.State.Lazy
-( -- * State effect
-  module State
-  -- * Lazy state carrier
-, runState
+( -- * Lazy state carrier
+  runState
 , evalState
 , execState
 , StateC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * State effect
+, module Control.Effect.State
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.State as State hiding (Carrier, Has, run)
+import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

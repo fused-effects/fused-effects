@@ -2,21 +2,17 @@
 
 -- | A carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
 module Control.Carrier.Fresh.Strict
-( -- * Fresh effect
-  module Control.Effect.Fresh
-  -- * Fresh carrier
-, runFresh
+( -- * Fresh carrier
+  runFresh
 , FreshC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Fresh effect
+, module Control.Effect.Fresh
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.State.Strict
-import Control.Effect.Fresh hiding (Carrier, Has, run)
+import Control.Effect.Fresh
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

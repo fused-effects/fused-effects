@@ -6,21 +6,17 @@ Under the hood, it uses a Church-encoded binary tree to avoid the problems assoc
 -}
 
 module Control.Carrier.Choose.Church
-( -- * Choose effect
-  module Control.Effect.Choose
-  -- * Choose carrier
-, runChoose
+( -- * Choose carrier
+  runChoose
 , runChooseS
 , ChooseC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Choose effect
+, module Control.Effect.Choose
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Carrier
-import Control.Effect.Choose hiding (Carrier, Has, run)
+import Control.Effect.Choose
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

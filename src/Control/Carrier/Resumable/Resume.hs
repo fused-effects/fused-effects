@@ -2,21 +2,17 @@
 
 -- | Provides a carrier for 'Resumable' that can, given a handler function, resume the computation that threw an exception.
 module Control.Carrier.Resumable.Resume
-( -- * Resumable effect
-  module Control.Effect.Resumable
-  -- * Resumable carrier
-, runResumable
+( -- * Resumable carrier
+  runResumable
 , ResumableC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Resumable effect
+, module Control.Effect.Resumable
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.Reader.Function
-import Control.Effect.Resumable hiding (Carrier, Has, run)
+import Control.Effect.Resumable
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

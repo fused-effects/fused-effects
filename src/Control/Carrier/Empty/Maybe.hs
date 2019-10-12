@@ -6,19 +6,15 @@ Note that 'Empty' effects can, when they are the last effect in a stack, be inte
 -}
 
 module Control.Carrier.Empty.Maybe
-( -- * Empty effect
-  module Control.Effect.Empty
-  -- * Empty carrier
-, runEmpty
+( -- * Empty carrier
+  runEmpty
 , EmptyC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Empty effect
+, module Control.Effect.Empty
 ) where
 
 import Control.Carrier
-import Control.Effect.Empty hiding (Carrier, Has, run)
+import Control.Effect.Empty
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
