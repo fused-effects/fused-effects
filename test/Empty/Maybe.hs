@@ -1,4 +1,4 @@
-{-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE TypeApplications #-}
 module Empty.Maybe
 ( tests
 , gen
