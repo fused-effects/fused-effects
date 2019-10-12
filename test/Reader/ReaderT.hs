@@ -1,5 +1,5 @@
 {-# LANGUAGE TypeApplications #-}
-module Reader.Trans
+module Reader.ReaderT
 ( tests
 , gen
 ) where
@@ -14,7 +14,7 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
-tests = testGroup "Reader.Trans.ReaderT"
+tests = testGroup "Reader.ReaderT"
   [ testProperty "ask environment" . forall (genA :. fn @A (Blind <$> gen genA) :. Nil) $
     \ a k -> ask_environment (~=) (flip Reader.runReaderT) a (getBlind . apply k)
   , testProperty "local modification" . forall (genA :. fn @A genA :. fmap Blind (gen genA) :. Nil) $
