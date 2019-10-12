@@ -4,6 +4,7 @@ module Main
 
 import qualified Empty.Base
 import qualified Empty.Maybe
+import qualified Error.Base
 import qualified Error.Either
 import qualified Fusion
 import qualified NonDet.Church
@@ -15,6 +16,7 @@ main :: IO ()
 main = defaultMain $ testGroup "unit tests"
   [ Empty.Base.tests
   , Empty.Maybe.tests
+  , Error.Base.tests
   , Error.Either.tests
   , Fusion.tests
   , NonDet.Church.tests

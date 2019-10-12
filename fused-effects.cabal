@@ -124,6 +124,7 @@ test-suite test
   other-modules:
     Empty.Base
     Empty.Maybe
+    Error.Base
     Error.Either
     Fusion
     NonDet.Church
