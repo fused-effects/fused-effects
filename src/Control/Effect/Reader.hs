@@ -7,6 +7,7 @@ This effect is similar to the traditional @MonadReader@ typeclass, though it all
 Predefined carriers:
 
 * "Control.Carrier.Reader.Function".
+* "Control.Monad.Trans.Reader".
 * If 'Reader' @r@ is the last effect in a stack, it can be interpreted directly to @(-> r)@ (a function taking an @r@).
 -}
 
