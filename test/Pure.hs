@@ -25,7 +25,7 @@ gen = fmap PureC
 
 
 genA :: Gen A
-genA = A <$> Gen.integral (Range.linear 0 10)
+genA = Gen.integral (Range.linear 0 10)
 
 newtype A = A { unA :: Integer }
   deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
@@ -33,7 +33,7 @@ newtype A = A { unA :: Integer }
 instance Arg A
 
 genB :: Gen B
-genB = B <$> Gen.integral (Range.linear 0 10)
+genB = Gen.integral (Range.linear 0 10)
 
 newtype B = B { unB :: Integer }
   deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
@@ -41,7 +41,7 @@ newtype B = B { unB :: Integer }
 instance Arg B
 
 genC :: Gen C
-genC = C <$> Gen.integral (Range.linear 0 10)
+genC = Gen.integral (Range.linear 0 10)
 
 newtype C = C { unC :: Integer }
   deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
