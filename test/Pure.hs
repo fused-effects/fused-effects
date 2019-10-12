@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving, StandaloneDeriving #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Pure
 ( module Control.Carrier.Pure
@@ -9,6 +10,7 @@ module Pure
 
 import Control.Carrier.Pure
 import Hedgehog
+import qualified Hedgehog.Function as Function
 import Test.QuickCheck.Poly
 import Test.Tasty.QuickCheck hiding (Gen)
 
@@ -23,3 +25,7 @@ instance Arbitrary a => Arbitrary (PureC a) where
 
 gen :: Gen a -> Gen (PureC a)
 gen = fmap PureC
+
+deriving instance Function.Vary A
+deriving instance Function.Vary B
+deriving instance Function.Vary C
