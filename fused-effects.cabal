@@ -134,11 +134,9 @@ test-suite test
     , hedgehog           ^>= 1
     , hedgehog-fn        ^>= 1
     , inspection-testing ^>= 0.4
-    , QuickCheck         ^>= 2.13
     , tasty              ^>= 1.2
     , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
-    , tasty-quickcheck   ^>= 0.10
     , transformers
 
 test-suite doctest
