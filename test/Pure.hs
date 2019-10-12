@@ -3,6 +3,9 @@
 module Pure
 ( module Control.Carrier.Pure
 , gen
+, genA
+, genB
+, genC
 , A(..)
 , B(..)
 , C(..)
@@ -11,6 +14,8 @@ module Pure
 import Control.Carrier.Pure
 import Hedgehog
 import qualified Hedgehog.Function as Function
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
 import Test.QuickCheck.Poly
 import Test.Tasty.QuickCheck hiding (Gen)
 
@@ -25,6 +30,15 @@ instance Arbitrary a => Arbitrary (PureC a) where
 
 gen :: Gen a -> Gen (PureC a)
 gen = fmap PureC
+
+genA :: Gen A
+genA = A <$> Gen.integral (Range.linear 0 10)
+
+genB :: Gen B
+genB = B <$> Gen.integral (Range.linear 0 10)
+
+genC :: Gen C
+genC = C <$> Gen.integral (Range.linear 0 10)
 
 deriving instance Function.Vary A
 deriving instance Function.Vary B
