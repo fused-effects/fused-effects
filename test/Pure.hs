@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, GeneralizedNewtypeDeriving, StandaloneDeriving #-}
+{-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Pure
 ( module Control.Carrier.Pure
@@ -9,6 +9,8 @@ module Pure
 , A(..)
 , B(..)
 , C(..)
+, Rec(..)
+, forall
 ) where
 
 import Control.Carrier.Pure
@@ -49,3 +51,24 @@ deriving instance Function.Generic C
 deriving instance Function.Vary A
 deriving instance Function.Vary B
 deriving instance Function.Vary C
+
+
+infixr 5 :.
+
+data Rec as where
+  Nil :: Rec '[]
+  (:.) :: a -> Rec as -> Rec (a ': as)
+
+forall :: Forall g f => g -> f -> Hedgehog.Property
+forall g f = Hedgehog.property (forall' g f)
+
+class Forall g f | g -> f, f -> g where
+  forall' :: g -> f -> PropertyT IO ()
+
+instance Forall (Rec '[]) (PropertyT IO ()) where
+  forall' Nil = id
+
+instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) where
+  forall' (g :. gs) f = do
+    a <- Hedgehog.forAll g
+    forall' gs (f a)
