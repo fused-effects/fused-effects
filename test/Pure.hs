@@ -1,4 +1,4 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, StandaloneDeriving #-}
+{-# LANGUAGE DeriveGeneric, GeneralizedNewtypeDeriving, StandaloneDeriving #-}
 {-# OPTIONS_GHC -Wno-orphans #-}
 module Pure
 ( module Control.Carrier.Pure
@@ -40,6 +40,12 @@ genB = B <$> Gen.integral (Range.linear 0 10)
 genC :: Gen C
 genC = C <$> Gen.integral (Range.linear 0 10)
 
+instance Function.Arg A
+instance Function.Arg B
+instance Function.Arg C
+deriving instance Function.Generic A
+deriving instance Function.Generic B
+deriving instance Function.Generic C
 deriving instance Function.Vary A
 deriving instance Function.Vary B
 deriving instance Function.Vary C

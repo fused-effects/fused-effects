@@ -132,6 +132,7 @@ test-suite test
       base
     , fused-effects
     , hedgehog           ^>= 1
+    , hedgehog-fn        ^>= 1
     , inspection-testing ^>= 0.4
     , QuickCheck         ^>= 2.13
     , tasty              ^>= 1.2
