@@ -83,6 +83,10 @@ modify f = do
 -- | Replace the state value with the result of applying a function to the current state value.
 --   This is lazy in the new state; injudicious use of this function may lead to space leaks.
 --
+-- @
+-- 'modifyLazy' f = 'get' '>>=' 'put' . f
+-- @
+--
 -- @since 0.1.0.0
 modifyLazy :: Has (State s) sig m => (s -> s) -> m ()
 modifyLazy f = get >>= put . f
