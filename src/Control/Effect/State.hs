@@ -70,7 +70,7 @@ put s = send (Put s (pure ()))
 --   This is strict in the new state.
 --
 -- @
--- 'modify' f = 'get' '>>=' 'put' . f
+-- 'modify' f = 'get' '>>=' ('put' . f '$!')
 -- @
 --
 -- @since 0.1.0.0
