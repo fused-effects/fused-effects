@@ -22,6 +22,8 @@ module Control.Effect.State
 , put
 , modify
 , modifyLazy
+  -- * Properties
+, get_state
   -- * Re-exports
 , Carrier
 , Has
@@ -103,3 +105,12 @@ modify f = do
 modifyLazy :: Has (State s) sig m => (s -> s) -> m ()
 modifyLazy f = get >>= put . f
 {-# INLINEABLE modifyLazy #-}
+
+
+-- Properties
+
+-- | 'get' returns the state variable.
+--
+-- @since 1.0.0.0
+get_state :: Has (State s) sig m => (b -> b -> prop) -> (s -> m a -> b) -> s -> (s -> m a) -> prop
+get_state (===) runState a k = runState a (get >>= k) === runState a (k a)
