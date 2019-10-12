@@ -57,9 +57,9 @@ gets f = send (Get (pure . f))
 
 -- | Replace the state value with a new value.
 --
---   prop> fst (run (runState a (put b))) === b
---   prop> snd (run (runState a (get <* put b))) === a
---   prop> snd (run (runState a (put b *> get))) === b
+-- @
+-- 'get' '>>=' 'put' = 'pure' ()
+-- @
 --
 -- @since 0.1.0.0
 put :: Has (State s) sig m => s -> m ()
