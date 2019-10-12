@@ -7,30 +7,21 @@ module Empty.Maybe
 
 import Control.Carrier
 import Control.Carrier.Empty.Maybe
-import Control.Monad.Trans.Maybe
 import Pure hiding (gen)
-import Hedgehog hiding (Property, (===))
+import Hedgehog
+import Hedgehog.Function
 import qualified Hedgehog.Gen as Gen
 import Test.Tasty
-import Test.Tasty.QuickCheck hiding (Gen)
+import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty.Maybe"
-  [ testProperty "empty annihilation" $
-    \ k -> empty_annihilation ((~=) @B) (applyFun @A k)
+  [ testProperty "empty annihilation" . property $ forAllFn (fn @A (gen genB)) >>=
+    \ k -> empty_annihilation ((~=) @B) k
   ]
 
-(~=) :: (Eq a, Show a) => EmptyC PureC a -> EmptyC PureC a -> Property
+(~=) :: (Eq a, Show a) => EmptyC PureC a -> EmptyC PureC a -> PropertyT IO ()
 m1 ~= m2 = run (runEmpty m1) === run (runEmpty m2)
-
-
-instance Arbitrary1 m => Arbitrary1 (EmptyC m) where
-  liftArbitrary genA = EmptyC . MaybeT <$> liftArbitrary @m (liftArbitrary @Maybe genA)
-  liftShrink shrinkA = map (EmptyC . MaybeT) . liftShrink (liftShrink shrinkA) . runEmpty
-
-instance (Arbitrary1 m, Arbitrary a) => Arbitrary (EmptyC m a) where
-  arbitrary = arbitrary1
-  shrink = shrink1
 
 
 gen :: (Carrier sig m, Effect sig) => Gen a -> Gen (EmptyC m a)
