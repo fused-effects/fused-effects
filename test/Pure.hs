@@ -2,10 +2,14 @@
 module Pure
 ( module Control.Carrier.Pure
 , gen
+, A(..)
+, B(..)
+, C(..)
 ) where
 
 import Control.Carrier.Pure
 import Hedgehog
+import Test.QuickCheck.Poly
 import Test.Tasty.QuickCheck hiding (Gen)
 
 instance Arbitrary1 PureC where

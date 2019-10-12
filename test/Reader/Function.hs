@@ -6,7 +6,6 @@ module Reader.Function
 
 import Control.Carrier.Reader.Function
 import Pure
-import Test.QuickCheck.Poly
 import Test.Tasty
 import Test.Tasty.QuickCheck
 

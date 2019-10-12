@@ -8,10 +8,9 @@ module Empty.Maybe
 import Control.Carrier
 import Control.Carrier.Empty.Maybe
 import Control.Monad.Trans.Maybe
-import Pure ()
+import Pure hiding (gen)
 import Hedgehog hiding (Property, (===))
 import qualified Hedgehog.Gen as Gen
-import Test.QuickCheck.Poly
 import Test.Tasty
 import Test.Tasty.QuickCheck hiding (Gen)
 
