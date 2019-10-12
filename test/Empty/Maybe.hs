@@ -1,5 +1,4 @@
 {-# LANGUAGE ScopedTypeVariables, TypeApplications #-}
-{-# OPTIONS_GHC -Wno-orphans #-}
 module Empty.Maybe
 ( tests
 , gen
