@@ -61,6 +61,10 @@ gets f = send (Get (pure . f))
 -- 'get' '>>=' 'put' = 'pure' ()
 -- @
 --
+-- @
+-- runState a ('put' b '>>' m) = runState b m
+-- @
+--
 -- @since 0.1.0.0
 put :: Has (State s) sig m => s -> m ()
 put s = send (Put s (pure ()))
