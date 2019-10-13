@@ -21,8 +21,8 @@ tests = testGroup "Reader"
   [ testReader "ReaderC" ReaderC.runReader         genA
   , testReader "(->)"    (fmap PureC . (&))        genA
   , testReader "ReaderT" (flip ReaderT.runReaderT) genA
-  , testReader "RWST (Lazy)"   (\ r m -> LazyRWST.runRWST   m r r >>= \ (a, _, ()) -> pure a) genA
-  , testReader "RWST (Strict)" (\ r m -> StrictRWST.runRWST m r r >>= \ (a, _, ()) -> pure a) genA
+  , testReader "RWST (Lazy)"   (\ r m -> (\ (a, _, ()) -> a) <$> LazyRWST.runRWST   m r r) genA
+  , testReader "RWST (Strict)" (\ r m -> (\ (a, _, ()) -> a) <$> StrictRWST.runRWST m r r) genA
   ]
 
 
