@@ -6,6 +6,8 @@ module State
 import qualified Control.Carrier.State.Lazy as LazyStateC
 import qualified Control.Carrier.State.Strict as StrictStateC
 import Control.Effect.State
+import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
+import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.State.Lazy as LazyStateT
 import qualified Control.Monad.Trans.State.Strict as StrictStateT
 import Data.Tuple (swap)
@@ -22,7 +24,10 @@ tests = testGroup "State"
   , testState "StateC (Strict)" StrictStateC.runState genA
   , testState "StateT (Lazy)"   (fmap (fmap swap) . flip LazyStateT.runStateT)   genA
   , testState "StateT (Strict)" (fmap (fmap swap) . flip StrictStateT.runStateT) genA
-  ]
+  , testState "RWST (Lazy)"     (runRWST LazyRWST.runRWST)   genA
+  , testState "RWST (Strict)"   (runRWST StrictRWST.runRWST) genA
+  ] where
+  runRWST f r m = (\ (a, s, ()) -> (s, a)) <$> f m r r
 
 
 genState :: Has (State a) sig m => Gen a -> Gen (m a) -> Gen (m a)
