@@ -19,7 +19,7 @@ import Test.Tasty.Hedgehog
 tests :: TestTree
 tests = testGroup "Writer"
   [ testWriter "WriterC (Strict)" StrictWriterC.runWriter genW
-  , testWriter "WriterT (Lazy)" (fmap swap . LazyWriterT.runWriterT) genW
+  , testWriter "WriterT (Lazy)"   (fmap swap . LazyWriterT.runWriterT)   genW
   , testWriter "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT) genW
   ] where
     genW = list (linear 0 10) genA
