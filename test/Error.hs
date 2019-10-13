@@ -9,7 +9,7 @@ import Control.Effect.Error
 import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
 import Hedgehog
-import Hedgehog.Function
+import Hedgehog.Function hiding (C)
 import Hedgehog.Gen
 import Pure
 import qualified Throw
@@ -18,10 +18,12 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Error" $
-  [ testError "ErrorC"  ErrorC.runError    genC genA genB
-  , testError "Either"  pure               genC genA genB
-  , testError "ExceptT" ExceptT.runExceptT genC genA genB
-  ]
+  [ testError "ErrorC"  ErrorC.runError
+  , testError "Either"  pure
+  , testError "ExceptT" ExceptT.runExceptT
+  ] where
+  testError :: Has (Error C) sig m => String -> (forall a . m a -> PureC (Either C a)) -> TestTree
+  testError name run = Error.testError name run genC genA genB
 
 
 genError :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> Gen a -> Gen (m a) -> Gen (m a)
