@@ -134,6 +134,7 @@ test-suite test
     Reader.Function
     Reader.ReaderT
     State.Lazy
+    State.StateT.Lazy
     State.StateT.Strict
     State.Strict
   build-depends:
