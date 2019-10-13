@@ -125,6 +125,7 @@ test-suite test
     Catch
     Empty.Base
     Empty.Maybe
+    Error
     Error.Base
     Error.Either
     Error.ExceptT

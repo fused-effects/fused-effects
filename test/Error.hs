@@ -1,0 +1,2 @@
+module Error
+() where
