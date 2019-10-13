@@ -46,8 +46,3 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (NonDetC m) where
   eff = NonDetC . eff . handleCoercible
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck
