@@ -20,6 +20,8 @@ import Control.Monad.Trans.Class
 import System.IO
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
+--
+-- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
 runTrace = runTraceC
 
