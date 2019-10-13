@@ -82,8 +82,9 @@ listens f m = send (Listen m (curry pure . f))
 
 -- | Run a computation, modifying its output with the passed function.
 --
---   prop> run (execWriter (censor (applyFun f) (tell (Sum a)))) === applyFun f (Sum a)
---   prop> run (execWriter (tell (Sum a) *> censor (applyFun f) (tell (Sum b)) *> tell (Sum c))) === (Sum a <> applyFun f (Sum b) <> Sum c)
+-- @
+-- runWriter ('censor' f m) = 'fmap' ('Data.Bifunctor.first' f) (runWriter m)
+-- @
 --
 -- @since 0.2.0.0
 censor :: Has (Writer w) sig m => (w -> w) -> m a -> m a
