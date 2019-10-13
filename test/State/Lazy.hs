@@ -6,7 +6,7 @@ module State.Lazy
 import Control.Carrier.State.Lazy
 import Hedgehog.Function
 import Pure
-import State
+import State.Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

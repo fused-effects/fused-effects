@@ -6,7 +6,7 @@ module State.Strict
 import Control.Carrier.State.Strict
 import Hedgehog.Function
 import Pure
-import State
+import State.Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

@@ -7,7 +7,7 @@ import Control.Effect.State
 import qualified Control.Monad.Trans.State.Strict as StateT
 import Hedgehog.Function
 import Pure
-import State
+import State.Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

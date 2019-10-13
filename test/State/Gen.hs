@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts #-}
-module State
+module State.Gen
 ( gen
 , genState
 ) where

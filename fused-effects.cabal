@@ -138,7 +138,7 @@ test-suite test
     Reader.Base
     Reader.Function
     Reader.ReaderT
-    State
+    State.Gen
     State.Lazy
     State.StateT.Lazy
     State.StateT.Strict
