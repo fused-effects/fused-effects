@@ -22,9 +22,11 @@ import Control.Monad.Trans.Maybe
 
 -- | Run 'NonDet' effects, returning 'Nothing' for empty computations, or 'Just' the result otherwise. Note that this will terminate on the first successful result.
 --
---   prop> run (runNonDet empty)    === Nothing
---   prop> run (runNonDet (pure a)) === Just a
---   prop> run (runNonDet (let f x = pure x <|> f x in f a)) === Just a
+-- @
+-- 'runNonDet' 'empty' = pure 'Nothing'
+-- 'runNonDet' ('pure' a) = 'pure' ('Just' a)
+-- 'runNonDet' ('foldMapA' 'pure' [1..]) = 'pure' ('Just' 1)
+-- @
 --
 -- @since 1.0.0.0
 runNonDet :: NonDetC m a -> m (Maybe a)
