@@ -21,7 +21,10 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
---   prop> run (runFail (pure a)) === Right a
+-- @
+-- 'runFail' ('pure' a) = 'pure' ('Right' a)
+-- 'runFail' ('fail' s) = 'pure' ('Left' s)
+-- @
 --
 -- @since 1.0.0.0
 runFail :: FailC m a -> m (Either String a)
@@ -39,7 +42,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
   eff (L (Throw s)) = FailC (throwError s)
   eff (R other)     = FailC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> import Test.QuickCheck
