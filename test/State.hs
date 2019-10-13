@@ -20,13 +20,15 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "State"
-  [ testState "StateC (Lazy)"   LazyStateC.runState   genA
-  , testState "StateC (Strict)" StrictStateC.runState genA
-  , testState "StateT (Lazy)"   (fmap (fmap swap) . flip LazyStateT.runStateT)   genA
-  , testState "StateT (Strict)" (fmap (fmap swap) . flip StrictStateT.runStateT) genA
-  , testState "RWST (Lazy)"     (runRWST LazyRWST.runRWST)   genA
-  , testState "RWST (Strict)"   (runRWST StrictRWST.runRWST) genA
+  [ testState "StateC (Lazy)"   LazyStateC.runState
+  , testState "StateC (Strict)" StrictStateC.runState
+  , testState "StateT (Lazy)"   (fmap (fmap swap) . flip LazyStateT.runStateT)
+  , testState "StateT (Strict)" (fmap (fmap swap) . flip StrictStateT.runStateT)
+  , testState "RWST (Lazy)"     (runRWST LazyRWST.runRWST)
+  , testState "RWST (Strict)"   (runRWST StrictRWST.runRWST)
   ] where
+  testState :: Has (State A) sig m => String -> (forall a . (A -> m a -> PureC (A, a))) -> TestTree
+  testState name run = State.testState name run genA
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
