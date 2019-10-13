@@ -17,6 +17,8 @@ tests :: TestTree
 tests = testGroup "State.Strict.StateC"
   [ testProperty "get state" . forall (genA :. fn @A (Blind <$> gen genA) :. Nil) $
     \ a k -> get_state (~=) runState a (getBlind . apply k)
+  , testProperty "put update" . forall (genA :. genA :. fmap Blind (gen genA) :. Nil) $
+    \ a b m -> put_update (~=) runState a b (getBlind m)
   ]
 
 (~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
