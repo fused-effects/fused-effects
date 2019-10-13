@@ -6,6 +6,8 @@ module Reader
 import qualified Control.Carrier.Reader.Function as ReaderC
 import Control.Effect.Reader
 import qualified Control.Monad.Trans.Reader as ReaderT
+import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
+import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
 import Gen.Reader
 import Hedgehog
@@ -19,6 +21,8 @@ tests = testGroup "Reader"
   [ testReader "ReaderC" ReaderC.runReader         genA
   , testReader "(->)"    (fmap PureC . (&))        genA
   , testReader "ReaderT" (flip ReaderT.runReaderT) genA
+  , testReader "RWST (Lazy)"   (\ r m -> LazyRWST.runRWST   m r r >>= \ (a, _, ()) -> pure a) genA
+  , testReader "RWST (Strict)" (\ r m -> StrictRWST.runRWST m r r >>= \ (a, _, ()) -> pure a) genA
   ]
 
 
