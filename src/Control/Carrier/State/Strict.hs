@@ -111,7 +111,3 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) w
   eff (L (Put s k)) = StateC (\ _ -> runState s k)
   eff (R other)     = StateC (\ s -> eff (handle (s, ()) (uncurry runState) other))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> import Test.QuickCheck

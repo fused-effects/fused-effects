@@ -114,6 +114,3 @@ evalState s = fmap snd . runState s
 execState :: forall s m a . Functor m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 {-# INLINE[3] execState #-}
-
--- $setup
--- >>> import Test.QuickCheck
