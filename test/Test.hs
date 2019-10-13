@@ -13,10 +13,7 @@ import qualified NonDet.Church
 import qualified Reader.Base
 import qualified Reader.Function
 import qualified Reader.ReaderT
-import qualified State.Lazy
-import qualified State.StateT.Lazy
-import qualified State.StateT.Strict
-import qualified State.Strict
+import qualified State
 import qualified Writer
 import Test.Tasty
 
@@ -33,9 +30,6 @@ main = defaultMain $ testGroup "unit tests"
   , Reader.Base.tests
   , Reader.Function.tests
   , Reader.ReaderT.tests
-  , State.Lazy.tests
-  , State.StateT.Lazy.tests
-  , State.StateT.Strict.tests
-  , State.Strict.tests
+  , State.tests
   , Writer.tests
   ]
