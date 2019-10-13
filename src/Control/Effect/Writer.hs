@@ -71,7 +71,9 @@ listen m = send (Listen m (curry pure))
 
 -- | Run a computation, applying a function to its output and returning the pair of the modified output and its result.
 --
---   prop> run (runWriter (fst <$ tell (Sum a) <*> listens @(Sum Integer) (applyFun f) (tell (Sum b)))) === (Sum a <> Sum b, applyFun f (Sum b))
+-- @
+-- 'listens' f m = 'fmap' ('Data.Bifunctor.first' f) ('listen' m)
+-- @
 --
 -- @since 0.2.0.0
 listens :: Has (Writer w) sig m => (w -> b) -> m a -> m (b, a)
