@@ -92,7 +92,9 @@ runState s c = runStateC c s
 
 -- | Run a lazy 'State' effect, yielding the result value and discarding the final state.
 --
---   prop> run (evalState a (pure b)) === b
+-- @
+-- 'evalState' s m = 'fmap' 'snd' ('runState' s m)
+-- @
 --
 -- @since 1.0.0.0
 evalState :: forall s m a . Functor m => s -> StateC s m a -> m a
