@@ -15,10 +15,12 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty"
-  [ testEmpty "EmptyC" EmptyC.runEmpty  genA genB
-  , testEmpty "Maybe"  pure             genA genB
-  , testEmpty "MaybeT" MaybeT.runMaybeT genA genB
-  ]
+  [ testEmpty "EmptyC" EmptyC.runEmpty
+  , testEmpty "Maybe"  pure
+  , testEmpty "MaybeT" MaybeT.runMaybeT
+  ] where
+  testEmpty :: Has Empty sig m => String -> (forall a . m a -> PureC (Maybe a)) -> TestTree
+  testEmpty name run = Empty.testEmpty name run genA genB
 
 
 genEmpty :: Has Empty sig m => Gen a -> Gen (m a) -> Gen (m a)
