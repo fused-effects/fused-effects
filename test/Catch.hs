@@ -8,5 +8,5 @@ import Hedgehog
 import Hedgehog.Function
 import Hedgehog.Gen
 
-genCatch :: forall e m a sig . (Has (Catch e) sig m, Arg e, Vary e) => Gen e -> Gen (m a) -> Gen (m a)
-genCatch _ ma = choice [ fn @e ma >>= subterm ma . flip catchError . apply ]
+genCatch :: forall e m a sig . (Has (Catch e) sig m, Arg e, Vary e) => Gen e -> Gen a -> Gen (m a) -> Gen (m a)
+genCatch _ _ ma = choice [ fn @e ma >>= subterm ma . flip catchError . apply ]
