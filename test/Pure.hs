@@ -25,8 +25,8 @@ import qualified Hedgehog.Range as Range
 m1 ~= m2 = run m1 === run m2
 
 
-genM :: Applicative m => (Gen (m a) -> Gen (m a)) -> Gen a -> Gen (m a)
-genM with a = go where go = Gen.choice [ pure <$> a, with go ]
+genM :: Applicative m => (Gen a -> Gen (m a) -> Gen (m a)) -> Gen a -> Gen (m a)
+genM with a = go where go = Gen.choice [ pure <$> a, with a go ]
 
 
 genA :: Gen A
