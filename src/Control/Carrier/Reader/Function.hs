@@ -22,7 +22,11 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Reader' effect with the passed environment value.
 --
---   prop> run (runReader a (pure b)) === b
+-- @
+-- 'runReader' a 'ask' = 'pure' a
+-- 'runReader' a ('pure' b) = 'pure' b
+-- 'runReader' a ('local' f m) = 'runReader' (f a) m
+-- @
 --
 -- @since 1.0.0.0
 runReader :: r -> ReaderC r m a -> m a
