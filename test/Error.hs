@@ -18,12 +18,12 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Error" $
-  [ testError "ErrorC"  ErrorC.runError
-  , testError "Either"  pure
-  , testError "ExceptT" ExceptT.runExceptT
+  [ testGroup "ErrorC"  $ errorTests ErrorC.runError
+  , testGroup "Either"  $ errorTests pure
+  , testGroup "ExceptT" $ errorTests ExceptT.runExceptT
   ] where
-  testError :: Has (Error C) sig m => String -> (forall a . m a -> PureC (Either C a)) -> TestTree
-  testError name run = Error.testError name run genC genA genB
+  errorTests :: Has (Error C) sig m => (forall a . m a -> PureC (Either C a)) -> [TestTree]
+  errorTests run = Error.errorTests run genC genA genB
 
 
 genError :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> Gen a -> Gen (m a) -> Gen (m a)
@@ -33,8 +33,8 @@ genError e a ma = choice
   ]
 
 
-testError :: forall e m a b sig . (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => String -> (forall a . m a -> PureC (Either e a)) -> Gen e -> Gen a -> Gen b -> TestTree
-testError name runError e a b = testGroup name
+errorTests :: forall e m a b sig . (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => (forall a . m a -> PureC (Either e a)) -> Gen e -> Gen a -> Gen b -> [TestTree]
+errorTests runError e a b =
   [ testProperty "throwError annihilation" . forall (e :. fn @a (Blind <$> genM [genError e] b) :. Nil) $
     \ e k -> throwError_annihilation (~=) runError e (getBlind . apply k)
   , testProperty "catchError interception" . forall (e :. fn (Blind <$> genM [genError e] a) :. Nil) $
