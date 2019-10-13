@@ -6,13 +6,13 @@ module Writer.WriterT.Strict
 import Control.Effect.Writer
 import qualified Control.Monad.Trans.Writer.Strict as WriterT
 import Data.Tuple
+import Gen.Writer
 import Hedgehog.Function
 import Hedgehog.Gen
 import Hedgehog.Range
 import Pure
 import Test.Tasty
 import Test.Tasty.Hedgehog
-import Writer
 
 tests :: TestTree
 tests = testGroup "Writer.WriterT.Strict"

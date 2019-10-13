@@ -4,13 +4,13 @@ module Writer.Strict
 ) where
 
 import Control.Carrier.Writer.Strict
+import Gen.Writer
 import Hedgehog.Function
 import Hedgehog.Gen
 import Hedgehog.Range
 import Pure
 import Test.Tasty
 import Test.Tasty.Hedgehog
-import Writer
 
 tests :: TestTree
 tests = testGroup "Writer.Strict.WriterC"

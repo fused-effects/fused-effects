@@ -1,5 +1,5 @@
 {-# LANGUAGE FlexibleContexts, ScopedTypeVariables, TypeApplications #-}
-module Writer
+module Gen.Writer
 ( gen
 , genWriter
 ) where
