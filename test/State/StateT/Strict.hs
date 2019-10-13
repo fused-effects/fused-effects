@@ -13,8 +13,8 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "State.StateT.Strict"
-  [ testProperty "get state" . forall (genA :. fn @A (Blind <$> gen genA) :. Nil) $
+  [ testProperty "get state" . forall (genA :. fn @A (Blind <$> genM genState genA) :. Nil) $
     \ a k -> get_state (~=) (flip StateT.runStateT) a (getBlind . apply k)
-  , testProperty "put update" . forall (genA :. genA :. fmap Blind (gen genA) :. Nil) $
+  , testProperty "put update" . forall (genA :. genA :. fmap Blind (genM genState genA) :. Nil) $
     \ a b m -> put_update (~=) (flip StateT.runStateT) a b (getBlind m)
   ]
