@@ -146,6 +146,7 @@ test-suite test
     Throw
     Writer
     Writer.Strict
+    Writer.WriterT.Strict
   build-depends:
       base
     , fused-effects
