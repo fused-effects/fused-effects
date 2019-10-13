@@ -1,16 +1,12 @@
 {-# LANGUAGE FlexibleContexts, ScopedTypeVariables, TypeApplications #-}
 module Writer.Gen
-( gen
-, genWriter
+( genWriter
 ) where
 
 import Control.Effect.Writer
 import Hedgehog
 import Hedgehog.Function
 import Hedgehog.Gen
-
-gen :: (Has (Writer a) sig m, Arg a, Vary a) => Gen a -> Gen (m a)
-gen a = choice [ genWriter a (gen a), pure <$> a ]
 
 genWriter :: forall a m sig . (Has (Writer a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
 genWriter a ma = choice
