@@ -47,7 +47,9 @@ fresh = send (Fresh pure)
 
 -- | Reset the fresh counter after running a computation.
 --
---   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) === run (runFresh (replicateM n fresh))
+-- @
+-- 'resetFresh' 'fresh' '>>' m = m
+-- @
 --
 -- @since 0.1.0.0
 resetFresh :: Has Fresh sig m => m a -> m a
