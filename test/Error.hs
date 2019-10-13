@@ -11,7 +11,7 @@ import qualified Throw
 
 gen :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> Gen a -> Gen (m a)
 gen e a = choice
-  [ Throw.genThrow e
+  [ Throw.genThrow e a (gen e a)
   , Catch.genCatch e a (gen e a)
   , pure <$> a
   ]
