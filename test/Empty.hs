@@ -15,20 +15,20 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty"
-  [ testEmpty "EmptyC" EmptyC.runEmpty
-  , testEmpty "Maybe"  pure
-  , testEmpty "MaybeT" MaybeT.runMaybeT
+  [ testGroup "EmptyC" $ emptyTests EmptyC.runEmpty
+  , testGroup "Maybe"  $ emptyTests pure
+  , testGroup "MaybeT" $ emptyTests MaybeT.runMaybeT
   ] where
-  testEmpty :: Has Empty sig m => String -> (forall a . m a -> PureC (Maybe a)) -> TestTree
-  testEmpty name run = Empty.testEmpty name run genA genB
+  emptyTests :: Has Empty sig m => (forall a . m a -> PureC (Maybe a)) -> [TestTree]
+  emptyTests run = Empty.emptyTests run genA genB
 
 
 genEmpty :: Has Empty sig m => Gen a -> Gen (m a) -> Gen (m a)
 genEmpty _ _ = pure empty
 
 
-testEmpty :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => String -> (forall a . m a -> PureC (Maybe a)) -> Gen a -> Gen b -> TestTree
-testEmpty name runEmpty _ genB = testGroup name
+emptyTests :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC (Maybe a)) -> Gen a -> Gen b -> [TestTree]
+emptyTests runEmpty _ genB =
   [ testProperty "empty annihilation" . forall (fn @a (Blind <$> genM [genEmpty] genB) :. Nil) $
     \ k -> empty_annihilation (~=) runEmpty (getBlind . apply k)
   ]
