@@ -36,7 +36,7 @@ runWriter = runState mempty . runWriterC
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
 --
 -- @
--- 'execWriter' ('tell' w '*>' 'pure' a) = 'pure' w
+-- 'execWriter' m = 'fmap' 'fst' ('runWriter' m)
 -- @
 execWriter :: (Monoid w, Functor m) => WriterC w m a -> m w
 execWriter = fmap fst . runWriter
