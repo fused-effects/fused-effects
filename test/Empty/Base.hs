@@ -1,18 +1,10 @@
-{-# LANGUAGE TypeApplications #-}
 module Empty.Base
 ( tests
 ) where
 
-import Control.Effect.Empty
 import Empty
-import Hedgehog
-import Hedgehog.Function
 import Pure
 import Test.Tasty
-import Test.Tasty.Hedgehog
 
 tests :: TestTree
-tests = testGroup "Empty.Maybe"
-  [ testProperty "empty annihilation" . forall (fn @A (genM [genEmpty] genB) :. Nil) $
-    \ k -> empty_annihilation (===) (id @(Maybe _)) (apply k)
-  ]
+tests = testEmpty "Maybe" pure genA genB
