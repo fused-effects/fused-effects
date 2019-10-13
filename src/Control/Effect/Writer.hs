@@ -90,9 +90,3 @@ listens f m = send (Listen m (curry pure . f))
 censor :: Has (Writer w) sig m => (w -> w) -> m a -> m a
 censor f m = send (Censor f m pure)
 {-# INLINE censor #-}
-
-
--- $setup
--- >>> import Control.Carrier.Writer.Strict
--- >>> import Test.QuickCheck
--- >>> import Data.Semigroup (Semigroup(..), Sum(..))
