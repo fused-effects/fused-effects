@@ -15,6 +15,6 @@ tests = testGroup "Writer.Strict.WriterC"
   []
 
 
-gen :: (Carrier sig m, Effect sig, Monoid a) => Gen a -> Gen (WriterC a m a)
+gen :: Has (Writer a) sig m => Gen a -> Gen (m a)
 gen a = Gen.choice [ tell' <$> a, pure <$> a ] where
   tell' a = a <$ tell a
