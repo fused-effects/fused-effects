@@ -10,9 +10,7 @@ import qualified Error.Either
 import qualified Error.ExceptT
 import qualified Fusion
 import qualified NonDet.Church
-import qualified Reader.Base
-import qualified Reader.Function
-import qualified Reader.ReaderT
+import qualified Reader
 import qualified State
 import qualified Writer
 import Test.Tasty
@@ -27,9 +25,7 @@ main = defaultMain $ testGroup "unit tests"
   , Error.ExceptT.tests
   , Fusion.tests
   , NonDet.Church.tests
-  , Reader.Base.tests
-  , Reader.Function.tests
-  , Reader.ReaderT.tests
+  , Reader.tests
   , State.tests
   , Writer.tests
   ]

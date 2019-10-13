@@ -135,9 +135,6 @@ test-suite test
     NonDet.Church
     Pure
     Reader
-    Reader.Base
-    Reader.Function
-    Reader.ReaderT
     State
     Throw
     Writer
