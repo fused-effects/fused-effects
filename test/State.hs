@@ -27,7 +27,7 @@ tests = testGroup "State"
   , testState "RWST (Lazy)"     (runRWST LazyRWST.runRWST)   genA
   , testState "RWST (Strict)"   (runRWST StrictRWST.runRWST) genA
   ] where
-  runRWST f r m = (\ (a, s, ()) -> (s, a)) <$> f m r r
+  runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
 genState :: Has (State a) sig m => Gen a -> Gen (m a) -> Gen (m a)
