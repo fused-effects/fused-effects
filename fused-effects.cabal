@@ -139,6 +139,7 @@ test-suite test
     State.StateT.Lazy
     State.StateT.Strict
     State.Strict
+    Throw
     Writer
     Writer.Strict
   build-depends:

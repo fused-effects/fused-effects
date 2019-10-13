@@ -1,0 +1,2 @@
+module Throw
+() where
