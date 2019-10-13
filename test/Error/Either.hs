@@ -16,13 +16,13 @@ import Test.Tasty.Hedgehog
 tests :: TestTree
 tests = testGroup "Error.Either.ErrorC"
   [ testProperty "throwError annihilation" . forall (genC :. fn @A (gen genC genB) :. Nil) $
-    \ e k -> throwError_annihilation (~=) e (apply k)
+    \ e k -> throwError_annihilation (~=) runError e (apply k)
   , testProperty "catchError interception" . forall (genC :. fn @C (gen genC genA) :. Nil) $
-    \ e f -> catchError_interception (~=) e (apply f)
+    \ e f -> catchError_interception (~=) runError e (apply f)
   ]
 
-(~=) :: (Eq e, Eq a, Show e, Show a) => ErrorC e PureC a -> ErrorC e PureC a -> PropertyT IO ()
-m1 ~= m2 = run (runError m1) === run (runError m2)
+(~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
+m1 ~= m2 = run m1 === run m2
 
 
 gen :: (Carrier sig m, Effect sig) => Gen e -> Gen a -> Gen (ErrorC e m a)

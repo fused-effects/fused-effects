@@ -42,5 +42,5 @@ throwError = send . Throw
 -- | 'throwError' annihilates '>>='.
 --
 -- @since 1.0.0.0
-throwError_annihilation :: Has (Throw e) sig m => (m b -> m b -> prop) -> e -> (a -> m b) -> prop
-throwError_annihilation (===) e k = (throwError e >>= k) === throwError e
+throwError_annihilation :: Has (Throw e) sig m => (c -> c -> prop) -> (m b -> c) -> e -> (a -> m b) -> prop
+throwError_annihilation (===) runError e k = runError (throwError e >>= k) === runError (throwError e)
