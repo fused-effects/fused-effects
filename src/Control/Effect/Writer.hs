@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, RankNTypes, StandaloneDeriving #-}
 
 {- | An effect allowing writes to an accumulated quantity alongside a computed value. A 'Writer' @w@ effect keeps track of a monoidal datum of type @w@ and strictly appends to that monoidal value with the 'tell' effect. Writes to that value can be detected and intercepted with the 'listen' and 'censor' effects.
 
@@ -21,12 +21,14 @@ module Control.Effect.Writer
 , censor
   -- * Properties
 , tell_append
+, listen_eavesdrop
   -- * Re-exports
 , Carrier
 , Has
 , run
 ) where
 
+import Control.Arrow ((&&&))
 import Control.Carrier
 import Data.Bifunctor (first)
 
@@ -64,7 +66,7 @@ tell w = send (Tell w (pure ()))
 -- | Run a computation, returning the pair of its output and its result.
 --
 -- @
--- runWriter ('listen' m) = 'fmap' ('fst' 'Control.Arrow.&&&' 'id') (runWriter m)
+-- runWriter ('listen' m) = 'fmap' ('fst' '&&&' 'id') (runWriter m)
 -- @
 --
 -- @since 0.2.0.0
@@ -102,3 +104,9 @@ censor f m = send (Censor f m pure)
 -- @since 1.0.0.0
 tell_append :: (Has (Writer w) sig m, Monoid w, Functor n) => (n (w, b) -> n (w, b) -> prop) -> (m a -> n (w, b)) -> w -> m a -> prop
 tell_append (===) runWriter w m = runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
+
+-- | 'listen' eavesdrops on written output.
+--
+-- @since 1.0.0.0
+listen_eavesdrop :: (Has (Writer w) sig m, Functor n, Eq a, Eq w) => (forall a . Eq a => n a -> n a -> prop) -> (forall a . m a -> n (w, a)) -> m a -> prop
+listen_eavesdrop (===) runWriter m = runWriter (listen m) === fmap (fst &&& id) (runWriter m)
