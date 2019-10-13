@@ -123,6 +123,7 @@ test-suite test
   main-is:             Test.hs
   other-modules:
     Catch
+    Empty
     Empty.Base
     Empty.Maybe
     Error
