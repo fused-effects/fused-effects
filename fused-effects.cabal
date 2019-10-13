@@ -145,10 +145,6 @@ test-suite test
     State.Strict
     Throw
     Writer
-    Writer.Gen
-    Writer.Strict
-    Writer.WriterT.Lazy
-    Writer.WriterT.Strict
   build-depends:
       base
     , fused-effects
