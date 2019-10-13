@@ -22,7 +22,12 @@ import Data.Bifunctor (first)
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
---   prop> run (runTrace (trace a *> trace b *> pure c)) === ([a, b], c)
+-- @
+-- 'runTrace' ('pure' a) = 'pure' ([], a)
+-- @
+-- @
+-- 'runTrace' ('trace' s) = 'pure' ([s], ())
+-- @
 --
 -- @since 1.0.0.0
 runTrace :: Functor m => TraceC m a -> m ([String], a)
@@ -35,7 +40,3 @@ newtype TraceC m a = TraceC { runTraceC :: StateC [String] m a }
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceC m) where
   eff (L (Trace m k)) = TraceC (modify (m :)) *> k
   eff (R other)       = TraceC (eff (R (handleCoercible other)))
-
-
--- $setup
--- >>> import Test.QuickCheck
