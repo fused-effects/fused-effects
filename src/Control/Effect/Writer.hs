@@ -22,6 +22,7 @@ module Control.Effect.Writer
   -- * Properties
 , tell_append
 , listen_eavesdrop
+, censor_revision
   -- * Re-exports
 , Carrier
 , Has
@@ -110,3 +111,9 @@ tell_append (===) runWriter w m = runWriter (tell w >> m) === fmap (first (mappe
 -- @since 1.0.0.0
 listen_eavesdrop :: (Has (Writer w) sig m, Functor n, Eq a, Eq w) => (forall a . Eq a => n a -> n a -> prop) -> (forall a . m a -> n (w, a)) -> m a -> prop
 listen_eavesdrop (===) runWriter m = runWriter (listen m) === fmap (fst &&& id) (runWriter m)
+
+-- | 'censor' revises written output.
+--
+-- @since 1.0.0.0
+censor_revision :: (Has (Writer w) sig m, Functor n, Eq a, Eq w) => (forall a . Eq a => n a -> n a -> prop) -> (forall a . m a -> n (w, a)) -> (w -> w) -> m a -> prop
+censor_revision (===) runWriter f m = runWriter (censor f m) === fmap (first f) (runWriter m)
