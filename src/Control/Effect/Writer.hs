@@ -60,7 +60,9 @@ tell w = send (Tell w (pure ()))
 
 -- | Run a computation, returning the pair of its output and its result.
 --
---   prop> run (runWriter (fst <$ tell (Sum a) <*> listen @(Sum Integer) (tell (Sum b)))) === (Sum a <> Sum b, Sum b)
+-- @
+-- runWriter ('listen' m) = ((,) '.' 'fst' '<*>' 'id') '<$>' runWriter m
+-- @
 --
 -- @since 0.2.0.0
 listen :: Has (Writer w) sig m => m a -> m (w, a)
