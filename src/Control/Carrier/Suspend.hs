@@ -19,4 +19,4 @@ instance MonadTrans (SuspendC eff) where
   lift m = SuspendC (lift m)
 
 data SomeEffect eff
-  = forall a . SomeError (eff a)
+  = forall a . SomeEffect (eff a)
