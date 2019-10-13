@@ -37,7 +37,9 @@ instance Effect Fresh where
 
 -- | Produce a fresh (i.e. unique) 'Int'.
 --
---   prop> run (runFresh (replicateM n fresh)) === nub (run (runFresh (replicateM n fresh)))
+-- @
+-- 'fresh' ≠ 'fresh' '>>' 'fresh'
+-- @
 --
 -- @since 0.1.0.0
 fresh :: Has Fresh sig m => m Int
