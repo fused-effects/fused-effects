@@ -25,6 +25,8 @@ import Control.Monad.Trans.Maybe
 --
 -- @
 -- 'runEmpty' 'empty' = 'pure' 'Nothing'
+-- @
+-- @
 -- 'runEmpty' ('pure' a) = 'Just' a
 -- @
 --

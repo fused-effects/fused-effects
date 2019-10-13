@@ -84,7 +84,11 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) w
 --
 -- @
 -- 'runState' s ('pure' a) = 'pure' (s, a)
+-- @
+-- @
 -- 'runState' s 'get' = 'pure' (s, s)
+-- @
+-- @
 -- 'runState' s ('put' t) = 'pure' (t, ())
 -- @
 --

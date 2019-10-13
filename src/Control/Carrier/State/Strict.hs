@@ -27,7 +27,11 @@ import Control.Monad.Trans.Class
 --
 -- @
 -- 'runState' s ('pure' a) = 'pure' (s, a)
+-- @
+-- @
 -- 'runState' s 'get' = 'pure' (s, s)
+-- @
+-- @
 -- 'runState' s ('put' t) = 'pure' (t, ())
 -- @
 --

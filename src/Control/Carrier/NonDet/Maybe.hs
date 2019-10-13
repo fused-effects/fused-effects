@@ -24,7 +24,11 @@ import Control.Monad.Trans.Maybe
 --
 -- @
 -- 'runNonDet' 'empty' = pure 'Nothing'
+-- @
+-- @
 -- 'runNonDet' ('pure' a) = 'pure' ('Just' a)
+-- @
+-- @
 -- 'runNonDet' ('foldMapA' 'pure' [1..]) = 'pure' ('Just' 1)
 -- @
 --

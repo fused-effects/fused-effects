@@ -22,6 +22,8 @@ import Control.Monad.Trans.Class
 --
 -- @
 -- 'runTrace' ('trace' s) = 'pure' ()
+-- @
+-- @
 -- 'runTrace' ('pure' a) = 'pure' a
 -- @
 --

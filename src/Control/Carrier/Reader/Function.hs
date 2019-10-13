@@ -24,7 +24,11 @@ import Control.Monad.Trans.Class
 --
 -- @
 -- 'runReader' a 'ask' = 'pure' a
+-- @
+-- @
 -- 'runReader' a ('pure' b) = 'pure' b
+-- @
+-- @
 -- 'runReader' a ('local' f m) = 'runReader' (f a) m
 -- @
 --

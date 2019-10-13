@@ -23,6 +23,8 @@ import Control.Monad.Trans.Class
 --
 -- @
 -- 'runFail' ('pure' a) = 'pure' ('Right' a)
+-- @
+-- @
 -- 'runFail' ('fail' s) = 'pure' ('Left' s)
 -- @
 --

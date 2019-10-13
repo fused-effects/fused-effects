@@ -28,6 +28,8 @@ import Control.Monad.Trans.Class
 --
 -- @
 -- 'runWriter' ('tell' w) = 'pure' (w, ())
+-- @
+-- @
 -- 'runWriter' ('pure' a) = 'pure' ('mempty', a)
 -- @
 runWriter :: Monoid w => WriterC w m a -> m (w, a)
