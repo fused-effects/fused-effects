@@ -8,10 +8,10 @@ import qualified Control.Carrier.Reader.Function as ReaderC
 import Control.Effect.Reader
 import qualified Control.Monad.Trans.Reader as ReaderT
 import Data.Function ((&))
-import Pure
 import Hedgehog
 import Hedgehog.Function
 import Hedgehog.Gen
+import Pure
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
