@@ -11,5 +11,5 @@ import Test.Tasty
 import Writer.Gen
 
 tests :: TestTree
-tests = testGroup "Writer.Strict.WriterC" (writerTests runWriter genW) where
+tests = testGroup "WriterC (Strict)" (writerTests runWriter genW) where
   genW = list (linear 0 10) genA

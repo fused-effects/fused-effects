@@ -12,6 +12,6 @@ import Test.Tasty
 import Writer.Gen
 
 tests :: TestTree
-tests = testGroup "Writer.WriterT.Lazy" (writerTests runWriter genW) where
+tests = testGroup "WriterT (Lazy)" (writerTests runWriter genW) where
   genW = list (linear 0 10) genA
   runWriter = fmap swap . WriterT.runWriterT
