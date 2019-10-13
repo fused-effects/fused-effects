@@ -19,6 +19,8 @@ module Control.Effect.Writer
 , listen
 , listens
 , censor
+  -- * Properties
+, tell_append
   -- * Re-exports
 , Carrier
 , Has
@@ -26,6 +28,7 @@ module Control.Effect.Writer
 ) where
 
 import Control.Carrier
+import Data.Bifunctor (first)
 
 -- | @since 0.1.0.0
 data Writer w m k
@@ -50,7 +53,7 @@ instance Effect (Writer w) where
 -- | Write a value to the log.
 --
 -- @
--- runWriter ('tell' w '>>' m) = 'Data.Bifunctor.first' ('mappend' w) '<$>' runWriter m
+-- runWriter ('tell' w '>>' m) = 'first' ('mappend' w) '<$>' runWriter m
 -- @
 --
 -- @since 0.1.0.0
@@ -72,7 +75,7 @@ listen m = send (Listen m (curry pure))
 -- | Run a computation, applying a function to its output and returning the pair of the modified output and its result.
 --
 -- @
--- 'listens' f m = 'fmap' ('Data.Bifunctor.first' f) ('listen' m)
+-- 'listens' f m = 'fmap' ('first' f) ('listen' m)
 -- @
 --
 -- @since 0.2.0.0
@@ -83,10 +86,19 @@ listens f m = send (Listen m (curry pure . f))
 -- | Run a computation, modifying its output with the passed function.
 --
 -- @
--- runWriter ('censor' f m) = 'fmap' ('Data.Bifunctor.first' f) (runWriter m)
+-- runWriter ('censor' f m) = 'fmap' ('first' f) (runWriter m)
 -- @
 --
 -- @since 0.2.0.0
 censor :: Has (Writer w) sig m => (w -> w) -> m a -> m a
 censor f m = send (Censor f m pure)
 {-# INLINE censor #-}
+
+
+-- Properties
+
+-- | 'tell' appends a value to the log.
+--
+-- @since 1.0.0.0
+tell_append :: (Has (Writer w) sig m, Monoid w, Functor n) => (n (w, b) -> n (w, b) -> prop) -> (m a -> n (w, b)) -> w -> m a -> prop
+tell_append (===) runWriter w m = runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
