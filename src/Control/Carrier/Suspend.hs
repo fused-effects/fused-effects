@@ -1,6 +1,7 @@
 {-# LANGUAGE ExistentialQuantification, GeneralizedNewtypeDeriving #-}
 module Control.Carrier.Suspend
-( SuspendC(..)
+( runSuspend
+, SuspendC(..)
 , SomeEffect(..)
 ) where
 
@@ -11,6 +12,9 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+
+runSuspend :: SuspendC eff m a -> m (Either (SomeEffect (eff m)) a)
+runSuspend = runError . runSuspendC
 
 newtype SuspendC eff m a = SuspendC { runSuspendC :: ErrorC (SomeEffect (eff m)) m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
