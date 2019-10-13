@@ -115,5 +115,5 @@ listen_eavesdrop (===) runWriter m = runWriter (listen m) === fmap (fst &&& id) 
 -- | 'censor' revises written output.
 --
 -- @since 1.0.0.0
-censor_revision :: (Has (Writer w) sig m, Functor n) => (n (w, a) -> n (w, a) -> prop) -> (forall a . m a -> n (w, a)) -> (w -> w) -> m a -> prop
+censor_revision :: (Has (Writer w) sig m, Functor n) => (n (w, a) -> n (w, a) -> prop) -> (m a -> n (w, a)) -> (w -> w) -> m a -> prop
 censor_revision (===) runWriter f m = runWriter (censor f m) === fmap (first f) (runWriter m)
