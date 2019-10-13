@@ -133,7 +133,6 @@ test-suite test
     Error.ExceptT
     Fusion
     Gen.Reader
-    Gen.State
     NonDet.Church
     Pure
     Reader
