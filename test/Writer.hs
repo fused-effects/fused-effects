@@ -24,6 +24,7 @@ tests = testGroup "Writer"
   ] where
     genW = list (linear 0 10) genA
 
+
 genWriter :: forall a m sig . (Has (Writer a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
 genWriter a ma = choice
   [ tell' <$> a
