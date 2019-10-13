@@ -20,7 +20,10 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Trace' effect, ignoring all traces.
 --
---   prop> run (runTrace (trace a *> pure b)) === b
+-- @
+-- 'runTrace' ('trace' s) = 'pure' ()
+-- 'runTrace' ('pure' a) = 'pure' a
+-- @
 --
 -- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
@@ -38,7 +41,3 @@ instance Carrier sig m => Carrier (Trace :+: sig) (TraceC m) where
   eff (L trace) = traceCont trace
   eff (R other) = TraceC (eff (handleCoercible other))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> import Test.QuickCheck
