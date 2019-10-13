@@ -3,6 +3,7 @@
 module Pure
 ( module Control.Carrier.Pure
 , (~=)
+, genM
 , genA
 , genB
 , genC
@@ -22,6 +23,10 @@ import qualified Hedgehog.Range as Range
 
 (~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
 m1 ~= m2 = run m1 === run m2
+
+
+genM :: Applicative m => (Gen (m a) -> Gen (m a)) -> Gen a -> Gen (m a)
+genM with a = go where go = Gen.choice [ pure <$> a, with go ]
 
 
 genA :: Gen A
