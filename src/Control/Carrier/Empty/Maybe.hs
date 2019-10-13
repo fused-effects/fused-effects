@@ -46,7 +46,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Empty :+: sig) (EmptyC m) where
   eff (L Empty) = EmptyC (MaybeT (pure Nothing))
   eff (R other) = EmptyC (MaybeT (eff (handle (Just ()) (maybe (pure Nothing) runEmpty) other)))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> import Test.QuickCheck
