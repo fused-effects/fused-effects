@@ -19,12 +19,14 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Reader"
-  [ testReader "ReaderC" ReaderC.runReader         genA
-  , testReader "(->)"    (fmap PureC . (&))        genA
-  , testReader "ReaderT" (flip ReaderT.runReaderT) genA
-  , testReader "RWST (Lazy)"   (runRWST LazyRWST.runRWST)   genA
-  , testReader "RWST (Strict)" (runRWST StrictRWST.runRWST) genA
+  [ testReader "ReaderC" ReaderC.runReader
+  , testReader "(->)"    (fmap PureC . (&))
+  , testReader "ReaderT" (flip ReaderT.runReaderT)
+  , testReader "RWST (Lazy)"   (runRWST LazyRWST.runRWST)
+  , testReader "RWST (Strict)" (runRWST StrictRWST.runRWST)
   ] where
+  testReader :: Has (Reader A) sig m => String -> (forall a . A -> m a -> PureC a) -> TestTree
+  testReader name run = Reader.testReader name run genA
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
