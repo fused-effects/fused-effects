@@ -12,7 +12,7 @@ import Hedgehog.Range
 import Pure
 import Test.Tasty
 import Test.Tasty.Hedgehog
-import Writer
+import Writer.Gen
 
 tests :: TestTree
 tests = testGroup "Writer.WriterT.Strict"
