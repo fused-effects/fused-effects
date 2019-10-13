@@ -5,6 +5,8 @@ module Writer
 
 import qualified Control.Carrier.Writer.Strict as StrictWriterC
 import Control.Effect.Writer
+import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
+import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Tuple (swap)
@@ -21,8 +23,11 @@ tests = testGroup "Writer"
   [ testWriter "WriterC (Strict)" StrictWriterC.runWriter genW
   , testWriter "WriterT (Lazy)"   (fmap swap . LazyWriterT.runWriterT)   genW
   , testWriter "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT) genW
+  , testWriter "RWST (Lazy)"      (runRWST LazyRWST.runRWST)   genW
+  , testWriter "RWST (Strict)"    (runRWST StrictRWST.runRWST) genW
   ] where
     genW = list (linear 0 10) genA
+    runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
 genWriter :: forall a m sig . (Has (Writer a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
