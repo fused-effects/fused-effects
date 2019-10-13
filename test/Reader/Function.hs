@@ -3,9 +3,7 @@ module Reader.Function
 ( tests
 ) where
 
-import Control.Carrier
 import Control.Carrier.Reader.Function
-import Hedgehog
 import Hedgehog.Function
 import Pure
 import qualified Reader
@@ -19,6 +17,3 @@ tests = testGroup "Reader.Function.ReaderC"
   , testProperty "local modification" . forall (genA :. fn @A genA :. fmap Blind (Reader.gen genA) :. Nil) $
     \ a f m -> local_modification (~=) runReader a (apply f) (getBlind m)
   ]
-
-(~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
-m1 ~= m2 = run m1 === run m2

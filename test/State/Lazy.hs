@@ -3,9 +3,7 @@ module State.Lazy
 ( tests
 ) where
 
-import Control.Carrier
 import Control.Carrier.State.Lazy
-import Hedgehog
 import Hedgehog.Function
 import Pure
 import qualified State
@@ -19,6 +17,3 @@ tests = testGroup "State.Lazy.StateC"
   , testProperty "put update" . forall (genA :. genA :. fmap Blind (State.gen genA) :. Nil) $
     \ a b m -> put_update (~=) runState a b (getBlind m)
   ]
-
-(~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
-m1 ~= m2 = run m1 === run m2

@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-identities #-}
 module Pure
 ( module Control.Carrier.Pure
+, (~=)
 , gen
 , genA
 , genB
@@ -19,6 +20,10 @@ import Hedgehog
 import Hedgehog.Function hiding (C)
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
+
+(~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
+m1 ~= m2 = run m1 === run m2
+
 
 gen :: Applicative m => Gen a -> Gen (m a)
 gen = fmap pure

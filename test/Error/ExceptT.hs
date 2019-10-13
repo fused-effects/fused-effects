@@ -3,11 +3,9 @@ module Error.ExceptT
 ( tests
 ) where
 
-import Control.Carrier
 import Control.Effect.Error
 import qualified Control.Monad.Trans.Except as Except
 import qualified Error
-import Hedgehog
 import Hedgehog.Function hiding (C)
 import Pure hiding (gen)
 import Test.Tasty
@@ -20,6 +18,3 @@ tests = testGroup "Error.ExceptT"
   , testProperty "catchError interception" . forall (genC :. fn @C (Error.gen genC genA) :. Nil) $
     \ e f -> catchError_interception (~=) (Except.runExceptT @C) e (apply f)
   ]
-
-(~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
-m1 ~= m2 = run m1 === run m2

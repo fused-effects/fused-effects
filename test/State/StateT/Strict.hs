@@ -3,10 +3,8 @@ module State.StateT.Strict
 ( tests
 ) where
 
-import Control.Carrier
 import Control.Effect.State
 import qualified Control.Monad.Trans.State.Strict as StateT
-import Hedgehog
 import Hedgehog.Function
 import Pure
 import qualified State
@@ -20,6 +18,3 @@ tests = testGroup "State.StateT.Strict"
   , testProperty "put update" . forall (genA :. genA :. fmap Blind (State.gen genA) :. Nil) $
     \ a b m -> put_update (~=) (flip StateT.runStateT) a b (getBlind m)
   ]
-
-(~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
-m1 ~= m2 = run m1 === run m2

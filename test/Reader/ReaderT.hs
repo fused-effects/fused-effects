@@ -5,7 +5,6 @@ module Reader.ReaderT
 
 import Control.Effect.Reader
 import qualified Control.Monad.Trans.Reader as Reader
-import Hedgehog
 import Hedgehog.Function
 import Pure
 import qualified Reader
@@ -19,6 +18,3 @@ tests = testGroup "Reader.ReaderT"
   , testProperty "local modification" . forall (genA :. fn @A genA :. fmap Blind (Reader.gen genA) :. Nil) $
     \ a f m -> local_modification (~=) (flip Reader.runReaderT) a (apply f) (getBlind m)
   ]
-
-(~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
-m1 ~= m2 = run m1 === run m2
