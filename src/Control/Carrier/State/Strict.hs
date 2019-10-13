@@ -25,7 +25,11 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'State' effect starting from the passed value.
 --
---   prop> run (runState a (pure b)) === (a, b)
+-- @
+-- 'runState' s ('pure' a) = 'pure' (s, a)
+-- 'runState' s 'get' = 'pure' (s, s)
+-- 'runState' s ('put' t) = 'pure' (t, ())
+-- @
 --
 -- @since 1.0.0.0
 runState :: s -> StateC s m a -> m (s, a)

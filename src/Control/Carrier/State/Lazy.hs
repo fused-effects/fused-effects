@@ -82,8 +82,11 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) w
 --   More programs terminate with lazy state than strict state, but injudicious
 --   use of lazy state may lead to thunk buildup.
 --
---   prop> run (runState a (pure b)) === (a, b)
---   prop> take 5 . snd . run $ runState () (traverse pure [1..]) === [1,2,3,4,5]
+-- @
+-- 'runState' s ('pure' a) = 'pure' (s, a)
+-- 'runState' s 'get' = 'pure' (s, s)
+-- 'runState' s ('put' t) = 'pure' (t, ())
+-- @
 --
 -- @since 1.0.0.0
 runState :: s -> StateC s m a -> m (s, a)
