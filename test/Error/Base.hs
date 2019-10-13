@@ -7,7 +7,7 @@ import Control.Effect.Error
 import qualified Error
 import Hedgehog
 import Hedgehog.Function hiding (C)
-import Pure hiding (gen)
+import Pure
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
