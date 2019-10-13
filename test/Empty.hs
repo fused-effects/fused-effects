@@ -1,15 +1,25 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Empty
 ( genEmpty
-, testEmpty
+, tests
 ) where
 
+import qualified Control.Carrier.Empty.Maybe as EmptyC
 import Control.Effect.Empty
+import qualified Control.Monad.Trans.Maybe as MaybeT
 import Hedgehog
 import Hedgehog.Function
 import Pure
 import Test.Tasty
 import Test.Tasty.Hedgehog
+
+tests :: TestTree
+tests = testGroup "Empty"
+  [ testEmpty "EmptyC" EmptyC.runEmpty  genA genB
+  , testEmpty "Maybe"  pure             genA genB
+  , testEmpty "MaybeT" MaybeT.runMaybeT genA genB
+  ]
+
 
 genEmpty :: Has Empty sig m => Gen a -> Gen (m a) -> Gen (m a)
 genEmpty _ _ = pure empty
