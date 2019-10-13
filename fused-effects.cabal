@@ -126,6 +126,7 @@ test-suite test
     Empty
     Empty.Base
     Empty.Maybe
+    Empty.MaybeT
     Error
     Error.Base
     Error.Either
