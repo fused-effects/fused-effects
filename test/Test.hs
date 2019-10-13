@@ -17,9 +17,7 @@ import qualified State.Lazy
 import qualified State.StateT.Lazy
 import qualified State.StateT.Strict
 import qualified State.Strict
-import qualified Writer.Strict
-import qualified Writer.WriterT.Lazy
-import qualified Writer.WriterT.Strict
+import qualified Writer
 import Test.Tasty
 
 main :: IO ()
@@ -39,7 +37,5 @@ main = defaultMain $ testGroup "unit tests"
   , State.StateT.Lazy.tests
   , State.StateT.Strict.tests
   , State.Strict.tests
-  , Writer.Strict.tests
-  , Writer.WriterT.Lazy.tests
-  , Writer.WriterT.Strict.tests
+  , Writer.tests
   ]

@@ -144,6 +144,7 @@ test-suite test
     State.StateT.Strict
     State.Strict
     Throw
+    Writer
     Writer.Gen
     Writer.Strict
     Writer.WriterT.Lazy
