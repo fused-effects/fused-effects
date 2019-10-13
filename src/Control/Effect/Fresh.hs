@@ -54,10 +54,3 @@ fresh = send (Fresh pure)
 -- @since 0.1.0.0
 resetFresh :: Has Fresh sig m => m a -> m a
 resetFresh m = send (Reset m pure)
-
-
--- $setup
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Fresh.Strict
--- >>> import Control.Monad (replicateM)
--- >>> import Data.List (nub)
