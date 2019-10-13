@@ -21,6 +21,13 @@ import System.IO
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
 --
+-- @
+-- 'runTrace' ('trace' s) = 'liftIO' ('putStrLn' s)
+-- @
+-- @
+-- 'runTrace' ('pure' a) = 'pure' a
+-- @
+--
 -- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
 runTrace = runTraceC
