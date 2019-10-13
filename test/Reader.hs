@@ -22,9 +22,10 @@ tests = testGroup "Reader"
   [ testReader "ReaderC" ReaderC.runReader         genA
   , testReader "(->)"    (fmap PureC . (&))        genA
   , testReader "ReaderT" (flip ReaderT.runReaderT) genA
-  , testReader "RWST (Lazy)"   (\ r m -> (\ (a, _, ()) -> a) <$> LazyRWST.runRWST   m r r) genA
-  , testReader "RWST (Strict)" (\ r m -> (\ (a, _, ()) -> a) <$> StrictRWST.runRWST m r r) genA
-  ]
+  , testReader "RWST (Lazy)"   (runRWST LazyRWST.runRWST)   genA
+  , testReader "RWST (Strict)" (runRWST StrictRWST.runRWST) genA
+  ] where
+  runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
 genReader :: (Has (Reader a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
