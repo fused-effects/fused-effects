@@ -23,6 +23,8 @@ import Data.Bifunctor (first)
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
 --   prop> run (runTrace (trace a *> trace b *> pure c)) === ([a, b], c)
+--
+-- @since 1.0.0.0
 runTrace :: Functor m => TraceC m a -> m ([String], a)
 runTrace = fmap (first reverse) . runState [] . runTraceC
 
