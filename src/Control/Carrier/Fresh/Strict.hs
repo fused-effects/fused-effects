@@ -21,8 +21,12 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Fresh' effect counting up from 0.
 --
---   prop> run (runFresh (replicateM n fresh)) === [0..pred n]
---   prop> run (runFresh (replicateM n fresh *> pure b)) === b
+-- @
+-- 'runFresh' ('pure' a) = 'pure' a
+-- @
+-- @
+-- 'runFresh' 'fresh' = 'pure' 0
+-- @
 --
 -- @since 0.1.0.0
 runFresh :: Functor m => FreshC m a -> m a
@@ -44,8 +48,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
     runFreshC (k a)
   eff (R other)       = FreshC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> import Test.QuickCheck
--- >>> import Control.Monad (replicateM)
