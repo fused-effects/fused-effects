@@ -49,7 +49,9 @@ instance Effect (Writer w) where
 
 -- | Write a value to the log.
 --
---   prop> fst (run (runWriter (mapM_ (tell . Sum) (0 : ws)))) === foldMap Sum ws
+-- @
+-- runWriter ('tell' w '>>' m) = 'Data.Bifunctor.first' ('mappend' w) '<$>' runWriter m
+-- @
 --
 -- @since 0.1.0.0
 tell :: Has (Writer w) sig m => w -> m ()
