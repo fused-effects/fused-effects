@@ -23,8 +23,10 @@ import Control.Monad.Trans.Maybe
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --
---   prop> run (runEmpty empty)    === Nothing
---   prop> run (runEmpty (pure a)) === Just a
+-- @
+-- 'runEmpty' 'empty' = 'pure' 'Nothing'
+-- 'runEmpty' ('pure' a) = 'Just' a
+-- @
 --
 -- @since 1.0.0.0
 runEmpty :: EmptyC m a -> m (Maybe a)
