@@ -20,12 +20,14 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testWriter "WriterC (Strict)" StrictWriterC.runWriter genW
-  , testWriter "WriterT (Lazy)"   (fmap swap . LazyWriterT.runWriterT)   genW
-  , testWriter "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT) genW
-  , testWriter "RWST (Lazy)"      (runRWST LazyRWST.runRWST)   genW
-  , testWriter "RWST (Strict)"    (runRWST StrictRWST.runRWST) genW
+  [ testWriter "WriterC (Strict)" StrictWriterC.runWriter
+  , testWriter "WriterT (Lazy)"   (fmap swap . LazyWriterT.runWriterT)
+  , testWriter "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT)
+  , testWriter "RWST (Lazy)"      (runRWST LazyRWST.runRWST)
+  , testWriter "RWST (Strict)"    (runRWST StrictRWST.runRWST)
   ] where
+  testWriter :: Has (Writer [A]) sig m => String -> (forall a . m a -> PureC ([A], a)) -> TestTree
+  testWriter name run = Writer.testWriter name run genW
   genW = list (linear 0 10) genA
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
