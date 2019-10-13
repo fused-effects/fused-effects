@@ -20,14 +20,14 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testWriter "WriterC (Strict)" StrictWriterC.runWriter
-  , testWriter "WriterT (Lazy)"   (fmap swap . LazyWriterT.runWriterT)
-  , testWriter "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT)
-  , testWriter "RWST (Lazy)"      (runRWST LazyRWST.runRWST)
-  , testWriter "RWST (Strict)"    (runRWST StrictRWST.runRWST)
+  [ testGroup "WriterC (Strict)" $ writerTests StrictWriterC.runWriter
+  , testGroup "WriterT (Lazy)"   $ writerTests (fmap swap . LazyWriterT.runWriterT)
+  , testGroup "WriterT (Strict)" $ writerTests (fmap swap . StrictWriterT.runWriterT)
+  , testGroup "RWST (Lazy)"      $ writerTests (runRWST LazyRWST.runRWST)
+  , testGroup "RWST (Strict)"    $ writerTests (runRWST StrictRWST.runRWST)
   ] where
-  testWriter :: Has (Writer [A]) sig m => String -> (forall a . m a -> PureC ([A], a)) -> TestTree
-  testWriter name run = Writer.testWriter name run genW
+  writerTests :: Has (Writer [A]) sig m => (forall a . m a -> PureC ([A], a)) -> [TestTree]
+  writerTests run = Writer.writerTests run genW
   genW = list (linear 0 10) genA
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
@@ -41,8 +41,8 @@ genWriter a ma = choice
   tell' a = a <$ tell a
 
 
-testWriter :: (Has (Writer w) sig m, Arg w, Eq w, Monoid w, Show w, Vary w) => String -> (forall a . (m a -> PureC (w, a))) -> Gen w -> TestTree
-testWriter name runWriter genW = testGroup name
+writerTests :: (Has (Writer w) sig m, Arg w, Eq w, Monoid w, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> Gen w -> [TestTree]
+writerTests runWriter genW =
   [ testProperty "tell append" . forall (genW :. fmap Blind (genM [genWriter] genW) :. Nil) $
     \ w m -> tell_append (~=) runWriter w (getBlind m)
   , testProperty "listen eavesdrop" . forall (fmap Blind (genM [genWriter] genW) :. Nil) $
