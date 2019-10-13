@@ -23,6 +23,8 @@ import Control.Monad.Trans.Class
 --
 --   prop> run (runFresh (replicateM n fresh)) === [0..pred n]
 --   prop> run (runFresh (replicateM n fresh *> pure b)) === b
+--
+-- @since 0.1.0.0
 runFresh :: Functor m => FreshC m a -> m a
 runFresh = evalState 0 . runFreshC
 
