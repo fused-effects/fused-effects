@@ -109,7 +109,7 @@ tell_append (===) runWriter w m = runWriter (tell w >> m) === fmap (first (mappe
 -- | 'listen' eavesdrops on written output.
 --
 -- @since 1.0.0.0
-listen_eavesdrop :: (Has (Writer w) sig m, Functor n, Eq a, Eq w) => (forall a . Eq a => n a -> n a -> prop) -> (forall a . m a -> n (w, a)) -> m a -> prop
+listen_eavesdrop :: (Has (Writer w) sig m, Functor n) => (n (w, (w, a)) -> n (w, (w, a)) -> prop) -> (forall a . m a -> n (w, a)) -> m a -> prop
 listen_eavesdrop (===) runWriter m = runWriter (listen m) === fmap (fst &&& id) (runWriter m)
 
 -- | 'censor' revises written output.
