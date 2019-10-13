@@ -20,8 +20,8 @@ import Hedgehog.Function hiding (C)
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
-gen :: Gen a -> Gen (PureC a)
-gen = fmap PureC
+gen :: Applicative m => Gen a -> Gen (m a)
+gen = fmap pure
 
 
 genA :: Gen A
