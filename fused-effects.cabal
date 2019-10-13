@@ -130,6 +130,7 @@ test-suite test
     Fusion
     NonDet.Church
     Pure
+    Reader
     Reader.Base
     Reader.Function
     Reader.ReaderT
