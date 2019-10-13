@@ -139,11 +139,6 @@ test-suite test
     Reader.Function
     Reader.ReaderT
     State
-    State.Gen
-    State.Lazy
-    State.StateT.Lazy
-    State.StateT.Strict
-    State.Strict
     Throw
     Writer
   build-depends:
