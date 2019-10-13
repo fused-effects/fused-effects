@@ -18,6 +18,7 @@ genReader a ma = choice
   , fn a >>= subterm ma . local . apply
   ]
 
+
 testReader :: (Has (Reader r) sig m, Arg r, Eq r, Show r, Vary r) => String -> (forall a . r -> m a -> PureC a) -> Gen r -> TestTree
 testReader name runReader genA = testGroup name
   [ testProperty "ask environment" . forall (genA :. fn (Blind <$> genM genReader genA) :. Nil) $
