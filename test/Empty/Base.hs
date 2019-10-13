@@ -4,7 +4,7 @@ module Empty.Base
 ) where
 
 import Control.Effect.Empty
-import qualified Empty
+import Empty
 import Hedgehog
 import Hedgehog.Function
 import Pure
@@ -13,6 +13,6 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty.Maybe"
-  [ testProperty "empty annihilation" . forall (fn @A (Empty.gen genB) :. Nil) $
+  [ testProperty "empty annihilation" . forall (fn @A (genM [genEmpty] genB) :. Nil) $
     \ k -> empty_annihilation (===) (id @(Maybe _)) (apply k)
   ]
