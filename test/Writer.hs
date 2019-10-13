@@ -26,8 +26,8 @@ tests = testGroup "Writer"
   , testWriter "RWST (Lazy)"      (runRWST LazyRWST.runRWST)   genW
   , testWriter "RWST (Strict)"    (runRWST StrictRWST.runRWST) genW
   ] where
-    genW = list (linear 0 10) genA
-    runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
+  genW = list (linear 0 10) genA
+  runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
 genWriter :: forall a m sig . (Has (Writer a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
