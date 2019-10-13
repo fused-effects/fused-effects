@@ -20,15 +20,15 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "State"
-  [ testState "StateC (Lazy)"   LazyStateC.runState
-  , testState "StateC (Strict)" StrictStateC.runState
-  , testState "StateT (Lazy)"   (fmap (fmap swap) . flip LazyStateT.runStateT)
-  , testState "StateT (Strict)" (fmap (fmap swap) . flip StrictStateT.runStateT)
-  , testState "RWST (Lazy)"     (runRWST LazyRWST.runRWST)
-  , testState "RWST (Strict)"   (runRWST StrictRWST.runRWST)
+  [ testGroup "StateC (Lazy)"   $ stateTests LazyStateC.runState
+  , testGroup "StateC (Strict)" $ stateTests StrictStateC.runState
+  , testGroup "StateT (Lazy)"   $ stateTests (fmap (fmap swap) . flip LazyStateT.runStateT)
+  , testGroup "StateT (Strict)" $ stateTests (fmap (fmap swap) . flip StrictStateT.runStateT)
+  , testGroup "RWST (Lazy)"     $ stateTests (runRWST LazyRWST.runRWST)
+  , testGroup "RWST (Strict)"   $ stateTests (runRWST StrictRWST.runRWST)
   ] where
-  testState :: Has (State A) sig m => String -> (forall a . (A -> m a -> PureC (A, a))) -> TestTree
-  testState name run = State.testState name run genA
+  stateTests :: Has (State A) sig m => (forall a . (A -> m a -> PureC (A, a))) -> [TestTree]
+  stateTests run = State.stateTests run genA
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
@@ -37,8 +37,8 @@ genState a _ = choice [ pure get, put' <$> a ] where
   put' a = a <$ put a
 
 
-testState :: (Has (State s) sig m, Arg s, Eq s, Show s, Vary s) => String -> (forall a . (s -> m a -> PureC (s, a))) -> Gen s -> TestTree
-testState name runState gen = testGroup name
+stateTests :: (Has (State s) sig m, Arg s, Eq s, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> Gen s -> [TestTree]
+stateTests runState gen =
   [ testProperty "get state" . forall (gen :. fn (Blind <$> genM [genState] gen) :. Nil) $
     \ a k -> get_state (~=) runState a (getBlind . apply k)
   , testProperty "put update" . forall (gen :. gen :. fmap Blind (genM [genState] gen) :. Nil) $
