@@ -5,10 +5,10 @@ module Throw
 
 import Control.Effect.Throw
 import Hedgehog
-import Hedgehog.Gen as Gen
+import Hedgehog.Gen
 
 gen :: Has (Throw e) sig m => Gen e -> Gen a -> Gen (m a)
-gen e a = Gen.choice [ genThrow e, pure <$> a ]
+gen e a = choice [ genThrow e, pure <$> a ]
 
 genThrow :: Has (Throw e) sig m => Gen e -> Gen (m a)
 genThrow e = throwError <$> e

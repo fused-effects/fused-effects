@@ -5,8 +5,8 @@ module State
 
 import Control.Effect.State
 import Hedgehog
-import Hedgehog.Gen as Gen
+import Hedgehog.Gen
 
 gen :: Has (State a) sig m => Gen a -> Gen (m a)
-gen a = Gen.choice [ pure get, put' <$> a, pure <$> a ] where
+gen a = choice [ pure get, put' <$> a, pure <$> a ] where
   put' a = a <$ put a

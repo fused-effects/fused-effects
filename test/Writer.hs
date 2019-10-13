@@ -6,10 +6,10 @@ module Writer
 
 import Control.Effect.Writer
 import Hedgehog
-import Hedgehog.Gen as Gen
+import Hedgehog.Gen
 
 gen :: Has (Writer a) sig m => Gen a -> Gen (m a)
-gen a = Gen.choice [ genWriter a, pure <$> a ]
+gen a = choice [ genWriter a, pure <$> a ]
 
 genWriter :: Has (Writer a) sig m => Gen a -> Gen (m a)
 genWriter a = tell' <$> a where
