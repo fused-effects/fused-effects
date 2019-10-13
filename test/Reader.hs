@@ -19,14 +19,14 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Reader"
-  [ testReader "ReaderC"       ReaderC.runReader
-  , testReader "(->)"          (fmap PureC . (&))
-  , testReader "ReaderT"       (flip ReaderT.runReaderT)
-  , testReader "RWST (Lazy)"   (runRWST LazyRWST.runRWST)
-  , testReader "RWST (Strict)" (runRWST StrictRWST.runRWST)
+  [ testGroup "ReaderC"       $ readerTests ReaderC.runReader
+  , testGroup "(->)"          $ readerTests (fmap PureC . (&))
+  , testGroup "ReaderT"       $ readerTests (flip ReaderT.runReaderT)
+  , testGroup "RWST (Lazy)"   $ readerTests (runRWST LazyRWST.runRWST)
+  , testGroup "RWST (Strict)" $ readerTests (runRWST StrictRWST.runRWST)
   ] where
-  testReader :: Has (Reader A) sig m => String -> (forall a . A -> m a -> PureC a) -> TestTree
-  testReader name run = Reader.testReader name run genA
+  readerTests :: Has (Reader A) sig m => (forall a . A -> m a -> PureC a) -> [TestTree]
+  readerTests run = Reader.readerTests run genA
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
@@ -37,8 +37,8 @@ genReader a ma = choice
   ]
 
 
-testReader :: (Has (Reader r) sig m, Arg r, Eq r, Show r, Vary r) => String -> (forall a . r -> m a -> PureC a) -> Gen r -> TestTree
-testReader name runReader genA = testGroup name
+readerTests :: (Has (Reader r) sig m, Arg r, Eq r, Show r, Vary r) => (forall a . r -> m a -> PureC a) -> Gen r -> [TestTree]
+readerTests runReader genA =
   [ testProperty "ask environment" . forall (genA :. fn (Blind <$> genM [genReader] genA) :. Nil) $
     \ a k -> ask_environment (~=) runReader a (getBlind . apply k)
   , testProperty "local modification" . forall (genA :. fn genA :. fmap Blind (genM [genReader] genA) :. Nil) $
