@@ -35,7 +35,9 @@ runWriter = runState mempty . runWriterC
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
 --
---   prop> run (execWriter (tell (Sum a) *> pure b)) === Sum a
+-- @
+-- 'execWriter' ('tell' w '*>' 'pure' a) = 'pure' w
+-- @
 execWriter :: (Monoid w, Functor m) => WriterC w m a -> m w
 execWriter = fmap fst . runWriter
 {-# INLINE execWriter #-}
