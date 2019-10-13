@@ -27,7 +27,8 @@ import Control.Monad.Trans.Class
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --
 -- @
--- 'runWriter' ('tell' w '*>' 'pure' a) = 'pure' (w, a)
+-- 'runWriter' ('tell' w) = 'pure' (w, ())
+-- 'runWriter' ('pure' a) = 'pure' ('mempty', a)
 -- @
 runWriter :: Monoid w => WriterC w m a -> m (w, a)
 runWriter = runState mempty . runWriterC
