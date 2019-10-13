@@ -134,7 +134,6 @@ test-suite test
     Fusion
     Gen.Reader
     Gen.State
-    Gen.Writer
     NonDet.Church
     Pure
     Reader

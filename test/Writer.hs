@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Writer
 ( tests
 ) where
@@ -8,7 +8,6 @@ import Control.Effect.Writer
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Tuple (swap)
-import Gen.Writer
 import Hedgehog
 import Hedgehog.Function
 import Hedgehog.Gen
@@ -24,6 +23,15 @@ tests = testGroup "Writer"
   , testWriter "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT) genW
   ] where
     genW = list (linear 0 10) genA
+
+
+genWriter :: forall a m sig . (Has (Writer a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
+genWriter a ma = choice
+  [ tell' <$> a
+  , subtermM ma (\ m -> element [fst <$> listen @a m, snd <$> listen @a m])
+  , fn a >>= subterm ma . censor . apply
+  ] where
+  tell' a = a <$ tell a
 
 
 testWriter :: (Has (Writer w) sig m, Arg w, Eq w, Monoid w, Show w, Vary w) => String -> (forall a . (m a -> PureC (w, a))) -> Gen w -> TestTree
