@@ -5,9 +5,7 @@ module Main
 import qualified Empty.Base
 import qualified Empty.Maybe
 import qualified Empty.MaybeT
-import qualified Error.Base
-import qualified Error.Either
-import qualified Error.ExceptT
+import qualified Error
 import qualified Fusion
 import qualified NonDet.Church
 import qualified Reader
@@ -20,9 +18,7 @@ main = defaultMain $ testGroup "unit tests"
   [ Empty.Base.tests
   , Empty.Maybe.tests
   , Empty.MaybeT.tests
-  , Error.Base.tests
-  , Error.Either.tests
-  , Error.ExceptT.tests
+  , Error.tests
   , Fusion.tests
   , NonDet.Church.tests
   , Reader.tests

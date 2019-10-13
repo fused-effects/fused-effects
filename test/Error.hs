@@ -1,10 +1,13 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Error
 ( genError
+, tests
 , testError
 ) where
 
+import qualified Control.Carrier.Error.Either as ErrorC
 import Control.Effect.Error
+import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
 import Hedgehog
 import Hedgehog.Function
@@ -13,6 +16,14 @@ import Pure
 import qualified Throw
 import Test.Tasty
 import Test.Tasty.Hedgehog
+
+tests :: TestTree
+tests = testGroup "Error" $
+  [ testError "ErrorC"  ErrorC.runError    genC genA genB
+  , testError "Either"  pure               genC genA genB
+  , testError "ExceptT" ExceptT.runExceptT genC genA genB
+  ]
+
 
 genError :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> Gen a -> Gen (m a) -> Gen (m a)
 genError e a ma = choice

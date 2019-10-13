@@ -128,9 +128,6 @@ test-suite test
     Empty.Maybe
     Empty.MaybeT
     Error
-    Error.Base
-    Error.Either
-    Error.ExceptT
     Fusion
     NonDet.Church
     Pure
