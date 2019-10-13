@@ -33,6 +33,7 @@ genWriter a ma = choice
   ] where
   tell' a = a <$ tell a
 
+
 testWriter :: (Has (Writer w) sig m, Arg w, Eq w, Monoid w, Show w, Vary w) => String -> (forall a . (m a -> PureC (w, a))) -> Gen w -> TestTree
 testWriter name runWriter genW = testGroup name
   [ testProperty "tell append" . forall (genW :. fmap Blind (genM genWriter genW) :. Nil) $
