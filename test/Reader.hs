@@ -1,6 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
 module Reader
-( tests
+( genReader
+, tests
 ) where
 
 import qualified Control.Carrier.Reader.Function as ReaderC
@@ -9,9 +10,9 @@ import qualified Control.Monad.Trans.Reader as ReaderT
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
-import Gen.Reader
 import Hedgehog
 import Hedgehog.Function
+import Hedgehog.Gen
 import Pure
 import Test.Tasty
 import Test.Tasty.Hedgehog
@@ -23,6 +24,13 @@ tests = testGroup "Reader"
   , testReader "ReaderT" (flip ReaderT.runReaderT) genA
   , testReader "RWST (Lazy)"   (\ r m -> (\ (a, _, ()) -> a) <$> LazyRWST.runRWST   m r r) genA
   , testReader "RWST (Strict)" (\ r m -> (\ (a, _, ()) -> a) <$> StrictRWST.runRWST m r r) genA
+  ]
+
+
+genReader :: (Has (Reader a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
+genReader a ma = choice
+  [ pure ask
+  , fn a >>= subterm ma . local . apply
   ]
 
 

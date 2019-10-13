@@ -132,7 +132,6 @@ test-suite test
     Error.Either
     Error.ExceptT
     Fusion
-    Gen.Reader
     NonDet.Church
     Pure
     Reader
