@@ -86,7 +86,3 @@ instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
   eff (R other)         = ReaderC (\ r -> eff (hmap (runReader r) other))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> import Test.QuickCheck
