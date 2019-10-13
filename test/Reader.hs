@@ -19,9 +19,9 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Reader"
-  [ testReader "ReaderC" ReaderC.runReader
-  , testReader "(->)"    (fmap PureC . (&))
-  , testReader "ReaderT" (flip ReaderT.runReaderT)
+  [ testReader "ReaderC"       ReaderC.runReader
+  , testReader "(->)"          (fmap PureC . (&))
+  , testReader "ReaderT"       (flip ReaderT.runReaderT)
   , testReader "RWST (Lazy)"   (runRWST LazyRWST.runRWST)
   , testReader "RWST (Strict)" (runRWST StrictRWST.runRWST)
   ] where
