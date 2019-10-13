@@ -43,7 +43,9 @@ evalState s = fmap snd . runState s
 
 -- | Run a 'State' effect, yielding the final state and discarding the return value.
 --
---   prop> run (execState a (pure b)) === a
+-- @
+-- 'execState' s m = 'fmap' 'fst' ('runState' s m)
+-- @
 --
 -- @since 1.0.0.0
 execState :: forall s m a . Functor m => s -> StateC s m a -> m s
