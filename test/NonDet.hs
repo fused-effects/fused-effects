@@ -38,9 +38,9 @@ gen m a = choice [ Empty.gen m a, Choose.gen m a ]
 
 nonDetTests :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
 nonDetTests runNonDet m a b
-  =  testProperty "<|> left identity"  (forall (m a :. Nil)
+  =  testProperty "empty is the left identity of <|>"  (forall (m a :. Nil)
     (\ (With m) -> choose_leftIdentity  (===) runNonDet m))
-  :  testProperty "<|> right identity" (forall (m a :. Nil)
+  :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
     (\ (With m) -> choose_rightIdentity (===) runNonDet m))
   :  Empty.emptyTests   (fmap listToMaybe . runNonDet) m a b
   ++ Choose.chooseTests runNonDet                      m a b
