@@ -1,6 +1,6 @@
 {-# LANGUAGE RankNTypes #-}
 module Reader
-( genReader
+( gen
 , tests
 ) where
 
@@ -30,8 +30,8 @@ tests = testGroup "Reader"
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
-genReader :: (Has (Reader a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
-genReader a ma = choice
+gen :: (Has (Reader a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
+gen a ma = choice
   [ pure ask
   , fn a >>= subterm ma . local . apply
   ]
@@ -39,8 +39,8 @@ genReader a ma = choice
 
 readerTests :: (Has (Reader r) sig m, Arg r, Eq r, Show r, Vary r) => (forall a . r -> m a -> PureC a) -> Gen r -> [TestTree]
 readerTests runReader a =
-  [ testProperty "ask environment" . forall (a :. fn (genM [genReader] a) :. Nil) $
+  [ testProperty "ask environment" . forall (a :. fn (genM [gen] a) :. Nil) $
     \ a k -> ask_environment (~=) runReader a (getBlind . apply k)
-  , testProperty "local modification" . forall (a :. fn a :. genM [genReader] a :. Nil) $
+  , testProperty "local modification" . forall (a :. fn a :. genM [gen] a :. Nil) $
     \ a f m -> local_modification (~=) runReader a (apply f) (getBlind m)
   ]
