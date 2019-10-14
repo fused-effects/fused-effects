@@ -2,6 +2,7 @@ module Main
 ( main
 ) where
 
+import qualified Choose
 import qualified Empty
 import qualified Error
 import qualified Fusion
@@ -13,7 +14,8 @@ import Test.Tasty
 
 main :: IO ()
 main = defaultMain $ testGroup "unit tests"
-  [ Empty.tests
+  [ Choose.tests
+  , Empty.tests
   , Error.tests
   , Fusion.tests
   , NonDet.Church.tests
