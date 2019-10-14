@@ -51,17 +51,17 @@ newtype T a = T { unT :: Integer }
 instance Arg (T a)
 
 genA :: Gen (T A)
-genA = Gen.integral (Range.linear 0 10)
+genA = genT
 
 data A
 
 genB :: Gen (T B)
-genB = Gen.integral (Range.linear 0 10)
+genB = genT
 
 data B
 
 genC :: Gen (T C)
-genC = Gen.integral (Range.linear 0 10)
+genC = genT
 
 data C
 
