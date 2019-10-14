@@ -25,6 +25,7 @@ module Pure
 , liftWith
 , liftWith2
 , pattern Fn
+, pattern FnWith
 ) where
 
 import Control.Carrier.Pure
@@ -146,3 +147,8 @@ pattern Fn :: (a -> b) -> Fn a b
 pattern Fn f <- (apply -> f)
 
 {-# COMPLETE Fn #-}
+
+pattern FnWith :: (a -> b) -> Fn a (With b)
+pattern FnWith f <- (fmap getWith . apply -> f)
+
+{-# COMPLETE FnWith #-}
