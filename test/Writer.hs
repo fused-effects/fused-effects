@@ -43,10 +43,10 @@ genWriter a ma = choice
 
 writerTests :: (Has (Writer w) sig m, Arg w, Eq w, Monoid w, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> Gen w -> [TestTree]
 writerTests runWriter genW =
-  [ testProperty "tell append" . forall (genW :. fmap Blind (genM [genWriter] genW) :. Nil) $
+  [ testProperty "tell append" . forall (genW :. genM [genWriter] genW :. Nil) $
     \ w m -> tell_append (~=) runWriter w (getBlind m)
-  , testProperty "listen eavesdrop" . forall (fmap Blind (genM [genWriter] genW) :. Nil) $
+  , testProperty "listen eavesdrop" . forall (genM [genWriter] genW :. Nil) $
     \ m -> listen_eavesdrop (~=) runWriter (getBlind m)
-  , testProperty "censor revision" . forall (fn genW :. fmap Blind (genM [genWriter] genW) :. Nil) $
+  , testProperty "censor revision" . forall (fn genW :. genM [genWriter] genW :. Nil) $
     \ f m -> censor_revision (~=) runWriter (apply f) (getBlind m)
   ]

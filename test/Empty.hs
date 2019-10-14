@@ -20,7 +20,7 @@ tests = testGroup "Empty"
   , testGroup "MaybeT" $ emptyTests MaybeT.runMaybeT
   ] where
   emptyTests :: Has Empty sig m => (forall a . m a -> PureC (Maybe a)) -> [TestTree]
-  emptyTests run = Empty.emptyTests run (fmap Blind . genM [genEmpty]) genA genB
+  emptyTests run = Empty.emptyTests run (genM [genEmpty]) genA genB
 
 
 genEmpty :: Has Empty sig m => Gen a -> Gen (m a) -> Gen (m a)

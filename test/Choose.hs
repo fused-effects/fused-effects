@@ -21,7 +21,7 @@ tests = testGroup "Choose"
   , testGroup "NonEmpty" $ chooseTests (pure . toList)
   ] where
   chooseTests :: Has Choose sig m => (forall a . m a -> PureC [a]) -> [TestTree]
-  chooseTests run = Choose.chooseTests run (fmap Blind . genM [genChoose]) genA genB
+  chooseTests run = Choose.chooseTests run (genM [genChoose]) genA genB
 
 
 genChoose :: Has Choose sig m => Gen a -> Gen (m a) -> Gen (m a)

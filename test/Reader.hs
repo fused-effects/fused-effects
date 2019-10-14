@@ -39,8 +39,8 @@ genReader a ma = choice
 
 readerTests :: (Has (Reader r) sig m, Arg r, Eq r, Show r, Vary r) => (forall a . r -> m a -> PureC a) -> Gen r -> [TestTree]
 readerTests runReader genA =
-  [ testProperty "ask environment" . forall (genA :. fn (Blind <$> genM [genReader] genA) :. Nil) $
+  [ testProperty "ask environment" . forall (genA :. fn (genM [genReader] genA) :. Nil) $
     \ a k -> ask_environment (~=) runReader a (getBlind . apply k)
-  , testProperty "local modification" . forall (genA :. fn genA :. fmap Blind (genM [genReader] genA) :. Nil) $
+  , testProperty "local modification" . forall (genA :. fn genA :. genM [genReader] genA :. Nil) $
     \ a f m -> local_modification (~=) runReader a (apply f) (getBlind m)
   ]
