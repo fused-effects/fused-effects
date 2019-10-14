@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Choose
-( genChoose
-, tests
+( tests
+, genChoose
 , chooseTests
 ) where
 
