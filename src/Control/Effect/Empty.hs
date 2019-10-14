@@ -56,5 +56,7 @@ guard False = empty
 -- Properties
 
 -- | 'empty' annihilates '>>='.
+--
+-- @since 1.0.0.0
 empty_annihilation :: Has Empty sig m => (c -> c -> prop) -> (m b -> c) -> (a -> m b) -> prop
 empty_annihilation (===) runEmpty k = runEmpty (empty >>= k) === runEmpty empty
