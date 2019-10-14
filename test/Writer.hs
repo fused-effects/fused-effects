@@ -25,7 +25,7 @@ tests = testGroup "Writer"
   , testGroup "RWST (Lazy)"      $ writerTests (runRWST LazyRWST.runRWST)
   , testGroup "RWST (Strict)"    $ writerTests (runRWST StrictRWST.runRWST)
   ] where
-  writerTests :: Has (Writer [T W]) sig m => (forall a . m a -> PureC ([T W], a)) -> [TestTree]
+  writerTests :: Has (Writer W) sig m => (forall a . m a -> PureC (W, a)) -> [TestTree]
   writerTests run = Writer.writerTests run (genM (gen w)) w a
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 

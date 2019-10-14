@@ -27,7 +27,7 @@ tests = testGroup "State"
   , testGroup "RWST (Lazy)"     $ stateTests (runRWST LazyRWST.runRWST)
   , testGroup "RWST (Strict)"   $ stateTests (runRWST StrictRWST.runRWST)
   ] where
-  stateTests :: Has (State (T S)) sig m => (forall a . (T S -> m a -> PureC (T S, a))) -> [TestTree]
+  stateTests :: Has (State S) sig m => (forall a . (S -> m a -> PureC (S, a))) -> [TestTree]
   stateTests run = State.stateTests run (genM (gen s)) s a
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 

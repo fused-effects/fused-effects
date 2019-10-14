@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 module Pure
 ( module Control.Carrier.Pure
@@ -58,35 +58,35 @@ newtype T a = T { unT :: Integer }
 
 instance Arg (T a)
 
-a :: Gen (T A)
+a :: Gen A
 a = genT
 
-data A
+type A = T "A"
 
-b :: Gen (T B)
+b :: Gen B
 b = genT
 
-data B
+type B = T "B"
 
-e :: Gen (T E)
+e :: Gen E
 e = genT
 
-data E
+type E = T "E"
 
-r :: Gen (T R)
+r :: Gen R
 r = genT
 
-data R
+type R = T "R"
 
-s :: Gen (T S)
+s :: Gen S
 s = genT
 
-data S
+type S = T "S"
 
-w :: Gen [T W]
+w :: Gen W
 w = list (linear 0 10) genT
 
-data W
+type W = [T "W"]
 
 
 infixr 5 :.
