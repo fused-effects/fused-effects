@@ -21,6 +21,7 @@ module Pure
 , forall
 , With(..)
 , blind
+, showing
 ) where
 
 import Control.Carrier.Pure
@@ -118,3 +119,6 @@ instance Show (With a) where
 
 blind :: a -> With a
 blind = With "_"
+
+showing :: Show a => a -> With a
+showing = With . show <*> id
