@@ -41,7 +41,7 @@ gen r m a = choice
 readerTests :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r) => (forall a . r -> m a -> PureC a) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen r -> Gen a -> [TestTree]
 readerTests runReader m r a =
   [ testProperty "ask environment" . forall (r :. fn (m a) :. Nil) $
-    \ r k -> ask_environment (===) runReader r (getWith . apply k)
+    \ r (FnWith k) -> ask_environment (===) runReader r k
   , testProperty "local modification" . forall (r :. fn r :. m a :. Nil) $
-    \ r f m -> local_modification (===) runReader r (apply f) (getWith m)
+    \ r (Fn f) (With m) -> local_modification (===) runReader r f m
   ]
