@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
 module Reader
-( gen
-, tests
+( tests
+, gen
 ) where
 
 import qualified Control.Carrier.Reader.Function as ReaderC
