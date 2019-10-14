@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
 module Pure
 ( module Control.Carrier.Pure
 , (~=)
@@ -25,6 +25,9 @@ module Pure
 ) where
 
 import Control.Carrier.Pure
+import Data.Functor.Classes (showsUnaryWith)
+import Data.Proxy
+import GHC.TypeLits
 import Hedgehog
 import Hedgehog.Function hiding (R, S)
 import Hedgehog.Gen
@@ -50,9 +53,12 @@ genT :: Gen (T a)
 genT = T <$> integral (linear 0 100)
 
 newtype T a = T { unT :: Integer }
-  deriving (Enum, Eq, Generic, Num, Ord, Real, Show, Vary)
+  deriving (Enum, Eq, Generic, Num, Ord, Real, Vary)
 
 instance Arg (T a)
+
+instance KnownSymbol s => Show (T s) where
+  showsPrec d = showsUnaryWith showsPrec (symbolVal (Proxy @s)) d . unT
 
 a :: Gen A
 a = genT
