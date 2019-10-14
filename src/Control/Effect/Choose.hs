@@ -52,6 +52,9 @@ instance Effect   Choose
 -- @
 -- m '<|>' 'empty' = m
 -- @
+-- @
+-- (m '<|>' n) '>>=' k = (m '>>=' k) '<|>' (n '>>=' k)
+-- @
 --
 -- @since 1.0.0.0
 (<|>) :: Has Choose sig m => m a -> m a -> m a
