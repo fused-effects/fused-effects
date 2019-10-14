@@ -40,12 +40,12 @@ gen w m a = choice
   ]
 
 
-writerTests :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen w -> Gen a -> [TestTree]
+writerTests :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> (forall a . Gen a -> Gen (With (m a))) -> Gen w -> Gen a -> [TestTree]
 writerTests runWriter m w a =
   [ testProperty "tell append" . forall (w :. m a :. Nil) $
-    \ w m -> tell_append (~=) runWriter w (getBlind m)
+    \ w m -> tell_append (~=) runWriter w (getWith m)
   , testProperty "listen eavesdrop" . forall (m a :. Nil) $
-    \ m -> listen_eavesdrop (~=) runWriter (getBlind m)
+    \ m -> listen_eavesdrop (~=) runWriter (getWith m)
   , testProperty "censor revision" . forall (fn w :. m a :. Nil) $
-    \ f m -> censor_revision (~=) runWriter (apply f) (getBlind m)
+    \ f m -> censor_revision (~=) runWriter (apply f) (getWith m)
   ]

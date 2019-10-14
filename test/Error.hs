@@ -33,7 +33,7 @@ gen e m a = choice
   ]
 
 
-errorTests :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
+errorTests :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Gen a -> Gen (With (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
 errorTests runError m e a b
   =  Throw.throwTests runError m e a b
   ++ Catch.catchTests runError m e a b

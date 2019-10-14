@@ -16,8 +16,8 @@ gen :: forall e m a sig . (Has (Catch e) sig m, Arg e, Vary e) => Gen e -> (fora
 gen _ m a = choice [ fn @e (m a) >>= subterm (m a) . flip catchError . apply ]
 
 
-catchTests :: forall e m a b sig . (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
+catchTests :: forall e m a b sig . (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Gen a -> Gen (With (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
 catchTests runError m e a _ =
   [ testProperty "catchError interception" . forall (e :. fn (m a) :. Nil) $
-    \ e f -> catchError_interception (~=) runError e (getBlind . apply f)
+    \ e f -> catchError_interception (~=) runError e (getWith . apply f)
   ]

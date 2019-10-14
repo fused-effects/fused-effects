@@ -41,10 +41,10 @@ gen s _ a = choice
   ]
 
 
-stateTests :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen s -> Gen a -> [TestTree]
+stateTests :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> (forall a . Gen a -> Gen (With (m a))) -> Gen s -> Gen a -> [TestTree]
 stateTests runState m s a =
   [ testProperty "get state" . forall (s :. fn (m a) :. Nil) $
-    \ s k -> get_state (~=) runState s (getBlind . apply k)
+    \ s k -> get_state (~=) runState s (getWith . apply k)
   , testProperty "put update" . forall (s :. s :. m a :. Nil) $
-    \ s s' m -> put_update (~=) runState s s' (getBlind m)
+    \ s s' m -> put_update (~=) runState s s' (getWith m)
   ]

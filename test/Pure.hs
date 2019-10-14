@@ -40,8 +40,8 @@ genM
   .  Applicative m
   => (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)) -- ^ A higher-order generator producing operations using any effects in @m@.
   -> Gen a                                                              -- ^ A generator for results.
-  -> Gen (Blind (m a))                                                  -- ^ A generator producing computations, wrapped in 'Blind' for convenience.
-genM with = fmap Blind . go where
+  -> Gen (With (m a))                                                   -- ^ A generator producing computations, wrapped in 'With' for convenience.
+genM with = fmap blind . go where
   go :: forall a . Gen a -> Gen (m a)
   go a = recursive choice [fmap pure a] [with go a]
 

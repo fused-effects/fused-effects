@@ -28,10 +28,10 @@ gen :: Has Choose sig m => (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
 gen m a = subterm2 (m a) (m a) (<|>)
 
 
-chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
+chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
 chooseTests runChoose m a b =
   [ testProperty "<|> distributivity" . forall (m a :. m a :. fn (m b) :. Nil) $
-    \ m n k -> choose_distributivity (~=) runChoose (getBlind m) (getBlind n) (getBlind . apply k)
+    \ m n k -> choose_distributivity (~=) runChoose (getWith m) (getWith n) (getWith . apply k)
   , testProperty "<|> associativity" . forall (m a :. m a :. m a :. Nil) $
-    \ m n o -> choose_associativity (~=) runChoose (getBlind m) (getBlind n) (getBlind o)
+    \ m n o -> choose_associativity (~=) runChoose (getWith m) (getWith n) (getWith o)
   ]
