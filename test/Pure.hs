@@ -108,6 +108,11 @@ instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) wher
 data With a = With { showWith :: String, getWith :: a }
   deriving (Eq, Functor, Ord)
 
+instance Applicative With where
+  pure = With "_"
+  With sf f <*> With sa a = With (sf <> " " <> parens sa) (f a) where
+    parens s = "(" <> s <> ")"
+
 instance Show (With a) where
   show = showWith
 
