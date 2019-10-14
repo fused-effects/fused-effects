@@ -27,26 +27,26 @@ tests = testGroup "Writer"
   , testGroup "RWST (Strict)"    $ writerTests (runRWST StrictRWST.runRWST)
   ] where
   writerTests :: Has (Writer [A]) sig m => (forall a . m a -> PureC ([A], a)) -> [TestTree]
-  writerTests run = Writer.writerTests run genW
-  genW = list (linear 0 10) genA
+  writerTests run = Writer.writerTests run (genM (gen w)) w genA
+  w = list (linear 0 10) genA
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
-gen :: forall a m sig . (Has (Writer a) sig m, Arg a, Vary a) => Gen (m a) -> Gen a -> Gen (m a)
-gen ma a = choice
-  [ tell' <$> a
-  , subtermM ma (\ m -> element [fst <$> listen @a m, snd <$> listen @a m])
-  , fn a >>= subterm ma . censor . apply
+gen :: forall w m a sig . (Has (Writer w) sig m, Arg w, Vary w) => Gen w -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
+gen w m a = choice
+  [ tell' <$> w <*> a
+  , subtermM (m a) (\ m -> choice [(\ f -> apply f . fst <$> listen @w m) <$> fn a, pure (snd <$> listen @w m)])
+  , fn w >>= subterm (m a) . censor . apply
   ] where
-  tell' a = a <$ tell a
+  tell' w a = a <$ tell w
 
 
-writerTests :: (Has (Writer w) sig m, Arg w, Eq w, Monoid w, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> Gen w -> [TestTree]
-writerTests runWriter genW =
-  [ testProperty "tell append" . forall (genW :. genM [gen] genW :. Nil) $
+writerTests :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen w -> Gen a -> [TestTree]
+writerTests runWriter m w a =
+  [ testProperty "tell append" . forall (w :. m a :. Nil) $
     \ w m -> tell_append (~=) runWriter w (getBlind m)
-  , testProperty "listen eavesdrop" . forall (genM [gen] genW :. Nil) $
+  , testProperty "listen eavesdrop" . forall (m a :. Nil) $
     \ m -> listen_eavesdrop (~=) runWriter (getBlind m)
-  , testProperty "censor revision" . forall (fn genW :. genM [gen] genW :. Nil) $
+  , testProperty "censor revision" . forall (fn w :. m a :. Nil) $
     \ f m -> censor_revision (~=) runWriter (apply f) (getBlind m)
   ]

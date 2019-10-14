@@ -11,7 +11,7 @@ import Pure
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
-gen :: Has (Throw e) sig m => Gen e -> Gen (m a) -> Gen a -> Gen (m a)
+gen :: Has (Throw e) sig m => Gen e -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
 gen e _ _ = throwError <$> e
 
 

@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Reader
 ( tests
 , gen
@@ -11,7 +11,7 @@ import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
 import Hedgehog
-import Hedgehog.Function
+import Hedgehog.Function hiding (C)
 import Hedgehog.Gen
 import Pure
 import Test.Tasty
@@ -25,22 +25,22 @@ tests = testGroup "Reader"
   , testGroup "RWST (Lazy)"   $ readerTests (runRWST LazyRWST.runRWST)
   , testGroup "RWST (Strict)" $ readerTests (runRWST StrictRWST.runRWST)
   ] where
-  readerTests :: Has (Reader A) sig m => (forall a . A -> m a -> PureC a) -> [TestTree]
-  readerTests run = Reader.readerTests run genA
+  readerTests :: Has (Reader C) sig m => (forall a . C -> m a -> PureC a) -> [TestTree]
+  readerTests run = Reader.readerTests run (genM (gen genC)) genC genA
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
-gen :: (Has (Reader a) sig m, Arg a, Vary a) => Gen (m a) -> Gen a -> Gen (m a)
-gen ma a = choice
-  [ pure ask
-  , fn a >>= subterm ma . local . apply
+gen :: forall r m a sig . (Has (Reader r) sig m, Arg r, Vary r) => Gen r -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
+gen r m a = choice
+  [ asks @r . apply <$> fn a
+  , fn r >>= subterm (m a) . local . apply
   ]
 
 
-readerTests :: (Has (Reader r) sig m, Arg r, Eq r, Show r, Vary r) => (forall a . r -> m a -> PureC a) -> Gen r -> [TestTree]
-readerTests runReader a =
-  [ testProperty "ask environment" . forall (a :. fn (genM [gen] a) :. Nil) $
-    \ a k -> ask_environment (~=) runReader a (getBlind . apply k)
-  , testProperty "local modification" . forall (a :. fn a :. genM [gen] a :. Nil) $
-    \ a f m -> local_modification (~=) runReader a (apply f) (getBlind m)
+readerTests :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r) => (forall a . r -> m a -> PureC a) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen r -> Gen a -> [TestTree]
+readerTests runReader m r a =
+  [ testProperty "ask environment" . forall (r :. fn (m a) :. Nil) $
+    \ r k -> ask_environment (~=) runReader r (getBlind . apply k)
+  , testProperty "local modification" . forall (r :. fn r :. m a :. Nil) $
+    \ r f m -> local_modification (~=) runReader r (apply f) (getBlind m)
   ]

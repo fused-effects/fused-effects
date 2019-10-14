@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 module Pure
 ( module Control.Carrier.Pure
@@ -25,12 +25,13 @@ import qualified Hedgehog.Range as Range
 m1 ~= m2 = run m1 === run m2
 
 
-genM :: Applicative m => [Gen (m a) -> Gen a -> Gen (m a)] -> Gen a -> Gen (Blind (m a))
-genM with a = Blind <$> go where
-  go = Gen.sized $ \case
+genM :: forall m a . Applicative m => (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)) -> Gen a -> Gen (Blind (m a))
+genM with = fmap Blind . go where
+  go :: forall a . Gen a -> Gen (m a)
+  go a = Gen.sized $ \case
     Size i
       | i <= 1 -> fmap pure a
-      | otherwise -> Gen.choice (fmap pure a : (with <*> [Gen.scale (`div` 2) go] <*> [a]))
+      | otherwise -> Gen.choice [ fmap pure a, with (Gen.scale (`div` 2) . go) a]
 
 
 genA :: Gen A
