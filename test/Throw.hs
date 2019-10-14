@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Throw
-( gen
-, throwTests
+( throwTests
+, gen
 ) where
 
 import Control.Effect.Throw
