@@ -57,4 +57,4 @@ catchError m h = send (Catch m h pure)
 --
 -- @since 1.0.0.0
 catchError_interception :: (Has (Catch e) sig m, Has (Throw e) sig m) => (b -> b -> prop) -> (m a -> b) -> e -> (e -> m a) -> prop
-catchError_interception (===) runError e f = runError (throwError e `catchError` f) === runError (f e)
+catchError_interception (===) runCatch e f = runCatch (throwError e `catchError` f) === runCatch (f e)
