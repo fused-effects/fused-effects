@@ -42,6 +42,10 @@ instance Effect (Catch e) where
 -- consider if 'Control.Effect.Resource' fits your use case; if not, use 'Control.Monad.IO.Class.liftIO' with
 -- 'Control.Exception.try' or use 'Control.Exception.catch' from outside the effect invocation.
 --
+-- @
+-- runError ('throwError' e `catchError` f) = runError (f e)
+-- @
+--
 -- @since 0.1.0.0
 catchError :: Has (Catch e) sig m => m a -> (e -> m a) -> m a
 catchError m h = send (Catch m h pure)
