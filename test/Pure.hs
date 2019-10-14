@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
-{-# OPTIONS_GHC -Wno-identities #-}
 module Pure
 ( module Control.Carrier.Pure
 , (~=)
@@ -46,10 +45,10 @@ genM with = fmap Blind . go where
 
 
 genT :: Gen (T a)
-genT = integral (linear 0 10)
+genT = T <$> integral (linear 0 10)
 
 newtype T a = T { unT :: Integer }
-  deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
+  deriving (Enum, Eq, Generic, Num, Ord, Real, Show, Vary)
 
 instance Arg (T a)
 
