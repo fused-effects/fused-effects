@@ -28,7 +28,6 @@ import Hedgehog
 import Hedgehog.Function hiding (R, S)
 import Hedgehog.Gen
 import Hedgehog.Range
-import qualified Hedgehog.Range as Range
 
 (~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
 m1 ~= m2 = run m1 === run m2
@@ -50,7 +49,7 @@ genM with = fmap Blind . go where
 
 
 genT :: Gen (T a)
-genT = integral (Range.linear 0 10)
+genT = integral (linear 0 10)
 
 newtype T a = T { unT :: Integer }
   deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
