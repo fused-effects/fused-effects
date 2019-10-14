@@ -19,7 +19,6 @@ module Pure
 , W
 , Rec(..)
 , forall
-, Blind(..)
 , With(..)
 , blind
 ) where
@@ -104,13 +103,6 @@ instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) wher
   forall' (g :. gs) f = do
     a <- Hedgehog.forAll g
     forall' gs (f a)
-
-
-newtype Blind a = Blind { getBlind :: a }
-  deriving (Eq, Ord)
-
-instance Show (Blind a) where
-  show _ = "_"
 
 
 data With a = With { showWith :: String, getWith :: a }
