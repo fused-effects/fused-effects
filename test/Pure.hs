@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 module Pure
 ( module Control.Carrier.Pure
@@ -26,7 +26,11 @@ m1 ~= m2 = run m1 === run m2
 
 
 genM :: Applicative m => [Gen a -> Gen (m a) -> Gen (m a)] -> Gen a -> Gen (m a)
-genM with a = go where go = Gen.choice (fmap pure a : (with <*> [a] <*> [go]))
+genM with a = go where
+  go = Gen.sized $ \case
+    Size i
+      | i <= 1 -> fmap pure a
+      | otherwise -> Gen.choice (fmap pure a : (with <*> [a] <*> [go]))
 
 
 genA :: Gen A
