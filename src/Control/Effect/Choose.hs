@@ -55,6 +55,10 @@ infixl 3 <|>
 
 -- | Select between 'Just' the result of an operation, and 'Nothing'.
 --
+-- @
+-- 'optional' 'empty' = 'pure' 'Nothing'
+-- @
+--
 -- @since 1.0.0.0
 optional :: Has Choose sig m => m a -> m (Maybe a)
 optional a = Just <$> a <|> pure Nothing
