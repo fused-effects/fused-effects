@@ -37,18 +37,10 @@ instance Effect Cull where
 
 -- | Cull nondeterminism in the argument, returning at most one result.
 --
---   prop> run (runNonDetA (runCullA (cull (pure a <|> pure b)))) === [a]
---   prop> run (runNonDetA (runCullA (cull (empty  <|> pure a)))) === [a]
---   prop> run (runNonDetA (runCullA (cull (pure a <|> pure b) <|> pure c))) === [a, c]
---   prop> run (runNonDetA (runCullA (cull (asum (map pure (repeat a)))))) === [a]
+-- @
+-- 'cull' ('pure' a 'Control.Effect.Choose.<|>' m) 'Control.Effect.Choose.<|>' n = 'pure' a 'Control.Effect.Choose.<|>' n
+-- @
 --
 -- @since 0.1.2.0
 cull :: Has Cull sig m => m a -> m a
 cull m = send (Cull m pure)
-
-
--- $setup
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Cull.Church
--- >>> import Control.Carrier.NonDet.Church
--- >>> import Data.Foldable (asum)
