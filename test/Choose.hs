@@ -33,5 +33,5 @@ chooseTests runChoose m a b =
   [ testProperty ">>= distributes over <|>" . forall (m a :. m a :. fn (m b) :. Nil) $
     \ (With m) (With n) (FnWith k) -> runChoose ((m <|> n) >>= k) === runChoose ((m >>= k) <|> (n >>= k))
   , testProperty "<|> is associative" . forall (m a :. m a :. m a :. Nil) $
-    \ (With m) (With n) (With o) -> choose_associativity (===) runChoose m n o
+    \ (With m) (With n) (With o) -> runChoose ((m <|> n) <|> o) === runChoose (m <|> (n <|> o))
   ]
