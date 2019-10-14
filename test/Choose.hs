@@ -5,6 +5,7 @@ module Choose
 , tests
 ) where
 
+import qualified Control.Carrier.Choose.Church as ChooseC
 import Control.Effect.Choose
 import Hedgehog
 import Hedgehog.Function
@@ -15,7 +16,10 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Choose"
-  []
+  [ testGroup "ChooseC" $ testChoose (ChooseC.runChooseS (pure . pure))
+  ] where
+  testChoose :: Has Choose sig m => (forall a . m a -> PureC [a]) -> [TestTree]
+  testChoose run = Choose.testChoose run genA genB
 
 
 genChoose :: Has Choose sig m => Gen a -> Gen (m a) -> Gen (m a)
