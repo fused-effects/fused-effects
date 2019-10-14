@@ -34,11 +34,10 @@ tests = testGroup "Writer"
 
 gen :: forall w m a sig . (Has (Writer w) sig m, Arg w, Vary w) => Gen w -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
 gen w m a = choice
-  [ tell' <$> w <*> a
+  [ (<$) <$> a <*> (tell <$> w)
   , subtermM (m a) (\ m -> choice [(\ f -> apply f . fst <$> listen @w m) <$> fn a, pure (snd <$> listen @w m)])
   , fn w >>= subterm (m a) . censor . apply
-  ] where
-  tell' w a = a <$ tell w
+  ]
 
 
 writerTests :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen w -> Gen a -> [TestTree]
