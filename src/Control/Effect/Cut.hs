@@ -73,9 +73,9 @@ call m = send (Call m pure)
 
 -- | Commit to the current branch, preventing backtracking within the nearest enclosing 'call' (if any) on failure.
 --
---   prop> run (runNonDet (runCut (pure a <|> cut *> pure b))) === [a, b]
---   prop> run (runNonDet (runCut (cut *> pure a <|> pure b))) === [a]
---   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) === []
+-- @
+-- 'cut' '>>' 'empty' = 'cutfail'
+-- @
 --
 -- @since 0.1.2.0
 cut :: (Alternative m, Has Cut sig m) => m ()
