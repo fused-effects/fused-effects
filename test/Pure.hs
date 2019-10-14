@@ -28,7 +28,6 @@ import Hedgehog
 import Hedgehog.Function hiding (R, S)
 import Hedgehog.Gen
 import Hedgehog.Range
-import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
 (~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
@@ -44,14 +43,14 @@ genM
   -> Gen (Blind (m a))                                                  -- ^ A generator producing computations, wrapped in 'Blind' for convenience.
 genM with = fmap Blind . go where
   go :: forall a . Gen a -> Gen (m a)
-  go a = Gen.sized $ \case
+  go a = sized $ \case
     Size i
       | i <= 1 -> fmap pure a
-      | otherwise -> Gen.choice [ fmap pure a, with (Gen.scale (`div` 2) . go) a]
+      | otherwise -> choice [ fmap pure a, with (scale (`div` 2) . go) a]
 
 
 genT :: Gen (T a)
-genT = Gen.integral (Range.linear 0 10)
+genT = integral (Range.linear 0 10)
 
 newtype T a = T { unT :: Integer }
   deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
