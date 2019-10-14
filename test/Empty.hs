@@ -20,15 +20,15 @@ tests = testGroup "Empty"
   , testGroup "MaybeT" $ emptyTests MaybeT.runMaybeT
   ] where
   emptyTests :: Has Empty sig m => (forall a . m a -> PureC (Maybe a)) -> [TestTree]
-  emptyTests run = Empty.emptyTests run genA genB
+  emptyTests run = Empty.emptyTests run (fmap Blind . genM [genEmpty]) genA genB
 
 
 genEmpty :: Has Empty sig m => Gen a -> Gen (m a) -> Gen (m a)
 genEmpty _ _ = pure empty
 
 
-emptyTests :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC (Maybe a)) -> Gen a -> Gen b -> [TestTree]
-emptyTests runEmpty _ b =
-  [ testProperty "empty annihilation" . forall (fn @a (Blind <$> genM [genEmpty] b) :. Nil) $
+emptyTests :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC (Maybe a)) -> (forall a. Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
+emptyTests runEmpty m _ b =
+  [ testProperty "empty annihilation" . forall (fn @a (m b) :. Nil) $
     \ k -> empty_annihilation (~=) runEmpty (getBlind . apply k)
   ]
