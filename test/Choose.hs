@@ -7,6 +7,7 @@ module Choose
 
 import qualified Control.Carrier.Choose.Church as ChooseC
 import Control.Effect.Choose
+import Data.List.NonEmpty
 import Hedgehog
 import Hedgehog.Function
 import Hedgehog.Gen
@@ -16,7 +17,8 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Choose"
-  [ testGroup "ChooseC" $ testChoose (ChooseC.runChooseS (pure . pure))
+  [ testGroup "ChooseC"  $ testChoose (ChooseC.runChooseS (pure . pure))
+  , testGroup "NonEmpty" $ testChoose (pure . toList)
   ] where
   testChoose :: Has Choose sig m => (forall a . m a -> PureC [a]) -> [TestTree]
   testChoose run = Choose.testChoose run (fmap Blind . genM [genChoose]) genA genB
