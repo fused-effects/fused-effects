@@ -32,15 +32,15 @@ tests = testGroup "State"
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
-genState :: Has (State a) sig m => Gen a -> Gen (m a) -> Gen (m a)
-genState a _ = choice [ pure get, put' <$> a ] where
+gen :: Has (State a) sig m => Gen a -> Gen (m a) -> Gen (m a)
+gen a _ = choice [ pure get, put' <$> a ] where
   put' a = a <$ put a
 
 
 stateTests :: (Has (State s) sig m, Arg s, Eq s, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> Gen s -> [TestTree]
 stateTests runState s =
-  [ testProperty "get state" . forall (s :. fn (genM [genState] s) :. Nil) $
+  [ testProperty "get state" . forall (s :. fn (genM [gen] s) :. Nil) $
     \ a k -> get_state (~=) runState a (getBlind . apply k)
-  , testProperty "put update" . forall (s :. s :. genM [genState] s :. Nil) $
+  , testProperty "put update" . forall (s :. s :. genM [gen] s :. Nil) $
     \ a b m -> put_update (~=) runState a b (getBlind m)
   ]
