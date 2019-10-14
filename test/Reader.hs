@@ -11,7 +11,7 @@ import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
 import Hedgehog
-import Hedgehog.Function hiding (C)
+import Hedgehog.Function hiding (C, R)
 import Hedgehog.Gen
 import Pure
 import Test.Tasty
@@ -25,8 +25,8 @@ tests = testGroup "Reader"
   , testGroup "RWST (Lazy)"   $ readerTests (runRWST LazyRWST.runRWST)
   , testGroup "RWST (Strict)" $ readerTests (runRWST StrictRWST.runRWST)
   ] where
-  readerTests :: Has (Reader (T C)) sig m => (forall a . T C -> m a -> PureC a) -> [TestTree]
-  readerTests run = Reader.readerTests run (genM (gen genC)) genC a
+  readerTests :: Has (Reader (T R)) sig m => (forall a . T R -> m a -> PureC a) -> [TestTree]
+  readerTests run = Reader.readerTests run (genM (gen r)) r a
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 

@@ -8,11 +8,13 @@ module Pure
 , a
 , b
 , e
+, r
 , genC
 , T(..)
 , A
 , B
 , E
+, R
 , C
 , Rec(..)
 , forall
@@ -21,7 +23,7 @@ module Pure
 
 import Control.Carrier.Pure
 import Hedgehog
-import Hedgehog.Function hiding (C)
+import Hedgehog.Function hiding (C, R)
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
@@ -66,6 +68,11 @@ e :: Gen (T E)
 e = genT
 
 data E
+
+r :: Gen (T R)
+r = genT
+
+data R
 
 genC :: Gen (T C)
 genC = genT
