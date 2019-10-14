@@ -124,6 +124,7 @@ test-suite test
   other-modules:
     Catch
     Choose
+    Cull
     Empty
     Error
     Fusion
