@@ -2,6 +2,7 @@
 module Empty
 ( genEmpty
 , tests
+, emptyTests
 ) where
 
 import qualified Control.Carrier.Empty.Maybe as EmptyC
