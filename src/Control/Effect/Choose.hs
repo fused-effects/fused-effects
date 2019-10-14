@@ -74,6 +74,10 @@ optional a = Just <$> a <|> pure Nothing
 
 -- | Zero or more.
 --
+-- @
+-- 'many' m = 'some' m '<|>' 'pure' []
+-- @
+--
 -- @since 1.0.0.0
 many :: Has Choose sig m => m a -> m [a]
 many a = go where go = (:) <$> a <*> go <|> pure []
