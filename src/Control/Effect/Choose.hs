@@ -44,7 +44,13 @@ instance Effect   Choose
 -- | Nondeterministically choose between two computations.
 --
 -- @
--- runChooseA (m '<|>' n) = ('++') '<$>' runChooseA m '<*>' runChooseA n
+-- (m '<|>' n) '<|>' o = m '<|>' (n '<|>' o)
+-- @
+-- @
+-- 'empty' '<|>' m = m
+-- @
+-- @
+-- m '<|>' 'empty' = m
 -- @
 --
 -- @since 1.0.0.0
