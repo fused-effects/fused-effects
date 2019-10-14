@@ -7,7 +7,7 @@ module Cut
 
 import qualified Control.Carrier.Cut.Church as CutC
 import Control.Effect.Choose
-import Control.Effect.Cut (Cut, cutfail)
+import Control.Effect.Cut (Cut, call, cutfail)
 import Control.Effect.NonDet (NonDet)
 import Hedgehog
 import Hedgehog.Function
@@ -40,5 +40,5 @@ cutTests runCut m a b
   : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
     (\ (With m) -> runCut (cutfail <|> m) === runCut cutfail))
   : testProperty "call delimits cutfail" (forall (m a :. Nil)
-    (\ (With m) -> call_delimiting (===) runCut m))
+    (\ (With m) -> runCut (call cutfail <|> m) === runCut m))
   : NonDet.nonDetTests runCut m a b
