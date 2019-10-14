@@ -6,6 +6,7 @@ import qualified Choose
 import qualified Empty
 import qualified Error
 import qualified Fusion
+import qualified NonDet
 import qualified NonDet.Church
 import qualified Reader
 import qualified State
@@ -18,6 +19,7 @@ main = defaultMain $ testGroup "unit tests"
   , Empty.tests
   , Error.tests
   , Fusion.tests
+  , NonDet.tests
   , NonDet.Church.tests
   , Reader.tests
   , State.tests
