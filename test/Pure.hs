@@ -45,7 +45,7 @@ genM with = fmap Blind . go where
 
 
 genT :: Gen (T a)
-genT = T <$> integral (linear 0 10)
+genT = T <$> integral (linear 0 100)
 
 newtype T a = T { unT :: Integer }
   deriving (Enum, Eq, Generic, Num, Ord, Real, Show, Vary)
@@ -78,7 +78,7 @@ s = genT
 type S = T "S"
 
 w :: Gen W
-w = list (linear 0 10) genT
+w = list (linear 0 100) genT
 
 type W = [T "W"]
 
