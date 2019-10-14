@@ -43,8 +43,8 @@ gen s _ a = choice
 
 stateTests :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen s -> Gen a -> [TestTree]
 stateTests runState m s a =
-  [ testProperty "get state" . forall (s :. fn (m a) :. Nil) $
+  [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
     \ s (FnWith k) -> get_state (===) runState s k
-  , testProperty "put update" . forall (s :. s :. m a :. Nil) $
+  , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
     \ s s' (With m) -> put_update (===) runState s s' m
   ]
