@@ -30,8 +30,8 @@ gen m a = subterm2 (m a) (m a) (liftWith2 "(<|>)" (<|>))
 
 chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
 chooseTests runChoose m a b =
-  [ testProperty "<|> distributivity" . forall (m a :. m a :. fn (m b) :. Nil) $
+  [ testProperty ">>= distributes over <|>" . forall (m a :. m a :. fn (m b) :. Nil) $
     \ (With m) (With n) (FnWith k) -> choose_distributivity (===) runChoose m n k
-  , testProperty "<|> associativity" . forall (m a :. m a :. m a :. Nil) $
+  , testProperty "<|> is associative" . forall (m a :. m a :. m a :. Nil) $
     \ (With m) (With n) (With o) -> choose_associativity (===) runChoose m n o
   ]
