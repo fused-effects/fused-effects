@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE RankNTypes #-}
 module Choose
 ( tests
 , gen
@@ -28,9 +28,9 @@ gen :: Has Choose sig m => Gen a -> Gen (m a) -> Gen (m a)
 gen _ m = subterm2 m m (<|>)
 
 
-chooseTests :: forall a b m sig . (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
+chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
 chooseTests runChoose m a b =
-  [ testProperty "<|> distributivity" . forall (m a :. m a :. fn @a (m b) :. Nil) $
+  [ testProperty "<|> distributivity" . forall (m a :. m a :. fn (m b) :. Nil) $
     \ m n k -> choose_distributivity (~=) runChoose (getBlind m) (getBlind n) (getBlind . apply k)
   , testProperty "<|> associativity" . forall (m a :. m a :. m a :. Nil) $
     \ m n o -> choose_associativity (~=) runChoose (getBlind m) (getBlind n) (getBlind o)
