@@ -34,8 +34,8 @@ import Hedgehog.Function hiding (R, S)
 import Hedgehog.Gen
 import Hedgehog.Range
 
-(~=) :: (Eq a, Show a) => PureC a -> PureC a -> PropertyT IO ()
-m1 ~= m2 = run m1 === run m2
+(~=) :: (Eq a, Show a, HasCallStack) => PureC a -> PureC a -> PropertyT IO ()
+m1 ~= m2 = withFrozenCallStack $ run m1 === run m2
 
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
