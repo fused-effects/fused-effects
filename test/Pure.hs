@@ -20,6 +20,7 @@ module Pure
 , Rec(..)
 , forall
 , Blind(..)
+, With(..)
 ) where
 
 import Control.Carrier.Pure
@@ -109,3 +110,10 @@ newtype Blind a = Blind { getBlind :: a }
 
 instance Show (Blind a) where
   show _ = "_"
+
+
+data With a = With { showWith :: String, getWith :: a }
+  deriving (Eq, Ord)
+
+instance Show (With a) where
+  show = showWith
