@@ -24,6 +24,7 @@ module Pure
 ) where
 
 import Control.Carrier.Pure
+import Data.Function (on)
 import Data.Functor.Classes (showsUnaryWith)
 import Data.Proxy
 import GHC.Stack
@@ -109,7 +110,10 @@ instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) wher
 
 
 data With a = With { showWith :: String, getWith :: a }
-  deriving (Eq, Functor, Ord)
+  deriving (Functor)
+
+instance Eq a => Eq (With a) where
+  (==) = (==) `on` getWith
 
 instance Applicative With where
   pure = With "_"
