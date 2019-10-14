@@ -30,7 +30,7 @@ genM with a = go where
   go = Gen.sized $ \case
     Size i
       | i <= 1 -> fmap pure a
-      | otherwise -> Gen.choice (fmap pure a : (with <*> [a] <*> [go]))
+      | otherwise -> Gen.choice (fmap pure a : (with <*> [a] <*> [Gen.scale (`div` 2) go]))
 
 
 genA :: Gen A
