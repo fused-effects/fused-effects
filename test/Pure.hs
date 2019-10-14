@@ -27,6 +27,7 @@ module Pure
 import Control.Carrier.Pure
 import Data.Functor.Classes (showsUnaryWith)
 import Data.Proxy
+import GHC.Stack
 import GHC.TypeLits
 import Hedgehog
 import Hedgehog.Function hiding (R, S)
@@ -97,11 +98,11 @@ data Rec as where
   Nil :: Rec '[]
   (:.) :: a -> Rec as -> Rec (a ': as)
 
-forall :: Forall g f => g -> f -> Hedgehog.Property
-forall g f = Hedgehog.property (forall' g f)
+forall :: (Forall g f, HasCallStack) => g -> f -> Hedgehog.Property
+forall g f = withFrozenCallStack $ Hedgehog.property (forall' g f)
 
 class Forall g f | g -> f, f -> g where
-  forall' :: g -> f -> PropertyT IO ()
+  forall' :: HasCallStack => g -> f -> PropertyT IO ()
 
 instance Forall (Rec '[]) (PropertyT IO ()) where
   forall' Nil = id
