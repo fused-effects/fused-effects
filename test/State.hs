@@ -37,7 +37,7 @@ tests = testGroup "State"
 gen :: forall s m a sig . (Has (State s) sig m, Arg s, Show a, Show s, Vary s) => Gen s -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
 gen s _ a = choice
   [ (atom "gets" (gets @s) <*>) . showingFn <$> fn a
-  , (<*>) . (atom "(<$)" (<$) <*>) . showing <$> a <*> ((atom "put" put <*>) . showing <$> s)
+  , liftWith2 (atom "(<$)" (<$)) . showing <$> a <*> ((atom "put" put <*>) . showing <$> s)
   ]
 
 

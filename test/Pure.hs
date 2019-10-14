@@ -22,6 +22,7 @@ module Pure
 , showing
 , showingFn
 , atom
+, liftWith2
 ) where
 
 import Control.Carrier.Pure
@@ -131,3 +132,6 @@ showingFn = With . flip showsPrec <*> apply
 
 atom :: String -> a -> With a
 atom s = With (\ _ -> showString s)
+
+liftWith2 :: With (a -> b -> c) -> With a -> With b -> With c
+liftWith2 w a b = w <*> a <*> b

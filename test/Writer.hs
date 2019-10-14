@@ -36,10 +36,10 @@ gen :: forall w m a sig . (Has (Writer w) sig m, Arg w, Show a, Show w, Vary w) 
 gen w m a = choice
   [ (<*>) . (atom "(<$)" (<$) <*>) . showing <$> a <*> ((atom "tell" tell <*>) . showing <$> w)
   , subtermM (m a) (\ m -> choice
-    [(\ f -> (atom "fmap" fmap <*> (atom "." (.) <*> showingFn f <*> atom "fst" fst) <*> (atom "listen" (listen @w) <*> m))) <$> fn a
-    , pure (atom "fmap" fmap <*> atom "snd" snd <*> (atom "listen" (listen @w) <*> m))
+    [(\ f -> (liftWith2 (atom "fmap" fmap) (liftWith2 (atom "(.)" (.)) (showingFn f) (atom "fst" fst)) (atom "listen" (listen @w) <*> m))) <$> fn a
+    , pure (liftWith2 (atom "fmap" fmap) (atom "snd" snd) (atom "listen" (listen @w) <*> m))
     ])
-  , fn w >>= \ f -> subterm (m a) (atom "censor" censor <*> showingFn f <*>)
+  , fn w >>= subterm (m a) . liftWith2 (atom "censor" censor) . showingFn
   ]
 
 
