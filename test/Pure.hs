@@ -21,6 +21,7 @@ module Pure
 , forall
 , With(..)
 , showing
+, showingFn
 ) where
 
 import Control.Carrier.Pure
@@ -118,3 +119,6 @@ instance Show (With a) where
 
 showing :: Show a => a -> With a
 showing = With . show <*> id
+
+showingFn :: (Show a, Show b) => Fn a b -> With (a -> b)
+showingFn = With . show <*> apply
