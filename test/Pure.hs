@@ -4,9 +4,11 @@ module Pure
 ( module Control.Carrier.Pure
 , (~=)
 , genM
+, genT
 , genA
 , genB
 , genC
+, T(..)
 , A(..)
 , B(..)
 , C(..)
@@ -39,6 +41,14 @@ genM with = fmap Blind . go where
       | i <= 1 -> fmap pure a
       | otherwise -> Gen.choice [ fmap pure a, with (Gen.scale (`div` 2) . go) a]
 
+
+genT :: Gen (T a)
+genT = Gen.integral (Range.linear 0 10)
+
+newtype T a = T { unT :: Integer }
+  deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
+
+instance Arg (T a)
 
 genA :: Gen A
 genA = Gen.integral (Range.linear 0 10)
