@@ -21,7 +21,7 @@ tests = testGroup "Cull"
   [ testGroup "CullC" $ cullTests CullC.runCullA
   ] where
   cullTests :: (Has Cull sig m, Has NonDet sig m) => (forall a . m a -> PureC [a]) -> [TestTree]
-  cullTests run = Cull.cullTests run (genM gen) a genB
+  cullTests run = Cull.cullTests run (genM gen) a b
 
 
 gen :: (Has Cull sig m, Has NonDet sig m) => (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)

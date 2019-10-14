@@ -6,7 +6,7 @@ module Pure
 , genM
 , genT
 , a
-, genB
+, b
 , genC
 , T(..)
 , A
@@ -55,8 +55,8 @@ a = genT
 
 data A
 
-genB :: Gen (T B)
-genB = genT
+b :: Gen (T B)
+b = genT
 
 data B
 

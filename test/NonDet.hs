@@ -29,7 +29,7 @@ tests = testGroup "NonDet"
   , testGroup "[]"               $ nonDetTests pure
   ] where
   nonDetTests :: Has NonDet sig m => (forall a . m a -> PureC [a]) -> [TestTree]
-  nonDetTests run = NonDet.nonDetTests run (genM gen) a genB
+  nonDetTests run = NonDet.nonDetTests run (genM gen) a b
 
 
 gen :: Has NonDet sig m => (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
