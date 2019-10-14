@@ -31,5 +31,7 @@ nonDetTests :: forall a b m sig . (Has NonDet sig m, Arg a, Eq a, Eq b, Show a,
 nonDetTests runNonDet m a b
   =  testProperty "<|> left identity" (forall (m a :. Nil)
     (\ m -> choose_leftIdentity (~=) runNonDet (getBlind m)))
+  :  testProperty "<|> right identity" (forall (m a :. Nil)
+    (\ m -> choose_rightIdentity (~=) runNonDet (getBlind m)))
   :  Empty.emptyTests   (fmap listToMaybe . runNonDet) m a b
   ++ Choose.chooseTests runNonDet m a b
