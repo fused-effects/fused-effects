@@ -47,8 +47,13 @@ instance Effect Cut where
 --
 --   Contrast with 'empty', which fails the current branch but allows backtracking.
 --
---   prop> run (runNonDet (runCut (cutfail <|> pure a))) === []
---   prop> run (runNonDet (runCut (pure a <|> cutfail))) === [a]
+-- @
+-- 'cutfail' '>>=' k = 'cutfail'
+-- @
+--
+-- @
+-- 'cutfail' '<|>' m = 'cutfail'
+-- @
 --
 -- @since 0.1.2.0
 cutfail :: Has Cut sig m => m a
