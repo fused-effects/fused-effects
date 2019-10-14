@@ -36,7 +36,7 @@ gen :: Has NonDet sig m => (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
 gen m a = choice [ Empty.gen m a, Choose.gen m a ]
 
 
-nonDetTests :: forall a b m sig . (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a. Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
+nonDetTests :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a. Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
 nonDetTests runNonDet m a b
   =  testProperty "<|> left identity" (forall (m a :. Nil)
     (\ m -> choose_leftIdentity (~=) runNonDet (getBlind m)))
