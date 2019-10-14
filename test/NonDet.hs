@@ -11,6 +11,7 @@ import qualified Control.Carrier.NonDet.Church as Church.NonDetC
 import qualified Control.Carrier.NonDet.Maybe as Maybe.NonDetC
 import Control.Effect.Choose
 import Control.Effect.NonDet (NonDet)
+import qualified Control.Monad.Trans.Maybe as MaybeT
 import Data.Maybe (listToMaybe, maybeToList)
 import qualified Empty
 import Hedgehog
@@ -24,6 +25,7 @@ tests :: TestTree
 tests = testGroup "NonDet"
   [ testGroup "NonDetC (Church)" $ nonDetTests Church.NonDetC.runNonDetA
   , testGroup "NonDetC (Maybe)"  $ nonDetTests (fmap maybeToList . Maybe.NonDetC.runNonDet)
+  , testGroup "MaybeT"           $ nonDetTests (fmap maybeToList . MaybeT.runMaybeT)
   , testGroup "[]"               $ nonDetTests pure
   ] where
   nonDetTests :: Has NonDet sig m => (forall a . m a -> PureC [a]) -> [TestTree]
