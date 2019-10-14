@@ -50,5 +50,5 @@ writerTests runWriter m w a =
   , testProperty "listen eavesdrop" . forall (m a :. Nil) $
     \ (With _ m) -> listen_eavesdrop (===) runWriter m
   , testProperty "censor revision" . forall (fn w :. m a :. Nil) $
-    \ f (With _ m) -> censor_revision (===) runWriter (apply f) m
+    \ (Fn f) (With _ m) -> censor_revision (===) runWriter f m
   ]
