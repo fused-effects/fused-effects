@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Error
-( gen
-, tests
+( tests
+, gen
 ) where
 
 import qualified Control.Carrier.Error.Either as ErrorC
