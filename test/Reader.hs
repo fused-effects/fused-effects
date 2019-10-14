@@ -43,5 +43,5 @@ readerTests runReader m r a =
   [ testProperty "ask returns the environment variable" . forall (r :. fn (m a) :. Nil) $
     \ r (FnWith k) -> runReader r (ask >>= k) === runReader r (k r)
   , testProperty "local modifies the environment variable" . forall (r :. fn r :. m a :. Nil) $
-    \ r (Fn f) (With m) -> local_modification (===) runReader r f m
+    \ r (Fn f) (With m) -> runReader r (local f m) === runReader (f r) m
   ]
