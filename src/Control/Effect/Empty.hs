@@ -15,8 +15,6 @@ module Control.Effect.Empty
   Empty(..)
 , empty
 , guard
-  -- * Properties
-, empty_annihilation
   -- * Re-exports
 , Carrier
 , Has
@@ -51,12 +49,3 @@ empty = send Empty
 guard :: Has Empty sig m => Bool -> m ()
 guard True  = pure ()
 guard False = empty
-
-
--- Properties
-
--- | 'empty' annihilates '>>='.
---
--- @since 1.0.0.0
-empty_annihilation :: Has Empty sig m => (c -> c -> prop) -> (m b -> c) -> (a -> m b) -> prop
-empty_annihilation (===) runEmpty k = runEmpty (empty >>= k) === runEmpty empty

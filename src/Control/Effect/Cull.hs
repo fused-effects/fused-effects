@@ -11,8 +11,6 @@ module Control.Effect.Cull
 ( -- * Cull effect
   Cull(..)
 , cull
-  -- * Properties
-, cull_pruning
   -- * Re-exports
 , Carrier
 , Has
@@ -20,7 +18,6 @@ module Control.Effect.Cull
 ) where
 
 import Control.Carrier
-import Control.Effect.Choose (Choose, (<|>))
 
 -- | 'Cull' effects are used with 'Choose' to provide control over branching.
 --
@@ -47,9 +44,3 @@ instance Effect Cull where
 -- @since 0.1.2.0
 cull :: Has Cull sig m => m a -> m a
 cull m = send (Cull m pure)
-
-
--- Properties
-
-cull_pruning :: (Has Cull sig m, Has Choose sig m) => (n [a] -> n [a] -> prop) -> (m a -> n [a]) -> a -> m a -> m a -> prop
-cull_pruning (===) runCull a m n = runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)

@@ -10,8 +10,6 @@ module Control.Effect.Catch
 ( -- * Catch effect
   Catch(..)
 , catchError
-  -- * Properties
-, catchError_interception
   -- * Re-exports
 , Carrier
 , Has
@@ -19,7 +17,6 @@ module Control.Effect.Catch
 ) where
 
 import Control.Carrier
-import Control.Effect.Throw
 
 -- | 'Catch' effects can be used alongside 'Control.Effect.Throw.Throw' to provide recoverable exceptions.
 data Catch e m k
@@ -49,12 +46,3 @@ instance Effect (Catch e) where
 -- @since 0.1.0.0
 catchError :: Has (Catch e) sig m => m a -> (e -> m a) -> m a
 catchError m h = send (Catch m h pure)
-
-
--- Properties
-
--- | 'catchError' intercepts 'throwError'.
---
--- @since 1.0.0.0
-catchError_interception :: (Has (Catch e) sig m, Has (Throw e) sig m) => (b -> b -> prop) -> (m a -> b) -> e -> (e -> m a) -> prop
-catchError_interception (===) runCatch e f = runCatch (throwError e `catchError` f) === runCatch (f e)

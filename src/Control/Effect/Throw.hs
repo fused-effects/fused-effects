@@ -11,8 +11,6 @@ module Control.Effect.Throw
 ( -- * Throw effect
   Throw(..)
 , throwError
-  -- * Properties
-, throwError_annihilation
   -- * Re-exports
 , Carrier
 , Has
@@ -35,12 +33,3 @@ instance Effect   (Throw e)
 -- @since 0.1.0.0
 throwError :: Has (Throw e) sig m => e -> m a
 throwError = send . Throw
-
-
--- Properties
-
--- | 'throwError' annihilates '>>='.
---
--- @since 1.0.0.0
-throwError_annihilation :: Has (Throw e) sig m => (c -> c -> prop) -> (m b -> c) -> e -> (a -> m b) -> prop
-throwError_annihilation (===) runThrow e k = runThrow (throwError e >>= k) === runThrow (throwError e)

@@ -19,19 +19,13 @@ module Control.Effect.Writer
 , listen
 , listens
 , censor
-  -- * Properties
-, tell_append
-, listen_eavesdrop
-, censor_revision
   -- * Re-exports
 , Carrier
 , Has
 , run
 ) where
 
-import Control.Arrow ((&&&))
 import Control.Carrier
-import Data.Bifunctor (first)
 
 -- | @since 0.1.0.0
 data Writer w m k
@@ -96,24 +90,3 @@ listens f m = send (Listen m (curry pure . f))
 censor :: Has (Writer w) sig m => (w -> w) -> m a -> m a
 censor f m = send (Censor f m pure)
 {-# INLINE censor #-}
-
-
--- Properties
-
--- | 'tell' appends a value to the log.
---
--- @since 1.0.0.0
-tell_append :: (Has (Writer w) sig m, Monoid w, Functor n) => (n (w, b) -> n (w, b) -> prop) -> (m a -> n (w, b)) -> w -> m a -> prop
-tell_append (===) runWriter w m = runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
-
--- | 'listen' eavesdrops on written output.
---
--- @since 1.0.0.0
-listen_eavesdrop :: (Has (Writer w) sig m, Functor n) => (n (w, (w, a)) -> n (w, (w, a)) -> prop) -> (forall a . m a -> n (w, a)) -> m a -> prop
-listen_eavesdrop (===) runWriter m = runWriter (listen m) === fmap (fst &&& id) (runWriter m)
-
--- | 'censor' revises written output.
---
--- @since 1.0.0.0
-censor_revision :: (Has (Writer w) sig m, Functor n) => (n (w, a) -> n (w, a) -> prop) -> (m a -> n (w, a)) -> (w -> w) -> m a -> prop
-censor_revision (===) runWriter f m = runWriter (censor f m) === fmap (first f) (runWriter m)

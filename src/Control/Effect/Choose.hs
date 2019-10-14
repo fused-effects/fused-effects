@@ -20,11 +20,6 @@ module Control.Effect.Choose
 , some1
   -- * Choosing semigroup
 , Choosing(..)
-  -- * Properties
-, choose_distributivity
-, choose_associativity
-, choose_leftIdentity
-, choose_rightIdentity
   -- * Re-exports
 , Carrier
 , Has
@@ -120,18 +115,3 @@ instance Has Choose sig m => S.Semigroup (Choosing m a) where
 instance (Has Choose sig m, Has Empty sig m) => Monoid (Choosing m a) where
   mempty = Choosing empty
   mappend = (S.<>)
-
-
--- Properties
-
-choose_distributivity :: Has Choose sig m => (n [b] -> n [b] -> prop) -> (m b -> n [b]) -> m a -> m a -> (a -> m b) -> prop
-choose_distributivity (===) runChoose m n k = runChoose ((m <|> n) >>= k) === runChoose ((m >>= k) <|> (n >>= k))
-
-choose_associativity :: Has Choose sig m => (n [a] -> n [a] -> prop) -> (m a -> n [a]) -> m a -> m a -> m a -> prop
-choose_associativity (===) runChoose m n o = runChoose ((m <|> n) <|> o) === runChoose (m <|> (n <|> o))
-
-choose_leftIdentity :: (Has Choose sig m, Has Empty sig m) => (n [a] -> n [a] -> prop) -> (m a -> n [a]) -> m a -> prop
-choose_leftIdentity (===) runChoose m = runChoose (empty <|> m) === runChoose m
-
-choose_rightIdentity :: (Has Choose sig m, Has Empty sig m) => (n [a] -> n [a] -> prop) -> (m a -> n [a]) -> m a -> prop
-choose_rightIdentity (===) runChoose m = runChoose (m <|> empty) === runChoose m

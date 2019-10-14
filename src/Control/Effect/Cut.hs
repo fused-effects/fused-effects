@@ -15,10 +15,6 @@ module Control.Effect.Cut
 , cutfail
 , call
 , cut
-  -- * Properties
-, cutfail_bindAnnihilation
-, cutfail_chooseAnnihilation
-, call_delimiting
   -- * Re-exports
 , Carrier
 , Has
@@ -27,7 +23,6 @@ module Control.Effect.Cut
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import qualified Control.Effect.Choose as Choose
 
 -- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
 --
@@ -86,24 +81,3 @@ call m = send (Call m pure)
 cut :: (Alternative m, Has Cut sig m) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}
-
-
--- * Properties
-
--- | 'cutfail' annihilates '>>='.
---
--- @since 1.0.0.0
-cutfail_bindAnnihilation :: Has Cut sig m => (c -> c -> prop) -> (m b -> c) -> (a -> m b) -> prop
-cutfail_bindAnnihilation (===) runCut k = runCut (cutfail >>= k) === runCut cutfail
-
--- | 'cutfail' annihilates '<|>'.
---
--- @since 1.0.0.0
-cutfail_chooseAnnihilation :: (Has Choose.Choose sig m, Has Cut sig m) => (c -> c -> prop) -> (m a -> c) -> m a -> prop
-cutfail_chooseAnnihilation (===) runCut m = runCut (cutfail Choose.<|> m) === runCut cutfail
-
--- | 'call' delimits the effect of 'cutfail'.
---
--- @since 1.0.0.0
-call_delimiting :: (Has Choose.Choose sig m, Has Cut sig m) => (c -> c -> prop) -> (m a -> c) -> m a -> prop
-call_delimiting (===) runCut m = runCut (call cutfail Choose.<|> m) === runCut m
