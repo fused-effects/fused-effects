@@ -42,10 +42,7 @@ genM
   -> Gen (Blind (m a))                                                  -- ^ A generator producing computations, wrapped in 'Blind' for convenience.
 genM with = fmap Blind . go where
   go :: forall a . Gen a -> Gen (m a)
-  go a = sized $ \case
-    Size i
-      | i <= 1 -> fmap pure a
-      | otherwise -> choice [ fmap pure a, with (scale (`div` 2) . go) a]
+  go a = recursive choice [fmap pure a] [with go a]
 
 
 genT :: Gen (T a)
