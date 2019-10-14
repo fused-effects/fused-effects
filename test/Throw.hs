@@ -22,7 +22,7 @@ tests = testGroup "Throw" $
 
 
 gen :: (Has (Throw e) sig m, Show e) => Gen e -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
-gen e _ _ = (atom "throwError" throwError <*>) . showing <$> e
+gen e _ _ = liftWith "throwError" throwError . showing <$> e
 
 
 throwTests :: forall e m a b sig . (Has (Throw e) sig m, Arg a, Eq b, Eq e, Show a, Show b, Show e, Vary a) => (forall a . m a -> PureC (Either e a)) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
