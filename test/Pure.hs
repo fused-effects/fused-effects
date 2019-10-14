@@ -9,9 +9,9 @@ module Pure
 , genB
 , genC
 , T(..)
-, A(..)
-, B(..)
-, C(..)
+, A
+, B
+, C
 , Rec(..)
 , forall
 , Blind(..)
@@ -50,29 +50,20 @@ newtype T a = T { unT :: Integer }
 
 instance Arg (T a)
 
-genA :: Gen A
+genA :: Gen (T A)
 genA = Gen.integral (Range.linear 0 10)
 
-newtype A = A { unA :: Integer }
-  deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
+data A
 
-instance Arg A
-
-genB :: Gen B
+genB :: Gen (T B)
 genB = Gen.integral (Range.linear 0 10)
 
-newtype B = B { unB :: Integer }
-  deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
+data B
 
-instance Arg B
-
-genC :: Gen C
+genC :: Gen (T C)
 genC = Gen.integral (Range.linear 0 10)
 
-newtype C = C { unC :: Integer }
-  deriving (Enum, Eq, Generic, Integral, Num, Ord, Real, Show, Vary)
-
-instance Arg C
+data C
 
 
 infixr 5 :.

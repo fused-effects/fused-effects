@@ -21,7 +21,7 @@ tests = testGroup "Error" $
   , testGroup "Either"  $ errorTests pure
   , testGroup "ExceptT" $ errorTests ExceptT.runExceptT
   ] where
-  errorTests :: Has (Error C) sig m => (forall a . m a -> PureC (Either C a)) -> [TestTree]
+  errorTests :: Has (Error (T C)) sig m => (forall a . m a -> PureC (Either (T C) a)) -> [TestTree]
   errorTests run = Error.errorTests run (genM (gen genC)) genC genA genB
 
 
