@@ -25,7 +25,12 @@ import qualified Hedgehog.Range as Range
 m1 ~= m2 = run m1 === run m2
 
 
-genM :: forall m a . Applicative m => (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)) -> Gen a -> Gen (Blind (m a))
+genM
+  :: forall m a
+  .  Applicative m
+  => (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a))
+  -> Gen a
+  -> Gen (Blind (m a))
 genM with = fmap Blind . go where
   go :: forall a . Gen a -> Gen (m a)
   go a = Gen.sized $ \case
