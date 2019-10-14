@@ -43,4 +43,4 @@ throwError = send . Throw
 --
 -- @since 1.0.0.0
 throwError_annihilation :: Has (Throw e) sig m => (c -> c -> prop) -> (m b -> c) -> e -> (a -> m b) -> prop
-throwError_annihilation (===) runError e k = runError (throwError e >>= k) === runError (throwError e)
+throwError_annihilation (===) runThrow e k = runThrow (throwError e >>= k) === runThrow (throwError e)
