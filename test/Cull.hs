@@ -24,14 +24,14 @@ tests = testGroup "Cull"
   cullTests run = Cull.cullTests run (genM gen) a b
 
 
-gen :: (Has Cull sig m, Has NonDet sig m) => (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
+gen :: (Has Cull sig m, Has NonDet sig m, Show a) => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
 gen m a = choice
-  [ subterm (m a) cull
+  [ subterm (m a) (With "cull" cull <*>)
   , NonDet.gen m a
   ]
 
 
-cullTests :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a. Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
+cullTests :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
 cullTests runCull m a b
   = testProperty "cull pruning" (forall (a :. m a :. m a :. Nil)
     (\ a m n -> cull_pruning (~=) runCull a (getWith m) (getWith n)))

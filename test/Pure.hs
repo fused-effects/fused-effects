@@ -37,13 +37,13 @@ m1 ~= m2 = run m1 === run m2
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
 genM
   :: forall m a
-  .  Applicative m
-  => (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)) -- ^ A higher-order generator producing operations using any effects in @m@.
-  -> Gen a                                                              -- ^ A generator for results.
-  -> Gen (With (m a))                                                   -- ^ A generator producing computations, wrapped in 'With' for convenience.
-genM with = fmap pure . go where
-  go :: forall a . Gen a -> Gen (m a)
-  go a = recursive choice [fmap pure a] [with go a]
+  .  (Applicative m, Show a)
+  => (forall a . Show a => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))) -- ^ A higher-order generator producing operations using any effects in @m@.
+  -> Gen a                                                                                      -- ^ A generator for results.
+  -> Gen (With (m a))                                                                           -- ^ A generator producing computations, wrapped in 'With' for convenience.
+genM with = go where
+  go :: forall a . Show a => Gen a -> Gen (With (m a))
+  go a = recursive choice [((With "pure" pure <*>) . showing) <$> a] [with go a]
 
 
 genT :: Gen (T a)

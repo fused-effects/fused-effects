@@ -31,14 +31,14 @@ tests = testGroup "Reader"
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
-gen :: forall r m a sig . (Has (Reader r) sig m, Arg r, Vary r) => Gen r -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
+gen :: forall r m a sig . (Has (Reader r) sig m, Arg r, Show a, Show r, Vary r) => Gen r -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
 gen r m a = choice
-  [ asks @r . apply <$> fn a
-  , fn r >>= subterm (m a) . local . apply
+  [ (With "asks" (asks @r) <*>) . showingFn <$> fn a
+  , fn r >>= subterm (m a) . (<*>) . (With "local" local <*>) . showingFn
   ]
 
 
-readerTests :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r) => (forall a . r -> m a -> PureC a) -> (forall a . Gen a -> Gen (With (m a))) -> Gen r -> Gen a -> [TestTree]
+readerTests :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r) => (forall a . r -> m a -> PureC a) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen r -> Gen a -> [TestTree]
 readerTests runReader m r a =
   [ testProperty "ask environment" . forall (r :. fn (m a) :. Nil) $
     \ r k -> ask_environment (~=) runReader r (getWith . apply k)

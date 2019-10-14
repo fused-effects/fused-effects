@@ -32,15 +32,18 @@ tests = testGroup "Writer"
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
-gen :: forall w m a sig . (Has (Writer w) sig m, Arg w, Vary w) => Gen w -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
+gen :: forall w m a sig . (Has (Writer w) sig m, Arg w, Show a, Show w, Vary w) => Gen w -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
 gen w m a = choice
-  [ (<$) <$> a <*> (tell <$> w)
-  , subtermM (m a) (\ m -> choice [(\ f -> apply f . fst <$> listen @w m) <$> fn a, pure (snd <$> listen @w m)])
-  , fn w >>= subterm (m a) . censor . apply
+  [ (<*>) . (With "(<$)" (<$) <*>) . showing <$> a <*> ((With "tell" tell <*>) . showing <$> w)
+  , subtermM (m a) (\ m -> choice
+    [(\ f -> (With "fmap" fmap <*> (With "." (.) <*> showingFn f <*> With "fst" fst) <*> (With "listen" (listen @w) <*> m))) <$> fn a
+    , pure (With "fmap" fmap <*> With "snd" snd <*> (With "listen" (listen @w) <*> m))
+    ])
+  , fn w >>= \ f -> subterm (m a) (With "censor" censor <*> showingFn f <*>)
   ]
 
 
-writerTests :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> (forall a . Gen a -> Gen (With (m a))) -> Gen w -> Gen a -> [TestTree]
+writerTests :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen w -> Gen a -> [TestTree]
 writerTests runWriter m w a =
   [ testProperty "tell append" . forall (w :. m a :. Nil) $
     \ w m -> tell_append (~=) runWriter w (getWith m)

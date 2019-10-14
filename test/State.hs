@@ -34,14 +34,14 @@ tests = testGroup "State"
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
-gen :: forall s m a sig . (Has (State s) sig m, Arg s, Vary s) => Gen s -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
+gen :: forall s m a sig . (Has (State s) sig m, Arg s, Show a, Show s, Vary s) => Gen s -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
 gen s _ a = choice
-  [ gets @s . apply <$> fn a
-  , (<$) <$> a <*> (put <$> s)
+  [ (With "gets" (gets @s) <*>) . showingFn <$> fn a
+  , (<*>) . (With "(<$)" (<$) <*>) . showing <$> a <*> ((With "put" put <*>) . showing <$> s)
   ]
 
 
-stateTests :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> (forall a . Gen a -> Gen (With (m a))) -> Gen s -> Gen a -> [TestTree]
+stateTests :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen s -> Gen a -> [TestTree]
 stateTests runState m s a =
   [ testProperty "get state" . forall (s :. fn (m a) :. Nil) $
     \ s k -> get_state (~=) runState s (getWith . apply k)

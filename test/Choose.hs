@@ -24,11 +24,11 @@ tests = testGroup "Choose"
   chooseTests run = Choose.chooseTests run (genM gen) a b
 
 
-gen :: Has Choose sig m => (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
-gen m a = subterm2 (m a) (m a) (<|>)
+gen :: (Has Choose sig m, Show a) => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen m a = subterm2 (m a) (m a) (\ l r -> With "(<|>)" (<|>) <*> l <*> r)
 
 
-chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
+chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
 chooseTests runChoose m a b =
   [ testProperty "<|> distributivity" . forall (m a :. m a :. fn (m b) :. Nil) $
     \ m n k -> choose_distributivity (~=) runChoose (getWith m) (getWith n) (getWith . apply k)

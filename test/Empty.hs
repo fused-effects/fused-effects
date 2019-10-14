@@ -24,11 +24,11 @@ tests = testGroup "Empty"
   emptyTests run = Empty.emptyTests run (genM gen) a b
 
 
-gen :: Has Empty sig m => (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
-gen _ _ = pure empty
+gen :: Has Empty sig m => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen _ _ = pure (With "empty" empty)
 
 
-emptyTests :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC (Maybe a)) -> (forall a. Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
+emptyTests :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC (Maybe a)) -> (forall a. Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
 emptyTests runEmpty m _ b =
   [ testProperty "empty annihilation" . forall (fn @a (m b) :. Nil) $
     \ k -> empty_annihilation (~=) runEmpty (getWith . apply k)

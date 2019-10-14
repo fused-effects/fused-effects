@@ -26,14 +26,14 @@ tests = testGroup "Error" $
   errorTests run = Error.errorTests run (genM (gen e)) e a b
 
 
-gen :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
+gen :: (Has (Error e) sig m, Arg e, Show a, Show e, Vary e) => Gen e -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
 gen e m a = choice
   [ Throw.gen e m a
   , Catch.gen e m a
   ]
 
 
-errorTests :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Gen a -> Gen (With (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
+errorTests :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
 errorTests runError m e a b
   =  Throw.throwTests runError m e a b
   ++ Catch.catchTests runError m e a b
