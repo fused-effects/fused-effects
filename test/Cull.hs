@@ -34,6 +34,6 @@ gen m a = choice
 
 cullTests :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
 cullTests runCull m a b
-  = testProperty "cull pruning" (forall (a :. m a :. m a :. Nil)
+  = testProperty "cull returns at most one success" (forall (a :. m a :. m a :. Nil)
     (\ a (With m) (With n) -> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
   : NonDet.nonDetTests runCull m a b
