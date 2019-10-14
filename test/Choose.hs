@@ -24,8 +24,8 @@ tests = testGroup "Choose"
   chooseTests run = Choose.chooseTests run (genM [gen]) genA genB
 
 
-gen :: Has Choose sig m => Gen a -> Gen (m a) -> Gen (m a)
-gen _ m = subterm2 m m (<|>)
+gen :: Has Choose sig m => Gen (m a) -> Gen a -> Gen (m a)
+gen m _ = subterm2 m m (<|>)
 
 
 chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]

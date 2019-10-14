@@ -32,8 +32,8 @@ tests = testGroup "Writer"
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
-gen :: forall a m sig . (Has (Writer a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
-gen a ma = choice
+gen :: forall a m sig . (Has (Writer a) sig m, Arg a, Vary a) => Gen (m a) -> Gen a -> Gen (m a)
+gen ma a = choice
   [ tell' <$> a
   , subtermM ma (\ m -> element [fst <$> listen @a m, snd <$> listen @a m])
   , fn a >>= subterm ma . censor . apply

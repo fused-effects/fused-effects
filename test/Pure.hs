@@ -25,12 +25,12 @@ import qualified Hedgehog.Range as Range
 m1 ~= m2 = run m1 === run m2
 
 
-genM :: Applicative m => [Gen a -> Gen (m a) -> Gen (m a)] -> Gen a -> Gen (Blind (m a))
+genM :: Applicative m => [Gen (m a) -> Gen a -> Gen (m a)] -> Gen a -> Gen (Blind (m a))
 genM with a = Blind <$> go where
   go = Gen.sized $ \case
     Size i
       | i <= 1 -> fmap pure a
-      | otherwise -> Gen.choice (fmap pure a : (with <*> [a] <*> [Gen.scale (`div` 2) go]))
+      | otherwise -> Gen.choice (fmap pure a : (with <*> [Gen.scale (`div` 2) go] <*> [a]))
 
 
 genA :: Gen A

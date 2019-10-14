@@ -32,8 +32,8 @@ tests = testGroup "State"
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
-gen :: Has (State a) sig m => Gen a -> Gen (m a) -> Gen (m a)
-gen a _ = choice [ pure get, put' <$> a ] where
+gen :: Has (State a) sig m => Gen (m a) -> Gen a -> Gen (m a)
+gen _ a = choice [ pure get, put' <$> a ] where
   put' a = a <$ put a
 
 

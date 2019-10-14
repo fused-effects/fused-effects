@@ -25,10 +25,10 @@ tests = testGroup "Error" $
   errorTests run = Error.errorTests run (genM [gen genC]) genC genA genB
 
 
-gen :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> Gen a -> Gen (m a) -> Gen (m a)
-gen e a ma = choice
-  [ Throw.gen e a ma
-  , Catch.gen e a ma
+gen :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> Gen (m a) -> Gen a -> Gen (m a)
+gen e ma a = choice
+  [ Throw.gen e ma a
+  , Catch.gen e ma a
   ]
 
 

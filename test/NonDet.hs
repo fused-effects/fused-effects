@@ -32,8 +32,8 @@ tests = testGroup "NonDet"
   nonDetTests run = NonDet.nonDetTests run (genM [gen]) genA genB
 
 
-gen :: Has NonDet sig m => Gen a -> Gen (m a) -> Gen (m a)
-gen a m = choice [ Empty.gen a m, Choose.gen a m ]
+gen :: Has NonDet sig m => Gen (m a) -> Gen a -> Gen (m a)
+gen m a = choice [ Empty.gen m a, Choose.gen m a ]
 
 
 nonDetTests :: forall a b m sig . (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a. Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]

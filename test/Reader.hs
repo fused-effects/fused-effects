@@ -30,8 +30,8 @@ tests = testGroup "Reader"
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
-gen :: (Has (Reader a) sig m, Arg a, Vary a) => Gen a -> Gen (m a) -> Gen (m a)
-gen a ma = choice
+gen :: (Has (Reader a) sig m, Arg a, Vary a) => Gen (m a) -> Gen a -> Gen (m a)
+gen ma a = choice
   [ pure ask
   , fn a >>= subterm ma . local . apply
   ]

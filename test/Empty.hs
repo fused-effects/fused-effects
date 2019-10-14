@@ -24,7 +24,7 @@ tests = testGroup "Empty"
   emptyTests run = Empty.emptyTests run (genM [gen]) genA genB
 
 
-gen :: Has Empty sig m => Gen a -> Gen (m a) -> Gen (m a)
+gen :: Has Empty sig m => Gen (m a) -> Gen a -> Gen (m a)
 gen _ _ = pure empty
 
 
