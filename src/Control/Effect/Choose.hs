@@ -44,6 +44,9 @@ instance Effect   Choose
 -- | Nondeterministically choose between two computations.
 --
 -- @
+-- (m '<|>' n) '>>=' k = (m '>>=' k) '<|>' (n '>>=' k)
+-- @
+-- @
 -- (m '<|>' n) '<|>' o = m '<|>' (n '<|>' o)
 -- @
 -- @
@@ -51,9 +54,6 @@ instance Effect   Choose
 -- @
 -- @
 -- m '<|>' 'empty' = m
--- @
--- @
--- (m '<|>' n) '>>=' k = (m '>>=' k) '<|>' (n '>>=' k)
 -- @
 --
 -- @since 1.0.0.0
