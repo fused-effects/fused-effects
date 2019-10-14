@@ -8,9 +8,10 @@ module NonDet
 import qualified Choose
 import Control.Carrier
 import qualified Control.Carrier.NonDet.Church as Church.NonDetC
+import qualified Control.Carrier.NonDet.Maybe as Maybe.NonDetC
 import Control.Effect.Choose
 import Control.Effect.NonDet (NonDet)
-import Data.Maybe (listToMaybe)
+import Data.Maybe (listToMaybe, maybeToList)
 import qualified Empty
 import Hedgehog
 import Hedgehog.Function
@@ -22,6 +23,7 @@ import Test.Tasty.Hedgehog
 tests :: TestTree
 tests = testGroup "NonDet"
   [ testGroup "NonDetC (Church)" $ nonDetTests Church.NonDetC.runNonDetA
+  , testGroup "NonDetC (Maybe)"  $ nonDetTests (fmap maybeToList . Maybe.NonDetC.runNonDet)
   , testGroup "[]"               $ nonDetTests pure
   ] where
   nonDetTests :: Has NonDet sig m => (forall a . m a -> PureC [a]) -> [TestTree]
