@@ -34,7 +34,7 @@ tests = testGroup "Reader"
 gen :: forall r m a sig . (Has (Reader r) sig m, Arg r, Show a, Show r, Vary r) => Gen r -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
 gen r m a = choice
   [ (atom "asks" (asks @r) <*>) . showingFn <$> fn a
-  , fn r >>= subterm (m a) . liftWith2 (atom "local" local) . showingFn
+  , fn r >>= subterm (m a) . liftWith2 "local" local . showingFn
   ]
 
 
