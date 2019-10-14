@@ -17,4 +17,4 @@ tests = testGroup "NonDet"
 
 
 genNonDet :: Has NonDet sig m => Gen a -> Gen (m a) -> Gen (m a)
-genNonDet a m = choice [ Empty.genEmpty a m, Choose.gen a m ]
+genNonDet a m = choice [ Empty.gen a m, Choose.gen a m ]

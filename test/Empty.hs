@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Empty
 ( tests
-, genEmpty
+, gen
 , emptyTests
 ) where
 
@@ -21,11 +21,11 @@ tests = testGroup "Empty"
   , testGroup "MaybeT" $ emptyTests MaybeT.runMaybeT
   ] where
   emptyTests :: Has Empty sig m => (forall a . m a -> PureC (Maybe a)) -> [TestTree]
-  emptyTests run = Empty.emptyTests run (genM [genEmpty]) genA genB
+  emptyTests run = Empty.emptyTests run (genM [gen]) genA genB
 
 
-genEmpty :: Has Empty sig m => Gen a -> Gen (m a) -> Gen (m a)
-genEmpty _ _ = pure empty
+gen :: Has Empty sig m => Gen a -> Gen (m a) -> Gen (m a)
+gen _ _ = pure empty
 
 
 emptyTests :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC (Maybe a)) -> (forall a. Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
