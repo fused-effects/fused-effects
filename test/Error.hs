@@ -1,6 +1,6 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Error
-( genError
+( gen
 , tests
 ) where
 
@@ -26,8 +26,8 @@ tests = testGroup "Error" $
   errorTests run = Error.errorTests run genC genA genB
 
 
-genError :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> Gen a -> Gen (m a) -> Gen (m a)
-genError e a ma = choice
+gen :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> Gen a -> Gen (m a) -> Gen (m a)
+gen e a ma = choice
   [ Throw.genThrow e a ma
   , Catch.genCatch e a ma
   ]
@@ -35,8 +35,8 @@ genError e a ma = choice
 
 errorTests :: forall e m a b sig . (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => (forall a . m a -> PureC (Either e a)) -> Gen e -> Gen a -> Gen b -> [TestTree]
 errorTests runError e a b =
-  [ testProperty "throwError annihilation" . forall (e :. fn @a (genM [genError e] b) :. Nil) $
+  [ testProperty "throwError annihilation" . forall (e :. fn @a (genM [gen e] b) :. Nil) $
     \ e k -> throwError_annihilation (~=) runError e (getBlind . apply k)
-  , testProperty "catchError interception" . forall (e :. fn (genM [genError e] a) :. Nil) $
+  , testProperty "catchError interception" . forall (e :. fn (genM [gen e] a) :. Nil) $
     \ e f -> catchError_interception (~=) runError e (getBlind . apply f)
   ]
