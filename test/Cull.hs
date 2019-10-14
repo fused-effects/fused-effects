@@ -31,7 +31,7 @@ gen m a = choice
   ]
 
 
-cullTests :: forall a b m sig . (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a. Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
+cullTests :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a. Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
 cullTests runCull m a b
   = testProperty "cull pruning" (forall (a :. m a :. m a :. Nil)
     (\ a m n -> cull_pruning (~=) runCull a (getBlind m) (getBlind n)))
