@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Cut
 ( tests
 , gen
@@ -13,6 +13,7 @@ import Hedgehog.Gen
 import qualified NonDet
 import Pure
 import Test.Tasty
+import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Cut"
@@ -29,4 +30,6 @@ gen m a = choice
 
 cutTests :: forall a b m sig . (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a. Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
 cutTests runCut m a b
-  = NonDet.nonDetTests runCut m a b
+  = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
+    (\ k -> cutfail_bindAnnihilation (~=) runCut (getBlind . apply k)))
+  : NonDet.nonDetTests runCut m a b
