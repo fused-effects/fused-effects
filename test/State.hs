@@ -37,9 +37,8 @@ tests = testGroup "State"
 gen :: forall s m a sig . (Has (State s) sig m, Arg s, Vary s) => Gen s -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
 gen s _ a = choice
   [ gets @s . apply <$> fn a
-  , put' <$> s <*> a
-  ] where
-  put' s a = a <$ put s
+  , (<$) <$> a <*> (put <$> s)
+  ]
 
 
 stateTests :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen s -> Gen a -> [TestTree]
