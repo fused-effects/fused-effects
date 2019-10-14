@@ -5,7 +5,7 @@ module Pure
 , (~=)
 , genM
 , genT
-, genA
+, a
 , genB
 , genC
 , T(..)
@@ -50,8 +50,8 @@ newtype T a = T { unT :: Integer }
 
 instance Arg (T a)
 
-genA :: Gen (T A)
-genA = genT
+a :: Gen (T A)
+a = genT
 
 data A
 

@@ -26,7 +26,7 @@ tests = testGroup "Reader"
   , testGroup "RWST (Strict)" $ readerTests (runRWST StrictRWST.runRWST)
   ] where
   readerTests :: Has (Reader (T C)) sig m => (forall a . T C -> m a -> PureC a) -> [TestTree]
-  readerTests run = Reader.readerTests run (genM (gen genC)) genC genA
+  readerTests run = Reader.readerTests run (genM (gen genC)) genC a
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 

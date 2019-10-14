@@ -28,7 +28,7 @@ tests = testGroup "State"
   , testGroup "RWST (Strict)"   $ stateTests (runRWST StrictRWST.runRWST)
   ] where
   stateTests :: Has (State (T C)) sig m => (forall a . (T C -> m a -> PureC (T C, a))) -> [TestTree]
-  stateTests run = State.stateTests run (genM (gen genC)) genC genA
+  stateTests run = State.stateTests run (genM (gen genC)) genC a
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
