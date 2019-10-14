@@ -34,4 +34,6 @@ cutTests runCut m a b
     (\ k -> cutfail_bindAnnihilation (~=) runCut (getBlind . apply k)))
   : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
     (\ m -> cutfail_chooseAnnihilation (~=) runCut (getBlind m)))
+  : testProperty "call delimits cutfail" (forall (m a :. Nil)
+    (\ m -> call_delimiting (~=) runCut (getBlind m)))
   : NonDet.nonDetTests runCut m a b
