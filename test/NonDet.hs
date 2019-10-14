@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
 module NonDet
 ( tests
-, genNonDet
+, gen
 , nonDetTests
 ) where
 
@@ -23,8 +23,8 @@ tests = testGroup "NonDet"
   []
 
 
-genNonDet :: Has NonDet sig m => Gen a -> Gen (m a) -> Gen (m a)
-genNonDet a m = choice [ Empty.gen a m, Choose.gen a m ]
+gen :: Has NonDet sig m => Gen a -> Gen (m a) -> Gen (m a)
+gen a m = choice [ Empty.gen a m, Choose.gen a m ]
 
 
 nonDetTests :: forall a b m sig . (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a. Gen a -> Gen (Blind (m a))) -> Gen a -> Gen b -> [TestTree]
