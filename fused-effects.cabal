@@ -125,6 +125,7 @@ test-suite test
     Catch
     Choose
     Cull
+    Cut
     Empty
     Error
     Fusion
