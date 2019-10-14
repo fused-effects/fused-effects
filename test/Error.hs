@@ -14,7 +14,6 @@ import Hedgehog.Gen
 import Pure
 import qualified Throw
 import Test.Tasty
-import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Error" $
@@ -34,9 +33,6 @@ gen e a ma = choice
 
 
 errorTests :: forall e m a b sig . (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
-errorTests runError m e a b =
-  [ testProperty "throwError annihilation" . forall (e :. fn @a (m b) :. Nil) $
-    \ e k -> throwError_annihilation (~=) runError e (getBlind . apply k)
-  , testProperty "catchError interception" . forall (e :. fn (m a) :. Nil) $
-    \ e f -> catchError_interception (~=) runError e (getBlind . apply f)
-  ]
+errorTests runError m e a b
+  =  Throw.throwTests runError m e a b
+  ++ Catch.catchTests runError m e a b
