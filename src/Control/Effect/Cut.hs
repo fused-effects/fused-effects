@@ -15,6 +15,8 @@ module Control.Effect.Cut
 , cutfail
 , call
 , cut
+  -- * Properties
+, cutfail_bindAnnihilation
   -- * Re-exports
 , Carrier
 , Has
@@ -81,3 +83,12 @@ call m = send (Call m pure)
 cut :: (Alternative m, Has Cut sig m) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}
+
+
+-- * Properties
+
+-- | 'cutfail' annihilates '>>='.
+--
+-- @since 1.0.0.0
+cutfail_bindAnnihilation :: Has Cut sig m => (c -> c -> prop) -> (m b -> c) -> (a -> m b) -> prop
+cutfail_bindAnnihilation (===) runCut k = runCut (cutfail >>= k) === runCut cutfail
