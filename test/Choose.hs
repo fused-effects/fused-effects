@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Choose
 ( genChoose
-, chooseTests
+, testChoose
 , tests
 ) where
 
@@ -22,8 +22,8 @@ genChoose :: Has Choose sig m => Gen a -> Gen (m a) -> Gen (m a)
 genChoose _ m = subterm2 m m (<|>)
 
 
-chooseTests :: forall a b m sig . (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> Gen a -> Gen b -> [TestTree]
-chooseTests runChoose a b =
+testChoose :: forall a b m sig . (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> Gen a -> Gen b -> [TestTree]
+testChoose runChoose a b =
   [ testProperty "choose distributivity" . forall (op :. op :. fn @a (Blind <$> genM [genChoose] b) :. Nil) $
     \ m n k -> choose_distributivity (~=) runChoose (getBlind m) (getBlind n) (getBlind . apply k)
   , testProperty "choose associativity" . forall (op :. op :. op :. Nil) $
