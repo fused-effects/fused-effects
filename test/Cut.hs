@@ -5,6 +5,7 @@ module Cut
 , cutTests
 ) where
 
+import qualified Control.Carrier.Cut.Church as CutC
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import Hedgehog
@@ -17,7 +18,10 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Cut"
-  []
+  [ testGroup "CutC" $ cutTests CutC.runCutA
+  ] where
+  cutTests :: (Has Cut sig m, Has NonDet sig m) => (forall a . m a -> PureC [a]) -> [TestTree]
+  cutTests run = Cut.cutTests run (genM gen) a b
 
 
 gen :: (Has Cut sig m, Has NonDet sig m) => (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
