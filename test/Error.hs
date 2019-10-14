@@ -23,7 +23,7 @@ tests = testGroup "Error" $
   , testGroup "ExceptT" $ errorTests ExceptT.runExceptT
   ] where
   errorTests :: Has (Error C) sig m => (forall a . m a -> PureC (Either C a)) -> [TestTree]
-  errorTests run = Error.errorTests run genC genA genB
+  errorTests run = Error.errorTests run (genM [gen genC]) genC genA genB
 
 
 gen :: (Has (Error e) sig m, Arg e, Vary e) => Gen e -> Gen a -> Gen (m a) -> Gen (m a)
@@ -33,10 +33,10 @@ gen e a ma = choice
   ]
 
 
-errorTests :: forall e m a b sig . (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => (forall a . m a -> PureC (Either e a)) -> Gen e -> Gen a -> Gen b -> [TestTree]
-errorTests runError e a b =
-  [ testProperty "throwError annihilation" . forall (e :. fn @a (genM [gen e] b) :. Nil) $
+errorTests :: forall e m a b sig . (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Gen a -> Gen (Blind (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
+errorTests runError m e a b =
+  [ testProperty "throwError annihilation" . forall (e :. fn @a (m b) :. Nil) $
     \ e k -> throwError_annihilation (~=) runError e (getBlind . apply k)
-  , testProperty "catchError interception" . forall (e :. fn (genM [gen e] a) :. Nil) $
+  , testProperty "catchError interception" . forall (e :. fn (m a) :. Nil) $
     \ e f -> catchError_interception (~=) runError e (getBlind . apply f)
   ]
