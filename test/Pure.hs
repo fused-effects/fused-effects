@@ -10,12 +10,14 @@ module Pure
 , e
 , r
 , s
+, w
 , T(..)
 , A
 , B
 , E
 , R
 , S
+, W
 , Rec(..)
 , forall
 , Blind(..)
@@ -24,6 +26,8 @@ module Pure
 import Control.Carrier.Pure
 import Hedgehog
 import Hedgehog.Function hiding (R, S)
+import Hedgehog.Gen
+import Hedgehog.Range
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
 
@@ -78,6 +82,11 @@ s :: Gen (T S)
 s = genT
 
 data S
+
+w :: Gen [T W]
+w = list (linear 0 10) genT
+
+data W
 
 
 infixr 5 :.

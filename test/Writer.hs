@@ -13,7 +13,6 @@ import Data.Tuple (swap)
 import Hedgehog
 import Hedgehog.Function
 import Hedgehog.Gen
-import Hedgehog.Range
 import Pure
 import Test.Tasty
 import Test.Tasty.Hedgehog
@@ -26,9 +25,8 @@ tests = testGroup "Writer"
   , testGroup "RWST (Lazy)"      $ writerTests (runRWST LazyRWST.runRWST)
   , testGroup "RWST (Strict)"    $ writerTests (runRWST StrictRWST.runRWST)
   ] where
-  writerTests :: Has (Writer [T A]) sig m => (forall a . m a -> PureC ([T A], a)) -> [TestTree]
+  writerTests :: Has (Writer [T W]) sig m => (forall a . m a -> PureC ([T W], a)) -> [TestTree]
   writerTests run = Writer.writerTests run (genM (gen w)) w a
-  w = list (linear 0 10) a
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
