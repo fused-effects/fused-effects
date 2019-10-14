@@ -9,7 +9,7 @@ import Control.Effect.Error
 import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
 import Hedgehog
-import Hedgehog.Function hiding (C)
+import Hedgehog.Function
 import Hedgehog.Gen
 import Pure
 import qualified Throw
