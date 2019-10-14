@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Pure
 ( module Control.Carrier.Pure
 , (~=)
@@ -106,7 +106,7 @@ instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) wher
 
 
 data With a = With { showWith :: String, getWith :: a }
-  deriving (Eq, Ord)
+  deriving (Eq, Functor, Ord)
 
 instance Show (With a) where
   show = showWith
