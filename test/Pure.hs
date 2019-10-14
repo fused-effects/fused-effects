@@ -21,6 +21,7 @@ module Pure
 , forall
 , Blind(..)
 , With(..)
+, blind
 ) where
 
 import Control.Carrier.Pure
@@ -117,3 +118,6 @@ data With a = With { showWith :: String, getWith :: a }
 
 instance Show (With a) where
   show = showWith
+
+blind :: a -> With a
+blind = With "_"
