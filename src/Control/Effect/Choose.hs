@@ -43,6 +43,10 @@ instance Effect   Choose
 
 -- | Nondeterministically choose between two computations.
 --
+-- @
+-- runChooseA (m '<|>' n) = ('++') '<$>' runChooseA m '<*>' runChooseA n
+-- @
+--
 -- @since 1.0.0.0
 (<|>) :: Has Choose sig m => m a -> m a -> m a
 (<|>) a b = send (Choose (bool b a))
