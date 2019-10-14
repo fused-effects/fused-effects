@@ -7,10 +7,12 @@ module Pure
 , genT
 , a
 , b
+, e
 , genC
 , T(..)
 , A
 , B
+, E
 , C
 , Rec(..)
 , forall
@@ -59,6 +61,11 @@ b :: Gen (T B)
 b = genT
 
 data B
+
+e :: Gen (T E)
+e = genT
+
+data E
 
 genC :: Gen (T C)
 genC = genT
