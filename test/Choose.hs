@@ -25,7 +25,7 @@ tests = testGroup "Choose"
 
 
 gen :: (Has Choose sig m, Show a) => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
-gen m a = subterm2 (m a) (m a) (\ l r -> With "(<|>)" (<|>) <*> l <*> r)
+gen m a = subterm2 (m a) (m a) (\ l r -> atom "(<|>)" (<|>) <*> l <*> r)
 
 
 chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]

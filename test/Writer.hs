@@ -34,12 +34,12 @@ tests = testGroup "Writer"
 
 gen :: forall w m a sig . (Has (Writer w) sig m, Arg w, Show a, Show w, Vary w) => Gen w -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
 gen w m a = choice
-  [ (<*>) . (With "(<$)" (<$) <*>) . showing <$> a <*> ((With "tell" tell <*>) . showing <$> w)
+  [ (<*>) . (atom "(<$)" (<$) <*>) . showing <$> a <*> ((atom "tell" tell <*>) . showing <$> w)
   , subtermM (m a) (\ m -> choice
-    [(\ f -> (With "fmap" fmap <*> (With "." (.) <*> showingFn f <*> With "fst" fst) <*> (With "listen" (listen @w) <*> m))) <$> fn a
-    , pure (With "fmap" fmap <*> With "snd" snd <*> (With "listen" (listen @w) <*> m))
+    [(\ f -> (atom "fmap" fmap <*> (atom "." (.) <*> showingFn f <*> atom "fst" fst) <*> (atom "listen" (listen @w) <*> m))) <$> fn a
+    , pure (atom "fmap" fmap <*> atom "snd" snd <*> (atom "listen" (listen @w) <*> m))
     ])
-  , fn w >>= \ f -> subterm (m a) (With "censor" censor <*> showingFn f <*>)
+  , fn w >>= \ f -> subterm (m a) (atom "censor" censor <*> showingFn f <*>)
   ]
 
 

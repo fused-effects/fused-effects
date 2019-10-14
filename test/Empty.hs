@@ -25,7 +25,7 @@ tests = testGroup "Empty"
 
 
 gen :: Has Empty sig m => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
-gen _ _ = pure (With "empty" empty)
+gen _ _ = pure (atom "empty" empty)
 
 
 emptyTests :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC (Maybe a)) -> (forall a. Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]

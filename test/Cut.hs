@@ -26,8 +26,8 @@ tests = testGroup "Cut"
 
 gen :: (Has Cut sig m, Has NonDet sig m, Show a) => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
 gen m a = choice
-  [ subterm (m a) (With "call" call <*>)
-  , pure (With "cutfail" cutfail)
+  [ subterm (m a) (atom "call" call <*>)
+  , pure (atom "cutfail" cutfail)
   , NonDet.gen m a
   ]
 

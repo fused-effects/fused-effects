@@ -21,6 +21,7 @@ module Pure
 , With(..)
 , showing
 , showingFn
+, atom
 ) where
 
 import Control.Carrier.Pure
@@ -43,7 +44,7 @@ genM
   -> Gen (With (m a))                                                                           -- ^ A generator producing computations, wrapped in 'With' for convenience.
 genM with = go where
   go :: forall a . Show a => Gen a -> Gen (With (m a))
-  go a = recursive choice [((With "pure" pure <*>) . showing) <$> a] [with go a]
+  go a = recursive choice [((atom "pure" pure <*>) . showing) <$> a] [with go a]
 
 
 genT :: Gen (T a)
@@ -109,22 +110,24 @@ instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) wher
     forall' gs (f a)
 
 
-data With a = With { showWith :: String, getWith :: a }
+data With a = With { showWith :: Int -> ShowS, getWith :: a }
   deriving (Functor)
 
 instance Eq a => Eq (With a) where
   (==) = (==) `on` getWith
 
 instance Applicative With where
-  pure = With "_"
-  With sf f <*> With sa a = With (sf <> " " <> parens sa) (f a) where
-    parens s = "(" <> s <> ")"
+  pure = atom "_"
+  With sf f <*> With sa a = With (\ d -> showParen (d > 10) (sf 10 . showString " " . sa 11)) (f a)
 
 instance Show (With a) where
-  show = showWith
+  showsPrec d (With s _) = s d
 
 showing :: Show a => a -> With a
-showing = With . show <*> id
+showing = With . flip showsPrec <*> id
 
 showingFn :: (Show a, Show b) => Fn a b -> With (a -> b)
-showingFn = With . show <*> apply
+showingFn = With . flip showsPrec <*> apply
+
+atom :: String -> a -> With a
+atom s = With (\ _ -> showString s)
