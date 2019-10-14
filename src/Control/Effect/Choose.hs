@@ -58,6 +58,9 @@ infixl 3 <|>
 -- @
 -- 'optional' 'empty' = 'pure' 'Nothing'
 -- @
+-- @
+-- 'optional' ('pure' a) = 'pure' ('Just' a)
+-- @
 --
 -- @since 1.0.0.0
 optional :: Has Choose sig m => m a -> m (Maybe a)
