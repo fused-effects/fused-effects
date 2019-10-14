@@ -46,5 +46,5 @@ stateTests runState m s a =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
     \ s (FnWith k) -> runState s (get >>= k) === runState s (k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
-    \ s s' (With m) -> put_update (===) runState s s' m
+    \ s s' (With m) -> runState s (put s' >> m) === runState s' m
   ]
