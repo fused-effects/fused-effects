@@ -28,7 +28,7 @@ genEmpty _ _ = pure empty
 
 
 emptyTests :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC (Maybe a)) -> Gen a -> Gen b -> [TestTree]
-emptyTests runEmpty _ genB =
-  [ testProperty "empty annihilation" . forall (fn @a (Blind <$> genM [genEmpty] genB) :. Nil) $
+emptyTests runEmpty _ b =
+  [ testProperty "empty annihilation" . forall (fn @a (Blind <$> genM [genEmpty] b) :. Nil) $
     \ k -> empty_annihilation (~=) runEmpty (getBlind . apply k)
   ]
