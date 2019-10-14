@@ -84,6 +84,10 @@ many a = go where go = (:) <$> a <*> go <|> pure []
 
 -- | One or more.
 --
+-- @
+-- 'some' m = (:) '<$>' m '<*>' 'many' m
+-- @
+--
 -- @since 1.0.0.0
 some :: Has Choose sig m => m a -> m [a]
 some a = (:) <$> a <*> many a
