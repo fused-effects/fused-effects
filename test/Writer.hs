@@ -11,6 +11,7 @@ import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
+import Data.Bifunctor (first)
 import Data.Tuple (swap)
 import Hedgehog
 import Hedgehog.Function
@@ -46,7 +47,7 @@ gen w m a = choice
 writerTests :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen w -> Gen a -> [TestTree]
 writerTests runWriter m w a =
   [ testProperty "tell append" . forall (w :. m a :. Nil) $
-    \ w (With m) -> tell_append (===) runWriter w m
+    \ w (With m) -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
   , testProperty "listen eavesdrop" . forall (m a :. Nil) $
     \ (With m) -> listen_eavesdrop (===) runWriter m
   , testProperty "censor revision" . forall (fn w :. m a :. Nil) $
