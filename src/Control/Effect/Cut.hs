@@ -18,6 +18,7 @@ module Control.Effect.Cut
   -- * Properties
 , cutfail_bindAnnihilation
 , cutfail_chooseAnnihilation
+, call_delimiting
   -- * Re-exports
 , Carrier
 , Has
@@ -99,3 +100,9 @@ cutfail_bindAnnihilation (===) runCut k = runCut (cutfail >>= k) === runCut cutf
 -- @since 1.0.0.0
 cutfail_chooseAnnihilation :: (Alternative m, Has Cut sig m) => (c -> c -> prop) -> (m a -> c) -> m a -> prop
 cutfail_chooseAnnihilation (===) runCut m = runCut (cutfail <|> m) === runCut cutfail
+
+-- | 'call' delimits the effect of 'cutfail'.
+--
+-- @since 1.0.0.0
+call_delimiting :: (Alternative m, Has Cut sig m) => (c -> c -> prop) -> (m a -> c) -> m a -> prop
+call_delimiting (===) runCut m = runCut (call cutfail <|> m) === runCut m
