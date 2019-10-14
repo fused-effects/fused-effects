@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Pure
 ( module Control.Carrier.Pure
 , genM
@@ -24,6 +24,7 @@ module Pure
 , atom
 , liftWith
 , liftWith2
+, pattern Fn
 ) where
 
 import Control.Carrier.Pure
@@ -139,3 +140,9 @@ liftWith s w a = atom s w <*> a
 
 liftWith2 :: String -> (a -> b -> c) -> With a -> With b -> With c
 liftWith2 s w a b = atom s w <*> a <*> b
+
+
+pattern Fn :: (a -> b) -> Fn a b
+pattern Fn f <- (apply -> f)
+
+{-# COMPLETE Fn #-}
