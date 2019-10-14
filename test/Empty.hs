@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Empty
-( genEmpty
-, tests
+( tests
+, genEmpty
 , emptyTests
 ) where
 
