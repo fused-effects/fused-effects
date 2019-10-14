@@ -13,7 +13,7 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 gen :: forall e m a sig . (Has (Catch e) sig m, Arg e, Vary e) => Gen e -> (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)
-gen _ m a = choice [ fn @e (m a) >>= subterm (m a) . flip catchError . apply ]
+gen _ m a = fn @e (m a) >>= subterm (m a) . flip catchError . apply
 
 
 catchTests :: forall e m a b sig . (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Gen a -> Gen (With (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
