@@ -21,6 +21,7 @@ module Control.Effect.Choose
   -- * Choosing semigroup
 , Choosing(..)
   -- * Properties
+, choose_distributivity
 , choose_associativity
   -- * Re-exports
 , Carrier
@@ -120,6 +121,9 @@ instance (Has Choose sig m, Has Empty sig m) => Monoid (Choosing m a) where
 
 
 -- Properties
+
+choose_distributivity :: Has Choose sig m => (n [b] -> n [b] -> prop) -> (m b -> n [b]) -> m a -> m a -> (a -> m b) -> prop
+choose_distributivity (===) runChoose m n k = runChoose ((m <|> n) >>= k) === runChoose ((m >>= k) <|> (n >>= k))
 
 choose_associativity :: Has Choose sig m => (n [a] -> n [a] -> prop) -> (m a -> n [a]) -> m a -> m a -> m a -> prop
 choose_associativity (===) runChoose m n o = runChoose ((m <|> n) <|> o) === runChoose (m <|> (n <|> o))
