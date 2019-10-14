@@ -12,7 +12,7 @@ import qualified Control.Monad.Trans.State.Lazy as LazyStateT
 import qualified Control.Monad.Trans.State.Strict as StrictStateT
 import Data.Tuple (swap)
 import Hedgehog
-import Hedgehog.Function hiding (C)
+import Hedgehog.Function hiding (S)
 import Hedgehog.Gen
 import Pure
 import Test.Tasty
@@ -27,8 +27,8 @@ tests = testGroup "State"
   , testGroup "RWST (Lazy)"     $ stateTests (runRWST LazyRWST.runRWST)
   , testGroup "RWST (Strict)"   $ stateTests (runRWST StrictRWST.runRWST)
   ] where
-  stateTests :: Has (State (T C)) sig m => (forall a . (T C -> m a -> PureC (T C, a))) -> [TestTree]
-  stateTests run = State.stateTests run (genM (gen genC)) genC a
+  stateTests :: Has (State (T S)) sig m => (forall a . (T S -> m a -> PureC (T S, a))) -> [TestTree]
+  stateTests run = State.stateTests run (genM (gen s)) s a
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
