@@ -62,7 +62,9 @@ cutfail = send Cutfail
 
 -- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
 --
---   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) === [b]
+-- @
+-- 'call' 'cutfail' '<|>' m = m
+-- @
 --
 -- @since 0.1.2.0
 call :: Has Cut sig m => m a -> m a
