@@ -23,6 +23,7 @@ module Control.Effect.Choose
   -- * Properties
 , choose_distributivity
 , choose_associativity
+, choose_leftIdentity
   -- * Re-exports
 , Carrier
 , Has
@@ -127,3 +128,6 @@ choose_distributivity (===) runChoose m n k = runChoose ((m <|> n) >>= k) === ru
 
 choose_associativity :: Has Choose sig m => (n [a] -> n [a] -> prop) -> (m a -> n [a]) -> m a -> m a -> m a -> prop
 choose_associativity (===) runChoose m n o = runChoose ((m <|> n) <|> o) === runChoose (m <|> (n <|> o))
+
+choose_leftIdentity :: (Has Choose sig m, Has Empty sig m) => (n [a] -> n [a] -> prop) -> (m a -> n [a]) -> m a -> prop
+choose_leftIdentity (===) runChoose m = runChoose (empty <|> m) === runChoose m
