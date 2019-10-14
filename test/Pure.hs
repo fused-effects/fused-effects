@@ -20,7 +20,6 @@ module Pure
 , Rec(..)
 , forall
 , With(..)
-, blind
 , showing
 ) where
 
@@ -116,9 +115,6 @@ instance Applicative With where
 
 instance Show (With a) where
   show = showWith
-
-blind :: a -> With a
-blind = With "_"
 
 showing :: Show a => a -> With a
 showing = With . show <*> id
