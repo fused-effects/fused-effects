@@ -32,4 +32,6 @@ cutTests :: forall a b m sig . (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, E
 cutTests runCut m a b
   = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
     (\ k -> cutfail_bindAnnihilation (~=) runCut (getBlind . apply k)))
+  : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
+    (\ m -> cutfail_chooseAnnihilation (~=) runCut (getBlind m)))
   : NonDet.nonDetTests runCut m a b
