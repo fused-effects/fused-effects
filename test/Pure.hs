@@ -29,9 +29,9 @@ m1 ~= m2 = run m1 === run m2
 genM
   :: forall m a
   .  Applicative m
-  => (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (Blind (m a))
+  => (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)) -- ^ A higher-order generator producing operations using any effects in @m@.
+  -> Gen a                                                              -- ^ A generator for results.
+  -> Gen (Blind (m a))                                                  -- ^ A generator producing computations, wrapped in 'Blind' for convenience.
 genM with = fmap Blind . go where
   go :: forall a . Gen a -> Gen (m a)
   go a = Gen.sized $ \case
