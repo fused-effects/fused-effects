@@ -94,6 +94,10 @@ some a = (:) <$> a <*> many a
 
 -- | One or more, returning a 'NonEmpty' list of the results.
 --
+-- @
+-- 'some1' m = (':|') '<$>' m '<*>' 'many' m
+-- @
+--
 -- @since 1.0.0.0
 some1 :: Has Choose sig m => m a -> m (NonEmpty a)
 some1 a = (:|) <$> a <*> many a
