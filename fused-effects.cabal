@@ -127,6 +127,7 @@ test-suite test
     Empty
     Error
     Fusion
+    NonDet
     NonDet.Church
     Pure
     Reader
