@@ -38,9 +38,9 @@ genState a _ = choice [ pure get, put' <$> a ] where
 
 
 stateTests :: (Has (State s) sig m, Arg s, Eq s, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> Gen s -> [TestTree]
-stateTests runState gen =
-  [ testProperty "get state" . forall (gen :. fn (genM [genState] gen) :. Nil) $
+stateTests runState s =
+  [ testProperty "get state" . forall (s :. fn (genM [genState] s) :. Nil) $
     \ a k -> get_state (~=) runState a (getBlind . apply k)
-  , testProperty "put update" . forall (gen :. gen :. genM [genState] gen :. Nil) $
+  , testProperty "put update" . forall (s :. s :. genM [genState] s :. Nil) $
     \ a b m -> put_update (~=) runState a b (getBlind m)
   ]
