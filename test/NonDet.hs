@@ -22,6 +22,7 @@ import Test.Tasty.Hedgehog
 tests :: TestTree
 tests = testGroup "NonDet"
   [ testGroup "NonDetC (Church)" $ nonDetTests Church.NonDetC.runNonDetA
+  , testGroup "[]"               $ nonDetTests pure
   ] where
   nonDetTests :: Has NonDet sig m => (forall a . m a -> PureC [a]) -> [TestTree]
   nonDetTests run = NonDet.nonDetTests run (genM [gen]) genA genB
