@@ -2,6 +2,7 @@
 module Error
 ( tests
 , gen
+, errorTests
 ) where
 
 import qualified Control.Carrier.Error.Either as ErrorC

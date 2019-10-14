@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module State
 ( tests
+, gen
+, stateTests
 ) where
 
 import qualified Control.Carrier.State.Lazy as LazyStateC

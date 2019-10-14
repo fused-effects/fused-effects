@@ -2,6 +2,7 @@
 module Reader
 ( tests
 , gen
+, readerTests
 ) where
 
 import qualified Control.Carrier.Reader.Function as ReaderC

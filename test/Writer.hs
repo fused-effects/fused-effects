@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Writer
 ( tests
+, gen
+, writerTests
 ) where
 
 import qualified Control.Carrier.Writer.Strict as StrictWriterC
