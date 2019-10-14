@@ -52,5 +52,5 @@ writerTests runWriter m w a =
   , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $
     \ (With m) -> runWriter (listen m) === fmap (fst &&& id) (runWriter m)
   , testProperty "censor revises written output" . forall (fn w :. m a :. Nil) $
-    \ (Fn f) (With m) -> censor_revision (===) runWriter f m
+    \ (Fn f) (With m) -> runWriter (censor f m) === fmap (first f) (runWriter m)
   ]
