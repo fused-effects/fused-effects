@@ -25,7 +25,7 @@ import qualified Hedgehog.Range as Range
 m1 ~= m2 = run m1 === run m2
 
 
--- | Generate a computation given a higher-order generator for operations & a generator for results.
+-- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
 genM
   :: forall m a
   .  Applicative m
