@@ -35,9 +35,9 @@ gen m a = choice
 cutTests :: forall a b m sig . (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
 cutTests runCut m a b
   = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
-    (\ k -> cutfail_bindAnnihilation (~=) runCut (getWith . apply k)))
+    (\ k -> cutfail_bindAnnihilation (===) runCut (getWith . apply k)))
   : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
-    (\ m -> cutfail_chooseAnnihilation (~=) runCut (getWith m)))
+    (\ m -> cutfail_chooseAnnihilation (===) runCut (getWith m)))
   : testProperty "call delimits cutfail" (forall (m a :. Nil)
-    (\ m -> call_delimiting (~=) runCut (getWith m)))
+    (\ m -> call_delimiting (===) runCut (getWith m)))
   : NonDet.nonDetTests runCut m a b

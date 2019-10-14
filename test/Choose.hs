@@ -31,7 +31,7 @@ gen m a = subterm2 (m a) (m a) (\ l r -> With "(<|>)" (<|>) <*> l <*> r)
 chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
 chooseTests runChoose m a b =
   [ testProperty "<|> distributivity" . forall (m a :. m a :. fn (m b) :. Nil) $
-    \ m n k -> choose_distributivity (~=) runChoose (getWith m) (getWith n) (getWith . apply k)
+    \ m n k -> choose_distributivity (===) runChoose (getWith m) (getWith n) (getWith . apply k)
   , testProperty "<|> associativity" . forall (m a :. m a :. m a :. Nil) $
-    \ m n o -> choose_associativity (~=) runChoose (getWith m) (getWith n) (getWith o)
+    \ m n o -> choose_associativity (===) runChoose (getWith m) (getWith n) (getWith o)
   ]

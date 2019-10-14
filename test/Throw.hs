@@ -28,5 +28,5 @@ gen e _ _ = (With "throwError" throwError <*>) . showing <$> e
 throwTests :: forall e m a b sig . (Has (Throw e) sig m, Arg a, Eq b, Eq e, Show a, Show b, Show e, Vary a) => (forall a . m a -> PureC (Either e a)) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
 throwTests runThrow m e _ b =
   [ testProperty "throwError annihilation" . forall (e :. fn @a (m b) :. Nil) $
-    \ e k -> throwError_annihilation (~=) runThrow e (getWith . apply k)
+    \ e k -> throwError_annihilation (===) runThrow e (getWith . apply k)
   ]
