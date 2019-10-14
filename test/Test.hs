@@ -11,6 +11,7 @@ import qualified NonDet
 import qualified NonDet.Church
 import qualified Reader
 import qualified State
+import qualified Throw
 import qualified Writer
 import Test.Tasty
 
@@ -25,5 +26,6 @@ main = defaultMain $ testGroup "unit tests"
   , NonDet.Church.tests
   , Reader.tests
   , State.tests
+  , Throw.tests
   , Writer.tests
   ]
