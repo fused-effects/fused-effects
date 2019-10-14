@@ -22,6 +22,7 @@ module Pure
 , showing
 , showingFn
 , atom
+, liftWith
 , liftWith2
 ) where
 
@@ -132,6 +133,9 @@ showingFn = With . flip showsPrec <*> apply
 
 atom :: String -> a -> With a
 atom s = With (\ _ -> showString s)
+
+liftWith :: String -> (a -> b) -> With a -> With b
+liftWith s w a = atom s w <*> a
 
 liftWith2 :: String -> (a -> b -> c) -> With a -> With b -> With c
 liftWith2 s w a b = atom s w <*> a <*> b
