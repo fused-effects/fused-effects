@@ -4,6 +4,7 @@ module Main
 
 import qualified Choose
 import qualified Cull
+import qualified Cut
 import qualified Empty
 import qualified Error
 import qualified Fusion
@@ -19,6 +20,7 @@ main :: IO ()
 main = defaultMain $ testGroup "unit tests"
   [ Choose.tests
   , Cull.tests
+  , Cut.tests
   , Empty.tests
   , Error.tests
   , Fusion.tests
