@@ -81,9 +81,3 @@ call m = send (Call m pure)
 cut :: (Alternative m, Has Cut sig m) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}
-
-
--- $setup
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Cut.Church
--- >>> import Control.Carrier.NonDet.Church
