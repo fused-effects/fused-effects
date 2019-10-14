@@ -20,6 +20,6 @@ gen _ m a = do
 
 catchTests :: forall e m a b sig . (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
 catchTests runError m e a _ =
-  [ testProperty "catchError interception" . forall (e :. fn (m a) :. Nil) $
+  [ testProperty "catchError intercepts throwError" . forall (e :. fn (m a) :. Nil) $
     \ e (FnWith h) -> catchError_interception (===) runError e h
   ]
