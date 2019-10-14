@@ -18,12 +18,13 @@ module Pure
 , W
 , Rec(..)
 , forall
-, With(..)
+, With(getWith)
 , showing
 , showingFn
 , atom
 , liftWith
 , liftWith2
+, pattern With
 , pattern Fn
 , pattern FnWith
 ) where
@@ -114,7 +115,7 @@ instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) wher
     forall' gs (f a)
 
 
-data With a = With { showWith :: Int -> ShowS, getWith :: a }
+data With a = With' { _showWith :: Int -> ShowS, getWith :: a }
   deriving (Functor)
 
 instance Eq a => Eq (With a) where
@@ -122,19 +123,19 @@ instance Eq a => Eq (With a) where
 
 instance Applicative With where
   pure = atom "_"
-  With sf f <*> With sa a = With (\ d -> showParen (d > 10) (sf 10 . showString " " . sa 11)) (f a)
+  With' sf f <*> With' sa a = With' (\ d -> showParen (d > 10) (sf 10 . showString " " . sa 11)) (f a)
 
 instance Show (With a) where
-  showsPrec d (With s _) = s d
+  showsPrec d (With' s _) = s d
 
 showing :: Show a => a -> With a
-showing = With . flip showsPrec <*> id
+showing = With' . flip showsPrec <*> id
 
 showingFn :: (Show a, Show b) => Fn a b -> With (a -> b)
-showingFn = With . flip showsPrec <*> apply
+showingFn = With' . flip showsPrec <*> apply
 
 atom :: String -> a -> With a
-atom s = With (\ _ -> showString s)
+atom s = With' (\ _ -> showString s)
 
 liftWith :: String -> (a -> b) -> With a -> With b
 liftWith s w a = atom s w <*> a
@@ -142,6 +143,11 @@ liftWith s w a = atom s w <*> a
 liftWith2 :: String -> (a -> b -> c) -> With a -> With b -> With c
 liftWith2 s w a b = atom s w <*> a <*> b
 
+
+pattern With :: a -> With a
+pattern With a <- (getWith -> a)
+
+{-# COMPLETE With #-}
 
 pattern Fn :: (a -> b) -> Fn a b
 pattern Fn f <- (apply -> f)
