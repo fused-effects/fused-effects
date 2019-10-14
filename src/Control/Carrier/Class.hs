@@ -20,6 +20,7 @@ import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
+import qualified Control.Monad.Trans.Identity as Identity
 import qualified Control.Monad.Trans.Maybe as Maybe
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Control.Monad.Trans.RWS.Lazy as RWS.Lazy
@@ -76,6 +77,9 @@ instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (Except.Except
   eff (L (L (Throw e)))     = Except.throwE e
   eff (L (R (Catch m h k))) = Except.catchE m h >>= k
   eff (R other)             = Except.ExceptT $ eff (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
+
+instance Carrier sig m => Carrier sig (Identity.IdentityT m) where
+  eff = Identity.IdentityT . eff . handleCoercible
 
 instance (Carrier sig m, Effect sig) => Carrier (NonDet :+: sig) (Maybe.MaybeT m) where
   eff (L (L Empty))      = empty
