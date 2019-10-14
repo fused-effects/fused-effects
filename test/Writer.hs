@@ -5,6 +5,7 @@ module Writer
 , writerTests
 ) where
 
+import Control.Arrow ((&&&))
 import qualified Control.Carrier.Writer.Strict as StrictWriterC
 import Control.Effect.Writer
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
@@ -49,7 +50,7 @@ writerTests runWriter m w a =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
     \ w (With m) -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
   , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $
-    \ (With m) -> listen_eavesdrop (===) runWriter m
+    \ (With m) -> runWriter (listen m) === fmap (fst &&& id) (runWriter m)
   , testProperty "censor revises written output" . forall (fn w :. m a :. Nil) $
     \ (Fn f) (With m) -> censor_revision (===) runWriter f m
   ]
