@@ -1,8 +1,8 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Choose
 ( genChoose
-, chooseTests
 , tests
+, chooseTests
 ) where
 
 import qualified Control.Carrier.Choose.Church as ChooseC
