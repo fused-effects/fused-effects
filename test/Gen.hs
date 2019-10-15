@@ -86,7 +86,7 @@ m with = go where
     ]
 
 
-genT :: Gen (T a)
+genT :: MonadGen m => m (T a)
 genT = T <$> integral (linear 0 100)
 
 newtype T a = T { unT :: Integer }
