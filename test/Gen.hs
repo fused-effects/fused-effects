@@ -123,9 +123,9 @@ s = genT
 type S = T "S"
 
 w :: Gen W
-w = list (linear 0 100) genT
+w = genT
 
-type W = [T "W"]
+type W = T "W"
 
 
 infixr 5 :.
