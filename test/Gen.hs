@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeFamilies, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Gen
 ( module Control.Carrier.Pure
   -- * Polymorphic generation & instantiation
@@ -233,3 +233,9 @@ instance MFunctor WithT where
 
 instance MonadTransDistributive WithT where
   distributeT m = lift . WithT . pure =<< hoist lift (runWithT m)
+
+instance MonadGen m => MonadGen (WithT m) where
+  type GenBase (WithT m) = WithT (GenBase m)
+
+  toGenT   = distributeT    . hoist toGenT
+  fromGenT = hoist fromGenT . distributeT
