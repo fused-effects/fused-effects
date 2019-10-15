@@ -27,6 +27,10 @@ module Gen
 , pattern With
 , pattern Fn
 , pattern FnWith
+  -- * Re-exports
+, Gen
+, (===)
+, (/==)
 ) where
 
 import Control.Carrier.Pure
