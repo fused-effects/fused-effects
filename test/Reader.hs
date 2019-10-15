@@ -34,8 +34,8 @@ gen
   -> Gen a
   -> Gen (With (m a))
 gen r m a = choice
-  [ liftWith "asks" (asks @r) . showingFn <$> fn a
-  , fn r >>= subterm (m a) . liftWith2 "local" local . showingFn
+  [ addLabel "ask" . liftWith "asks" (asks @r) . showingFn <$> fn a
+  , fn r >>= subterm (m a) . fmap (addLabel "local") . liftWith2 "local" local . showingFn
   ]
 
 

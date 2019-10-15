@@ -24,7 +24,7 @@ gen
   => (forall a . Show a => Gen a -> Gen (With (m a)))
   -> Gen a
   -> Gen (With (m a))
-gen m a = subterm2 (m a) (m a) (liftWith2InfixL 3 "<|>" (<|>))
+gen m a = subterm2 (m a) (m a) (fmap (addLabel "<|>") . liftWith2InfixL 3 "<|>" (<|>))
 
 
 test

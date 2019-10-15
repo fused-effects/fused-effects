@@ -23,7 +23,7 @@ gen
   => (forall a . Show a => Gen a -> Gen (With (m a)))
   -> Gen a
   -> Gen (With (m a))
-gen _ _ = pure (atom "empty" empty)
+gen _ _ = pure (addLabel "empty" (atom "empty" empty))
 
 
 test

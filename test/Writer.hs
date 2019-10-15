@@ -38,9 +38,9 @@ gen
   -> Gen a
   -> Gen (With (m a))
 gen w b m a = choice
-  [ liftWith2InfixL 4 "<$" (<$) . showing <$> a <*> (liftWith "tell" tell . showing <$> w)
-  , fn a >>= \ f -> liftWith2 "fmap" fmap (showingFn f) . liftWith "listen" (listen @w) <$> m b
-  , fn w >>= subterm (m a) . liftWith2 "censor" censor . showingFn
+  [ liftWith2InfixL 4 "<$" (<$) . showing <$> a <*> (addLabel "tell" . liftWith "tell" tell . showing <$> w)
+  , fn a >>= \ f -> liftWith2 "fmap" fmap (showingFn f) . addLabel "listen" . liftWith "listen" (listen @w) <$> m b
+  , fn w >>= subterm (m a) . fmap (addLabel "censor") . liftWith2 "censor" censor . showingFn
   ]
 
 

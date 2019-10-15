@@ -23,7 +23,7 @@ gen
   -> (forall a . Show a => Gen a -> Gen (With (m a)))
   -> Gen a
   -> Gen (With (m a))
-gen e _ _ = liftWith "throwError" throwError . showing <$> e
+gen e _ _ = addLabel "throwError" . liftWith "throwError" throwError . showing <$> e
 
 
 test

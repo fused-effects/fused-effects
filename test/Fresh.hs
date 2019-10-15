@@ -24,7 +24,7 @@ gen
   -> Gen (With (m a))
 gen _ a = do
   f <- fn a
-  pure (liftWith2 "fmap" fmap (showingFn f) (atom "fresh" fresh))
+  pure (liftWith2 "fmap" fmap (showingFn f) (addLabel "fresh" (atom "fresh" fresh)))
 
 
 test

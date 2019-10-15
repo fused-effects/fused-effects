@@ -26,8 +26,8 @@ gen
   -> Gen a
   -> Gen (With (m a))
 gen m a = choice
-  [ subterm (m a) (liftWith "call" call)
-  , pure (atom "cutfail" cutfail)
+  [ subterm (m a) (addLabel "call" . liftWith "call" call)
+  , pure (addLabel "cutfail" (atom "cutfail" cutfail))
   , NonDet.gen m a
   ]
 

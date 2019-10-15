@@ -18,7 +18,7 @@ gen
   -> Gen (With (m a))
 gen _ m a = do
   h <- fn @e (m a)
-  subterm (m a) $ \ m -> liftWith2 "catchError" catchError m (fmap getWith <$> showingFn h)
+  subterm (m a) $ \ m -> addLabel "catchError" (liftWith2 "catchError" catchError m (fmap getWith <$> showingFn h))
 
 
 test

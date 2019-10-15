@@ -26,7 +26,7 @@ gen
   -> Gen a
   -> Gen (With (m a))
 gen m a = choice
-  [ subterm (m a) (liftWith "cull" cull)
+  [ subterm (m a) (addLabel "cull" . liftWith "cull" cull)
   , NonDet.gen m a
   ]
 
