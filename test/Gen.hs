@@ -210,7 +210,7 @@ pattern FnWith f <- (fmap getWith . apply -> f)
 {-# COMPLETE FnWith #-}
 
 
-newtype Gen a = Gen { runWithM :: Hedgehog.Gen (With a) }
+newtype Gen a = Gen { runGen :: Hedgehog.Gen (With a) }
   deriving (Functor)
 
 instance Applicative Gen where
@@ -220,5 +220,5 @@ instance Applicative Gen where
 instance Monad Gen where
   Gen m >>= f = Gen $ do
     With' l1 _  a <- m
-    With' l2 s2 b <- runWithM (f a)
+    With' l2 s2 b <- runGen (f a)
     pure (With' (l1 <> l2) s2 b)
