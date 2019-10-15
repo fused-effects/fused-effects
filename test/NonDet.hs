@@ -17,7 +17,6 @@ import Data.Maybe (listToMaybe, maybeToList)
 import qualified Empty
 import Gen
 import Hedgehog.Function
-import Hedgehog.Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

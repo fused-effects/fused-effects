@@ -7,7 +7,6 @@ module Catch
 import Control.Effect.Error
 import Gen
 import Hedgehog.Function
-import Hedgehog.Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

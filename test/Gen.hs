@@ -31,6 +31,10 @@ module Gen
 , Gen
 , (===)
 , (/==)
+, choice
+, subterm
+, subtermM
+, subterm2
 ) where
 
 import Control.Carrier.Pure

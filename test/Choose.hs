@@ -10,7 +10,6 @@ import Control.Effect.Choose
 import Data.List.NonEmpty
 import Gen
 import Hedgehog.Function
-import Hedgehog.Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

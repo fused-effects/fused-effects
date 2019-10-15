@@ -11,7 +11,6 @@ import Control.Effect.Cull
 import Control.Effect.NonDet (NonDet)
 import Gen
 import Hedgehog.Function
-import Hedgehog.Gen
 import qualified NonDet
 import Test.Tasty
 import Test.Tasty.Hedgehog
