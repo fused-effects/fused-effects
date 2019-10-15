@@ -42,4 +42,4 @@ cullTests
 cullTests runCull m a b
   = testProperty "cull returns at most one success" (forall (a :. m a :. m a :. Nil)
     (\ a (With m) (With n) -> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
-  : NonDet.nonDetTests runCull m a b
+  : NonDet.test m a b runCull

@@ -48,4 +48,4 @@ cutTests runCut m a b
     (\ (With m) -> runCut (cutfail <|> m) === runCut cutfail))
   : testProperty "call delimits cutfail" (forall (m a :. Nil)
     (\ (With m) -> runCut (call cutfail <|> m) === runCut m))
-  : NonDet.nonDetTests runCut m a b
+  : NonDet.test m a b runCut
