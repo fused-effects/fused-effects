@@ -42,5 +42,5 @@ errorTests
   -> Gen b
   -> [TestTree]
 errorTests runError m e a b
-  =  Throw.throwTests runError m e a b
+  =  Throw.test e m a b runError
   ++ Catch.catchTests runError m e a b
