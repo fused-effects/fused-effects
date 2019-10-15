@@ -47,7 +47,7 @@ test
   => Gen s
   -> (forall a . Show a => Gen a -> Gen (With (m a)))
   -> Gen a
-  -> (forall a . (s -> m a -> PureC (s, a)))
+  -> (forall a . s -> m a -> PureC (s, a))
   -> [TestTree]
 test s m a runState =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $

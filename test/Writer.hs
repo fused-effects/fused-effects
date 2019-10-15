@@ -49,7 +49,7 @@ test
   => Gen w
   -> (forall a . Show a => Gen a -> Gen (With (m a)))
   -> Gen a
-  -> (forall a . (m a -> PureC (w, a)))
+  -> (forall a . m a -> PureC (w, a))
   -> [TestTree]
 test w m a runWriter =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
