@@ -23,6 +23,7 @@ module Gen
   -- * Showing generated values
 , With(getWith)
 , atom
+, Gen.label
 , infixL
 , infixR
 , liftWith
@@ -152,7 +153,7 @@ instance Forall (Rec '[]) (PropertyT IO ()) where
 instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
   forall' (g :. gs) f = do
     (a, labels) <- Hedgehog.forAll (runWriterT (runGen g))
-    traverse_ label labels
+    traverse_ Hedgehog.label labels
     forall' gs (f (getWith a))
 
 
@@ -177,6 +178,9 @@ showingFn = With . Pure . flip showsPrec <*> Fn.apply
 
 atom :: String -> a -> Gen a
 atom s = Gen . pure . With (Pure (const (showString s)))
+
+label :: String -> a -> Gen a
+label s = addLabel s . atom s
 
 infixL :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
 infixL p s f = Gen (pure (With (InfixL p s) f))
