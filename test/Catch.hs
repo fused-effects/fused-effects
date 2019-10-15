@@ -1,11 +1,11 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Catch
 ( gen
-, catchTests
+, test
 ) where
 
 import Control.Effect.Error
-import Hedgehog
+import Hedgehog (Gen, (===))
 import Hedgehog.Function
 import Hedgehog.Gen
 import Pure
@@ -18,16 +18,16 @@ gen _ m a = do
   subterm (m a) $ \ m -> liftWith2 "catchError" catchError m (fmap getWith <$> showingFn h)
 
 
-catchTests
+test
   :: forall e m a b sig
   .  (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e)
-  => (forall a . m a -> PureC (Either e a))
+  => Gen e
   -> (forall a . Show a => Gen a -> Gen (With (m a)))
-  -> Gen e
   -> Gen a
   -> Gen b
+  -> (forall a . m a -> PureC (Either e a))
   -> [TestTree]
-catchTests runCatch m e a _ =
+test e m a _ runCatch =
   [ testProperty "catchError intercepts throwError" . forall (e :. fn (m a) :. Nil) $
     \ e (FnWith h) -> runCatch (throwError e `catchError` h) === runCatch (h e)
   ]
