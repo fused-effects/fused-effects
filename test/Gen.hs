@@ -154,27 +154,27 @@ instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
     forall' gs (f (getWith a))
 
 
-data With a = With { _showWith :: Int -> ShowS, getWith :: a }
+data With a = With { showWith :: Term a, getWith :: a }
   deriving (Functor)
 
 instance Eq a => Eq (With a) where
   (==) = (==) `on` getWith
 
 instance Applicative With where
-  pure = With (\ _ -> showString "_")
-  With sf f <*> With sa a = With (\ d -> showParen (d > 10) (sf 10 . showString " " . sa 11)) (f a)
+  pure = With . pure <*> id
+  With sf f <*> With sa a = With (sf <*> sa) (f a)
 
 instance Show (With a) where
-  showsPrec d (With s _) = s d
+  showsPrec d = showsPrec d . showWith
 
 showing :: Show a => a -> With a
-showing = With . flip showsPrec <*> id
+showing = With . Pure . flip showsPrec <*> id
 
 showingFn :: (Show a, Show b) => Fn.Fn a b -> With (a -> b)
-showingFn = With . flip showsPrec <*> Fn.apply
+showingFn = With . Pure . flip showsPrec <*> Fn.apply
 
 atom :: String -> a -> Gen a
-atom s = Gen . pure . With (\ _ -> showString s)
+atom s = Gen . pure . With (Pure (const (showString s)))
 
 liftWith :: String -> (a -> b) -> Gen a -> Gen b
 liftWith s w a = atom s w <*> a
@@ -183,23 +183,17 @@ liftWith2 :: String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
 liftWith2 s w a b = atom s w <*> a <*> b
 
 liftWith2InfixL :: Int -> String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
-liftWith2InfixL p s f ga gb = Gen $ do
-  With sa a <- runGen ga
-  With sb b <- runGen gb
-  pure (With (\ d -> showParen (d > p) (sa p . showString " " . showString s . showString " " . sb (succ p))) (f a b))
+liftWith2InfixL p s f ga gb = Gen (pure (With (InfixL p s) f)) <*> ga <*> gb
 
 liftWith2InfixR :: Int -> String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
-liftWith2InfixR p s f ga gb = Gen $ do
-  With sa a <- runGen ga
-  With sb b <- runGen gb
-  pure (With (\ d -> showParen (d > p) (sa (succ p) . showString " " . showString s . showString " " . sb p)) (f a b))
+liftWith2InfixR p s f ga gb = Gen (pure (With (InfixR p s) f)) <*> ga <*> gb
 
 addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
 
 
 data Term a where
-  Pure :: String -> Term a
+  Pure :: (Int -> ShowS) -> Term a
   InfixL :: Int -> String -> Term (a -> b -> c)
   InfixR :: Int -> String -> Term (a -> b -> c)
   (:<*>) :: Term (a -> b) -> Term a -> Term b
@@ -210,12 +204,12 @@ instance Functor Term where
   fmap = liftA
 
 instance Applicative Term where
-  pure _ = Pure "_"
+  pure _ = Pure (const (showString "_"))
   (<*>) = (:<*>)
 
 instance Show (Term a) where
   showsPrec d = \case
-    Pure s -> showString s
+    Pure s -> s d
     InfixL _ s -> showParen True (showString s)
     InfixR _ s -> showParen True (showString s)
     InfixL p s :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
