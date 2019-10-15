@@ -64,6 +64,7 @@ import GHC.TypeLits
 import Hedgehog
 import Hedgehog.Function hiding (R, S)
 import Hedgehog.Gen
+import Hedgehog.Internal.Distributive
 import Hedgehog.Range
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
@@ -229,3 +230,6 @@ instance MonadTrans WithT where
 
 instance MFunctor WithT where
   hoist f (WithT m) = WithT (f m)
+
+instance MonadTransDistributive WithT where
+  distributeT m = lift . WithT . pure =<< hoist lift (runWithT m)
