@@ -47,6 +47,7 @@ module Gen
 , Vary
 , fn
 , apply
+, WithT(..)
 ) where
 
 import Control.Carrier.Pure
@@ -207,3 +208,7 @@ pattern FnWith :: (a -> b) -> Fn a (With b)
 pattern FnWith f <- (fmap getWith . apply -> f)
 
 {-# COMPLETE FnWith #-}
+
+
+newtype WithT m a = WithT { runWithT :: m (With a) }
+  deriving (Functor)
