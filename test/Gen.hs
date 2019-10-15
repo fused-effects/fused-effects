@@ -212,3 +212,7 @@ pattern FnWith f <- (fmap getWith . apply -> f)
 
 newtype WithT m a = WithT { runWithT :: m (With a) }
   deriving (Functor)
+
+instance Applicative m => Applicative (WithT m) where
+  pure = WithT . pure . pure
+  WithT m1 <*> WithT m2 = WithT ((<*>) <$> m1 <*> m2)
