@@ -33,10 +33,10 @@ module Gen
 , (===)
 , (/==)
 , Gen.choice
-, Arg
-, Vary
+, Fn.Arg
+, Fn.Vary
 , Gen.fn
-, apply
+, Fn.apply
 ) where
 
 import Control.Carrier.Pure
@@ -53,7 +53,7 @@ import GHC.Stack
 import GHC.TypeLits
 import Hedgehog hiding (Gen)
 import qualified Hedgehog
-import Hedgehog.Function as Fn hiding (R, S)
+import qualified Hedgehog.Function as Fn
 import Hedgehog.Gen
 import Hedgehog.Range
 
@@ -79,9 +79,9 @@ genT :: KnownSymbol s => Gen (T s)
 genT = Gen (showing . T <$> integral (linear 0 100))
 
 newtype T a = T { unT :: Integer }
-  deriving (Enum, Eq, Generic, Num, Ord, Real, Vary)
+  deriving (Enum, Eq, Fn.Generic, Num, Ord, Real, Fn.Vary)
 
-instance Arg (T a)
+instance Fn.Arg (T a)
 
 instance S.Semigroup (T a) where
   T a <> T b = T (a + b)
@@ -123,7 +123,7 @@ w = genT
 
 type W = T "W"
 
-fn :: (Arg a, Vary a, Show a) => Gen b -> Gen (a -> b)
+fn :: (Fn.Arg a, Fn.Vary a, Show a) => Gen b -> Gen (a -> b)
 fn b = Gen (lift (fmap (fmap getWith) . showingFn <$> Fn.fn (fst <$> runWriterT (runGen b))))
 
 choice :: [Gen a] -> Gen a
@@ -168,8 +168,8 @@ instance Show (With a) where
 showing :: Show a => a -> With a
 showing = With . flip showsPrec <*> id
 
-showingFn :: (Show a, Show b) => Fn a b -> With (a -> b)
-showingFn = With . flip showsPrec <*> apply
+showingFn :: (Show a, Show b) => Fn.Fn a b -> With (a -> b)
+showingFn = With . flip showsPrec <*> Fn.apply
 
 atom :: String -> a -> Gen a
 atom s = Gen . pure . With (\ _ -> showString s)
