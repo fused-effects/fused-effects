@@ -122,7 +122,7 @@ w = genT
 type W = T "W"
 
 fn :: (Fn.Arg a, Fn.Vary a, Show a) => Gen b -> Gen (a -> b)
-fn b = Gen (lift (fmap (fmap getWith) . showingFn <$> Fn.fn (fst <$> runWriterT (runGen b))))
+fn b = Gen (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT (runGen b))))
 
 choice :: [Gen a] -> Gen a
 choice = Gen . Hedgehog.Gen.choice . Prelude.map runGen
@@ -147,69 +147,66 @@ instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
   forall' (g :. gs) f = do
     (a, labels) <- Hedgehog.forAll (runWriterT (runGen g))
     traverse_ Hedgehog.label labels
-    forall' gs (f (getWith a))
+    forall' gs (f (runTerm a))
 
 
-data With a = With { showWith :: Term a, getWith :: a }
-  deriving (Functor)
+showing :: Show a => a -> Term a
+showing = Pure showsPrec
 
-instance Applicative With where
-  pure = With . pure <*> id
-  With sf f <*> With sa a = With (sf <*> sa) (f a)
-
-instance Show (With a) where
-  showsPrec d = showsPrec d . showWith
-
-showing :: Show a => a -> With a
-showing = With . Pure . flip showsPrec <*> id
-
-showingFn :: (Show a, Show b) => Fn.Fn a b -> With (a -> b)
-showingFn = With . Pure . flip showsPrec <*> Fn.apply
+showingFn :: (Show a, Show b) => Fn.Fn a b -> Term (a -> b)
+showingFn fn = Pure (\ d _ -> showsPrec d fn) (Fn.apply fn)
 
 atom :: String -> a -> Gen a
-atom s = Gen . pure . With (Pure (const (showString s)))
+atom s = Gen . pure . Pure (const (const (showString s)))
 
 label :: String -> a -> Gen a
 label s = addLabel s . atom s
 
 infixL :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
-infixL p s f = Gen (pure (With (InfixL p s) f))
+infixL p s f = Gen (pure (InfixL p s f))
 
 infixR :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
-infixR p s f = Gen (pure (With (InfixR p s) f))
+infixR p s f = Gen (pure (InfixR p s f))
 
 addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
 
 
 data Term a where
-  Pure :: (Int -> ShowS) -> Term a
-  InfixL :: Int -> String -> Term (a -> b -> c)
-  InfixR :: Int -> String -> Term (a -> b -> c)
+  Pure :: (Int -> a -> ShowS) -> a -> Term a
+  InfixL :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
+  InfixR :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
   (:<*>) :: Term (a -> b) -> Term a -> Term b
 
 infixl 4 :<*>
+
+runTerm :: Term a -> a
+runTerm = \case
+  Pure _ a -> a
+  InfixL _ _ f -> f
+  InfixR _ _ f -> f
+  f :<*> a -> runTerm f $ runTerm a
 
 instance Functor Term where
   fmap = liftA
 
 instance Applicative Term where
-  pure _ = Pure (const (showString "_"))
+  pure = Pure (const (const (showString "_")))
   (<*>) = (:<*>)
 
 instance Show (Term a) where
   showsPrec d = \case
-    Pure s -> s d
-    InfixL _ s -> showParen True (showString s)
-    InfixR _ s -> showParen True (showString s)
-    InfixL p s :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
-    InfixR p s :<*> a :<*> b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
-    InfixL p s :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
-    InfixR p s :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
+    Pure s a -> s d a
+    InfixL _ s _ -> showParen True (showString s)
+    InfixR _ s _ -> showParen True (showString s)
+    InfixL p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
+    InfixR p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
+    InfixL p s _ :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
+    InfixR p s _ :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
     f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)
 
 
-newtype Gen a = Gen { runGen :: WriterT (Set.Set LabelName) Hedgehog.Gen (With a) }
+newtype Gen a = Gen { runGen :: WriterT (Set.Set LabelName) Hedgehog.Gen (Term a) }
   deriving (Functor)
 
 instance Applicative Gen where
