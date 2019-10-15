@@ -35,7 +35,6 @@ module Gen
 , Fn.Vary
 , Gen.fn
 , Fn.apply
-, Term(..)
 ) where
 
 import Control.Applicative
