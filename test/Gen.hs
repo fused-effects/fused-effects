@@ -198,7 +198,7 @@ addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGe
 
 
 data Term a where
-  Prefix :: String -> a -> Term a
+  Pure :: String -> a -> Term a
   InfixL :: Int -> String -> Term (a -> b -> c)
   InfixR :: Int -> String -> Term (a -> b -> c)
   (:<*>) :: Term (a -> b) -> Term a -> Term b
@@ -207,7 +207,7 @@ infixl 4 :<*>
 
 instance Show (Term a) where
   showsPrec d = \case
-    Prefix s _ -> showString s
+    Pure s _ -> showString s
     InfixL _ s -> showParen True (showString s)
     InfixR _ s -> showParen True (showString s)
     InfixL p s :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
