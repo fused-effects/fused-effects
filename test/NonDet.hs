@@ -8,7 +8,6 @@ module NonDet
 import qualified Choose
 import Control.Carrier
 import qualified Control.Carrier.NonDet.Church as Church.NonDetC
-import qualified Control.Carrier.NonDet.Maybe as Maybe.NonDetC
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet (NonDet)
@@ -22,7 +21,6 @@ import Test.Tasty.Hedgehog
 tests :: TestTree
 tests = testGroup "NonDet"
   [ testGroup "NonDetC (Church)" $ test (m gen) a b Church.NonDetC.runNonDetA
-  , testGroup "NonDetC (Maybe)"  $ test (m gen) a b (fmap maybeToList . Maybe.NonDetC.runNonDet)
   , testGroup "MaybeT"           $ test (m gen) a b (fmap maybeToList . MaybeT.runMaybeT)
   , testGroup "[]"               $ test (m gen) a b pure
   ]
