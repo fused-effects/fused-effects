@@ -20,28 +20,26 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testGroup "WriterC (Strict)" $ test w (m (gen w)) a StrictWriterC.runWriter
-  , testGroup "WriterT (Lazy)"   $ test w (m (gen w)) a (fmap swap . LazyWriterT.runWriterT)
-  , testGroup "WriterT (Strict)" $ test w (m (gen w)) a (fmap swap . StrictWriterT.runWriterT)
-  , testGroup "RWST (Lazy)"      $ test w (m (gen w)) a (runRWST LazyRWST.runRWST)
-  , testGroup "RWST (Strict)"    $ test w (m (gen w)) a (runRWST StrictRWST.runRWST)
+  [ testGroup "WriterC (Strict)" $ test w (m (gen w b)) a StrictWriterC.runWriter
+  , testGroup "WriterT (Lazy)"   $ test w (m (gen w b)) a (fmap swap . LazyWriterT.runWriterT)
+  , testGroup "WriterT (Strict)" $ test w (m (gen w b)) a (fmap swap . StrictWriterT.runWriterT)
+  , testGroup "RWST (Lazy)"      $ test w (m (gen w b)) a (runRWST LazyRWST.runRWST)
+  , testGroup "RWST (Strict)"    $ test w (m (gen w b)) a (runRWST StrictRWST.runRWST)
   ] where
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
 gen
-  :: forall w m a sig
-  .  (Has (Writer w) sig m, Arg w, Show a, Show w, Vary w)
+  :: forall w b m a sig
+  .  (Has (Writer w) sig m, Arg b, Arg w, Show a, Show b, Show w, Vary b, Vary w)
   => Gen w
+  -> Gen b
   -> (forall a . Show a => Gen a -> Gen (With (m a)))
   -> Gen a
   -> Gen (With (m a))
-gen w m a = choice
+gen w b m a = choice
   [ liftWith2InfixL 4 "<$" (<$) . showing <$> a <*> (liftWith "tell" tell . showing <$> w)
-  , subtermM (m a) (\ m -> choice
-    [(\ f -> (liftWith2 "fmap" fmap (liftWith2InfixR 9 "." (.) (showingFn f) (atom "fst" fst)) (liftWith "listen" (listen @w) m))) <$> fn a
-    , pure (liftWith2 "fmap" fmap (atom "snd" snd) (liftWith "listen" (listen @w) m))
-    ])
+  , fn a >>= \ f -> liftWith2 "fmap" fmap (showingFn f) . liftWith "listen" (listen @w) <$> m b
   , fn w >>= subterm (m a) . liftWith2 "censor" censor . showingFn
   ]
 
