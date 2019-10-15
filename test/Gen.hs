@@ -23,6 +23,7 @@ module Gen
   -- * Showing generated values
 , With(getWith)
 , atom
+, infixL
 , liftWith
 , liftWith2
 , liftWith2InfixL
@@ -175,6 +176,9 @@ showingFn = With . Pure . flip showsPrec <*> Fn.apply
 
 atom :: String -> a -> Gen a
 atom s = Gen . pure . With (Pure (const (showString s)))
+
+infixL :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
+infixL p s f = Gen (pure (With (InfixL p s) f))
 
 liftWith :: String -> (a -> b) -> Gen a -> Gen b
 liftWith s w a = atom s w <*> a
