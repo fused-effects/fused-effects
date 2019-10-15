@@ -90,6 +90,10 @@ instance Arg (T a)
 instance S.Semigroup (T a) where
   T a <> T b = T (a + b)
 
+instance Monoid (T a) where
+  mempty = T 0
+  mappend = (S.<>)
+
 instance KnownSymbol s => Show (T s) where
   showsPrec d = showsUnaryWith showsPrec (symbolVal (Proxy @s)) d . unT
 
