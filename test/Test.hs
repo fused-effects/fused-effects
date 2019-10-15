@@ -7,6 +7,7 @@ import qualified Cull
 import qualified Cut
 import qualified Empty
 import qualified Error
+import qualified Fresh
 import qualified Fusion
 import qualified NonDet
 import qualified NonDet.Church
@@ -23,6 +24,7 @@ main = defaultMain $ testGroup "unit tests"
   , Cut.tests
   , Empty.tests
   , Error.tests
+  , Fresh.tests
   , Fusion.tests
   , NonDet.tests
   , NonDet.Church.tests
