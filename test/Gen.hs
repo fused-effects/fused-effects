@@ -47,7 +47,6 @@ module Gen
 , Vary
 , fn
 , apply
-, WithM(..)
 ) where
 
 import Control.Carrier.Pure
