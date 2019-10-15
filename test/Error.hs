@@ -10,7 +10,6 @@ import Control.Effect.Error
 import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
 import Gen
-import Hedgehog (Gen)
 import qualified Throw
 import Test.Tasty
 
