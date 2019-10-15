@@ -21,7 +21,7 @@ module Gen
 , Rec(..)
 , forall
   -- * Showing generated values
-, With(getWith)
+, With(labelWith, getWith)
 , showing
 , showingFn
 , atom
@@ -49,6 +49,8 @@ import Control.Carrier.Pure
 import Data.Function (on)
 import Data.Functor.Classes (showsUnaryWith)
 import Data.Proxy
+import qualified Data.Set as Set
+import Data.String (fromString)
 import GHC.Stack
 import GHC.TypeLits
 import Hedgehog
@@ -137,7 +139,7 @@ instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) wher
     forall' gs (f a)
 
 
-data With a = With' { _showWith :: Int -> ShowS, getWith :: a }
+data With a = With' { labelWith :: Set.Set LabelName, _showWith :: Int -> ShowS, getWith :: a }
   deriving (Functor)
 
 instance Eq a => Eq (With a) where
@@ -145,19 +147,19 @@ instance Eq a => Eq (With a) where
 
 instance Applicative With where
   pure = atom "_"
-  With' sf f <*> With' sa a = With' (\ d -> showParen (d > 10) (sf 10 . showString " " . sa 11)) (f a)
+  With' lf sf f <*> With' la sa a = With' (mappend lf la) (\ d -> showParen (d > 10) (sf 10 . showString " " . sa 11)) (f a)
 
 instance Show (With a) where
-  showsPrec d (With' s _) = s d
+  showsPrec d (With' _ s _) = s d
 
 showing :: Show a => a -> With a
-showing = With' . flip showsPrec <*> id
+showing = With' mempty . flip showsPrec <*> id
 
 showingFn :: (Show a, Show b) => Fn a b -> With (a -> b)
-showingFn = With' . flip showsPrec <*> apply
+showingFn = With' mempty . flip showsPrec <*> apply
 
 atom :: String -> a -> With a
-atom s = With' (\ _ -> showString s)
+atom s = With' (Set.singleton (fromString s)) (\ _ -> showString s)
 
 liftWith :: String -> (a -> b) -> With a -> With b
 liftWith s w a = atom s w <*> a
