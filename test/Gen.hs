@@ -37,6 +37,7 @@ module Gen
 , Fn.Vary
 , Gen.fn
 , Fn.apply
+, Term(..)
 ) where
 
 import Control.Carrier.Pure
@@ -194,6 +195,24 @@ liftWith2InfixR p s f ga gb = Gen $ do
 
 addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
+
+
+data Term
+  = Prefix String
+  | InfixL Int String
+  | InfixR Int String
+  | App Term Term
+
+instance Show Term where
+  showsPrec d = \case
+    Prefix   s -> showString s
+    InfixL _ s -> showParen True (showString s)
+    InfixR _ s -> showParen True (showString s)
+    App (App (InfixL p s) a) b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
+    App (App (InfixR p s) a) b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
+    App (InfixL p s) a -> showParen True (showsPrec p a . showString " " . showString s)
+    App (InfixR p s) a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
+    App f a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)
 
 
 newtype Gen a = Gen { runGen :: WriterT (Set.Set LabelName) Hedgehog.Gen (With a) }
