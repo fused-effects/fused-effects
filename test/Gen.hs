@@ -24,6 +24,7 @@ module Gen
 , With(getWith)
 , atom
 , infixL
+, infixR
 , liftWith
 , liftWith2
 , liftWith2InfixL
@@ -179,6 +180,9 @@ atom s = Gen . pure . With (Pure (const (showString s)))
 
 infixL :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
 infixL p s f = Gen (pure (With (InfixL p s) f))
+
+infixR :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
+infixR p s f = Gen (pure (With (InfixR p s) f))
 
 liftWith :: String -> (a -> b) -> Gen a -> Gen b
 liftWith s w a = atom s w <*> a
