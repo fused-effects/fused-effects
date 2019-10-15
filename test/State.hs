@@ -16,7 +16,7 @@ import Data.Tuple (swap)
 import Hedgehog (Gen, (===))
 import Hedgehog.Function hiding (S)
 import Hedgehog.Gen
-import Pure
+import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

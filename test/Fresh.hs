@@ -9,7 +9,7 @@ import qualified Control.Carrier.Fresh.Strict as FreshC
 import Control.Effect.Fresh
 import Hedgehog (Gen, (/==))
 import Hedgehog.Function
-import Pure
+import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

@@ -13,7 +13,7 @@ import Hedgehog (Gen, (===))
 import Hedgehog.Function
 import Hedgehog.Gen
 import qualified NonDet
-import Pure
+import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

@@ -10,7 +10,7 @@ import Control.Effect.Empty
 import qualified Control.Monad.Trans.Maybe as MaybeT
 import Hedgehog (Gen, (===))
 import Hedgehog.Function
-import Pure
+import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

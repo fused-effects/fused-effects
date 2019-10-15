@@ -130,9 +130,9 @@ test-suite test
     Error
     Fresh
     Fusion
+    Gen
     NonDet
     NonDet.Church
-    Pure
     Reader
     State
     Throw

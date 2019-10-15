@@ -18,7 +18,7 @@ import qualified Empty
 import Hedgehog (Gen, (===))
 import Hedgehog.Function
 import Hedgehog.Gen
-import Pure
+import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

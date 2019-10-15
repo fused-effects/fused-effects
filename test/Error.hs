@@ -12,7 +12,7 @@ import qualified Catch
 import Hedgehog (Gen)
 import Hedgehog.Function
 import Hedgehog.Gen
-import Pure
+import Gen
 import qualified Throw
 import Test.Tasty
 

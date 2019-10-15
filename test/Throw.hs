@@ -9,7 +9,7 @@ import qualified Control.Carrier.Throw.Either as ThrowC
 import Control.Effect.Throw
 import Hedgehog (Gen, (===))
 import Hedgehog.Function
-import Pure
+import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

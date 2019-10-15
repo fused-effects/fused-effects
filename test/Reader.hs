@@ -14,7 +14,7 @@ import Data.Function ((&))
 import Hedgehog (Gen, (===))
 import Hedgehog.Function hiding (R)
 import Hedgehog.Gen
-import Pure
+import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
