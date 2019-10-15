@@ -8,7 +8,6 @@ module Fresh
 import qualified Control.Carrier.Fresh.Strict as FreshC
 import Control.Effect.Fresh
 import Gen
-import Hedgehog (Gen, (/==))
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
