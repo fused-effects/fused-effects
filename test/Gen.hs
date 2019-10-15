@@ -27,7 +27,6 @@ module Gen
 , infixL
 , infixR
 , liftWith
-, liftWith2
 , addLabel
   -- * Re-exports
 , Gen
@@ -188,9 +187,6 @@ infixR p s f = Gen (pure (With (InfixR p s) f))
 
 liftWith :: String -> (a -> b) -> Gen a -> Gen b
 liftWith s w a = atom s w <*> a
-
-liftWith2 :: String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
-liftWith2 s w a b = atom s w <*> a <*> b
 
 addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
