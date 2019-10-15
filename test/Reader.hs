@@ -12,7 +12,6 @@ import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
 import Gen
-import Hedgehog.Function hiding (R)
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

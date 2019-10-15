@@ -35,6 +35,10 @@ module Gen
 , subterm
 , subtermM
 , subterm2
+, Arg
+, Vary
+, fn
+, apply
 ) where
 
 import Control.Carrier.Pure

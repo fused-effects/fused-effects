@@ -10,7 +10,6 @@ import Control.Effect.Choose
 import Control.Effect.Cut (Cut, call, cutfail)
 import Control.Effect.NonDet (NonDet)
 import Gen
-import Hedgehog.Function
 import qualified NonDet
 import Test.Tasty
 import Test.Tasty.Hedgehog

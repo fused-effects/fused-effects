@@ -16,7 +16,6 @@ import qualified Control.Monad.Trans.Maybe as MaybeT
 import Data.Maybe (listToMaybe, maybeToList)
 import qualified Empty
 import Gen
-import Hedgehog.Function
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

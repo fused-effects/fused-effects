@@ -14,7 +14,6 @@ import qualified Control.Monad.Trans.State.Lazy as LazyStateT
 import qualified Control.Monad.Trans.State.Strict as StrictStateT
 import Data.Tuple (swap)
 import Gen
-import Hedgehog.Function hiding (S)
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

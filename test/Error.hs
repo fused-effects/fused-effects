@@ -11,7 +11,6 @@ import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
 import Gen
 import Hedgehog (Gen)
-import Hedgehog.Function
 import qualified Throw
 import Test.Tasty
 

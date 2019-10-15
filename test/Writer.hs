@@ -15,7 +15,6 @@ import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Bifunctor (first)
 import Data.Tuple (swap)
 import Gen
-import Hedgehog.Function
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
