@@ -30,6 +30,7 @@ module Gen
 , liftWith2InfixL
 , liftWith2InfixR
 , addLabel
+, labelling
   -- * Pattern synonyms
 , pattern With
 , pattern Fn
@@ -49,6 +50,7 @@ module Gen
 ) where
 
 import Control.Carrier.Pure
+import Data.Foldable (traverse_)
 import Data.Function (on)
 import Data.Functor.Classes (showsUnaryWith)
 import Data.Proxy
@@ -186,6 +188,9 @@ liftWith2InfixR p s f (With' la sa a) (With' lb sb b) = With' (mappend la lb) (\
 
 addLabel :: String -> With a -> With a
 addLabel s w = w { labelWith = Set.insert (fromString s) (labelWith w) }
+
+labelling :: (MonadTest m, HasCallStack) => With a -> m ()
+labelling = withFrozenCallStack . traverse_ label . labelWith
 
 
 pattern With :: a -> With a
