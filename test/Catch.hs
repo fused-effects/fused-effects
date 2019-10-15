@@ -9,7 +9,13 @@ import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
-gen :: forall e m a sig . (Has (Catch e) sig m, Arg e, Show a, Show e, Vary e) => Gen e -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen
+  :: forall e m a sig
+  .  (Has (Catch e) sig m, Arg e, Show a, Show e, Vary e)
+  => Gen e
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen (With (m a))
 gen _ m a = do
   h <- fn @e (m a)
   subterm (m a) $ \ m -> liftWith2 "catchError" catchError m (fmap getWith <$> showingFn h)

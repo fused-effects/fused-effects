@@ -28,7 +28,11 @@ tests = testGroup "NonDet"
   ]
 
 
-gen :: (Has NonDet sig m, Show a) => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen
+  :: (Has NonDet sig m, Show a)
+  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen (With (m a))
 gen m a = choice [ Empty.gen m a, Choose.gen m a ]
 
 

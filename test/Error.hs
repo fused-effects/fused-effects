@@ -22,7 +22,12 @@ tests = testGroup "Error" $
   ]
 
 
-gen :: (Has (Error e) sig m, Arg e, Show a, Show e, Vary e) => Gen e -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen
+  :: (Has (Error e) sig m, Arg e, Show a, Show e, Vary e)
+  => Gen e
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen (With (m a))
 gen e m a = choice
   [ Throw.gen e m a
   , Catch.gen e m a

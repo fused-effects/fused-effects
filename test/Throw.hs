@@ -17,7 +17,12 @@ tests = testGroup "Throw" $
   ]
 
 
-gen :: (Has (Throw e) sig m, Show e) => Gen e -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen
+  :: (Has (Throw e) sig m, Show e)
+  => Gen e
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen (With (m a))
 gen e _ _ = liftWith "throwError" throwError . showing <$> e
 
 

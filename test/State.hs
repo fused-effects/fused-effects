@@ -29,7 +29,13 @@ tests = testGroup "State"
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
-gen :: forall s m a sig . (Has (State s) sig m, Arg s, Show a, Show s, Vary s) => Gen s -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen
+  :: forall s m a sig
+  .  (Has (State s) sig m, Arg s, Show a, Show s, Vary s)
+  => Gen s
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen (With (m a))
 gen s _ a = choice
   [ liftWith "gets" (gets @s) . showingFn <$> fn a
   , liftWith2 "(<$)" (<$) . showing <$> a <*> (liftWith "put" put . showing <$> s)

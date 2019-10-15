@@ -19,7 +19,11 @@ tests = testGroup "Choose"
   ]
 
 
-gen :: (Has Choose sig m, Show a) => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen
+  :: (Has Choose sig m, Show a)
+  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen (With (m a))
 gen m a = subterm2 (m a) (m a) (liftWith2 "(<|>)" (<|>))
 
 

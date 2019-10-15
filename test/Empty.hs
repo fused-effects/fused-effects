@@ -20,7 +20,11 @@ tests = testGroup "Empty"
   ]
 
 
-gen :: Has Empty sig m => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen
+  :: Has Empty sig m
+  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen (With (m a))
 gen _ _ = pure (atom "empty" empty)
 
 

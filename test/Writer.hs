@@ -29,7 +29,13 @@ tests = testGroup "Writer"
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
-gen :: forall w m a sig . (Has (Writer w) sig m, Arg w, Show a, Show w, Vary w) => Gen w -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))
+gen
+  :: forall w m a sig
+  .  (Has (Writer w) sig m, Arg w, Show a, Show w, Vary w)
+  => Gen w
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen (With (m a))
 gen w m a = choice
   [ liftWith2 "(<$)" (<$) . showing <$> a <*> (liftWith "tell" tell . showing <$> w)
   , subtermM (m a) (\ m -> choice
