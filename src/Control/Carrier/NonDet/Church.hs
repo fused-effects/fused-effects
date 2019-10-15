@@ -65,9 +65,6 @@ newtype NonDetC m a = NonDetC
   }
   deriving (Functor)
 
--- $
---   prop> run (runNonDetA (pure a *> pure b)) === Just b
---   prop> run (runNonDetA (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ _ leaf _ -> leaf a)
   {-# INLINE pure #-}
@@ -75,9 +72,6 @@ instance Applicative (NonDetC m) where
     f fork (\ f' -> a fork (leaf . f') nil) nil
   {-# INLINE (<*>) #-}
 
--- $
---   prop> run (runNonDetA (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
---   prop> run (runNonDetA ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ _ nil -> nil)
   {-# INLINE empty #-}
@@ -94,9 +88,6 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
   {-# INLINE fail #-}
 
 -- | Separate fixpoints are computed for each branch.
---
--- >>> run (runNonDetA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
--- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
     mfix (runNonDetA . f . head)
@@ -149,7 +140,3 @@ fold fork leaf nil = go where
   go (Leaf a)   = leaf a
   go (Fork a b) = fork (go a) (go b)
 {-# INLINE fold #-}
-
-
--- $setup
--- >>> import Test.QuickCheck
