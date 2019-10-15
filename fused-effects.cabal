@@ -128,6 +128,7 @@ test-suite test
     Cut
     Empty
     Error
+    Fresh
     Fusion
     NonDet
     NonDet.Church
