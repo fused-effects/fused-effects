@@ -42,7 +42,6 @@ import Control.Carrier.Pure
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Writer
 import Data.Foldable (traverse_)
-import Data.Function (on)
 import Data.Functor.Classes (showsUnaryWith)
 import Data.Proxy
 import qualified Data.Semigroup as S
@@ -153,9 +152,6 @@ instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
 
 data With a = With { showWith :: Term a, getWith :: a }
   deriving (Functor)
-
-instance Eq a => Eq (With a) where
-  (==) = (==) `on` getWith
 
 instance Applicative With where
   pure = With . pure <*> id
