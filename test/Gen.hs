@@ -36,7 +36,6 @@ module Gen
 , pattern Fn
 , pattern FnWith
   -- * Re-exports
-, MonadGen
 , Gen
 , (===)
 , (/==)
