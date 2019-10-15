@@ -216,3 +216,9 @@ newtype WithT m a = WithT { runWithT :: m (With a) }
 instance Applicative m => Applicative (WithT m) where
   pure = WithT . pure . pure
   WithT m1 <*> WithT m2 = WithT ((<*>) <$> m1 <*> m2)
+
+instance Monad m => Monad (WithT m) where
+  WithT m >>= f = WithT $ do
+    With' l1 _  a <- m
+    With' l2 s2 b <- runWithT (f a)
+    pure (With' (l1 <> l2) s2 b)
