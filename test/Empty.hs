@@ -23,7 +23,7 @@ gen
   => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
-gen _ _ = addLabel "empty" (atom "empty" empty)
+gen _ _ = label "empty" empty
 
 
 test

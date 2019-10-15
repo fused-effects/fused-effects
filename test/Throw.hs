@@ -23,7 +23,7 @@ gen
   -> (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
-gen e _ _ = addLabel "throwError" (atom "throwError" throwError <*> e)
+gen e _ _ = label "throwError" throwError <*> e
 
 
 test

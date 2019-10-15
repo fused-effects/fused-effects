@@ -37,8 +37,8 @@ gen
   -> Gen a
   -> Gen (m a)
 gen s _ a = choice
-  [ addLabel "get" (atom "gets" (gets @s) <*> fn a)
-  , infixL 4 "<$" (<$) <*> a <*> addLabel "put" (atom "put" put <*> s)
+  [ label "gets" (gets @s) <*> fn a
+  , infixL 4 "<$" (<$) <*> a <*> (label "put" put <*> s)
   ]
 
 

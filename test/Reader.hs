@@ -34,8 +34,8 @@ gen
   -> Gen a
   -> Gen (m a)
 gen r m a = choice
-  [ addLabel "ask" (atom "asks" (asks @r) <*> fn a)
-  , addLabel "local" (atom "local" local <*> fn r <*> m a)
+  [ label "asks" (asks @r) <*> fn a
+  , label "local" local <*> fn r <*> m a
   ]
 
 

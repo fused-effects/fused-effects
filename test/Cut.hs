@@ -26,8 +26,8 @@ gen
   -> Gen a
   -> Gen (m a)
 gen m a = choice
-  [ addLabel "call" (atom "call" call <*> m a)
-  , addLabel "cutfail" (atom "cutfail" cutfail)
+  [ label "call" call <*> m a
+  , label "cutfail" cutfail
   , NonDet.gen m a
   ]
 

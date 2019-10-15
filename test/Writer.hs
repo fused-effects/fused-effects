@@ -38,9 +38,9 @@ gen
   -> Gen a
   -> Gen (m a)
 gen w b m a = choice
-  [ infixL 4 "<$" (<$) <*> a <*> addLabel "tell" (atom "tell" tell <*> w)
-  , atom "fmap" fmap <*> fn a <*> addLabel "listen" (atom "listen" (listen @w) <*> m b)
-  , addLabel "censor" (atom "censor" censor <*> fn w <*> m a)
+  [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w)
+  , atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
+  , label "censor" censor <*> fn w <*> m a
   ]
 
 

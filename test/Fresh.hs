@@ -22,7 +22,7 @@ gen
   => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
-gen _ a = atom "fmap" fmap <*> fn a <*> addLabel "fresh" (atom "fresh" fresh)
+gen _ a = atom "fmap" fmap <*> fn a <*> label "fresh" fresh
 
 
 test
