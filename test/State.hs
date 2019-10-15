@@ -53,5 +53,5 @@ test s m a runState =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
     \ s (FnWith k) -> runState s (get >>= k) === runState s (k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
-    \ s s' (With m) -> runState s (put s' >> m) === runState s' m
+    \ s s' m'@(With m) -> labelling m' >> runState s (put s' >> m) === runState s' m
   ]

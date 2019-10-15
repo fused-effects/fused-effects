@@ -40,5 +40,5 @@ test
   -> [TestTree]
 test m a b runCull
   = testProperty "cull returns at most one success" (forall (a :. m a :. m a :. Nil)
-    (\ a (With m) (With n) -> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
+    (\ a m'@(With m) n'@(With n) -> labelling m' >> labelling n' >> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
   : NonDet.test m a b runCull

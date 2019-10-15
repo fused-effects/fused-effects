@@ -50,5 +50,5 @@ test r m a runReader =
   [ testProperty "ask returns the environment variable" . forall (r :. fn (m a) :. Nil) $
     \ r (FnWith k) -> runReader r (ask >>= k) === runReader r (k r)
   , testProperty "local modifies the environment variable" . forall (r :. fn r :. m a :. Nil) $
-    \ r (Fn f) (With m) -> runReader r (local f m) === runReader (f r) m
+    \ r (Fn f) m'@(With m) -> labelling m' >> runReader r (local f m) === runReader (f r) m
   ]

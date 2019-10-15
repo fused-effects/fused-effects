@@ -53,9 +53,9 @@ test
   -> [TestTree]
 test w m a runWriter =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
-    \ w (With m) -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
+    \ w m'@(With m) -> labelling m' >> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
   , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $
-    \ (With m) -> runWriter (listen m) === fmap (fst &&& id) (runWriter m)
+    \ m'@(With m) -> labelling m' >> runWriter (listen m) === fmap (fst &&& id) (runWriter m)
   , testProperty "censor revises written output" . forall (fn w :. m a :. Nil) $
-    \ (Fn f) (With m) -> runWriter (censor f m) === fmap (first f) (runWriter m)
+    \ (Fn f) m'@(With m) -> labelling m' >> runWriter (censor f m) === fmap (first f) (runWriter m)
   ]

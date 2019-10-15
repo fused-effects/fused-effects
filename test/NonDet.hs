@@ -41,8 +41,8 @@ test
   -> [TestTree]
 test m a b runNonDet
   =  testProperty "empty is the left identity of <|>"  (forall (m a :. Nil)
-    (\ (With m) -> runNonDet (empty <|> m) === runNonDet m))
+    (\ m'@(With m) -> labelling m' >> runNonDet (empty <|> m) === runNonDet m))
   :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
-    (\ (With m) -> runNonDet (m <|> empty) === runNonDet m))
+    (\ m'@(With m) -> labelling m' >> runNonDet (m <|> empty) === runNonDet m))
   :  Empty.test  m a b (fmap listToMaybe . runNonDet)
   ++ Choose.test m a b runNonDet

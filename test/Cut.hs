@@ -44,7 +44,7 @@ test m a b runCut
   = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
     (\ (FnWith k) -> runCut (cutfail >>= k) === runCut cutfail))
   : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
-    (\ (With m) -> runCut (cutfail <|> m) === runCut cutfail))
+    (\ m'@(With m) -> labelling m' >> runCut (cutfail <|> m) === runCut cutfail))
   : testProperty "call delimits cutfail" (forall (m a :. Nil)
-    (\ (With m) -> runCut (call cutfail <|> m) === runCut m))
+    (\ m'@(With m) -> labelling m' >> runCut (call cutfail <|> m) === runCut m))
   : NonDet.test m a b runCut

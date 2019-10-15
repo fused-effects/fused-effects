@@ -35,5 +35,5 @@ test
   -> [TestTree]
 test m a runFresh =
   [ testProperty "fresh yields unique values" . forall (m a :. Nil) $
-    \ (With m) -> runFresh (m >> fresh) /== runFresh (m >> fresh >> fresh)
+    \ m'@(With m) -> labelling m' >> runFresh (m >> fresh) /== runFresh (m >> fresh >> fresh)
   ]
