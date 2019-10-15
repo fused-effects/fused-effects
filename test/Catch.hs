@@ -16,7 +16,7 @@ gen
   -> (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
-gen _ m a = addLabel "catchError" (liftWith2 "catchError" catchError (m a) (fn @e (m a)))
+gen _ m a = addLabel "catchError" (atom "catchError" catchError <*> m a <*> fn @e (m a))
 
 
 test

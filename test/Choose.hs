@@ -24,7 +24,7 @@ gen
   => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
-gen m a = addLabel "<|>" (liftWith2InfixL 3 "<|>" (<|>) (m a) (m a))
+gen m a = addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a)
 
 
 test

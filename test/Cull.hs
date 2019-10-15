@@ -26,7 +26,7 @@ gen
   -> Gen a
   -> Gen (m a)
 gen m a = choice
-  [ addLabel "cull" (liftWith "cull" cull (m a))
+  [ addLabel "cull" (atom "cull" cull <*> m a)
   , NonDet.gen m a
   ]
 
