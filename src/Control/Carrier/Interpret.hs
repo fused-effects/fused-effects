@@ -10,6 +10,7 @@ module Control.Carrier.Interpret
 , Handler
   -- * Re-exports
 , Carrier
+, Has
 , run
 ) where
 
@@ -57,8 +58,6 @@ reify a k =
 --
 -- Note that due to the higher-rank type, you have to use either '$' or explicit application when applying this interpreter. That is, you will need to write @runInterpret f (runInterpret g myPrgram)@ or @runInterpret f $ runInterpret g $ myProgram@. If you try and write @runInterpret f . runInterpret g@, you will unfortunately get a rather scary type error!
 --
---   prop> run (runInterpret (\ op -> case op of { Get k -> k a ; Put _ k -> k }) get) === a
---
 -- @since 1.0.0.0
 runInterpret
   :: forall eff m a.
@@ -84,8 +83,6 @@ runInterpret f m =
 
 
 -- | Interpret an effect using a higher-order function with some state variable.
---
---   prop> run (runInterpretState (\ s op -> case op of { Get k -> runState s (k s) ; Put s' k -> runState s' k }) a get) === a
 --
 -- @since 1.0.0.0
 runInterpretState
@@ -115,9 +112,3 @@ instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrie
     runHandler (unTag (reflect @s)) eff
   eff (R other) =
     InterpretC (eff (handleCoercible other))
-
-
--- $setup
--- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Control.Effect.State

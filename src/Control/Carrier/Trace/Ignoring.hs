@@ -2,14 +2,11 @@
 
 -- | A carrier for the 'Control.Effect.Trace' effect that ignores all traced results. Useful when you wish to disable tracing without removing all trace statements.
 module Control.Carrier.Trace.Ignoring
-( -- * Trace effect
-  module Control.Effect.Trace
-  -- * Trace carrier
-, runTrace
+( -- * Trace carrier
+  runTrace
 , TraceC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Trace effect
+, module Control.Effect.Trace
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -23,7 +20,12 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Trace' effect, ignoring all traces.
 --
---   prop> run (runTrace (trace a *> pure b)) === b
+-- @
+-- 'runTrace' ('trace' s) = 'pure' ()
+-- @
+-- @
+-- 'runTrace' ('pure' a) = 'pure' a
+-- @
 --
 -- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
@@ -41,8 +43,3 @@ instance Carrier sig m => Carrier (Trace :+: sig) (TraceC m) where
   eff (L trace) = traceCont trace
   eff (R other) = TraceC (eff (handleCoercible other))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck

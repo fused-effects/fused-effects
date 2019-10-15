@@ -6,15 +6,12 @@ This implementation is based on a post Gabriel Gonzalez made to the Haskell mail
 -}
 
 module Control.Carrier.Writer.Strict
-( -- * Writer effect
-  module Control.Effect.Writer
-  -- * Writer carrier
-, runWriter
+( -- * Writer carrier
+  runWriter
 , execWriter
 , WriterC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Writer effect
+, module Control.Effect.Writer
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -29,14 +26,21 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --
---   prop> run (runWriter (tell (Sum a) *> pure b)) === (Sum a, b)
+-- @
+-- 'runWriter' ('tell' w) = 'pure' (w, ())
+-- @
+-- @
+-- 'runWriter' ('pure' a) = 'pure' ('mempty', a)
+-- @
 runWriter :: Monoid w => WriterC w m a -> m (w, a)
 runWriter = runState mempty . runWriterC
 {-# INLINE runWriter #-}
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
 --
---   prop> run (execWriter (tell (Sum a) *> pure b)) === Sum a
+-- @
+-- 'execWriter' m = 'fmap' 'fst' ('runWriter' m)
+-- @
 execWriter :: (Monoid w, Functor m) => WriterC w m a -> m w
 execWriter = fmap fst . runWriter
 {-# INLINE execWriter #-}
@@ -65,11 +69,3 @@ instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (Wr
     runWriterC (k a)
   eff (R other)          = WriterC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XTypeApplications
--- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Data.Semigroup (Semigroup(..), Sum(..))

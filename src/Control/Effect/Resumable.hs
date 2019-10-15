@@ -12,7 +12,9 @@ module Control.Effect.Resumable
   Resumable(..)
 , throwResumable
   -- * Re-exports
+, Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier
@@ -33,18 +35,6 @@ instance Effect (Resumable err) where
 
 -- | Throw an error which can be resumed with a value of its result type. Note that the type parameters in the @err a@ paramater and @m a@ parameter must match up; this indicates the type with which the error must be resumed.
 --
---   prop> run (runResumable (throwResumable (Identity a))) === Left (SomeError (Identity a))
---
 -- @since 0.1.0.0
 throwResumable :: Has (Resumable err) sig m => err a -> m a
 throwResumable err = send (Resumable err pure)
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XGADTs
--- >>> :seti -XTypeApplications
--- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Data.Functor.Const
--- >>> import Data.Functor.Identity

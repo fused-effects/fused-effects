@@ -13,7 +13,9 @@ module Control.Effect.Fresh
 , fresh
 , resetFresh
   -- * Re-exports
+, Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier
@@ -35,7 +37,9 @@ instance Effect Fresh where
 
 -- | Produce a fresh (i.e. unique) 'Int'.
 --
---   prop> run (runFresh (replicateM n fresh)) === nub (run (runFresh (replicateM n fresh)))
+-- @
+-- m '>>' 'fresh' ≠ m '>>' 'fresh' '>>' 'fresh'
+-- @
 --
 -- @since 0.1.0.0
 fresh :: Has Fresh sig m => m Int
@@ -43,16 +47,10 @@ fresh = send (Fresh pure)
 
 -- | Reset the fresh counter after running a computation.
 --
---   prop> run (runFresh (resetFresh (replicateM m fresh) *> replicateM n fresh)) === run (runFresh (replicateM n fresh))
+-- @
+-- 'resetFresh' 'fresh' '>>' m = m
+-- @
 --
 -- @since 0.1.0.0
 resetFresh :: Has Fresh sig m => m a -> m a
 resetFresh m = send (Reset m pure)
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Fresh.Strict
--- >>> import Control.Monad (replicateM)
--- >>> import Data.List (nub)

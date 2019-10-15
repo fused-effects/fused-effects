@@ -1,33 +1,48 @@
-{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
 module NonDet
 ( tests
+, gen
+, test
 ) where
 
-import Control.Carrier.Error.Either
-import Control.Carrier.NonDet.Church
-import Control.Carrier.State.Strict
-import Prelude hiding (error)
+import qualified Choose
+import Control.Carrier
+import qualified Control.Carrier.NonDet.Church as Church.NonDetC
+import Control.Effect.Choose
+import Control.Effect.Empty
+import Control.Effect.NonDet (NonDet)
+import Data.Maybe (listToMaybe)
+import qualified Empty
+import Gen
 import Test.Tasty
-import Test.Tasty.HUnit
+import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "NonDet"
-  [ testCase "collects results of effects run inside it" $
-    run (runNonDetA (runState 'a' state))
-    @?= [('a', 'z'), ('b', 'b'), ('a', 'a')]
-  , testCase "collapses results of effects run outside it" $
-    run (runState 'a' (runNonDetA state))
-    @?= ('b', "zbb")
-  , testCase "collects results from higher-order effects run inside it" $
-    run (runNonDetA (runError error))
-    @?= [Right 'z', Right 'a' :: Either Char Char]
-  , testCase "collapses results of higher-order effects run outside it" $
-    run (runError (runNonDetA error))
-    @?= (Right "a" :: Either Char String)
+  [ testGroup "NonDetC (Church)" $ test (m gen) a b Church.NonDetC.runNonDetA
+  , testGroup "[]"               $ test (m gen) a b pure
   ]
 
-state :: (Alternative m, Has (State Char) sig m) => m Char
-state = pure 'z' <|> put 'b' *> get <|> get
 
-error :: (Alternative m, Has (Error Char) sig m) => m Char
-error = (pure 'z' <|> throwError 'a') `catchError` pure
+gen
+  :: (Has NonDet sig m, Show a)
+  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen (With (m a))
+gen m a = choice [ Empty.gen m a, Choose.gen m a ]
+
+
+test
+  :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
+  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen b
+  -> (forall a . m a -> PureC [a])
+  -> [TestTree]
+test m a b runNonDet
+  =  testProperty "empty is the left identity of <|>"  (forall (m a :. Nil)
+    (\ (With m) -> runNonDet (empty <|> m) === runNonDet m))
+  :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
+    (\ (With m) -> runNonDet (m <|> empty) === runNonDet m))
+  :  Empty.test  m a b (fmap listToMaybe . runNonDet)
+  ++ Choose.test m a b runNonDet

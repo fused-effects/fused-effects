@@ -6,21 +6,18 @@ Note that the parameter order in 'runState', 'evalState', and 'execState' is rev
 -}
 
 module Control.Carrier.State.Lazy
-( -- * State effect
-  module State
-  -- * Lazy state carrier
-, runState
+( -- * Lazy state carrier
+  runState
 , evalState
 , execState
 , StateC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * State effect
+, module Control.Effect.State
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Effect.State as State
+import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
@@ -34,7 +31,7 @@ instance Functor m => Functor (StateC s m) where
   fmap f m = StateC $ \ s -> fmap (\ ~(s', a) -> (s', f a)) $ runStateC m s
   {-# INLINE fmap #-}
 
-instance (Functor m, Monad m) => Applicative (StateC s m) where
+instance Monad m => Applicative (StateC s m) where
   pure a = StateC $ \ s -> pure (s, a)
   {-# INLINE pure #-}
   StateC mf <*> StateC mx = StateC $ \ s -> do
@@ -85,8 +82,15 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) w
 --   More programs terminate with lazy state than strict state, but injudicious
 --   use of lazy state may lead to thunk buildup.
 --
---   prop> run (runState a (pure b)) === (a, b)
---   prop> take 5 . snd . run $ runState () (traverse pure [1..]) === [1,2,3,4,5]
+-- @
+-- 'runState' s ('pure' a) = 'pure' (s, a)
+-- @
+-- @
+-- 'runState' s 'get' = 'pure' (s, s)
+-- @
+-- @
+-- 'runState' s ('put' t) = 'pure' (t, ())
+-- @
 --
 -- @since 1.0.0.0
 runState :: s -> StateC s m a -> m (s, a)
@@ -95,7 +99,9 @@ runState s c = runStateC c s
 
 -- | Run a lazy 'State' effect, yielding the result value and discarding the final state.
 --
---   prop> run (evalState a (pure b)) === b
+-- @
+-- 'evalState' s m = 'fmap' 'snd' ('runState' s m)
+-- @
 --
 -- @since 1.0.0.0
 evalState :: forall s m a . Functor m => s -> StateC s m a -> m a
@@ -104,14 +110,11 @@ evalState s = fmap snd . runState s
 
 -- | Run a lazy 'State' effect, yielding the final state and discarding the return value.
 --
---   prop> run (execState a (pure b)) === a
+-- @
+-- 'execState' s m = 'fmap' 'fst' ('runState' s m)
+-- @
 --
 -- @since 1.0.0.0
 execState :: forall s m a . Functor m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
 {-# INLINE[3] execState #-}
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure

@@ -19,14 +19,14 @@ before_cache:
 
 matrix:
   include:
-    - compiler: "ghc-8.8.1"
-      addons: {apt: {packages: [cabal-install-3.0,ghc-8.8.1], sources: [hvr-ghc]}}
-    - compiler: "ghc-8.6.5"
-      addons: {apt: {packages: [cabal-install-2.4,ghc-8.6.5], sources: [hvr-ghc]}}
-    - compiler: "ghc-8.4.4"
-      addons: {apt: {packages: [cabal-install-2.4,ghc-8.4.4], sources: [hvr-ghc]}}
     - compiler: "ghc-8.2.2"
       addons: {apt: {packages: [cabal-install-2.4,ghc-8.2.2], sources: [hvr-ghc]}}
+    - compiler: "ghc-8.4.4"
+      addons: {apt: {packages: [cabal-install-2.4,ghc-8.4.4], sources: [hvr-ghc]}}
+    - compiler: "ghc-8.6.5"
+      addons: {apt: {packages: [cabal-install-2.4,ghc-8.6.5], sources: [hvr-ghc]}}
+    - compiler: "ghc-8.8.1"
+      addons: {apt: {packages: [cabal-install-3.0,ghc-8.8.1], sources: [hvr-ghc]}}
 
 before_install:
 - mkdir -p $HOME/.local/bin
@@ -43,7 +43,6 @@ script:
 - cabal v2-build
 - cabal v2-run test
 - cabal v2-run examples
-- cabal v2-run doctest
 - cabal v2-haddock
 - cabal v2-sdist
 - cabal check

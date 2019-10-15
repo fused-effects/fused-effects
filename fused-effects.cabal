@@ -41,8 +41,8 @@ common common
     ghc-options: -Wno-missing-deriving-strategies
 
 library
-  import:              common
-  hs-source-dirs:      src
+  import:         common
+  hs-source-dirs: src
   exposed-modules:
     -- Carriers
     Control.Carrier
@@ -57,7 +57,6 @@ library
     Control.Carrier.Interpret
     Control.Carrier.Lift
     Control.Carrier.NonDet.Church
-    Control.Carrier.NonDet.Maybe
     Control.Carrier.Pure
     Control.Carrier.Reader
     Control.Carrier.Resource
@@ -95,14 +94,14 @@ library
       base           >= 4.9 && < 4.14
     , deepseq       ^>= 1.4.3
     , unliftio-core ^>= 0.1.2
-    , transformers
+    , transformers   >= 0.4 && < 0.6
 
 
 test-suite examples
-  import:              common
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      examples
-  main-is:             Main.hs
+  import:         common
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: examples
+  main-is:        Main.hs
   other-modules:
     Inference
     Parser
@@ -117,36 +116,43 @@ test-suite examples
     , transformers
 
 test-suite test
-  import:              common
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Test.hs
+  import:         common
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Test.hs
   other-modules:
+    Catch
+    Choose
+    Cull
+    Cut
+    Empty
+    Error
+    Fresh
     Fusion
+    Gen
     NonDet
+    NonDet.Church
+    Reader
+    State
+    Throw
+    Writer
   build-depends:
       base
     , fused-effects
+    , hedgehog           ^>= 1
+    , hedgehog-fn        ^>= 1
     , inspection-testing ^>= 0.4
     , tasty              ^>= 1.2
+    , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
-
-test-suite doctest
-  import:              common
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Doctest.hs
-  build-depends:
-      base
-    , doctest  >= 0.7 && < 1
-    , fused-effects
+    , transformers
 
 
 benchmark benchmark
-  import:             common
-  type:               exitcode-stdio-1.0
-  hs-source-dirs:     benchmark
-  main-is:            Bench.hs
+  import:         common
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: benchmark
+  main-is:        Bench.hs
   other-modules:
     NonDet
     NonDet.NQueens

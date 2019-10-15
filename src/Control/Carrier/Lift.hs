@@ -2,14 +2,11 @@
 
 -- | A carrier for 'Lift' allowing monadic actions to be lifted into a larger context with 'sendM'.
 module Control.Carrier.Lift
-( -- * Lift effect
-  module Control.Effect.Lift
-  -- * Lift carrier
-, runM
+( -- * Lift carrier
+  runM
 , LiftC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Lift effect
+, module Control.Effect.Lift
 ) where
 
 import Control.Applicative (Alternative(..))

@@ -11,7 +11,9 @@ module Control.Effect.Catch
   Catch(..)
 , catchError
   -- * Re-exports
+, Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier
@@ -36,6 +38,10 @@ instance Effect (Catch e) where
 -- nor will it handle exceptions thrown from pure code. If you need to handle IO-based errors,
 -- consider if 'Control.Effect.Resource' fits your use case; if not, use 'Control.Monad.IO.Class.liftIO' with
 -- 'Control.Exception.try' or use 'Control.Exception.catch' from outside the effect invocation.
+--
+-- @
+-- runError ('throwError' e `catchError` f) = runError (f e)
+-- @
 --
 -- @since 0.1.0.0
 catchError :: Has (Catch e) sig m => m a -> (e -> m a) -> m a

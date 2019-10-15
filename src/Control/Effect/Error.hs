@@ -7,21 +7,20 @@ This effect is similar to the traditional @MonadError@ typeclass, though it allo
 Predefined carriers:
 
 * "Control.Carrier.Error.Either".
+* "Control.Monad.Trans.Except".
 * If 'Error' @e@ is the last effect in a stack, it can be interpreted directly to an 'Either' @e@.
 -}
 
 module Control.Effect.Error
-( -- * Error effect
+( -- * Error effects
   Error
 , module Control.Effect.Throw
 , module Control.Effect.Catch
-  -- * Re-exports
-, Has
 ) where
 
 import Control.Carrier
-import Control.Effect.Catch hiding (Has)
-import Control.Effect.Throw hiding (Has)
+import Control.Effect.Catch
+import Control.Effect.Throw
 
 -- | @since 0.1.0.0
 type Error e = Throw e :+: Catch e

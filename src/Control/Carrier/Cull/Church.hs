@@ -2,18 +2,15 @@
 
 -- | A carrier for 'Cull' and 'NonDet' effects used in tandem (@Cull :+: NonDet@).
 module Control.Carrier.Cull.Church
-( -- * Cull effect
-  module Control.Effect.Cull
-  -- * NonDet effects
-, module Control.Effect.NonDet
-  -- * Cull carrier
-, runCull
+( -- * Cull carrier
+  runCull
 , runCullA
 , runCullM
 , CullC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Cull effect
+, module Control.Effect.Cull
+  -- * NonDet effects
+, module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (liftA2)
@@ -28,8 +25,6 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 -- | Run a 'Cull' effect with the supplied continuations for '<|>', 'pure', and 'empty'. Branches outside of any 'cull' block will not be pruned.
---
---   prop> run (runCull (liftA2 (<|>)) (pure . pure) (pure empty) (pure a <|> pure b)) === [a, b]
 --
 -- @since 1.0.0.0
 runCull :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CullC m a -> m b
@@ -63,9 +58,6 @@ instance Alternative (CullC m) where
   {-# INLINE (<|>) #-}
 
 -- | Separate fixpoints are computed for each branch.
---
--- >>> run (runCullA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
--- [[0,1,2],[0,-1,-2]]
 deriving instance MonadFix m => MonadFix (CullC m)
 
 instance MonadPlus (CullC m)
@@ -80,9 +72,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC
   eff (R (L (R (Choose k)))) = k True <|> k False
   eff (R (R other))          = CullC (eff (R (R (handleCoercible other))))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XTypeApplications
--- >>> import Test.QuickCheck

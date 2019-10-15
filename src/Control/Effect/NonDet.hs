@@ -7,29 +7,30 @@ Nondeterministic operations are encapsulated by the 'Alternative' class, where '
 Predefined carriers:
 
 * "Control.Carrier.NonDet.Church", which collects all branches' results using an @Alternative@ functor.
-* "Control.Carrier.NonDet.Maybe", which returns at most one result, in `Maybe`.
 * If 'NonDet' is the last effect in a stack, it can be interpreted directly into a @[]@.
 -}
 
 module Control.Effect.NonDet
 ( -- * NonDet effects
   NonDet
+, module Control.Effect.Choose
+, module Control.Effect.Empty
 , oneOf
 , foldMapA
   -- * Re-exports
 , Alternative(..)
+, Carrier
+, Has
+, MonadPlus(..)
 , guard
 , optional
-, MonadPlus(..)
-  -- * Constituent effects
-, module Control.Effect.Choose
-, module Control.Effect.Empty
+, run
 ) where
 
 import Control.Applicative (Alternative(..), optional)
+import Control.Carrier
 import Control.Effect.Choose (Choose(..))
 import Control.Effect.Empty (Empty(..))
-import Control.Effect.Sum
 import Control.Monad (MonadPlus(..), guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))

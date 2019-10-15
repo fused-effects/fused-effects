@@ -2,14 +2,11 @@
 
 -- | A carrier for the 'Control.Effect.Trace' effect that prints all traced results to stderr.
 module Control.Carrier.Trace.Printing
-( -- * Trace effect
-  module Control.Effect.Trace
-  -- * Trace carrier
-, runTrace
+( -- * Trace carrier
+  runTrace
 , TraceC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Trace effect
+, module Control.Effect.Trace
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -23,6 +20,15 @@ import Control.Monad.Trans.Class
 import System.IO
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
+--
+-- @
+-- 'runTrace' ('trace' s) = 'liftIO' ('putStrLn' s)
+-- @
+-- @
+-- 'runTrace' ('pure' a) = 'pure' a
+-- @
+--
+-- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
 runTrace = runTraceC
 

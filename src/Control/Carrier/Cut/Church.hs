@@ -2,18 +2,15 @@
 
 -- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
 module Control.Carrier.Cut.Church
-( -- * Cut effect
-  module Control.Effect.Cut
-  -- * NonDet effects
-, module Control.Effect.NonDet
-  -- * Cut carrier
-, runCut
+( -- * Cut carrier
+  runCut
 , runCutA
 , runCutM
 , CutC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Cut effect
+, module Control.Effect.Cut
+  -- * NonDet effects
+, module Control.Effect.NonDet
 ) where
 
 import Control.Carrier
@@ -25,8 +22,6 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 -- | Run a 'Cut' effect with the supplied continuations for 'pure' / '<|>', 'empty', and 'cutfail'.
---
---   prop> run (runCut (fmap . (:)) (pure []) (pure []) (pure a)) === [a]
 --
 -- @since 1.0.0.0
 runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
@@ -74,9 +69,6 @@ instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
   {-# INLINE fail #-}
 
 -- | Separate fixpoints are computed for each branch.
---
--- >>> run (runCutA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
--- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (CutC m) where
   mfix f = CutC $ \ cons nil fail ->
     mfix (runCutA . f . head)
@@ -103,9 +95,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
   eff (R (L (R (Choose k)))) = k True <|> k False
   eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutA) other) >>= foldr cons nil
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XTypeApplications
--- >>> import Test.QuickCheck

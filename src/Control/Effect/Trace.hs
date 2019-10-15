@@ -14,7 +14,9 @@ module Control.Effect.Trace
   Trace(..)
 , trace
   -- * Re-exports
+, Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

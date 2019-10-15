@@ -2,11 +2,11 @@
 
 -- | A carrier for pure effects, used to kick off a stack of effects with 'run'.
 module Control.Carrier.Pure
-( -- * Pure effect
-  module Control.Effect.Pure
-  -- * Pure carrier
-, run
+( -- * Pure carrier
+  run
 , PureC(..)
+  -- * Pure effect
+, module Control.Effect.Pure
 ) where
 
 import Control.Applicative
@@ -24,6 +24,7 @@ run = runPureC
 
 -- | @since 1.0.0.0
 newtype PureC a = PureC { runPureC :: a }
+  deriving (Eq, Show)
 
 instance Functor PureC where
   fmap = coerce

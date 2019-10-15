@@ -6,16 +6,13 @@ Under the hood, it uses a Church-encoded structure and a binary tree to prevent 
 -}
 
 module Control.Carrier.NonDet.Church
-( -- * NonDet effects
-  module Control.Effect.NonDet
-  -- * NonDet carrier
-, runNonDet
+( -- * NonDet carrier
+  runNonDet
 , runNonDetA
 , runNonDetM
 , NonDetC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * NonDet effects
+, module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (liftA2)
@@ -42,8 +39,12 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 --
 -- Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unless used with 'Control.Effect.Cull.cull', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
 --
---   prop> run (runNonDetA (pure a)) === [a]
---   prop> run (runNonDetA (pure a)) === Just a
+-- @
+-- 'runNonDetA' ('pure' a) = 'pure' [a]
+-- @
+-- @
+-- 'runNonDetA' ('pure' a) = 'pure' ('Just' a)
+-- @
 --
 -- @since 1.0.0.0
 runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
@@ -64,9 +65,6 @@ newtype NonDetC m a = NonDetC
   }
   deriving (Functor)
 
--- $
---   prop> run (runNonDetA (pure a *> pure b)) === Just b
---   prop> run (runNonDetA (pure a <* pure b)) === Just a
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ _ leaf _ -> leaf a)
   {-# INLINE pure #-}
@@ -74,9 +72,6 @@ instance Applicative (NonDetC m) where
     f fork (\ f' -> a fork (leaf . f') nil) nil
   {-# INLINE (<*>) #-}
 
--- $
---   prop> run (runNonDetA (pure a <|> (pure b <|> pure c))) === Fork (Leaf a) (Fork (Leaf b) (Leaf c))
---   prop> run (runNonDetA ((pure a <|> pure b) <|> pure c)) === Fork (Fork (Leaf a) (Leaf b)) (Leaf c)
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ _ nil -> nil)
   {-# INLINE empty #-}
@@ -93,9 +88,6 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
   {-# INLINE fail #-}
 
 -- | Separate fixpoints are computed for each branch.
---
--- >>> run (runNonDetA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
--- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
     mfix (runNonDetA . f . head)
@@ -148,9 +140,3 @@ fold fork leaf nil = go where
   go (Leaf a)   = leaf a
   go (Fork a b) = fork (go a) (go b)
 {-# INLINE fold #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XTypeApplications
--- >>> import Test.QuickCheck

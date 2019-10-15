@@ -12,7 +12,9 @@ module Control.Effect.Throw
   Throw(..)
 , throwError
   -- * Re-exports
+, Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

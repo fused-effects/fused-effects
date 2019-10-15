@@ -16,7 +16,9 @@ module Control.Effect.Empty
 , empty
 , guard
   -- * Re-exports
+, Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier
@@ -31,7 +33,11 @@ instance Effect   Empty
 
 -- | Abort the computation.
 --
---   prop> run (runEmpty empty) === Nothing
+-- 'empty' annihilates '>>=':
+--
+-- @
+-- 'empty' '>>=' k = 'empty'
+-- @
 --
 -- @since 1.0.0.0
 empty :: Has Empty sig m => m a
@@ -43,9 +49,3 @@ empty = send Empty
 guard :: Has Empty sig m => Bool -> m ()
 guard True  = pure ()
 guard False = empty
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Empty.Maybe

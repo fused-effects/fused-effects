@@ -4,15 +4,12 @@
 This can be useful when debugging or intercepting the behavior of a computation that invokes resumability.
 -}
 module Control.Carrier.Resumable.Either
-( -- * Resumable effect
-  module Control.Effect.Resumable
-  -- * Resumable carrier
-, runResumable
+( -- * Resumable carrier
+  runResumable
 , ResumableC(..)
 , SomeError(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Resumable effect
+, module Control.Effect.Resumable
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -29,7 +26,12 @@ import Data.Functor.Classes
 
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
---   prop> run (runResumable (pure a)) === Right @(SomeError Identity) @Int a
+-- @
+-- 'runResumable' ('pure' a) = 'pure' ('Right' a)
+-- @
+-- @
+-- 'runResumable' ('throwResumable' err) = 'pure' ('Left' err)
+-- @
 --
 -- @since 1.0.0.0
 runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
@@ -52,33 +54,22 @@ data SomeError err
 -- | Equality for 'SomeError' is determined by an 'Eq1' instance for the error type.
 --
 --   Note that since we can’t tell whether the type indices are equal, let alone what 'Eq' instance to use for them, the comparator passed to 'liftEq' always returns 'True'. Thus, 'SomeError' is best used with type-indexed GADTs for the error type.
---
---   prop> SomeError (Identity a) === SomeError (Identity b)
---   prop> (SomeError (Const a) === SomeError (Const b)) == (a == b)
 instance Eq1 err => Eq (SomeError err) where
   SomeError exc1 == SomeError exc2 = liftEq (const (const True)) exc1 exc2
 
 -- | Ordering for 'SomeError' is determined by an 'Ord1' instance for the error type.
 --
 --   Note that since we can’t tell whether the type indices are equal, let alone what 'Ord' instance to use for them, the comparator passed to 'liftCompare' always returns 'EQ'. Thus, 'SomeError' is best used with type-indexed GADTs for the error type.
---
---   prop> (SomeError (Identity a) `compare` SomeError (Identity b)) === EQ
---   prop> (SomeError (Const a) `compare` SomeError (Const b)) === (a `compare` b)
 instance Ord1 err => Ord (SomeError err) where
   SomeError exc1 `compare` SomeError exc2 = liftCompare (const (const EQ)) exc1 exc2
 
 -- | Showing for 'SomeError' is determined by a 'Show1' instance for the error type.
 --
 --   Note that since we can’t tell what 'Show' instance to use for the type index, the functions passed to 'liftShowsPrec' always return the empty 'ShowS'. Thus, 'SomeError' is best used with type-indexed GADTs for the error type.
---
---   prop> show (SomeError (Identity a)) === "SomeError (Identity )"
---   prop> show (SomeError (Const a)) === ("SomeError (Const " ++ showsPrec 11 a ")")
 instance Show1 err => Show (SomeError err) where
   showsPrec d (SomeError err) = showsUnaryWith (liftShowsPrec (const (const id)) (const id)) "SomeError" d err
 
 
 -- | Evaluation of 'SomeError' to normal forms is determined by a 'NFData1' instance for the error type.
---
---   prop> pure (rnf (SomeError (Identity (error "error"))) :: SomeError Identity) `shouldThrow` errorCall "error"
 instance NFData1 err => NFData (SomeError err) where
   rnf (SomeError err) = liftRnf (\a -> seq a ()) err

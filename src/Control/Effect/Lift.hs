@@ -15,7 +15,9 @@ module Control.Effect.Lift
   Lift(..)
 , sendM
   -- * Re-exports
+, Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier

@@ -6,15 +6,12 @@ Under the hood, it uses a Church-encoded binary tree to avoid the problems assoc
 -}
 
 module Control.Carrier.Choose.Church
-( -- * Choose effect
-  module Control.Effect.Choose
-  -- * Choose carrier
-, runChoose
+( -- * Choose carrier
+  runChoose
 , runChooseS
 , ChooseC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Choose effect
+, module Control.Effect.Choose
 ) where
 
 import Control.Applicative (liftA2)
@@ -67,9 +64,6 @@ instance Fail.MonadFail m => Fail.MonadFail (ChooseC m) where
   {-# INLINE fail #-}
 
 -- | Separate fixpoints are computed for each branch.
---
--- >>> run (runChooseS @[[Integer]] (pure . pure) (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
--- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (ChooseC m) where
   mfix f = ChooseC $ \ fork leaf ->
     mfix (runChooseS (pure . pure) . f . head)
@@ -113,9 +107,3 @@ fold fork leaf = go where
   go (Leaf a)   = leaf a
   go (Fork a b) = fork (go a) (go b)
 {-# INLINE fold #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XTypeApplications
--- >>> import Test.QuickCheck

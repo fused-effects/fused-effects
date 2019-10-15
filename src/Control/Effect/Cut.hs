@@ -16,7 +16,9 @@ module Control.Effect.Cut
 , call
 , cut
   -- * Re-exports
+, Carrier
 , Has
+, run
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -45,8 +47,13 @@ instance Effect Cut where
 --
 --   Contrast with 'empty', which fails the current branch but allows backtracking.
 --
---   prop> run (runNonDet (runCut (cutfail <|> pure a))) === []
---   prop> run (runNonDet (runCut (pure a <|> cutfail))) === [a]
+-- @
+-- 'cutfail' '>>=' k = 'cutfail'
+-- @
+--
+-- @
+-- 'cutfail' '<|>' m = 'cutfail'
+-- @
 --
 -- @since 0.1.2.0
 cutfail :: Has Cut sig m => m a
@@ -55,7 +62,9 @@ cutfail = send Cutfail
 
 -- | Delimit the effect of 'cutfail's, allowing backtracking to resume.
 --
---   prop> run (runNonDet (runCut (call (cutfail <|> pure a) <|> pure b))) === [b]
+-- @
+-- 'call' 'cutfail' '<|>' m = m
+-- @
 --
 -- @since 0.1.2.0
 call :: Has Cut sig m => m a -> m a
@@ -64,18 +73,11 @@ call m = send (Call m pure)
 
 -- | Commit to the current branch, preventing backtracking within the nearest enclosing 'call' (if any) on failure.
 --
---   prop> run (runNonDet (runCut (pure a <|> cut *> pure b))) === [a, b]
---   prop> run (runNonDet (runCut (cut *> pure a <|> pure b))) === [a]
---   prop> run (runNonDet (runCut (cut *> empty <|> pure a))) === []
+-- @
+-- 'cut' '>>' 'empty' = 'cutfail'
+-- @
 --
 -- @since 0.1.2.0
 cut :: (Alternative m, Has Cut sig m) => m ()
 cut = pure () <|> cutfail
 {-# INLINE cut #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck
--- >>> import Control.Carrier.Cut.Church
--- >>> import Control.Carrier.NonDet.Church

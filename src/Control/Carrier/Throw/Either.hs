@@ -1,13 +1,10 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Control.Carrier.Throw.Either
-( -- * Throw effect
-  module Control.Effect.Throw
-  -- * Throw carrier
-, runThrow
+( -- * Throw carrier
+  runThrow
 , ThrowC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Throw effect
+, module Control.Effect.Throw
 ) where
 
 import Control.Applicative (Alternative)

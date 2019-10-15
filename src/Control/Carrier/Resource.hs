@@ -2,14 +2,11 @@
 
 -- | Provides a carrier for a 'Resource' effect. This carrier is implemented atop 'Control.Exception.catch' from "Control.Exception" and is thus safe in the presence of asynchronous exceptions.
 module Control.Carrier.Resource
-( -- * Resource effect
-  module Control.Effect.Resource
-  -- * Resource carrier
-, runResource
+( -- * Resource carrier
+  runResource
 , ResourceC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Resource effect
+, module Control.Effect.Resource
 ) where
 
 import           Control.Applicative (Alternative(..))

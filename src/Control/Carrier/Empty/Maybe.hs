@@ -6,14 +6,11 @@ Note that 'Empty' effects can, when they are the last effect in a stack, be inte
 -}
 
 module Control.Carrier.Empty.Maybe
-( -- * Empty effect
-  module Control.Effect.Empty
-  -- * Empty carrier
-, runEmpty
+( -- * Empty carrier
+  runEmpty
 , EmptyC(..)
-  -- * Re-exports
-, Carrier
-, run
+  -- * Empty effect
+, module Control.Effect.Empty
 ) where
 
 import Control.Carrier
@@ -26,8 +23,12 @@ import Control.Monad.Trans.Maybe
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --
---   prop> run (runEmpty empty)    === Nothing
---   prop> run (runEmpty (pure a)) === Just a
+-- @
+-- 'runEmpty' 'empty' = 'pure' 'Nothing'
+-- @
+-- @
+-- 'runEmpty' ('pure' a) = 'Just' a
+-- @
 --
 -- @since 1.0.0.0
 runEmpty :: EmptyC m a -> m (Maybe a)
@@ -47,8 +48,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Empty :+: sig) (EmptyC m) where
   eff (L Empty) = EmptyC (MaybeT (pure Nothing))
   eff (R other) = EmptyC (MaybeT (eff (handle (Just ()) (maybe (pure Nothing) runEmpty) other)))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck

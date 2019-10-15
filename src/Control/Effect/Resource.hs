@@ -15,7 +15,9 @@ module Control.Effect.Resource
 , finally
 , onException
   -- * Re-exports
+, Carrier
 , Has
+, run
 ) where
 
 import Control.Carrier
