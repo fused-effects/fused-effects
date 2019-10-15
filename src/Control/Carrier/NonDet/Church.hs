@@ -39,8 +39,12 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 --
 -- Using @[]@ as the 'Alternative' functor will produce all results, while 'Maybe' will return only the first. However, unless used with 'Control.Effect.Cull.cull', this will still enumerate the entire search space before returning, meaning that it will diverge for infinite search spaces, even when using 'Maybe'.
 --
---   prop> run (runNonDetA (pure a)) === [a]
---   prop> run (runNonDetA (pure a)) === Just a
+-- @
+-- 'runNonDetA' ('pure' a) = 'pure' [a]
+-- @
+-- @
+-- 'runNonDetA' ('pure' a) = 'pure' ('Just' a)
+-- @
 --
 -- @since 1.0.0.0
 runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
