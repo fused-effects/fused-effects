@@ -69,11 +69,11 @@ import Hedgehog.Range
 m
   :: forall m a
   .  (Monad m, Show a)
-  => (forall a . Show a => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))) -- ^ A higher-order generator producing operations using any effects in @m@.
-  -> Gen a                                                                                                -- ^ A generator for results.
-  -> Gen (With (m a))                                                                                     -- ^ A generator producing computations, wrapped in 'With' for convenience.
+  => (forall a . Show a => (forall a . Show a => Hedgehog.Gen a -> Hedgehog.Gen (With (m a))) -> Hedgehog.Gen a -> Hedgehog.Gen (With (m a))) -- ^ A higher-order generator producing operations using any effects in @m@.
+  -> Hedgehog.Gen a                                                                                                -- ^ A generator for results.
+  -> Hedgehog.Gen (With (m a))                                                                                     -- ^ A generator producing computations, wrapped in 'With' for convenience.
 m with = go where
-  go :: forall a . Show a => Gen a -> Gen (With (m a))
+  go :: forall a . Show a => Hedgehog.Gen a -> Hedgehog.Gen (With (m a))
   go a = recursive choice
     [ addLabel "pure" . liftWith "pure" pure . showing <$> a ]
     [ frequency
@@ -83,7 +83,7 @@ m with = go where
     ]
 
 
-genT :: Gen (T a)
+genT :: Hedgehog.Gen (T a)
 genT = T <$> integral (linear 0 100)
 
 newtype T a = T { unT :: Integer }
@@ -101,32 +101,32 @@ instance Monoid (T a) where
 instance KnownSymbol s => Show (T s) where
   showsPrec d = showsUnaryWith showsPrec (symbolVal (Proxy @s)) d . unT
 
-a :: Gen A
+a :: Hedgehog.Gen A
 a = genT
 
 type A = T "A"
 
-b :: Gen B
+b :: Hedgehog.Gen B
 b = genT
 
 type B = T "B"
 
-e :: Gen E
+e :: Hedgehog.Gen E
 e = genT
 
 type E = T "E"
 
-r :: Gen R
+r :: Hedgehog.Gen R
 r = genT
 
 type R = T "R"
 
-s :: Gen S
+s :: Hedgehog.Gen S
 s = genT
 
 type S = T "S"
 
-w :: Gen W
+w :: Hedgehog.Gen W
 w = genT
 
 type W = T "W"
@@ -147,7 +147,7 @@ class Forall g f | g -> f, f -> g where
 instance Forall (Rec '[]) (PropertyT IO ()) where
   forall' Nil = id
 
-instance (Forall (Rec gs) b, Show a) => Forall (Rec (Gen a ': gs)) (a -> b) where
+instance (Forall (Rec gs) b, Show a) => Forall (Rec (Hedgehog.Gen a ': gs)) (a -> b) where
   forall' (g :. gs) f = do
     a <- Hedgehog.forAll g
     forall' gs (f a)
@@ -210,7 +210,7 @@ pattern FnWith f <- (fmap getWith . apply -> f)
 {-# COMPLETE FnWith #-}
 
 
-newtype WithM a = WithM { runWithM :: Gen (With a) }
+newtype WithM a = WithM { runWithM :: Hedgehog.Gen (With a) }
   deriving (Functor)
 
 instance Applicative WithM where
