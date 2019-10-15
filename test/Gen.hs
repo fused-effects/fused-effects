@@ -179,10 +179,10 @@ liftWith2 :: String -> (a -> b -> c) -> With a -> With b -> With c
 liftWith2 s w a b = atom s w <*> a <*> b
 
 liftWith2InfixL :: Int -> String -> (a -> b -> c) -> With a -> With b -> With c
-liftWith2InfixL p s f (With' la sa a) (With' lb sb b) = With' (Set.insert (fromString s) (mappend la lb)) (\ d -> showParen (d > p) (sa p . showString " " . showString s . showString " " . sb (succ p))) (f a b)
+liftWith2InfixL p s f (With' la sa a) (With' lb sb b) = addLabel s $ With' (mappend la lb) (\ d -> showParen (d > p) (sa p . showString " " . showString s . showString " " . sb (succ p))) (f a b)
 
 liftWith2InfixR :: Int -> String -> (a -> b -> c) -> With a -> With b -> With c
-liftWith2InfixR p s f (With' la sa a) (With' lb sb b) = With' (Set.insert (fromString s) (mappend la lb)) (\ d -> showParen (d > p) (sa (succ p) . showString " " . showString s . showString " " . sb p)) (f a b)
+liftWith2InfixR p s f (With' la sa a) (With' lb sb b) = addLabel s $ With' (mappend la lb) (\ d -> showParen (d > p) (sa (succ p) . showString " " . showString s . showString " " . sb p)) (f a b)
 
 addLabel :: String -> With a -> With a
 addLabel s w = w { labelWith = Set.insert (fromString s) (labelWith w) }
