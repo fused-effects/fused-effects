@@ -143,7 +143,6 @@ test-suite test
     , hedgehog           ^>= 1
     , hedgehog-fn        ^>= 1
     , inspection-testing ^>= 0.4
-    , mmorph              >= 1.0 && < 1.2
     , tasty              ^>= 1.2
     , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
