@@ -191,10 +191,10 @@ liftWith2 :: String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
 liftWith2 s w a b = atom s w <*> a <*> b
 
 liftWith2InfixL :: Int -> String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
-liftWith2InfixL p s f ga gb = Gen (pure (With (InfixL p s) f)) <*> ga <*> gb
+liftWith2InfixL p s f ga gb = infixL p s f <*> ga <*> gb
 
 liftWith2InfixR :: Int -> String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
-liftWith2InfixR p s f ga gb = Gen (pure (With (InfixR p s) f)) <*> ga <*> gb
+liftWith2InfixR p s f ga gb = infixR p s f <*> ga <*> gb
 
 addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
