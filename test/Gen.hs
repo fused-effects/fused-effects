@@ -36,7 +36,7 @@ module Gen
 , pattern Fn
 , pattern FnWith
   -- * Re-exports
-, Gen
+, Hedgehog.Gen
 , (===)
 , (/==)
 , choice
