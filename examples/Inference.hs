@@ -4,7 +4,7 @@ module Inference
 ) where
 
 import Control.Carrier
-import Control.Carrier.Reader.Function
+import Control.Carrier.Reader
 import Test.Tasty
 import Test.Tasty.QuickCheck
 

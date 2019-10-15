@@ -5,7 +5,7 @@ module Reader
 , test
 ) where
 
-import qualified Control.Carrier.Reader.Function as ReaderC
+import qualified Control.Carrier.Reader as ReaderC
 import Control.Effect.Reader
 import qualified Control.Monad.Trans.Reader as ReaderT
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST

@@ -6,7 +6,7 @@ This effect is similar to the traditional @MonadReader@ typeclass, though it all
 
 Predefined carriers:
 
-* "Control.Carrier.Reader.Function".
+* "Control.Carrier.Reader".
 * "Control.Monad.Trans.Reader".
 * "Control.Monad.Trans.RWS.Lazy"
 * "Control.Monad.Trans.RWS.Strict"
