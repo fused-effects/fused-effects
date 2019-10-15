@@ -2,7 +2,7 @@
 module State
 ( tests
 , gen
-, stateTests
+, test
 ) where
 
 import qualified Control.Carrier.State.Lazy as LazyStateC
@@ -13,7 +13,7 @@ import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.State.Lazy as LazyStateT
 import qualified Control.Monad.Trans.State.Strict as StrictStateT
 import Data.Tuple (swap)
-import Hedgehog
+import Hedgehog (Gen, (===))
 import Hedgehog.Function hiding (S)
 import Hedgehog.Gen
 import Pure
@@ -22,15 +22,13 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "State"
-  [ testGroup "StateC (Lazy)"   $ stateTests LazyStateC.runState
-  , testGroup "StateC (Strict)" $ stateTests StrictStateC.runState
-  , testGroup "StateT (Lazy)"   $ stateTests (fmap (fmap swap) . flip LazyStateT.runStateT)
-  , testGroup "StateT (Strict)" $ stateTests (fmap (fmap swap) . flip StrictStateT.runStateT)
-  , testGroup "RWST (Lazy)"     $ stateTests (runRWST LazyRWST.runRWST)
-  , testGroup "RWST (Strict)"   $ stateTests (runRWST StrictRWST.runRWST)
+  [ testGroup "StateC (Lazy)"   $ test s (m (gen s)) a LazyStateC.runState
+  , testGroup "StateC (Strict)" $ test s (m (gen s)) a StrictStateC.runState
+  , testGroup "StateT (Lazy)"   $ test s (m (gen s)) a (fmap (fmap swap) . flip LazyStateT.runStateT)
+  , testGroup "StateT (Strict)" $ test s (m (gen s)) a (fmap (fmap swap) . flip StrictStateT.runStateT)
+  , testGroup "RWST (Lazy)"     $ test s (m (gen s)) a (runRWST LazyRWST.runRWST)
+  , testGroup "RWST (Strict)"   $ test s (m (gen s)) a (runRWST StrictRWST.runRWST)
   ] where
-  stateTests :: Has (State S) sig m => (forall a . (S -> m a -> PureC (S, a))) -> [TestTree]
-  stateTests run = State.stateTests run (m (gen s)) s a
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
@@ -41,14 +39,14 @@ gen s _ a = choice
   ]
 
 
-stateTests
+test
   :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s)
-  => (forall a . (s -> m a -> PureC (s, a)))
+  => Gen s
   -> (forall a . Show a => Gen a -> Gen (With (m a)))
-  -> Gen s
   -> Gen a
+  -> (forall a . (s -> m a -> PureC (s, a)))
   -> [TestTree]
-stateTests runState m s a =
+test s m a runState =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
     \ s (FnWith k) -> runState s (get >>= k) === runState s (k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
