@@ -185,7 +185,7 @@ liftWith2InfixR p s f (With' la sa a) (With' lb sb b) = With' (Set.insert (fromS
 
 
 pattern With :: a -> With a
-pattern With a <- (getWith -> a)
+pattern With a <- (With' _ _ a)
 
 {-# COMPLETE With #-}
 
