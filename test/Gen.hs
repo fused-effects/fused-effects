@@ -201,18 +201,20 @@ data Term a where
   Prefix :: String -> a -> Term a
   InfixL :: Int -> String -> Term (a -> b -> c)
   InfixR :: Int -> String -> Term (a -> b -> c)
-  App :: Term (a -> b) -> Term a -> Term b
+  (:<*>) :: Term (a -> b) -> Term a -> Term b
+
+infixl 4 :<*>
 
 instance Show (Term a) where
   showsPrec d = \case
     Prefix s _ -> showString s
     InfixL _ s -> showParen True (showString s)
     InfixR _ s -> showParen True (showString s)
-    App (App (InfixL p s) a) b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
-    App (App (InfixR p s) a) b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
-    App (InfixL p s) a -> showParen True (showsPrec p a . showString " " . showString s)
-    App (InfixR p s) a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
-    App f a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)
+    InfixL p s :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
+    InfixR p s :<*> a :<*> b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
+    InfixL p s :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
+    InfixR p s :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
+    f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)
 
 
 newtype Gen a = Gen { runGen :: WriterT (Set.Set LabelName) Hedgehog.Gen (With a) }
