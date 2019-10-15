@@ -65,7 +65,7 @@ m
 m with = go where
   go :: forall a . Show a => Gen a -> Gen (m a)
   go a = Gen $ recursive Hedgehog.Gen.choice
-    [ runGen (addLabel "pure" (atom "pure" pure <*> a)) ]
+    [ runGen (Gen.label "pure" pure <*> a) ]
     [ frequency
       [ (3, runGen (with go a))
       , (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> go a <*> go a)))
