@@ -14,10 +14,10 @@ import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Bifunctor (first)
 import Data.Tuple (swap)
+import Gen
 import Hedgehog (Gen, (===))
 import Hedgehog.Function
 import Hedgehog.Gen
-import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

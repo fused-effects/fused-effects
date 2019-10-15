@@ -13,10 +13,10 @@ import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.State.Lazy as LazyStateT
 import qualified Control.Monad.Trans.State.Strict as StrictStateT
 import Data.Tuple (swap)
+import Gen
 import Hedgehog (Gen, (===))
 import Hedgehog.Function hiding (S)
 import Hedgehog.Gen
-import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

@@ -9,10 +9,10 @@ import qualified Control.Carrier.Error.Either as ErrorC
 import Control.Effect.Error
 import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
+import Gen
 import Hedgehog (Gen)
 import Hedgehog.Function
 import Hedgehog.Gen
-import Gen
 import qualified Throw
 import Test.Tasty
 

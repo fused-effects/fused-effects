@@ -11,10 +11,10 @@ import qualified Control.Monad.Trans.Reader as ReaderT
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
+import Gen
 import Hedgehog (Gen, (===))
 import Hedgehog.Function hiding (R)
 import Hedgehog.Gen
-import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

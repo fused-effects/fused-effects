@@ -7,9 +7,9 @@ module Throw
 
 import qualified Control.Carrier.Throw.Either as ThrowC
 import Control.Effect.Throw
+import Gen
 import Hedgehog (Gen, (===))
 import Hedgehog.Function
-import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

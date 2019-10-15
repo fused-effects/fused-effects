@@ -15,10 +15,10 @@ import Control.Effect.NonDet (NonDet)
 import qualified Control.Monad.Trans.Maybe as MaybeT
 import Data.Maybe (listToMaybe, maybeToList)
 import qualified Empty
+import Gen
 import Hedgehog (Gen, (===))
 import Hedgehog.Function
 import Hedgehog.Gen
-import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

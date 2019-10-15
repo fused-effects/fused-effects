@@ -9,11 +9,11 @@ import qualified Control.Carrier.Cull.Church as CullC
 import Control.Effect.Choose
 import Control.Effect.Cull
 import Control.Effect.NonDet (NonDet)
+import Gen
 import Hedgehog (Gen, (===))
 import Hedgehog.Function
 import Hedgehog.Gen
 import qualified NonDet
-import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 

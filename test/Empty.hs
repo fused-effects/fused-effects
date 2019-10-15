@@ -8,9 +8,9 @@ module Empty
 import qualified Control.Carrier.Empty.Maybe as EmptyC
 import Control.Effect.Empty
 import qualified Control.Monad.Trans.Maybe as MaybeT
+import Gen
 import Hedgehog (Gen, (===))
 import Hedgehog.Function
-import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
