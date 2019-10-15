@@ -2,7 +2,7 @@
 module Writer
 ( tests
 , gen
-, writerTests
+, test
 ) where
 
 import Control.Arrow ((&&&))
@@ -14,7 +14,7 @@ import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Bifunctor (first)
 import Data.Tuple (swap)
-import Hedgehog
+import Hedgehog (Gen, (===))
 import Hedgehog.Function
 import Hedgehog.Gen
 import Pure
@@ -23,14 +23,12 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testGroup "WriterC (Strict)" $ writerTests StrictWriterC.runWriter
-  , testGroup "WriterT (Lazy)"   $ writerTests (fmap swap . LazyWriterT.runWriterT)
-  , testGroup "WriterT (Strict)" $ writerTests (fmap swap . StrictWriterT.runWriterT)
-  , testGroup "RWST (Lazy)"      $ writerTests (runRWST LazyRWST.runRWST)
-  , testGroup "RWST (Strict)"    $ writerTests (runRWST StrictRWST.runRWST)
+  [ testGroup "WriterC (Strict)" $ test w (genM (gen w)) a StrictWriterC.runWriter
+  , testGroup "WriterT (Lazy)"   $ test w (genM (gen w)) a (fmap swap . LazyWriterT.runWriterT)
+  , testGroup "WriterT (Strict)" $ test w (genM (gen w)) a (fmap swap . StrictWriterT.runWriterT)
+  , testGroup "RWST (Lazy)"      $ test w (genM (gen w)) a (runRWST LazyRWST.runRWST)
+  , testGroup "RWST (Strict)"    $ test w (genM (gen w)) a (runRWST StrictRWST.runRWST)
   ] where
-  writerTests :: Has (Writer W) sig m => (forall a . m a -> PureC (W, a)) -> [TestTree]
-  writerTests run = Writer.writerTests run (genM (gen w)) w a
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
@@ -45,14 +43,14 @@ gen w m a = choice
   ]
 
 
-writerTests
+test
   :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w)
-  => (forall a . (m a -> PureC (w, a)))
+  => Gen w
   -> (forall a . Show a => Gen a -> Gen (With (m a)))
-  -> Gen w
   -> Gen a
+  -> (forall a . (m a -> PureC (w, a)))
   -> [TestTree]
-writerTests runWriter m w a =
+test w m a runWriter =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
     \ w (With m) -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
   , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $
