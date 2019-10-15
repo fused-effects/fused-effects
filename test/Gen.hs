@@ -29,6 +29,7 @@ module Gen
 , liftWith2
 , liftWith2InfixL
 , liftWith2InfixR
+, labelledWith
   -- * Pattern synonyms
 , pattern With
 , pattern Fn
@@ -182,6 +183,9 @@ liftWith2InfixL p s f (With' la sa a) (With' lb sb b) = With' (Set.insert (fromS
 
 liftWith2InfixR :: Int -> String -> (a -> b -> c) -> With a -> With b -> With c
 liftWith2InfixR p s f (With' la sa a) (With' lb sb b) = With' (Set.insert (fromString s) (mappend la lb)) (\ d -> showParen (d > p) (sa (succ p) . showString " " . showString s . showString " " . sb p)) (f a b)
+
+labelledWith :: String -> With a -> With a
+labelledWith s w = w { labelWith = Set.singleton (fromString s) }
 
 
 pattern With :: a -> With a
