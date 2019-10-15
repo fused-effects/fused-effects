@@ -28,7 +28,6 @@ module Gen
 , infixR
 , liftWith
 , liftWith2
-, liftWith2InfixL
 , addLabel
   -- * Re-exports
 , Gen
@@ -192,9 +191,6 @@ liftWith s w a = atom s w <*> a
 
 liftWith2 :: String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
 liftWith2 s w a b = atom s w <*> a <*> b
-
-liftWith2InfixL :: Int -> String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
-liftWith2InfixL p s f ga gb = infixL p s f <*> ga <*> gb
 
 addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
