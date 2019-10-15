@@ -66,8 +66,8 @@ m
   :: forall m a
   .  (Monad m, Show a)
   => (forall a . Show a => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))) -- ^ A higher-order generator producing operations using any effects in @m@.
-  -> Gen a                                                                                      -- ^ A generator for results.
-  -> Gen (With (m a))                                                                           -- ^ A generator producing computations, wrapped in 'With' for convenience.
+  -> Gen a                                                                                                -- ^ A generator for results.
+  -> Gen (With (m a))                                                                                     -- ^ A generator producing computations, wrapped in 'With' for convenience.
 m with = go where
   go :: forall a . Show a => Gen a -> Gen (With (m a))
   go a = recursive choice
