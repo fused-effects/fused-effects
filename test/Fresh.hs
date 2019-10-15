@@ -18,22 +18,20 @@ tests = testGroup "Fresh"
 
 
 gen
-  :: (Has Fresh sig m, Show a)
-  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  :: Has Fresh sig m
+  => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
-  -> Gen (With (m a))
-gen _ a = do
-  f <- fn a
-  pure (liftWith2 "fmap" fmap (showingFn f) (addLabel "fresh" (atom "fresh" fresh)))
+  -> Gen (m a)
+gen _ a = liftWith2 "fmap" fmap (fn a) (addLabel "fresh" (atom "fresh" fresh))
 
 
 test
   :: (Has Fresh sig m, Show a)
-  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> (forall a . m a -> PureC a)
   -> [TestTree]
 test m a runFresh =
   [ testProperty "fresh yields unique values" . forall (m a :. Nil) $
-    \ m'@(With m) -> labelling m' >> runFresh (m >> fresh) /== runFresh (m >> fresh >> fresh)
+    \ m -> runFresh (m >> fresh) /== runFresh (m >> fresh >> fresh)
   ]

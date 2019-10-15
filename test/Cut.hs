@@ -22,12 +22,12 @@ tests = testGroup "Cut"
 
 gen
   :: (Has Cut sig m, Has NonDet sig m, Show a)
-  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
-  -> Gen (With (m a))
+  -> Gen (m a)
 gen m a = choice
-  [ subterm (m a) (addLabel "call" . liftWith "call" call)
-  , pure (addLabel "cutfail" (atom "cutfail" cutfail))
+  [ addLabel "call" (liftWith "call" call (m a))
+  , addLabel "cutfail" (atom "cutfail" cutfail)
   , NonDet.gen m a
   ]
 
@@ -35,16 +35,16 @@ gen m a = choice
 test
   :: forall a b m sig
   .  (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
-  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> (forall a . m a -> PureC [a])
   -> [TestTree]
 test m a b runCut
   = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
-    (\ (FnWith k) -> runCut (cutfail >>= k) === runCut cutfail))
+    (\ k -> runCut (cutfail >>= k) === runCut cutfail))
   : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
-    (\ m'@(With m) -> labelling m' >> runCut (cutfail <|> m) === runCut cutfail))
+    (\ m -> runCut (cutfail <|> m) === runCut cutfail))
   : testProperty "call delimits cutfail" (forall (m a :. Nil)
-    (\ m'@(With m) -> labelling m' >> runCut (call cutfail <|> m) === runCut m))
+    (\ m -> runCut (call cutfail <|> m) === runCut m))
   : NonDet.test m a b runCut

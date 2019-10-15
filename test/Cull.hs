@@ -22,23 +22,23 @@ tests = testGroup "Cull"
 
 gen
   :: (Has Cull sig m, Has NonDet sig m, Show a)
-  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
-  -> Gen (With (m a))
+  -> Gen (m a)
 gen m a = choice
-  [ subterm (m a) (addLabel "cull" . liftWith "cull" cull)
+  [ addLabel "cull" (liftWith "cull" cull (m a))
   , NonDet.gen m a
   ]
 
 
 test
   :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
-  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> (forall a . m a -> PureC [a])
   -> [TestTree]
 test m a b runCull
   = testProperty "cull returns at most one success" (forall (a :. m a :. m a :. Nil)
-    (\ a m'@(With m) n'@(With n) -> labelling m' >> labelling n' >> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
+    (\ a m n -> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
   : NonDet.test m a b runCull

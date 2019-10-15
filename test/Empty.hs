@@ -20,21 +20,21 @@ tests = testGroup "Empty"
 
 gen
   :: Has Empty sig m
-  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
-  -> Gen (With (m a))
-gen _ _ = pure (addLabel "empty" (atom "empty" empty))
+  -> Gen (m a)
+gen _ _ = addLabel "empty" (atom "empty" empty)
 
 
 test
   :: forall a b m sig
   .  (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a)
-  => (forall a. Show a => Gen a -> Gen (With (m a)))
+  => (forall a. Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> (forall a . m a -> PureC (Maybe a))
   -> [TestTree]
 test m _ b runEmpty =
   [ testProperty "empty annihilates >>=" . forall (fn @a (m b) :. Nil) $
-    \ (FnWith k) -> runEmpty (empty >>= k) === runEmpty empty
+    \ k -> runEmpty (empty >>= k) === runEmpty empty
   ]

@@ -34,28 +34,28 @@ gen
   .  (Has (Writer w) sig m, Arg b, Arg w, Show a, Show b, Show w, Vary b, Vary w)
   => Gen w
   -> Gen b
-  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
-  -> Gen (With (m a))
+  -> Gen (m a)
 gen w b m a = choice
-  [ liftWith2InfixL 4 "<$" (<$) . showing <$> a <*> (addLabel "tell" . liftWith "tell" tell . showing <$> w)
-  , fn a >>= \ f -> liftWith2 "fmap" fmap (showingFn f) . addLabel "listen" . liftWith "listen" (listen @w) <$> m b
-  , fn w >>= subterm (m a) . fmap (addLabel "censor") . liftWith2 "censor" censor . showingFn
+  [ liftWith2InfixL 4 "<$" (<$) a (addLabel "tell" (liftWith "tell" tell w))
+  , liftWith2 "fmap" fmap (fn a) (addLabel "listen" (liftWith "listen" (listen @w) (m b)))
+  , addLabel "censor" (liftWith2 "censor" censor (fn w) (m a))
   ]
 
 
 test
   :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w)
   => Gen w
-  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> (forall a . m a -> PureC (w, a))
   -> [TestTree]
 test w m a runWriter =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
-    \ w m'@(With m) -> labelling m' >> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
+    \ w m -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
   , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $
-    \ m'@(With m) -> labelling m' >> runWriter (listen m) === fmap (fst &&& id) (runWriter m)
+    \ m -> runWriter (listen m) === fmap (fst &&& id) (runWriter m)
   , testProperty "censor revises written output" . forall (fn w :. m a :. Nil) $
-    \ (Fn f) m'@(With m) -> labelling m' >> runWriter (censor f m) === fmap (first f) (runWriter m)
+    \ f m -> runWriter (censor f m) === fmap (first f) (runWriter m)
   ]

@@ -18,24 +18,24 @@ tests = testGroup "Throw" $
 
 
 gen
-  :: (Has (Throw e) sig m, Show e)
+  :: Has (Throw e) sig m
   => Gen e
-  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
-  -> Gen (With (m a))
-gen e _ _ = addLabel "throwError" . liftWith "throwError" throwError . showing <$> e
+  -> Gen (m a)
+gen e _ _ = addLabel "throwError" (liftWith "throwError" throwError e)
 
 
 test
   :: forall e m a b sig
   .  (Has (Throw e) sig m, Arg a, Eq b, Eq e, Show a, Show b, Show e, Vary a)
   => Gen e
-  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> (forall a . m a -> PureC (Either e a))
   -> [TestTree]
 test e m _ b runThrow =
   [ testProperty "throwError annihilates >>=" . forall (e :. fn @a (m b) :. Nil) $
-    \ e (FnWith k) -> runThrow (throwError e >>= k) === runThrow (throwError e)
+    \ e k -> runThrow (throwError e >>= k) === runThrow (throwError e)
   ]

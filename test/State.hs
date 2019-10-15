@@ -31,27 +31,27 @@ tests = testGroup "State"
 
 gen
   :: forall s m a sig
-  .  (Has (State s) sig m, Arg s, Show a, Show s, Vary s)
+  .  (Has (State s) sig m, Arg s, Show s, Vary s)
   => Gen s
-  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
-  -> Gen (With (m a))
+  -> Gen (m a)
 gen s _ a = choice
-  [ addLabel "get" . liftWith "gets" (gets @s) . showingFn <$> fn a
-  , liftWith2InfixL 4 "<$" (<$) . showing <$> a <*> (addLabel "put" . liftWith "put" put . showing <$> s)
+  [ addLabel "get" (liftWith "gets" (gets @s) (fn a))
+  , liftWith2InfixL 4 "<$" (<$) a (addLabel "put" (liftWith "put" put s))
   ]
 
 
 test
   :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s)
   => Gen s
-  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> (forall a . s -> m a -> PureC (s, a))
   -> [TestTree]
 test s m a runState =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
-    \ s (FnWith k) -> runState s (get >>= k) === runState s (k s)
+    \ s k -> runState s (get >>= k) === runState s (k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
-    \ s s' m'@(With m) -> labelling m' >> runState s (put s' >> m) === runState s' m
+    \ s s' m -> runState s (put s' >> m) === runState s' m
   ]
