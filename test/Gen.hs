@@ -124,8 +124,7 @@ w = genT
 type W = T "W"
 
 fn :: (Arg a, Vary a, Show a) => Gen b -> Gen (a -> b)
-fn b = Gen (lift (fmap (fmap getWith) . showingFn <$> (Fn.fn (fst <$> runWriterT (runGen b)))))
-  -- fmap (fmap (fmap getWith) . showingFn) . Fn.fn . runGen
+fn b = Gen (lift (fmap (fmap getWith) . showingFn <$> Fn.fn (fst <$> runWriterT (runGen b))))
 
 choice :: [Gen a] -> Gen a
 choice = Gen . Hedgehog.Gen.choice . Prelude.map runGen
