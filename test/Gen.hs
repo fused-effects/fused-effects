@@ -28,7 +28,6 @@ module Gen
 , liftWith2InfixL
 , liftWith2InfixR
 , addLabel
-, labelling
   -- * Re-exports
 , Gen
 , (===)
@@ -193,9 +192,6 @@ liftWith2InfixR p s f ga gb = Gen $ do
 
 addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . fmap (\ w -> w { labelWith = Set.insert (fromString s) (labelWith w) }) . runGen
-
-labelling :: (MonadTest m, HasCallStack) => With a -> m ()
-labelling = withFrozenCallStack . traverse_ label . labelWith
 
 
 newtype Gen a = Gen { runGen :: Hedgehog.Gen (With a) }
