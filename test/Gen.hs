@@ -151,13 +151,13 @@ instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
 
 
 showing :: Show a => a -> Term a
-showing = Pure showsPrec
+showing = Pure . flip showsPrec <*> id
 
 showingFn :: (Show a, Show b) => Fn.Fn a b -> Term (a -> b)
-showingFn fn = Pure (\ d _ -> showsPrec d fn) (Fn.apply fn)
+showingFn = Pure . flip showsPrec <*> Fn.apply
 
 atom :: String -> a -> Gen a
-atom s = Gen . pure . Pure (const (const (showString s)))
+atom s = Gen . pure . Pure (const (showString s))
 
 label :: String -> a -> Gen a
 label s = addLabel s . atom s
@@ -173,7 +173,7 @@ addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGe
 
 
 data Term a where
-  Pure :: (Int -> a -> ShowS) -> a -> Term a
+  Pure :: (Int -> ShowS) -> a -> Term a
   InfixL :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
   InfixR :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
   (:<*>) :: Term (a -> b) -> Term a -> Term b
@@ -191,12 +191,12 @@ instance Functor Term where
   fmap = liftA
 
 instance Applicative Term where
-  pure = Pure (const (const (showString "_")))
+  pure = Pure (const (showString "_"))
   (<*>) = (:<*>)
 
 instance Show (Term a) where
   showsPrec d = \case
-    Pure s a -> s d a
+    Pure s _ -> s d
     InfixL _ s _ -> showParen True (showString s)
     InfixR _ s _ -> showParen True (showString s)
     InfixL p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
