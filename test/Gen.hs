@@ -197,15 +197,15 @@ addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
 
 
-data Term
-  = Prefix String
-  | InfixL Int String
-  | InfixR Int String
-  | App Term Term
+data Term a where
+  Prefix :: String -> a -> Term a
+  InfixL :: Int -> String -> Term (a -> b -> c)
+  InfixR :: Int -> String -> Term (a -> b -> c)
+  App :: Term (a -> b) -> Term a -> Term b
 
-instance Show Term where
+instance Show (Term a) where
   showsPrec d = \case
-    Prefix   s -> showString s
+    Prefix s _ -> showString s
     InfixL _ s -> showParen True (showString s)
     InfixR _ s -> showParen True (showString s)
     App (App (InfixL p s) a) b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
