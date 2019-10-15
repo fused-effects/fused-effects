@@ -70,13 +70,13 @@ import Hedgehog.Range
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
 m
-  :: forall m a
-  .  (Monad m, Show a)
-  => (forall a . Show a => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))) -- ^ A higher-order generator producing operations using any effects in @m@.
-  -> Gen a                                                                                                -- ^ A generator for results.
-  -> Gen (With (m a))                                                                                     -- ^ A generator producing computations, wrapped in 'With' for convenience.
+  :: forall g m a
+  .  (MonadGen g, Monad m, Show a)
+  => (forall a . Show a => (forall a . Show a => g a -> g (With (m a))) -> g a -> g (With (m a))) -- ^ A higher-order generator producing operations using any effects in @m@.
+  -> g a                                                                                                -- ^ A generator for results.
+  -> g (With (m a))                                                                                     -- ^ A generator producing computations, wrapped in 'With' for convenience.
 m with = go where
-  go :: forall a . Show a => Gen a -> Gen (With (m a))
+  go :: forall a . Show a => g a -> g (With (m a))
   go a = recursive choice
     [ addLabel "pure" . liftWith "pure" pure . showing <$> a ]
     [ frequency
