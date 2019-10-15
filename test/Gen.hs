@@ -51,6 +51,7 @@ import Control.Carrier.Pure
 import Data.Function (on)
 import Data.Functor.Classes (showsUnaryWith)
 import Data.Proxy
+import qualified Data.Semigroup as S
 import qualified Data.Set as Set
 import Data.String (fromString)
 import GHC.Stack
@@ -85,6 +86,9 @@ newtype T a = T { unT :: Integer }
   deriving (Enum, Eq, Generic, Num, Ord, Real, Vary)
 
 instance Arg (T a)
+
+instance S.Semigroup (T a) where
+  T a <> T b = T (a + b)
 
 instance KnownSymbol s => Show (T s) where
   showsPrec d = showsUnaryWith showsPrec (symbolVal (Proxy @s)) d . unT
