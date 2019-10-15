@@ -43,7 +43,6 @@ script:
 - cabal v2-build
 - cabal v2-run test
 - cabal v2-run examples
-- cabal v2-run doctest
 - cabal v2-haddock
 - cabal v2-sdist
 - cabal check
