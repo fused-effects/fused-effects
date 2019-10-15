@@ -7,7 +7,6 @@ module Empty
 
 import qualified Control.Carrier.Empty.Maybe as EmptyC
 import Control.Effect.Empty
-import qualified Control.Monad.Trans.Maybe as MaybeT
 import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
@@ -16,7 +15,6 @@ tests :: TestTree
 tests = testGroup "Empty"
   [ testGroup "EmptyC" $ test (m gen) a b EmptyC.runEmpty
   , testGroup "Maybe"  $ test (m gen) a b pure
-  , testGroup "MaybeT" $ test (m gen) a b MaybeT.runMaybeT
   ]
 
 

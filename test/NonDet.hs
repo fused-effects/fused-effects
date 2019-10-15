@@ -11,8 +11,7 @@ import qualified Control.Carrier.NonDet.Church as Church.NonDetC
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet (NonDet)
-import qualified Control.Monad.Trans.Maybe as MaybeT
-import Data.Maybe (listToMaybe, maybeToList)
+import Data.Maybe (listToMaybe)
 import qualified Empty
 import Gen
 import Test.Tasty
@@ -21,7 +20,6 @@ import Test.Tasty.Hedgehog
 tests :: TestTree
 tests = testGroup "NonDet"
   [ testGroup "NonDetC (Church)" $ test (m gen) a b Church.NonDetC.runNonDetA
-  , testGroup "MaybeT"           $ test (m gen) a b (fmap maybeToList . MaybeT.runMaybeT)
   , testGroup "[]"               $ test (m gen) a b pure
   ]
 
