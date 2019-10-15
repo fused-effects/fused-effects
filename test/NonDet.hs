@@ -49,5 +49,5 @@ nonDetTests runNonDet m a b
     (\ (With m) -> runNonDet (empty <|> m) === runNonDet m))
   :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
     (\ (With m) -> runNonDet (m <|> empty) === runNonDet m))
-  :  Empty.emptyTests   (fmap listToMaybe . runNonDet) m a b
+  :  Empty.test m a b (fmap listToMaybe . runNonDet)
   ++ Choose.chooseTests runNonDet                      m a b
