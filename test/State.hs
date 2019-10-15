@@ -38,7 +38,7 @@ gen
   -> Gen (With (m a))
 gen s _ a = choice
   [ liftWith "gets" (gets @s) . showingFn <$> fn a
-  , liftWith2 "(<$)" (<$) . showing <$> a <*> (liftWith "put" put . showing <$> s)
+  , liftWith2InfixL 4 "<$" (<$) . showing <$> a <*> (liftWith "put" put . showing <$> s)
   ]
 
 
