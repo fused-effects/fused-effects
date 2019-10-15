@@ -22,7 +22,7 @@ tests = testGroup "Cut"
   [ testGroup "CutC" $ cutTests CutC.runCutA
   ] where
   cutTests :: (Has Cut sig m, Has NonDet sig m) => (forall a . m a -> PureC [a]) -> [TestTree]
-  cutTests run = Cut.cutTests run (genM gen) a b
+  cutTests run = Cut.cutTests run (m gen) a b
 
 
 gen :: (Has Cut sig m, Has NonDet sig m, Show a) => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))

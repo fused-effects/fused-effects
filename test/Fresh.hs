@@ -18,7 +18,7 @@ tests = testGroup "Fresh"
   [ testGroup "FreshC" $ freshTests FreshC.runFresh
   ] where
   freshTests :: Has Fresh sig m => (forall a . m a -> PureC a) -> [TestTree]
-  freshTests run = Fresh.freshTests run (genM gen) a
+  freshTests run = Fresh.freshTests run (m gen) a
 
 
 gen :: (Has Fresh sig m, Show a) => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))

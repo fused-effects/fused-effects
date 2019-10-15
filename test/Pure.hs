@@ -1,7 +1,7 @@
 {-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Pure
 ( module Control.Carrier.Pure
-, genM
+, m
 , genT
 , a
 , b
@@ -41,13 +41,13 @@ import Hedgehog.Gen
 import Hedgehog.Range
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
-genM
+m
   :: forall m a
   .  (Applicative m, Show a)
   => (forall a . Show a => (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))) -- ^ A higher-order generator producing operations using any effects in @m@.
   -> Gen a                                                                                      -- ^ A generator for results.
   -> Gen (With (m a))                                                                           -- ^ A generator producing computations, wrapped in 'With' for convenience.
-genM with = go where
+m with = go where
   go :: forall a . Show a => Gen a -> Gen (With (m a))
   go a = recursive choice [(liftWith "pure" pure . showing) <$> a] [with go a]
 

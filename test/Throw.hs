@@ -18,7 +18,7 @@ tests = testGroup "Throw" $
   [ testGroup "ThrowC" $ throwTests ThrowC.runThrow
   ] where
   throwTests :: Has (Throw E) sig m => (forall a . m a -> PureC (Either E a)) -> [TestTree]
-  throwTests run = Throw.throwTests run (genM (gen e)) e a b
+  throwTests run = Throw.throwTests run (m (gen e)) e a b
 
 
 gen :: (Has (Throw e) sig m, Show e) => Gen e -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))

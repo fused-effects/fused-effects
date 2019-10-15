@@ -23,7 +23,7 @@ tests = testGroup "Error" $
   , testGroup "ExceptT" $ errorTests ExceptT.runExceptT
   ] where
   errorTests :: Has (Error E) sig m => (forall a . m a -> PureC (Either E a)) -> [TestTree]
-  errorTests run = Error.errorTests run (genM (gen e)) e a b
+  errorTests run = Error.errorTests run (m (gen e)) e a b
 
 
 gen :: (Has (Error e) sig m, Arg e, Show a, Show e, Vary e) => Gen e -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen (With (m a))

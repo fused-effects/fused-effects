@@ -23,11 +23,11 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testGroup "WriterC (Strict)" $ test w (genM (gen w)) a StrictWriterC.runWriter
-  , testGroup "WriterT (Lazy)"   $ test w (genM (gen w)) a (fmap swap . LazyWriterT.runWriterT)
-  , testGroup "WriterT (Strict)" $ test w (genM (gen w)) a (fmap swap . StrictWriterT.runWriterT)
-  , testGroup "RWST (Lazy)"      $ test w (genM (gen w)) a (runRWST LazyRWST.runRWST)
-  , testGroup "RWST (Strict)"    $ test w (genM (gen w)) a (runRWST StrictRWST.runRWST)
+  [ testGroup "WriterC (Strict)" $ test w (m (gen w)) a StrictWriterC.runWriter
+  , testGroup "WriterT (Lazy)"   $ test w (m (gen w)) a (fmap swap . LazyWriterT.runWriterT)
+  , testGroup "WriterT (Strict)" $ test w (m (gen w)) a (fmap swap . StrictWriterT.runWriterT)
+  , testGroup "RWST (Lazy)"      $ test w (m (gen w)) a (runRWST LazyRWST.runRWST)
+  , testGroup "RWST (Strict)"    $ test w (m (gen w)) a (runRWST StrictRWST.runRWST)
   ] where
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
