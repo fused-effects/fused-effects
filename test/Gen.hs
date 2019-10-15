@@ -199,7 +199,7 @@ addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGe
 
 
 data Term a where
-  Pure :: String -> a -> Term a
+  Pure :: String -> Term a
   InfixL :: Int -> String -> Term (a -> b -> c)
   InfixR :: Int -> String -> Term (a -> b -> c)
   (:<*>) :: Term (a -> b) -> Term a -> Term b
@@ -210,12 +210,12 @@ instance Functor Term where
   fmap = liftA
 
 instance Applicative Term where
-  pure = Pure "_"
+  pure _ = Pure "_"
   (<*>) = (:<*>)
 
 instance Show (Term a) where
   showsPrec d = \case
-    Pure s _ -> showString s
+    Pure s -> showString s
     InfixL _ s -> showParen True (showString s)
     InfixR _ s -> showParen True (showString s)
     InfixL p s :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
