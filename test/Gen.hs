@@ -65,7 +65,7 @@ m
   -> Gen (With (m a))                                                                           -- ^ A generator producing computations, wrapped in 'With' for convenience.
 m with = go where
   go :: forall a . Show a => Gen a -> Gen (With (m a))
-  go a = recursive choice [(liftWith "pure" pure . showing) <$> a] [with go a]
+  go a = recursive choice [liftWith "pure" pure . showing <$> a] [with go a]
 
 
 genT :: Gen (T a)
