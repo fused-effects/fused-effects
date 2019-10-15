@@ -223,9 +223,3 @@ newtype Gen a = Gen { runGen :: Hedgehog.Gen (With a) }
 instance Applicative Gen where
   pure = Gen . pure . pure
   Gen m1 <*> Gen m2 = Gen ((<*>) <$> m1 <*> m2)
-
-instance Monad Gen where
-  Gen m >>= f = Gen $ do
-    With' l1 _  a <- m
-    With' l2 s2 b <- runGen (f a)
-    pure (With' (l1 <> l2) s2 b)
