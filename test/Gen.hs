@@ -59,7 +59,8 @@ import qualified Data.Set as Set
 import Data.String (fromString)
 import GHC.Stack
 import GHC.TypeLits
-import Hedgehog
+import Hedgehog hiding (Gen)
+import qualified Hedgehog
 import Hedgehog.Function hiding (R, S)
 import Hedgehog.Gen
 import Hedgehog.Range
@@ -209,15 +210,15 @@ pattern FnWith f <- (fmap getWith . apply -> f)
 {-# COMPLETE FnWith #-}
 
 
-newtype WithM a = WithM { runWithM :: Hedgehog.Gen (With a) }
+newtype Gen a = Gen { runWithM :: Hedgehog.Gen (With a) }
   deriving (Functor)
 
-instance Applicative WithM where
-  pure = WithM . pure . pure
-  WithM m1 <*> WithM m2 = WithM ((<*>) <$> m1 <*> m2)
+instance Applicative Gen where
+  pure = Gen . pure . pure
+  Gen m1 <*> Gen m2 = Gen ((<*>) <$> m1 <*> m2)
 
-instance Monad WithM where
-  WithM m >>= f = WithM $ do
+instance Monad Gen where
+  Gen m >>= f = Gen $ do
     With' l1 _  a <- m
     With' l2 s2 b <- runWithM (f a)
     pure (With' (l1 <> l2) s2 b)
