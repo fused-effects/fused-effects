@@ -62,7 +62,7 @@ m
   .  (Monad m, Show a)
   => (forall a . Show a => (forall a . Show a => Gen a -> Gen (m a)) -> Gen a -> Gen (m a)) -- ^ A higher-order generator producing operations using any effects in @m@.
   -> Gen a                                                                                        -- ^ A generator for results.
-  -> Gen (m a)                                                                                    -- ^ A generator producing computations, wrapped in 'With' for convenience.
+  -> Gen (m a)                                                                                    -- ^ A generator producing computations.
 m with = go where
   go :: forall a . Show a => Gen a -> Gen (m a)
   go a = Gen $ recursive Hedgehog.Gen.choice
