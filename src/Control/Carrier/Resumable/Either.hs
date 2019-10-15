@@ -26,7 +26,12 @@ import Data.Functor.Classes
 
 -- | Run a 'Resumable' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
---   prop> run (runResumable (pure a)) === Right @(SomeError Identity) @Int a
+-- @
+-- 'runResumable' ('pure' a) = 'pure' ('Right' a)
+-- @
+-- @
+-- 'runResumable' ('throwResumable' err) = 'pure' ('Left' err)
+-- @
 --
 -- @since 1.0.0.0
 runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
