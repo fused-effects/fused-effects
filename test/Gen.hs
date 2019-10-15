@@ -74,7 +74,7 @@ m with = go where
     [ liftWith "pure" pure . showing <$> a ]
     [ frequency
       [ (3, with go a)
-      , (1, subterm2 (go a) (go a) (liftWith2 "(>>)" (>>)))
+      , (1, subterm2 (go a) (go a) (liftWith2InfixL 1 ">>" (>>)))
       ]
     ]
 
