@@ -150,27 +150,27 @@ instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
     forall' gs (f (getWith a))
 
 
-data With a = With' { labelWith :: Set.Set LabelName, _showWith :: Int -> ShowS, getWith :: a }
+data With a = With { labelWith :: Set.Set LabelName, _showWith :: Int -> ShowS, getWith :: a }
   deriving (Functor)
 
 instance Eq a => Eq (With a) where
   (==) = (==) `on` getWith
 
 instance Applicative With where
-  pure = With' mempty (\ _ -> showString "_")
-  With' lf sf f <*> With' la sa a = With' (mappend lf la) (\ d -> showParen (d > 10) (sf 10 . showString " " . sa 11)) (f a)
+  pure = With mempty (\ _ -> showString "_")
+  With lf sf f <*> With la sa a = With (mappend lf la) (\ d -> showParen (d > 10) (sf 10 . showString " " . sa 11)) (f a)
 
 instance Show (With a) where
-  showsPrec d (With' _ s _) = s d
+  showsPrec d (With _ s _) = s d
 
 showing :: Show a => a -> With a
-showing = With' mempty . flip showsPrec <*> id
+showing = With mempty . flip showsPrec <*> id
 
 showingFn :: (Show a, Show b) => Fn a b -> With (a -> b)
-showingFn = With' mempty . flip showsPrec <*> apply
+showingFn = With mempty . flip showsPrec <*> apply
 
 atom :: String -> a -> Gen a
-atom s = Gen . pure . With' mempty (\ _ -> showString s)
+atom s = Gen . pure . With mempty (\ _ -> showString s)
 
 liftWith :: String -> (a -> b) -> Gen a -> Gen b
 liftWith s w a = atom s w <*> a
@@ -180,15 +180,15 @@ liftWith2 s w a b = atom s w <*> a <*> b
 
 liftWith2InfixL :: Int -> String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
 liftWith2InfixL p s f ga gb = Gen $ do
-  With' la sa a <- runGen ga
-  With' lb sb b <- runGen gb
-  pure (With' (mappend la lb) (\ d -> showParen (d > p) (sa p . showString " " . showString s . showString " " . sb (succ p))) (f a b))
+  With la sa a <- runGen ga
+  With lb sb b <- runGen gb
+  pure (With (mappend la lb) (\ d -> showParen (d > p) (sa p . showString " " . showString s . showString " " . sb (succ p))) (f a b))
 
 liftWith2InfixR :: Int -> String -> (a -> b -> c) -> Gen a -> Gen b -> Gen c
 liftWith2InfixR p s f ga gb = Gen $ do
-  With' la sa a <- runGen ga
-  With' lb sb b <- runGen gb
-  pure (With' (mappend la lb) (\ d -> showParen (d > p) (sa (succ p) . showString " " . showString s . showString " " . sb p)) (f a b))
+  With la sa a <- runGen ga
+  With lb sb b <- runGen gb
+  pure (With (mappend la lb) (\ d -> showParen (d > p) (sa (succ p) . showString " " . showString s . showString " " . sb p)) (f a b))
 
 addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . fmap (\ w -> w { labelWith = Set.insert (fromString s) (labelWith w) }) . runGen
