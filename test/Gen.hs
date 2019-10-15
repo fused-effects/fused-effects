@@ -51,6 +51,7 @@ module Gen
 ) where
 
 import Control.Carrier.Pure
+import Control.Monad.Trans.Class
 import Data.Foldable (traverse_)
 import Data.Function (on)
 import Data.Functor.Classes (showsUnaryWith)
@@ -222,3 +223,6 @@ instance Monad m => Monad (WithT m) where
     With' l1 _  a <- m
     With' l2 s2 b <- runWithT (f a)
     pure (With' (l1 <> l2) s2 b)
+
+instance MonadTrans WithT where
+  lift = WithT . fmap pure
