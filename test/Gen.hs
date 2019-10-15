@@ -47,11 +47,10 @@ module Gen
 , Vary
 , fn
 , apply
-, WithT(..)
+, WithM(..)
 ) where
 
 import Control.Carrier.Pure
-import Control.Monad.Trans.Class
 import Data.Foldable (traverse_)
 import Data.Function (on)
 import Data.Functor.Classes (showsUnaryWith)
@@ -211,18 +210,15 @@ pattern FnWith f <- (fmap getWith . apply -> f)
 {-# COMPLETE FnWith #-}
 
 
-newtype WithT m a = WithT { runWithT :: m (With a) }
+newtype WithM a = WithM { runWithM :: Gen (With a) }
   deriving (Functor)
 
-instance Applicative m => Applicative (WithT m) where
-  pure = WithT . pure . pure
-  WithT m1 <*> WithT m2 = WithT ((<*>) <$> m1 <*> m2)
+instance Applicative WithM where
+  pure = WithM . pure . pure
+  WithM m1 <*> WithM m2 = WithM ((<*>) <$> m1 <*> m2)
 
-instance Monad m => Monad (WithT m) where
-  WithT m >>= f = WithT $ do
+instance Monad WithM where
+  WithM m >>= f = WithM $ do
     With' l1 _  a <- m
-    With' l2 s2 b <- runWithT (f a)
+    With' l2 s2 b <- runWithM (f a)
     pure (With' (l1 <> l2) s2 b)
-
-instance MonadTrans WithT where
-  lift = WithT . fmap pure
