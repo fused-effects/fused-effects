@@ -38,7 +38,7 @@ instance Effect Fresh where
 -- | Produce a fresh (i.e. unique) 'Int'.
 --
 -- @
--- 'fresh' ≠ 'fresh' '>>' 'fresh'
+-- m '>>' 'fresh' ≠ m '>>' 'fresh' '>>' 'fresh'
 -- @
 --
 -- @since 0.1.0.0
