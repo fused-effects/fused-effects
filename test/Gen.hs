@@ -72,10 +72,10 @@ m
 m with = go where
   go :: forall a . Show a => Gen a -> Gen (With (m a))
   go a = recursive choice
-    [ liftWith "pure" pure . showing <$> a ]
+    [ addLabel "pure" . liftWith "pure" pure . showing <$> a ]
     [ frequency
       [ (3, with go a)
-      , (1, subterm2 (go a) (go a) (liftWith2InfixL 1 ">>" (>>)))
+      , (1, addLabel ">>" <$> subterm2 (go a) (go a) (liftWith2InfixL 1 ">>" (>>)))
       ]
     ]
 
@@ -170,7 +170,7 @@ showingFn :: (Show a, Show b) => Fn a b -> With (a -> b)
 showingFn = With' mempty . flip showsPrec <*> apply
 
 atom :: String -> a -> With a
-atom s = With' (Set.singleton (fromString s)) (\ _ -> showString s)
+atom s = With' mempty (\ _ -> showString s)
 
 liftWith :: String -> (a -> b) -> With a -> With b
 liftWith s w a = atom s w <*> a
@@ -179,10 +179,10 @@ liftWith2 :: String -> (a -> b -> c) -> With a -> With b -> With c
 liftWith2 s w a b = atom s w <*> a <*> b
 
 liftWith2InfixL :: Int -> String -> (a -> b -> c) -> With a -> With b -> With c
-liftWith2InfixL p s f (With' la sa a) (With' lb sb b) = addLabel s $ With' (mappend la lb) (\ d -> showParen (d > p) (sa p . showString " " . showString s . showString " " . sb (succ p))) (f a b)
+liftWith2InfixL p s f (With' la sa a) (With' lb sb b) = With' (mappend la lb) (\ d -> showParen (d > p) (sa p . showString " " . showString s . showString " " . sb (succ p))) (f a b)
 
 liftWith2InfixR :: Int -> String -> (a -> b -> c) -> With a -> With b -> With c
-liftWith2InfixR p s f (With' la sa a) (With' lb sb b) = addLabel s $ With' (mappend la lb) (\ d -> showParen (d > p) (sa (succ p) . showString " " . showString s . showString " " . sb p)) (f a b)
+liftWith2InfixR p s f (With' la sa a) (With' lb sb b) = With' (mappend la lb) (\ d -> showParen (d > p) (sa (succ p) . showString " " . showString s . showString " " . sb p)) (f a b)
 
 addLabel :: String -> With a -> With a
 addLabel s w = w { labelWith = Set.insert (fromString s) (labelWith w) }
