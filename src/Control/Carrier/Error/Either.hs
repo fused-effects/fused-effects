@@ -36,7 +36,7 @@ runError :: ErrorC exc m a -> m (Either exc a)
 runError = runExceptT . runErrorC
 
 newtype ErrorC e m a = ErrorC { runErrorC :: ExceptT e m a }
-  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadTrans, Show)
+  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadTrans)
 
 -- | 'ErrorC' passes 'Alternative' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
 instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
