@@ -147,6 +147,7 @@ instance Forall (Rec '[]) (PropertyT IO ()) where
 instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
   forall' (g :. gs) f = do
     a <- Hedgehog.forAll (runGen g)
+    traverse_ label (labelWith a)
     forall' gs (f (getWith a))
 
 
