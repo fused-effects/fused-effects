@@ -21,7 +21,6 @@ module Gen
 , Rec(..)
 , forall
   -- * Showing generated values
-, With(getWith)
 , atom
 , Gen.label
 , infixL
