@@ -36,8 +36,9 @@ module Gen
 , pattern Fn
 , pattern FnWith
   -- * Re-exports
-, MonadGen
+, MonadGen(GenBase)
 , Gen
+, Identity
 , (===)
 , (/==)
 , choice
@@ -46,7 +47,7 @@ module Gen
 , subterm2
 , Arg
 , Vary
-, fn
+, Gen.fn
 , apply
 , WithT(..)
 ) where
@@ -56,6 +57,7 @@ import Control.Monad.Morph
 import Data.Foldable (traverse_)
 import Data.Function (on)
 import Data.Functor.Classes (showsUnaryWith)
+import Data.Functor.Identity
 import Data.Proxy
 import qualified Data.Semigroup as S
 import qualified Data.Set as Set
@@ -63,7 +65,7 @@ import Data.String (fromString)
 import GHC.Stack
 import GHC.TypeLits
 import Hedgehog
-import Hedgehog.Function hiding (R, S)
+import Hedgehog.Function as Fn hiding (R, S)
 import Hedgehog.Gen
 import Hedgehog.Internal.Distributive
 import Hedgehog.Range
@@ -133,6 +135,9 @@ w :: MonadGen m => m W
 w = genT
 
 type W = T "W"
+
+fn :: (Arg a, Vary a, GenBase m ~ Identity, MonadGen m) => m b -> m (Fn a b)
+fn = fromGenT . Fn.fn . toGenT
 
 
 infixr 5 :.
