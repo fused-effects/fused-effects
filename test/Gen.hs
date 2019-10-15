@@ -40,6 +40,7 @@ module Gen
 , Term(..)
 ) where
 
+import Control.Applicative
 import Control.Carrier.Pure
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Writer
@@ -204,6 +205,13 @@ data Term a where
   (:<*>) :: Term (a -> b) -> Term a -> Term b
 
 infixl 4 :<*>
+
+instance Functor Term where
+  fmap = liftA
+
+instance Applicative Term where
+  pure = Pure "_"
+  (<*>) = (:<*>)
 
 instance Show (Term a) where
   showsPrec d = \case
