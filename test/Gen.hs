@@ -104,32 +104,32 @@ instance Monoid (T a) where
 instance KnownSymbol s => Show (T s) where
   showsPrec d = showsUnaryWith showsPrec (symbolVal (Proxy @s)) d . unT
 
-a :: Gen A
+a :: MonadGen m => m A
 a = genT
 
 type A = T "A"
 
-b :: Gen B
+b :: MonadGen m => m B
 b = genT
 
 type B = T "B"
 
-e :: Gen E
+e :: MonadGen m => m E
 e = genT
 
 type E = T "E"
 
-r :: Gen R
+r :: MonadGen m => m R
 r = genT
 
 type R = T "R"
 
-s :: Gen S
+s :: MonadGen m => m S
 s = genT
 
 type S = T "S"
 
-w :: Gen W
+w :: MonadGen m => m W
 w = genT
 
 type W = T "W"
