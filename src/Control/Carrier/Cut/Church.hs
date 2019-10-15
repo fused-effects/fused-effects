@@ -23,8 +23,6 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Cut' effect with the supplied continuations for 'pure' / '<|>', 'empty', and 'cutfail'.
 --
---   prop> run (runCut (fmap . (:)) (pure []) (pure []) (pure a)) === [a]
---
 -- @since 1.0.0.0
 runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
 runCut cons nil fail m = runCutC m cons nil fail
@@ -71,9 +69,6 @@ instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
   {-# INLINE fail #-}
 
 -- | Separate fixpoints are computed for each branch.
---
--- >>> run (runCutA @[] (take 3 <$> mfix (\ as -> pure (0 : map succ as) <|> pure (0 : map pred as))))
--- [[0,1,2],[0,-1,-2]]
 instance MonadFix m => MonadFix (CutC m) where
   mfix f = CutC $ \ cons nil fail ->
     mfix (runCutA . f . head)
@@ -100,7 +95,3 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
   eff (R (L (R (Choose k)))) = k True <|> k False
   eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutA) other) >>= foldr cons nil
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> import Test.QuickCheck
