@@ -1,6 +1,7 @@
 {-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Gen
 ( module Control.Carrier.Pure
+  -- * Polymorphic generation & instantiation
 , m
 , genT
 , a
@@ -16,14 +17,17 @@ module Gen
 , R
 , S
 , W
+  -- * Generation
 , Rec(..)
 , forall
+  -- * Showing generated values
 , With(getWith)
 , showing
 , showingFn
 , atom
 , liftWith
 , liftWith2
+  -- * Pattern synonyms
 , pattern With
 , pattern Fn
 , pattern FnWith
