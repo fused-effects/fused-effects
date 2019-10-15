@@ -28,7 +28,13 @@ gen :: (Has Choose sig m, Show a) => (forall a . Show a => Gen a -> Gen (With (m
 gen m a = subterm2 (m a) (m a) (liftWith2 "(<|>)" (<|>))
 
 
-chooseTests :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
+chooseTests
+  :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
+  => (forall a . m a -> PureC [a])
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen b
+  -> [TestTree]
 chooseTests runChoose m a b =
   [ testProperty ">>= distributes over <|>" . forall (m a :. m a :. fn (m b) :. Nil) $
     \ (With m) (With n) (FnWith k) -> runChoose ((m <|> n) >>= k) === runChoose ((m >>= k) <|> (n >>= k))

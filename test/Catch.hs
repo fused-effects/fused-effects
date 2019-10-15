@@ -18,7 +18,15 @@ gen _ m a = do
   subterm (m a) $ \ m -> liftWith2 "catchError" catchError m (fmap getWith <$> showingFn h)
 
 
-catchTests :: forall e m a b sig . (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e) => (forall a . m a -> PureC (Either e a)) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen e -> Gen a -> Gen b -> [TestTree]
+catchTests
+  :: forall e m a b sig
+  .  (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e)
+  => (forall a . m a -> PureC (Either e a))
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen e
+  -> Gen a
+  -> Gen b
+  -> [TestTree]
 catchTests runCatch m e a _ =
   [ testProperty "catchError intercepts throwError" . forall (e :. fn (m a) :. Nil) $
     \ e (FnWith h) -> runCatch (throwError e `catchError` h) === runCatch (h e)

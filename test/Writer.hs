@@ -45,7 +45,13 @@ gen w m a = choice
   ]
 
 
-writerTests :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w) => (forall a . (m a -> PureC (w, a))) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen w -> Gen a -> [TestTree]
+writerTests
+  :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w)
+  => (forall a . (m a -> PureC (w, a)))
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen w
+  -> Gen a
+  -> [TestTree]
 writerTests runWriter m w a =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
     \ w (With m) -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)

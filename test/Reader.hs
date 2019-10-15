@@ -38,7 +38,13 @@ gen r m a = choice
   ]
 
 
-readerTests :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r) => (forall a . r -> m a -> PureC a) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen r -> Gen a -> [TestTree]
+readerTests
+  :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r)
+  => (forall a . r -> m a -> PureC a)
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen r
+  -> Gen a
+  -> [TestTree]
 readerTests runReader m r a =
   [ testProperty "ask returns the environment variable" . forall (r :. fn (m a) :. Nil) $
     \ r (FnWith k) -> runReader r (ask >>= k) === runReader r (k r)

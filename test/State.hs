@@ -41,7 +41,13 @@ gen s _ a = choice
   ]
 
 
-stateTests :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s) => (forall a . (s -> m a -> PureC (s, a))) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen s -> Gen a -> [TestTree]
+stateTests
+  :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s)
+  => (forall a . (s -> m a -> PureC (s, a)))
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen s
+  -> Gen a
+  -> [TestTree]
 stateTests runState m s a =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
     \ s (FnWith k) -> runState s (get >>= k) === runState s (k s)

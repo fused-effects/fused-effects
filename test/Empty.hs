@@ -28,7 +28,14 @@ gen :: Has Empty sig m => (forall a . Show a => Gen a -> Gen (With (m a))) -> Ge
 gen _ _ = pure (atom "empty" empty)
 
 
-emptyTests :: forall a b m sig . (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC (Maybe a)) -> (forall a. Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
+emptyTests
+  :: forall a b m sig
+  .  (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a)
+  => (forall a . m a -> PureC (Maybe a))
+  -> (forall a. Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen b
+  -> [TestTree]
 emptyTests runEmpty m _ b =
   [ testProperty "empty annihilates >>=" . forall (fn @a (m b) :. Nil) $
     \ (FnWith k) -> runEmpty (empty >>= k) === runEmpty empty

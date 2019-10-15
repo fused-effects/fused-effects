@@ -33,7 +33,14 @@ gen m a = choice
   ]
 
 
-cutTests :: forall a b m sig . (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a) => (forall a . m a -> PureC [a]) -> (forall a . Show a => Gen a -> Gen (With (m a))) -> Gen a -> Gen b -> [TestTree]
+cutTests
+  :: forall a b m sig
+  .  (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
+  => (forall a . m a -> PureC [a])
+  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> Gen a
+  -> Gen b
+  -> [TestTree]
 cutTests runCut m a b
   = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
     (\ (FnWith k) -> runCut (cutfail >>= k) === runCut cutfail))
