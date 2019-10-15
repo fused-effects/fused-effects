@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PatternSynonyms, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
 module Gen
 ( module Control.Carrier.Pure
   -- * Polymorphic generation & instantiation
@@ -29,10 +29,6 @@ module Gen
 , liftWith2InfixR
 , addLabel
 , labelling
-  -- * Pattern synonyms
-, pattern With
-, pattern Fn
-, pattern FnWith
   -- * Re-exports
 , Gen
 , (===)
@@ -199,22 +195,6 @@ addLabel s = Gen . fmap (\ w -> w { labelWith = Set.insert (fromString s) (label
 
 labelling :: (MonadTest m, HasCallStack) => With a -> m ()
 labelling = withFrozenCallStack . traverse_ label . labelWith
-
-
-pattern With :: a -> With a
-pattern With a <- (With' _ _ a)
-
-{-# COMPLETE With #-}
-
-pattern Fn :: (a -> b) -> Fn a b
-pattern Fn f <- (apply -> f)
-
-{-# COMPLETE Fn #-}
-
-pattern FnWith :: (a -> b) -> Fn a (With b)
-pattern FnWith f <- (fmap getWith . apply -> f)
-
-{-# COMPLETE FnWith #-}
 
 
 newtype Gen a = Gen { runGen :: Hedgehog.Gen (With a) }
