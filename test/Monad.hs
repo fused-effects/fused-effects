@@ -1,0 +1,2 @@
+module Monad
+() where

@@ -130,6 +130,7 @@ test-suite test
     Fresh
     Fusion
     Gen
+    Monad
     NonDet
     NonDet.Church
     Reader
