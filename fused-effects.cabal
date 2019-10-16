@@ -82,7 +82,6 @@ library
     Control.Effect.Pure
     Control.Effect.Reader
     Control.Effect.Resource
-    Control.Effect.Resumable
     Control.Effect.State
     Control.Effect.Sum
     Control.Effect.Throw
