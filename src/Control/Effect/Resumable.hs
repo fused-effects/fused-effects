@@ -5,7 +5,6 @@
 --
 -- Predefined carriers:
 --
--- * "Control.Carrier.Resumable.Resume", which provides full resumption semantics.
 -- * "Control.Carrier.Resumable.Either", which elides resumption support (like @Control.Effect.Error@).
 module Control.Effect.Resumable
 ( -- * Resumable effect

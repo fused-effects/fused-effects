@@ -61,7 +61,6 @@ library
     Control.Carrier.Reader
     Control.Carrier.Resource
     Control.Carrier.Resumable.Either
-    Control.Carrier.Resumable.Resume
     Control.Carrier.State.Lazy
     Control.Carrier.State.Strict
     Control.Carrier.Throw.Either
