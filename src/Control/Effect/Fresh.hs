@@ -11,7 +11,6 @@ module Control.Effect.Fresh
 ( -- * Fresh effect
   Fresh(..)
 , fresh
-, resetFresh
   -- * Re-exports
 , Carrier
 , Has
@@ -44,13 +43,3 @@ instance Effect Fresh where
 -- @since 0.1.0.0
 fresh :: Has Fresh sig m => m Int
 fresh = send (Fresh pure)
-
--- | Reset the fresh counter after running a computation.
---
--- @
--- 'resetFresh' 'fresh' '>>' m = m
--- @
---
--- @since 0.1.0.0
-resetFresh :: Has Fresh sig m => m a -> m a
-resetFresh m = send (Reset m pure)
