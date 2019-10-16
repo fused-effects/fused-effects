@@ -3,7 +3,7 @@ module Monad
 ( test
 ) where
 
-import Control.Monad ((>=>))
+import Control.Monad ((>=>), ap)
 import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
@@ -25,4 +25,6 @@ test m a b c run =
     \ (With m) (FnWith k) (FnWith h) -> run (m >>= (k >=> h)) === run ((m >>= k) >>= h)
   , testProperty "return = pure" . forall (a :. Nil) $
     \ a -> run (return a) === run (pure a)
+  , testProperty "ap = (<*>)" . forall (fn b :. m a :. Nil) $
+    \ (Fn f) (With m) -> run (pure f `ap` m) === run (pure f <*> m)
   ]
