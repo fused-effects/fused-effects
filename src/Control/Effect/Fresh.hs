@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts #-}
 
 {- | This effect provides source to an infinite source of 'Int' values, suitable for generating "fresh" values to uniquely identify data without needing to invoke random numbers or impure IO.
 
@@ -18,11 +18,12 @@ module Control.Effect.Fresh
 ) where
 
 import Control.Carrier
+import GHC.Generics (Generic1)
 
 -- | @since 0.1.0.0
 data Fresh m k
   = Fresh (Int -> m k)
-  deriving (Functor)
+  deriving (Functor, Generic1)
 
 instance HFunctor Fresh where
   hmap f (Fresh   k) = Fresh       (f . k)
