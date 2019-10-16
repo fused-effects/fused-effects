@@ -48,7 +48,7 @@
 
 - Removes `prj` from `Member`, as it was only used in `InterposeC` (see above), and was generally inadvisable due to its lack of modularity. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
 
-- Simplifies `ResourceC` by moving the `MonadUnliftIO` constraint on its `Carrier` instance instead of on the `runResource` handler, obviating the need for it to wrap a `ReaderC` carrier. This should not impact usage except in code manually constructing/eliminating `ResourceC` values. ([#254](https://github.com/fused-effects/fused-effects/pull/254))
+- Removes the `Resource` effect and carrier. Both have been relocated to `fused-effects-exceptions`. ([#268](https://github.com/fused-effects/fused-effects/pull/268))
 
 - Redefines `Fail` as a synonym for `Throw String`. ([#247](https://github.com/fused-effects/fused-effects/pull/247))
 
