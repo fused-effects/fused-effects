@@ -15,6 +15,7 @@ import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Bifunctor (first)
 import Data.Tuple (swap)
 import Gen
+import qualified Monad
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -27,7 +28,9 @@ tests = testGroup "Writer"
   , test "RWST (Strict)"    (runRWST StrictRWST.runRWST)
   ] where
   test :: Has (Writer W) sig m => String -> (forall a . m a -> PureC (W, a)) -> TestTree
-  test s run = testGroup s $ Writer.test w (m (gen w)) a run
+  test s run = testGroup s
+    $  Monad.test    (m (gen w)) a b c run
+    ++ Writer.test w (m (gen w)) a     run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
