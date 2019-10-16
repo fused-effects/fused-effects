@@ -52,6 +52,8 @@
 
 - Redefines `Fail` as a synonym for `Throw String`. ([#247](https://github.com/fused-effects/fused-effects/pull/247))
 
+- Removes `Resumable` and its carriers, as they can be more usefully and flexibly replaced by arbitrary effects, `Lift`, and `InterpretC`. ([#269](https://github.com/fused-effects/fused-effects/pull/269))
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
