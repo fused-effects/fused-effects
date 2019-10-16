@@ -23,15 +23,15 @@ import Control.Monad.Trans.Class
 -- | Run a 'Fresh' effect counting up from 0.
 --
 -- @
--- 'runFresh' ('pure' a) = 'pure' a
+-- 'runFresh' n ('pure' a) = 'pure' (n, a)
 -- @
 -- @
--- 'runFresh' 'fresh' = 'pure' 0
+-- 'runFresh' n 'fresh' = 'pure' (n '+' 1, n)
 -- @
 --
 -- @since 0.1.0.0
-runFresh :: Functor m => FreshC m a -> m a
-runFresh = evalState 0 . runFreshC
+runFresh :: Int -> FreshC m a -> m (Int, a)
+runFresh n = runState n . runFreshC
 
 -- | Run a 'Fresh' effect counting up from an initial value, and forgetting the final value.
 --
