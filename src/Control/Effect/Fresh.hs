@@ -25,8 +25,7 @@ data Fresh m k
   = Fresh (Int -> m k)
   deriving (Functor, Generic1)
 
-instance HFunctor Fresh where
-  hmap f (Fresh   k) = Fresh       (f . k)
+instance HFunctor Fresh
 
 instance Effect Fresh where
   handle state handler (Fresh   k) = Fresh (handler . (<$ state) . k)
