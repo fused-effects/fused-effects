@@ -23,4 +23,6 @@ test m a b c run =
     \ (With m) -> run (m >>= return) === run m
   , testProperty ">>= is associative" . forall (m a :. fn (m b) :. fn (m c) :. Nil) $
     \ (With m) (FnWith k) (FnWith h) -> run (m >>= (k >=> h)) === run ((m >>= k) >>= h)
+  , testProperty "return = pure" . forall (a :. Nil) $
+    \ a -> run (return a) === run (pure a)
   ]
