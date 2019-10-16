@@ -2,10 +2,6 @@
 -- | An effect providing the ability to throw exceptions from a context. If an exception is
 -- thrown, the calling context may choose to resume the computation. Type safety of the
 -- resumed operation is preserved by parametricity achieved from the @-XGADTs@ extension.
---
--- Predefined carriers:
---
--- * "Control.Carrier.Resumable.Either", which elides resumption support (like @Control.Effect.Error@).
 module Control.Effect.Resumable
 ( -- * Resumable effect
   Resumable(..)
