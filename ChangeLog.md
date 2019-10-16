@@ -54,6 +54,8 @@
 
 - Redefines `Fail` as a synonym for `Throw String`. ([#247](https://github.com/fused-effects/fused-effects/pull/247))
 
+- Changes `Control.Carrier.Fresh.Strict.runFresh` to take and return the initial & final values, respectively, allowing for safer operation. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
