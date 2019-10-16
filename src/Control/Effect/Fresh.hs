@@ -34,6 +34,7 @@ instance Effect Fresh where
   handle state handler (Fresh   k) = Fresh (handler . (<$ state) . k)
   handle state handler (Reset m k) = Reset (handler (m <$ state)) (handler . fmap k)
 
+
 -- | Produce a fresh (i.e. unique) 'Int'.
 --
 -- @
