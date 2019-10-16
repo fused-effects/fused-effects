@@ -41,10 +41,5 @@ instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
     i <- get
     put (succ i)
     runFreshC (k i)
-  eff (L (Reset m k)) = FreshC $ do
-    i <- get
-    a <- runFreshC m
-    put (i :: Int)
-    runFreshC (k a)
   eff (R other)       = FreshC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
