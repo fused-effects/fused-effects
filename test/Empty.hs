@@ -20,7 +20,7 @@ tests = testGroup "Empty"
 
 gen
   :: Has Empty sig m
-  => (forall a . Show a => Gen a -> Gen (m a))
+  => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
 gen _ _ = label "empty" empty
@@ -29,7 +29,7 @@ gen _ _ = label "empty" empty
 test
   :: forall a b m sig
   .  (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a)
-  => (forall a. Show a => Gen a -> Gen (m a))
+  => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> (forall a . m a -> PureC (Maybe a))

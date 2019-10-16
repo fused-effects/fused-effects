@@ -20,7 +20,7 @@ tests = testGroup "Throw" $
 gen
   :: Has (Throw e) sig m
   => Gen e
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
 gen e _ _ = label "throwError" throwError <*> e
@@ -30,7 +30,7 @@ test
   :: forall e m a b sig
   .  (Has (Throw e) sig m, Arg a, Eq b, Eq e, Show a, Show b, Show e, Vary a)
   => Gen e
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> (forall a . m a -> PureC (Either e a))

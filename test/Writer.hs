@@ -31,10 +31,10 @@ tests = testGroup "Writer"
 
 gen
   :: forall w b m a sig
-  .  (Has (Writer w) sig m, Arg b, Arg w, Show a, Show b, Show w, Vary b, Vary w)
+  .  (Has (Writer w) sig m, Arg b, Arg w, Show b, Show w, Vary b, Vary w)
   => Gen w
   -> Gen b
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
 gen w b m a = choice
@@ -47,7 +47,7 @@ gen w b m a = choice
 test
   :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w)
   => Gen w
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> (forall a . m a -> PureC (w, a))
   -> [TestTree]

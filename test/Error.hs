@@ -22,9 +22,9 @@ tests = testGroup "Error" $
 
 
 gen
-  :: (Has (Error e) sig m, Arg e, Show a, Show e, Vary e)
+  :: (Has (Error e) sig m, Arg e, Show e, Vary e)
   => Gen e
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
 gen e m a = choice
@@ -36,7 +36,7 @@ gen e m a = choice
 test
   :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e)
   => Gen e
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> (forall a . m a -> PureC (Either e a))

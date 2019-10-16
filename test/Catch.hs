@@ -11,9 +11,9 @@ import Test.Tasty.Hedgehog
 
 gen
   :: forall e m a sig
-  .  (Has (Catch e) sig m, Arg e, Show a, Show e, Vary e)
+  .  (Has (Catch e) sig m, Arg e, Show e, Vary e)
   => Gen e
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
 gen _ m a = label "catchError" catchError <*> m a <*> fn @e (m a)
@@ -23,7 +23,7 @@ test
   :: forall e m a b sig
   .  (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e)
   => Gen e
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> (forall a . m a -> PureC (Either e a))

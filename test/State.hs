@@ -33,7 +33,7 @@ gen
   :: forall s m a sig
   .  (Has (State s) sig m, Arg s, Show s, Vary s)
   => Gen s
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen (m a)
 gen s _ a = choice
@@ -45,7 +45,7 @@ gen s _ a = choice
 test
   :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s)
   => Gen s
-  -> (forall a . Show a => Gen a -> Gen (m a))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> (forall a . s -> m a -> PureC (s, a))
   -> [TestTree]
