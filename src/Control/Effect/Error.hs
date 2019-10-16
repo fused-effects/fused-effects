@@ -2,7 +2,7 @@
 
 {- | An effect modelling catchable failure with a polymorphic error type, the combination of 'Throw' and 'Catch'.
 
-This effect is similar to the traditional @MonadError@ typeclass, though it allows the presence of multiple @Error@ effects in a given effect stack. It offers precise exception handling, rather than the dynamic exception hierarchy provided by the @exceptions@ package. The 'Control.Effect.Resource' effect or the @fused-effects-exceptions@ package may be more suitable for handling dynamic/impure effect handling.
+This effect is similar to the traditional @MonadError@ typeclass, though it allows the presence of multiple @Error@ effects in a given effect stack. It offers precise exception handling, rather than the dynamic exception hierarchy provided by the @exceptions@ package. The @fused-effects-exceptions@ package may be more suitable for handling dynamic/impure effect handling.
 
 Predefined carriers:
 
