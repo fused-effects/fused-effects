@@ -7,12 +7,14 @@ module Control.Carrier.Reader
   runReader
 , ReaderC(..)
   -- * Reader effect
-, module Control.Effect.Reader
+, module X
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Carrier
 import Control.Effect.Reader
+import Control.Effect.Reader as X (Reader)
+import Control.Effect.Reader as X hiding (Reader)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
