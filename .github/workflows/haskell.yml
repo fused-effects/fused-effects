@@ -8,8 +8,8 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: [8.2.2, 8.4.4, 8.6.5, 8.8.1]
-        cabal-install: [3.0]
+        ghc: ["8.2.2", "8.4.4", "8.6.5", "8.8.1"]
+        cabal-install: ["3.0"]
 
     steps:
     - uses: actions/checkout@master
