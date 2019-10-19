@@ -9,7 +9,7 @@ module Control.Carrier.Resumable.Either
 , ResumableC(..)
 , SomeError(..)
   -- * Resumable effect
-, module Control.Effect.Resumable
+, module X
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -17,6 +17,8 @@ import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.DeepSeq
 import Control.Effect.Resumable
+import Control.Effect.Resumable as X (Resumable)
+import Control.Effect.Resumable as X hiding (Resumable)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
