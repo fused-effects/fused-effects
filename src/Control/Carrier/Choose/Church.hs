@@ -11,12 +11,14 @@ module Control.Carrier.Choose.Church
 , runChooseS
 , ChooseC(..)
   -- * Choose effect
-, module Control.Effect.Choose
+, module X
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Effect.Choose
+import Control.Effect.Choose as X (Choose)
+import Control.Effect.Choose as X hiding (Choose)
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
