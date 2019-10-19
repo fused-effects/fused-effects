@@ -9,13 +9,19 @@ import qualified Control.Carrier.Fresh.Strict as FreshC
 import Control.Effect.Fresh
 import Gen
 import qualified Hedgehog.Range as R
+import qualified Monad
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Fresh"
-  [ testGroup "FreshC" $ test (m gen) a FreshC.runFresh
-  ]
+  [ test "FreshC" FreshC.runFresh
+  ] where
+  test :: Has Fresh sig m => String -> (forall a . Int -> m a -> PureC (Int, a)) -> TestTree
+  test name run = testGroup name
+    $  Monad.test (m gen) a b c ((,) <$> n <*> pure ()) (uncurry run)
+    ++ Fresh.test (m gen) a                             run
+  n = Gen.integral (R.linear 0 100)
 
 
 gen
