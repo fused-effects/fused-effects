@@ -57,7 +57,7 @@ instance Monad PureC where
   {-# INLINE (>>=) #-}
 
 instance MonadFix PureC where
-  mfix f = PureC (fix (runPureC . f))
+  mfix f = PureC (fix (run . f))
   {-# INLINE mfix #-}
 
 instance Carrier Pure PureC where
