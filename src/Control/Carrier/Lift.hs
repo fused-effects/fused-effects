@@ -4,7 +4,7 @@
 module Control.Carrier.Lift
 ( -- * Lift carrier
   runM
-, LiftC(..)
+, LiftC(LiftC)
   -- * Lift effect
 , module X
 ) where
@@ -21,24 +21,23 @@ import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 
--- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
---
--- @since 1.0.0.0
-runM :: LiftC m a -> m a
-runM = runLiftC
-
 -- | @since 1.0.0.0
-newtype LiftC m a = LiftC { runLiftC :: m a }
+newtype LiftC m a = LiftC
+  { -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
+    --
+    -- @since 1.0.0.0
+    runM :: m a
+  }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans LiftC where
   lift = LiftC
 
 instance Monad m => Carrier (Lift m) (LiftC m) where
-  eff = LiftC . (>>= runLiftC) . unLift
+  eff = LiftC . (>>= runM) . unLift
 
 instance MonadUnliftIO m => MonadUnliftIO (LiftC m) where
-  askUnliftIO = LiftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runLiftC))
+  askUnliftIO = LiftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runM))
   {-# INLINE askUnliftIO #-}
-  withRunInIO inner = LiftC $ withRunInIO $ \run -> inner (run . runLiftC)
+  withRunInIO inner = LiftC $ withRunInIO $ \run -> inner (run . runM)
   {-# INLINE withRunInIO #-}
