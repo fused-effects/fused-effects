@@ -6,13 +6,15 @@ module Control.Carrier.Fail.Either
   runFail
 , FailC(..)
   -- * Fail effect
-, module Control.Effect.Fail
+, module X
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.Effect.Fail
+import Control.Effect.Fail as X (Throw)
+import Control.Effect.Fail as X hiding (Throw)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
