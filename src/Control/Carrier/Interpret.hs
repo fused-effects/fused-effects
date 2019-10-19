@@ -78,8 +78,8 @@ runInterpret f m =
       :: forall x s .
          InterpretC s eff m x
       -> Tagged s (m x)
-    go m =
-      Tagged (runInterpretC m)
+    go (InterpretC m) =
+      Tagged m
 
 
 -- | Interpret an effect using a higher-order function with some state variable.
