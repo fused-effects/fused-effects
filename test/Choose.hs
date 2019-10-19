@@ -7,8 +7,8 @@ module Choose
 
 import qualified Control.Carrier.Choose.Church as ChooseC
 import Control.Effect.Choose
-import Data.List.NonEmpty
 import Data.Functor.Identity (Identity(..))
+import Data.List.NonEmpty
 import Gen
 import qualified Monad
 import Test.Tasty
