@@ -44,7 +44,7 @@ runChooseS = runChoose (liftA2 (S.<>))
 --
 -- @since 1.0.0.0
 newtype ChooseC m a = ChooseC
-  { -- | A higher-order function receiving two continuations, respectively implementing choice and 'pure'.
+  { -- | A handler receiving continuations respectively interpreting '<|>' and 'pure'.
     runChooseC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b
   }
   deriving (Functor)
