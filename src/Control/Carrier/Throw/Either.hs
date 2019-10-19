@@ -4,13 +4,15 @@ module Control.Carrier.Throw.Either
   runThrow
 , ThrowC(..)
   -- * Throw effect
-, module Control.Effect.Throw
+, module X
 ) where
 
 import Control.Applicative (Alternative)
 import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.Effect.Throw
+import Control.Effect.Throw as X (Throw)
+import Control.Effect.Throw as X hiding (Throw)
 import Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
