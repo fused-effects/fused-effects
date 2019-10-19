@@ -32,7 +32,7 @@ import System.IO
 --
 -- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
-runTrace = runTraceC
+runTrace (TraceC m) = m
 
 -- | @since 1.0.0.0
 newtype TraceC m a = TraceC { runTraceC :: m a }
