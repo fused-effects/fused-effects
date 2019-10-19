@@ -227,11 +227,13 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 
 * [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computations.
 * [`fused-effects-exceptions`][exc] provides handlers for exceptions thrown in the `IO` monad.
+* [`fused-effects-resumable`][] provides resumable exceptions, which can also serve as a limited form of coroutines.
 * [`fused-effects-random`][] provides a `Random` effect integrated into a `fused-effects` stack.
 
 [exc]: https://github.com/fused-effects/fused-effects-exceptions
 [felens]: http://hackage.haskell.org/package/fused-effects-lens
 [`fused-effects-random`]: https://github.com/fused-effects/fused-effects-random
+[`fused-effects-resumable`]: https://github.com/fused-effects/fused-effects-resumable
 [lens]: http://hackage.haskell.org/package/lens
 
 ### Comparison to `mtl`
