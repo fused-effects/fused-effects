@@ -28,7 +28,7 @@ import Data.List.NonEmpty (NonEmpty(..), head, tail)
 import qualified Data.Semigroup as S
 import Prelude hiding (head, tail)
 
--- | Run a 'Choose' effect, passing branches and results to the supplied continuations.
+-- | Run a 'Choose' effect with continuations respectively interpreting '<|>' and 'pure'.
 --
 -- @since 1.0.0.0
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
