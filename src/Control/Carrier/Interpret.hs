@@ -69,7 +69,7 @@ runInterpretState
   :: (HFunctor eff, Monad m)
   => (forall x . s -> eff (StateC s m) x -> m (s, x))
   -> s
-  -> (forall t. Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
+  -> (forall t . Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
   -> m (s, a)
 runInterpretState handler state m
   = runState state
