@@ -6,13 +6,15 @@ module Control.Carrier.Trace.Returning
   runTrace
 , TraceC(..)
   -- * Trace effect
-, module Control.Effect.Trace
+, module X
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.State.Strict
 import Control.Effect.Trace
+import Control.Effect.Trace as X (Trace)
+import Control.Effect.Trace as X hiding (Trace)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
