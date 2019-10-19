@@ -6,7 +6,7 @@ module Control.Carrier.Cut.Church
   runCut
 , runCutA
 , runCutM
-, CutC(CutC)
+, CutC(..)
   -- * Cut effects
 , module X
 ) where
