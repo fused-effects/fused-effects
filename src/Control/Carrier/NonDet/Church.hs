@@ -12,12 +12,14 @@ module Control.Carrier.NonDet.Church
 , runNonDetM
 , NonDetC(..)
   -- * NonDet effects
-, module Control.Effect.NonDet
+, module X
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Effect.NonDet
+import Control.Effect.NonDet as X (Choose, Empty)
+import Control.Effect.NonDet as X hiding (Choose, Empty)
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
