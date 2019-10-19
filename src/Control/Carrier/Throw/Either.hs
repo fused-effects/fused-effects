@@ -27,7 +27,7 @@ import Control.Monad.Trans.Class
 runThrow :: ThrowC e m a -> m (Either e a)
 runThrow (ThrowC m) = runError m
 
-newtype ThrowC e m a = ThrowC { runThrowC :: ErrorC e m a }
+newtype ThrowC e m a = ThrowC (ErrorC e m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Throw e :+: sig) (ThrowC e m) where
