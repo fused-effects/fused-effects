@@ -34,7 +34,7 @@ runTrace :: TraceC m a -> m a
 runTrace (TraceC m) = m
 
 -- | @since 1.0.0.0
-newtype TraceC m a = TraceC { runTraceC :: m a }
+newtype TraceC m a = TraceC (m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans TraceC where
