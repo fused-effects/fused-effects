@@ -36,7 +36,7 @@ runTrace :: Functor m => TraceC m a -> m ([String], a)
 runTrace (TraceC m) = first reverse <$> runState [] m
 
 -- | @since 1.0.0.0
-newtype TraceC m a = TraceC { runTraceC :: StateC [String] m a }
+newtype TraceC m a = TraceC (StateC [String] m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceC m) where
