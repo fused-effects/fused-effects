@@ -54,6 +54,8 @@
 
 - Redefines `Fail` as a synonym for `Throw String`. ([#247](https://github.com/fused-effects/fused-effects/pull/247))
 
+- Removes `Resumable` and its carriers. Both have been relocated to `fused-effects-resumable`; they can also be usefully and flexibly replaced by arbitrary effects, `Lift`, and `InterpretC`. ([#269](https://github.com/fused-effects/fused-effects/pull/269))
+
 - Changes `Control.Carrier.Fresh.Strict.runFresh` to take and return the initial & final values, respectively, allowing for safer operation. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
 
 - Removes `resetFresh`, as it was unsafe. Greater safety _and_ control over the generation of fresh values can be obtained by use of `runFresh`. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
