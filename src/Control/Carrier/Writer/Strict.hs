@@ -54,18 +54,18 @@ newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
 
 instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
   eff (L (Tell w               k)) = WriterC (modify (`mappend` w)) >> k
-  eff (L (Listen   (WriterC m) k)) = WriterC $ do
+  eff (L (Listen   (WriterC m) k)) = WriterC (do
     w <- get
     put (mempty :: w)
     a <- m
     w' <- get
-    modify (mappend (w :: w))
-    runWriterC (k w' a)
-  eff (L (Censor f (WriterC m) k)) = WriterC $ do
+    (w', a) <$ modify (mappend (w :: w)))
+    >>= uncurry k
+  eff (L (Censor f (WriterC m) k)) = WriterC (do
     w <- get
     put (mempty :: w)
     a <- m
-    modify (mappend w . f)
-    runWriterC (k a)
+    a <$ modify (mappend w . f))
+    >>= k
   eff (R other)          = WriterC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
