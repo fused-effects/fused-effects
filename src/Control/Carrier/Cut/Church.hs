@@ -43,7 +43,11 @@ runCutM leaf = runCut (fmap . mappend . leaf) (pure mempty) (pure mempty)
 
 -- | @since 1.0.0.0
 newtype CutC m a = CutC
-  { -- | A higher-order function receiving three parameters: a function to combine each solution with the rest of the solutions, an action to run when no results are produced (e.g. on 'empty'), and an action to run when no results are produced and backtrcking should not be attempted (e.g. on 'cutfail').
+  { -- | A handler receiving continuations respectively to:
+    --
+    -- 1. combine each solution with the rest of the solutions,
+    -- 2. interpret the absence of solutions (e.g. on 'empty'), and
+    -- 3. interpret the absence of solutions when backtrcking should not be attempted (e.g. on 'cutfail').
     runCutC :: forall b . (a -> m b -> m b) -> m b -> m b -> m b
   }
   deriving (Functor)
