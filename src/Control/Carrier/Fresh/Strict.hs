@@ -57,5 +57,5 @@ instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
     i <- get
     put (succ i)
     runFreshC (k i)
-  eff (R other)       = FreshC (eff (R (handleCoercible other)))
+  eff (R other)     = FreshC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
