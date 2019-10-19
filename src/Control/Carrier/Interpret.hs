@@ -99,7 +99,7 @@ runInterpretState handler state m =
 
 
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
-  InterpretC { runInterpretC :: m a }
+  InterpretC (m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 
