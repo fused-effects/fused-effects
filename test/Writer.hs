@@ -38,6 +38,7 @@ tests = testGroup "Writer"
 
 newtype Run w m = Run (forall a . m a -> PureC (w, a))
 
+
 gen
   :: forall w b m a sig
   .  (Has (Writer w) sig m, Arg b, Arg w, Show b, Show w, Vary b, Vary w)
