@@ -7,6 +7,8 @@ Computations that signal failure with 'cutfail' prevent backtracking within the 
 Predefined carriers:
 
 * "Control.Carrier.Cut.Church"
+
+@since 0.1.2.0
 -}
 
 module Control.Effect.Cut

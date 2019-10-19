@@ -7,6 +7,8 @@ This effect is invoked through the 'Fail.fail' method from 'Fail.MonadFail'.
 Predefined carriers:
 
 * "Control.Carrier.Fail.Either"
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.Fail
