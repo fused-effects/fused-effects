@@ -78,7 +78,7 @@ instance Monad m => Applicative (StateC s m) where
   StateC mf <*> StateC mx = StateC $ \ s -> do
     ~(s',  f) <- mf s
     ~(s'', x) <- mx s'
-    return (s'', f x)
+    pure (s'', f x)
   {-# INLINE (<*>) #-}
   m *> k = m >>= \_ -> k
   {-# INLINE (*>) #-}
