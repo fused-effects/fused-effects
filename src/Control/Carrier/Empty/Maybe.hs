@@ -10,11 +10,13 @@ module Control.Carrier.Empty.Maybe
   runEmpty
 , EmptyC(..)
   -- * Empty effect
-, module Control.Effect.Empty
+, module X
 ) where
 
 import Control.Carrier
 import Control.Effect.Empty
+import Control.Effect.Empty as X (Empty)
+import Control.Effect.Empty as X hiding (Empty)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
