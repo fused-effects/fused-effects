@@ -45,7 +45,7 @@ runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
 runCullM leaf = runCull (liftA2 mappend) (pure . leaf) (pure mempty)
 
 -- | @since 1.0.0.0
-newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
+newtype CullC m a = CullC (ReaderC Bool (NonDetC m) a)
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
 instance Alternative (CullC m) where
