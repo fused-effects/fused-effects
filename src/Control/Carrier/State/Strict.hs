@@ -66,7 +66,7 @@ execState s = fmap fst . runState s
 
 
 -- | @since 1.0.0.0
-newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
+newtype StateC s m a = StateC (s -> m (s, a))
   deriving (Functor)
 
 instance Monad m => Applicative (StateC s m) where
