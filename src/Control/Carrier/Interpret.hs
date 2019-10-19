@@ -108,7 +108,5 @@ instance MonadTrans (InterpretC s sig) where
 
 
 instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrier sig m) => Carrier (eff :+: sig) (InterpretC s eff m) where
-  eff (L eff) =
-    runHandler (unTag (reflect @s)) eff
-  eff (R other) =
-    InterpretC (eff (handleCoercible other))
+  eff (L eff)   = runHandler (unTag (reflect @s)) eff
+  eff (R other) = InterpretC (eff (handleCoercible other))
