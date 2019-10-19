@@ -51,12 +51,12 @@ newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
 instance Alternative (CullC m) where
   empty = CullC empty
   {-# INLINE empty #-}
-  l <|> r = CullC $ ReaderC $ \ cull ->
+  CullC l <|> CullC r = CullC $ ReaderC $ \ cull ->
     if cull then
       NonDetC $ \ fork leaf nil ->
-        runNonDetC (runReader cull (runCullC l)) fork leaf (runNonDetC (runReader cull (runCullC r)) fork leaf nil)
+        runNonDetC (runReader cull l) fork leaf (runNonDetC (runReader cull r) fork leaf nil)
     else
-      runReader cull (runCullC l) <|> runReader cull (runCullC r)
+      runReader cull l <|> runReader cull r
   {-# INLINE (<|>) #-}
 
 -- | Separate fixpoints are computed for each branch.
