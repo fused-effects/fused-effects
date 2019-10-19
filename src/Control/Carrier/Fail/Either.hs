@@ -11,7 +11,7 @@ module Control.Carrier.Fail.Either
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Carrier.Error.Either
+import Control.Carrier.Throw.Either
 import Control.Effect.Fail
 import Control.Effect.Fail as X (type Fail)
 import Control.Effect.Fail as X hiding (type Fail)
@@ -32,10 +32,10 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runFail :: FailC m a -> m (Either String a)
-runFail (FailC m) = runError m
+runFail (FailC m) = runThrow m
 
 -- | @since 1.0.0.0
-newtype FailC m a = FailC (ErrorC String m a)
+newtype FailC m a = FailC (ThrowC String m a)
   deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Fail.MonadFail (FailC m) where
@@ -43,6 +43,5 @@ instance (Carrier sig m, Effect sig) => Fail.MonadFail (FailC m) where
   {-# INLINE fail #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
-  eff (L (Fail s)) = FailC (throwError s)
-  eff (R other)    = FailC (eff (R (handleCoercible other)))
+  eff = FailC . eff . handleCoercible
   {-# INLINE eff #-}
