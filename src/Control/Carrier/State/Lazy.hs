@@ -26,9 +26,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | Run a lazy 'State' effect, yielding the result value and the final state.
---   More programs terminate with lazy state than strict state, but injudicious
---   use of lazy state may lead to thunk buildup.
+-- | Run a lazy 'State' effect, yielding the result value and the final state. More programs terminate with lazy state than strict state, but injudicious use of lazy state may lead to thunk buildup.
 --
 -- @
 -- 'runState' s ('pure' a) = 'pure' (s, a)
