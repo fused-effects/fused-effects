@@ -24,7 +24,6 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Unsafe.Coerce (unsafeCoerce)
 
-
 -- | A @Handler@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
 newtype Handler sig m =
   Handler { runHandler :: forall s x . sig (InterpretC s sig m) x -> InterpretC s sig m x }
@@ -33,18 +32,15 @@ newtype Handler sig m =
 newtype Tagged a b =
   Tagged { unTag :: b }
 
-
 class Reifies s a | s -> a where
   reflect :: Tagged s a
 
 
 data Skolem
 
-
 -- | @Magic@ captures the GHC implementation detail of how single method type classes are implemented.
 newtype Magic a r =
   Magic (Reifies Skolem a => Tagged Skolem r)
-
 
 -- For more information on this technique, see the @reflection@ library. We use the formulation described in https://github.com/ekmett/reflection/issues/31 for better inlining.
 --
@@ -81,7 +77,6 @@ runInterpret f m =
     go (InterpretC m) =
       Tagged m
 
-
 -- | Interpret an effect using a higher-order function with some state variable.
 --
 -- @since 1.0.0.0
@@ -97,15 +92,12 @@ runInterpretState handler state m =
     (\e -> StateC (\s -> handler s e))
     m
 
-
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
   InterpretC (m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
-
 instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
-
 
 instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrier sig m) => Carrier (eff :+: sig) (InterpretC s eff m) where
   eff (L eff)   = runHandler (unTag (reflect @s)) eff
