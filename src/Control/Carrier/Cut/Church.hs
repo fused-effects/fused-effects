@@ -23,7 +23,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | Run a 'Cut' effect with continuations interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
+-- | Run a 'Cut' effect with continuations respectively interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
 --
 -- @since 1.0.0.0
 runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
