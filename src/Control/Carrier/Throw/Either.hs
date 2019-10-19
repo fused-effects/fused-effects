@@ -25,7 +25,7 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Throw' effect, returning failures in 'Left' and successful computations’ results in 'Right'.
 runThrow :: ThrowC e m a -> m (Either e a)
-runThrow = runError . runThrowC
+runThrow (ThrowC m) = runError m
 
 newtype ThrowC e m a = ThrowC { runThrowC :: ErrorC e m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
