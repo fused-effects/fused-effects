@@ -40,7 +40,7 @@ runResumable
 runResumable with (ResumableC m) = runReader (Handler with) m
 
 -- | @since 1.0.0.0
-newtype ResumableC err m a = ResumableC { runResumableC :: ReaderC (Handler err m) m a }
+newtype ResumableC err m a = ResumableC (ReaderC (Handler err m) m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (ResumableC err) where
