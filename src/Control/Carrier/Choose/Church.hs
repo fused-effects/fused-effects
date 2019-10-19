@@ -43,10 +43,7 @@ runChooseS = runChoose (liftA2 (S.<>))
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 --
 -- @since 1.0.0.0
-newtype ChooseC m a = ChooseC
-  { -- | A handler receiving continuations respectively interpreting '<|>' and 'pure'.
-    runChooseC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b
-  }
+newtype ChooseC m a = ChooseC (forall b . (m b -> m b -> m b) -> (a -> m b) -> m b)
   deriving (Functor)
 
 instance Applicative (ChooseC m) where
