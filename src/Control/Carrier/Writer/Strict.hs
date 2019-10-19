@@ -35,7 +35,7 @@ import Control.Monad.Trans.Class
 -- 'runWriter' ('pure' a) = 'pure' ('mempty', a)
 -- @
 runWriter :: Monoid w => WriterC w m a -> m (w, a)
-runWriter = runState mempty . runWriterC
+runWriter (WriterC m) = runState mempty m
 {-# INLINE runWriter #-}
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
