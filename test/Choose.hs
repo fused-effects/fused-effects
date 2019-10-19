@@ -20,23 +20,23 @@ tests = testGroup "Choose"
 
 
 gen
-  :: (Has Choose sig m, Show a)
-  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  :: Has Choose sig m
+  => (forall a . Gen a -> Gen (m a))
   -> Gen a
-  -> Gen (With (m a))
-gen m a = subterm2 (m a) (m a) (liftWith2 "(<|>)" (<|>))
+  -> Gen (m a)
+gen m a = addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a)
 
 
 test
   :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
-  => (forall a . Show a => Gen a -> Gen (With (m a)))
+  => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> (forall a . m a -> PureC [a])
   -> [TestTree]
 test m a b runChoose =
   [ testProperty ">>= distributes over <|>" . forall (m a :. m a :. fn (m b) :. Nil) $
-    \ (With m) (With n) (FnWith k) -> runChoose ((m <|> n) >>= k) === runChoose ((m >>= k) <|> (n >>= k))
+    \ m n k -> runChoose ((m <|> n) >>= k) === runChoose ((m >>= k) <|> (n >>= k))
   , testProperty "<|> is associative" . forall (m a :. m a :. m a :. Nil) $
-    \ (With m) (With n) (With o) -> runChoose ((m <|> n) <|> o) === runChoose (m <|> (n <|> o))
+    \ m n o -> runChoose ((m <|> n) <|> o) === runChoose (m <|> (n <|> o))
   ]
