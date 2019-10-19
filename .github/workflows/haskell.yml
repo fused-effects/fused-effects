@@ -43,4 +43,3 @@ jobs:
         export PATH="/opt/ghc/bin:$PATH"
         cabal v2-run test
         cabal v2-run examples
-        cabal v2-run doctest
