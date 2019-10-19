@@ -37,7 +37,7 @@ import Data.Functor.Classes
 --
 -- @since 1.0.0.0
 runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
-runResumable = runError . runResumableC
+runResumable (ResumableC m) = runError m
 
 -- | @since 1.0.0.0
 newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
