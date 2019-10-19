@@ -59,7 +59,6 @@ library
     Control.Carrier.NonDet.Church
     Control.Carrier.Pure
     Control.Carrier.Reader
-    Control.Carrier.Resource
     Control.Carrier.State.Lazy
     Control.Carrier.State.Strict
     Control.Carrier.Throw.Either
@@ -81,7 +80,6 @@ library
     Control.Effect.NonDet
     Control.Effect.Pure
     Control.Effect.Reader
-    Control.Effect.Resource
     Control.Effect.State
     Control.Effect.Sum
     Control.Effect.Throw
@@ -135,6 +133,7 @@ test-suite test
     Writer
   build-depends:
       base
+    , containers          >= 0.5 && < 0.7
     , fused-effects
     , hedgehog           ^>= 1
     , hedgehog-fn        ^>= 1

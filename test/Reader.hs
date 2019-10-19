@@ -28,27 +28,27 @@ tests = testGroup "Reader"
 
 gen
   :: forall r m a sig
-  .  (Has (Reader r) sig m, Arg r, Show a, Show r, Vary r)
+  .  (Has (Reader r) sig m, Arg r, Show r, Vary r)
   => Gen r
-  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
-  -> Gen (With (m a))
+  -> Gen (m a)
 gen r m a = choice
-  [ liftWith "asks" (asks @r) . showingFn <$> fn a
-  , fn r >>= subterm (m a) . liftWith2 "local" local . showingFn
+  [ label "asks" (asks @r) <*> fn a
+  , label "local" local <*> fn r <*> m a
   ]
 
 
 test
   :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r)
   => Gen r
-  -> (forall a . Show a => Gen a -> Gen (With (m a)))
+  -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> (forall a . r -> m a -> PureC a)
   -> [TestTree]
 test r m a runReader =
   [ testProperty "ask returns the environment variable" . forall (r :. fn (m a) :. Nil) $
-    \ r (FnWith k) -> runReader r (ask >>= k) === runReader r (k r)
+    \ r k -> runReader r (ask >>= k) === runReader r (k r)
   , testProperty "local modifies the environment variable" . forall (r :. fn r :. m a :. Nil) $
-    \ r (Fn f) (With m) -> runReader r (local f m) === runReader (f r) m
+    \ r f m -> runReader r (local f m) === runReader (f r) m
   ]
