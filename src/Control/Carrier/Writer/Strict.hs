@@ -67,5 +67,5 @@ instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (Wr
     a <- m
     a <$ modify (mappend w . f))
     >>= k
-  eff (R other)          = WriterC (eff (R (handleCoercible other)))
+  eff (R other)                    = WriterC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
