@@ -20,6 +20,8 @@
 
 - Defines `Carrier` instances for a number of types in `transformers`. ([#226](https://github.com/fused-effects/fused-effects/pull/226))
 
+- Defines an `evalFresh` handler for `Control.Carrier.Strict.FreshC`, taking the initial value. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
+
 ## Backwards-incompatible changes
 
 - Fixes unlawful behaviour in the `Applicative` instance for `ErrorC`, which had different behaviour between `<*>` and `ap` in the presence of a divergent rhs. In order to accomplish this, `ErrorC` has been defined as a wrapper around `Control.Monad.Trans.Except.ExceptT`. ([#228](https://github.com/fused-effects/fused-effects/pull/228))
@@ -48,9 +50,13 @@
 
 - Removes `prj` from `Member`, as it was only used in `InterposeC` (see above), and was generally inadvisable due to its lack of modularity. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
 
-- Simplifies `ResourceC` by moving the `MonadUnliftIO` constraint on its `Carrier` instance instead of on the `runResource` handler, obviating the need for it to wrap a `ReaderC` carrier. This should not impact usage except in code manually constructing/eliminating `ResourceC` values. ([#254](https://github.com/fused-effects/fused-effects/pull/254))
+- Removes the `Resource` effect and carrier. Both have been relocated to `fused-effects-exceptions`. ([#268](https://github.com/fused-effects/fused-effects/pull/268))
 
 - Redefines `Fail` as a synonym for `Throw String`. ([#247](https://github.com/fused-effects/fused-effects/pull/247))
+
+- Changes `Control.Carrier.Fresh.Strict.runFresh` to take and return the initial & final values, respectively, allowing for safer operation. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
+
+- Removes `resetFresh`, as it was unsafe. Greater safety _and_ control over the generation of fresh values can be obtained by use of `runFresh`. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
 
 # v0.5.0.1
 

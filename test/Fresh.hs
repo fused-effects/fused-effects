@@ -8,6 +8,8 @@ module Fresh
 import qualified Control.Carrier.Fresh.Strict as FreshC
 import Control.Effect.Fresh
 import Gen
+import qualified Hedgehog.Gen as G
+import qualified Hedgehog.Range as R
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -29,9 +31,9 @@ test
   :: Has Fresh sig m
   => (forall a . Gen a -> Gen (m a))
   -> Gen a
-  -> (forall a . m a -> PureC a)
+  -> (forall a . Int -> m a -> PureC (Int, a))
   -> [TestTree]
 test m a runFresh =
-  [ testProperty "fresh yields unique values" . forall (m a :. Nil) $
-    \ m -> runFresh (m >> fresh) /== runFresh (m >> fresh >> fresh)
+  [ testProperty "fresh yields unique values" . forall (G.integral (R.linear 0 100) :. m a :. Nil) $
+    \ n m -> runFresh n (m >> fresh) /== runFresh n (m >> fresh >> fresh)
   ]
