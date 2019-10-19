@@ -6,13 +6,15 @@ module Control.Carrier.Resumable.Resume
   runResumable
 , ResumableC(..)
   -- * Resumable effect
-, module Control.Effect.Resumable
+, module X
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.Reader
 import Control.Effect.Resumable
+import Control.Effect.Resumable as X (Resumable)
+import Control.Effect.Resumable as X hiding (Resumable)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
