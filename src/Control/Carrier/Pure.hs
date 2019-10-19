@@ -1,10 +1,12 @@
 {-# LANGUAGE EmptyCase, MultiParamTypeClasses #-}
+
+-- | A carrier for pure effects, used to kick off a stack of effects with 'run'.
 module Control.Carrier.Pure
-( -- * Pure effect
-  module Control.Effect.Pure
-  -- * Pure carrier
-, run
+( -- * Pure carrier
+  run
 , PureC(..)
+  -- * Pure effect
+, module Control.Effect.Pure
 ) where
 
 import Control.Applicative
@@ -14,11 +16,15 @@ import Control.Monad.Fix
 import Data.Coerce
 
 -- | Run an action exhausted of effects to produce its final result value.
+--
+-- @since 1.0.0.0
 run :: PureC a -> a
 run = runPureC
 {-# INLINE run #-}
 
+-- | @since 1.0.0.0
 newtype PureC a = PureC { runPureC :: a }
+  deriving (Eq, Show)
 
 instance Functor PureC where
   fmap = coerce

@@ -1,14 +1,33 @@
 {-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
+
+{- | An effect providing access to an immutable (but locally-modifiable) context value.
+
+This effect is similar to the traditional @MonadReader@ typeclass, though it allows the presence of multiple @Reader t@ effects.
+
+Predefined carriers:
+
+* "Control.Carrier.Reader".
+* "Control.Monad.Trans.Reader".
+* "Control.Monad.Trans.RWS.Lazy"
+* "Control.Monad.Trans.RWS.Strict"
+* If 'Reader' @r@ is the last effect in a stack, it can be interpreted directly to @(-> r)@ (a function taking an @r@).
+-}
+
 module Control.Effect.Reader
 ( -- * Reader effect
   Reader(..)
 , ask
 , asks
 , local
+  -- * Re-exports
+, Carrier
+, Has
+, run
 ) where
 
 import Control.Carrier
 
+-- | @since 0.1.0.0
 data Reader r m k
   = Ask (r -> m k)
   | forall b . Local (r -> r) (m b) (b -> m k)
@@ -25,26 +44,30 @@ instance Effect (Reader r) where
 
 -- | Retrieve the environment value.
 --
---   prop> run (runReader a ask) === a
+-- @
+-- runReader a ('ask' '>>=' k) = runReader a (k a)
+-- @
+--
+-- @since 0.1.0.0
 ask :: Has (Reader r) sig m => m r
 ask = send (Ask pure)
 
 -- | Project a function out of the current environment value.
 --
---   prop> snd (run (runReader a (asks (applyFun f)))) === applyFun f a
+-- @
+-- 'asks' f = 'fmap' f 'ask'
+-- @
+--
+-- @since 0.1.0.0
 asks :: Has (Reader r) sig m => (r -> a) -> m a
 asks f = send (Ask (pure . f))
 
 -- | Run a computation with an environment value locally modified by the passed function.
 --
---   prop> run (runReader a (local (applyFun f) ask)) === applyFun f a
---   prop> run (runReader a ((,,) <$> ask <*> local (applyFun f) ask <*> ask)) === (a, applyFun f a, a)
+-- @
+-- runReader a ('local' f m) = runReader (f a) m
+-- @
+--
+-- @since 0.1.0.0
 local :: Has (Reader r) sig m => (r -> r) -> m a -> m a
 local f m = send (Local f m pure)
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Control.Carrier.Reader

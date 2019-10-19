@@ -1,14 +1,12 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+-- | A carrier for the 'Control.Effect.Trace' effect that aggregates and returns all traced values.
 module Control.Carrier.Trace.Returning
-( -- * Trace effect
-  module Control.Effect.Trace
-  -- * Trace carrier
-, runTrace
+( -- * Trace carrier
+  runTrace
 , TraceC(..)
--- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Trace effect
+, module Control.Effect.Trace
 ) where
 
 import Control.Applicative (Alternative(..))
@@ -24,18 +22,21 @@ import Data.Bifunctor (first)
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
---   prop> run (runTrace (trace a *> trace b *> pure c)) === ([a, b], c)
+-- @
+-- 'runTrace' ('pure' a) = 'pure' ([], a)
+-- @
+-- @
+-- 'runTrace' ('trace' s) = 'pure' ([s], ())
+-- @
+--
+-- @since 1.0.0.0
 runTrace :: Functor m => TraceC m a -> m ([String], a)
 runTrace = fmap (first reverse) . runState [] . runTraceC
 
+-- | @since 1.0.0.0
 newtype TraceC m a = TraceC { runTraceC :: StateC [String] m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceC m) where
   eff (L (Trace m k)) = TraceC (modify (m :)) *> k
   eff (R other)       = TraceC (eff (R (handleCoercible other)))
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck

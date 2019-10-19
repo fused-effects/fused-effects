@@ -1,17 +1,20 @@
-{-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+
+{- | A carrier for 'Choose' effects (nondeterminism without failure).
+
+Under the hood, it uses a Church-encoded binary tree to avoid the problems associated with a naïve list-based implementation (see ["ListT done right"](http://wiki.haskell.org/ListT_done_right)).
+-}
+
 module Control.Carrier.Choose.Church
-( -- * Choose effect
-  module Control.Effect.Choose
-  -- * Choose carrier
-, runChoose
+( -- * Choose carrier
+  runChoose
+, runChooseS
 , ChooseC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Choose effect
+, module Control.Effect.Choose
 ) where
 
-import Control.Applicative as Alt ((<|>), liftA2)
+import Control.Applicative (liftA2)
 import Control.Carrier
 import Control.Effect.Choose
 import Control.Monad (join)
@@ -19,13 +22,25 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Maybe (fromJust)
-import Prelude hiding (fail)
+import Data.List.NonEmpty (NonEmpty(..), head, tail)
+import qualified Data.Semigroup as S
+import Prelude hiding (head, tail)
 
+-- | Run a 'Choose' effect, passing branches and results to the supplied continuations.
+--
+-- @since 1.0.0.0
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf m = runChooseC m fork leaf
 
+-- | Run a 'Choose' effect, passing results to the supplied function, and merging branches together using 'S.<>'.
+--
+-- @since 1.0.0.0
+runChooseS :: (S.Semigroup b, Applicative m) => (a -> m b) -> ChooseC m a -> m b
+runChooseS = runChoose (liftA2 (S.<>))
+
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
+--
+-- @since 1.0.0.0
 newtype ChooseC m a = ChooseC
   { -- | A higher-order function receiving two continuations, respectively implementing choice and 'pure'.
     runChooseC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b
@@ -48,11 +63,15 @@ instance Fail.MonadFail m => Fail.MonadFail (ChooseC m) where
   fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
+-- | Separate fixpoints are computed for each branch.
 instance MonadFix m => MonadFix (ChooseC m) where
   mfix f = ChooseC $ \ fork leaf ->
-    mfix (runChoose (liftA2 Fork) (pure . Leaf)
-      . f . fromJust . fold (Alt.<|>) Just)
-    >>= fold fork leaf
+    mfix (runChooseS (pure . pure) . f . head)
+    >>= \case
+      a:|[] -> leaf a
+      a:|_  -> leaf a `fork` runChoose fork leaf (mfix (liftAll . fmap tail . runChooseS (pure . pure) . f))
+      where
+    liftAll m = ChooseC $ \ fork leaf -> m >>= foldr1 fork . fmap leaf
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (ChooseC m) where

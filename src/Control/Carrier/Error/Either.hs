@@ -1,20 +1,18 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+-- | A carrier for an 'Error' effect.
 module Control.Carrier.Error.Either
-( -- * Error effect
-  module Control.Effect.Error
-  -- * Error carrier
-, runError
+( -- * Error carrier
+  runError
 , ErrorC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Error effect
+, module Control.Effect.Error
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Effect.Error
-import Control.Monad (MonadPlus(..), (<=<))
+import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -23,7 +21,17 @@ import Control.Monad.Trans.Except
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
---   prop> run (runError (pure a)) === Right @Int @Int a
+-- @
+-- 'runError' ('pure' a) = 'pure' ('Right' a)
+-- @
+-- @
+-- 'runError' ('throwError' e) = 'pure' ('Left' e)
+-- @
+-- @
+-- 'runError' ('throwError' e `catchError` 'pure') = 'pure' ('Right' e)
+-- @
+--
+-- @since 0.1.0.0
 runError :: ErrorC exc m a -> m (Either exc a)
 runError = runExceptT . runErrorC
 
@@ -41,13 +49,5 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  eff (L (Throw e))     = ErrorC (ExceptT (pure (Left e)))
-  eff (L (Catch m h k)) = ErrorC (ExceptT (runError m >>= either (either (pure . Left) (runError . k) <=< runError . h) (runError . k)))
-  eff (R other)         = ErrorC (ExceptT (eff (handle (Right ()) (either (pure . Left) runError) other)))
+  eff = ErrorC . eff . handleCoercible
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XTypeApplications
--- >>> import Test.QuickCheck

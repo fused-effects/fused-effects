@@ -1,14 +1,13 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+-- | A carrier for 'Reader' effects.
+
 module Control.Carrier.Reader
-( -- * Reader effect
-  module Control.Effect.Reader
-  -- * Reader carrier
-, runReader
+( -- * Reader carrier
+  runReader
 , ReaderC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Reader effect
+, module Control.Effect.Reader
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
@@ -23,11 +22,22 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Reader' effect with the passed environment value.
 --
---   prop> run (runReader a (pure b)) === b
+-- @
+-- 'runReader' a 'ask' = 'pure' a
+-- @
+-- @
+-- 'runReader' a ('pure' b) = 'pure' b
+-- @
+-- @
+-- 'runReader' a ('local' f m) = 'runReader' (f a) m
+-- @
+--
+-- @since 1.0.0.0
 runReader :: r -> ReaderC r m a -> m a
 runReader r c = runReaderC c r
 {-# INLINE runReader #-}
 
+-- | @since 1.0.0.0
 newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
   deriving (Functor)
 
@@ -80,9 +90,3 @@ instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
   eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
   eff (R other)         = ReaderC (\ r -> eff (hmap (runReader r) other))
   {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
