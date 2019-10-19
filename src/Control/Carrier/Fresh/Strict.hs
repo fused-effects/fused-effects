@@ -53,7 +53,7 @@ newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
-  eff (L (Fresh   k)) = FreshC $ do
+  eff (L (Fresh k)) = FreshC $ do
     i <- get
     put (succ i)
     runFreshC (k i)
