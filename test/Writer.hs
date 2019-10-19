@@ -26,6 +26,7 @@ tests = testGroup "Writer"
     [ testMonad
     , testWriter
     ] >>= ($ Run StrictWriterC.runWriter)
+  , testGroup "(,)"              $ testWriter (Run pure)
   , testGroup "WriterT (Lazy)"   $ testWriter (Run (fmap swap . LazyWriterT.runWriterT))
   , testGroup "WriterT (Strict)" $ testWriter (Run (fmap swap . StrictWriterT.runWriterT))
   , testGroup "RWST (Lazy)"      $ testWriter (Run (runRWST LazyRWST.runRWST))
