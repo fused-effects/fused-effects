@@ -54,7 +54,7 @@ instance Alternative (CullC m) where
   CullC l <|> CullC r = CullC $ ReaderC $ \ cull ->
     if cull then
       NonDetC $ \ fork leaf nil ->
-        runNonDetC (runReader cull l) fork leaf (runNonDetC (runReader cull r) fork leaf nil)
+        runNonDet fork leaf (runNonDet fork leaf nil (runReader cull r)) (runReader cull l)
     else
       runReader cull l <|> runReader cull r
   {-# INLINE (<|>) #-}
