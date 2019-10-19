@@ -7,13 +7,15 @@ module Control.Carrier.Fresh.Strict
 , evalFresh
 , FreshC(..)
   -- * Fresh effect
-, module Control.Effect.Fresh
+, module X
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.State.Strict
 import Control.Effect.Fresh
+import Control.Effect.Fresh as X (Fresh)
+import Control.Effect.Fresh as X hiding (Fresh)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
