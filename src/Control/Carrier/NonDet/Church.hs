@@ -62,7 +62,7 @@ runNonDetM leaf = runNonDet (liftA2 mappend) (pure . leaf) (pure mempty)
 --
 -- @since 1.0.0.0
 newtype NonDetC m a = NonDetC
-  { -- | A higher-order function receiving three continuations, respectively implementing '<|>', 'pure', and 'empty'.
+  { -- | A handler receiving continuations respectively interpreting '<|>', 'pure', and 'empty'.
     runNonDetC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b -> m b
   }
   deriving (Functor)
