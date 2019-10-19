@@ -84,7 +84,7 @@ instance Monad m => Applicative (StateC s m) where
   {-# INLINE (*>) #-}
 
 instance Monad m => Monad (StateC s m) where
-  m >>= k  = StateC $ \ s -> do
+  m >>= k = StateC $ \ s -> do
     ~(s', a) <- runState s m
     runState s' (k a)
   {-# INLINE (>>=) #-}
