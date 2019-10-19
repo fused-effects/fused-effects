@@ -59,11 +59,10 @@ instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (Wr
     let w'' = mappend w w'
     w'' `seq` pure (w'', (w', a))))
     >>= uncurry k
-  eff (L (Censor f (WriterC m) k)) = WriterC (do
-    w <- get
-    put (mempty :: w)
-    a <- m
-    a <$ modify (mappend w . f))
+  eff (L (Censor f (WriterC m) k)) = WriterC (StateC (\ w -> do
+    (w', a) <- runState mempty m
+    let w'' = mappend w (f w')
+    w'' `seq` pure (w'', a)))
     >>= k
   eff (R other)                    = WriterC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
