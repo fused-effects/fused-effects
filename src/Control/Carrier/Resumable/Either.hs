@@ -40,7 +40,7 @@ runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
 runResumable (ResumableC m) = runError m
 
 -- | @since 1.0.0.0
-newtype ResumableC err m a = ResumableC { runResumableC :: ErrorC (SomeError err) m a }
+newtype ResumableC err m a = ResumableC (ErrorC (SomeError err) m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
