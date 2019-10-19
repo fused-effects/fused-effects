@@ -13,6 +13,7 @@ import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Bifunctor (first)
+import Data.Functor.Identity (Identity(..))
 import Data.Tuple (swap)
 import Gen
 import qualified Monad
@@ -29,8 +30,8 @@ tests = testGroup "Writer"
   ] where
   test :: Has (Writer W) sig m => String -> (forall a . m a -> PureC (W, a)) -> TestTree
   test s run = testGroup s
-    $  Monad.test    (m (gen w b)) a b c run
-    ++ Writer.test w (m (gen w b)) a     run
+    $  Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
+    ++ Writer.test w (m (gen w b)) a                          run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
