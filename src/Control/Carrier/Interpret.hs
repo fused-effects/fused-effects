@@ -60,10 +60,10 @@ runInterpret
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
 runInterpret f m = reify (Handler handler) (go m) where
-  handler :: forall s x . eff (InterpretC s eff m) x -> InterpretC s eff m x
+  handler :: eff (InterpretC s eff m) x -> InterpretC s eff m x
   handler e = InterpretC (f (handleCoercible e))
 
-  go :: forall x s .  InterpretC s eff m x -> Tagged s (m x)
+  go :: InterpretC s eff m x -> Tagged s (m x)
   go (InterpretC m) = Tagged m
 
 -- | Interpret an effect using a higher-order function with some state variable.
