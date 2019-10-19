@@ -19,7 +19,7 @@ import Data.Coerce
 --
 -- @since 1.0.0.0
 run :: PureC a -> a
-run = runPureC
+run (PureC a) = a
 {-# INLINE run #-}
 
 -- | @since 1.0.0.0
