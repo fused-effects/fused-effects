@@ -11,13 +11,15 @@ module Control.Carrier.Writer.Strict
 , execWriter
 , WriterC(..)
   -- * Writer effect
-, module Control.Effect.Writer
+, module X
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.State.Strict
 import Control.Effect.Writer
+import Control.Effect.Trace as X (Trace)
+import Control.Effect.Trace as X hiding (Trace)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
