@@ -24,5 +24,5 @@ module Control.Effect.Fail
 import Control.Effect.Throw
 import qualified Control.Monad.Fail as Fail
 
--- | @since 1.0.0.0
+-- | @since 0.1.0.0
 type Fail = Throw String

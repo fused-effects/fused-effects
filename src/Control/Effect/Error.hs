@@ -24,5 +24,5 @@ import Control.Carrier
 import Control.Effect.Catch
 import Control.Effect.Throw
 
--- | @since 1.0.0.0
+-- | @since 0.1.0.0
 type Error e = Throw e :+: Catch e
