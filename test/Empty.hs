@@ -7,15 +7,21 @@ module Empty
 
 import qualified Control.Carrier.Empty.Maybe as EmptyC
 import Control.Effect.Empty
+import Data.Functor.Identity (Identity(..))
 import Gen
+import qualified Monad
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty"
-  [ testGroup "EmptyC" $ test (m gen) a b EmptyC.runEmpty
-  , testGroup "Maybe"  $ test (m gen) a b pure
-  ]
+  [ test "EmptyC" EmptyC.runEmpty
+  , test "Maybe"  pure
+  ] where
+  test :: Has Empty sig m => String -> (forall a . m a -> PureC (Maybe a)) -> TestTree
+  test name run = testGroup name
+    $  Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
+    ++ Empty.test (m gen) a b                        run
 
 
 gen

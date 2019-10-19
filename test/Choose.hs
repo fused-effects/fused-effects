@@ -7,16 +7,22 @@ module Choose
 
 import qualified Control.Carrier.Choose.Church as ChooseC
 import Control.Effect.Choose
+import Data.Functor.Identity (Identity(..))
 import Data.List.NonEmpty
 import Gen
+import qualified Monad
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Choose"
-  [ testGroup "ChooseC"  $ test (m gen) a b (ChooseC.runChooseS (pure . pure))
-  , testGroup "NonEmpty" $ test (m gen) a b (pure . toList)
-  ]
+  [ test "ChooseC"  (ChooseC.runChooseS (pure . pure))
+  , test "NonEmpty" (pure . toList)
+  ] where
+  test :: Has Choose sig m => String -> (forall a . m a -> PureC [a]) -> TestTree
+  test name run = testGroup name
+    $  Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
+    ++ Choose.test (m gen) a b                        run
 
 
 gen

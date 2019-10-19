@@ -9,16 +9,22 @@ import qualified Control.Carrier.Error.Either as ErrorC
 import Control.Effect.Error
 import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
+import Data.Functor.Identity (Identity(..))
 import Gen
-import qualified Throw
+import qualified Monad
 import Test.Tasty
+import qualified Throw
 
 tests :: TestTree
 tests = testGroup "Error" $
-  [ testGroup "ErrorC"  $ test e (m (gen e)) a b ErrorC.runError
-  , testGroup "Either"  $ test e (m (gen e)) a b pure
-  , testGroup "ExceptT" $ test e (m (gen e)) a b ExceptT.runExceptT
-  ]
+  [ test "ErrorC"  ErrorC.runError
+  , test "Either"  pure
+  , test "ExceptT" ExceptT.runExceptT
+  ] where
+  test :: Has (Error E) sig m => String -> (forall a . m a -> PureC (Either E a)) -> TestTree
+  test name run = testGroup name
+    $  Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
+    ++ Error.test e (m (gen e)) a b                        run
 
 
 gen

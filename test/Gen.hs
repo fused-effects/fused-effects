@@ -7,6 +7,7 @@ module Gen
 , genT
 , a
 , b
+, c
 , e
 , r
 , s
@@ -14,6 +15,7 @@ module Gen
 , T(..)
 , A
 , B
+, C
 , E
 , R
 , S
@@ -102,6 +104,11 @@ b :: Gen B
 b = genT
 
 type B = T "B"
+
+c :: Gen C
+c = genT
+
+type C = T "C"
 
 e :: Gen E
 e = genT

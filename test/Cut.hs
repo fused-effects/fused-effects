@@ -9,15 +9,21 @@ import qualified Control.Carrier.Cut.Church as CutC
 import Control.Effect.Choose
 import Control.Effect.Cut (Cut, call, cutfail)
 import Control.Effect.NonDet (NonDet)
+import Data.Functor.Identity (Identity(..))
 import Gen
+import qualified Monad
 import qualified NonDet
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Cut"
-  [ testGroup "CutC" $ test (m gen) a b CutC.runCutA
-  ]
+  [ test "CutC" CutC.runCutA
+  ] where
+  test :: (Has Cut sig m, Has NonDet sig m) => String -> (forall a . m a -> PureC [a]) -> TestTree
+  test name run = testGroup name
+    $  Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
+    ++ Cut.test   (m gen) a b                        run
 
 
 gen

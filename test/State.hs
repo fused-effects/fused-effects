@@ -14,18 +14,23 @@ import qualified Control.Monad.Trans.State.Lazy as LazyStateT
 import qualified Control.Monad.Trans.State.Strict as StrictStateT
 import Data.Tuple (swap)
 import Gen
+import qualified Monad
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "State"
-  [ testGroup "StateC (Lazy)"   $ test s (m (gen s)) a LazyStateC.runState
-  , testGroup "StateC (Strict)" $ test s (m (gen s)) a StrictStateC.runState
-  , testGroup "StateT (Lazy)"   $ test s (m (gen s)) a (fmap (fmap swap) . flip LazyStateT.runStateT)
-  , testGroup "StateT (Strict)" $ test s (m (gen s)) a (fmap (fmap swap) . flip StrictStateT.runStateT)
-  , testGroup "RWST (Lazy)"     $ test s (m (gen s)) a (runRWST LazyRWST.runRWST)
-  , testGroup "RWST (Strict)"   $ test s (m (gen s)) a (runRWST StrictRWST.runRWST)
+  [ test "StateC (Lazy)"   LazyStateC.runState
+  , test "StateC (Strict)" StrictStateC.runState
+  , test "StateT (Lazy)"   (fmap (fmap swap) . flip LazyStateT.runStateT)
+  , test "StateT (Strict)" (fmap (fmap swap) . flip StrictStateT.runStateT)
+  , test "RWST (Lazy)"     (runRWST LazyRWST.runRWST)
+  , test "RWST (Strict)"   (runRWST StrictRWST.runRWST)
   ] where
+  test :: Has (State S) sig m => String -> (forall a . S -> m a -> PureC (S, a)) -> TestTree
+  test name run = testGroup name
+    $  Monad.test   (m (gen s)) a b c ((,) <$> s <*> pure ()) (uncurry run)
+    ++ State.test s (m (gen s)) a                             run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 

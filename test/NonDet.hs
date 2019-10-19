@@ -11,17 +11,23 @@ import qualified Control.Carrier.NonDet.Church as Church.NonDetC
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet (NonDet)
+import Data.Functor.Identity (Identity(..))
 import Data.Maybe (listToMaybe)
 import qualified Empty
 import Gen
+import qualified Monad
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "NonDet"
-  [ testGroup "NonDetC (Church)" $ test (m gen) a b Church.NonDetC.runNonDetA
-  , testGroup "[]"               $ test (m gen) a b pure
-  ]
+  [ test "NonDetC (Church)" Church.NonDetC.runNonDetA
+  , test "[]"               pure
+  ] where
+  test :: Has NonDet sig m => String -> (forall a . m a -> PureC [a]) -> TestTree
+  test name run = testGroup name
+    $  Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
+    ++ NonDet.test (m gen) a b                        run
 
 
 gen

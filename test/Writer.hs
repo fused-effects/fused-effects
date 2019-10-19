@@ -13,19 +13,25 @@ import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Bifunctor (first)
+import Data.Functor.Identity (Identity(..))
 import Data.Tuple (swap)
 import Gen
+import qualified Monad
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testGroup "WriterC (Strict)" $ test w (m (gen w b)) a StrictWriterC.runWriter
-  , testGroup "WriterT (Lazy)"   $ test w (m (gen w b)) a (fmap swap . LazyWriterT.runWriterT)
-  , testGroup "WriterT (Strict)" $ test w (m (gen w b)) a (fmap swap . StrictWriterT.runWriterT)
-  , testGroup "RWST (Lazy)"      $ test w (m (gen w b)) a (runRWST LazyRWST.runRWST)
-  , testGroup "RWST (Strict)"    $ test w (m (gen w b)) a (runRWST StrictRWST.runRWST)
+  [ test "WriterC (Strict)" StrictWriterC.runWriter
+  , test "WriterT (Lazy)"   (fmap swap . LazyWriterT.runWriterT)
+  , test "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT)
+  , test "RWST (Lazy)"      (runRWST LazyRWST.runRWST)
+  , test "RWST (Strict)"    (runRWST StrictRWST.runRWST)
   ] where
+  test :: Has (Writer W) sig m => String -> (forall a . m a -> PureC (W, a)) -> TestTree
+  test s run = testGroup s
+    $  Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
+    ++ Writer.test w (m (gen w b)) a                          run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
