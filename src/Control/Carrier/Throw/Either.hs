@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 -- | A carrier for a 'Throw' effect.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Throw.Either
 ( -- * Throw carrier
   runThrow
