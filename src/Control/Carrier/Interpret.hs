@@ -22,6 +22,7 @@ import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
+import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 import Data.Functor.Const (Const(..))
 import Unsafe.Coerce (unsafeCoerce)
@@ -79,6 +80,12 @@ newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC (m a)
 
 instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
+
+instance MonadUnliftIO m => MonadUnliftIO (InterpretC s sig m) where
+  askUnliftIO = InterpretC $ withUnliftIO $ \u -> return (UnliftIO (\ (InterpretC m) -> unliftIO u m))
+  {-# INLINE askUnliftIO #-}
+  withRunInIO inner = InterpretC $ withRunInIO $ \run -> inner (\ (InterpretC m) -> run m)
+  {-# INLINE withRunInIO #-}
 
 instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrier sig m) => Carrier (eff :+: sig) (InterpretC s eff m) where
   eff (L eff)   = runHandler (getConst (reflect @s)) eff

@@ -19,6 +19,7 @@ import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
+import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 
 -- | Run a 'Resumable' effect, resuming uncaught errors with a given handler.
@@ -46,6 +47,12 @@ newtype ResumableC err m a = ResumableC (ReaderC (Handler err m) m a)
 instance MonadTrans (ResumableC err) where
   lift = ResumableC . lift
   {-# INLINE lift #-}
+
+instance MonadUnliftIO m => MonadUnliftIO (ResumableC err m) where
+  askUnliftIO = ResumableC $ withUnliftIO $ \u -> return (UnliftIO (\ (ResumableC m) -> unliftIO u m))
+  {-# INLINE askUnliftIO #-}
+  withRunInIO inner = ResumableC $ withRunInIO $ \run -> inner (\ (ResumableC m) -> run m)
+  {-# INLINE withRunInIO #-}
 
 newtype Handler err m = Handler { runHandler :: forall x . err x -> m x }
 
