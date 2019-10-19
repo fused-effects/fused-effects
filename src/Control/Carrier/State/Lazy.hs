@@ -40,7 +40,7 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runState :: s -> StateC s m a -> m (s, a)
-runState s c = runStateC c s
+runState s (StateC runStateC) = runStateC s
 {-# INLINE[3] runState #-}
 
 -- | Run a lazy 'State' effect, yielding the result value and discarding the final state.
