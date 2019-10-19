@@ -13,6 +13,7 @@ module Control.Effect.Fail
 ( -- * Fail effect
   Fail
 , Fail.MonadFail(..)
+, Throw(..)
   -- * Re-exports
 , Carrier
 , Has
