@@ -32,10 +32,10 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runFail :: FailC m a -> m (Either String a)
-runFail = runError . runFailC
+runFail (FailC m) = runError m
 
 -- | @since 1.0.0.0
-newtype FailC m a = FailC { runFailC :: ErrorC String m a }
+newtype FailC m a = FailC (ErrorC String m a)
   deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Fail.MonadFail (FailC m) where
