@@ -54,8 +54,7 @@ reify a k = unsafeCoerce (Magic @a k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: forall eff m a
-  .  (HFunctor eff, Monad m)
+  :: (HFunctor eff, Monad m)
   => (forall x . eff m x -> m x)
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
