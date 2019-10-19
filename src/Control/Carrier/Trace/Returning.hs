@@ -11,7 +11,7 @@ module Control.Carrier.Trace.Returning
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Carrier.State.Strict
+import Control.Carrier.Writer.Strict
 import Control.Effect.Trace
 import Control.Effect.Trace as X (Trace)
 import Control.Effect.Trace as X hiding (Trace)
@@ -21,6 +21,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Bifunctor (first)
+import Data.Monoid (Endo(..))
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
@@ -33,12 +34,12 @@ import Data.Bifunctor (first)
 --
 -- @since 1.0.0.0
 runTrace :: Functor m => TraceC m a -> m ([String], a)
-runTrace (TraceC m) = first reverse <$> runState [] m
+runTrace (TraceC m) = first (($[]) . appEndo) <$> runWriter m
 
 -- | @since 1.0.0.0
-newtype TraceC m a = TraceC (StateC [String] m a)
+newtype TraceC m a = TraceC (WriterC (Endo [String]) m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Trace :+: sig) (TraceC m) where
-  eff (L (Trace m k)) = TraceC (modify (m :)) *> k
+  eff (L (Trace m k)) = TraceC (tell (Endo (m :))) *> k
   eff (R other)       = TraceC (eff (R (handleCoercible other)))
