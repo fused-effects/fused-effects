@@ -7,14 +7,20 @@ module Throw
 
 import qualified Control.Carrier.Throw.Either as ThrowC
 import Control.Effect.Throw
+import Data.Functor.Identity (Identity(..))
 import Gen
+import qualified Monad
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Throw" $
-  [ testGroup "ThrowC" $ test e (m (gen e)) a b ThrowC.runThrow
-  ]
+  [ test "ThrowC" ThrowC.runThrow
+  ] where
+  test :: Has (Throw E) sig m => String -> (forall a . m a -> PureC (Either E a)) -> TestTree
+  test name run = testGroup name
+    $  Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
+    ++ Throw.test e (m (gen e)) a b                        run
 
 
 gen
