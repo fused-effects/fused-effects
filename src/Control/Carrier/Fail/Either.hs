@@ -13,8 +13,8 @@ import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.Error.Either
 import Control.Effect.Fail
-import Control.Effect.Fail as X (Throw)
-import Control.Effect.Fail as X hiding (Throw)
+import Control.Effect.Fail as X (type Fail)
+import Control.Effect.Fail as X hiding (type Fail)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
@@ -39,10 +39,10 @@ newtype FailC m a = FailC { runFailC :: ErrorC String m a }
   deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Fail.MonadFail (FailC m) where
-  fail = send . Throw
+  fail = send . Fail
   {-# INLINE fail #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
-  eff (L (Throw s)) = FailC (throwError s)
-  eff (R other)     = FailC (eff (R (handleCoercible other)))
+  eff (L (Fail s)) = FailC (throwError s)
+  eff (R other)    = FailC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
