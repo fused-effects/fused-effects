@@ -5,7 +5,7 @@ module Control.Carrier.Fresh.Strict
 ( -- * Fresh carrier
   runFresh
 , evalFresh
-, FreshC(..)
+, FreshC(FreshC)
   -- * Fresh effect
 , module X
 ) where
