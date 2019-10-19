@@ -33,7 +33,7 @@ import Data.Bifunctor (first)
 --
 -- @since 1.0.0.0
 runTrace :: Functor m => TraceC m a -> m ([String], a)
-runTrace = fmap (first reverse) . runState [] . runTraceC
+runTrace (TraceC m) = first reverse <$> runState [] m
 
 -- | @since 1.0.0.0
 newtype TraceC m a = TraceC { runTraceC :: StateC [String] m a }
