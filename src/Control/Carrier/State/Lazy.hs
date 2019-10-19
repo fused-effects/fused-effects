@@ -69,7 +69,7 @@ execState s = fmap fst . runState s
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
 instance Functor m => Functor (StateC s m) where
-  fmap f m = StateC $ \ s -> fmap (\ ~(s', a) -> (s', f a)) $ runState s m
+  fmap f m = StateC $ \ s -> (\ ~(s', a) -> (s', f a)) <$> runState s m
   {-# INLINE fmap #-}
 
 instance Monad m => Applicative (StateC s m) where
