@@ -59,10 +59,7 @@ runInterpret
   => (forall x . eff m x -> m x)
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
-runInterpret f m = reify (Handler handler) (go m) where
-  handler :: eff (InterpretC s eff m) x -> InterpretC s eff m x
-  handler e = InterpretC (f (handleCoercible e))
-
+runInterpret f m = reify (Handler (InterpretC . f . handleCoercible)) (go m) where
   go :: InterpretC s eff m x -> Tagged s (m x)
   go (InterpretC m) = Tagged m
 
