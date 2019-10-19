@@ -1,4 +1,5 @@
 {-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# OPTIONS_GHC -Wno-identities #-}
 module Gen
 ( module Control.Carrier.Pure
   -- * Polymorphic generation & instantiation
@@ -31,6 +32,7 @@ module Gen
 , (===)
 , (/==)
 , Gen.choice
+, Gen.integral
 , Fn.Arg
 , Fn.Vary
 , Gen.fn
@@ -74,10 +76,10 @@ m with = go where
 
 
 genT :: KnownSymbol s => Gen (T s)
-genT = Gen (showing . T <$> integral (linear 0 100))
+genT = Gen.integral (linear 0 100)
 
 newtype T a = T { unT :: Integer }
-  deriving (Enum, Eq, Fn.Generic, Num, Ord, Real, Fn.Vary)
+  deriving (Enum, Eq, Fn.Generic, Integral, Num, Ord, Real, Fn.Vary)
 
 instance Fn.Arg (T a)
 
@@ -126,6 +128,9 @@ fn b = Gen (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT 
 
 choice :: [Gen a] -> Gen a
 choice = Gen . Hedgehog.Gen.choice . Prelude.map runGen
+
+integral :: (Integral a, Show a) => Range a -> Gen a
+integral range = Gen (showing <$> Hedgehog.Gen.integral range)
 
 
 infixr 5 :.
