@@ -11,18 +11,24 @@ import qualified Control.Monad.Trans.Reader as ReaderT
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
+import Data.Functor.Identity (Identity(..))
 import Gen
+import qualified Monad
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Reader"
-  [ testGroup "ReaderC"       $ test r (m (gen r)) a ReaderC.runReader
-  , testGroup "(->)"          $ test r (m (gen r)) a (fmap PureC . (&))
-  , testGroup "ReaderT"       $ test r (m (gen r)) a (flip ReaderT.runReaderT)
-  , testGroup "RWST (Lazy)"   $ test r (m (gen r)) a (runRWST LazyRWST.runRWST)
-  , testGroup "RWST (Strict)" $ test r (m (gen r)) a (runRWST StrictRWST.runRWST)
+  [ test "ReaderC"       ReaderC.runReader
+  , test "(->)"          (fmap PureC . (&))
+  , test "ReaderT"       (flip ReaderT.runReaderT)
+  , test "RWST (Lazy)"   (runRWST LazyRWST.runRWST)
+  , test "RWST (Strict)" (runRWST StrictRWST.runRWST)
   ] where
+  test :: Has (Reader R) sig m => String -> (forall a . R -> m a -> PureC a) -> TestTree
+  test name run = testGroup name
+    $  Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) (fmap Identity . uncurry run)
+    ++ Reader.test r (m (gen r)) a                             run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
