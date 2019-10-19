@@ -30,7 +30,7 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runCull :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CullC m a -> m b
-runCull fork leaf nil = runNonDet fork leaf nil . runReader False . runCullC
+runCull fork leaf nil (CullC m) = runNonDet fork leaf nil (runReader False m)
 
 -- | Run a 'Cull' effect, interpreting the result into an 'Alternative' functor. Choice is handled with '<|>', embedding with 'pure', and failure with 'empty'.
 --
