@@ -68,7 +68,7 @@ instance Alternative (CutC m) where
 
 instance Monad (CutC m) where
   CutC a >>= f = CutC $ \ cons nil fail ->
-    a (\ a' as -> runCutC (f a') cons as fail) nil fail
+    a (\ a' as -> runCut cons as fail (f a')) nil fail
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
@@ -97,7 +97,7 @@ instance MonadTrans CutC where
 
 instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
-  eff (L (Call m k)) = CutC $ \ cons nil fail -> runCutC m (\ a as -> runCutC (k a) cons as fail) nil nil
+  eff (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
   eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutA) other) >>= foldr cons nil
