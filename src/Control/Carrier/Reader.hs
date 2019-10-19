@@ -40,7 +40,7 @@ runReader r (ReaderC runReaderC) = runReaderC r
 {-# INLINE runReader #-}
 
 -- | @since 1.0.0.0
-newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
+newtype ReaderC r m a = ReaderC (r -> m a)
   deriving (Functor)
 
 instance Applicative m => Applicative (ReaderC r m) where
