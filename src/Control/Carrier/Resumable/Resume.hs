@@ -37,7 +37,7 @@ runResumable
   :: (forall x . err x -> m x)
   -> ResumableC err m a
   -> m a
-runResumable with = runReader (Handler with) . runResumableC
+runResumable with (ResumableC m) = runReader (Handler with) m
 
 -- | @since 1.0.0.0
 newtype ResumableC err m a = ResumableC { runResumableC :: ReaderC (Handler err m) m a }
