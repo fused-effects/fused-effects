@@ -65,7 +65,7 @@ instance Carrier NonDet [] where
 
 instance Monoid w => Carrier (Writer w) ((,) w) where
   eff (Tell w (w', k))    = (mappend w w', k)
-  eff (Listen m k)        = uncurry k m
+  eff (Listen (w, a) k)   = let (w', a') = k w a in (mappend w w', a')
   eff (Censor f (w, a) k) = let (w', a') = k a in (mappend (f w) w', a')
 
 
