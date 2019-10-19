@@ -23,7 +23,7 @@ run (PureC a) = a
 {-# INLINE run #-}
 
 -- | @since 1.0.0.0
-newtype PureC a = PureC { runPureC :: a }
+newtype PureC a = PureC a
   deriving (Eq, Show)
 
 instance Functor PureC where
