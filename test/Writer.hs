@@ -22,18 +22,20 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ test "WriterC (Strict)" StrictWriterC.runWriter
-  , test "WriterT (Lazy)"   (fmap swap . LazyWriterT.runWriterT)
-  , test "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT)
-  , test "RWST (Lazy)"      (runRWST LazyRWST.runRWST)
-  , test "RWST (Strict)"    (runRWST StrictRWST.runRWST)
+  [ testGroup "WriterC (Strict)" $
+    [ testMonad
+    , testWriter
+    ] >>= ($ Run StrictWriterC.runWriter)
+  , testGroup "WriterT (Lazy)"   $ testWriter (Run (fmap swap . LazyWriterT.runWriterT))
+  , testGroup "WriterT (Strict)" $ testWriter (Run (fmap swap . StrictWriterT.runWriterT))
+  , testGroup "RWST (Lazy)"      $ testWriter (Run (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"    $ testWriter (Run (runRWST StrictRWST.runRWST))
   ] where
-  test :: Has (Writer W) sig m => String -> (forall a . m a -> PureC (W, a)) -> TestTree
-  test s run = testGroup s
-    $  Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Writer.test w (m (gen w b)) a                          run
+  testMonad  (Run run) = Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
+  testWriter (Run run) = Writer.test w (m (gen w b)) a                           run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
+newtype Run w m = Run (forall a . m a -> PureC (w, a))
 
 gen
   :: forall w b m a sig
