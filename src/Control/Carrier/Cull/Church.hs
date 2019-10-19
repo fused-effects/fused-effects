@@ -7,10 +7,8 @@ module Control.Carrier.Cull.Church
 , runCullA
 , runCullM
 , CullC(..)
-  -- * Cull effect
-, module Control.Effect.Cull
-  -- * NonDet effects
-, module Control.Effect.NonDet
+  -- * Cull effects
+, module X
 ) where
 
 import Control.Applicative (liftA2)
@@ -18,7 +16,11 @@ import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
 import Control.Effect.Cull
+import Control.Effect.Cull as X (Cull)
+import Control.Effect.Cull as X hiding (Cull)
 import Control.Effect.NonDet
+import Control.Effect.NonDet as X (Choose, Empty)
+import Control.Effect.NonDet as X hiding (Choose, Empty)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
