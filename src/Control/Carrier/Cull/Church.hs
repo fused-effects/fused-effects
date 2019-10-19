@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Cull' and 'NonDet' effects used in tandem (@Cull :+: NonDet@).
+--
+-- @since 1.0.0.0
 module Control.Carrier.Cull.Church
 ( -- * Cull carrier
   runCull

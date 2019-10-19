@@ -1,4 +1,8 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+-- | An 'Either'-based carrier for the 'Throw' effect.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Throw.Either
 ( -- * Throw carrier
   runThrow
@@ -21,6 +25,7 @@ import Control.Monad.Trans.Class
 runThrow :: ThrowC e m a -> m (Either e a)
 runThrow = runError . runThrowC
 
+-- | @since 1.0.0.0
 newtype ThrowC e m a = ThrowC { runThrowC :: ErrorC e m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

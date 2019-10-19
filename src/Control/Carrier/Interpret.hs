@@ -98,6 +98,7 @@ runInterpretState handler state m =
     (\e -> StateC (\s -> handler s e))
     m
 
+-- | @since 1.0.0.0
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a =
   InterpretC { runInterpretC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)

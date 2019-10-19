@@ -3,6 +3,8 @@
 {- | A carrier for 'Writer' effects. This carrier performs its append operations strictly and thus avoids the space leaks inherent in lazy writer monads.
 
 This implementation is based on a post Gabriel Gonzalez made to the Haskell mailing list: <https://mail.haskell.org/pipermail/libraries/2013-March/019528.html>
+
+@since 1.0.0.0
 -}
 
 module Control.Carrier.Writer.Strict
@@ -47,6 +49,8 @@ execWriter = fmap fst . runWriter
 
 
 -- | A space-efficient carrier for 'Writer' effects, implemented atop "Control.Carrier.State.Strict".
+--
+-- @since 1.0.0.0
 newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

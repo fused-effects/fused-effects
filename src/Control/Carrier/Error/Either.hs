@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for an 'Error' effect.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Error.Either
 ( -- * Error carrier
   runError
@@ -31,7 +33,7 @@ import Control.Monad.Trans.Except
 -- 'runError' ('throwError' e `catchError` 'pure') = 'pure' ('Right' e)
 -- @
 --
--- @since 0.1.0.0
+-- @since 1.0.0.0
 runError :: ErrorC exc m a -> m (Either exc a)
 runError = runExceptT . runErrorC
 
