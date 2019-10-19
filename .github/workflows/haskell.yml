@@ -28,18 +28,18 @@ jobs:
     - name: Install dependencies
       run: |
         export PATH="/opt/ghc/bin:$PATH"
-        cabal v2-update
-        cabal v2-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
-        cabal v2-build --only-dependencies
+        cabal v2-update --config-file=cabal.config
+        cabal v2-configure --config-file=cabal.config --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
+        cabal v2-build --config-file=cabal.config --only-dependencies
     - name: Build
       run: |
         export PATH="/opt/ghc/bin:$PATH"
-        cabal v2-build
-        cabal v2-haddock
-        cabal v2-sdist
-        cabal check
+        cabal v2-build --config-file=cabal.config
+        cabal v2-haddock --config-file=cabal.config
+        cabal v2-sdist --config-file=cabal.config
+        cabal check --config-file=cabal.config
     - name: Run tests
       run: |
         export PATH="/opt/ghc/bin:$PATH"
-        cabal v2-run test
-        cabal v2-run examples
+        cabal v2-run --config-file=cabal.config test
+        cabal v2-run --config-file=cabal.config examples
