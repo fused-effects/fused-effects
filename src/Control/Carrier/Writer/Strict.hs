@@ -53,18 +53,18 @@ newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
-  eff (L (Tell w     k)) = WriterC (modify (`mappend` w)) >> k
-  eff (L (Listen   m k)) = WriterC $ do
+  eff (L (Tell w               k)) = WriterC (modify (`mappend` w)) >> k
+  eff (L (Listen   (WriterC m) k)) = WriterC $ do
     w <- get
     put (mempty :: w)
-    a <- runWriterC m
+    a <- m
     w' <- get
     modify (mappend (w :: w))
     runWriterC (k w' a)
-  eff (L (Censor f m k)) = WriterC $ do
+  eff (L (Censor f (WriterC m) k)) = WriterC $ do
     w <- get
     put (mempty :: w)
-    a <- runWriterC m
+    a <- m
     modify (mappend w . f)
     runWriterC (k a)
   eff (R other)          = WriterC (eff (R (handleCoercible other)))
