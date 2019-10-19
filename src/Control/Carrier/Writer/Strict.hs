@@ -25,7 +25,6 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Bifunctor (first)
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --
@@ -60,8 +59,10 @@ instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (Wr
     let w'' = mappend w w'
     w'' `seq` pure (w'', (w', a))))
     >>= uncurry k
-  eff (L (Censor f (WriterC m) k)) = WriterC (StateC (\ w ->
-    first (mappend w . f $!) <$> runState mempty m))
+  eff (L (Censor f (WriterC m) k)) = WriterC (StateC (\ w -> do
+    (w', a) <- runState mempty m
+    let w'' = mappend w (f w')
+    w'' `seq` pure (w'', a)))
     >>= k
   eff (R other)                    = WriterC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
