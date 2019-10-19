@@ -14,7 +14,7 @@ module Control.Carrier.Resumable.Either
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
-import Control.Carrier.Error.Either
+import Control.Carrier.Throw.Either
 import Control.DeepSeq
 import Control.Effect.Resumable
 import Control.Effect.Resumable as X (Resumable)
@@ -37,10 +37,10 @@ import Data.Functor.Classes
 --
 -- @since 1.0.0.0
 runResumable :: ResumableC err m a -> m (Either (SomeError err) a)
-runResumable (ResumableC m) = runError m
+runResumable (ResumableC m) = runThrow m
 
 -- | @since 1.0.0.0
-newtype ResumableC err m a = ResumableC (ErrorC (SomeError err) m a)
+newtype ResumableC err m a = ResumableC (ThrowC (SomeError err) m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Carrier sig m, Effect sig) => Carrier (Resumable err :+: sig) (ResumableC err m) where
