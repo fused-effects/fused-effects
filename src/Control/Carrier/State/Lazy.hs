@@ -12,12 +12,14 @@ module Control.Carrier.State.Lazy
 , execState
 , StateC(..)
   -- * State effect
-, module Control.Effect.State
+, module X
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Effect.State
+import Control.Effect.State as X (State)
+import Control.Effect.State as X hiding (State)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
