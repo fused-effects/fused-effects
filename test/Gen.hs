@@ -77,13 +77,13 @@ m
   .  Monad m
   => (GenM m -> GenM m) -- ^ A higher-order computation generator using any effects in @m@.
   -> GenM m             -- ^ A computation generator.
-m with = go where
-  go :: GenM m
-  go a = Gen $ recursive Hedgehog.Gen.choice
+m with = m where
+  m :: GenM m
+  m a = Gen $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
     [ runGen (Gen.label "pure" pure <*> a) ]
     [ frequency
-      [ (3, runGen (with go a))
-      , (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> go a <*> go a)))
+      [ (3, runGen (with m a))
+      , (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> m a <*> m a)))
       ]
     ]
 
