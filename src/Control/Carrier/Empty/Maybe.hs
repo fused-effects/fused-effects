@@ -3,6 +3,8 @@
 {- | A carrier for an 'Empty' effect, indicating failure with a 'Nothing' value. Users that need access to an error message should use the 'Control.Effect.Fail.Fail' effect.
 
 Note that 'Empty' effects can, when they are the last effect in a stack, be interpreted directly to a 'Maybe' without a call to 'runEmpty'.
+
+@since 1.0.0.0
 -}
 
 module Control.Carrier.Empty.Maybe

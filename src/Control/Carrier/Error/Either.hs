@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for an 'Error' effect.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Error.Either
 ( -- * Error carrier
   runError
@@ -35,6 +37,7 @@ import Control.Monad.Trans.Except
 runError :: ErrorC exc m a -> m (Either exc a)
 runError (ErrorC m) = runExceptT m
 
+-- | @since 0.1.0.0
 newtype ErrorC e m a = ErrorC (ExceptT e m a)
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadTrans)
 

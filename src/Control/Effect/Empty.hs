@@ -8,6 +8,8 @@ Predefined carriers:
 
 * "Control.Carrier.Empty.Maybe".
 * If 'Empty' is the last effect in a stack, it can be interpreted directly to a 'Maybe'.
+
+@since 1.0.0.0
 -}
 
 module Control.Effect.Empty

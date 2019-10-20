@@ -3,6 +3,8 @@
 {- | Provides 'NonDetC', a carrier for 'NonDet' effects providing choice and failure.
 
 Under the hood, it uses a Church-encoded structure and a binary tree to prevent the problems associated with a naïve list-based implementation.
+
+@since 1.0.0.0
 -}
 
 module Control.Carrier.NonDet.Church

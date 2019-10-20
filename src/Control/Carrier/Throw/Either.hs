@@ -25,6 +25,7 @@ import Control.Monad.Trans.Class
 runThrow :: ThrowC e m a -> m (Either e a)
 runThrow (ThrowC m) = runError m
 
+-- | @since 1.0.0.0
 newtype ThrowC e m a = ThrowC (ErrorC e m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

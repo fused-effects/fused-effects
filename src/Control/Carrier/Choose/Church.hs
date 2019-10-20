@@ -3,6 +3,8 @@
 {- | A carrier for 'Choose' effects (nondeterminism without failure).
 
 Under the hood, it uses a Church-encoded binary tree to avoid the problems associated with a naïve list-based implementation (see ["ListT done right"](http://wiki.haskell.org/ListT_done_right)).
+
+@since 1.0.0.0
 -}
 
 module Control.Carrier.Choose.Church

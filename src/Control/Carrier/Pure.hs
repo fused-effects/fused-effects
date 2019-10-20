@@ -1,6 +1,8 @@
 {-# LANGUAGE EmptyCase, MultiParamTypeClasses #-}
 
 -- | A carrier for pure effects, used to kick off a stack of effects with 'run'.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Pure
 ( -- * Pure carrier
   run
