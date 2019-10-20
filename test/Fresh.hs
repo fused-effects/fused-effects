@@ -22,9 +22,9 @@ tests = testGroup "Fresh"
     , testFresh
     ] >>= ($ RunS FreshC.runFresh)
   ] where
-  testMonad    run = Monad.test    (m gen) a b c ((,) <$> n <*> pure ()) run
-  testMonadFix run = MonadFix.test (m gen) a b   ((,) <$> n <*> pure ()) run
-  testFresh    run = Fresh.test n  (m gen) a                             run
+  testMonad    run = Monad.test    (m gen) a b c (atom "(,)" (,) <*> n <*> unit) run
+  testMonadFix run = MonadFix.test (m gen) a b   (atom "(,)" (,) <*> n <*> unit) run
+  testFresh    run = Fresh.test n  (m gen) a                                     run
   n = Gen.integral (R.linear 0 100)
 
 
