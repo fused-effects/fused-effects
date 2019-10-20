@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module Cull
 ( tests
 , gen
@@ -18,12 +18,15 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Cull"
-  [ test "CullC" CullC.runCullA
+  [ testGroup "CullC" $
+    [ testMonad
+    , testCull
+    ] >>= ($ Run CullC.runCullA)
   ] where
-  test :: (Has Cull sig m, Has NonDet sig m) => String -> (forall a . m a -> PureC [a]) -> TestTree
-  test name run = testGroup name
-    $  Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Cull.test  (m gen) a b                        run
+  testMonad (Run run) = Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
+  testCull  (Run run) = Cull.test  (m gen) a b                         run
+
+newtype Run m = Run (forall a . m a -> PureC [a])
 
 
 gen
