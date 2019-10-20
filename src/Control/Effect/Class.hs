@@ -1,6 +1,8 @@
 {-# LANGUAGE DefaultSignatures, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators #-}
 
 -- | Provides the 'HFunctor' and 'Effect' classes that effect types implement.
+--
+-- @since 1.0.0.0
 module Control.Effect.Class
 ( HFunctor(..)
 , handleCoercible

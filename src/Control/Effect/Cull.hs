@@ -6,6 +6,8 @@ Computations run inside a call to 'cull' will return at most one result.
 Predefined carriers:
 
 * "Control.Carrier.Cull.Church"
+
+@since 0.1.2.0
 -}
 module Control.Effect.Cull
 ( -- * Cull effect

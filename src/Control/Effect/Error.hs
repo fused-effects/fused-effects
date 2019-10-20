@@ -9,6 +9,8 @@ Predefined carriers:
 * "Control.Carrier.Error.Either".
 * "Control.Monad.Trans.Except".
 * If 'Error' @e@ is the last effect in a stack, it can be interpreted directly to an 'Either' @e@.
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.Error

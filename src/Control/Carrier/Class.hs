@@ -1,4 +1,7 @@
 {-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
+-- | An instance of the 'Carrier' class defines an interpretation of an effect signature atop a given monad.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Class
 ( Carrier(..)
 , Has
@@ -39,6 +42,8 @@ import qualified Data.Semigroup as S
 import Data.Tuple (swap)
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
+--
+-- @since 1.0.0.0
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   eff :: sig m a -> m a

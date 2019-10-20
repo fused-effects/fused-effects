@@ -12,6 +12,8 @@ Predefined carriers:
 * "Control.Monad.Trans.RWS.Strict"
 * "Control.Monad.Trans.State.Lazy"
 * "Control.Monad.Trans.State.Strict"
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.State
