@@ -10,25 +10,23 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 gen
-  :: forall e m a sig
+  :: forall e m sig
   .  (Has (Catch e) sig m, Arg e, Show e, Vary e)
   => Gen e
-  -> (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  -> GenM m
+  -> GenM m
 gen _ m a = label "catchError" catchError <*> m a <*> fn @e (m a)
 
 
 test
-  :: forall e m a b sig
-  .  (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e)
+  :: (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e)
   => Gen e
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC (Either e a))
+  -> RunL (Either e) m
   -> [TestTree]
-test e m a _ runCatch =
+test e m a _ (RunL runCatch) =
   [ testProperty "catchError intercepts throwError" . forall (e :. fn (m a) :. Nil) $
     \ e h -> runCatch (throwError e `catchError` h) === runCatch (h e)
   ]

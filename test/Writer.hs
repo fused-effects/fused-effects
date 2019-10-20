@@ -6,43 +6,46 @@ module Writer
 ) where
 
 import Control.Arrow ((&&&))
-import qualified Control.Carrier.Writer.Strict as StrictWriterC
+import qualified Control.Carrier.Writer.Strict as WriterC
 import Control.Effect.Writer
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Bifunctor (first)
-import Data.Functor.Identity (Identity(..))
 import Data.Tuple (swap)
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ test "WriterC (Strict)" StrictWriterC.runWriter
-  , test "WriterT (Lazy)"   (fmap swap . LazyWriterT.runWriterT)
-  , test "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT)
-  , test "RWST (Lazy)"      (runRWST LazyRWST.runRWST)
-  , test "RWST (Strict)"    (runRWST StrictRWST.runRWST)
+  [ testGroup "WriterC" $
+    [ testMonad
+    , testMonadFix
+    , testWriter
+    ] >>= ($ RunL WriterC.runWriter)
+  , testGroup "(,)"              $ testWriter (RunL pure)
+  , testGroup "WriterT (Lazy)"   $ testWriter (RunL (fmap swap . LazyWriterT.runWriterT))
+  , testGroup "WriterT (Strict)" $ testWriter (RunL (fmap swap . StrictWriterT.runWriterT))
+  , testGroup "RWST (Lazy)"      $ testWriter (RunL (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"    $ testWriter (RunL (runRWST StrictRWST.runRWST))
   ] where
-  test :: Has (Writer W) sig m => String -> (forall a . m a -> PureC (W, a)) -> TestTree
-  test s run = testGroup s
-    $  Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Writer.test w (m (gen w b)) a                          run
+  testMonad    run = Monad.test    (m (gen w b)) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (gen w b)) a b   (identity <*> unit) run
+  testWriter   run = Writer.test w (m (gen w b)) a                         run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
 gen
-  :: forall w b m a sig
+  :: forall w b m sig
   .  (Has (Writer w) sig m, Arg b, Arg w, Show b, Show w, Vary b, Vary w)
   => Gen w
   -> Gen b
-  -> (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  -> GenM m
+  -> GenM m
 gen w b m a = choice
   [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w)
   , atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
@@ -53,11 +56,11 @@ gen w b m a = choice
 test
   :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w)
   => Gen w
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
-  -> (forall a . m a -> PureC (w, a))
+  -> RunL ((,) w) m
   -> [TestTree]
-test w m a runWriter =
+test w m a (RunL runWriter) =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
     \ w m -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
   , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $

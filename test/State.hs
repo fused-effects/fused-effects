@@ -15,32 +15,39 @@ import qualified Control.Monad.Trans.State.Strict as StrictStateT
 import Data.Tuple (swap)
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "State"
-  [ test "StateC (Lazy)"   LazyStateC.runState
-  , test "StateC (Strict)" StrictStateC.runState
-  , test "StateT (Lazy)"   (fmap (fmap swap) . flip LazyStateT.runStateT)
-  , test "StateT (Strict)" (fmap (fmap swap) . flip StrictStateT.runStateT)
-  , test "RWST (Lazy)"     (runRWST LazyRWST.runRWST)
-  , test "RWST (Strict)"   (runRWST StrictRWST.runRWST)
+  [ testGroup "StateC (Lazy)"   $
+    [ testMonad
+    , testMonadFix
+    , testState
+    ] >>= ($ RunC LazyStateC.runState)
+  , testGroup "StateC (Strict)" $
+    [ testMonad
+    , testMonadFix
+    , testState
+    ] >>= ($ RunC StrictStateC.runState)
+  , testGroup "StateT (Lazy)"   $ testState (RunC (fmap (fmap swap) . flip LazyStateT.runStateT))
+  , testGroup "StateT (Strict)" $ testState (RunC (fmap (fmap swap) . flip StrictStateT.runStateT))
+  , testGroup "RWST (Lazy)"     $ testState (RunC (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"   $ testState (RunC (runRWST StrictRWST.runRWST))
   ] where
-  test :: Has (State S) sig m => String -> (forall a . S -> m a -> PureC (S, a)) -> TestTree
-  test name run = testGroup name
-    $  Monad.test   (m (gen s)) a b c ((,) <$> s <*> pure ()) (uncurry run)
-    ++ State.test s (m (gen s)) a                             run
+  testMonad    run = Monad.test    (m (gen s)) a b c (atom "(,)" (,) <*> s <*> unit) run
+  testMonadFix run = MonadFix.test (m (gen s)) a b   (atom "(,)" (,) <*> s <*> unit) run
+  testState    run = State.test s  (m (gen s)) a                                     run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
 gen
-  :: forall s m a sig
+  :: forall s m sig
   .  (Has (State s) sig m, Arg s, Show s, Vary s)
   => Gen s
-  -> (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  -> GenM m
+  -> GenM m
 gen s _ a = choice
   [ label "gets" (gets @s) <*> fn a
   , infixL 4 "<$" (<$) <*> a <*> (label "put" put <*> s)
@@ -50,11 +57,11 @@ gen s _ a = choice
 test
   :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s)
   => Gen s
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
-  -> (forall a . s -> m a -> PureC (s, a))
+  -> RunC s ((,) s) m
   -> [TestTree]
-test s m a runState =
+test s m a (RunC runState) =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
     \ s k -> runState s (get >>= k) === runState s (k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $

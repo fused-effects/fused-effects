@@ -9,15 +9,15 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 test
-  :: (Monad m, Arg a, Arg b, Eq (f a), Eq (f b), Eq (f c), Show a, Show b, Show c, Show (f a), Show (f b), Show (f c), Vary a, Vary b, Functor s)
-  => (forall a . Show a => Gen a -> Gen (m a))
+  :: (Monad m, Arg a, Arg b, Eq (g a), Eq (g b), Eq (g c), Show a, Show b, Show (g a), Show (g b), Show (g c), Vary a, Vary b, Functor f)
+  => GenM m
   -> Gen a
   -> Gen b
   -> Gen c
-  -> Gen (s ())
-  -> (forall a . s (m a) -> PureC (f a))
+  -> Gen (f ())
+  -> Run f g m
   -> [TestTree]
-test m a b c s run =
+test m a b c s (Run run) =
   [ testProperty "return is the left-identity of >>=" . forall (s :. a :. fn (m b) :. Nil) $
     \ s a k -> run ((return a >>= k) <$ s) === run ((k a) <$ s)
   , testProperty "return is the right-identity of >>=" . forall (s :. m a :. Nil) $
@@ -25,7 +25,7 @@ test m a b c s run =
   , testProperty ">>= is associative" . forall (s :. m a :. fn (m b) :. fn (m c) :. Nil) $
     \ s m k h -> run ((m >>= (k >=> h)) <$ s) === run (((m >>= k) >>= h) <$ s)
   , testProperty "return = pure" . forall (s :. a :. Nil) $
-    \ s a -> run ((return a) <$ s) === run ((pure a) <$ s)
+    \ s a -> run (return a <$ s) === run (pure a <$ s)
   , testProperty "ap = (<*>)" . forall (s :. fn b :. m a :. Nil) $
     \ s f m -> run ((pure f `ap` m) <$ s) === run ((pure f <*> m) <$ s)
   ]

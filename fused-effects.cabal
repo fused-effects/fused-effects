@@ -121,10 +121,12 @@ test-suite test
     Cut
     Empty
     Error
+    Fail
     Fresh
     Fusion
     Gen
     Monad
+    MonadFix
     NonDet
     NonDet.Church
     Reader
