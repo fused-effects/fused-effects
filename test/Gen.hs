@@ -4,6 +4,7 @@ module Gen
 ( module Control.Carrier.Pure
   -- * Polymorphic generation & instantiation
 , m
+, GenM
 , genT
 , T(..)
 , a
@@ -71,13 +72,12 @@ import Hedgehog.Range
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
 m
-  :: forall m a
+  :: forall m
   .  Monad m
-  => (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)) -- ^ A higher-order generator producing operations using any effects in @m@.
-  -> Gen a                                                              -- ^ A generator for results.
-  -> Gen (m a)                                                          -- ^ A generator producing computations.
+  => (GenM m -> GenM m) -- ^ A higher-order computation generator using any effects in @m@.
+  -> GenM m             -- ^ A computation generator.
 m with = go where
-  go :: forall a . Gen a -> Gen (m a)
+  go :: GenM m
   go a = Gen $ recursive Hedgehog.Gen.choice
     [ runGen (Gen.label "pure" pure <*> a) ]
     [ frequency
@@ -85,6 +85,9 @@ m with = go where
       , (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> go a <*> go a)))
       ]
     ]
+
+-- | Computation generators are higher-order generators of computations in some monad @m@.
+type GenM m = (forall a . Gen a -> Gen (m a))
 
 
 genT :: KnownSymbol s => Gen (T s)
