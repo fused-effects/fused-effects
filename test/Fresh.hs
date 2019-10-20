@@ -20,8 +20,8 @@ tests = testGroup "Fresh"
     , testFresh
     ] >>= ($ RunS FreshC.runFresh)
   ] where
-  testMonad (RunS run) = Monad.test (m gen) a b c ((,) <$> n <*> pure ()) (uncurry run)
-  testFresh run        = Fresh.test (m gen) a                                      run
+  testMonad (RunS run) = Monad.test (m gen) a b c ((,) <$> n <*> pure ()) (Run (uncurry run))
+  testFresh run        = Fresh.test (m gen) a                                           run
   n = Gen.integral (R.linear 0 100)
 
 

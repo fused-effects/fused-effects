@@ -32,8 +32,8 @@ tests = testGroup "Writer"
   , testGroup "RWST (Lazy)"      $ testWriter (RunW (runRWST LazyRWST.runRWST))
   , testGroup "RWST (Strict)"    $ testWriter (RunW (runRWST StrictRWST.runRWST))
   ] where
-  testMonad  (RunW run) = Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
-  testWriter run        = Writer.test w (m (gen w b)) a                           run
+  testMonad  (RunW run) = Monad.test    (m (gen w b)) a b c (pure (Identity ())) (liftRunL run)
+  testWriter run        = Writer.test w (m (gen w b)) a                                    run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 newtype RunW w m = RunW (forall a . m a -> PureC (w, a))

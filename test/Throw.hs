@@ -20,8 +20,8 @@ tests = testGroup "Throw" $
     , testThrow
     ] >>= ($ RunE ThrowC.runThrow)
   ] where
-  testMonad (RunE run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
-  testThrow run        = Throw.test e (m (gen e)) a b                         run
+  testMonad (RunE run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (liftRunL run)
+  testThrow run        = Throw.test e (m (gen e)) a b                                  run
 
 
 gen
