@@ -38,19 +38,19 @@ gen m a = choice
 
 
 test
-  :: forall a b m sig
-  .  (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
+  :: forall a b m f sig
+  .  (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
   -> Gen a
   -> Gen b
-  -> Gen (Identity ())
-  -> Run Identity [] m
+  -> Gen (f ())
+  -> Run f [] m
   -> [TestTree]
-test m a b i (RunL runCut)
-  = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
-    (\ k -> runCut (cutfail >>= k) === runCut cutfail))
-  : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
-    (\ m -> runCut (cutfail <|> m) === runCut cutfail))
-  : testProperty "call delimits cutfail" (forall (m a :. Nil)
-    (\ m -> runCut (call cutfail <|> m) === runCut m))
-  : NonDet.test m a b i (RunL runCut)
+test m a b i (Run runCut)
+  = testProperty "cutfail annihilates >>=" (forall (i :. fn @a (m a) :. Nil)
+    (\ i k -> runCut ((cutfail >>= k) <$ i) === runCut (cutfail <$ i)))
+  : testProperty "cutfail annihilates <|>" (forall (i :. m a :. Nil)
+    (\ i m -> runCut ((cutfail <|> m) <$ i) === runCut (cutfail <$ i)))
+  : testProperty "call delimits cutfail" (forall (i :. m a :. Nil)
+    (\ i m -> runCut ((call cutfail <|> m) <$ i) === runCut (m <$ i)))
+  : NonDet.test m a b i (Run runCut)
