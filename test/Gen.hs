@@ -12,6 +12,7 @@ module Gen
 , r
 , s
 , w
+, unit
 , T(..)
 , A
 , B
@@ -138,6 +139,9 @@ w :: Gen W
 w = genT
 
 type W = T "W"
+
+unit :: Gen ()
+unit = atom "()" ()
 
 fn :: (Fn.Arg a, Fn.Vary a, Show a) => Gen b -> Gen (a -> b)
 fn b = Gen (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT (runGen b))))
