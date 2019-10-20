@@ -7,17 +7,15 @@ module Control.Carrier.Cut.Church
 , runCutA
 , runCutM
 , CutC(..)
-  -- * Cut effects
-, module X
+  -- * Cut effect
+, module Control.Effect.Cut
+  -- * NonDet effects
+, module Control.Effect.NonDet
 ) where
 
 import Control.Carrier
 import Control.Effect.Cut
-import Control.Effect.Cut as X (Cut)
-import Control.Effect.Cut as X hiding (Cut)
 import Control.Effect.NonDet
-import Control.Effect.NonDet as X (Choose, Empty)
-import Control.Effect.NonDet as X hiding (Choose, Empty)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
