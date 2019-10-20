@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-identities #-}
 module Gen
 ( module Control.Carrier.Pure
+, Identity(..)
   -- * Polymorphic generation & instantiation
 , m
 , GenM

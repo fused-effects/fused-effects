@@ -11,7 +11,6 @@ import qualified Control.Monad.Trans.Reader as ReaderT
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
-import Data.Functor.Identity (Identity)
 import Gen
 import qualified Monad
 import qualified MonadFix
