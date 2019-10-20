@@ -25,9 +25,9 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ RunL CutC.runCutA)
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (pure (Identity ())) run
-  testMonadFix run = MonadFix.test (m gen) a b   (pure (Identity ())) run
-  testCut      run = Cut.test      (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen) a b c (atom "pure" pure <*> unit) run
+  testMonadFix run = MonadFix.test (m gen) a b   (atom "pure" pure <*> unit) run
+  testCut      run = Cut.test      (m gen) a b                               run
 
 
 gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
