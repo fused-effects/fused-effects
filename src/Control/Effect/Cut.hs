@@ -52,7 +52,6 @@ instance Effect Cut where
 -- @
 -- 'cutfail' '>>=' k = 'cutfail'
 -- @
---
 -- @
 -- 'cutfail' '<|>' m = 'cutfail'
 -- @
