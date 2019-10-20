@@ -20,7 +20,7 @@ tests = testGroup "Fresh"
     [ testMonad
     , testMonadFix
     , testFresh
-    ] >>= ($ RunC FreshC.runFresh)
+    ] >>= ($ runC FreshC.runFresh)
   ] where
   testMonad    run = Monad.test    (m gen) a b c (atom "(,)" (,) <*> n <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (atom "(,)" (,) <*> n <*> unit) run

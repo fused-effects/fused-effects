@@ -25,16 +25,16 @@ tests = testGroup "State"
     [ testMonad
     , testMonadFix
     , testState
-    ] >>= ($ RunC LazyStateC.runState)
+    ] >>= ($ runC LazyStateC.runState)
   , testGroup "StateC (Strict)" $
     [ testMonad
     , testMonadFix
     , testState
-    ] >>= ($ RunC StrictStateC.runState)
-  , testGroup "StateT (Lazy)"   $ testState (RunC (fmap (fmap swap) . flip LazyStateT.runStateT))
-  , testGroup "StateT (Strict)" $ testState (RunC (fmap (fmap swap) . flip StrictStateT.runStateT))
-  , testGroup "RWST (Lazy)"     $ testState (RunC (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)"   $ testState (RunC (runRWST StrictRWST.runRWST))
+    ] >>= ($ runC StrictStateC.runState)
+  , testGroup "StateT (Lazy)"   $ testState (runC (fmap (fmap swap) . flip LazyStateT.runStateT))
+  , testGroup "StateT (Strict)" $ testState (runC (fmap (fmap swap) . flip StrictStateT.runStateT))
+  , testGroup "RWST (Lazy)"     $ testState (runC (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"   $ testState (runC (runRWST StrictRWST.runRWST))
   ] where
   testMonad    run = Monad.test    (m (gen s)) a b c (atom "(,)" (,) <*> s <*> unit) run
   testMonadFix run = MonadFix.test (m (gen s)) a b   (atom "(,)" (,) <*> s <*> unit) run

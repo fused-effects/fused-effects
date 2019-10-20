@@ -28,7 +28,7 @@ module Gen
 , Run(..)
 , runL
 , runR
-, pattern RunC
+, runC
   -- * Generation
 , Rec(..)
 , forall
@@ -184,17 +184,8 @@ runR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
 runR run = Run (fmap Identity . run)
 
 -- | Handlers with curried input state (e.g. 'Control.Carrier.Reader.ReaderC', 'Control.Carrier.State.Strict.StateC').
-pattern RunC :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m
-pattern RunC run <- Run (curry' -> run) where
-  RunC run = Run (uncurry run)
-
-{-# COMPLETE RunC #-}
-
-
--- Regrettable necessities for composing rank-n functions.
-
-curry' :: (forall a . (s, m a) -> PureC (g a)) -> (forall a . s -> m a -> PureC (g a))
-curry' f = \ s m -> f (s, m)
+runC :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m
+runC run = Run (uncurry run)
 
 
 infixr 5 :.
