@@ -177,8 +177,10 @@ string range cs = Gen (showing <$> Hedgehog.Gen.string range (runTerm <$> runGen
 -- | This captures the shape of the handler function passed to the "Monad" & "MonadFix" tests.
 newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
 
+-- | The type of handlers with output state, but no input state (e.g. 'Control.Carrier.Error.Either.ErrorC').
 type RunL g m = Run Identity g m
 
+-- | Handlers with output state, but no input state (e.g. 'Control.Carrier.Error.Either.ErrorC').
 pattern RunL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
 pattern RunL run <- Run ((.# Identity) -> run) where
   RunL run = Run (run . runIdentity)
