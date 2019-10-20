@@ -24,7 +24,7 @@ tests = testGroup "Fail" $
   ] where
   testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run
-  testFail     run = Fail.test e   (m (gen e)) a b                       run
+  testFail     run = Fail.test e   (m (gen e)) a b   (identity <*> unit) run
   e = string (Range.linear 0 50) unicode
 
 
@@ -39,9 +39,10 @@ test
   -> GenM m
   -> Gen a
   -> Gen b
-  -> RunL (Either String) m
+  -> Gen (Identity ())
+  -> Run Identity (Either String) m
   -> [TestTree]
-test msg m _ b (RunL runThrow) =
+test msg m _ b _ (RunL runThrow) =
   [ testProperty "fail annihilates >>=" . forall (msg :. fn @a (m b) :. Nil) $
     \ s k -> runThrow (Fail.fail s >>= k) === runThrow (Fail.fail s)
   ]
