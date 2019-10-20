@@ -11,6 +11,7 @@ import Data.Functor.Identity (Identity(..))
 import Data.Maybe (maybeToList)
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -18,12 +19,14 @@ tests :: TestTree
 tests = testGroup "Empty"
   [ testGroup "EmptyC" $
     [ testMonad
+    , testMonadFix
     , testEmpty
     ] >>= ($ RunL (fmap maybeToList . EmptyC.runEmpty))
   , testGroup "Maybe"  $ testEmpty (RunL (pure . maybeToList))
   ] where
-  testMonad run = Monad.test (m gen) a b c (pure (Identity ())) run
-  testEmpty run = Empty.test (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen) a b c (pure (Identity ())) run
+  testMonadFix run = MonadFix.test (m gen) a b   (pure (Identity ())) run
+  testEmpty    run = Empty.test    (m gen) a b                        run
 
 
 gen :: Has Empty sig m => GenM m -> GenM m
