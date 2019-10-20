@@ -25,16 +25,16 @@ tests = testGroup "State"
     [ testMonad
     , testMonadFix
     , testState
-    ] >>= ($ RunS LazyStateC.runState)
+    ] >>= ($ RunC LazyStateC.runState)
   , testGroup "StateC (Strict)" $
     [ testMonad
     , testMonadFix
     , testState
-    ] >>= ($ RunS StrictStateC.runState)
-  , testGroup "StateT (Lazy)"   $ testState (RunS (fmap (fmap swap) . flip LazyStateT.runStateT))
-  , testGroup "StateT (Strict)" $ testState (RunS (fmap (fmap swap) . flip StrictStateT.runStateT))
-  , testGroup "RWST (Lazy)"     $ testState (RunS (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)"   $ testState (RunS (runRWST StrictRWST.runRWST))
+    ] >>= ($ RunC StrictStateC.runState)
+  , testGroup "StateT (Lazy)"   $ testState (RunC (fmap (fmap swap) . flip LazyStateT.runStateT))
+  , testGroup "StateT (Strict)" $ testState (RunC (fmap (fmap swap) . flip StrictStateT.runStateT))
+  , testGroup "RWST (Lazy)"     $ testState (RunC (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"   $ testState (RunC (runRWST StrictRWST.runRWST))
   ] where
   testMonad    run = Monad.test    (m (gen s)) a b c (atom "(,)" (,) <*> s <*> unit) run
   testMonadFix run = MonadFix.test (m (gen s)) a b   (atom "(,)" (,) <*> s <*> unit) run
@@ -59,9 +59,9 @@ test
   => Gen s
   -> GenM m
   -> Gen a
-  -> RunS s ((,) s) m
+  -> RunC s ((,) s) m
   -> [TestTree]
-test s m a (RunS runState) =
+test s m a (RunC runState) =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
     \ s k -> runState s (get >>= k) === runState s (k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $

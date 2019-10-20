@@ -20,7 +20,7 @@ tests = testGroup "Fresh"
     [ testMonad
     , testMonadFix
     , testFresh
-    ] >>= ($ RunS FreshC.runFresh)
+    ] >>= ($ RunC FreshC.runFresh)
   ] where
   testMonad    run = Monad.test    (m gen) a b c (atom "(,)" (,) <*> n <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (atom "(,)" (,) <*> n <*> unit) run
@@ -37,9 +37,9 @@ test
   => Gen Int
   -> GenM m
   -> Gen a
-  -> RunS Int ((,) Int) m
+  -> RunC Int ((,) Int) m
   -> [TestTree]
-test n m a (RunS runFresh) =
+test n m a (RunC runFresh) =
   [ testProperty "fresh yields unique values" . forall (n :. m a :. Nil) $
     \ n m -> runFresh n (m >> fresh) /== runFresh n (m >> fresh >> fresh)
   ]

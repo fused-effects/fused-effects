@@ -29,8 +29,8 @@ module Gen
 , pattern RunL
 , type RunR
 , pattern RunR
-, type RunS
-, pattern RunS
+, type RunC
+, pattern RunC
   -- * Generation
 , Rec(..)
 , forall
@@ -197,13 +197,13 @@ pattern RunR run <- Run ((fmap runIdentity #.) -> run) where
 
 {-# COMPLETE RunR #-}
 
-type RunS s f m = Run ((,) s) f m
+type RunC s f m = Run ((,) s) f m
 
-pattern RunS :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m
-pattern RunS run <- Run (curry' -> run) where
-  RunS run = Run (uncurry run)
+pattern RunC :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m
+pattern RunC run <- Run (curry' -> run) where
+  RunC run = Run (uncurry run)
 
-{-# COMPLETE RunS #-}
+{-# COMPLETE RunC #-}
 
 (.#) :: (forall a . f (m a) -> PureC (g a)) -> (forall a . m a -> f (m a)) -> (forall a . m a -> PureC (g a))
 (f .# g) m = f (g m)
