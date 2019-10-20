@@ -12,7 +12,6 @@ import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet (NonDet)
 import Data.Functor.Identity (Identity(..))
-import Data.Maybe (listToMaybe)
 import qualified Empty
 import Gen
 import qualified Monad
@@ -51,5 +50,5 @@ test m a b runNonDet
     (\ m -> runNonDet (empty <|> m) === runNonDet m))
   :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
     (\ m -> runNonDet (m <|> empty) === runNonDet m))
-  :  Empty.test  m a b (fmap listToMaybe . runNonDet)
+  :  Empty.test  m a b runNonDet
   ++ Choose.test m a b runNonDet

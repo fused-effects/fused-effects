@@ -8,6 +8,7 @@ module Empty
 import qualified Control.Carrier.Empty.Maybe as EmptyC
 import Control.Effect.Empty
 import Data.Functor.Identity (Identity(..))
+import Data.Maybe (maybeToList)
 import Gen
 import qualified Monad
 import Test.Tasty
@@ -18,13 +19,11 @@ tests = testGroup "Empty"
   [ testGroup "EmptyC" $
     [ testMonad
     , testEmpty
-    ] >>= ($ Run EmptyC.runEmpty)
-  , testGroup "Maybe"  $ testEmpty (Run pure)
+    ] >>= ($ RunND (fmap maybeToList . EmptyC.runEmpty))
+  , testGroup "Maybe"  $ testEmpty (RunND (pure . maybeToList))
   ] where
-  testMonad (Run run) = Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
-  testEmpty (Run run) = Empty.test (m gen) a b                         run
-
-newtype Run m = Run (forall a . m a -> PureC (Maybe a))
+  testMonad (RunND run) = Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
+  testEmpty (RunND run) = Empty.test (m gen) a b                         run
 
 
 gen
@@ -41,7 +40,7 @@ test
   => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC (Maybe a))
+  -> (forall a . m a -> PureC [a])
   -> [TestTree]
 test m _ b runEmpty =
   [ testProperty "empty annihilates >>=" . forall (fn @a (m b) :. Nil) $
