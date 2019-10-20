@@ -23,8 +23,8 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ RunL CutC.runCutA)
   ] where
-  testMonad (RunL run) = Monad.test (m gen) a b c (pure (Identity ())) (runL run)
-  testCut   run        = Cut.test   (m gen) a b                              run
+  testMonad run = Monad.test (m gen) a b c (pure (Identity ())) run
+  testCut   run = Cut.test   (m gen) a b                        run
 
 
 gen

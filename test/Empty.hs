@@ -22,8 +22,8 @@ tests = testGroup "Empty"
     ] >>= ($ RunL (fmap maybeToList . EmptyC.runEmpty))
   , testGroup "Maybe"  $ testEmpty (RunL (pure . maybeToList))
   ] where
-  testMonad (RunL run) = Monad.test (m gen) a b c (pure (Identity ())) (runL run)
-  testEmpty run        = Empty.test (m gen) a b                              run
+  testMonad run = Monad.test (m gen) a b c (pure (Identity ())) run
+  testEmpty run = Empty.test (m gen) a b                        run
 
 
 gen
