@@ -15,6 +15,7 @@ import Data.Functor.Identity (Identity(..))
 import qualified Empty
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -22,12 +23,14 @@ tests :: TestTree
 tests = testGroup "NonDet"
   [ testGroup "NonDetC (Church)" $
     [ testMonad
+    , testMonadFix
     , testNonDet
     ] >>= ($ RunL Church.NonDetC.runNonDetA)
   , testGroup "[]" $ testNonDet (RunL pure)
   ] where
-  testMonad  run = Monad.test  (m gen) a b c (pure (Identity ())) run
-  testNonDet run = NonDet.test (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen) a b c (pure (Identity ())) run
+  testMonadFix run = MonadFix.test (m gen) a b   (pure (Identity ())) run
+  testNonDet   run = NonDet.test   (m gen) a b                        run
 
 
 gen :: Has NonDet sig m => GenM m -> GenM m
