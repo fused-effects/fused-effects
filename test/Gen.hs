@@ -25,7 +25,6 @@ module Gen
 , RunL(..)
 , RunR(..)
 , RunE(..)
-, RunS(..)
 , liftRunL
 , liftRunR
   -- * Generation
@@ -153,7 +152,6 @@ newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
 newtype RunL g m = RunL (forall a . m a -> PureC (g a))
 newtype RunR f m = RunR (forall a . f (m a) -> PureC a)
 newtype RunE e m = RunE (forall a . m a -> PureC (Either e a))
-newtype RunS s m = RunS (forall a . s -> m a -> PureC (s, a))
 
 liftRunL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
 liftRunL run = Run (run . runIdentity)
