@@ -22,6 +22,8 @@ module Gen
 , W
   -- * Handlers
 , Run(..)
+, RunL(..)
+, RunR(..)
 , RunE(..)
 , RunS(..)
 , RunND(..)
@@ -149,6 +151,8 @@ integral range = Gen (showing <$> Hedgehog.Gen.integral range)
 
 
 newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
+newtype RunL g m = RunL (forall a . m a -> PureC (g a))
+newtype RunR f m = RunR (forall a . f (m a) -> PureC a)
 newtype RunE e m = RunE (forall a . m a -> PureC (Either e a))
 newtype RunS s m = RunS (forall a . s -> m a -> PureC (s, a))
 newtype RunND m = RunND (forall a . m a -> PureC [a])

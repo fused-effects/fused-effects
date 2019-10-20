@@ -21,17 +21,15 @@ tests = testGroup "Reader"
   [ testGroup "ReaderC"       $
     [ testMonad
     , testReader
-    ] >>= ($ RunR ReaderC.runReader)
-  , testGroup "(->)"          $ testReader (RunR (fmap PureC . (&)))
-  , testGroup "ReaderT"       $ testReader (RunR (flip ReaderT.runReaderT))
-  , testGroup "RWST (Lazy)"   $ testReader (RunR (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)" $ testReader (RunR (runRWST StrictRWST.runRWST))
+    ] >>= ($ RunR (uncurry ReaderC.runReader))
+  , testGroup "(->)"          $ testReader (RunR (uncurry (fmap PureC . (&))))
+  , testGroup "ReaderT"       $ testReader (RunR (uncurry (flip ReaderT.runReaderT)))
+  , testGroup "RWST (Lazy)"   $ testReader (RunR (uncurry (runRWST LazyRWST.runRWST)))
+  , testGroup "RWST (Strict)" $ testReader (RunR (uncurry (runRWST StrictRWST.runRWST)))
   ] where
-  testMonad  (RunR run) = Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) (liftRunR (uncurry run))
-  testReader run        = Reader.test r (m (gen r)) a                                                run
+  testMonad  (RunR run) = Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) (liftRunR run)
+  testReader run        = Reader.test r (m (gen r)) a                                       run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
-
-newtype RunR r m = RunR (forall a . r -> m a -> PureC a)
 
 
 gen
@@ -52,11 +50,11 @@ test
   => Gen r
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
-  -> RunR r m
+  -> RunR ((,) r) m
   -> [TestTree]
 test r m a (RunR runReader) =
   [ testProperty "ask returns the environment variable" . forall (r :. fn (m a) :. Nil) $
-    \ r k -> runReader r (ask >>= k) === runReader r (k r)
+    \ r k -> runReader (r, ask >>= k) === runReader (r, k r)
   , testProperty "local modifies the environment variable" . forall (r :. fn r :. m a :. Nil) $
-    \ r f m -> runReader r (local f m) === runReader (f r) m
+    \ r f m -> runReader (r, local f m) === runReader (f r, m)
   ]
