@@ -18,13 +18,11 @@ tests = testGroup "Fresh"
   [ testGroup "FreshC" $
     [ testMonad
     , testFresh
-    ] >>= ($ Run FreshC.runFresh)
+    ] >>= ($ RunS FreshC.runFresh)
   ] where
-  testMonad (Run run) = Monad.test (m gen) a b c ((,) <$> n <*> pure ()) (uncurry run)
-  testFresh (Run run) = Fresh.test (m gen) a                                      run
+  testMonad (RunS run) = Monad.test (m gen) a b c ((,) <$> n <*> pure ()) (uncurry run)
+  testFresh (RunS run) = Fresh.test (m gen) a                                      run
   n = Gen.integral (R.linear 0 100)
-
-newtype Run m = Run (forall a . Int -> m a -> PureC (Int, a))
 
 
 gen

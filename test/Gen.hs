@@ -20,6 +20,8 @@ module Gen
 , R
 , S
 , W
+  -- * Handlers
+, RunS(..)
   -- * Generation
 , Rec(..)
 , forall
@@ -138,6 +140,9 @@ choice = Gen . Hedgehog.Gen.choice . Prelude.map runGen
 
 integral :: (Integral a, Show a) => Range a -> Gen a
 integral range = Gen (showing <$> Hedgehog.Gen.integral range)
+
+
+newtype RunS s m = RunS (forall a . s -> m a -> PureC (s, a))
 
 
 infixr 5 :.

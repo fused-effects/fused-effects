@@ -23,21 +23,19 @@ tests = testGroup "State"
   [ testGroup "StateC (Lazy)"   $
     [ testMonad
     , testState
-    ] >>= ($ Run LazyStateC.runState)
+    ] >>= ($ RunS LazyStateC.runState)
   , testGroup "StateC (Strict)" $
     [ testMonad
     , testState
-    ] >>= ($ Run StrictStateC.runState)
-  , testGroup "StateT (Lazy)"   $ testState (Run (fmap (fmap swap) . flip LazyStateT.runStateT))
-  , testGroup "StateT (Strict)" $ testState (Run (fmap (fmap swap) . flip StrictStateT.runStateT))
-  , testGroup "RWST (Lazy)"     $ testState (Run (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)"   $ testState (Run (runRWST StrictRWST.runRWST))
+    ] >>= ($ RunS StrictStateC.runState)
+  , testGroup "StateT (Lazy)"   $ testState (RunS (fmap (fmap swap) . flip LazyStateT.runStateT))
+  , testGroup "StateT (Strict)" $ testState (RunS (fmap (fmap swap) . flip StrictStateT.runStateT))
+  , testGroup "RWST (Lazy)"     $ testState (RunS (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"   $ testState (RunS (runRWST StrictRWST.runRWST))
   ] where
-  testMonad (Run run) = Monad.test   (m (gen s)) a b c ((,) <$> s <*> pure ()) (uncurry run)
-  testState (Run run) = State.test s (m (gen s)) a                                      run
+  testMonad (RunS run) = Monad.test   (m (gen s)) a b c ((,) <$> s <*> pure ()) (uncurry run)
+  testState (RunS run) = State.test s (m (gen s)) a                                      run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
-
-newtype Run s m = Run (forall a . s -> m a -> PureC (s, a))
 
 
 gen
