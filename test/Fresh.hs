@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module Fresh
 ( tests
 , gen
@@ -15,13 +15,16 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Fresh"
-  [ test "FreshC" FreshC.runFresh
+  [ testGroup "FreshC" $
+    [ testMonad
+    , testFresh
+    ] >>= ($ Run FreshC.runFresh)
   ] where
-  test :: Has Fresh sig m => String -> (forall a . Int -> m a -> PureC (Int, a)) -> TestTree
-  test name run = testGroup name
-    $  Monad.test (m gen) a b c ((,) <$> n <*> pure ()) (uncurry run)
-    ++ Fresh.test (m gen) a                             run
+  testMonad (Run run) = Monad.test (m gen) a b c ((,) <$> n <*> pure ()) (uncurry run)
+  testFresh (Run run) = Fresh.test (m gen) a                                      run
   n = Gen.integral (R.linear 0 100)
+
+newtype Run m = Run (forall a . Int -> m a -> PureC (Int, a))
 
 
 gen
