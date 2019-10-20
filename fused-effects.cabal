@@ -126,6 +126,7 @@ test-suite test
     Fusion
     Gen
     Monad
+    MonadFix
     NonDet
     NonDet.Church
     Reader
