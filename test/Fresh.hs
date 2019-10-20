@@ -27,16 +27,15 @@ tests = testGroup "Fresh"
 
 gen
   :: Has Fresh sig m
-  => (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  => GenM m
+  -> GenM m
 gen _ a = atom "fmap" fmap <*> fn a <*> label "fresh" fresh
 
 
 test
   :: Has Fresh sig m
   => Gen Int
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
   -> RunS Int m
   -> [TestTree]

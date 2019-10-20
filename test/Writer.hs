@@ -38,13 +38,12 @@ tests = testGroup "Writer"
 
 
 gen
-  :: forall w b m a sig
+  :: forall w b m sig
   .  (Has (Writer w) sig m, Arg b, Arg w, Show b, Show w, Vary b, Vary w)
   => Gen w
   -> Gen b
-  -> (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  -> GenM m
+  -> GenM m
 gen w b m a = choice
   [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w)
   , atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
@@ -55,7 +54,7 @@ gen w b m a = choice
 test
   :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w)
   => Gen w
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
   -> RunL ((,) w) m
   -> [TestTree]

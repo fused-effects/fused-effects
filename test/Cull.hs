@@ -29,9 +29,8 @@ tests = testGroup "Cull"
 
 gen
   :: (Has Cull sig m, Has NonDet sig m)
-  => (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  => GenM m
+  -> GenM m
 gen m a = choice
   [ label "cull" cull <*> m a
   , NonDet.gen m a
@@ -40,7 +39,7 @@ gen m a = choice
 
 test
   :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
-  => (forall a . Gen a -> Gen (m a))
+  => GenM m
   -> Gen a
   -> Gen b
   -> RunL [] m

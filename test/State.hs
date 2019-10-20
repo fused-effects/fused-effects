@@ -39,12 +39,11 @@ tests = testGroup "State"
 
 
 gen
-  :: forall s m a sig
+  :: forall s m sig
   .  (Has (State s) sig m, Arg s, Show s, Vary s)
   => Gen s
-  -> (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  -> GenM m
+  -> GenM m
 gen s _ a = choice
   [ label "gets" (gets @s) <*> fn a
   , infixL 4 "<$" (<$) <*> a <*> (label "put" put <*> s)
@@ -54,7 +53,7 @@ gen s _ a = choice
 test
   :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s)
   => Gen s
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
   -> RunS s m
   -> [TestTree]

@@ -32,15 +32,14 @@ tests = testGroup "NonDet"
 
 gen
   :: Has NonDet sig m
-  => (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  => GenM m
+  -> GenM m
 gen m a = choice [ Empty.gen m a, Choose.gen m a ]
 
 
 test
   :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
-  => (forall a . Gen a -> Gen (m a))
+  => GenM m
   -> Gen a
   -> Gen b
   -> RunL [] m

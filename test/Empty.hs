@@ -28,16 +28,15 @@ tests = testGroup "Empty"
 
 gen
   :: Has Empty sig m
-  => (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  => GenM m
+  -> GenM m
 gen _ _ = label "empty" empty
 
 
 test
   :: forall a b m sig
   .  (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a)
-  => (forall a . Gen a -> Gen (m a))
+  => GenM m
   -> Gen a
   -> Gen b
   -> RunL [] m

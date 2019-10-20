@@ -33,12 +33,11 @@ tests = testGroup "Reader"
 
 
 gen
-  :: forall r m a sig
+  :: forall r m sig
   .  (Has (Reader r) sig m, Arg r, Show r, Vary r)
   => Gen r
-  -> (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  -> GenM m
+  -> GenM m
 gen r m a = choice
   [ label "asks" (asks @r) <*> fn a
   , label "local" local <*> fn r <*> m a
@@ -48,7 +47,7 @@ gen r m a = choice
 test
   :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r)
   => Gen r
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
   -> RunR ((,) r) m
   -> [TestTree]

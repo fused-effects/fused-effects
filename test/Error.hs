@@ -31,9 +31,8 @@ tests = testGroup "Error" $
 gen
   :: (Has (Error e) sig m, Arg e, Show e, Vary e)
   => Gen e
-  -> (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
+  -> GenM m
+  -> GenM m
 gen e m a = choice
   [ Throw.gen e m a
   , Catch.gen e m a
@@ -43,7 +42,7 @@ gen e m a = choice
 test
   :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e)
   => Gen e
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
   -> Gen b
   -> RunL (Either e) m
