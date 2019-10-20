@@ -34,11 +34,11 @@ import Control.Monad.Trans.Maybe
 --
 -- @since 1.0.0.0
 runEmpty :: EmptyC m a -> m (Maybe a)
-runEmpty = runMaybeT . runEmptyC
+runEmpty (EmptyC m) = runMaybeT m
 {-# INLINE runEmpty #-}
 
 -- | @since 1.0.0.0
-newtype EmptyC m a = EmptyC { runEmptyC :: MaybeT m a }
+newtype EmptyC m a = EmptyC (MaybeT m a)
   deriving (Applicative, Functor, Monad, MonadFix, MonadIO, MonadTrans)
 
 -- | 'EmptyC' passes 'Fail.MonadFail' operations along to the underlying monad @m@, rather than interpreting it as a synonym for 'empty' à la 'MaybeT'.

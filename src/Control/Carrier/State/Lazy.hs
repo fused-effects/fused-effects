@@ -26,28 +26,67 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
+-- | Run a lazy 'State' effect, yielding the result value and the final state. More programs terminate with lazy state than strict state, but injudicious use of lazy state may lead to thunk buildup.
+--
+-- @
+-- 'runState' s ('pure' a) = 'pure' (s, a)
+-- @
+-- @
+-- 'runState' s 'get' = 'pure' (s, s)
+-- @
+-- @
+-- 'runState' s ('put' t) = 'pure' (t, ())
+-- @
+--
+-- @since 1.0.0.0
+runState :: s -> StateC s m a -> m (s, a)
+runState s (StateC runStateC) = runStateC s
+{-# INLINE[3] runState #-}
+
+-- | Run a lazy 'State' effect, yielding the result value and discarding the final state.
+--
+-- @
+-- 'evalState' s m = 'fmap' 'snd' ('runState' s m)
+-- @
+--
+-- @since 1.0.0.0
+evalState :: forall s m a . Functor m => s -> StateC s m a -> m a
+evalState s = fmap snd . runState s
+{-# INLINE[3] evalState #-}
+
+-- | Run a lazy 'State' effect, yielding the final state and discarding the return value.
+--
+-- @
+-- 'execState' s m = 'fmap' 'fst' ('runState' s m)
+-- @
+--
+-- @since 1.0.0.0
+execState :: forall s m a . Functor m => s -> StateC s m a -> m s
+execState s = fmap fst . runState s
+{-# INLINE[3] execState #-}
+
 -- | @since 1.0.0.0
 newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
 
 instance Functor m => Functor (StateC s m) where
-  fmap f m = StateC $ \ s -> fmap (\ ~(s', a) -> (s', f a)) $ runStateC m s
+  fmap f m = StateC $ \ s -> (\ ~(s', a) -> (s', f a)) <$> runState s m
   {-# INLINE fmap #-}
 
 instance Monad m => Applicative (StateC s m) where
   pure a = StateC $ \ s -> pure (s, a)
   {-# INLINE pure #-}
   StateC mf <*> StateC mx = StateC $ \ s -> do
-    ~(s', f) <- mf s
+    ~(s',  f) <- mf s
     ~(s'', x) <- mx s'
-    return (s'', f x)
+    pure (s'', f x)
   {-# INLINE (<*>) #-}
   m *> k = m >>= \_ -> k
   {-# INLINE (*>) #-}
 
 instance Monad m => Monad (StateC s m) where
-  m >>= k  = StateC $ \ s -> do
-    ~(s', a) <- runStateC m s
-    runStateC (k a) s'
+  m >>= k = StateC $ \ s -> do
+    ~(s', a) <- runState s m
+    runState s' (k a)
   {-# INLINE (>>=) #-}
 
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
@@ -79,44 +118,3 @@ instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) w
   eff (L (Put s k)) = StateC (\ _ -> runState s k)
   eff (R other)     = StateC (\ s -> eff (handle (s, ()) (uncurry runState) other))
   {-# INLINE eff #-}
-
--- | Run a lazy 'State' effect, yielding the result value and the final state.
---   More programs terminate with lazy state than strict state, but injudicious
---   use of lazy state may lead to thunk buildup.
---
--- @
--- 'runState' s ('pure' a) = 'pure' (s, a)
--- @
--- @
--- 'runState' s 'get' = 'pure' (s, s)
--- @
--- @
--- 'runState' s ('put' t) = 'pure' (t, ())
--- @
---
--- @since 1.0.0.0
-runState :: s -> StateC s m a -> m (s, a)
-runState s c = runStateC c s
-{-# INLINE[3] runState #-}
-
--- | Run a lazy 'State' effect, yielding the result value and discarding the final state.
---
--- @
--- 'evalState' s m = 'fmap' 'snd' ('runState' s m)
--- @
---
--- @since 1.0.0.0
-evalState :: forall s m a . Functor m => s -> StateC s m a -> m a
-evalState s = fmap snd . runState s
-{-# INLINE[3] evalState #-}
-
--- | Run a lazy 'State' effect, yielding the final state and discarding the return value.
---
--- @
--- 'execState' s m = 'fmap' 'fst' ('runState' s m)
--- @
---
--- @since 1.0.0.0
-execState :: forall s m a . Functor m => s -> StateC s m a -> m s
-execState s = fmap fst . runState s
-{-# INLINE[3] execState #-}

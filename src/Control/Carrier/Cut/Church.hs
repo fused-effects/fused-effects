@@ -23,11 +23,11 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | Run a 'Cut' effect with the supplied continuations for 'pure' / '<|>', 'empty', and 'cutfail'.
+-- | Run a 'Cut' effect with continuations respectively interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
 --
 -- @since 1.0.0.0
 runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
-runCut cons nil fail m = runCutC m cons nil fail
+runCut cons nil fail (CutC runCutC) = runCutC cons nil fail
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 --
@@ -42,10 +42,7 @@ runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
 runCutM leaf = runCut (fmap . mappend . leaf) (pure mempty) (pure mempty)
 
 -- | @since 1.0.0.0
-newtype CutC m a = CutC
-  { -- | A higher-order function receiving three parameters: a function to combine each solution with the rest of the solutions, an action to run when no results are produced (e.g. on 'empty'), and an action to run when no results are produced and backtrcking should not be attempted (e.g. on 'cutfail').
-    runCutC :: forall b . (a -> m b -> m b) -> m b -> m b -> m b
-  }
+newtype CutC m a = CutC (forall b . (a -> m b -> m b) -> m b -> m b -> m b)
   deriving (Functor)
 
 instance Applicative (CutC m) where
@@ -63,7 +60,7 @@ instance Alternative (CutC m) where
 
 instance Monad (CutC m) where
   CutC a >>= f = CutC $ \ cons nil fail ->
-    a (\ a' as -> runCutC (f a') cons as fail) nil fail
+    a (\ a' as -> runCut cons as fail (f a')) nil fail
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
@@ -92,7 +89,7 @@ instance MonadTrans CutC where
 
 instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
-  eff (L (Call m k)) = CutC $ \ cons nil fail -> runCutC m (\ a as -> runCutC (k a) cons as fail) nil nil
+  eff (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
   eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutA) other) >>= foldr cons nil

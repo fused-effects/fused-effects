@@ -35,11 +35,11 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runReader :: r -> ReaderC r m a -> m a
-runReader r c = runReaderC c r
+runReader r (ReaderC runReaderC) = runReaderC r
 {-# INLINE runReader #-}
 
 -- | @since 1.0.0.0
-newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
+newtype ReaderC r m a = ReaderC (r -> m a)
   deriving (Functor)
 
 instance Applicative m => Applicative (ReaderC r m) where

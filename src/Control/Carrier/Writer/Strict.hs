@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 {- | A carrier for 'Writer' effects. This carrier performs its append operations strictly and thus avoids the space leaks inherent in lazy writer monads.
 
@@ -35,7 +35,7 @@ import Control.Monad.Trans.Class
 -- 'runWriter' ('pure' a) = 'pure' ('mempty', a)
 -- @
 runWriter :: Monoid w => WriterC w m a -> m (w, a)
-runWriter = runState mempty . runWriterC
+runWriter (WriterC m) = runState mempty m
 {-# INLINE runWriter #-}
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
@@ -51,25 +51,20 @@ execWriter = fmap fst . runWriter
 -- | A space-efficient carrier for 'Writer' effects, implemented atop "Control.Carrier.State.Strict".
 --
 -- @since 1.0.0.0
-newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
+newtype WriterC w m a = WriterC (StateC w m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
-  eff (L (Tell w     k)) = WriterC $ do
-    modify (`mappend` w)
-    runWriterC k
-  eff (L (Listen   m k)) = WriterC $ do
-    w <- get
-    put (mempty :: w)
-    a <- runWriterC m
-    w' <- get
-    modify (mappend (w :: w))
-    runWriterC (k w' a)
-  eff (L (Censor f m k)) = WriterC $ do
-    w <- get
-    put (mempty :: w)
-    a <- runWriterC m
-    modify (mappend w . f)
-    runWriterC (k a)
+  eff (L (Tell w     k)) = WriterC (modify (`mappend` w)) >> k
+  eff (L (Listen   m k)) = WriterC (StateC (\ w -> do
+    (w', a) <- runWriter m
+    let w'' = mappend w w'
+    w'' `seq` pure (w'', (w', a))))
+    >>= uncurry k
+  eff (L (Censor f m k)) = WriterC (StateC (\ w -> do
+    (w', a) <- runWriter m
+    let w'' = mappend w (f w')
+    w'' `seq` pure (w'', a)))
+    >>= k
   eff (R other)          = WriterC (eff (R (handleCoercible other)))
   {-# INLINE eff #-}
