@@ -11,6 +11,7 @@ import qualified Control.Monad.Trans.Reader as ReaderT
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
+import Data.Functor.Identity (Identity)
 import Gen
 import qualified Monad
 import qualified MonadFix
@@ -52,11 +53,11 @@ test
   => Gen r
   -> GenM m
   -> Gen a
-  -> RunR ((,) r) m
+  -> RunC r Identity m
   -> [TestTree]
-test r m a (RunR runReader) =
+test r m a (RunC runReader) =
   [ testProperty "ask returns the environment variable" . forall (r :. fn (m a) :. Nil) $
-    \ r k -> runReader (r, ask >>= k) === runReader (r, k r)
+    \ r k -> runReader r (ask >>= k) === runReader r (k r)
   , testProperty "local modifies the environment variable" . forall (r :. fn r :. m a :. Nil) $
-    \ r f m -> runReader (r, local f m) === runReader (f r, m)
+    \ r f m -> runReader r (local f m) === runReader (f r) m
   ]
