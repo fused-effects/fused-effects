@@ -46,6 +46,6 @@ test
   -> Gen (f ())
   -> Run f (Either e) m
   -> [TestTree]
-test e m a b s runError
-  =  Throw.test e m a b s runError
-  ++ Catch.test e m a b s runError
+test e m a b i runError
+  =  Throw.test e m a b i runError
+  ++ Catch.test e m a b i runError
