@@ -19,15 +19,15 @@ gen _ m a = label "catchError" catchError <*> m a <*> fn @e (m a)
 
 
 test
-  :: (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e)
+  :: (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e, Functor f)
   => Gen e
   -> GenM m
   -> Gen a
   -> Gen b
-  -> Gen (Identity ())
-  -> Run Identity (Either e) m
+  -> Gen (f ())
+  -> Run f (Either e) m
   -> [TestTree]
-test e m a _ _ (RunL runCatch) =
-  [ testProperty "catchError intercepts throwError" . forall (e :. fn (m a) :. Nil) $
-    \ e h -> runCatch (throwError e `catchError` h) === runCatch (h e)
+test e m a _ i (Run runCatch) =
+  [ testProperty "catchError intercepts throwError" . forall (i :. e :. fn (m a) :. Nil) $
+    \ i e h -> runCatch ((throwError e `catchError` h) <$ i) === runCatch (h e <$ i)
   ]
