@@ -10,6 +10,7 @@ import Control.Effect.Throw
 import Data.Functor.Identity (Identity(..))
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -17,11 +18,13 @@ tests :: TestTree
 tests = testGroup "Throw" $
   [ testGroup "ThrowC" $
     [ testMonad
+    , testMonadFix
     , testThrow
     ] >>= ($ RunL ThrowC.runThrow)
   ] where
-  testMonad run = Monad.test   (m (gen e)) a b c (pure (Identity ())) run
-  testThrow run = Throw.test e (m (gen e)) a b                        run
+  testMonad    run = Monad.test    (m (gen e)) a b c (pure (Identity ())) run
+  testMonadFix run = MonadFix.test (m (gen e)) a b   (pure (Identity ())) run
+  testThrow    run = Throw.test e  (m (gen e)) a b                        run
 
 
 gen :: Has (Throw e) sig m => Gen e -> GenM m -> GenM m
