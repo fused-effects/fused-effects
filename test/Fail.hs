@@ -7,7 +7,6 @@ module Fail
 
 import qualified Control.Carrier.Fail.Either as FailC
 import Control.Effect.Fail as Fail
-import Data.Functor.Identity (Identity(..))
 import Gen
 import Hedgehog.Range as Range
 import qualified Monad
@@ -23,9 +22,9 @@ tests = testGroup "Fail" $
     , testFail
     ] >>= ($ RunL FailC.runFail)
   ] where
-  testMonad    run = Monad.test    (m (gen e)) a b c (pure (Identity ())) run
-  testMonadFix run = MonadFix.test (m (gen e)) a b   (pure (Identity ())) run
-  testFail     run = Fail.test e   (m (gen e)) a b                        run
+  testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run
+  testFail     run = Fail.test e   (m (gen e)) a b                       run
   e = string (Range.linear 0 50) unicode
 
 

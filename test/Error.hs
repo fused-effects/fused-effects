@@ -9,7 +9,6 @@ import qualified Control.Carrier.Error.Either as ErrorC
 import Control.Effect.Error
 import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
-import Data.Functor.Identity (Identity(..))
 import Gen
 import qualified Monad
 import qualified MonadFix
@@ -26,9 +25,9 @@ tests = testGroup "Error" $
   , testGroup "Either"  $ testError (RunL pure)
   , testGroup "ExceptT" $ testError (RunL ExceptT.runExceptT)
   ] where
-  testMonad    run = Monad.test    (m (gen e)) a b c (pure (Identity ())) run
-  testMonadFix run = MonadFix.test (m (gen e)) a b   (pure (Identity ())) run
-  testError    run = Error.test e  (m (gen e)) a b                        run
+  testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run
+  testError    run = Error.test e  (m (gen e)) a b                       run
 
 
 gen :: (Has (Error e) sig m, Arg e, Show e, Vary e) => Gen e -> GenM m -> GenM m

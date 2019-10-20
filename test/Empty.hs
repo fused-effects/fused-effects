@@ -7,7 +7,6 @@ module Empty
 
 import qualified Control.Carrier.Empty.Maybe as EmptyC
 import Control.Effect.Empty
-import Data.Functor.Identity (Identity(..))
 import Data.Maybe (maybeToList)
 import Gen
 import qualified Monad
@@ -24,9 +23,9 @@ tests = testGroup "Empty"
     ] >>= ($ RunL (fmap maybeToList . EmptyC.runEmpty))
   , testGroup "Maybe"  $ testEmpty (RunL (pure . maybeToList))
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (pure (Identity ())) run
-  testMonadFix run = MonadFix.test (m gen) a b   (pure (Identity ())) run
-  testEmpty    run = Empty.test    (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
+  testEmpty    run = Empty.test    (m gen) a b                       run
 
 
 gen :: Has Empty sig m => GenM m -> GenM m

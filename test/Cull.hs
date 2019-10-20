@@ -9,7 +9,6 @@ import qualified Control.Carrier.Cull.Church as CullC
 import Control.Effect.Choose
 import Control.Effect.Cull
 import Control.Effect.NonDet (NonDet)
-import Data.Functor.Identity (Identity(..))
 import Gen
 import qualified Monad
 import qualified MonadFix
@@ -25,9 +24,9 @@ tests = testGroup "Cull"
     , testCull
     ] >>= ($ RunL CullC.runCullA)
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (pure (Identity ())) run
-  testMonadFix run = MonadFix.test (m gen) a b   (pure (Identity ())) run
-  testCull     run = Cull.test     (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
+  testCull     run = Cull.test     (m gen) a b                       run
 
 
 gen :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenM m

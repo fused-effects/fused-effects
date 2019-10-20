@@ -7,7 +7,6 @@ module Choose
 
 import qualified Control.Carrier.Choose.Church as ChooseC
 import Control.Effect.Choose
-import Data.Functor.Identity (Identity(..))
 import Data.List.NonEmpty
 import Gen
 import qualified Monad
@@ -24,9 +23,9 @@ tests = testGroup "Choose"
     ] >>= ($ RunL (ChooseC.runChooseS (pure . pure)))
   , testGroup "NonEmpty" $ testChoose (RunL (pure . toList))
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (pure (Identity ())) run
-  testMonadFix run = MonadFix.test (m gen) a b   (pure (Identity ())) run
-  testChoose   run = Choose.test   (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
+  testChoose   run = Choose.test   (m gen) a b                       run
 
 
 gen :: Has Choose sig m => GenM m -> GenM m

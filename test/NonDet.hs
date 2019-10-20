@@ -11,7 +11,6 @@ import qualified Control.Carrier.NonDet.Church as Church.NonDetC
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet (NonDet)
-import Data.Functor.Identity (Identity(..))
 import qualified Empty
 import Gen
 import qualified Monad
@@ -28,9 +27,9 @@ tests = testGroup "NonDet"
     ] >>= ($ RunL Church.NonDetC.runNonDetA)
   , testGroup "[]" $ testNonDet (RunL pure)
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (pure (Identity ())) run
-  testMonadFix run = MonadFix.test (m gen) a b   (pure (Identity ())) run
-  testNonDet   run = NonDet.test   (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
+  testNonDet   run = NonDet.test   (m gen) a b                       run
 
 
 gen :: Has NonDet sig m => GenM m -> GenM m

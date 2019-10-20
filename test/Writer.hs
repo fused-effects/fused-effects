@@ -13,7 +13,6 @@ import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Bifunctor (first)
-import Data.Functor.Identity (Identity(..))
 import Data.Tuple (swap)
 import Gen
 import qualified Monad
@@ -34,9 +33,9 @@ tests = testGroup "Writer"
   , testGroup "RWST (Lazy)"      $ testWriter (RunL (runRWST LazyRWST.runRWST))
   , testGroup "RWST (Strict)"    $ testWriter (RunL (runRWST StrictRWST.runRWST))
   ] where
-  testMonad    run = Monad.test    (m (gen w b)) a b c (pure (Identity ())) run
-  testMonadFix run = MonadFix.test (m (gen w b)) a b   (pure (Identity ())) run
-  testWriter   run = Writer.test w (m (gen w b)) a                          run
+  testMonad    run = Monad.test    (m (gen w b)) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (gen w b)) a b   (identity <*> unit) run
+  testWriter   run = Writer.test w (m (gen w b)) a                         run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
