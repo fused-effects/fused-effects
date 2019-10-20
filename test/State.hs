@@ -23,15 +23,15 @@ tests = testGroup "State"
   [ testGroup "StateC (Lazy)"   $
     [ testMonad
     , testState
-    ] >>= ($ Run (uncurry LazyStateC.runState))
+    ] >>= ($ RunS LazyStateC.runState)
   , testGroup "StateC (Strict)" $
     [ testMonad
     , testState
-    ] >>= ($ Run (uncurry StrictStateC.runState))
-  , testGroup "StateT (Lazy)"   $ testState (Run (uncurry (fmap (fmap swap) . flip LazyStateT.runStateT)))
-  , testGroup "StateT (Strict)" $ testState (Run (uncurry (fmap (fmap swap) . flip StrictStateT.runStateT)))
-  , testGroup "RWST (Lazy)"     $ testState (Run (uncurry (runRWST LazyRWST.runRWST)))
-  , testGroup "RWST (Strict)"   $ testState (Run (uncurry (runRWST StrictRWST.runRWST)))
+    ] >>= ($ RunS StrictStateC.runState)
+  , testGroup "StateT (Lazy)"   $ testState (RunS (fmap (fmap swap) . flip LazyStateT.runStateT))
+  , testGroup "StateT (Strict)" $ testState (RunS (fmap (fmap swap) . flip StrictStateT.runStateT))
+  , testGroup "RWST (Lazy)"     $ testState (RunS (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"   $ testState (RunS (runRWST StrictRWST.runRWST))
   ] where
   testMonad run = Monad.test   (m (gen s)) a b c ((,) <$> s <*> pure ()) run
   testState run = State.test s (m (gen s)) a                             run
@@ -56,11 +56,11 @@ test
   => Gen s
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
-  -> Run ((,) s) ((,) s) m
+  -> RunS s m
   -> [TestTree]
-test s m a (Run runState) =
+test s m a (RunS runState) =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
-    \ s k -> runState (s, get >>= k) === runState (s, k s)
+    \ s k -> runState s (get >>= k) === runState s (k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
-    \ s s' m -> runState (s, put s' >> m) === runState (s', m)
+    \ s s' m -> runState s (put s' >> m) === runState s' m
   ]
