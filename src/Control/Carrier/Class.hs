@@ -3,10 +3,12 @@ module Control.Carrier.Class
 ( Carrier(..)
 , Has
 , send
-, HFunctor
-, Effect
+, (:+:) (..)
+, run
+, module Control.Effect.Class
 ) where
 
+import {-# SOURCE #-} Control.Carrier.Pure (run)
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
