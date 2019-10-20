@@ -25,18 +25,18 @@ tests = testGroup "Writer"
   [ testGroup "WriterC (Strict)" $
     [ testMonad
     , testWriter
-    ] >>= ($ Run StrictWriterC.runWriter)
-  , testGroup "(,)"              $ testWriter (Run pure)
-  , testGroup "WriterT (Lazy)"   $ testWriter (Run (fmap swap . LazyWriterT.runWriterT))
-  , testGroup "WriterT (Strict)" $ testWriter (Run (fmap swap . StrictWriterT.runWriterT))
-  , testGroup "RWST (Lazy)"      $ testWriter (Run (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)"    $ testWriter (Run (runRWST StrictRWST.runRWST))
+    ] >>= ($ RunW StrictWriterC.runWriter)
+  , testGroup "(,)"              $ testWriter (RunW pure)
+  , testGroup "WriterT (Lazy)"   $ testWriter (RunW (fmap swap . LazyWriterT.runWriterT))
+  , testGroup "WriterT (Strict)" $ testWriter (RunW (fmap swap . StrictWriterT.runWriterT))
+  , testGroup "RWST (Lazy)"      $ testWriter (RunW (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"    $ testWriter (RunW (runRWST StrictRWST.runRWST))
   ] where
-  testMonad  (Run run) = Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
-  testWriter (Run run) = Writer.test w (m (gen w b)) a                           run
+  testMonad  (RunW run) = Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
+  testWriter (RunW run) = Writer.test w (m (gen w b)) a                           run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
-newtype Run w m = Run (forall a . m a -> PureC (w, a))
+newtype RunW w m = RunW (forall a . m a -> PureC (w, a))
 
 
 gen
