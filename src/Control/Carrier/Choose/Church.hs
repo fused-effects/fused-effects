@@ -26,11 +26,11 @@ import Data.List.NonEmpty (NonEmpty(..), head, tail)
 import qualified Data.Semigroup as S
 import Prelude hiding (head, tail)
 
--- | Run a 'Choose' effect, passing branches and results to the supplied continuations.
+-- | Run a 'Choose' effect with continuations respectively interpreting '<|>' and 'pure'.
 --
 -- @since 1.0.0.0
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
-runChoose fork leaf m = runChooseC m fork leaf
+runChoose fork leaf (ChooseC runChooseC) = runChooseC fork leaf
 
 -- | Run a 'Choose' effect, passing results to the supplied function, and merging branches together using 'S.<>'.
 --
@@ -41,10 +41,7 @@ runChooseS = runChoose (liftA2 (S.<>))
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 --
 -- @since 1.0.0.0
-newtype ChooseC m a = ChooseC
-  { -- | A higher-order function receiving two continuations, respectively implementing choice and 'pure'.
-    runChooseC :: forall b . (m b -> m b -> m b) -> (a -> m b) -> m b
-  }
+newtype ChooseC m a = ChooseC (forall b . (m b -> m b -> m b) -> (a -> m b) -> m b)
   deriving (Functor)
 
 instance Applicative (ChooseC m) where
@@ -83,7 +80,7 @@ instance MonadTrans ChooseC where
   {-# INLINE lift #-}
 
 instance (Carrier sig m, Effect sig) => Carrier (Choose :+: sig) (ChooseC m) where
-  eff (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChooseC (k True) fork leaf) (runChooseC (k False) fork leaf)
+  eff (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
   eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (Leaf ()) (fmap join . traverse (runChoose (liftA2 Fork) (pure . Leaf))) other) >>= fold fork leaf
   {-# INLINE eff #-}
 

@@ -33,9 +33,9 @@ import Control.Monad.Trans.Except
 --
 -- @since 0.1.0.0
 runError :: ErrorC exc m a -> m (Either exc a)
-runError = runExceptT . runErrorC
+runError (ErrorC m) = runExceptT m
 
-newtype ErrorC e m a = ErrorC { runErrorC :: ExceptT e m a }
+newtype ErrorC e m a = ErrorC (ExceptT e m a)
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadTrans)
 
 -- | 'ErrorC' passes 'Alternative' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
