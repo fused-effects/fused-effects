@@ -35,7 +35,7 @@ tests = testGroup "Writer"
   ] where
   testMonad    run = Monad.test    (m (gen w b)) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m (gen w b)) a b   (identity <*> unit) run
-  testWriter   run = Writer.test w (m (gen w b)) a                         run
+  testWriter   run = Writer.test w (m (gen w b)) a     (identity <*> unit) run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
@@ -58,9 +58,10 @@ test
   => Gen w
   -> GenM m
   -> Gen a
-  -> RunL ((,) w) m
+  -> Gen (Identity ())
+  -> Run Identity ((,) w) m
   -> [TestTree]
-test w m a (RunL runWriter) =
+test w m a _ (RunL runWriter) =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
     \ w m -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
   , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $
