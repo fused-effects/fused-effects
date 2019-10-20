@@ -31,7 +31,7 @@ tests = testGroup "Reader"
   ] where
   testMonad    run = Monad.test    (m (gen r)) a b c (atom "(,)" (,) <*> r <*> unit) run
   testMonadFix run = MonadFix.test (m (gen r)) a b   (atom "(,)" (,) <*> r <*> unit) run
-  testReader   run = Reader.test r (m (gen r)) a                                     run
+  testReader   run = Reader.test   (m (gen r)) a                         r           run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
@@ -49,12 +49,12 @@ gen r m a = choice
 
 test
   :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r)
-  => Gen r
-  -> GenM m
+  => GenM m
   -> Gen a
+  -> Gen r
   -> RunC r Identity m
   -> [TestTree]
-test r m a (RunC runReader) =
+test m a r (RunC runReader) =
   [ testProperty "ask returns the environment variable" . forall (r :. fn (m a) :. Nil) $
     \ r k -> runReader r (ask >>= k) === runReader r (k r)
   , testProperty "local modifies the environment variable" . forall (r :. fn r :. m a :. Nil) $
