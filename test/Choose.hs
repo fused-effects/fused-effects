@@ -11,6 +11,7 @@ import Data.Functor.Identity (Identity(..))
 import Data.List.NonEmpty
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -18,12 +19,14 @@ tests :: TestTree
 tests = testGroup "Choose"
   [ testGroup "ChooseC"  $
     [ testMonad
+    , testMonadFix
     , testChoose
     ] >>= ($ RunL (ChooseC.runChooseS (pure . pure)))
   , testGroup "NonEmpty" $ testChoose (RunL (pure . toList))
   ] where
-  testMonad  run = Monad.test  (m gen) a b c (pure (Identity ())) run
-  testChoose run = Choose.test (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen) a b c (pure (Identity ())) run
+  testMonadFix run = MonadFix.test (m gen) a b   (pure (Identity ())) run
+  testChoose   run = Choose.test   (m gen) a b                        run
 
 
 gen :: Has Choose sig m => GenM m -> GenM m
