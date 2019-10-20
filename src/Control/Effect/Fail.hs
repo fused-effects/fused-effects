@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures, PatternSynonyms #-}
 
 {- | An effect providing failure with an error message.
 
@@ -12,6 +12,7 @@ Predefined carriers:
 module Control.Effect.Fail
 ( -- * Fail effect
   Fail
+, pattern Fail
 , Fail.MonadFail(..)
   -- * Re-exports
 , Carrier
@@ -24,3 +25,9 @@ import qualified Control.Monad.Fail as Fail
 
 -- | @since 1.0.0.0
 type Fail = Throw String
+
+-- | @since 1.0.0.0
+pattern Fail :: String -> Fail m k
+pattern Fail s = Throw s
+
+{-# COMPLETE Fail #-}

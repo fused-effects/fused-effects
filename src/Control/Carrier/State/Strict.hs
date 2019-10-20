@@ -37,7 +37,7 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runState :: s -> StateC s m a -> m (s, a)
-runState s x = runStateC x s
+runState s (StateC runStateC) = runStateC s
 {-# INLINE[3] runState #-}
 
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
@@ -64,7 +64,7 @@ execState s = fmap fst . runState s
 
 
 -- | @since 1.0.0.0
-newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
+newtype StateC s m a = StateC (s -> m (s, a))
   deriving (Functor)
 
 instance Monad m => Applicative (StateC s m) where

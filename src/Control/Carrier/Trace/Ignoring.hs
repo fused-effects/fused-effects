@@ -30,10 +30,10 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
-runTrace = runTraceC
+runTrace (TraceC m) = m
 
 -- | @since 1.0.0.0
-newtype TraceC m a = TraceC { runTraceC :: m a }
+newtype TraceC m a = TraceC (m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans TraceC where
@@ -41,9 +41,9 @@ instance MonadTrans TraceC where
   {-# INLINE lift #-}
 
 instance MonadUnliftIO m => MonadUnliftIO (TraceC m) where
-  askUnliftIO = TraceC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runTraceC))
+  askUnliftIO = TraceC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runTrace))
   {-# INLINE askUnliftIO #-}
-  withRunInIO inner = TraceC $ withRunInIO $ \run -> inner (run . runTraceC)
+  withRunInIO inner = TraceC $ withRunInIO $ \run -> inner (run . runTrace)
   {-# INLINE withRunInIO #-}
 
 instance Carrier sig m => Carrier (Trace :+: sig) (TraceC m) where
