@@ -38,13 +38,13 @@ gen e m a = choice
 
 
 test
-  :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e)
+  :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e, Functor f)
   => Gen e
   -> GenM m
   -> Gen a
   -> Gen b
-  -> Gen (Identity ())
-  -> Run Identity (Either e) m
+  -> Gen (f ())
+  -> Run f (Either e) m
   -> [TestTree]
 test e m a b s runError
   =  Throw.test e m a b s runError
