@@ -25,18 +25,16 @@ tests = testGroup "Writer"
   [ testGroup "WriterC (Strict)" $
     [ testMonad
     , testWriter
-    ] >>= ($ RunW StrictWriterC.runWriter)
-  , testGroup "(,)"              $ testWriter (RunW pure)
-  , testGroup "WriterT (Lazy)"   $ testWriter (RunW (fmap swap . LazyWriterT.runWriterT))
-  , testGroup "WriterT (Strict)" $ testWriter (RunW (fmap swap . StrictWriterT.runWriterT))
-  , testGroup "RWST (Lazy)"      $ testWriter (RunW (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)"    $ testWriter (RunW (runRWST StrictRWST.runRWST))
+    ] >>= ($ RunL StrictWriterC.runWriter)
+  , testGroup "(,)"              $ testWriter (RunL pure)
+  , testGroup "WriterT (Lazy)"   $ testWriter (RunL (fmap swap . LazyWriterT.runWriterT))
+  , testGroup "WriterT (Strict)" $ testWriter (RunL (fmap swap . StrictWriterT.runWriterT))
+  , testGroup "RWST (Lazy)"      $ testWriter (RunL (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"    $ testWriter (RunL (runRWST StrictRWST.runRWST))
   ] where
-  testMonad  (RunW run) = Monad.test    (m (gen w b)) a b c (pure (Identity ())) (liftRunL run)
+  testMonad  (RunL run) = Monad.test    (m (gen w b)) a b c (pure (Identity ())) (liftRunL run)
   testWriter run        = Writer.test w (m (gen w b)) a                                    run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
-
-newtype RunW w m = RunW (forall a . m a -> PureC (w, a))
 
 
 gen
@@ -59,9 +57,9 @@ test
   => Gen w
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
-  -> RunW w m
+  -> RunL ((,) w) m
   -> [TestTree]
-test w m a (RunW runWriter) =
+test w m a (RunL runWriter) =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
     \ w m -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
   , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $
