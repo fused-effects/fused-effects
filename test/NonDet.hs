@@ -30,10 +30,7 @@ tests = testGroup "NonDet"
   testNonDet run = NonDet.test (m gen) a b                        run
 
 
-gen
-  :: Has NonDet sig m
-  => GenM m
-  -> GenM m
+gen :: Has NonDet sig m => GenM m -> GenM m
 gen m a = choice [ Empty.gen m a, Choose.gen m a ]
 
 

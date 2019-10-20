@@ -27,10 +27,7 @@ tests = testGroup "Cut"
   testCut   run = Cut.test   (m gen) a b                        run
 
 
-gen
-  :: (Has Cut sig m, Has NonDet sig m)
-  => GenM m
-  -> GenM m
+gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
 gen m a = choice
   [ label "call" call <*> m a
   , label "cutfail" cutfail

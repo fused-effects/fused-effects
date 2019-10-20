@@ -27,10 +27,7 @@ tests = testGroup "Cull"
   testCull  run = Cull.test  (m gen) a b                        run
 
 
-gen
-  :: (Has Cull sig m, Has NonDet sig m)
-  => GenM m
-  -> GenM m
+gen :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenM m
 gen m a = choice
   [ label "cull" cull <*> m a
   , NonDet.gen m a

@@ -25,10 +25,7 @@ tests = testGroup "Fresh"
   n = Gen.integral (R.linear 0 100)
 
 
-gen
-  :: Has Fresh sig m
-  => GenM m
-  -> GenM m
+gen :: Has Fresh sig m => GenM m -> GenM m
 gen _ a = atom "fmap" fmap <*> fn a <*> label "fresh" fresh
 
 

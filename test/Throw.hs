@@ -24,11 +24,7 @@ tests = testGroup "Throw" $
   testThrow run = Throw.test e (m (gen e)) a b                        run
 
 
-gen
-  :: Has (Throw e) sig m
-  => Gen e
-  -> GenM m
-  -> GenM m
+gen :: Has (Throw e) sig m => Gen e -> GenM m -> GenM m
 gen e _ _ = label "throwError" throwError <*> e
 
 

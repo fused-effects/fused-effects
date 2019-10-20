@@ -26,10 +26,7 @@ tests = testGroup "Empty"
   testEmpty run = Empty.test (m gen) a b                        run
 
 
-gen
-  :: Has Empty sig m
-  => GenM m
-  -> GenM m
+gen :: Has Empty sig m => GenM m -> GenM m
 gen _ _ = label "empty" empty
 
 

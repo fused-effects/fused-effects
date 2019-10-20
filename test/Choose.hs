@@ -26,10 +26,7 @@ tests = testGroup "Choose"
   testChoose run = Choose.test (m gen) a b                        run
 
 
-gen
-  :: Has Choose sig m
-  => GenM m
-  -> GenM m
+gen :: Has Choose sig m => GenM m -> GenM m
 gen m a = addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a)
 
 
