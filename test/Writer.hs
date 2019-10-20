@@ -54,18 +54,18 @@ gen w b m a = choice
 
 
 test
-  :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w)
+  :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w, Functor f)
   => Gen w
   -> GenM m
   -> Gen a
-  -> Gen (Identity ())
-  -> Run Identity ((,) w) m
+  -> Gen (f ())
+  -> Run f ((,) w) m
   -> [TestTree]
-test w m a _ (RunL runWriter) =
-  [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
-    \ w m -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
-  , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $
-    \ m -> runWriter (listen m) === fmap (fst &&& id) (runWriter m)
-  , testProperty "censor revises written output" . forall (fn w :. m a :. Nil) $
-    \ f m -> runWriter (censor f m) === fmap (first f) (runWriter m)
+test w m a i (Run runWriter) =
+  [ testProperty "tell appends a value to the log" . forall (i :. w :. m a :. Nil) $
+    \ i w m -> runWriter ((tell w >> m) <$ i) === fmap (first (mappend w)) (runWriter (m <$ i))
+  , testProperty "listen eavesdrops on written output" . forall (i :. m a :. Nil) $
+    \ i m -> runWriter (listen m <$ i) === fmap (fst &&& id) (runWriter (m <$ i))
+  , testProperty "censor revises written output" . forall (i :. fn w :. m a :. Nil) $
+    \ i f m -> runWriter (censor f m <$ i) === fmap (first f) (runWriter (m <$ i))
   ]
