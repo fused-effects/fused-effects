@@ -45,6 +45,8 @@ module Gen
 , (/==)
 , Gen.choice
 , Gen.integral
+, Gen.unicode
+, Gen.string
 , Fn.Arg
 , Fn.Vary
 , Gen.fn
@@ -160,6 +162,12 @@ choice = Gen . Hedgehog.Gen.choice . Prelude.map runGen
 
 integral :: (Integral a, Show a) => Range a -> Gen a
 integral range = Gen (showing <$> Hedgehog.Gen.integral range)
+
+unicode :: Gen Char
+unicode = Gen (showing <$> Hedgehog.Gen.unicode)
+
+string :: Range Int -> Gen Char -> Gen String
+string range cs = Gen (showing <$> Hedgehog.Gen.string range (runTerm <$> runGen cs))
 
 
 newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
