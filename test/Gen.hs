@@ -187,8 +187,10 @@ pattern RunL run <- Run ((.# Identity) -> run) where
 
 {-# COMPLETE RunL #-}
 
+-- | The type of handlers with input state, but no output state (e.g. 'Control.Carrier.Reader.ReaderC').
 type RunR f m = Run f Identity m
 
+-- | Handlers with input state, but no output state (e.g. 'Control.Carrier.Reader.ReaderC').
 pattern RunR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
 pattern RunR run <- Run ((fmap runIdentity #.) -> run) where
   RunR run = Run (fmap Identity . run)
