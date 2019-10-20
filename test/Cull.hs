@@ -44,7 +44,7 @@ test
   -> Gen (Identity ())
   -> Run Identity [] m
   -> [TestTree]
-test m a b s (RunL runCull)
+test m a b i (RunL runCull)
   = testProperty "cull returns at most one success" (forall (a :. m a :. m a :. Nil)
     (\ a m n -> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
-  : NonDet.test m a b s (RunL runCull)
+  : NonDet.test m a b i (RunL runCull)
