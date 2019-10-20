@@ -33,7 +33,7 @@ tests = testGroup "Writer"
   , testGroup "RWST (Strict)"    $ testWriter (RunW (runRWST StrictRWST.runRWST))
   ] where
   testMonad  (RunW run) = Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
-  testWriter (RunW run) = Writer.test w (m (gen w b)) a                           run
+  testWriter run        = Writer.test w (m (gen w b)) a                           run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 newtype RunW w m = RunW (forall a . m a -> PureC (w, a))
@@ -59,9 +59,9 @@ test
   => Gen w
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
-  -> (forall a . m a -> PureC (w, a))
+  -> RunW w m
   -> [TestTree]
-test w m a runWriter =
+test w m a (RunW runWriter) =
   [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
     \ w m -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
   , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $

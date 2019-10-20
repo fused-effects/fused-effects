@@ -29,7 +29,7 @@ tests = testGroup "Reader"
   , testGroup "RWST (Strict)" $ testReader (RunR (runRWST StrictRWST.runRWST))
   ] where
   testMonad  (RunR run) = Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) (fmap Identity . uncurry run)
-  testReader (RunR run) = Reader.test r (m (gen r)) a                                                      run
+  testReader run        = Reader.test r (m (gen r)) a                                                      run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 newtype RunR r m = RunR (forall a . r -> m a -> PureC a)
@@ -53,9 +53,9 @@ test
   => Gen r
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
-  -> (forall a . r -> m a -> PureC a)
+  -> RunR r m
   -> [TestTree]
-test r m a runReader =
+test r m a (RunR runReader) =
   [ testProperty "ask returns the environment variable" . forall (r :. fn (m a) :. Nil) $
     \ r k -> runReader r (ask >>= k) === runReader r (k r)
   , testProperty "local modifies the environment variable" . forall (r :. fn r :. m a :. Nil) $

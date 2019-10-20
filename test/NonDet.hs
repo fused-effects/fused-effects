@@ -27,7 +27,7 @@ tests = testGroup "NonDet"
   , testGroup "[]" $ testNonDet (RunND pure)
   ] where
   testMonad  (RunND run) = Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
-  testNonDet (RunND run) = NonDet.test (m gen) a b                         run
+  testNonDet run         = NonDet.test (m gen) a b                         run
 
 
 gen
@@ -43,12 +43,12 @@ test
   => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC [a])
+  -> RunND m
   -> [TestTree]
-test m a b runNonDet
+test m a b (RunND runNonDet)
   =  testProperty "empty is the left identity of <|>"  (forall (m a :. Nil)
     (\ m -> runNonDet (empty <|> m) === runNonDet m))
   :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
     (\ m -> runNonDet (m <|> empty) === runNonDet m))
-  :  Empty.test  m a b runNonDet
-  ++ Choose.test m a b runNonDet
+  :  Empty.test  m a b (RunND runNonDet)
+  ++ Choose.test m a b (RunND runNonDet)

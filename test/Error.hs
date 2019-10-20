@@ -25,7 +25,7 @@ tests = testGroup "Error" $
   , testGroup "ExceptT" $ testError (RunE ExceptT.runExceptT)
   ] where
   testMonad (RunE run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
-  testError (RunE run) = Error.test e (m (gen e)) a b                         run
+  testError run        = Error.test e (m (gen e)) a b                         run
 
 
 gen
@@ -46,7 +46,7 @@ test
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC (Either e a))
+  -> RunE e m
   -> [TestTree]
 test e m a b runError
   =  Throw.test e m a b runError

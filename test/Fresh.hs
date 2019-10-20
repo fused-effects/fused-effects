@@ -21,7 +21,7 @@ tests = testGroup "Fresh"
     ] >>= ($ RunS FreshC.runFresh)
   ] where
   testMonad (RunS run) = Monad.test (m gen) a b c ((,) <$> n <*> pure ()) (uncurry run)
-  testFresh (RunS run) = Fresh.test (m gen) a                                      run
+  testFresh run        = Fresh.test (m gen) a                                      run
   n = Gen.integral (R.linear 0 100)
 
 
@@ -37,9 +37,9 @@ test
   :: Has Fresh sig m
   => (forall a . Gen a -> Gen (m a))
   -> Gen a
-  -> (forall a . Int -> m a -> PureC (Int, a))
+  -> RunS Int m
   -> [TestTree]
-test m a runFresh =
+test m a (RunS runFresh) =
   [ testProperty "fresh yields unique values" . forall (Gen.integral (R.linear 0 100) :. m a :. Nil) $
     \ n m -> runFresh n (m >> fresh) /== runFresh n (m >> fresh >> fresh)
   ]

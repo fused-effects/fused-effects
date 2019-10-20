@@ -21,7 +21,7 @@ tests = testGroup "Throw" $
     ] >>= ($ RunE ThrowC.runThrow)
   ] where
   testMonad (RunE run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
-  testThrow (RunE run) = Throw.test e (m (gen e)) a b                         run
+  testThrow run        = Throw.test e (m (gen e)) a b                         run
 
 
 gen
@@ -40,9 +40,9 @@ test
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC (Either e a))
+  -> RunE e m
   -> [TestTree]
-test e m _ b runThrow =
+test e m _ b (RunE runThrow) =
   [ testProperty "throwError annihilates >>=" . forall (e :. fn @a (m b) :. Nil) $
     \ e k -> runThrow (throwError e >>= k) === runThrow (throwError e)
   ]

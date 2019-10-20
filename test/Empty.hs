@@ -23,7 +23,7 @@ tests = testGroup "Empty"
   , testGroup "Maybe"  $ testEmpty (RunND (pure . maybeToList))
   ] where
   testMonad (RunND run) = Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
-  testEmpty (RunND run) = Empty.test (m gen) a b                         run
+  testEmpty run         = Empty.test (m gen) a b                         run
 
 
 gen
@@ -40,9 +40,9 @@ test
   => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC [a])
+  -> RunND m
   -> [TestTree]
-test m _ b runEmpty =
+test m _ b (RunND runEmpty) =
   [ testProperty "empty annihilates >>=" . forall (fn @a (m b) :. Nil) $
     \ k -> runEmpty (empty >>= k) === runEmpty empty
   ]

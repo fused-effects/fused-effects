@@ -24,7 +24,7 @@ tests = testGroup "Cut"
     ] >>= ($ RunND CutC.runCutA)
   ] where
   testMonad (RunND run) = Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
-  testCut   (RunND run) = Cut.test   (m gen) a b                         run
+  testCut   run         = Cut.test   (m gen) a b                         run
 
 
 gen
@@ -45,13 +45,13 @@ test
   => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC [a])
+  -> RunND m
   -> [TestTree]
-test m a b runCut
+test m a b (RunND runCut)
   = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
     (\ k -> runCut (cutfail >>= k) === runCut cutfail))
   : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
     (\ m -> runCut (cutfail <|> m) === runCut cutfail))
   : testProperty "call delimits cutfail" (forall (m a :. Nil)
     (\ m -> runCut (call cutfail <|> m) === runCut m))
-  : NonDet.test m a b runCut
+  : NonDet.test m a b (RunND runCut)
