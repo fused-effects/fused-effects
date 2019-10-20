@@ -9,13 +9,13 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 test
-  :: (Monad m, Arg a, Arg b, Eq (f a), Eq (f b), Eq (f c), Show a, Show b, Show c, Show (f a), Show (f b), Show (f c), Vary a, Vary b, Functor s)
+  :: (Monad m, Arg a, Arg b, Eq (g a), Eq (g b), Eq (g c), Show a, Show b, Show c, Show (g a), Show (g b), Show (g c), Vary a, Vary b, Functor f)
   => (forall a . Show a => Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
   -> Gen c
-  -> Gen (s ())
-  -> (forall a . s (m a) -> PureC (f a))
+  -> Gen (f ())
+  -> (forall a . f (m a) -> PureC (g a))
   -> [TestTree]
 test m a b c s run =
   [ testProperty "return is the left-identity of >>=" . forall (s :. a :. fn (m b) :. Nil) $
