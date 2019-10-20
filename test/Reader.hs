@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Reader
 ( tests
 , gen
@@ -19,17 +19,20 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Reader"
-  [ test "ReaderC"       ReaderC.runReader
-  , test "(->)"          (fmap PureC . (&))
-  , test "ReaderT"       (flip ReaderT.runReaderT)
-  , test "RWST (Lazy)"   (runRWST LazyRWST.runRWST)
-  , test "RWST (Strict)" (runRWST StrictRWST.runRWST)
+  [ testGroup "ReaderC"       $
+    [ testMonad
+    , testReader
+    ] >>= ($ Run ReaderC.runReader)
+  , testGroup "(->)"          $ testReader (Run (fmap PureC . (&)))
+  , testGroup "ReaderT"       $ testReader (Run (flip ReaderT.runReaderT))
+  , testGroup "RWST (Lazy)"   $ testReader (Run (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)" $ testReader (Run (runRWST StrictRWST.runRWST))
   ] where
-  test :: Has (Reader R) sig m => String -> (forall a . R -> m a -> PureC a) -> TestTree
-  test name run = testGroup name
-    $  Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) (fmap Identity . uncurry run)
-    ++ Reader.test r (m (gen r)) a                             run
+  testMonad  (Run run) = Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) (fmap Identity . uncurry run)
+  testReader (Run run) = Reader.test r (m (gen r)) a                                                      run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
+
+newtype Run r m = Run (forall a . r -> m a -> PureC a)
 
 
 gen
