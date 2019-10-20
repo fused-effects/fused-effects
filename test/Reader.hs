@@ -23,11 +23,11 @@ tests = testGroup "Reader"
     [ testMonad
     , testMonadFix
     , testReader
-    ] >>= ($ RunR (uncurry ReaderC.runReader))
-  , testGroup "(->)"          $ testReader (RunR (uncurry (fmap PureC . (&))))
-  , testGroup "ReaderT"       $ testReader (RunR (uncurry (flip ReaderT.runReaderT)))
-  , testGroup "RWST (Lazy)"   $ testReader (RunR (uncurry (runRWST LazyRWST.runRWST)))
-  , testGroup "RWST (Strict)" $ testReader (RunR (uncurry (runRWST StrictRWST.runRWST)))
+    ] >>= ($ runR (uncurry ReaderC.runReader))
+  , testGroup "(->)"          $ testReader (runR (uncurry (fmap PureC . (&))))
+  , testGroup "ReaderT"       $ testReader (runR (uncurry (flip ReaderT.runReaderT)))
+  , testGroup "RWST (Lazy)"   $ testReader (runR (uncurry (runRWST LazyRWST.runRWST)))
+  , testGroup "RWST (Strict)" $ testReader (runR (uncurry (runRWST StrictRWST.runRWST)))
   ] where
   testMonad    run = Monad.test    (m (gen r)) a b c (atom "(,)" (,) <*> r <*> unit) run
   testMonadFix run = MonadFix.test (m (gen r)) a b   (atom "(,)" (,) <*> r <*> unit) run
