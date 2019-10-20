@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module Error
 ( tests
 , gen
@@ -17,14 +17,17 @@ import qualified Throw
 
 tests :: TestTree
 tests = testGroup "Error" $
-  [ test "ErrorC"  ErrorC.runError
-  , test "Either"  pure
-  , test "ExceptT" ExceptT.runExceptT
+  [ testGroup "ErrorC"  $
+    [ testMonad
+    , testError
+    ] >>= ($ Run ErrorC.runError)
+  , testGroup "Either"  $ testError (Run pure)
+  , testGroup "ExceptT" $ testError (Run ExceptT.runExceptT)
   ] where
-  test :: Has (Error E) sig m => String -> (forall a . m a -> PureC (Either E a)) -> TestTree
-  test name run = testGroup name
-    $  Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Error.test e (m (gen e)) a b                        run
+  testMonad (Run run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
+  testError (Run run) = Error.test e (m (gen e)) a b                         run
+
+newtype Run e m = Run (forall a . m a -> PureC (Either e a))
 
 
 gen
