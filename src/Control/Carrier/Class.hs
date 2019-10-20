@@ -3,6 +3,7 @@ module Control.Carrier.Class
 ( Carrier(..)
 , Has
 , send
+  -- * Re-exports
 , (:+:) (..)
 , run
 , module Control.Effect.Class
