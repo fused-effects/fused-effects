@@ -27,7 +27,6 @@ module Gen
   -- * Handlers
 , Run(..)
 , pattern RunL
-, type RunR
 , pattern RunR
 , type RunC
 , pattern RunC
@@ -183,9 +182,6 @@ pattern RunL run <- Run ((.# Identity) -> run) where
   RunL run = Run (run . runIdentity)
 
 {-# COMPLETE RunL #-}
-
--- | The type of handlers with input state, but no output state (e.g. 'Control.Carrier.Reader.ReaderC').
-type RunR f m = Run f Identity m
 
 -- | Handlers with input state, but no output state (e.g. 'Control.Carrier.Reader.ReaderC').
 pattern RunR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
