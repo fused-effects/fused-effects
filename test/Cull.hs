@@ -37,14 +37,14 @@ gen m a = choice
 
 
 test
-  :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
+  :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
   -> Gen a
   -> Gen b
-  -> Gen (Identity ())
-  -> Run Identity [] m
+  -> Gen (f ())
+  -> Run f [] m
   -> [TestTree]
-test m a b i (RunL runCull)
-  = testProperty "cull returns at most one success" (forall (a :. m a :. m a :. Nil)
-    (\ a m n -> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
-  : NonDet.test m a b i (RunL runCull)
+test m a b i (Run runCull)
+  = testProperty "cull returns at most one success" (forall (i :. a :. m a :. m a :. Nil)
+    (\ i a m n -> runCull ((cull (pure a <|> m) <|> n) <$ i) === runCull ((pure a <|> n) <$ i)))
+  : NonDet.test m a b i (Run runCull)
