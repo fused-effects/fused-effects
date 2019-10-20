@@ -24,7 +24,7 @@ module Control.Effect.Cut
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier
+import Control.Carrier.Class
 
 -- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
 --

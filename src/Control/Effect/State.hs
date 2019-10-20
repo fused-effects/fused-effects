@@ -30,7 +30,7 @@ module Control.Effect.State
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import GHC.Generics (Generic1)
 
 -- | @since 0.1.0.0

@@ -28,7 +28,7 @@ module Control.Effect.Choose
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Empty
 import Data.Bool (bool)
 import Data.List.NonEmpty (NonEmpty (..))

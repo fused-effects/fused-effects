@@ -1,11 +1,18 @@
-{-# LANGUAGE DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
 -- | An instance of the 'Carrier' class defines an interpretation of an effect signature atop a given monad.
 --
 -- @since 1.0.0.0
 module Control.Carrier.Class
 ( Carrier(..)
+, Has
+, send
+  -- * Re-exports
+, (:+:) (..)
+, run
+, module Control.Effect.Class
 ) where
 
+import {-# SOURCE #-} Control.Carrier.Pure (run)
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
@@ -16,7 +23,7 @@ import {-# SOURCE #-} Control.Effect.NonDet (NonDet)
 import Control.Effect.Pure
 import {-# SOURCE #-} Control.Effect.Reader (Reader(..))
 import {-# SOURCE #-} Control.Effect.State (State(..))
-import Control.Effect.Sum ((:+:)(..))
+import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import {-# SOURCE #-} Control.Effect.Throw (Throw(..))
 import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<), join)
@@ -40,6 +47,20 @@ import Data.Tuple (swap)
 class (HFunctor sig, Monad m) => Carrier sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   eff :: sig m a -> m a
+
+-- | @m@ is a carrier for @sig@ containing @eff@.
+--
+-- Note that if @eff@ is a sum, it will be decomposed into multiple 'Member' constraints. While this technically allows one to combine multiple unrelated effects into a single 'Has' constraint, doing so has two significant drawbacks:
+--
+-- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles.
+--
+-- 2. It defeats @ghc@’s warnings for redundant constraints, and thus can lead to a proliferation of redundant constraints as code is changed.
+type Has eff sig m = (Members eff sig, Carrier sig m)
+
+-- | Construct a request for an effect to be interpreted by some handler later on.
+send :: (Member eff sig, Carrier sig m) => eff m a -> m a
+send = eff . inj
+{-# INLINE send #-}
 
 
 -- base

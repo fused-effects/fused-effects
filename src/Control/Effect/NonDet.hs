@@ -30,7 +30,7 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (Alternative(..), optional)
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Choose (Choose(..))
 import Control.Effect.Empty (Empty(..))
 import Control.Monad (MonadPlus(..), guard)

@@ -19,7 +19,7 @@ module Control.Effect.Cull
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 
 -- | 'Cull' effects are used with 'Choose' to provide control over branching.
 --

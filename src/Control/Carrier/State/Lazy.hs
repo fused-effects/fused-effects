@@ -18,7 +18,7 @@ module Control.Carrier.State.Lazy
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

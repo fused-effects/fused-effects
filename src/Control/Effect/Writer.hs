@@ -27,7 +27,7 @@ module Control.Effect.Writer
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 
 -- | @since 0.1.0.0
 data Writer w m k

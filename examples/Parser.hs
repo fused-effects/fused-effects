@@ -3,7 +3,7 @@ module Parser
 ( example
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Carrier.Cut.Church
 import Control.Carrier.NonDet.Church
 import Control.Carrier.State.Strict

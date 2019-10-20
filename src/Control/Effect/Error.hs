@@ -20,7 +20,7 @@ module Control.Effect.Error
 , module Control.Effect.Catch
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Catch
 import Control.Effect.Throw
 
