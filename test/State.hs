@@ -38,7 +38,7 @@ tests = testGroup "State"
   ] where
   testMonad    run = Monad.test    (m (gen s)) a b c (atom "(,)" (,) <*> s <*> unit) run
   testMonadFix run = MonadFix.test (m (gen s)) a b   (atom "(,)" (,) <*> s <*> unit) run
-  testState    run = State.test s  (m (gen s)) a                                     run
+  testState    run = State.test    (m (gen s)) a                         s           run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
@@ -56,12 +56,12 @@ gen s _ a = choice
 
 test
   :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s)
-  => Gen s
-  -> GenM m
+  => GenM m
   -> Gen a
+  -> Gen s
   -> RunC s ((,) s) m
   -> [TestTree]
-test s m a (RunC runState) =
+test m a s (RunC runState) =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
     \ s k -> runState s (get >>= k) === runState s (k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
