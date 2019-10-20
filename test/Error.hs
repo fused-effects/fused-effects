@@ -20,11 +20,11 @@ tests = testGroup "Error" $
   [ testGroup "ErrorC"  $
     [ testMonad
     , testError
-    ] >>= ($ RunE ErrorC.runError)
-  , testGroup "Either"  $ testError (RunE pure)
-  , testGroup "ExceptT" $ testError (RunE ExceptT.runExceptT)
+    ] >>= ($ RunL ErrorC.runError)
+  , testGroup "Either"  $ testError (RunL pure)
+  , testGroup "ExceptT" $ testError (RunL ExceptT.runExceptT)
   ] where
-  testMonad (RunE run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (liftRunL run)
+  testMonad (RunL run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (liftRunL run)
   testError run        = Error.test e (m (gen e)) a b                                  run
 
 
@@ -46,7 +46,7 @@ test
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> RunE e m
+  -> RunL (Either e) m
   -> [TestTree]
 test e m a b runError
   =  Throw.test e m a b runError

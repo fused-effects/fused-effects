@@ -25,9 +25,9 @@ test
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> RunE e m
+  -> RunL (Either e) m
   -> [TestTree]
-test e m a _ (RunE runCatch) =
+test e m a _ (RunL runCatch) =
   [ testProperty "catchError intercepts throwError" . forall (e :. fn (m a) :. Nil) $
     \ e h -> runCatch (throwError e `catchError` h) === runCatch (h e)
   ]
