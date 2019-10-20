@@ -18,8 +18,8 @@ import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Carrier.State.Strict
 import Control.Effect.Writer
-import Control.Effect.Writer as X (Writer)
-import Control.Effect.Writer as X hiding (Writer)
+import Control.Effect.Trace as X (Trace)
+import Control.Effect.Trace as X hiding (Trace)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
