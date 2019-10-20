@@ -36,17 +36,17 @@ gen m a = choice [ Empty.gen m a, Choose.gen m a ]
 
 
 test
-  :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
+  :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
   -> Gen a
   -> Gen b
-  -> Gen (Identity ())
-  -> Run Identity [] m
+  -> Gen (f ())
+  -> Run f [] m
   -> [TestTree]
-test m a b i (RunL runNonDet)
-  =  testProperty "empty is the left identity of <|>"  (forall (m a :. Nil)
-    (\ m -> runNonDet (empty <|> m) === runNonDet m))
-  :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
-    (\ m -> runNonDet (m <|> empty) === runNonDet m))
-  :  Empty.test  m a b i (RunL runNonDet)
-  ++ Choose.test m a b i (RunL runNonDet)
+test m a b i (Run runNonDet)
+  =  testProperty "empty is the left identity of <|>"  (forall (i :. m a :. Nil)
+    (\ i m -> runNonDet ((empty <|> m) <$ i) === runNonDet (m <$ i)))
+  :  testProperty "empty is the right identity of <|>" (forall (i :. m a :. Nil)
+    (\ i m -> runNonDet ((m <|> empty) <$ i) === runNonDet (m <$ i)))
+  :  Empty.test  m a b i (Run runNonDet)
+  ++ Choose.test m a b i (Run runNonDet)
