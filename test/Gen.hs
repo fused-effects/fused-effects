@@ -174,6 +174,7 @@ string :: Range Int -> Gen Char -> Gen String
 string range cs = Gen (showing <$> Hedgehog.Gen.string range (runTerm <$> runGen cs))
 
 
+-- | This captures the shape of the handler function passed to the "Monad" & "MonadFix" tests.
 newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
 
 type RunL g m = Run Identity g m
