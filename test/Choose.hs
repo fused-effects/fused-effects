@@ -33,16 +33,16 @@ gen m a = addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a)
 
 
 test
-  :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
+  :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
   -> Gen a
   -> Gen b
-  -> Gen (Identity ())
-  -> Run Identity [] m
+  -> Gen (f ())
+  -> Run f [] m
   -> [TestTree]
-test m a b _ (RunL runChoose) =
-  [ testProperty ">>= distributes over <|>" . forall (m a :. m a :. fn (m b) :. Nil) $
-    \ m n k -> runChoose ((m <|> n) >>= k) === runChoose ((m >>= k) <|> (n >>= k))
-  , testProperty "<|> is associative" . forall (m a :. m a :. m a :. Nil) $
-    \ m n o -> runChoose ((m <|> n) <|> o) === runChoose (m <|> (n <|> o))
+test m a b i (Run runChoose) =
+  [ testProperty ">>= distributes over <|>" . forall (i :. m a :. m a :. fn (m b) :. Nil) $
+    \ i m n k -> runChoose (((m <|> n) >>= k) <$ i) === runChoose (((m >>= k) <|> (n >>= k)) <$ i)
+  , testProperty "<|> is associative" . forall (i :. m a :. m a :. m a :. Nil) $
+    \ i m n o -> runChoose (((m <|> n) <|> o) <$ i) === runChoose ((m <|> (n <|> o)) <$ i)
   ]
