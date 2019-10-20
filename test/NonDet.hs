@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module NonDet
 ( tests
 , gen
@@ -21,13 +21,16 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "NonDet"
-  [ test "NonDetC (Church)" Church.NonDetC.runNonDetA
-  , test "[]"               pure
+  [ testGroup "NonDetC (Church)" $
+    [ testMonad
+    , testNonDet
+    ] >>= ($ Run Church.NonDetC.runNonDetA)
+  , testGroup "[]" $ testNonDet (Run pure)
   ] where
-  test :: Has NonDet sig m => String -> (forall a . m a -> PureC [a]) -> TestTree
-  test name run = testGroup name
-    $  Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
-    ++ NonDet.test (m gen) a b                        run
+  testMonad  (Run run) = Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
+  testNonDet (Run run) = NonDet.test (m gen) a b                         run
+
+newtype Run m = Run (forall a . m a -> PureC [a])
 
 
 gen
