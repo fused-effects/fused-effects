@@ -10,6 +10,7 @@ import Control.Effect.Fresh
 import Gen
 import qualified Hedgehog.Range as R
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -17,11 +18,13 @@ tests :: TestTree
 tests = testGroup "Fresh"
   [ testGroup "FreshC" $
     [ testMonad
+    , testMonadFix
     , testFresh
     ] >>= ($ RunS FreshC.runFresh)
   ] where
-  testMonad run = Monad.test   (m gen) a b c ((,) <$> n <*> pure ()) run
-  testFresh run = Fresh.test n (m gen) a                             run
+  testMonad    run = Monad.test    (m gen) a b c ((,) <$> n <*> pure ()) run
+  testMonadFix run = MonadFix.test (m gen) a b   ((,) <$> n <*> pure ()) run
+  testFresh    run = Fresh.test n  (m gen) a                             run
   n = Gen.integral (R.linear 0 100)
 
 
