@@ -13,6 +13,7 @@ import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -20,6 +21,7 @@ tests :: TestTree
 tests = testGroup "Reader"
   [ testGroup "ReaderC"       $
     [ testMonad
+    , testMonadFix
     , testReader
     ] >>= ($ RunR (uncurry ReaderC.runReader))
   , testGroup "(->)"          $ testReader (RunR (uncurry (fmap PureC . (&))))
@@ -27,8 +29,9 @@ tests = testGroup "Reader"
   , testGroup "RWST (Lazy)"   $ testReader (RunR (uncurry (runRWST LazyRWST.runRWST)))
   , testGroup "RWST (Strict)" $ testReader (RunR (uncurry (runRWST StrictRWST.runRWST)))
   ] where
-  testMonad  run = Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) run
-  testReader run = Reader.test r (m (gen r)) a                             run
+  testMonad    run = Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) run
+  testMonadFix run = MonadFix.test (m (gen r)) a b   ((,) <$> r <*> pure ()) run
+  testReader   run = Reader.test r (m (gen r)) a                             run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
