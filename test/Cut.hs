@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Cut
 ( tests
 , gen
@@ -18,12 +18,15 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Cut"
-  [ test "CutC" CutC.runCutA
+  [ testGroup "CutC" $
+    [ testMonad
+    , testCut
+    ] >>= ($ Run CutC.runCutA)
   ] where
-  test :: (Has Cut sig m, Has NonDet sig m) => String -> (forall a . m a -> PureC [a]) -> TestTree
-  test name run = testGroup name
-    $  Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Cut.test   (m gen) a b                        run
+  testMonad (Run run) = Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
+  testCut   (Run run) = Cut.test   (m gen) a b                         run
+
+newtype Run m = Run (forall a . m a -> PureC [a])
 
 
 gen
