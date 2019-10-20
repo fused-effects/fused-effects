@@ -6,14 +6,12 @@ module Control.Carrier.Error.Either
   runError
 , ErrorC(..)
   -- * Error effect
-, module X
+, module Control.Effect.Error
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Effect.Error
-import Control.Effect.Error as X (Error, Throw, Catch)
-import Control.Effect.Error as X hiding (Error, Throw, Catch)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
