@@ -6,6 +6,7 @@ module Cut
 ) where
 
 import qualified Control.Carrier.Cut.Church as CutC
+import Control.Carrier.Reader
 import Control.Effect.Choose
 import Control.Effect.Cut (Cut, call, cutfail)
 import Control.Effect.NonDet (NonDet)
@@ -13,6 +14,7 @@ import Gen
 import qualified Monad
 -- import qualified MonadFix
 import qualified NonDet
+import qualified Reader
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -23,6 +25,8 @@ tests = testGroup "Cut"
     -- , testMonadFix
     , testCut
     ] >>= ($ runL CutC.runCutA)
+  , testGroup "ReaderC · CutC" $
+     Cut.test (m (\ m a -> choice [gen m a, Reader.gen r m a])) a b (atom "(,)" (,) <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
