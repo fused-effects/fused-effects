@@ -5,22 +5,22 @@ module Gen
   -- * Polymorphic generation & instantiation
 , m
 , genT
-, a
-, b
-, c
-, e
-, r
-, s
-, w
-, unit
 , T(..)
+, a
 , A
+, b
 , B
+, c
 , C
+, e
 , E
+, r
 , R
+, s
 , S
+, w
 , W
+, unit
   -- * Handlers
 , Run(..)
 , type RunL
