@@ -152,7 +152,7 @@ fn b = Gen (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT 
 
 termFn :: Gen b -> Gen (a -> b)
 termFn b = Gen $ recursive Hedgehog.Gen.choice
-  [ runGen (Gen.label "const" const <*> b) ]
+  [ runGen (atom "const" const <*> b) ]
   []
 
 choice :: [Gen a] -> Gen a
