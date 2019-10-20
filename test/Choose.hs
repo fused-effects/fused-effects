@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module Choose
 ( tests
 , gen
@@ -16,13 +16,16 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Choose"
-  [ test "ChooseC"  (ChooseC.runChooseS (pure . pure))
-  , test "NonEmpty" (pure . toList)
+  [ testGroup "ChooseC"  $
+    [ testMonad
+    , testChoose
+    ] >>= ($ Run (ChooseC.runChooseS (pure . pure)))
+  , testGroup "NonEmpty" $ testChoose (Run (pure . toList))
   ] where
-  test :: Has Choose sig m => String -> (forall a . m a -> PureC [a]) -> TestTree
-  test name run = testGroup name
-    $  Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Choose.test (m gen) a b                        run
+  testMonad  (Run run) = Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
+  testChoose (Run run) = Choose.test (m gen) a b                         run
+
+newtype Run m = Run (forall a . m a -> PureC [a])
 
 
 gen
