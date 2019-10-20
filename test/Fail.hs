@@ -20,7 +20,7 @@ tests = testGroup "Fail" $
     [ testMonad
     , testMonadFix
     , testFail
-    ] >>= ($ RunL FailC.runFail)
+    ] >>= ($ runL FailC.runFail)
   ] where
   testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run

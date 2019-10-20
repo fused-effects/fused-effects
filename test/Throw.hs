@@ -19,7 +19,7 @@ tests = testGroup "Throw" $
     [ testMonad
     , testMonadFix
     , testThrow
-    ] >>= ($ RunL ThrowC.runThrow)
+    ] >>= ($ runL ThrowC.runThrow)
   ] where
   testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run

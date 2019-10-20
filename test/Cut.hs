@@ -22,7 +22,7 @@ tests = testGroup "Cut"
     [ testMonad
     -- , testMonadFix
     , testCut
-    ] >>= ($ RunL CutC.runCutA)
+    ] >>= ($ runL CutC.runCutA)
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run

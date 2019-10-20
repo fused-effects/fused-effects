@@ -22,7 +22,7 @@ tests = testGroup "Cull"
     [ testMonad
     , testMonadFix
     , testCull
-    ] >>= ($ RunL CullC.runCullA)
+    ] >>= ($ runL CullC.runCullA)
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run

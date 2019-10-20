@@ -26,12 +26,12 @@ tests = testGroup "Writer"
     [ testMonad
     , testMonadFix
     , testWriter
-    ] >>= ($ RunL WriterC.runWriter)
-  , testGroup "(,)"              $ testWriter (RunL pure)
-  , testGroup "WriterT (Lazy)"   $ testWriter (RunL (fmap swap . LazyWriterT.runWriterT))
-  , testGroup "WriterT (Strict)" $ testWriter (RunL (fmap swap . StrictWriterT.runWriterT))
-  , testGroup "RWST (Lazy)"      $ testWriter (RunL (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)"    $ testWriter (RunL (runRWST StrictRWST.runRWST))
+    ] >>= ($ runL WriterC.runWriter)
+  , testGroup "(,)"              $ testWriter (runL pure)
+  , testGroup "WriterT (Lazy)"   $ testWriter (runL (fmap swap . LazyWriterT.runWriterT))
+  , testGroup "WriterT (Strict)" $ testWriter (runL (fmap swap . StrictWriterT.runWriterT))
+  , testGroup "RWST (Lazy)"      $ testWriter (runL (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"    $ testWriter (runL (runRWST StrictRWST.runRWST))
   ] where
   testMonad    run = Monad.test    (m (gen w b)) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m (gen w b)) a b   (identity <*> unit) run

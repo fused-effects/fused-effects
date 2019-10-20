@@ -20,8 +20,8 @@ tests = testGroup "Choose"
     [ testMonad
     , testMonadFix
     , testChoose
-    ] >>= ($ RunL (ChooseC.runChooseS (pure . pure)))
-  , testGroup "NonEmpty" $ testChoose (RunL (pure . toList))
+    ] >>= ($ runL (ChooseC.runChooseS (pure . pure)))
+  , testGroup "NonEmpty" $ testChoose (runL (pure . toList))
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run

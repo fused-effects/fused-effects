@@ -20,8 +20,8 @@ tests = testGroup "Empty"
     [ testMonad
     , testMonadFix
     , testEmpty
-    ] >>= ($ RunL (fmap maybeToList . EmptyC.runEmpty))
-  , testGroup "Maybe"  $ testEmpty (RunL (pure . maybeToList))
+    ] >>= ($ runL (fmap maybeToList . EmptyC.runEmpty))
+  , testGroup "Maybe"  $ testEmpty (runL (pure . maybeToList))
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run

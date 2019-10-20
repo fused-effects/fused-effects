@@ -21,9 +21,9 @@ tests = testGroup "Error" $
     [ testMonad
     , testMonadFix
     , testError
-    ] >>= ($ RunL ErrorC.runError)
-  , testGroup "Either"  $ testError (RunL pure)
-  , testGroup "ExceptT" $ testError (RunL ExceptT.runExceptT)
+    ] >>= ($ runL ErrorC.runError)
+  , testGroup "Either"  $ testError (runL pure)
+  , testGroup "ExceptT" $ testError (runL ExceptT.runExceptT)
   ] where
   testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run

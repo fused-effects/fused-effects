@@ -26,7 +26,7 @@ module Gen
 , identity
   -- * Handlers
 , Run(..)
-, pattern RunL
+, runL
 , pattern RunR
 , pattern RunC
   -- * Generation
@@ -176,11 +176,8 @@ string range cs = Gen (showing <$> Hedgehog.Gen.string range (runTerm <$> runGen
 newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
 
 -- | Handlers with output state, but no input state (e.g. 'Control.Carrier.Error.Either.ErrorC').
-pattern RunL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
-pattern RunL run <- Run ((.# Identity) -> run) where
-  RunL run = Run (run . runIdentity)
-
-{-# COMPLETE RunL #-}
+runL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
+runL run = Run (run . runIdentity)
 
 -- | Handlers with input state, but no output state (e.g. 'Control.Carrier.Reader.ReaderC').
 pattern RunR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
@@ -198,9 +195,6 @@ pattern RunC run <- Run (curry' -> run) where
 
 
 -- Regrettable necessities for composing rank-n functions.
-
-(.#) :: (forall a . f (m a) -> PureC (g a)) -> (forall a . m a -> f (m a)) -> (forall a . m a -> PureC (g a))
-(f .# g) m = f (g m)
 
 (#.) :: (forall a . PureC (g a) -> PureC a) -> (forall a . f (m a) -> PureC (g a)) -> (forall a . f (m a) -> PureC a)
 (f #. g) m = f (g m)
