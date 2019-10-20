@@ -20,8 +20,7 @@ gen _ m a = label "catchError" catchError <*> m a <*> fn @e (m a)
 
 
 test
-  :: forall e m a b sig
-  .  (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e)
+  :: (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e)
   => Gen e
   -> (forall a . Gen a -> Gen (m a))
   -> Gen a
