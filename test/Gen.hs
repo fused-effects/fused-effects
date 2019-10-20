@@ -223,9 +223,14 @@ instance Forall (Rec '[]) (PropertyT IO ()) where
 
 instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
   forall' (g :. gs) f = do
-    (a, labels) <- Hedgehog.forAll (runWriterT (runGen g))
+    HideLabels (a, labels) <- Hedgehog.forAll (HideLabels <$> runWriterT (runGen g))
     traverse_ Hedgehog.label labels
     forall' gs (f (runTerm a))
+
+newtype HideLabels a = HideLabels { unHideLabels :: (a, Set.Set LabelName) }
+
+instance Show a => Show (HideLabels a) where
+  showsPrec d = showsPrec d . fst . unHideLabels
 
 
 showing :: Show a => a -> Term a
