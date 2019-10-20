@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators #-}
 module Reader
 ( tests
 , gen
@@ -12,6 +12,7 @@ import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import Data.Function ((&))
 import Gen
+import GHC.Generics ((:.:)(..))
 import qualified Monad
 import qualified MonadFix
 import Test.Tasty
@@ -23,16 +24,17 @@ tests = testGroup "Reader"
     [ testMonad
     , testMonadFix
     , testReader
-    ] >>= ($ runR (uncurry ReaderC.runReader))
-  , testGroup "(->)"          $ testReader (runR (uncurry (fmap PureC . (&))))
-  , testGroup "ReaderT"       $ testReader (runR (uncurry (flip ReaderT.runReaderT)))
-  , testGroup "RWST (Lazy)"   $ testReader (runR (uncurry (runRWST LazyRWST.runRWST)))
-  , testGroup "RWST (Strict)" $ testReader (runR (uncurry (runRWST StrictRWST.runRWST)))
+    ] >>= ($ runR (uncurry ReaderC.runReader . lower))
+  , testGroup "(->)"          $ testReader (runR (uncurry (fmap PureC . (&))           . lower))
+  , testGroup "ReaderT"       $ testReader (runR (uncurry (flip ReaderT.runReaderT)    . lower))
+  , testGroup "RWST (Lazy)"   $ testReader (runR (uncurry (runRWST LazyRWST.runRWST)   . lower))
+  , testGroup "RWST (Strict)" $ testReader (runR (uncurry (runRWST StrictRWST.runRWST) . lower))
   ] where
-  testMonad    run = Monad.test    (m (gen r)) a b c (atom "(,)" (,) <*> r <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen r)) a b   (atom "(,)" (,) <*> r <*> unit) run
-  testReader   run = Reader.test   (m (gen r)) a                         r           run
+  testMonad    run = Monad.test    (m (gen r)) a b c (atom "Comp1" Comp1 <*> (identity <*> (atom "(,)" (,) <*> r <*> unit))) run
+  testMonadFix run = MonadFix.test (m (gen r)) a b   (atom "Comp1" Comp1 <*> (identity <*> (atom "(,)" (,) <*> r <*> unit))) run
+  testReader   run = Reader.test r (m (gen r)) a                             (identity <*>                           unit)   run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
+  lower = runIdentity . unComp1
 
 
 gen
@@ -48,15 +50,16 @@ gen r m a = choice
 
 
 test
-  :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r)
-  => GenM m
+  :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r, Functor f)
+  => Gen r
+  -> GenM m
   -> Gen a
-  -> Gen r
-  -> Run ((,) r) Identity m
+  -> Gen (f ())
+  -> Run (f :.: ((,) r)) Identity m
   -> [TestTree]
-test m a r (Run runReader) =
-  [ testProperty "ask returns the environment variable" . forall (r :. fn (m a) :. Nil) $
-    \ r k -> runReader (r, ask >>= k) === runReader (r, k r)
-  , testProperty "local modifies the environment variable" . forall (r :. fn r :. m a :. Nil) $
-    \ r f m -> runReader (r, local f m) === runReader (f r, m)
+test r m a i (Run runReader) =
+  [ testProperty "ask returns the environment variable" . forall (i :. r :. fn (m a) :. Nil) $
+    \ i r k -> runReader (Comp1 ((r, ask >>= k) <$ i)) === runReader (Comp1 ((r, k r) <$ i))
+  , testProperty "local modifies the environment variable" . forall (i :. r :. fn r :. m a :. Nil) $
+    \ i r f m -> runReader (Comp1 ((r, local f m) <$ i)) === runReader (Comp1 ((f r, m) <$ i))
   ]
