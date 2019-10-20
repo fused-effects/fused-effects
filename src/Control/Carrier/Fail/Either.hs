@@ -10,7 +10,7 @@ module Control.Carrier.Fail.Either
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Carrier.Error.Either
 import Control.Effect.Fail
 import Control.Monad (MonadPlus(..))

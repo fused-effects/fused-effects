@@ -3,6 +3,8 @@ module Control.Carrier.Class
 ( Carrier(..)
 , Has
 , send
+, HFunctor
+, Effect
 ) where
 
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))

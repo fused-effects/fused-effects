@@ -17,7 +17,7 @@ module Control.Effect.Throw
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import GHC.Generics (Generic1)
 
 data Throw e (m :: * -> *) k

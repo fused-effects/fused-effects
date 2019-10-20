@@ -8,7 +8,7 @@ module Control.Carrier.Throw.Either
 ) where
 
 import Control.Applicative (Alternative)
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Carrier.Error.Either
 import Control.Effect.Throw
 import Control.Monad (MonadPlus)

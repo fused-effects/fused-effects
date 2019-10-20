@@ -13,7 +13,7 @@ module Control.Carrier.Empty.Maybe
 , module Control.Effect.Empty
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Empty
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix

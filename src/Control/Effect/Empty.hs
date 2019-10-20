@@ -21,7 +21,7 @@ module Control.Effect.Empty
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import GHC.Generics (Generic1)
 
 -- | @since 1.0.0.0

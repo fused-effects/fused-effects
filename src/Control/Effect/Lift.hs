@@ -20,7 +20,7 @@ module Control.Effect.Lift
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import GHC.Generics
 
 -- | @since 0.1.0.0

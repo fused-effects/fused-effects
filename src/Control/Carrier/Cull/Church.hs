@@ -14,7 +14,7 @@ module Control.Carrier.Cull.Church
 ) where
 
 import Control.Applicative (liftA2)
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
 import Control.Effect.Cull
