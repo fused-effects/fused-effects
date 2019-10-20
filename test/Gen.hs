@@ -197,9 +197,9 @@ pattern RunR run <- Run ((fmap runIdentity #.) -> run) where
 
 {-# COMPLETE RunR #-}
 
-type RunS s m = Run ((,) s) ((,) s) m
+type RunS s f m = Run ((,) s) f m
 
-pattern RunS :: (forall a . s -> m a -> PureC (s, a)) -> Run ((,) s) ((,) s) m
+pattern RunS :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m
 pattern RunS run <- Run (curry' -> run) where
   RunS run = Run (uncurry run)
 
