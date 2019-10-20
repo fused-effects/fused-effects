@@ -31,16 +31,16 @@ gen e _ _ = label "throwError" throwError <*> e
 
 
 test
-  :: forall e m a b sig
-  .  (Has (Throw e) sig m, Arg a, Eq b, Eq e, Show a, Show b, Show e, Vary a)
+  :: forall e m a b f sig
+  .  (Has (Throw e) sig m, Arg a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Functor f)
   => Gen e
   -> GenM m
   -> Gen a
   -> Gen b
-  -> Gen (Identity ())
-  -> Run Identity (Either e) m
+  -> Gen (f ())
+  -> Run f (Either e) m
   -> [TestTree]
-test e m _ b _ (RunL runThrow) =
-  [ testProperty "throwError annihilates >>=" . forall (e :. fn @a (m b) :. Nil) $
-    \ e k -> runThrow (throwError e >>= k) === runThrow (throwError e)
+test e m _ b i (Run runThrow) =
+  [ testProperty "throwError annihilates >>=" . forall (i :. e :. fn @a (m b) :. Nil) $
+    \ i e k -> runThrow ((throwError e >>= k) <$ i) === runThrow ((throwError e) <$ i)
   ]
