@@ -11,7 +11,7 @@ import Control.Effect.Cut (Cut, call, cutfail)
 import Control.Effect.NonDet (NonDet)
 import Gen
 import qualified Monad
-import qualified MonadFix
+-- import qualified MonadFix
 import qualified NonDet
 import Test.Tasty
 import Test.Tasty.Hedgehog
@@ -20,12 +20,12 @@ tests :: TestTree
 tests = testGroup "Cut"
   [ testGroup "CutC" $
     [ testMonad
-    , testMonadFix
+    -- , testMonadFix
     , testCut
     ] >>= ($ RunL CutC.runCutA)
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
+  -- testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
   testCut      run = Cut.test      (m gen) a b                       run
 
 
