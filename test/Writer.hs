@@ -6,7 +6,7 @@ module Writer
 ) where
 
 import Control.Arrow ((&&&))
-import qualified Control.Carrier.Writer.Strict as StrictWriterC
+import qualified Control.Carrier.Writer.Strict as WriterC
 import Control.Effect.Writer
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
@@ -23,11 +23,11 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testGroup "WriterC (Strict)" $
+  [ testGroup "WriterC" $
     [ testMonad
     , testMonadFix
     , testWriter
-    ] >>= ($ RunL StrictWriterC.runWriter)
+    ] >>= ($ RunL WriterC.runWriter)
   , testGroup "(,)"              $ testWriter (RunL pure)
   , testGroup "WriterT (Lazy)"   $ testWriter (RunL (fmap swap . LazyWriterT.runWriterT))
   , testGroup "WriterT (Strict)" $ testWriter (RunL (fmap swap . StrictWriterT.runWriterT))
