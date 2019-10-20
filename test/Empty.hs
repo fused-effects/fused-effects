@@ -25,7 +25,7 @@ tests = testGroup "Empty"
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testEmpty    run = Empty.test    (m gen) a b                       run
+  testEmpty    run = Empty.test    (m gen) a b   (identity <*> unit) run
 
 
 gen :: Has Empty sig m => GenM m -> GenM m
@@ -38,9 +38,10 @@ test
   => GenM m
   -> Gen a
   -> Gen b
-  -> RunL [] m
+  -> Gen (Identity ())
+  -> Run Identity [] m
   -> [TestTree]
-test m _ b (RunL runEmpty) =
+test m _ b _ (RunL runEmpty) =
   [ testProperty "empty annihilates >>=" . forall (fn @a (m b) :. Nil) $
     \ k -> runEmpty (empty >>= k) === runEmpty empty
   ]

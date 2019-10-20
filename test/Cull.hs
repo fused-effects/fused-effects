@@ -26,7 +26,7 @@ tests = testGroup "Cull"
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testCull     run = Cull.test     (m gen) a b                       run
+  testCull     run = Cull.test     (m gen) a b   (identity <*> unit) run
 
 
 gen :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenM m
@@ -41,9 +41,10 @@ test
   => GenM m
   -> Gen a
   -> Gen b
-  -> RunL [] m
+  -> Gen (Identity ())
+  -> Run Identity [] m
   -> [TestTree]
-test m a b (RunL runCull)
+test m a b s (RunL runCull)
   = testProperty "cull returns at most one success" (forall (a :. m a :. m a :. Nil)
     (\ a m n -> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
-  : NonDet.test m a b (RunL runCull)
+  : NonDet.test m a b s (RunL runCull)

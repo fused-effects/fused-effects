@@ -26,7 +26,7 @@ tests = testGroup "Cut"
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testCut      run = Cut.test      (m gen) a b                       run
+  testCut      run = Cut.test      (m gen) a b   (identity <*> unit) run
 
 
 gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
@@ -43,13 +43,14 @@ test
   => GenM m
   -> Gen a
   -> Gen b
-  -> RunL [] m
+  -> Gen (Identity ())
+  -> Run Identity [] m
   -> [TestTree]
-test m a b (RunL runCut)
+test m a b s (RunL runCut)
   = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
     (\ k -> runCut (cutfail >>= k) === runCut cutfail))
   : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
     (\ m -> runCut (cutfail <|> m) === runCut cutfail))
   : testProperty "call delimits cutfail" (forall (m a :. Nil)
     (\ m -> runCut (call cutfail <|> m) === runCut m))
-  : NonDet.test m a b (RunL runCut)
+  : NonDet.test m a b s (RunL runCut)

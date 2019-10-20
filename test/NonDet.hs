@@ -28,7 +28,7 @@ tests = testGroup "NonDet"
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testNonDet   run = NonDet.test   (m gen) a b                       run
+  testNonDet   run = NonDet.test   (m gen) a b   (identity <*> unit) run
 
 
 gen :: Has NonDet sig m => GenM m -> GenM m
@@ -40,12 +40,13 @@ test
   => GenM m
   -> Gen a
   -> Gen b
-  -> RunL [] m
+  -> Gen (Identity ())
+  -> Run Identity [] m
   -> [TestTree]
-test m a b (RunL runNonDet)
+test m a b s (RunL runNonDet)
   =  testProperty "empty is the left identity of <|>"  (forall (m a :. Nil)
     (\ m -> runNonDet (empty <|> m) === runNonDet m))
   :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
     (\ m -> runNonDet (m <|> empty) === runNonDet m))
-  :  Empty.test  m a b (RunL runNonDet)
-  ++ Choose.test m a b (RunL runNonDet)
+  :  Empty.test  m a b s (RunL runNonDet)
+  ++ Choose.test m a b s (RunL runNonDet)

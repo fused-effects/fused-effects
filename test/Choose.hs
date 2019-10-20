@@ -25,7 +25,7 @@ tests = testGroup "Choose"
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testChoose   run = Choose.test   (m gen) a b                       run
+  testChoose   run = Choose.test   (m gen) a b   (identity <*> unit) run
 
 
 gen :: Has Choose sig m => GenM m -> GenM m
@@ -37,9 +37,10 @@ test
   => GenM m
   -> Gen a
   -> Gen b
-  -> RunL [] m
+  -> Gen (Identity ())
+  -> Run Identity [] m
   -> [TestTree]
-test m a b (RunL runChoose) =
+test m a b _ (RunL runChoose) =
   [ testProperty ">>= distributes over <|>" . forall (m a :. m a :. fn (m b) :. Nil) $
     \ m n k -> runChoose ((m <|> n) >>= k) === runChoose ((m >>= k) <|> (n >>= k))
   , testProperty "<|> is associative" . forall (m a :. m a :. m a :. Nil) $
