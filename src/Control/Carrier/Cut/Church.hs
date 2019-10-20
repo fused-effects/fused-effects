@@ -14,6 +14,7 @@ module Control.Carrier.Cut.Church
 ) where
 
 import Control.Carrier
+import Control.Monad (join)
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
@@ -90,7 +91,7 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
   eff (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutA) other) >>= foldr cons nil
+  eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle (Leaf ()) (fmap join . traverse (runCut (fmap . Fork . Leaf) (pure Nil) (pure Fail))) other) >>= foldr cons nil
   {-# INLINE eff #-}
 
 
