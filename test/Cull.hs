@@ -12,6 +12,7 @@ import Control.Effect.NonDet (NonDet)
 import Data.Functor.Identity (Identity(..))
 import Gen
 import qualified Monad
+import qualified MonadFix
 import qualified NonDet
 import Test.Tasty
 import Test.Tasty.Hedgehog
@@ -20,11 +21,13 @@ tests :: TestTree
 tests = testGroup "Cull"
   [ testGroup "CullC" $
     [ testMonad
+    , testMonadFix
     , testCull
     ] >>= ($ RunL CullC.runCullA)
   ] where
-  testMonad run = Monad.test (m gen) a b c (pure (Identity ())) run
-  testCull  run = Cull.test  (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen) a b c (pure (Identity ())) run
+  testMonadFix run = MonadFix.test (m gen) a b   (pure (Identity ())) run
+  testCull     run = Cull.test     (m gen) a b                        run
 
 
 gen :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenM m
