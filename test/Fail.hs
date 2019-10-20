@@ -33,16 +33,16 @@ gen e _ _ = label "fail" Fail.fail <*> e
 
 
 test
-  :: forall m a b
-  .  (MonadFail m, Arg a, Eq b, Show a, Show b, Vary a)
+  :: forall m a b f
+  .  (MonadFail m, Arg a, Eq b, Show a, Show b, Vary a, Functor f)
   => Gen String
   -> GenM m
   -> Gen a
   -> Gen b
-  -> Gen (Identity ())
-  -> Run Identity (Either String) m
+  -> Gen (f ())
+  -> Run f (Either String) m
   -> [TestTree]
-test msg m _ b _ (RunL runThrow) =
-  [ testProperty "fail annihilates >>=" . forall (msg :. fn @a (m b) :. Nil) $
-    \ s k -> runThrow (Fail.fail s >>= k) === runThrow (Fail.fail s)
+test msg m _ b i (Run runThrow) =
+  [ testProperty "fail annihilates >>=" . forall (i :. msg :. fn @a (m b) :. Nil) $
+    \ i s k -> runThrow ((Fail.fail s >>= k) <$ i) === runThrow ((Fail.fail s) <$ i)
   ]
