@@ -61,9 +61,9 @@ test
   -> Gen s
   -> Run ((,) s) ((,) s) m
   -> [TestTree]
-test m a s (RunC runState) =
+test m a s (Run runState) =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
-    \ s k -> runState s (get >>= k) === runState s (k s)
+    \ s k -> runState (s, get >>= k) === runState (s, k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
-    \ s s' m -> runState s (put s' >> m) === runState s' m
+    \ s s' m -> runState (s, put s' >> m) === runState (s', m)
   ]
