@@ -33,15 +33,15 @@ gen _ _ = label "empty" empty
 
 
 test
-  :: forall a b m sig
-  .  (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a)
+  :: forall a b m f sig
+  .  (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
   -> Gen a
   -> Gen b
-  -> Gen (Identity ())
-  -> Run Identity [] m
+  -> Gen (f ())
+  -> Run f [] m
   -> [TestTree]
-test m _ b _ (RunL runEmpty) =
-  [ testProperty "empty annihilates >>=" . forall (fn @a (m b) :. Nil) $
-    \ k -> runEmpty (empty >>= k) === runEmpty empty
+test m _ b i (Run runEmpty) =
+  [ testProperty "empty annihilates >>=" . forall (i :. fn @a (m b) :. Nil) $
+    \ i k -> runEmpty ((empty >>= k) <$ i) === runEmpty (empty <$ i)
   ]
