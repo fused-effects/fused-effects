@@ -24,7 +24,7 @@ tests = testGroup "Fresh"
   ] where
   testMonad    run = Monad.test    (m gen) a b c (atom "(,)" (,) <*> n <*> unit) run
   testMonadFix run = MonadFix.test (m gen) a b   (atom "(,)" (,) <*> n <*> unit) run
-  testFresh    run = Fresh.test    (m gen) a                         n           run
+  testFresh    run = Fresh.test    (m gen) a     (atom "(,)" (,) <*> n <*> unit) run
   n = Gen.integral (R.linear 0 100)
 
 
@@ -33,13 +33,13 @@ gen _ a = atom "fmap" fmap <*> fn a <*> label "fresh" fresh
 
 
 test
-  :: Has Fresh sig m
+  :: (Has Fresh sig m, Functor f)
   => GenM m
   -> Gen a
-  -> Gen Int
-  -> Run ((,) Int) ((,) Int) m
+  -> Gen (f ())
+  -> Run f ((,) Int) m
   -> [TestTree]
-test m a n (RunC runFresh) =
-  [ testProperty "fresh yields unique values" . forall (n :. m a :. Nil) $
-    \ n m -> runFresh n (m >> fresh) /== runFresh n (m >> fresh >> fresh)
+test m a i (Run runFresh) =
+  [ testProperty "fresh yields unique values" . forall (i :. m a :. Nil) $
+    \ i m -> runFresh ((m >> fresh) <$ i) /== runFresh ((m >> fresh >> fresh) <$ i)
   ]
