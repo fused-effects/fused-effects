@@ -28,7 +28,6 @@ module Gen
 , Run(..)
 , pattern RunL
 , pattern RunR
-, type RunC
 , pattern RunC
   -- * Generation
 , Rec(..)
@@ -189,9 +188,6 @@ pattern RunR run <- Run ((fmap runIdentity #.) -> run) where
   RunR run = Run (fmap Identity . run)
 
 {-# COMPLETE RunR #-}
-
--- | The type of handlers with curried input state (e.g. 'Control.Carrier.Reader.ReaderC', 'Control.Carrier.State.Strict.StateC').
-type RunC s f m = Run ((,) s) f m
 
 -- | Handlers with curried input state (e.g. 'Control.Carrier.Reader.ReaderC', 'Control.Carrier.State.Strict.StateC').
 pattern RunC :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m

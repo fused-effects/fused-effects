@@ -59,7 +59,7 @@ test
   => GenM m
   -> Gen a
   -> Gen s
-  -> RunC s ((,) s) m
+  -> Run ((,) s) ((,) s) m
   -> [TestTree]
 test m a s (RunC runState) =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $

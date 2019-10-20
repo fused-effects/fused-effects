@@ -37,7 +37,7 @@ test
   => GenM m
   -> Gen a
   -> Gen Int
-  -> RunC Int ((,) Int) m
+  -> Run ((,) Int) ((,) Int) m
   -> [TestTree]
 test m a n (RunC runFresh) =
   [ testProperty "fresh yields unique values" . forall (n :. m a :. Nil) $
