@@ -15,6 +15,7 @@ import qualified Control.Monad.Trans.State.Strict as StrictStateT
 import Data.Tuple (swap)
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -22,10 +23,12 @@ tests :: TestTree
 tests = testGroup "State"
   [ testGroup "StateC (Lazy)"   $
     [ testMonad
+    , testMonadFix
     , testState
     ] >>= ($ RunS LazyStateC.runState)
   , testGroup "StateC (Strict)" $
     [ testMonad
+    , testMonadFix
     , testState
     ] >>= ($ RunS StrictStateC.runState)
   , testGroup "StateT (Lazy)"   $ testState (RunS (fmap (fmap swap) . flip LazyStateT.runStateT))
@@ -33,8 +36,9 @@ tests = testGroup "State"
   , testGroup "RWST (Lazy)"     $ testState (RunS (runRWST LazyRWST.runRWST))
   , testGroup "RWST (Strict)"   $ testState (RunS (runRWST StrictRWST.runRWST))
   ] where
-  testMonad run = Monad.test   (m (gen s)) a b c ((,) <$> s <*> pure ()) run
-  testState run = State.test s (m (gen s)) a                             run
+  testMonad    run = Monad.test    (m (gen s)) a b c ((,) <$> s <*> pure ()) run
+  testMonadFix run = MonadFix.test (m (gen s)) a b   ((,) <$> s <*> pure ()) run
+  testState    run = State.test s  (m (gen s)) a                             run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
