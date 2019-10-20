@@ -21,7 +21,7 @@ test m a b s (Run run) =
   [ testProperty "purity" . forall (s :. termFn a :. Nil) $
     \ s h -> run (mfix (return . h) <$ s) === run (return (fix h) <$ s)
   , testProperty "left-shrinking" . forall (s :. m a :. termFn (fn (m b)) :. Nil) $
-    \ s a f -> run (mfix (\ x -> a >>= \ y -> f x y) <$ s) === run ((a >>= \ y -> mfix (\ x -> f x y)) <$ s)
+    \ s m f -> run (mfix (\ x -> m >>= \ y -> f x y) <$ s) === run ((m >>= \ y -> mfix (\ x -> f x y)) <$ s)
   , testProperty "sliding" . forall (s :. fn b :. termFn (m a) :. Nil) $
     \ s h f -> run (mfix (liftM h . f) <$ s) === run (liftM h (mfix (f . h)) <$ s)
   , testProperty "nesting" . forall (s :. termFn (termFn (m a)) :. Nil) $
