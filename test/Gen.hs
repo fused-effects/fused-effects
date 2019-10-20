@@ -22,6 +22,7 @@ module Gen
 , W
   -- * Handlers
 , RunS(..)
+, RunND(..)
   -- * Generation
 , Rec(..)
 , forall
@@ -143,6 +144,7 @@ integral range = Gen (showing <$> Hedgehog.Gen.integral range)
 
 
 newtype RunS s m = RunS (forall a . s -> m a -> PureC (s, a))
+newtype RunND m = RunND (forall a . m a -> PureC [a])
 
 
 infixr 5 :.

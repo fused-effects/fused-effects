@@ -19,13 +19,11 @@ tests = testGroup "Choose"
   [ testGroup "ChooseC"  $
     [ testMonad
     , testChoose
-    ] >>= ($ Run (ChooseC.runChooseS (pure . pure)))
-  , testGroup "NonEmpty" $ testChoose (Run (pure . toList))
+    ] >>= ($ RunND (ChooseC.runChooseS (pure . pure)))
+  , testGroup "NonEmpty" $ testChoose (RunND (pure . toList))
   ] where
-  testMonad  (Run run) = Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
-  testChoose (Run run) = Choose.test (m gen) a b                         run
-
-newtype Run m = Run (forall a . m a -> PureC [a])
+  testMonad  (RunND run) = Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
+  testChoose (RunND run) = Choose.test (m gen) a b                         run
 
 
 gen

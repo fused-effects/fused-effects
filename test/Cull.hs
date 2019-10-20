@@ -21,12 +21,10 @@ tests = testGroup "Cull"
   [ testGroup "CullC" $
     [ testMonad
     , testCull
-    ] >>= ($ Run CullC.runCullA)
+    ] >>= ($ RunND CullC.runCullA)
   ] where
-  testMonad (Run run) = Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
-  testCull  (Run run) = Cull.test  (m gen) a b                         run
-
-newtype Run m = Run (forall a . m a -> PureC [a])
+  testMonad (RunND run) = Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
+  testCull  (RunND run) = Cull.test  (m gen) a b                         run
 
 
 gen

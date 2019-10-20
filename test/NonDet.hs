@@ -24,13 +24,11 @@ tests = testGroup "NonDet"
   [ testGroup "NonDetC (Church)" $
     [ testMonad
     , testNonDet
-    ] >>= ($ Run Church.NonDetC.runNonDetA)
-  , testGroup "[]" $ testNonDet (Run pure)
+    ] >>= ($ RunND Church.NonDetC.runNonDetA)
+  , testGroup "[]" $ testNonDet (RunND pure)
   ] where
-  testMonad  (Run run) = Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
-  testNonDet (Run run) = NonDet.test (m gen) a b                         run
-
-newtype Run m = Run (forall a . m a -> PureC [a])
+  testMonad  (RunND run) = Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
+  testNonDet (RunND run) = NonDet.test (m gen) a b                         run
 
 
 gen
