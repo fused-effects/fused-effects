@@ -20,7 +20,7 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Reader"
-  [ testGroup "ReaderC"       $
+  [ testGroup "ReaderC" $
     [ testMonad
     , testMonadFix
     , testReader
