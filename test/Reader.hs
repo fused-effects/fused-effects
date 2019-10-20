@@ -30,9 +30,9 @@ tests = testGroup "Reader"
   , testGroup "RWST (Lazy)"   $ testReader (runR (uncurry (runRWST LazyRWST.runRWST)   . lower))
   , testGroup "RWST (Strict)" $ testReader (runR (uncurry (runRWST StrictRWST.runRWST) . lower))
   ] where
-  testMonad    run = Monad.test    (m (gen r)) a b c (atom "Comp1" Comp1 <*> (identity <*> (atom "(,)" (,) <*> r <*> unit))) run
-  testMonadFix run = MonadFix.test (m (gen r)) a b   (atom "Comp1" Comp1 <*> (identity <*> (atom "(,)" (,) <*> r <*> unit))) run
-  testReader   run = Reader.test r (m (gen r)) a                             (identity <*>                           unit)   run
+  testMonad    run = Monad.test    (m (gen r)) a b c (Comp1 <$> (identity <*> (atom "(,)" (,) <*> r <*> unit))) run
+  testMonadFix run = MonadFix.test (m (gen r)) a b   (Comp1 <$> (identity <*> (atom "(,)" (,) <*> r <*> unit))) run
+  testReader   run = Reader.test r (m (gen r)) a                (identity <*>                           unit)   run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
   lower = runIdentity . unComp1
 
