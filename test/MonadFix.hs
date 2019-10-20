@@ -24,4 +24,6 @@ test m a b s (Run run) =
     \ s a f -> run (mfix (\ x -> a >>= \ y -> f x y) <$ s) === run ((a >>= \ y -> mfix (\ x -> f x y)) <$ s)
   , testProperty "sliding" . forall (s :. fn b :. termFn (m a) :. Nil) $
     \ s h f -> run (mfix (liftM h . f) <$ s) === run (liftM h (mfix (f . h)) <$ s)
+  , testProperty "nesting" . forall (s :. termFn (termFn (m a)) :. Nil) $
+    \ s f -> run (mfix (\ x -> mfix (\ y -> f x y)) <$ s) === run (mfix (\ x -> f x x) <$ s)
   ]
