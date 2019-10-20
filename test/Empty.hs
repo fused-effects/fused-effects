@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Empty
 ( tests
 , gen
@@ -15,13 +15,16 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty"
-  [ test "EmptyC" EmptyC.runEmpty
-  , test "Maybe"  pure
+  [ testGroup "EmptyC" $
+    [ testMonad
+    , testEmpty
+    ] >>= ($ Run EmptyC.runEmpty)
+  , testGroup "Maybe"  $ testEmpty (Run pure)
   ] where
-  test :: Has Empty sig m => String -> (forall a . m a -> PureC (Maybe a)) -> TestTree
-  test name run = testGroup name
-    $  Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Empty.test (m gen) a b                        run
+  testMonad (Run run) = Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
+  testEmpty (Run run) = Empty.test (m gen) a b                         run
+
+newtype Run m = Run (forall a . m a -> PureC (Maybe a))
 
 
 gen
