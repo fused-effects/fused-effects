@@ -3,6 +3,7 @@ module MonadFix
 ( test
 ) where
 
+import Control.Monad (liftM)
 import Control.Monad.Fix
 import Gen
 import Test.Tasty
@@ -21,4 +22,6 @@ test m a b s (Run run) =
     \ s h -> run (mfix (return . h) <$ s) === run (return (fix h) <$ s)
   , testProperty "left-shrinking" . forall (s :. m a :. termFn (fn (m b)) :. Nil) $
     \ s a f -> run (mfix (\ x -> a >>= \ y -> f x y) <$ s) === run ((a >>= \ y -> mfix (\ x -> f x y)) <$ s)
+  , testProperty "sliding" . forall (s :. fn b :. termFn (m a) :. Nil) $
+    \ s h f -> run (mfix (liftM h . f) <$ s) === run (liftM h (mfix (f . h)) <$ s)
   ]
