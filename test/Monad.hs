@@ -25,7 +25,7 @@ test m a b c s (Run run) =
   , testProperty ">>= is associative" . forall (s :. m a :. fn (m b) :. fn (m c) :. Nil) $
     \ s m k h -> run ((m >>= (k >=> h)) <$ s) === run (((m >>= k) >>= h) <$ s)
   , testProperty "return = pure" . forall (s :. a :. Nil) $
-    \ s a -> run ((return a) <$ s) === run ((pure a) <$ s)
+    \ s a -> run (return a <$ s) === run (pure a <$ s)
   , testProperty "ap = (<*>)" . forall (s :. fn b :. m a :. Nil) $
     \ s f m -> run ((pure f `ap` m) <$ s) === run ((pure f <*> m) <$ s)
   ]
