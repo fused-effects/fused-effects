@@ -22,6 +22,7 @@ module Gen
 , w
 , W
 , unit
+, identity
   -- * Handlers
 , Run(..)
 , type RunL
@@ -148,6 +149,9 @@ type W = T "W"
 
 unit :: Gen ()
 unit = atom "()" ()
+
+identity :: Gen (a -> Identity a)
+identity = atom "Identity" Identity
 
 fn :: (Fn.Arg a, Fn.Vary a, Show a) => Gen b -> Gen (a -> b)
 fn b = Gen (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT (runGen b))))
