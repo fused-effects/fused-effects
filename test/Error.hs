@@ -20,14 +20,12 @@ tests = testGroup "Error" $
   [ testGroup "ErrorC"  $
     [ testMonad
     , testError
-    ] >>= ($ Run ErrorC.runError)
-  , testGroup "Either"  $ testError (Run pure)
-  , testGroup "ExceptT" $ testError (Run ExceptT.runExceptT)
+    ] >>= ($ RunE ErrorC.runError)
+  , testGroup "Either"  $ testError (RunE pure)
+  , testGroup "ExceptT" $ testError (RunE ExceptT.runExceptT)
   ] where
-  testMonad (Run run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
-  testError (Run run) = Error.test e (m (gen e)) a b                         run
-
-newtype Run e m = Run (forall a . m a -> PureC (Either e a))
+  testMonad (RunE run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
+  testError (RunE run) = Error.test e (m (gen e)) a b                         run
 
 
 gen

@@ -21,6 +21,7 @@ module Gen
 , S
 , W
   -- * Handlers
+, RunE(..)
 , RunS(..)
 , RunND(..)
   -- * Generation
@@ -143,6 +144,7 @@ integral :: (Integral a, Show a) => Range a -> Gen a
 integral range = Gen (showing <$> Hedgehog.Gen.integral range)
 
 
+newtype RunE e m = RunE (forall a . m a -> PureC (Either e a))
 newtype RunS s m = RunS (forall a . s -> m a -> PureC (s, a))
 newtype RunND m = RunND (forall a . m a -> PureC [a])
 
