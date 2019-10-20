@@ -55,7 +55,7 @@ test
   -> GenM m
   -> Gen a
   -> Gen (f ())
-  -> Run (f :.: ((,) r)) Identity m
+  -> Run (f :.: (,) r) Identity m
   -> [TestTree]
 test r m a i (Run runReader) =
   [ testProperty "ask returns the environment variable" . forall (i :. r :. fn (m a) :. Nil) $
