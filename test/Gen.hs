@@ -24,8 +24,8 @@ module Gen
 , Run(..)
 , RunL(..)
 , RunR(..)
-, liftRunL
-, liftRunR
+, runL
+, runR
   -- * Generation
 , Rec(..)
 , forall
@@ -151,11 +151,11 @@ newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
 newtype RunL g m = RunL (forall a . m a -> PureC (g a))
 newtype RunR f m = RunR (forall a . f (m a) -> PureC a)
 
-liftRunL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
-liftRunL run = Run (run . runIdentity)
+runL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
+runL run = Run (run . runIdentity)
 
-liftRunR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
-liftRunR run = Run (fmap Identity . run)
+runR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
+runR run = Run (fmap Identity . run)
 
 
 infixr 5 :.

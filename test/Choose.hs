@@ -22,8 +22,8 @@ tests = testGroup "Choose"
     ] >>= ($ RunL (ChooseC.runChooseS (pure . pure)))
   , testGroup "NonEmpty" $ testChoose (RunL (pure . toList))
   ] where
-  testMonad  (RunL run) = Monad.test  (m gen) a b c (pure (Identity ())) (liftRunL run)
-  testChoose run        = Choose.test (m gen) a b                                  run
+  testMonad  (RunL run) = Monad.test  (m gen) a b c (pure (Identity ())) (runL run)
+  testChoose run        = Choose.test (m gen) a b                              run
 
 
 gen

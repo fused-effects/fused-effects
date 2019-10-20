@@ -23,8 +23,8 @@ tests = testGroup "Cull"
     , testCull
     ] >>= ($ RunL CullC.runCullA)
   ] where
-  testMonad (RunL run) = Monad.test (m gen) a b c (pure (Identity ())) (liftRunL run)
-  testCull  run        = Cull.test  (m gen) a b                                  run
+  testMonad (RunL run) = Monad.test (m gen) a b c (pure (Identity ())) (runL run)
+  testCull  run        = Cull.test  (m gen) a b                              run
 
 
 gen

@@ -26,8 +26,8 @@ tests = testGroup "NonDet"
     ] >>= ($ RunL Church.NonDetC.runNonDetA)
   , testGroup "[]" $ testNonDet (RunL pure)
   ] where
-  testMonad  (RunL run) = Monad.test  (m gen) a b c (pure (Identity ())) (liftRunL run)
-  testNonDet run        = NonDet.test (m gen) a b                                  run
+  testMonad  (RunL run) = Monad.test  (m gen) a b c (pure (Identity ())) (runL run)
+  testNonDet run        = NonDet.test (m gen) a b                              run
 
 
 gen

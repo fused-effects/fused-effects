@@ -24,8 +24,8 @@ tests = testGroup "Error" $
   , testGroup "Either"  $ testError (RunL pure)
   , testGroup "ExceptT" $ testError (RunL ExceptT.runExceptT)
   ] where
-  testMonad (RunL run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (liftRunL run)
-  testError run        = Error.test e (m (gen e)) a b                                  run
+  testMonad (RunL run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (runL run)
+  testError run        = Error.test e (m (gen e)) a b                              run
 
 
 gen

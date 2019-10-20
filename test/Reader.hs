@@ -27,8 +27,8 @@ tests = testGroup "Reader"
   , testGroup "RWST (Lazy)"   $ testReader (RunR (uncurry (runRWST LazyRWST.runRWST)))
   , testGroup "RWST (Strict)" $ testReader (RunR (uncurry (runRWST StrictRWST.runRWST)))
   ] where
-  testMonad  (RunR run) = Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) (liftRunR run)
-  testReader run        = Reader.test r (m (gen r)) a                                       run
+  testMonad  (RunR run) = Monad.test    (m (gen r)) a b c ((,) <$> r <*> pure ()) (runR run)
+  testReader run        = Reader.test r (m (gen r)) a                                   run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
 
 
