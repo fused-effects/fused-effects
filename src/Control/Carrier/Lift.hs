@@ -6,14 +6,12 @@ module Control.Carrier.Lift
   runM
 , LiftC(..)
   -- * Lift effect
-, module X
+, module Control.Effect.Lift
 ) where
 
 import Control.Applicative (Alternative(..))
 import Control.Carrier
 import Control.Effect.Lift
-import Control.Effect.Lift as X (Lift)
-import Control.Effect.Lift as X hiding (Lift)
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
