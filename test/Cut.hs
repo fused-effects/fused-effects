@@ -27,6 +27,8 @@ tests = testGroup "Cut"
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
      Cut.test (m (\ m a -> choice [gen m a, Reader.gen r m a])) a b (atom "(,)" (,) <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+  , testGroup "CutC · ReaderC" $
+     Cut.test (m (\ m a -> choice [gen m a, Reader.gen r m a])) a b (atom "(,)" (,) <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
