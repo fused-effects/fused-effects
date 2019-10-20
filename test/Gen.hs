@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 module Gen
 ( module Control.Carrier.Pure
@@ -87,7 +87,7 @@ m with = go where
 genT :: KnownSymbol s => Gen (T s)
 genT = Gen.integral (linear 0 100)
 
-newtype T a = T { unT :: Integer }
+newtype T (a :: Symbol) = T { unT :: Integer }
   deriving (Enum, Eq, Fn.Generic, Integral, Num, Ord, Real, Fn.Vary)
 
 instance Fn.Arg (T a)
