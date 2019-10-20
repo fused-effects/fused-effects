@@ -48,6 +48,7 @@ module Gen
 , Fn.Arg
 , Fn.Vary
 , Gen.fn
+, termFn
 , Fn.apply
 ) where
 
@@ -148,6 +149,11 @@ unit = atom "()" ()
 
 fn :: (Fn.Arg a, Fn.Vary a, Show a) => Gen b -> Gen (a -> b)
 fn b = Gen (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT (runGen b))))
+
+termFn :: Gen b -> Gen (a -> b)
+termFn b = Gen $ recursive Hedgehog.Gen.choice
+  [ runGen (Gen.label "const" const <*> b) ]
+  []
 
 choice :: [Gen a] -> Gen a
 choice = Gen . Hedgehog.Gen.choice . Prelude.map runGen
