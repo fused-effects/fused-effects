@@ -12,6 +12,7 @@ import qualified Catch
 import Data.Functor.Identity (Identity(..))
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import qualified Throw
 
@@ -19,13 +20,15 @@ tests :: TestTree
 tests = testGroup "Error" $
   [ testGroup "ErrorC"  $
     [ testMonad
+    , testMonadFix
     , testError
     ] >>= ($ RunL ErrorC.runError)
   , testGroup "Either"  $ testError (RunL pure)
   , testGroup "ExceptT" $ testError (RunL ExceptT.runExceptT)
   ] where
-  testMonad run = Monad.test   (m (gen e)) a b c (pure (Identity ())) run
-  testError run = Error.test e (m (gen e)) a b                        run
+  testMonad    run = Monad.test    (m (gen e)) a b c (pure (Identity ())) run
+  testMonadFix run = MonadFix.test (m (gen e)) a b   (pure (Identity ())) run
+  testError    run = Error.test e  (m (gen e)) a b                        run
 
 
 gen :: (Has (Error e) sig m, Arg e, Show e, Vary e) => Gen e -> GenM m -> GenM m
