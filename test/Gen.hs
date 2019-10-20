@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, PatternSynonyms, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 module Gen
 ( module Control.Carrier.Pure
@@ -22,7 +22,8 @@ module Gen
 , W
   -- * Handlers
 , Run(..)
-, RunL(..)
+, type RunL
+, pattern RunL
 , RunR(..)
 , runL
 , runR
@@ -148,8 +149,19 @@ integral range = Gen (showing <$> Hedgehog.Gen.integral range)
 
 
 newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
-newtype RunL g m = RunL (forall a . m a -> PureC (g a))
+
+type RunL g m = Run Identity g m
+
+pattern RunL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
+pattern RunL run <- Run ((.# Identity) -> run) where
+  RunL run = Run (run . runIdentity)
+
+{-# COMPLETE RunL #-}
+
 newtype RunR f m = RunR (forall a . f (m a) -> PureC a)
+
+(.#) :: (forall a . f (m a) -> PureC (g a)) -> (forall a . m a -> f (m a)) -> (forall a . m a -> PureC (g a))
+(f .# g) m = f (g m)
 
 runL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
 runL run = Run (run . runIdentity)
