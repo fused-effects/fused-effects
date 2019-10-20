@@ -25,6 +25,8 @@ module Gen
 , RunE(..)
 , RunS(..)
 , RunND(..)
+, liftRunL
+, liftRunR
   -- * Generation
 , Rec(..)
 , forall
@@ -52,6 +54,7 @@ import Control.Monad.Trans.Class
 import Control.Monad.Trans.Writer
 import Data.Foldable (traverse_)
 import Data.Functor.Classes (showsUnaryWith)
+import Data.Functor.Identity
 import Data.Proxy
 import qualified Data.Semigroup as S
 import qualified Data.Set as Set
@@ -149,6 +152,12 @@ newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
 newtype RunE e m = RunE (forall a . m a -> PureC (Either e a))
 newtype RunS s m = RunS (forall a . s -> m a -> PureC (s, a))
 newtype RunND m = RunND (forall a . m a -> PureC [a])
+
+liftRunL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
+liftRunL run = Run (run . runIdentity)
+
+liftRunR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
+liftRunR run = Run (fmap Identity . run)
 
 
 infixr 5 :.
