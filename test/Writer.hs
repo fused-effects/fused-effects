@@ -17,6 +17,7 @@ import Data.Functor.Identity (Identity(..))
 import Data.Tuple (swap)
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
@@ -24,6 +25,7 @@ tests :: TestTree
 tests = testGroup "Writer"
   [ testGroup "WriterC (Strict)" $
     [ testMonad
+    , testMonadFix
     , testWriter
     ] >>= ($ RunL StrictWriterC.runWriter)
   , testGroup "(,)"              $ testWriter (RunL pure)
@@ -32,8 +34,9 @@ tests = testGroup "Writer"
   , testGroup "RWST (Lazy)"      $ testWriter (RunL (runRWST LazyRWST.runRWST))
   , testGroup "RWST (Strict)"    $ testWriter (RunL (runRWST StrictRWST.runRWST))
   ] where
-  testMonad  run = Monad.test    (m (gen w b)) a b c (pure (Identity ())) run
-  testWriter run = Writer.test w (m (gen w b)) a                          run
+  testMonad    run = Monad.test    (m (gen w b)) a b c (pure (Identity ())) run
+  testMonadFix run = MonadFix.test (m (gen w b)) a b   (pure (Identity ())) run
+  testWriter   run = Writer.test w (m (gen w b)) a                          run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
