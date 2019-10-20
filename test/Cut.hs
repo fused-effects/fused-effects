@@ -46,11 +46,11 @@ test
   -> Gen (Identity ())
   -> Run Identity [] m
   -> [TestTree]
-test m a b s (RunL runCut)
+test m a b i (RunL runCut)
   = testProperty "cutfail annihilates >>=" (forall (fn @a (m a) :. Nil)
     (\ k -> runCut (cutfail >>= k) === runCut cutfail))
   : testProperty "cutfail annihilates <|>" (forall (m a :. Nil)
     (\ m -> runCut (cutfail <|> m) === runCut cutfail))
   : testProperty "call delimits cutfail" (forall (m a :. Nil)
     (\ m -> runCut (call cutfail <|> m) === runCut m))
-  : NonDet.test m a b s (RunL runCut)
+  : NonDet.test m a b i (RunL runCut)
