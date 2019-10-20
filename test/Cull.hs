@@ -21,10 +21,10 @@ tests = testGroup "Cull"
   [ testGroup "CullC" $
     [ testMonad
     , testCull
-    ] >>= ($ RunND CullC.runCullA)
+    ] >>= ($ RunL CullC.runCullA)
   ] where
-  testMonad (RunND run) = Monad.test (m gen) a b c (pure (Identity ())) (liftRunL run)
-  testCull  run         = Cull.test  (m gen) a b                                  run
+  testMonad (RunL run) = Monad.test (m gen) a b c (pure (Identity ())) (liftRunL run)
+  testCull  run        = Cull.test  (m gen) a b                                  run
 
 
 gen
@@ -43,9 +43,9 @@ test
   => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> RunND m
+  -> RunL [] m
   -> [TestTree]
-test m a b (RunND runCull)
+test m a b (RunL runCull)
   = testProperty "cull returns at most one success" (forall (a :. m a :. m a :. Nil)
     (\ a m n -> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
-  : NonDet.test m a b (RunND runCull)
+  : NonDet.test m a b (RunL runCull)

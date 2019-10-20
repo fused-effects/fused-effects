@@ -23,11 +23,11 @@ tests = testGroup "NonDet"
   [ testGroup "NonDetC (Church)" $
     [ testMonad
     , testNonDet
-    ] >>= ($ RunND Church.NonDetC.runNonDetA)
-  , testGroup "[]" $ testNonDet (RunND pure)
+    ] >>= ($ RunL Church.NonDetC.runNonDetA)
+  , testGroup "[]" $ testNonDet (RunL pure)
   ] where
-  testMonad  (RunND run) = Monad.test  (m gen) a b c (pure (Identity ())) (liftRunL run)
-  testNonDet run         = NonDet.test (m gen) a b                                  run
+  testMonad  (RunL run) = Monad.test  (m gen) a b c (pure (Identity ())) (liftRunL run)
+  testNonDet run        = NonDet.test (m gen) a b                                  run
 
 
 gen
@@ -43,12 +43,12 @@ test
   => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> RunND m
+  -> RunL [] m
   -> [TestTree]
-test m a b (RunND runNonDet)
+test m a b (RunL runNonDet)
   =  testProperty "empty is the left identity of <|>"  (forall (m a :. Nil)
     (\ m -> runNonDet (empty <|> m) === runNonDet m))
   :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
     (\ m -> runNonDet (m <|> empty) === runNonDet m))
-  :  Empty.test  m a b (RunND runNonDet)
-  ++ Choose.test m a b (RunND runNonDet)
+  :  Empty.test  m a b (RunL runNonDet)
+  ++ Choose.test m a b (RunL runNonDet)

@@ -19,11 +19,11 @@ tests = testGroup "Choose"
   [ testGroup "ChooseC"  $
     [ testMonad
     , testChoose
-    ] >>= ($ RunND (ChooseC.runChooseS (pure . pure)))
-  , testGroup "NonEmpty" $ testChoose (RunND (pure . toList))
+    ] >>= ($ RunL (ChooseC.runChooseS (pure . pure)))
+  , testGroup "NonEmpty" $ testChoose (RunL (pure . toList))
   ] where
-  testMonad  (RunND run) = Monad.test  (m gen) a b c (pure (Identity ())) (liftRunL run)
-  testChoose run         = Choose.test (m gen) a b                                  run
+  testMonad  (RunL run) = Monad.test  (m gen) a b c (pure (Identity ())) (liftRunL run)
+  testChoose run        = Choose.test (m gen) a b                                  run
 
 
 gen
@@ -39,9 +39,9 @@ test
   => (forall a . Gen a -> Gen (m a))
   -> Gen a
   -> Gen b
-  -> RunND m
+  -> RunL [] m
   -> [TestTree]
-test m a b (RunND runChoose) =
+test m a b (RunL runChoose) =
   [ testProperty ">>= distributes over <|>" . forall (m a :. m a :. fn (m b) :. Nil) $
     \ m n k -> runChoose ((m <|> n) >>= k) === runChoose ((m >>= k) <|> (n >>= k))
   , testProperty "<|> is associative" . forall (m a :. m a :. m a :. Nil) $
