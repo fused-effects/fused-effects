@@ -23,7 +23,7 @@ tests = testGroup "Throw" $
   ] where
   testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run
-  testThrow    run = Throw.test e  (m (gen e)) a b                       run
+  testThrow    run = Throw.test e  (m (gen e)) a b   (identity <*> unit) run
 
 
 gen :: Has (Throw e) sig m => Gen e -> GenM m -> GenM m
@@ -37,9 +37,10 @@ test
   -> GenM m
   -> Gen a
   -> Gen b
-  -> RunL (Either e) m
+  -> Gen (Identity ())
+  -> Run Identity (Either e) m
   -> [TestTree]
-test e m _ b (RunL runThrow) =
+test e m _ b _ (RunL runThrow) =
   [ testProperty "throwError annihilates >>=" . forall (e :. fn @a (m b) :. Nil) $
     \ e k -> runThrow (throwError e >>= k) === runThrow (throwError e)
   ]

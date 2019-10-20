@@ -27,7 +27,7 @@ tests = testGroup "Error" $
   ] where
   testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
   testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run
-  testError    run = Error.test e  (m (gen e)) a b                       run
+  testError    run = Error.test e  (m (gen e)) a b   (identity <*> unit) run
 
 
 gen :: (Has (Error e) sig m, Arg e, Show e, Vary e) => Gen e -> GenM m -> GenM m
@@ -43,8 +43,9 @@ test
   -> GenM m
   -> Gen a
   -> Gen b
-  -> RunL (Either e) m
+  -> Gen (Identity ())
+  -> Run Identity (Either e) m
   -> [TestTree]
-test e m a b runError
-  =  Throw.test e m a b runError
-  ++ Catch.test e m a b runError
+test e m a b s runError
+  =  Throw.test e m a b s runError
+  ++ Catch.test e m a b s runError
