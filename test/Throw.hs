@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Throw
 ( tests
 , gen
@@ -15,12 +15,15 @@ import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Throw" $
-  [ test "ThrowC" ThrowC.runThrow
+  [ testGroup "ThrowC" $
+    [ testMonad
+    , testThrow
+    ] >>= ($ Run ThrowC.runThrow)
   ] where
-  test :: Has (Throw E) sig m => String -> (forall a . m a -> PureC (Either E a)) -> TestTree
-  test name run = testGroup name
-    $  Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Throw.test e (m (gen e)) a b                        run
+  testMonad (Run run) = Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
+  testThrow (Run run) = Throw.test e (m (gen e)) a b                         run
+
+newtype Run e m = Run (forall a . m a -> PureC (Either e a))
 
 
 gen
