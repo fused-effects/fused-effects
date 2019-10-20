@@ -207,6 +207,9 @@ pattern RunC run <- Run (curry' -> run) where
 
 {-# COMPLETE RunC #-}
 
+
+-- Regrettable necessities for composing rank-n functions.
+
 (.#) :: (forall a . f (m a) -> PureC (g a)) -> (forall a . m a -> f (m a)) -> (forall a . m a -> PureC (g a))
 (f .# g) m = f (g m)
 
