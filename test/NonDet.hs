@@ -32,7 +32,7 @@ tests = testGroup "NonDet"
 
 
 gen :: Has NonDet sig m => GenM m -> GenM m
-gen = choiceM [ Empty.gen, Choose.gen ]
+gen m = choiceM [ Empty.gen m, Choose.gen m ]
 
 
 test

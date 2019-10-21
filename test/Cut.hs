@@ -26,9 +26,9 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
-    Cut.test (Hom (local (id @R))) (m (choiceM [gen, Reader.gen r])) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    Cut.test (Hom (local (id @R))) (m (\ m -> choiceM [gen m, Reader.gen r m])) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   , testGroup "CutC · ReaderC" $
-    Cut.test (Hom (local (id @R))) (m (choiceM [gen, Reader.gen r])) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+    Cut.test (Hom (local (id @R))) (m (\ m -> choiceM [gen m, Reader.gen r m])) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
   testMonad    run = Monad.test        (m gen) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test     (m gen) a b   (identity <*> unit) run
@@ -36,10 +36,10 @@ tests = testGroup "Cut"
 
 
 gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
-gen = choiceM
-  [ \ (GenM m) -> GenM $ \ a -> label "call" call <*> m a
-  , \ _        -> GenM $ \ _ -> label "cutfail" cutfail
-  , NonDet.gen
+gen (GenM m) = choiceM
+  [ GenM $ \ a -> label "call" call <*> m a
+  , GenM $ \ _ -> label "cutfail" cutfail
+  , NonDet.gen (GenM m)
   ]
 
 
