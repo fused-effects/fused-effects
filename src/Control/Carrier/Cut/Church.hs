@@ -62,7 +62,7 @@ instance Monad m => Alternative (CutC m) where
     if prune' then
       pure (prune', l')
     else
-      runState prune' (fork (pure l') (runNonDet fork leaf nil r))
+      runState prune' (pure l' `fork` runNonDet fork leaf nil r)
   {-# INLINE (<|>) #-}
 
 -- | Separate fixpoints are computed for each branch.
