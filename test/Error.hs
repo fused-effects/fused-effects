@@ -35,8 +35,7 @@ gen0 :: Has (Error e) sig m => Gen e -> Gen a -> [Gen (m a)]
 gen0 = Throw.gen0
 
 genN
-  :: forall e m a sig
-  .  (Has (Error e) sig m, Arg e, Show e, Vary e)
+  :: (Has (Error e) sig m, Arg e, Show e, Vary e)
   => Gen e
   -> GenM m
   -> Gen a

@@ -47,8 +47,7 @@ gen0
 gen0 _ a = [ label "asks" (asks @r) <*> fn a ]
 
 genN
-  :: forall r m a sig
-  .  (Has (Reader r) sig m, Arg r, Show r, Vary r)
+  :: (Has (Reader r) sig m, Arg r, Show r, Vary r)
   => Gen r
   -> GenM m
   -> Gen a
