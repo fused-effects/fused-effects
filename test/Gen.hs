@@ -241,7 +241,7 @@ pair :: Gen (a -> b -> (a, b))
 pair = Gen (pure Pair)
 
 addLabel :: String -> Gen a -> Gen a
-addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
+addLabel s = Gen . (>>= (<$ tell (Set.singleton (fromString s)))) . runGen
 
 
 data Term a where
