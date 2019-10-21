@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module Cull
 ( tests
-, NonDet.gen0
+, gen0
 , genN
 , test
 ) where
@@ -25,11 +25,14 @@ tests = testGroup "Cull"
     , testCull
     ] >>= ($ runL CullC.runCullA)
   ] where
-  testMonad    run = Monad.test    (m NonDet.gen0 genN) a b c initial run
-  testMonadFix run = MonadFix.test (m NonDet.gen0 genN) a b   initial run
-  testCull     run = Cull.test     (m NonDet.gen0 genN) a b   initial run
+  testMonad    run = Monad.test    (m gen0 genN) a b c initial run
+  testMonadFix run = MonadFix.test (m gen0 genN) a b   initial run
+  testCull     run = Cull.test     (m gen0 genN) a b   initial run
   initial = identity <*> unit
 
+
+gen0 :: (Has Cull sig m, Has NonDet sig m) => Gen a -> [Gen (m a)]
+gen0 = NonDet.gen0
 
 genN :: (Has Cull sig m, Has NonDet sig m) => GenM m -> Gen a -> [Gen (m a)]
 genN m a = (label "cull" cull <*> m a) : NonDet.genN m a
