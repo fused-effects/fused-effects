@@ -11,6 +11,7 @@ import Control.Carrier.Reader
 import Control.Effect.Choose
 import Control.Effect.Cut (Cut, call, cutfail)
 import Control.Effect.NonDet (NonDet)
+import Data.Semigroup as S ((<>))
 import Gen
 import qualified Monad
 -- import qualified MonadFix
@@ -27,9 +28,9 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
-    Cut.test (local (id @R)) (m (\ a -> gen0 a ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    Cut.test (local (id @R)) (m (gen0 S.<> Reader.gen0 r) (\ m -> genN m S.<> Reader.genN r m)) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   -- , testGroup "CutC · ReaderC" $
-  --   Cut.test (local (id @R)) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+  --   Cut.test (local (id @R)) (m (gen0 S.<> Reader.gen0 r) (\ m -> genN m S.<> Reader.genN r m)) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
   testMonad    run = Monad.test    (m gen0 genN) a b c initial run
   -- testMonadFix run = MonadFix.test (m gen0 genN) a b   initial run
