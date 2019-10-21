@@ -29,36 +29,34 @@ import Control.Monad.Trans.Class
 -- | Run a 'Cut' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'.
 --
 -- @since 1.0.0.0
-runCut :: Monad m => (m b -> m b -> m b) -> (a -> m b) -> m b -> CutC m a -> m b
-runCut fork leaf nil (CutC m) = evalState False (runNonDet (\ l r -> StateC $ \ prune -> do
-  (prune', l') <- runState prune l
-  if prune' then
-    pure (prune', l')
-  else do
-    (prune'', r') <- runState prune r
-    (,) prune'' <$> fork (pure l') (pure r')) (lift . leaf) (lift nil) m)
+runCut :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CutC m a -> m b
+runCut fork leaf nil (CutC m) = runNonDet fork leaf nil (evalState False m)
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 --
 -- @since 1.0.0.0
-runCutA :: (Alternative f, Monad m) => CutC m a -> m (f a)
+runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
 runCutA = runCut (liftA2 (<|>)) (pure . pure) (pure empty)
 
 -- | Run a 'Cut' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
-runCutM :: (Monad m, Monoid b) => (a -> b) -> CutC m a -> m b
+runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
 runCutM leaf = runCut (liftA2 mappend) (pure . leaf) (pure mempty)
 
 -- | @since 1.0.0.0
-newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
+newtype CutC m a = CutC (StateC Bool (NonDetC m) a)
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
 instance Alternative (CutC m) where
   empty = CutC empty
   {-# INLINE empty #-}
-  CutC l <|> CutC r = CutC $ NonDetC $ \ fork leaf nil -> StateC $ \ prune ->
-    runState prune (fork (runNonDet fork leaf nil l) (if prune then nil else runNonDet fork leaf nil r))
+  CutC l <|> CutC r = CutC $ StateC $ \ prune -> do
+    (prune', l') <- runState prune l
+    if prune' then
+      pure (prune', l')
+    else
+      pure (prune', l') <|> runState prune' r
   {-# INLINE (<|>) #-}
 
 -- | Separate fixpoints are computed for each branch.
@@ -72,7 +70,7 @@ instance MonadTrans CutC where
 
 instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)            = CutC (put True *> empty)
-  eff (L (Call (CutC m) k))  = CutC (NonDetC (\ fork leaf nil -> StateC $ \ prune -> (,) prune <$> evalState prune (runNonDet fork leaf nil m))) >>= k
+  eff (L (Call (CutC m) k))  = CutC (StateC $ \ prune -> (,) prune <$> evalState prune m) >>= k
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
   eff (R (R other))          = CutC (eff (R (R (handleCoercible other))))
