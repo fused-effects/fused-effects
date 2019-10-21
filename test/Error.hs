@@ -10,6 +10,7 @@ import qualified Control.Carrier.Error.Either as ErrorC
 import Control.Effect.Error
 import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
+import Data.Semigroup as S ((<>))
 import Gen
 import qualified Monad
 import qualified MonadFix
@@ -52,6 +53,4 @@ test
   -> Gen (f ())
   -> Run f (Either e) m
   -> [TestTree]
-test e m a b i runError
-  =  Throw.test e m a b i runError
-  ++ Catch.test e m a b i runError
+test e m = Throw.test e m S.<> Catch.test e m
