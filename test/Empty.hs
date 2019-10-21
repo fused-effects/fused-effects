@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Empty
 ( tests
-, gen
+, gen0
 , test
 ) where
 
@@ -23,13 +23,13 @@ tests = testGroup "Empty"
     ] >>= ($ runL (fmap maybeToList . EmptyC.runEmpty))
   , testGroup "Maybe"  $ testEmpty (runL (pure . maybeToList))
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testEmpty    run = Empty.test    (m gen) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (\ _ -> gen0) (\ _ _ -> [])) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (\ _ -> gen0) (\ _ _ -> [])) a b   (identity <*> unit) run
+  testEmpty    run = Empty.test    (m (\ _ -> gen0) (\ _ _ -> [])) a b   (identity <*> unit) run
 
 
-gen :: Has Empty sig m => GenM m -> GenM m
-gen _ = GenM $ \ _ -> label "empty" empty
+gen0 :: Has Empty sig m => [Gen (m a)]
+gen0 = [ label "empty" empty ]
 
 
 test

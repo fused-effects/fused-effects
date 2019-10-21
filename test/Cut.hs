@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Cut
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
@@ -26,21 +27,20 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
-    Cut.test (Hom (local (id @R))) (m (\ m -> choiceM [gen m, Reader.gen r m])) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    Cut.test (Hom (local (id @R))) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   , testGroup "CutC · ReaderC" $
-    Cut.test (Hom (local (id @R))) (m (\ m -> choiceM [gen m, Reader.gen r m])) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+    Cut.test (Hom (local (id @R))) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
-  testMonad    run = Monad.test        (m gen) a b c (identity <*> unit) run
-  -- testMonadFix run = MonadFix.test     (m gen) a b   (identity <*> unit) run
-  testCut      run = Cut.test (Hom id) (m gen) a b   (identity <*> unit) run
+  testMonad    run = Monad.test        (m (const gen0) genN) a b c (identity <*> unit) run
+  -- testMonadFix run = MonadFix.test     (m (const gen0) genN) a b   (identity <*> unit) run
+  testCut      run = Cut.test (Hom id) (m (const gen0) genN) a b   (identity <*> unit) run
 
 
-gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
-gen (GenM m) = choiceM
-  [ GenM $ \ a -> label "call" call <*> m a
-  , GenM $ \ _ -> label "cutfail" cutfail
-  , NonDet.gen (GenM m)
-  ]
+gen0 :: (Has Cut sig m, Has NonDet sig m) => [Gen (m a)]
+gen0 = label "cutfail" cutfail : NonDet.gen0
+
+genN :: (Has Cut sig m, Has NonDet sig m) => GenM m -> Gen a -> [Gen (m a)]
+genN (GenM m) a = (label "call" call <*> m a) : NonDet.genN (GenM m) a
 
 
 newtype Hom m = Hom (forall a . m a -> m a)

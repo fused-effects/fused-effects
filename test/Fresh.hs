@@ -22,14 +22,14 @@ tests = testGroup "Fresh"
     , testFresh
     ] >>= ($ runC FreshC.runFresh)
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (pair <*> n <*> unit) run
-  testMonadFix run = MonadFix.test (m gen) a b   (pair <*> n <*> unit) run
-  testFresh    run = Fresh.test    (m gen) a     (pair <*> n <*> unit) run
+  testMonad    run = Monad.test    (m gen (\ _ _ -> [])) a b c (pair <*> n <*> unit) run
+  testMonadFix run = MonadFix.test (m gen (\ _ _ -> [])) a b   (pair <*> n <*> unit) run
+  testFresh    run = Fresh.test    (m gen (\ _ _ -> [])) a     (pair <*> n <*> unit) run
   n = Gen.integral (R.linear 0 100)
 
 
-gen :: Has Fresh sig m => GenM m -> GenM m
-gen _ = GenM $ \ a -> atom "fmap" fmap <*> fn a <*> label "fresh" fresh
+gen :: Has Fresh sig m => Gen a -> [Gen (m a)]
+gen a = [ atom "fmap" fmap <*> fn a <*> label "fresh" fresh ]
 
 
 test

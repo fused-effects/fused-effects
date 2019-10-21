@@ -78,16 +78,16 @@ import Hedgehog.Range
 m
   :: forall m
   .  Monad m
-  => (GenM m -> GenM m) -- ^ A higher-order computation generator using any effects in @m@.
-  -> GenM m             -- ^ A computation generator.
-m with = m where
+  => (forall a . Gen a -> [Gen (m a)])
+  -> (forall a . GenM m -> Gen a -> [Gen (m a)]) -- ^ A higher-order computation generator using any effects in @m@.
+  -> GenM m                                      -- ^ A computation generator.
+m terminals nonterminals = m where
   m :: GenM m
   m = GenM $ \ a -> Gen $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
-    [ runGen (Gen.label "pure" pure <*> a) ]
+    (runGen <$> ((Gen.label "pure" pure <*> a) : terminals a))
     [ frequency
-      [ (3, runGen (runGenM (with m) a))
-      , (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> runGenM m a <*> runGenM m a)))
-      ]
+      $ (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> runGenM m a <*> runGenM m a)))
+      : ((,) 3 . runGen <$> nonterminals m a)
     ]
 
 -- | Computation generators are higher-order generators of computations in some monad @m@.

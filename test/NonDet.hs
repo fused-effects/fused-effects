@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module NonDet
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
@@ -26,13 +27,16 @@ tests = testGroup "NonDet"
     ] >>= ($ runL Church.NonDetC.runNonDetA)
   , testGroup "[]" $ testNonDet (runL pure)
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testNonDet   run = NonDet.test   (m gen) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (const gen0) genN) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (const gen0) genN) a b   (identity <*> unit) run
+  testNonDet   run = NonDet.test   (m (const gen0) genN) a b   (identity <*> unit) run
 
 
-gen :: Has NonDet sig m => GenM m -> GenM m
-gen m = choiceM [ Empty.gen m, Choose.gen m ]
+gen0 :: Has NonDet sig m => [Gen (m a)]
+gen0 = Empty.gen0
+
+genN :: Has NonDet sig m => GenM m -> Gen a -> [Gen (m a)]
+genN = Choose.genN
 
 
 test

@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module Choose
 ( tests
-, gen
+, genN
 , test
 ) where
 
@@ -23,13 +23,13 @@ tests = testGroup "Choose"
     ] >>= ($ runL (ChooseC.runChooseS (pure . pure)))
   , testGroup "NonEmpty" $ testChoose (runL (pure . toList))
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testChoose   run = Choose.test   (m gen) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (\ _ -> []) genN) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (\ _ -> []) genN) a b   (identity <*> unit) run
+  testChoose   run = Choose.test   (m (\ _ -> []) genN) a b   (identity <*> unit) run
 
 
-gen :: Has Choose sig m => GenM m -> GenM m
-gen (GenM m) = GenM $ \ a -> addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a)
+genN :: Has Choose sig m => GenM m -> Gen a -> [Gen (m a)]
+genN (GenM m) a = [ addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a) ]
 
 
 test

@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module Error
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
@@ -25,13 +26,21 @@ tests = testGroup "Error" $
   , testGroup "Either"  $ testError (runL pure)
   , testGroup "ExceptT" $ testError (runL ExceptT.runExceptT)
   ] where
-  testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run
-  testError    run = Error.test e  (m (gen e)) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (\ _ -> gen0 e) (genN e)) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (\ _ -> gen0 e) (genN e)) a b   (identity <*> unit) run
+  testError    run = Error.test e  (m (\ _ -> gen0 e) (genN e)) a b   (identity <*> unit) run
 
+gen0 :: Has (Error e) sig m => Gen e -> [Gen (m a)]
+gen0 = Throw.gen0
 
-gen :: (Has (Error e) sig m, Arg e, Show e, Vary e) => Gen e -> GenM m -> GenM m
-gen e m = choiceM [ Throw.gen e m, Catch.gen e m ]
+genN
+  :: forall e m a sig
+  .  (Has (Error e) sig m, Arg e, Show e, Vary e)
+  => Gen e
+  -> GenM m
+  -> Gen a
+  -> [Gen (m a)]
+genN = Catch.genN
 
 
 test

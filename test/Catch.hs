@@ -1,6 +1,6 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Catch
-( gen
+( genN
 , test
 ) where
 
@@ -9,13 +9,14 @@ import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
-gen
-  :: forall e m sig
+genN
+  :: forall e m a sig
   .  (Has (Catch e) sig m, Arg e, Show e, Vary e)
   => Gen e
   -> GenM m
-  -> GenM m
-gen _ (GenM m) = GenM $ \ a -> label "catchError" catchError <*> m a <*> fn @e (m a)
+  -> Gen a
+  -> [Gen (m a)]
+genN _ (GenM m) a = [ label "catchError" catchError <*> m a <*> fn @e (m a) ]
 
 
 test

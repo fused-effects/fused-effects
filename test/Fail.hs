@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Fail
 ( tests
-, gen
+, gen0
 , test
 ) where
 
@@ -22,14 +22,14 @@ tests = testGroup "Fail" $
     , testFail
     ] >>= ($ runL FailC.runFail)
   ] where
-  testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run
-  testFail     run = Fail.test e   (m (gen e)) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (\ _ -> gen0 e) (\ _ _ -> [])) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   (identity <*> unit) run
+  testFail     run = Fail.test e   (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   (identity <*> unit) run
   e = string (Range.linear 0 50) unicode
 
 
-gen :: MonadFail m => Gen String -> GenM m -> GenM m
-gen e _ = GenM $ \ _ -> label "fail" Fail.fail <*> e
+gen0 :: MonadFail m => Gen String -> [Gen (m a)]
+gen0 e = [ label "fail" Fail.fail <*> e ]
 
 
 test

@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Writer
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
@@ -33,22 +34,29 @@ tests = testGroup "Writer"
   , testGroup "RWST (Lazy)"      $ testWriter (runL (runRWST LazyRWST.runRWST))
   , testGroup "RWST (Strict)"    $ testWriter (runL (runRWST StrictRWST.runRWST))
   ] where
-  testMonad    run = Monad.test    (m (gen w b)) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen w b)) a b   (identity <*> unit) run
-  testWriter   run = Writer.test w (m (gen w b)) a     (identity <*> unit) run
+  testMonad    run = Monad.test    (m (gen0 w) (genN w b)) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (gen0 w) (genN w b)) a b   (identity <*> unit) run
+  testWriter   run = Writer.test w (m (gen0 w) (genN w b)) a     (identity <*> unit) run
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
-gen
-  :: forall w b m sig
+gen0
+  :: Has (Writer w) sig m
+  => Gen w
+  -> Gen a
+  -> [Gen (m a)]
+gen0 w a = [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w) ]
+
+genN
+  :: forall w b m a sig
   .  (Has (Writer w) sig m, Arg b, Arg w, Show b, Show w, Vary b, Vary w)
   => Gen w
   -> Gen b
   -> GenM m
-  -> GenM m
-gen w b (GenM m) = GenM $ \ a -> choice
-  [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w)
-  , atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
+  -> Gen a
+  -> [Gen (m a)]
+genN w b (GenM m) a =
+  [ atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
   , label "censor" censor <*> fn w <*> m a
   ]
 

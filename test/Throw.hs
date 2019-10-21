@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Throw
 ( tests
-, gen
+, gen0
 , test
 ) where
 
@@ -21,13 +21,13 @@ tests = testGroup "Throw" $
     , testThrow
     ] >>= ($ runL ThrowC.runThrow)
   ] where
-  testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run
-  testThrow    run = Throw.test e  (m (gen e)) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (\ _ -> gen0 e) (\ _ _ -> [])) a b c (identity <*> unit) run
+  testMonadFix run = MonadFix.test (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   (identity <*> unit) run
+  testThrow    run = Throw.test e  (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   (identity <*> unit) run
 
 
-gen :: Has (Throw e) sig m => Gen e -> GenM m -> GenM m
-gen e _ = GenM $ \ _ -> label "throwError" throwError <*> e
+gen0 :: Has (Throw e) sig m => Gen e -> [Gen (m a)]
+gen0 e = [ label "throwError" throwError <*> e ]
 
 
 test

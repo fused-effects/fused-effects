@@ -1,7 +1,8 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators #-}
 module Reader
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
@@ -30,23 +31,29 @@ tests = testGroup "Reader"
   , testGroup "RWST (Lazy)"   $ testReader (runR (uncurry (runRWST LazyRWST.runRWST)   . lower))
   , testGroup "RWST (Strict)" $ testReader (runR (uncurry (runRWST StrictRWST.runRWST) . lower))
   ] where
-  testMonad    run = Monad.test    (m (gen r)) a b c (Comp1 <$> (identity <*> (pair <*> r <*> unit))) run
-  testMonadFix run = MonadFix.test (m (gen r)) a b   (Comp1 <$> (identity <*> (pair <*> r <*> unit))) run
-  testReader   run = Reader.test r (m (gen r)) a                (identity <*>                 unit)   run
+  testMonad    run = Monad.test    (m (gen0 r) (genN r)) a b c (Comp1 <$> (identity <*> (pair <*> r <*> unit))) run
+  testMonadFix run = MonadFix.test (m (gen0 r) (genN r)) a b   (Comp1 <$> (identity <*> (pair <*> r <*> unit))) run
+  testReader   run = Reader.test r (m (gen0 r) (genN r)) a                (identity <*>                 unit)   run
   runRWST f r m = (\ (a, _, ()) -> a) <$> f m r r
   lower = runIdentity . unComp1
 
 
-gen
-  :: forall r m sig
+gen0
+  :: forall r m a sig
+  .  (Has (Reader r) sig m, Arg r, Show r, Vary r)
+  => Gen r
+  -> Gen a
+  -> [Gen (m a)]
+gen0 _ a = [ label "asks" (asks @r) <*> fn a ]
+
+genN
+  :: forall r m a sig
   .  (Has (Reader r) sig m, Arg r, Show r, Vary r)
   => Gen r
   -> GenM m
-  -> GenM m
-gen r (GenM m) = GenM $ \ a -> choice
-  [ label "asks" (asks @r) <*> fn a
-  , label "local" local <*> fn r <*> m a
-  ]
+  -> Gen a
+  -> [Gen (m a)]
+genN r (GenM m) a = [ label "local" local <*> fn r <*> m a ]
 
 
 test

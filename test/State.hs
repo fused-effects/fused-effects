@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module State
 ( tests
-, gen
+, gen0
 , test
 ) where
 
@@ -36,19 +36,19 @@ tests = testGroup "State"
   , testGroup "RWST (Lazy)"     $ testState (runC (runRWST LazyRWST.runRWST))
   , testGroup "RWST (Strict)"   $ testState (runC (runRWST StrictRWST.runRWST))
   ] where
-  testMonad    run = Monad.test    (m (gen s)) a b c (pair <*> s <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen s)) a b   (pair <*> s <*> unit) run
-  testState    run = State.test    (m (gen s)) a               s           run
+  testMonad    run = Monad.test    (m (gen0 s) (\ _ _ -> [])) a b c (pair <*> s <*> unit) run
+  testMonadFix run = MonadFix.test (m (gen0 s) (\ _ _ -> [])) a b   (pair <*> s <*> unit) run
+  testState    run = State.test    (m (gen0 s) (\ _ _ -> [])) a               s           run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
-gen
-  :: forall s m sig
+gen0
+  :: forall s m a sig
   .  (Has (State s) sig m, Arg s, Show s, Vary s)
   => Gen s
-  -> GenM m
-  -> GenM m
-gen s _ = GenM $ \ a -> choice
+  -> Gen a
+  -> [Gen (m a)]
+gen0 s a =
   [ label "gets" (gets @s) <*> fn a
   , infixL 4 "<$" (<$) <*> a <*> (label "put" put <*> s)
   ]
