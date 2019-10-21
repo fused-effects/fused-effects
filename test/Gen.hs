@@ -61,6 +61,7 @@ module Gen
 import Control.Applicative
 import Control.Carrier
 import Control.Carrier.Pure
+import Control.Monad.Fix
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Writer
 import Data.Foldable (traverse_)
@@ -310,6 +311,9 @@ instance Applicative NestC where
 
 instance Monad NestC where
   NestC a >>= f = f a
+
+instance MonadFix NestC where
+  mfix f = NestC (fix (runNest . f))
 
 instance Carrier Nest NestC where
   eff (Nest (NestC m) k) = k m
