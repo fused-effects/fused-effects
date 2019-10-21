@@ -11,6 +11,7 @@ import qualified Control.Carrier.NonDet.Church as Church.NonDetC
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet (NonDet)
+import Data.Semigroup as S ((<>))
 import qualified Empty
 import Gen
 import qualified Monad
@@ -48,10 +49,12 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test m a b i (Run runNonDet)
-  =  testProperty "empty is the left identity of <|>"  (forall (i :. m a :. Nil)
-    (\ i m -> runNonDet ((empty <|> m) <$ i) === runNonDet (m <$ i)))
-  :  testProperty "empty is the right identity of <|>" (forall (i :. m a :. Nil)
-    (\ i m -> runNonDet ((m <|> empty) <$ i) === runNonDet (m <$ i)))
-  :  Empty.test  m a b i (Run runNonDet)
-  ++ Choose.test m a b i (Run runNonDet)
+test m
+  = (\ a _ i (Run runNonDet) ->
+    [ testProperty "empty is the left identity of <|>"  (forall (i :. m a :. Nil)
+      (\ i m -> runNonDet ((empty <|> m) <$ i) === runNonDet (m <$ i)))
+    ,  testProperty "empty is the right identity of <|>" (forall (i :. m a :. Nil)
+      (\ i m -> runNonDet ((m <|> empty) <$ i) === runNonDet (m <$ i)))
+    ])
+  S.<> Empty.test  m
+  S.<> Choose.test m
