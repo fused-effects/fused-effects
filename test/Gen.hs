@@ -180,18 +180,18 @@ string range cs = Gen (showing <$> Hedgehog.Gen.string range (runTerm <$> runGen
 
 
 -- | This captures the shape of the handler function passed to the "Monad" & "MonadFix" tests.
-newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
+newtype Run f g m = Run (forall a . f (m a) -> NestC (g a))
 
 -- | Handlers with output state, but no input state (e.g. 'Control.Carrier.Error.Either.ErrorC').
-runL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
+runL :: (forall a . m a -> NestC (f a)) -> Run Identity f m
 runL run = Run (run . runIdentity)
 
 -- | Handlers with input state, but no output state (e.g. 'Control.Carrier.Reader.ReaderC').
-runR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
+runR :: (forall a . f (m a) -> NestC a) -> Run f Identity m
 runR run = Run (fmap Identity . run)
 
 -- | Handlers with curried input state (e.g. 'Control.Carrier.Reader.ReaderC', 'Control.Carrier.State.Strict.StateC').
-runC :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m
+runC :: (forall a . s -> m a -> NestC (f a)) -> Run ((,) s) f m
 runC run = Run (uncurry run)
 
 
