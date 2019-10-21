@@ -37,6 +37,7 @@ module Gen
 , Gen.label
 , infixL
 , infixR
+, pair
 , addLabel
   -- * Re-exports
 , Gen
@@ -233,6 +234,9 @@ infixL p s f = Gen (pure (InfixL p s f))
 infixR :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
 infixR p s f = Gen (pure (InfixR p s f))
 
+pair :: Gen (a -> b -> (a, b))
+pair = Gen (pure Pair)
+
 addLabel :: String -> Gen a -> Gen a
 addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
 
@@ -241,6 +245,7 @@ data Term a where
   Pure :: (Int -> ShowS) -> a -> Term a
   InfixL :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
   InfixR :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
+  Pair :: Term (a -> b -> (a, b))
   (:<*>) :: Term (a -> b) -> Term a -> Term b
 
 infixl 4 :<*>
@@ -250,6 +255,7 @@ runTerm = \case
   Pure _ a -> a
   InfixL _ _ f -> f
   InfixR _ _ f -> f
+  Pair -> (,)
   f :<*> a -> runTerm f $ runTerm a
 
 instance Functor Term where
@@ -264,8 +270,10 @@ instance Show (Term a) where
     Pure s _ -> s d
     InfixL _ s _ -> showParen True (showString s)
     InfixR _ s _ -> showParen True (showString s)
+    Pair -> showParen True (showString ",")
     InfixL p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
     InfixR p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
+    Pair :<*> a :<*> b -> showParen True (showsPrec 0 a . showString ", " . showsPrec 0 b)
     InfixL p s _ :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
     InfixR p s _ :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
     f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)
