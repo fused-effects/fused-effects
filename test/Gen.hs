@@ -54,6 +54,7 @@ module Gen
   -- * Higher-order effects
 , Nest
 , nest
+, runNest
 , NestC(..)
 ) where
 
@@ -298,10 +299,21 @@ instance Effect   Nest where
 nest :: Has Nest sig m => m a -> m a
 nest m = send (Nest m pure)
 
+runNest :: NestC a -> a
+runNest (NestC a) = a
 
-newtype NestC m a = NestC { runNest :: m a }
-  deriving (Applicative, Eq, Functor, Monad, MonadFix, Show)
+newtype NestC a = NestC a
+  deriving (Eq, Functor, Show)
 
-instance Carrier sig m => Carrier (Nest :+: sig) (NestC m) where
-  eff (L (Nest m k)) = m >>= k
-  eff (R other)      = NestC (eff (handleCoercible other))
+instance Applicative NestC where
+  pure = NestC
+  NestC f <*> NestC a = NestC (f a)
+
+instance Monad NestC where
+  NestC a >>= f = f a
+
+instance MonadFix NestC where
+  mfix f = NestC (fix (runNest . f))
+
+instance Carrier Nest NestC where
+  eff (Nest (NestC m) k) = k m
