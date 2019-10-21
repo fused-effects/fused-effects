@@ -1,8 +1,12 @@
 {-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
--- | An instance of the 'Carrier' class defines an interpretation of an effect signature atop a given monad.
---
--- @since 1.0.0.0
-module Control.Carrier.Class
+
+{- | The 'Algebra' class is the mechanism with which effects are interpreted.
+
+An instance of the 'Algebra' class defines an interpretation of an effect signature atop a given monad.
+
+@since 1.0.0.0
+-}
+module Control.Algebra
 ( Carrier(..)
 , Has
 , send
