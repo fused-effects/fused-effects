@@ -36,9 +36,9 @@ tests = testGroup "State"
   , testGroup "RWST (Lazy)"     $ testState (runC (runRWST LazyRWST.runRWST))
   , testGroup "RWST (Strict)"   $ testState (runC (runRWST StrictRWST.runRWST))
   ] where
-  testMonad    run = Monad.test    (m (gen s)) a b c (atom "(,)" (,) <*> s <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen s)) a b   (atom "(,)" (,) <*> s <*> unit) run
-  testState    run = State.test    (m (gen s)) a                         s           run
+  testMonad    run = Monad.test    (m (gen s)) a b c (pair <*> s <*> unit) run
+  testMonadFix run = MonadFix.test (m (gen s)) a b   (pair <*> s <*> unit) run
+  testState    run = State.test    (m (gen s)) a               s           run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 

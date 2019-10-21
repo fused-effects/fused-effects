@@ -28,11 +28,11 @@ tests = testGroup "Cut"
   , testGroup "ReaderC · CutC" $
     [ Cut.test
     , testCutfailLocal
-    ] >>= \ f -> f (m genCutReader) a b (atom "(,)" (,) <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    ] >>= \ f -> f (m genCutReader) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   , testGroup "CutC · ReaderC" $
     [ Cut.test
     , testCutfailLocal
-    ] >>= \ f -> f (m genCutReader) a b (atom "(,)" (,) <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+    ] >>= \ f -> f (m genCutReader) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
