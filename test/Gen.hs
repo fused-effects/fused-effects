@@ -53,7 +53,6 @@ module Gen
 , Fn.apply
   -- * Higher-order effects
 , Nest
-, nest
 ) where
 
 import Control.Applicative
@@ -292,6 +291,3 @@ instance HFunctor Nest where
 
 instance Effect   Nest where
   handle state handler (Nest m k) = Nest (handler (m <$ state)) (handler . fmap k)
-
-nest :: Has Nest sig m => m a -> m a
-nest m = send (Nest m pure)
