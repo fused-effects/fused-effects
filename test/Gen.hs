@@ -85,10 +85,8 @@ m terminals nonterminals = m where
   m :: GenM m
   m = GenM $ \ a -> Gen $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
     (runGen <$> ((Gen.label "pure" pure <*> a) : terminals a))
-    [ frequency
-      $ (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> runGenM m a <*> runGenM m a)))
-      : ((,) 3 . runGen <$> nonterminals m a)
-    ]
+    ( (runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> runGenM m a <*> runGenM m a)))
+    : (runGen <$> nonterminals m a))
 
 -- | Computation generators are higher-order generators of computations in some monad @m@.
 newtype GenM m = GenM { runGenM :: forall a . Gen a -> Gen (m a) }
