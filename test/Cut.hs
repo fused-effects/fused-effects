@@ -26,22 +26,14 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
-    [ Cut.test
-    , testCutfailLocal
-    ] >>= \ f -> f (m genCutReader) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    Cut.test (Hom (local (id @R))) (m genCutReader) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   , testGroup "CutC · ReaderC" $
-    [ Cut.test
-    , testCutfailLocal
-    ] >>= \ f -> f (m genCutReader) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+    Cut.test (Hom (local (id @R))) (m genCutReader) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
-  -- testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testCut      run = Cut.test      (m gen) a b   (identity <*> unit) run
+  testMonad    run = Monad.test        (m gen) a b c (identity <*> unit) run
+  -- testMonadFix run = MonadFix.test     (m gen) a b   (identity <*> unit) run
+  testCut      run = Cut.test (Hom id) (m gen) a b   (identity <*> unit) run
   genCutReader m = GenM $ \ a -> choice [runGenM (gen m) a, runGenM (Reader.gen r m) a]
-  testCutfailLocal (GenM m) a _ i (Run run) =
-    [ testProperty "cutfail commutes with local" (forall (i :. fn r :. m a :. Nil)
-      (\ i f m -> run ((local f cutfail <|> m) <$ i) === run (cutfail <$ i)))
-    ]
 
 
 gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
@@ -52,20 +44,23 @@ gen (GenM m) = GenM $ \ a -> choice
   ]
 
 
+newtype Hom m = Hom (forall a . m a -> m a)
+
 test
   :: forall a b m f sig
   .  (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
-  => GenM m
+  => Hom m
+  -> GenM m
   -> Gen a
   -> Gen b
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test (GenM m) a b i (Run runCut)
+test (Hom hom) (GenM m) a b i (Run runCut)
   = testProperty "cutfail annihilates >>=" (forall (i :. fn @a (m a) :. Nil)
-    (\ i k -> runCut ((cutfail >>= k) <$ i) === runCut (cutfail <$ i)))
+    (\ i k -> runCut ((hom cutfail >>= k) <$ i) === runCut (hom cutfail <$ i)))
   : testProperty "cutfail annihilates <|>" (forall (i :. m a :. Nil)
-    (\ i m -> runCut ((cutfail <|> m) <$ i) === runCut (cutfail <$ i)))
+    (\ i m -> runCut ((hom cutfail <|> m) <$ i) === runCut (hom cutfail <$ i)))
   : testProperty "call delimits cutfail" (forall (i :. m a :. Nil)
-    (\ i m -> runCut ((call cutfail <|> m) <$ i) === runCut (m <$ i)))
+    (\ i m -> runCut ((hom (call (hom cutfail)) <|> m) <$ i) === runCut (m <$ i)))
   : NonDet.test (GenM m) a b i (Run runCut)
