@@ -25,40 +25,41 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Function (on)
 
 -- | Run a 'Cut' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'.
 --
 -- @since 1.0.0.0
-runCut :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CutC m a -> m b
-runCut fork leaf nil (CutC m) = runNonDet fork leaf nil (evalState False m)
+runCut :: Monad m => (m b -> m b -> m b) -> (a -> m b) -> m b -> CutC m a -> m b
+runCut fork leaf nil (CutC m) = evalState False (runNonDet (fmap lift . fork `on` evalState False) (lift . leaf) (lift nil) m)
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 --
 -- @since 1.0.0.0
-runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
+runCutA :: (Alternative f, Monad m) => CutC m a -> m (f a)
 runCutA = runCut (liftA2 (<|>)) (pure . pure) (pure empty)
 
 -- | Run a 'Cut' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
-runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
+runCutM :: (Monad m, Monoid b) => (a -> b) -> CutC m a -> m b
 runCutM leaf = runCut (liftA2 mappend) (pure . leaf) (pure mempty)
 
 -- | @since 1.0.0.0
-newtype CutC m a = CutC (StateC Bool (NonDetC m) a)
+newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
-instance Alternative (CutC m) where
+instance (Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = CutC empty
   {-# INLINE empty #-}
-  CutC l <|> CutC r = CutC $ StateC $ \ prune ->
-    runState prune l <|> if prune then empty else runState prune r
+  CutC l <|> CutC r = CutC $ get >>= \ prune ->
+    l <|> if prune then empty else r
   {-# INLINE (<|>) #-}
 
 -- | Separate fixpoints are computed for each branch.
 deriving instance MonadFix m => MonadFix (CutC m)
 
-instance MonadPlus (CutC m)
+instance (Carrier sig m, Effect sig) => MonadPlus (CutC m)
 
 instance MonadTrans CutC where
   lift = CutC . lift . lift
