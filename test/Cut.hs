@@ -55,11 +55,12 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test hom m a b i (Run runCut)
-  = testProperty "cutfail annihilates >>=" (forall (i :. fn @a (m a) :. Nil)
+test hom m = (\ a _ i (Run runCut) ->
+  [ testProperty "cutfail annihilates >>=" (forall (i :. fn @a (m a) :. Nil)
     (\ i k -> runCut ((hom cutfail >>= k) <$ i) === runCut (hom cutfail <$ i)))
-  : testProperty "cutfail annihilates <|>" (forall (i :. m a :. Nil)
+  , testProperty "cutfail annihilates <|>" (forall (i :. m a :. Nil)
     (\ i m -> runCut ((hom cutfail <|> m) <$ i) === runCut (hom cutfail <$ i)))
-  : testProperty "call delimits cutfail" (forall (i :. m a :. Nil)
+  , testProperty "call delimits cutfail" (forall (i :. m a :. Nil)
     (\ i m -> runCut ((hom (call (hom cutfail)) <|> m) <$ i) === runCut (m <$ i)))
-  : NonDet.test m a b i (Run runCut)
+  ])
+  S.<> NonDet.test m
