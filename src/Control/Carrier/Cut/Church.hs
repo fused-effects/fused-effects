@@ -23,6 +23,7 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Semigroup as S
 
 -- | Run a 'Cut' effect with continuations respectively interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
 --
@@ -93,28 +94,36 @@ instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m
   eff (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle (Leaf ()) (fmap join . traverse (runCut (fmap . Fork . Leaf) (pure Nil) (pure Fail))) other) >>= foldr cons nil
+  eff (R (R other))          = CutC $ \ cons nil fail -> eff (handle (Cons () Nil) (fmap join . traverse (runCut (fmap . Cons) (pure Nil) (pure Fail))) other) >>= fold cons nil fail
   {-# INLINE eff #-}
 
 
-data BinaryTree a = Fail | Nil | Leaf a | Fork (BinaryTree a) (BinaryTree a)
+data List a = Fail | Nil | Cons a (List a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
-instance Applicative BinaryTree where
-  pure = Leaf
+instance S.Semigroup (List a) where
+  Fail      <> b = b
+  Nil       <> b = b
+  Cons a as <> b = Cons a (as <> b)
+
+instance Applicative List where
+  pure a = Cons a Nil
   {-# INLINE pure #-}
-  f <*> a = fold Fork (<$> a) Nil Fail f
+  Fail      <*> _ = Fail
+  Nil       <*> _ = Nil
+  Cons f fs <*> a = (f <$> a) <> (fs <*> a)
   {-# INLINE (<*>) #-}
 
-instance Monad BinaryTree where
-  a >>= f = fold Fork f Nil Fail a
+instance Monad List where
+  Fail      >>= _ = Fail
+  Nil       >>= _ = Nil
+  Cons a as >>= f = f a <> (as >>= f)
   {-# INLINE (>>=) #-}
 
 
-fold :: (b -> b -> b) -> (a -> b) -> b -> b -> BinaryTree a -> b
-fold fork leaf nil fail = go where
-  go Fail       = fail
-  go Nil        = nil
-  go (Leaf a)   = leaf a
-  go (Fork a b) = fork (go a) (go b)
+fold :: (a -> b -> b) -> b -> b -> List a -> b
+fold cons nil fail = go where
+  go Fail        = fail
+  go Nil         = nil
+  go (Cons a as) = cons a (go as)
 {-# INLINE fold #-}
