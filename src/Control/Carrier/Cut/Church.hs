@@ -30,13 +30,17 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runCut :: Monad m => (m b -> m b -> m b) -> (a -> m b) -> m b -> CutC m a -> m b
-runCut fork leaf nil (CutC m) = evalState False (runNonDet (\ l r -> StateC $ \ prune -> do
-  (prune', l') <- runState prune l
-  if prune' then
-    pure (prune', l')
-  else do
-    (prune'', r') <- runState prune' r
-    (,) prune'' <$> (pure l' `fork` pure r')) (lift . leaf) (lift nil) m)
+runCut fork leaf nil (CutC m) = evalState False (runNonDet
+  (\ l r -> StateC $ \ prune -> do
+    (prune', l') <- runState prune l
+    if prune' then
+      pure (prune', l')
+    else do
+      (prune'', r') <- runState prune' r
+      (,) prune'' <$> (pure l' `fork` pure r'))
+  (lift . leaf)
+  (lift nil)
+  m)
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 --
