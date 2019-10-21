@@ -6,7 +6,7 @@ module NonDet
 ) where
 
 import qualified Choose
-import Control.Carrier.Class
+import Control.Algebra
 import qualified Control.Carrier.NonDet.Church as Church.NonDetC
 import Control.Effect.Choose
 import Control.Effect.Empty

@@ -11,8 +11,8 @@ module Control.Carrier.Trace.Printing
 , module Control.Effect.Trace
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
 import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

@@ -3,7 +3,7 @@ module Inference
 ( example
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import Control.Carrier.Reader
 import Test.Tasty
 import Test.Tasty.QuickCheck

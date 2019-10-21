@@ -18,7 +18,7 @@ module Control.Effect.Catch
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 
 -- | 'Catch' effects can be used alongside 'Control.Effect.Throw.Throw' to provide recoverable exceptions.
 --

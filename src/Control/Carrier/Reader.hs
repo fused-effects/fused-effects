@@ -11,8 +11,8 @@ module Control.Carrier.Reader
 , module Control.Effect.Reader
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier.Class
 import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

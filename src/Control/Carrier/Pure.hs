@@ -11,8 +11,8 @@ module Control.Carrier.Pure
 , module Control.Effect.Pure
 ) where
 
+import Control.Algebra
 import Control.Applicative
-import Control.Carrier.Class
 import Control.Effect.Pure
 import Control.Monad.Fix
 import Data.Coerce

@@ -16,8 +16,8 @@ module Control.Carrier.Writer.Strict
 , module Control.Effect.Writer
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
 import Control.Carrier.State.Strict
 import Control.Effect.Writer
 import Control.Monad (MonadPlus(..))

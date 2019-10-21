@@ -19,7 +19,7 @@ module Control.Effect.Throw
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import GHC.Generics (Generic1)
 
 -- | @since 1.0.0.0

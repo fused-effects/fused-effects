@@ -11,8 +11,8 @@ module Control.Carrier.Fail.Either
 , module Control.Effect.Fail
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
 import Control.Carrier.Throw.Either
 import Control.Effect.Fail
 import Control.Monad (MonadPlus(..))

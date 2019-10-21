@@ -5,13 +5,13 @@ module Control.Carrier
   Has
 , send
   -- * Re-exports
-, module Control.Carrier.Class
+, module Control.Algebra
 , module Control.Carrier.Pure
 , module Control.Effect.Class
 , (:+:)(..)
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import Control.Carrier.Pure
 import Control.Effect.Class
 import Control.Effect.Sum

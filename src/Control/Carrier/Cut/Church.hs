@@ -15,7 +15,7 @@ module Control.Carrier.Cut.Church
 , module Control.Effect.NonDet
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail

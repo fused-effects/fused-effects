@@ -16,8 +16,8 @@ module Control.Carrier.Choose.Church
 , module Control.Effect.Choose
 ) where
 
+import Control.Algebra
 import Control.Applicative (liftA2)
-import Control.Carrier.Class
 import Control.Effect.Choose
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail

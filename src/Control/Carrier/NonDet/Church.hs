@@ -17,8 +17,8 @@ module Control.Carrier.NonDet.Church
 , module Control.Effect.NonDet
 ) where
 
+import Control.Algebra
 import Control.Applicative (liftA2)
-import Control.Carrier.Class
 import Control.Effect.NonDet
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail

@@ -33,7 +33,7 @@ module ReinterpretLog
   , runApplication
   ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Carrier.Writer.Strict

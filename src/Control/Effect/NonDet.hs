@@ -29,8 +29,8 @@ module Control.Effect.NonDet
 , run
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..), optional)
-import Control.Carrier.Class
 import Control.Effect.Choose (Choose(..))
 import Control.Effect.Empty (Empty(..))
 import Control.Monad (MonadPlus(..), guard)

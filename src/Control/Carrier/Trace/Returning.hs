@@ -11,8 +11,8 @@ module Control.Carrier.Trace.Returning
 , module Control.Effect.Trace
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
 import Control.Carrier.Writer.Strict
 import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))

@@ -15,8 +15,8 @@ module Control.Carrier.Cull.Church
 , module Control.Effect.NonDet
 ) where
 
+import Control.Algebra
 import Control.Applicative (liftA2)
-import Control.Carrier.Class
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
 import Control.Effect.Cull

@@ -16,8 +16,8 @@ module Control.Carrier.State.Strict
 , module Control.Effect.State
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
