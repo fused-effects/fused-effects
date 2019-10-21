@@ -53,7 +53,7 @@ module Gen
 , termFn
 , Fn.apply
   -- * Higher-order effects
-, Nest(..)
+, Nest
 ) where
 
 import Control.Applicative
