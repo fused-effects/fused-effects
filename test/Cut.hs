@@ -26,14 +26,22 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
-    Cut.test (m genCutReader) a b (atom "(,)" (,) <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    [ Cut.test
+    , testCutfailLocal
+    ] >>= \ f -> f (m genCutReader) a b (atom "(,)" (,) <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   , testGroup "CutC · ReaderC" $
-    Cut.test (m genCutReader) a b (atom "(,)" (,) <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+    [ Cut.test
+    , testCutfailLocal
+    ] >>= \ f -> f (m genCutReader) a b (atom "(,)" (,) <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
   testCut      run = Cut.test      (m gen) a b   (identity <*> unit) run
   genCutReader m = GenM $ \ a -> choice [runGenM (gen m) a, runGenM (Reader.gen r m) a]
+  testCutfailLocal (GenM m) a _ i (Run run) =
+    [ testProperty "cutfail commutes with local" (forall (i :. fn r :. m a :. Nil)
+      (\ i f m -> run ((local f cutfail <|> m) <$ i) === run (cutfail <$ i)))
+    ]
 
 
 gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
