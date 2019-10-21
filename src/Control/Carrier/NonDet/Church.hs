@@ -52,7 +52,7 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
 
--- | Run a 'NonDet' effect, collecting results into a 'Monoid'.
+-- | Run a 'NonDet' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runNonDetM :: (Applicative m, Monoid b) => (a -> b) -> NonDetC m a -> m b

@@ -34,7 +34,7 @@ import Prelude hiding (head, tail)
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf (ChooseC runChooseC) = runChooseC fork leaf
 
--- | Run a 'Choose' effect, passing results to the supplied function, and merging branches together using 'S.<>'.
+-- | Run a 'Choose' effect, mapping results into a 'S.Semigroup'.
 --
 -- @since 1.0.0.0
 runChooseS :: (S.Semigroup b, Applicative m) => (a -> m b) -> ChooseC m a -> m b
