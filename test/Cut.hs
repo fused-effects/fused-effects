@@ -26,14 +26,13 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
-    Cut.test (Hom (local (id @R))) (m genCutReader) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    Cut.test (Hom (local (id @R))) (m (choiceM [gen, Reader.gen r])) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   , testGroup "CutC · ReaderC" $
-    Cut.test (Hom (local (id @R))) (m genCutReader) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+    Cut.test (Hom (local (id @R))) (m (choiceM [gen, Reader.gen r])) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
   testMonad    run = Monad.test        (m gen) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test     (m gen) a b   (identity <*> unit) run
   testCut      run = Cut.test (Hom id) (m gen) a b   (identity <*> unit) run
-  genCutReader m = GenM $ \ a -> choice [runGenM (gen m) a, runGenM (Reader.gen r m) a]
 
 
 gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
