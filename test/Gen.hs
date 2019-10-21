@@ -54,7 +54,6 @@ module Gen
   -- * Higher-order effects
 , Nest
 , nest
-, runNest
 , NestC(..)
 ) where
 
@@ -297,9 +296,6 @@ instance Effect   Nest where
 
 nest :: Has Nest sig m => m a -> m a
 nest m = send (Nest m pure)
-
-runNest :: NestC a -> a
-runNest (NestC a) = a
 
 newtype NestC a = NestC a
   deriving (Eq, Functor, Show)
