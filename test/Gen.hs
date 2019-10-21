@@ -310,6 +310,3 @@ instance Applicative NestC where
 
 instance Monad NestC where
   NestC a >>= f = f a
-
-instance Carrier Nest NestC where
-  eff (Nest (NestC m) k) = k m
