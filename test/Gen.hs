@@ -44,6 +44,7 @@ module Gen
 , (===)
 , (/==)
 , Gen.choice
+, choiceM
 , Gen.integral
 , Gen.unicode
 , Gen.string
@@ -162,6 +163,9 @@ termFn b = Gen $ recursive Hedgehog.Gen.choice
 
 choice :: [Gen a] -> Gen a
 choice = Gen . Hedgehog.Gen.choice . Prelude.map runGen
+
+choiceM :: [GenM a] -> GenM a
+choiceM cs = GenM $ \ a -> Gen.choice (Prelude.map runGenM cs <*> [a])
 
 integral :: (Integral a, Show a) => Range a -> Gen a
 integral range = Gen (showing <$> Hedgehog.Gen.integral range)
