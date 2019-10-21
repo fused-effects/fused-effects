@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, ExistentialQuantification, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, PatternSynonyms, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, PatternSynonyms, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 module Gen
 ( module Control.Carrier.Pure
@@ -52,12 +52,9 @@ module Gen
 , Gen.fn
 , termFn
 , Fn.apply
-  -- * Higher-order effects
-, Nest
 ) where
 
 import Control.Applicative
-import Control.Carrier
 import Control.Carrier.Pure
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Writer
@@ -288,14 +285,3 @@ newtype Gen a = Gen { runGen :: WriterT (Set.Set LabelName) Hedgehog.Gen (Term a
 instance Applicative Gen where
   pure = Gen . pure . pure
   Gen m1 <*> Gen m2 = Gen ((<*>) <$> m1 <*> m2)
-
-
-data Nest m k = forall a . Nest (m a) (a -> m k)
-
-deriving instance Functor m => Functor (Nest m)
-
-instance HFunctor Nest where
-  hmap f (Nest m k) = Nest (f m) (f . k)
-
-instance Effect   Nest where
-  handle state handler (Nest m k) = Nest (handler (m <$ state)) (handler . fmap k)
