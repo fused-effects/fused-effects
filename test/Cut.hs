@@ -31,9 +31,10 @@ tests = testGroup "Cut"
   -- , testGroup "CutC · ReaderC" $
   --   Cut.test (local (id @R)) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
-  testMonad    run = Monad.test    (m (const gen0) genN) a b c (identity <*> unit) run
-  -- testMonadFix run = MonadFix.test (m (const gen0) genN) a b   (identity <*> unit) run
-  testCut      run = Cut.test id   (m (const gen0) genN) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (const gen0) genN) a b c initial run
+  -- testMonadFix run = MonadFix.test (m (const gen0) genN) a b   initial run
+  testCut      run = Cut.test id   (m (const gen0) genN) a b   initial run
+  initial = identity <*> unit
 
 
 gen0 :: (Has Cut sig m, Has NonDet sig m) => [Gen (m a)]

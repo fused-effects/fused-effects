@@ -21,9 +21,10 @@ tests = testGroup "Throw" $
     , testThrow
     ] >>= ($ runL ThrowC.runThrow)
   ] where
-  testMonad    run = Monad.test    (m (\ _ -> gen0 e) (\ _ _ -> [])) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   (identity <*> unit) run
-  testThrow    run = Throw.test e  (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (\ _ -> gen0 e) (\ _ _ -> [])) a b c initial run
+  testMonadFix run = MonadFix.test (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   initial run
+  testThrow    run = Throw.test e  (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   initial run
+  initial = identity <*> unit
 
 
 gen0 :: Has (Throw e) sig m => Gen e -> [Gen (m a)]

@@ -23,9 +23,10 @@ tests = testGroup "Empty"
     ] >>= ($ runL (fmap maybeToList . EmptyC.runEmpty))
   , testGroup "Maybe"  $ testEmpty (runL (pure . maybeToList))
   ] where
-  testMonad    run = Monad.test    (m (\ _ -> gen0) (\ _ _ -> [])) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m (\ _ -> gen0) (\ _ _ -> [])) a b   (identity <*> unit) run
-  testEmpty    run = Empty.test    (m (\ _ -> gen0) (\ _ _ -> [])) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (\ _ -> gen0) (\ _ _ -> [])) a b c initial run
+  testMonadFix run = MonadFix.test (m (\ _ -> gen0) (\ _ _ -> [])) a b   initial run
+  testEmpty    run = Empty.test    (m (\ _ -> gen0) (\ _ _ -> [])) a b   initial run
+  initial = identity <*> unit
 
 
 gen0 :: Has Empty sig m => [Gen (m a)]

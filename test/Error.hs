@@ -26,9 +26,10 @@ tests = testGroup "Error" $
   , testGroup "Either"  $ testError (runL pure)
   , testGroup "ExceptT" $ testError (runL ExceptT.runExceptT)
   ] where
-  testMonad    run = Monad.test    (m (\ _ -> gen0 e) (genN e)) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m (\ _ -> gen0 e) (genN e)) a b   (identity <*> unit) run
-  testError    run = Error.test e  (m (\ _ -> gen0 e) (genN e)) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (\ _ -> gen0 e) (genN e)) a b c initial run
+  testMonadFix run = MonadFix.test (m (\ _ -> gen0 e) (genN e)) a b   initial run
+  testError    run = Error.test e  (m (\ _ -> gen0 e) (genN e)) a b   initial run
+  initial = identity <*> unit
 
 gen0 :: Has (Error e) sig m => Gen e -> [Gen (m a)]
 gen0 = Throw.gen0
