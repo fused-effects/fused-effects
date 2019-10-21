@@ -31,10 +31,7 @@ tests = testGroup "Error" $
 
 
 gen :: (Has (Error e) sig m, Arg e, Show e, Vary e) => Gen e -> GenM m -> GenM m
-gen e = choiceM
-  [ Throw.gen e
-  , Catch.gen e
-  ]
+gen e = choiceM [ Throw.gen e, Catch.gen e ]
 
 
 test
