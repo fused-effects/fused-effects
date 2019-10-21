@@ -72,7 +72,7 @@ instance MonadTrans CutC where
 
 instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)            = CutC (put True *> empty)
-  eff (L (Call m k))         = m <* CutC (put False) >>= k
+  eff (L (Call (CutC m) k))  = CutC (NonDetC (\ fork leaf nil -> StateC $ \ prune -> (,) prune <$> evalState prune (runNonDet fork leaf nil m))) >>= k
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
   eff (R (R other))          = CutC (eff (R (R (handleCoercible other))))
