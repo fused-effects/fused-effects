@@ -43,12 +43,10 @@ genN :: (Has Cut sig m, Has NonDet sig m) => GenM m -> Gen a -> [Gen (m a)]
 genN m a = (label "call" call <*> m a) : NonDet.genN m a
 
 
-type Hom m = (forall a . m a -> m a)
-
 test
   :: forall a b m f sig
   .  (Has Cut sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
-  => Hom m
+  => (forall a . m a -> m a)
   -> GenM m
   -> Gen a
   -> Gen b
