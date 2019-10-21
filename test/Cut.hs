@@ -40,7 +40,7 @@ gen0 :: (Has Cut sig m, Has NonDet sig m) => [Gen (m a)]
 gen0 = label "cutfail" cutfail : NonDet.gen0
 
 genN :: (Has Cut sig m, Has NonDet sig m) => GenM m -> Gen a -> [Gen (m a)]
-genN (GenM m) a = (label "call" call <*> m a) : NonDet.genN (GenM m) a
+genN m a = (label "call" call <*> m a) : NonDet.genN m a
 
 
 newtype Hom m = Hom (forall a . m a -> m a)
@@ -55,11 +55,11 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test (Hom hom) (GenM m) a b i (Run runCut)
+test (Hom hom) m a b i (Run runCut)
   = testProperty "cutfail annihilates >>=" (forall (i :. fn @a (m a) :. Nil)
     (\ i k -> runCut ((hom cutfail >>= k) <$ i) === runCut (hom cutfail <$ i)))
   : testProperty "cutfail annihilates <|>" (forall (i :. m a :. Nil)
     (\ i m -> runCut ((hom cutfail <|> m) <$ i) === runCut (hom cutfail <$ i)))
   : testProperty "call delimits cutfail" (forall (i :. m a :. Nil)
     (\ i m -> runCut ((hom (call (hom cutfail)) <|> m) <$ i) === runCut (m <$ i)))
-  : NonDet.test (GenM m) a b i (Run runCut)
+  : NonDet.test m a b i (Run runCut)

@@ -39,7 +39,7 @@ test
   -> Gen (f ())
   -> Run f ((,) Int) m
   -> [TestTree]
-test (GenM m) a i (Run runFresh) =
+test m a i (Run runFresh) =
   [ testProperty "fresh yields unique values" . forall (i :. m a :. Nil) $
     \ i m -> runFresh ((m >> fresh) <$ i) /== runFresh ((m >> fresh >> fresh) <$ i)
   ]

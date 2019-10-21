@@ -40,7 +40,7 @@ test
   -> Gen (f ())
   -> Run f (Either e) m
   -> [TestTree]
-test e (GenM m) _ b i (Run runThrow) =
+test e m _ b i (Run runThrow) =
   [ testProperty "throwError annihilates >>=" . forall (i :. e :. fn @a (m b) :. Nil) $
     \ i e k -> runThrow ((throwError e >>= k) <$ i) === runThrow ((throwError e) <$ i)
   ]

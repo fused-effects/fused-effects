@@ -17,7 +17,7 @@ test
   -> Gen (f ())
   -> Run f g m
   -> [TestTree]
-test (GenM m) a b s (Run run) =
+test m a b s (Run run) =
   [ testProperty "purity" . forall (s :. termFn a :. Nil) $
     \ s h -> run (mfix (return . h) <$ s) === run (return (fix h) <$ s)
   , testProperty "left-shrinking" . forall (s :. m a :. termFn (fn (m b)) :. Nil) $

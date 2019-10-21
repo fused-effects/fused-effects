@@ -47,10 +47,10 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test (GenM m) a b i (Run runNonDet)
+test m a b i (Run runNonDet)
   =  testProperty "empty is the left identity of <|>"  (forall (i :. m a :. Nil)
     (\ i m -> runNonDet ((empty <|> m) <$ i) === runNonDet (m <$ i)))
   :  testProperty "empty is the right identity of <|>" (forall (i :. m a :. Nil)
     (\ i m -> runNonDet ((m <|> empty) <$ i) === runNonDet (m <$ i)))
-  :  Empty.test  (GenM m) a b i (Run runNonDet)
-  ++ Choose.test (GenM m) a b i (Run runNonDet)
+  :  Empty.test  m a b i (Run runNonDet)
+  ++ Choose.test m a b i (Run runNonDet)

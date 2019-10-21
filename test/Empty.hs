@@ -41,7 +41,7 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test (GenM m) _ b i (Run runEmpty) =
+test m _ b i (Run runEmpty) =
   [ testProperty "empty annihilates >>=" . forall (i :. fn @a (m b) :. Nil) $
     \ i k -> runEmpty ((empty >>= k) <$ i) === runEmpty (empty <$ i)
   ]

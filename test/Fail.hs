@@ -42,7 +42,7 @@ test
   -> Gen (f ())
   -> Run f (Either String) m
   -> [TestTree]
-test msg (GenM m) _ b i (Run runFail) =
+test msg m _ b i (Run runFail) =
   [ testProperty "fail annihilates >>=" . forall (i :. msg :. fn @a (m b) :. Nil) $
     \ i s k -> runFail ((Fail.fail s >>= k) <$ i) === runFail ((Fail.fail s) <$ i)
   ]
