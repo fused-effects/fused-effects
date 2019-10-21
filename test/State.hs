@@ -48,7 +48,7 @@ gen
   => Gen s
   -> GenM m
   -> GenM m
-gen s _ a = choice
+gen s _ = GenM $ \ a -> choice
   [ label "gets" (gets @s) <*> fn a
   , infixL 4 "<$" (<$) <*> a <*> (label "put" put <*> s)
   ]
@@ -61,7 +61,7 @@ test
   -> Gen s
   -> Run ((,) s) ((,) s) m
   -> [TestTree]
-test m a s (Run runState) =
+test (GenM m) a s (Run runState) =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
     \ s k -> runState (s, get >>= k) === runState (s, k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $

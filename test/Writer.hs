@@ -46,7 +46,7 @@ gen
   -> Gen b
   -> GenM m
   -> GenM m
-gen w b m a = choice
+gen w b (GenM m) = GenM $ \ a -> choice
   [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w)
   , atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
   , label "censor" censor <*> fn w <*> m a
@@ -61,7 +61,7 @@ test
   -> Gen (f ())
   -> Run f ((,) w) m
   -> [TestTree]
-test w m a i (Run runWriter) =
+test w (GenM m) a i (Run runWriter) =
   [ testProperty "tell appends a value to the log" . forall (i :. w :. m a :. Nil) $
     \ i w m -> runWriter ((tell w >> m) <$ i) === fmap (first (mappend w)) (runWriter (m <$ i))
   , testProperty "listen eavesdrops on written output" . forall (i :. m a :. Nil) $

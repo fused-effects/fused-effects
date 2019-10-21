@@ -17,7 +17,7 @@ test
   -> Gen (f ())
   -> Run f g m
   -> [TestTree]
-test m a b c s (Run run) =
+test (GenM m) a b c s (Run run) =
   [ testProperty "return is the left-identity of >>=" . forall (s :. a :. fn (m b) :. Nil) $
     \ s a k -> run ((return a >>= k) <$ s) === run ((k a) <$ s)
   , testProperty "return is the right-identity of >>=" . forall (s :. m a :. Nil) $

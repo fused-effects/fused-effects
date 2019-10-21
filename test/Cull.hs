@@ -30,9 +30,9 @@ tests = testGroup "Cull"
 
 
 gen :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenM m
-gen m a = choice
+gen (GenM m) = GenM $ \ a -> choice
   [ label "cull" cull <*> m a
-  , NonDet.gen m a
+  , runGenM (NonDet.gen (GenM m)) a
   ]
 
 
@@ -44,7 +44,7 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test m a b i (Run runCull)
+test (GenM m) a b i (Run runCull)
   = testProperty "cull returns at most one success" (forall (i :. a :. m a :. m a :. Nil)
     (\ i a m n -> runCull ((cull (pure a <|> m) <|> n) <$ i) === runCull ((pure a <|> n) <$ i)))
-  : NonDet.test m a b i (Run runCull)
+  : NonDet.test (GenM m) a b i (Run runCull)

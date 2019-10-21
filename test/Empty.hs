@@ -29,7 +29,7 @@ tests = testGroup "Empty"
 
 
 gen :: Has Empty sig m => GenM m -> GenM m
-gen _ _ = label "empty" empty
+gen _ = GenM $ \ _ -> label "empty" empty
 
 
 test
@@ -41,7 +41,7 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test m _ b i (Run runEmpty) =
+test (GenM m) _ b i (Run runEmpty) =
   [ testProperty "empty annihilates >>=" . forall (i :. fn @a (m b) :. Nil) $
     \ i k -> runEmpty ((empty >>= k) <$ i) === runEmpty (empty <$ i)
   ]

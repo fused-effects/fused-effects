@@ -29,7 +29,7 @@ tests = testGroup "Choose"
 
 
 gen :: Has Choose sig m => GenM m -> GenM m
-gen m a = addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a)
+gen (GenM m) = GenM $ \ a -> addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a)
 
 
 test
@@ -40,7 +40,7 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test m a b i (Run runChoose) =
+test (GenM m) a b i (Run runChoose) =
   [ testProperty ">>= distributes over <|>" . forall (i :. m a :. m a :. fn (m b) :. Nil) $
     \ i m n k -> runChoose (((m <|> n) >>= k) <$ i) === runChoose (((m >>= k) <|> (n >>= k)) <$ i)
   , testProperty "<|> is associative" . forall (i :. m a :. m a :. m a :. Nil) $

@@ -27,7 +27,7 @@ tests = testGroup "Throw" $
 
 
 gen :: Has (Throw e) sig m => Gen e -> GenM m -> GenM m
-gen e _ _ = label "throwError" throwError <*> e
+gen e _ = GenM $ \ _ -> label "throwError" throwError <*> e
 
 
 test
@@ -40,7 +40,7 @@ test
   -> Gen (f ())
   -> Run f (Either e) m
   -> [TestTree]
-test e m _ b i (Run runThrow) =
+test e (GenM m) _ b i (Run runThrow) =
   [ testProperty "throwError annihilates >>=" . forall (i :. e :. fn @a (m b) :. Nil) $
     \ i e k -> runThrow ((throwError e >>= k) <$ i) === runThrow ((throwError e) <$ i)
   ]

@@ -29,7 +29,7 @@ tests = testGroup "Fresh"
 
 
 gen :: Has Fresh sig m => GenM m -> GenM m
-gen _ a = atom "fmap" fmap <*> fn a <*> label "fresh" fresh
+gen _ = GenM $ \ a -> atom "fmap" fmap <*> fn a <*> label "fresh" fresh
 
 
 test
@@ -39,7 +39,7 @@ test
   -> Gen (f ())
   -> Run f ((,) Int) m
   -> [TestTree]
-test m a i (Run runFresh) =
+test (GenM m) a i (Run runFresh) =
   [ testProperty "fresh yields unique values" . forall (i :. m a :. Nil) $
     \ i m -> runFresh ((m >> fresh) <$ i) /== runFresh ((m >> fresh >> fresh) <$ i)
   ]

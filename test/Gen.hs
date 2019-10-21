@@ -5,7 +5,7 @@ module Gen
 , Identity(..)
   -- * Polymorphic generation & instantiation
 , m
-, GenM
+, GenM(..)
 , genT
 , T(..)
 , a
@@ -80,16 +80,16 @@ m
   -> GenM m             -- ^ A computation generator.
 m with = m where
   m :: GenM m
-  m a = Gen $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
+  m = GenM $ \ a -> Gen $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
     [ runGen (Gen.label "pure" pure <*> a) ]
     [ frequency
-      [ (3, runGen (with m a))
-      , (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> m a <*> m a)))
+      [ (3, runGen (runGenM (with m) a))
+      , (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> runGenM m a <*> runGenM m a)))
       ]
     ]
 
 -- | Computation generators are higher-order generators of computations in some monad @m@.
-type GenM m = (forall a . Gen a -> Gen (m a))
+newtype GenM m = GenM { runGenM :: forall a . Gen a -> Gen (m a) }
 
 
 genT :: KnownSymbol s => Gen (T s)

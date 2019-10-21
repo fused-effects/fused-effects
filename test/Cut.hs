@@ -26,20 +26,21 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
-    Cut.test (m (\ m a -> choice [gen m a, Reader.gen r m a])) a b (atom "(,)" (,) <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    Cut.test (m genCutReader) a b (atom "(,)" (,) <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   , testGroup "CutC · ReaderC" $
-    Cut.test (m (\ m a -> choice [gen m a, Reader.gen r m a])) a b (atom "(,)" (,) <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+    Cut.test (m genCutReader) a b (atom "(,)" (,) <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
   testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
   testCut      run = Cut.test      (m gen) a b   (identity <*> unit) run
+  genCutReader m = GenM $ \ a -> choice [runGenM (gen m) a, runGenM (Reader.gen r m) a]
 
 
 gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
-gen m a = choice
+gen (GenM m) = GenM $ \ a -> choice
   [ label "call" call <*> m a
   , label "cutfail" cutfail
-  , NonDet.gen m a
+  , runGenM (NonDet.gen (GenM m)) a
   ]
 
 
@@ -52,11 +53,11 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test m a b i (Run runCut)
+test (GenM m) a b i (Run runCut)
   = testProperty "cutfail annihilates >>=" (forall (i :. fn @a (m a) :. Nil)
     (\ i k -> runCut ((cutfail >>= k) <$ i) === runCut (cutfail <$ i)))
   : testProperty "cutfail annihilates <|>" (forall (i :. m a :. Nil)
     (\ i m -> runCut ((cutfail <|> m) <$ i) === runCut (cutfail <$ i)))
   : testProperty "call delimits cutfail" (forall (i :. m a :. Nil)
     (\ i m -> runCut ((call cutfail <|> m) <$ i) === runCut (m <$ i)))
-  : NonDet.test m a b i (Run runCut)
+  : NonDet.test (GenM m) a b i (Run runCut)

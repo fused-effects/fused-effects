@@ -29,7 +29,7 @@ tests = testGroup "Fail" $
 
 
 gen :: MonadFail m => Gen String -> GenM m -> GenM m
-gen e _ _ = label "fail" Fail.fail <*> e
+gen e _ = GenM $ \ _ -> label "fail" Fail.fail <*> e
 
 
 test
@@ -42,7 +42,7 @@ test
   -> Gen (f ())
   -> Run f (Either String) m
   -> [TestTree]
-test msg m _ b i (Run runFail) =
+test msg (GenM m) _ b i (Run runFail) =
   [ testProperty "fail annihilates >>=" . forall (i :. msg :. fn @a (m b) :. Nil) $
     \ i s k -> runFail ((Fail.fail s >>= k) <$ i) === runFail ((Fail.fail s) <$ i)
   ]

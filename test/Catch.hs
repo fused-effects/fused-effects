@@ -15,7 +15,7 @@ gen
   => Gen e
   -> GenM m
   -> GenM m
-gen _ m a = label "catchError" catchError <*> m a <*> fn @e (m a)
+gen _ (GenM m) = GenM $ \ a -> label "catchError" catchError <*> m a <*> fn @e (m a)
 
 
 test
@@ -27,7 +27,7 @@ test
   -> Gen (f ())
   -> Run f (Either e) m
   -> [TestTree]
-test e m a _ i (Run runCatch) =
+test e (GenM m) a _ i (Run runCatch) =
   [ testProperty "catchError intercepts throwError" . forall (i :. e :. fn (m a) :. Nil) $
     \ i e h -> runCatch ((throwError e `catchError` h) <$ i) === runCatch (h e <$ i)
   ]

@@ -43,7 +43,7 @@ gen
   => Gen r
   -> GenM m
   -> GenM m
-gen r m a = choice
+gen r (GenM m) = GenM $ \ a -> choice
   [ label "asks" (asks @r) <*> fn a
   , label "local" local <*> fn r <*> m a
   ]
@@ -57,7 +57,7 @@ test
   -> Gen (f ())
   -> Run (f :.: (,) r) Identity m
   -> [TestTree]
-test r m a i (Run runReader) =
+test r (GenM m) a i (Run runReader) =
   [ testProperty "ask returns the environment variable" . forall (i :. r :. fn (m a) :. Nil) $
     \ i r k -> runReader (Comp1 ((r, ask >>= k) <$ i)) === runReader (Comp1 ((r, k r) <$ i))
   , testProperty "local modifies the environment variable" . forall (i :. r :. fn r :. m a :. Nil) $

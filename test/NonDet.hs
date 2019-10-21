@@ -32,7 +32,7 @@ tests = testGroup "NonDet"
 
 
 gen :: Has NonDet sig m => GenM m -> GenM m
-gen m a = choice [ Empty.gen m a, Choose.gen m a ]
+gen m = GenM $ \ a -> choice [ runGenM (Empty.gen m) a, runGenM (Choose.gen m) a ]
 
 
 test
@@ -43,10 +43,10 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test m a b i (Run runNonDet)
+test (GenM m) a b i (Run runNonDet)
   =  testProperty "empty is the left identity of <|>"  (forall (i :. m a :. Nil)
     (\ i m -> runNonDet ((empty <|> m) <$ i) === runNonDet (m <$ i)))
   :  testProperty "empty is the right identity of <|>" (forall (i :. m a :. Nil)
     (\ i m -> runNonDet ((m <|> empty) <$ i) === runNonDet (m <$ i)))
-  :  Empty.test  m a b i (Run runNonDet)
-  ++ Choose.test m a b i (Run runNonDet)
+  :  Empty.test  (GenM m) a b i (Run runNonDet)
+  ++ Choose.test (GenM m) a b i (Run runNonDet)
