@@ -28,8 +28,8 @@ tests = testGroup "Cut"
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
     Cut.test (local (id @R)) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
-  , testGroup "CutC · ReaderC" $
-    Cut.test (local (id @R)) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+  -- , testGroup "CutC · ReaderC" $
+  --   Cut.test (local (id @R)) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
   testMonad    run = Monad.test    (m (const gen0) genN) a b c (identity <*> unit) run
   -- testMonadFix run = MonadFix.test (m (const gen0) genN) a b   (identity <*> unit) run
