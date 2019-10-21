@@ -4,7 +4,7 @@ module Fusion
 ( tests
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Carrier.Error.Either
 import Control.Carrier.State.Strict
 import Test.Inspection as Inspection

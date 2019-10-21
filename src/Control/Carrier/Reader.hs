@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Reader' effects.
-
+--
+-- @since 1.0.0.0
 module Control.Carrier.Reader
 ( -- * Reader carrier
   runReader
@@ -11,7 +12,7 @@ module Control.Carrier.Reader
 ) where
 
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

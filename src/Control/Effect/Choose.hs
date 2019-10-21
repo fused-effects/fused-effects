@@ -8,6 +8,8 @@ Predefined carriers:
 
 * "Control.Carrier.Choose.Church".
 * If 'Choose' is the last effect in a stack, it can be interpreted directly to a 'NonEmpty'.
+
+@since 1.0.0.0
 -}
 
 module Control.Effect.Choose
@@ -26,7 +28,7 @@ module Control.Effect.Choose
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Empty
 import Data.Bool (bool)
 import Data.List.NonEmpty (NonEmpty (..))

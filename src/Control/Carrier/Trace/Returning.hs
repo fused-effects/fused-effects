@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for the 'Control.Effect.Trace' effect that aggregates and returns all traced values.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Trace.Returning
 ( -- * Trace carrier
   runTrace
@@ -10,7 +12,7 @@ module Control.Carrier.Trace.Returning
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Carrier.Writer.Strict
 import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))

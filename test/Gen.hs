@@ -1,25 +1,34 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, LambdaCase, PolyKinds, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, PatternSynonyms, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 module Gen
 ( module Control.Carrier.Pure
+, Identity(..)
   -- * Polymorphic generation & instantiation
 , m
+, GenM
 , genT
-, a
-, b
-, c
-, e
-, r
-, s
-, w
 , T(..)
+, a
 , A
+, b
 , B
+, c
 , C
+, e
 , E
+, r
 , R
+, s
 , S
+, w
 , W
+, unit
+, identity
+  -- * Handlers
+, Run(..)
+, runL
+, runR
+, runC
   -- * Generation
 , Rec(..)
 , forall
@@ -28,6 +37,7 @@ module Gen
 , Gen.label
 , infixL
 , infixR
+, pair
 , addLabel
   -- * Re-exports
 , Gen
@@ -35,9 +45,12 @@ module Gen
 , (/==)
 , Gen.choice
 , Gen.integral
+, Gen.unicode
+, Gen.string
 , Fn.Arg
 , Fn.Vary
 , Gen.fn
+, termFn
 , Fn.apply
 ) where
 
@@ -47,6 +60,7 @@ import Control.Monad.Trans.Class
 import Control.Monad.Trans.Writer
 import Data.Foldable (traverse_)
 import Data.Functor.Classes (showsUnaryWith)
+import Data.Functor.Identity
 import Data.Proxy
 import qualified Data.Semigroup as S
 import qualified Data.Set as Set
@@ -61,26 +75,26 @@ import Hedgehog.Range
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
 m
-  :: forall m a
+  :: forall m
   .  Monad m
-  => (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)) -- ^ A higher-order generator producing operations using any effects in @m@.
-  -> Gen a                                                              -- ^ A generator for results.
-  -> Gen (m a)                                                          -- ^ A generator producing computations.
-m with = go where
-  go :: forall a . Gen a -> Gen (m a)
-  go a = Gen $ recursive Hedgehog.Gen.choice
-    [ runGen (Gen.label "pure" pure <*> a) ]
-    [ frequency
-      [ (3, runGen (with go a))
-      , (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> go a <*> go a)))
-      ]
-    ]
+  => (forall a . Gen a -> [Gen (m a)])
+  -> (forall a . GenM m -> Gen a -> [Gen (m a)]) -- ^ A higher-order computation generator using any effects in @m@.
+  -> GenM m                                      -- ^ A computation generator.
+m terminals nonterminals = m where
+  m :: GenM m
+  m = \ a -> Gen $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
+    (runGen <$> ((Gen.label "pure" pure <*> a) : terminals a))
+    ( (runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> m a <*> m a)))
+    : (runGen <$> nonterminals m a))
+
+-- | Computation generators are higher-order generators of computations in some monad @m@.
+type GenM m = (forall a . Gen a -> Gen (m a))
 
 
 genT :: KnownSymbol s => Gen (T s)
 genT = Gen.integral (linear 0 100)
 
-newtype T a = T { unT :: Integer }
+newtype T (a :: Symbol) = T { unT :: Integer }
   deriving (Enum, Eq, Fn.Generic, Integral, Num, Ord, Real, Fn.Vary)
 
 instance Fn.Arg (T a)
@@ -130,14 +144,47 @@ w = genT
 
 type W = T "W"
 
+unit :: Gen ()
+unit = atom "()" ()
+
+identity :: Gen (a -> Identity a)
+identity = atom "Identity" Identity
+
 fn :: (Fn.Arg a, Fn.Vary a, Show a) => Gen b -> Gen (a -> b)
 fn b = Gen (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT (runGen b))))
+
+termFn :: Gen b -> Gen (a -> b)
+termFn b = Gen $ recursive Hedgehog.Gen.choice
+  [ runGen (atom "const" const <*> b) ]
+  []
 
 choice :: [Gen a] -> Gen a
 choice = Gen . Hedgehog.Gen.choice . Prelude.map runGen
 
 integral :: (Integral a, Show a) => Range a -> Gen a
 integral range = Gen (showing <$> Hedgehog.Gen.integral range)
+
+unicode :: Gen Char
+unicode = Gen (showing <$> Hedgehog.Gen.unicode)
+
+string :: Range Int -> Gen Char -> Gen String
+string range cs = Gen (showing <$> Hedgehog.Gen.string range (runTerm <$> runGen cs))
+
+
+-- | This captures the shape of the handler function passed to the "Monad" & "MonadFix" tests.
+newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
+
+-- | Handlers with output state, but no input state (e.g. 'Control.Carrier.Error.Either.ErrorC').
+runL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
+runL run = Run (run . runIdentity)
+
+-- | Handlers with input state, but no output state (e.g. 'Control.Carrier.Reader.ReaderC').
+runR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
+runR run = Run (fmap Identity . run)
+
+-- | Handlers with curried input state (e.g. 'Control.Carrier.Reader.ReaderC', 'Control.Carrier.State.Strict.StateC').
+runC :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m
+runC run = Run (uncurry run)
 
 
 infixr 5 :.
@@ -157,9 +204,14 @@ instance Forall (Rec '[]) (PropertyT IO ()) where
 
 instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
   forall' (g :. gs) f = do
-    (a, labels) <- Hedgehog.forAll (runWriterT (runGen g))
+    HideLabels (a, labels) <- Hedgehog.forAll (HideLabels <$> runWriterT (runGen g))
     traverse_ Hedgehog.label labels
     forall' gs (f (runTerm a))
+
+newtype HideLabels a = HideLabels { unHideLabels :: (a, Set.Set LabelName) }
+
+instance Show a => Show (HideLabels a) where
+  showsPrec d = showsPrec d . fst . unHideLabels
 
 
 showing :: Show a => a -> Term a
@@ -180,14 +232,18 @@ infixL p s f = Gen (pure (InfixL p s f))
 infixR :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
 infixR p s f = Gen (pure (InfixR p s f))
 
+pair :: Gen (a -> b -> (a, b))
+pair = Gen (pure Pair)
+
 addLabel :: String -> Gen a -> Gen a
-addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
+addLabel s = Gen . (>>= (<$ tell (Set.singleton (fromString s)))) . runGen
 
 
 data Term a where
   Pure :: (Int -> ShowS) -> a -> Term a
   InfixL :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
   InfixR :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
+  Pair :: Term (a -> b -> (a, b))
   (:<*>) :: Term (a -> b) -> Term a -> Term b
 
 infixl 4 :<*>
@@ -197,6 +253,7 @@ runTerm = \case
   Pure _ a -> a
   InfixL _ _ f -> f
   InfixR _ _ f -> f
+  Pair -> (,)
   f :<*> a -> runTerm f $ runTerm a
 
 instance Functor Term where
@@ -211,8 +268,10 @@ instance Show (Term a) where
     Pure s _ -> s d
     InfixL _ s _ -> showParen True (showString s)
     InfixR _ s _ -> showParen True (showString s)
+    Pair -> showParen True (showString ",")
     InfixL p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
     InfixR p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
+    Pair :<*> a :<*> b -> showParen True (showsPrec 0 a . showString ", " . showsPrec 0 b)
     InfixL p s _ :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
     InfixR p s _ :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
     f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)

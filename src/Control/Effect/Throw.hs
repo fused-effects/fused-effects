@@ -6,6 +6,8 @@ Predefined carriers:
 
 * "Control.Carrier.Throw.Either"
 * "Control.Carrier.Error.Either" (with 'Control.Effect.Catch.Catch')
+
+@since 1.0.0.0
 -}
 module Control.Effect.Throw
 ( -- * Throw effect
@@ -17,9 +19,10 @@ module Control.Effect.Throw
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import GHC.Generics (Generic1)
 
+-- | @since 1.0.0.0
 data Throw e (m :: * -> *) k
   = Throw e
   deriving (Functor, Generic1)

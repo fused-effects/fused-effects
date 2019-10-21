@@ -1,4 +1,5 @@
 {-# LANGUAGE ConstraintKinds #-}
+-- | @since 1.0.0.0
 module Control.Carrier
 ( -- * Effect requests
   Has

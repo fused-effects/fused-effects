@@ -8,6 +8,8 @@ Predefined carriers:
 
 * "Control.Carrier.Pure"
 * 'Data.Functor.Identity.Identity'
+
+@since 0.3.0.0
 -}
 
 module Control.Effect.Pure

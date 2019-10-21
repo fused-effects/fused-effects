@@ -8,6 +8,8 @@ Predefined carriers:
 
 * "Control.Carrier.Lift"
 * 'IO'
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.Lift
@@ -20,7 +22,7 @@ module Control.Effect.Lift
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import GHC.Generics
 
 -- | @since 0.1.0.0

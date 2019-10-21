@@ -1,7 +1,8 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module Error
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
@@ -9,44 +10,47 @@ import qualified Control.Carrier.Error.Either as ErrorC
 import Control.Effect.Error
 import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
-import Data.Functor.Identity (Identity(..))
+import Data.Semigroup as S ((<>))
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import qualified Throw
 
 tests :: TestTree
 tests = testGroup "Error" $
-  [ test "ErrorC"  ErrorC.runError
-  , test "Either"  pure
-  , test "ExceptT" ExceptT.runExceptT
+  [ testGroup "ErrorC"  $
+    [ testMonad
+    , testMonadFix
+    , testError
+    ] >>= ($ runL ErrorC.runError)
+  , testGroup "Either"  $ testError (runL pure)
+  , testGroup "ExceptT" $ testError (runL ExceptT.runExceptT)
   ] where
-  test :: Has (Error E) sig m => String -> (forall a . m a -> PureC (Either E a)) -> TestTree
-  test name run = testGroup name
-    $  Monad.test   (m (gen e)) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Error.test e (m (gen e)) a b                        run
+  testMonad    run = Monad.test    (m (gen0 e) (genN e)) a b c initial run
+  testMonadFix run = MonadFix.test (m (gen0 e) (genN e)) a b   initial run
+  testError    run = Error.test e  (m (gen0 e) (genN e)) a b   initial run
+  initial = identity <*> unit
 
+gen0 :: Has (Error e) sig m => Gen e -> Gen a -> [Gen (m a)]
+gen0 = Throw.gen0
 
-gen
+genN
   :: (Has (Error e) sig m, Arg e, Show e, Vary e)
   => Gen e
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
-  -> Gen (m a)
-gen e m a = choice
-  [ Throw.gen e m a
-  , Catch.gen e m a
-  ]
+  -> [Gen (m a)]
+genN = Catch.genN
 
 
 test
-  :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e)
+  :: (Has (Error e) sig m, Arg a, Arg e, Eq a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Vary e, Functor f)
   => Gen e
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC (Either e a))
+  -> Gen (f ())
+  -> Run f (Either e) m
   -> [TestTree]
-test e m a b runError
-  =  Throw.test e m a b runError
-  ++ Catch.test e m a b runError
+test e m = Throw.test e m S.<> Catch.test e m

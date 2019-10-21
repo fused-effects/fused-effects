@@ -7,6 +7,8 @@ Computations that signal failure with 'cutfail' prevent backtracking within the 
 Predefined carriers:
 
 * "Control.Carrier.Cut.Church"
+
+@since 0.1.2.0
 -}
 
 module Control.Effect.Cut
@@ -22,7 +24,7 @@ module Control.Effect.Cut
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier
+import Control.Carrier.Class
 
 -- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
 --
@@ -50,7 +52,6 @@ instance Effect Cut where
 -- @
 -- 'cutfail' '>>=' k = 'cutfail'
 -- @
---
 -- @
 -- 'cutfail' '<|>' m = 'cutfail'
 -- @

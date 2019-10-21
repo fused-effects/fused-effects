@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for the 'Control.Effect.Trace' effect that ignores all traced results. Useful when you wish to disable tracing without removing all trace statements.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Trace.Ignoring
 ( -- * Trace carrier
   runTrace
@@ -10,7 +12,7 @@ module Control.Carrier.Trace.Ignoring
 ) where
 
 import Control.Applicative (Alternative(..))
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail

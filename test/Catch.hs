@@ -1,6 +1,6 @@
 {-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Catch
-( gen
+( genN
 , test
 ) where
 
@@ -9,26 +9,26 @@ import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
-gen
+genN
   :: forall e m a sig
   .  (Has (Catch e) sig m, Arg e, Show e, Vary e)
   => Gen e
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
-  -> Gen (m a)
-gen _ m a = label "catchError" catchError <*> m a <*> fn @e (m a)
+  -> [Gen (m a)]
+genN _ m a = [ label "catchError" catchError <*> m a <*> fn @e (m a) ]
 
 
 test
-  :: forall e m a b sig
-  .  (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e)
+  :: (Has (Error e) sig m, Arg e, Eq a, Eq e, Show a, Show e, Vary e, Functor f)
   => Gen e
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC (Either e a))
+  -> Gen (f ())
+  -> Run f (Either e) m
   -> [TestTree]
-test e m a _ runCatch =
-  [ testProperty "catchError intercepts throwError" . forall (e :. fn (m a) :. Nil) $
-    \ e h -> runCatch (throwError e `catchError` h) === runCatch (h e)
+test e m a _ i (Run runCatch) =
+  [ testProperty "catchError intercepts throwError" . forall (i :. e :. fn (m a) :. Nil) $
+    \ i e h -> runCatch ((throwError e `catchError` h) <$ i) === runCatch (h e <$ i)
   ]

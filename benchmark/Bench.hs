@@ -3,7 +3,7 @@ module Main
 ( main
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Carrier.Interpret
 import Control.Carrier.State.Strict
 import Control.Carrier.Writer.Strict

@@ -1,6 +1,8 @@
 {-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
+--
+-- @since 1.0.0.0
 module Control.Carrier.Cut.Church
 ( -- * Cut carrier
   runCut
@@ -13,7 +15,7 @@ module Control.Carrier.Cut.Church
 , module Control.Effect.NonDet
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Monad (join)
 import Control.Effect.Cut
 import Control.Effect.NonDet

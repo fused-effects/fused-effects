@@ -8,6 +8,8 @@ Predefined carriers:
 
 * "Control.Carrier.NonDet.Church", which collects all branches' results using an @Alternative@ functor.
 * If 'NonDet' is the last effect in a stack, it can be interpreted directly into a @[]@.
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.NonDet
@@ -28,7 +30,7 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Applicative (Alternative(..), optional)
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Choose (Choose(..))
 import Control.Effect.Empty (Empty(..))
 import Control.Monad (MonadPlus(..), guard)

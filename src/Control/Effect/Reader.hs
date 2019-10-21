@@ -11,6 +11,8 @@ Predefined carriers:
 * "Control.Monad.Trans.RWS.Lazy"
 * "Control.Monad.Trans.RWS.Strict"
 * If 'Reader' @r@ is the last effect in a stack, it can be interpreted directly to @(-> r)@ (a function taking an @r@).
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.Reader
@@ -25,7 +27,7 @@ module Control.Effect.Reader
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 
 -- | @since 0.1.0.0
 data Reader r m k

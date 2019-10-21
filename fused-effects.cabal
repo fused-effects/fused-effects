@@ -45,7 +45,6 @@ library
   hs-source-dirs: src
   exposed-modules:
     -- Carriers
-    Control.Carrier
     Control.Carrier.Choose.Church
     Control.Carrier.Class
     Control.Carrier.Cull.Church
@@ -123,10 +122,12 @@ test-suite test
     Cut.Church
     Empty
     Error
+    Fail
     Fresh
     Fusion
     Gen
     Monad
+    MonadFix
     NonDet
     NonDet.Church
     Reader

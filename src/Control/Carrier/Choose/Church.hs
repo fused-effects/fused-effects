@@ -3,6 +3,8 @@
 {- | A carrier for 'Choose' effects (nondeterminism without failure).
 
 Under the hood, it uses a Church-encoded binary tree to avoid the problems associated with a naïve list-based implementation (see ["ListT done right"](http://wiki.haskell.org/ListT_done_right)).
+
+@since 1.0.0.0
 -}
 
 module Control.Carrier.Choose.Church
@@ -15,7 +17,7 @@ module Control.Carrier.Choose.Church
 ) where
 
 import Control.Applicative (liftA2)
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.Choose
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail

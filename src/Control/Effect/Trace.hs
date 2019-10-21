@@ -7,6 +7,8 @@ Predefined carriers:
 * "Control.Carrier.Trace.Printing", which logs to stderr in a 'Control.Monad.IO.Class.MonadIO' context.
 * "Control.Carrier.Trace.Returning", which aggregates all traces in a @[String].
 * "Control.Carrier.Trace.Ignoring", which discards all traced values.
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.Trace
@@ -19,7 +21,7 @@ module Control.Effect.Trace
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 import GHC.Generics (Generic1)
 
 -- | @since 0.1.0.0

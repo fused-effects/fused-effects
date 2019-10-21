@@ -1,54 +1,60 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module NonDet
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
 import qualified Choose
-import Control.Carrier
 import qualified Control.Carrier.NonDet.Church as Church.NonDetC
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet (NonDet)
-import Data.Functor.Identity (Identity(..))
-import Data.Maybe (listToMaybe)
+import Data.Semigroup as S ((<>))
 import qualified Empty
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "NonDet"
-  [ test "NonDetC (Church)" Church.NonDetC.runNonDetA
-  , test "[]"               pure
+  [ testGroup "NonDetC (Church)" $
+    [ testMonad
+    , testMonadFix
+    , testNonDet
+    ] >>= ($ runL Church.NonDetC.runNonDetA)
+  , testGroup "[]" $ testNonDet (runL pure)
   ] where
-  test :: Has NonDet sig m => String -> (forall a . m a -> PureC [a]) -> TestTree
-  test name run = testGroup name
-    $  Monad.test  (m gen) a b c (pure (Identity ())) (run . runIdentity)
-    ++ NonDet.test (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen0 genN) a b c initial run
+  testMonadFix run = MonadFix.test (m gen0 genN) a b   initial run
+  testNonDet   run = NonDet.test   (m gen0 genN) a b   initial run
+  initial = identity <*> unit
 
 
-gen
-  :: Has NonDet sig m
-  => (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
-gen m a = choice [ Empty.gen m a, Choose.gen m a ]
+gen0 :: Has NonDet sig m => Gen a -> [Gen (m a)]
+gen0 = Empty.gen0
+
+genN :: Has NonDet sig m => GenM m -> Gen a -> [Gen (m a)]
+genN = Choose.genN
 
 
 test
-  :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
-  => (forall a . Gen a -> Gen (m a))
+  :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
+  => GenM m
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC [a])
+  -> Gen (f ())
+  -> Run f [] m
   -> [TestTree]
-test m a b runNonDet
-  =  testProperty "empty is the left identity of <|>"  (forall (m a :. Nil)
-    (\ m -> runNonDet (empty <|> m) === runNonDet m))
-  :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
-    (\ m -> runNonDet (m <|> empty) === runNonDet m))
-  :  Empty.test  m a b (fmap listToMaybe . runNonDet)
-  ++ Choose.test m a b runNonDet
+test m
+  = (\ a _ i (Run runNonDet) ->
+    [ testProperty "empty is the left identity of <|>"  (forall (i :. m a :. Nil)
+      (\ i m -> runNonDet ((empty <|> m) <$ i) === runNonDet (m <$ i)))
+    ,  testProperty "empty is the right identity of <|>" (forall (i :. m a :. Nil)
+      (\ i m -> runNonDet ((m <|> empty) <$ i) === runNonDet (m <$ i)))
+    ])
+  S.<> Empty.test  m
+  S.<> Choose.test m

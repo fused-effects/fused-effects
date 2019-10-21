@@ -1,46 +1,48 @@
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Empty
 ( tests
-, gen
+, gen0
 , test
 ) where
 
 import qualified Control.Carrier.Empty.Maybe as EmptyC
 import Control.Effect.Empty
-import Data.Functor.Identity (Identity(..))
+import Data.Maybe (maybeToList)
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty"
-  [ test "EmptyC" EmptyC.runEmpty
-  , test "Maybe"  pure
+  [ testGroup "EmptyC" $
+    [ testMonad
+    , testMonadFix
+    , testEmpty
+    ] >>= ($ runL (fmap maybeToList . EmptyC.runEmpty))
+  , testGroup "Maybe"  $ testEmpty (runL (pure . maybeToList))
   ] where
-  test :: Has Empty sig m => String -> (forall a . m a -> PureC (Maybe a)) -> TestTree
-  test name run = testGroup name
-    $  Monad.test (m gen) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Empty.test (m gen) a b                        run
+  testMonad    run = Monad.test    (m gen0 (\ _ _ -> [])) a b c initial run
+  testMonadFix run = MonadFix.test (m gen0 (\ _ _ -> [])) a b   initial run
+  testEmpty    run = Empty.test    (m gen0 (\ _ _ -> [])) a b   initial run
+  initial = identity <*> unit
 
 
-gen
-  :: Has Empty sig m
-  => (forall a . Gen a -> Gen (m a))
-  -> Gen a
-  -> Gen (m a)
-gen _ _ = label "empty" empty
+gen0 :: Has Empty sig m => Gen a -> [Gen (m a)]
+gen0 _ = [ label "empty" empty ]
 
 
 test
-  :: forall a b m sig
-  .  (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a)
-  => (forall a . Gen a -> Gen (m a))
+  :: forall a b m f sig
+  .  (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a, Functor f)
+  => GenM m
   -> Gen a
   -> Gen b
-  -> (forall a . m a -> PureC (Maybe a))
+  -> Gen (f ())
+  -> Run f [] m
   -> [TestTree]
-test m _ b runEmpty =
-  [ testProperty "empty annihilates >>=" . forall (fn @a (m b) :. Nil) $
-    \ k -> runEmpty (empty >>= k) === runEmpty empty
+test m _ b i (Run runEmpty) =
+  [ testProperty "empty annihilates >>=" . forall (i :. fn @a (m b) :. Nil) $
+    \ i k -> runEmpty ((empty >>= k) <$ i) === runEmpty (empty <$ i)
   ]

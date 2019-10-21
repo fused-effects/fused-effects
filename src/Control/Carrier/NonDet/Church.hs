@@ -3,6 +3,8 @@
 {- | Provides 'NonDetC', a carrier for 'NonDet' effects providing choice and failure.
 
 Under the hood, it uses a Church-encoded structure and a binary tree to prevent the problems associated with a naïve list-based implementation.
+
+@since 1.0.0.0
 -}
 
 module Control.Carrier.NonDet.Church
@@ -16,7 +18,7 @@ module Control.Carrier.NonDet.Church
 ) where
 
 import Control.Applicative (liftA2)
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Effect.NonDet
 import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail

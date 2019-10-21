@@ -7,7 +7,7 @@ module Teletype
 
 import Prelude hiding (read)
 
-import Control.Carrier
+import Control.Carrier.Class
 import Control.Carrier.State.Strict
 import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class

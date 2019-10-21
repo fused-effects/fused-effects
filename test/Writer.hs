@@ -1,67 +1,76 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Writer
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
 import Control.Arrow ((&&&))
-import qualified Control.Carrier.Writer.Strict as StrictWriterC
+import qualified Control.Carrier.Writer.Strict as WriterC
 import Control.Effect.Writer
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import Data.Bifunctor (first)
-import Data.Functor.Identity (Identity(..))
 import Data.Tuple (swap)
 import Gen
 import qualified Monad
+import qualified MonadFix
 import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ test "WriterC (Strict)" StrictWriterC.runWriter
-  , test "WriterT (Lazy)"   (fmap swap . LazyWriterT.runWriterT)
-  , test "WriterT (Strict)" (fmap swap . StrictWriterT.runWriterT)
-  , test "RWST (Lazy)"      (runRWST LazyRWST.runRWST)
-  , test "RWST (Strict)"    (runRWST StrictRWST.runRWST)
+  [ testGroup "WriterC" $
+    [ testMonad
+    , testMonadFix
+    , testWriter
+    ] >>= ($ runL WriterC.runWriter)
+  , testGroup "(,)"              $ testWriter (runL pure)
+  , testGroup "WriterT (Lazy)"   $ testWriter (runL (fmap swap . LazyWriterT.runWriterT))
+  , testGroup "WriterT (Strict)" $ testWriter (runL (fmap swap . StrictWriterT.runWriterT))
+  , testGroup "RWST (Lazy)"      $ testWriter (runL (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"    $ testWriter (runL (runRWST StrictRWST.runRWST))
   ] where
-  test :: Has (Writer W) sig m => String -> (forall a . m a -> PureC (W, a)) -> TestTree
-  test s run = testGroup s
-    $  Monad.test    (m (gen w b)) a b c (pure (Identity ())) (run . runIdentity)
-    ++ Writer.test w (m (gen w b)) a                          run
+  testMonad    run = Monad.test    (m (gen0 w) (genN w b)) a b c initial run
+  testMonadFix run = MonadFix.test (m (gen0 w) (genN w b)) a b   initial run
+  testWriter   run = Writer.test w (m (gen0 w) (genN w b)) a     initial run
+  initial = identity <*> unit
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
-gen
+gen0 :: Has (Writer w) sig m => Gen w -> Gen a -> [Gen (m a)]
+gen0 w a = [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w) ]
+
+genN
   :: forall w b m a sig
   .  (Has (Writer w) sig m, Arg b, Arg w, Show b, Show w, Vary b, Vary w)
   => Gen w
   -> Gen b
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
-  -> Gen (m a)
-gen w b m a = choice
-  [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w)
-  , atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
+  -> [Gen (m a)]
+genN w b m a =
+  [ atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
   , label "censor" censor <*> fn w <*> m a
   ]
 
 
 test
-  :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w)
+  :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w, Functor f)
   => Gen w
-  -> (forall a . Gen a -> Gen (m a))
+  -> GenM m
   -> Gen a
-  -> (forall a . m a -> PureC (w, a))
+  -> Gen (f ())
+  -> Run f ((,) w) m
   -> [TestTree]
-test w m a runWriter =
-  [ testProperty "tell appends a value to the log" . forall (w :. m a :. Nil) $
-    \ w m -> runWriter (tell w >> m) === fmap (first (mappend w)) (runWriter m)
-  , testProperty "listen eavesdrops on written output" . forall (m a :. Nil) $
-    \ m -> runWriter (listen m) === fmap (fst &&& id) (runWriter m)
-  , testProperty "censor revises written output" . forall (fn w :. m a :. Nil) $
-    \ f m -> runWriter (censor f m) === fmap (first f) (runWriter m)
+test w m a i (Run runWriter) =
+  [ testProperty "tell appends a value to the log" . forall (i :. w :. m a :. Nil) $
+    \ i w m -> runWriter ((tell w >> m) <$ i) === fmap (first (mappend w)) (runWriter (m <$ i))
+  , testProperty "listen eavesdrops on written output" . forall (i :. m a :. Nil) $
+    \ i m -> runWriter (listen m <$ i) === fmap (fst &&& id) (runWriter (m <$ i))
+  , testProperty "censor revises written output" . forall (i :. fn w :. m a :. Nil) $
+    \ i f m -> runWriter (censor f m <$ i) === fmap (first f) (runWriter (m <$ i))
   ]

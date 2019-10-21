@@ -10,6 +10,8 @@ Predefined carriers:
 * "Control.Monad.Trans.Writer.Lazy"
 * "Control.Monad.Trans.Writer.Strict"
 * If 'Writer' @w@ is the last effect in a stack, it can be interpreted to a tuple @(w, a)@ given some result type @a@ and the presence of a 'Monoid' instance for @w@.
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.Writer
@@ -25,7 +27,7 @@ module Control.Effect.Writer
 , run
 ) where
 
-import Control.Carrier
+import Control.Carrier.Class
 
 -- | @since 0.1.0.0
 data Writer w m k
