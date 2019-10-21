@@ -307,3 +307,6 @@ newtype NestC a = NestC a
 instance Applicative NestC where
   pure = NestC
   NestC f <*> NestC a = NestC (f a)
+
+instance Monad NestC where
+  NestC a >>= f = f a
