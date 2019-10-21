@@ -23,9 +23,9 @@ tests = testGroup "Choose"
     ] >>= ($ runL (ChooseC.runChooseS (pure . pure)))
   , testGroup "NonEmpty" $ testChoose (runL (pure . toList))
   ] where
-  testMonad    run = Monad.test    (m (const []) genN) a b c initial run
-  testMonadFix run = MonadFix.test (m (const []) genN) a b   initial run
-  testChoose   run = Choose.test   (m (const []) genN) a b   initial run
+  testMonad    run = Monad.test    (m mempty genN) a b c initial run
+  testMonadFix run = MonadFix.test (m mempty genN) a b   initial run
+  testChoose   run = Choose.test   (m mempty genN) a b   initial run
   initial = identity <*> unit
 
 
