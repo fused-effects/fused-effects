@@ -6,6 +6,7 @@ module Gen
   -- * Polymorphic generation & instantiation
 , m
 , GenM(..)
+, genM
 , genT
 , T(..)
 , a
@@ -92,6 +93,9 @@ m with = m where
 
 -- | Computation generators are higher-order generators of computations in some monad @m@.
 newtype GenM m = GenM { runGenM :: forall a . Gen a -> Gen (m a) }
+
+genM :: (forall a . (forall a . Gen a -> Gen (m a)) -> Gen a -> Gen (m a)) -> GenM m -> GenM m
+genM with (GenM m) = GenM (with m)
 
 
 genT :: KnownSymbol s => Gen (T s)
