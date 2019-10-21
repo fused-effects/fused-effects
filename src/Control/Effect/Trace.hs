@@ -16,7 +16,7 @@ module Control.Effect.Trace
   Trace(..)
 , trace
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

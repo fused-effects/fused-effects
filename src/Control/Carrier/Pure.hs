@@ -62,6 +62,6 @@ instance MonadFix PureC where
   mfix f = PureC (fix (run . f))
   {-# INLINE mfix #-}
 
-instance Carrier Pure PureC where
+instance Algebra Pure PureC where
   eff v = case v of {}
   {-# INLINE eff #-}

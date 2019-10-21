@@ -12,7 +12,7 @@ module Control.Effect.Fresh
   Fresh(..)
 , fresh
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

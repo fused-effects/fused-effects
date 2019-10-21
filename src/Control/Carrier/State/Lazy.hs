@@ -113,7 +113,7 @@ instance MonadTrans (StateC s) where
   lift m = StateC (\ s -> (,) s <$> m)
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
+instance (Algebra sig m, Effect sig) => Algebra (State s :+: sig) (StateC s m) where
   eff (L (Get   k)) = StateC (\ s -> runState s (k s))
   eff (L (Put s k)) = StateC (\ _ -> runState s k)
   eff (R other)     = StateC (\ s -> eff (handle (s, ()) (uncurry runState) other))

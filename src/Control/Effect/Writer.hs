@@ -22,7 +22,7 @@ module Control.Effect.Writer
 , listens
 , censor
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

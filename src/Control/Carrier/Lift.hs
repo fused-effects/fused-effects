@@ -34,7 +34,7 @@ newtype LiftC m a = LiftC (m a)
 instance MonadTrans LiftC where
   lift = LiftC
 
-instance Monad m => Carrier (Lift m) (LiftC m) where
+instance Monad m => Algebra (Lift m) (LiftC m) where
   eff = LiftC . (>>= runM) . unLift
 
 instance MonadUnliftIO m => MonadUnliftIO (LiftC m) where

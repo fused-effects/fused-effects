@@ -23,7 +23,7 @@ module Control.Effect.Choose
   -- * Choosing semigroup
 , Choosing(..)
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

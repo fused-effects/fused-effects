@@ -14,7 +14,7 @@ module Control.Effect.Throw
   Throw(..)
 , throwError
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

@@ -68,7 +68,7 @@ instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
+instance (Algebra sig m, Effect sig) => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
   eff (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False

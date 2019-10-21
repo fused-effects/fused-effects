@@ -87,7 +87,7 @@ instance MonadTrans CutC where
   lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
+instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
   eff (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   eff (R (L (L Empty)))      = empty

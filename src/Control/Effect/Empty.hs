@@ -18,7 +18,7 @@ module Control.Effect.Empty
 , empty
 , guard
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

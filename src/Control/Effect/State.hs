@@ -25,7 +25,7 @@ module Control.Effect.State
 , modify
 , modifyLazy
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

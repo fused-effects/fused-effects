@@ -38,10 +38,10 @@ runFail (FailC m) = runThrow m
 newtype FailC m a = FailC (ThrowC String m a)
   deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Carrier sig m, Effect sig) => Fail.MonadFail (FailC m) where
+instance (Algebra sig m, Effect sig) => Fail.MonadFail (FailC m) where
   fail = send . Fail
   {-# INLINE fail #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Fail :+: sig) (FailC m) where
+instance (Algebra sig m, Effect sig) => Algebra (Fail :+: sig) (FailC m) where
   eff = FailC . eff . handleCoercible
   {-# INLINE eff #-}

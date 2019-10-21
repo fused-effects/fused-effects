@@ -22,7 +22,7 @@ module Control.Effect.Reader
 , asks
 , local
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

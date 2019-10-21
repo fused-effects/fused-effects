@@ -13,7 +13,7 @@ module Control.Effect.Catch
   Catch(..)
 , catchError
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

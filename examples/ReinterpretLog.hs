@@ -130,11 +130,11 @@ newtype LogStdoutC m a
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects (and also
      -- perform IO)...
-     ( Carrier sig m
+     ( Algebra sig m
      , MonadIO m
      )
      -- ... the 'LogStdoutC m' monad can interpret 'Log String :+: sig' effects
-  => Carrier (Log String :+: sig) (LogStdoutC m) where
+  => Algebra (Log String :+: sig) (LogStdoutC m) where
 
   eff :: (Log String :+: sig) (LogStdoutC m) a -> LogStdoutC m a
   eff = \case
@@ -166,7 +166,7 @@ instance
      Has (Log t) sig m
      -- ... the 'ReinterpretLogC s t m' monad can interpret 'Log s :+: sig'
      -- effects
-  => Carrier (Log s :+: sig) (ReinterpretLogC s t m) where
+  => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
 
   eff ::
        (Log s :+: sig) (ReinterpretLogC s t m) a
@@ -199,12 +199,12 @@ newtype CollectLogMessagesC s m a
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
-     ( Carrier sig m
+     ( Algebra sig m
      , Effect sig
      )
      -- ...the 'CollectLogMessagesC s m' monad can interpret 'Log s :+: sig'
      -- effects
-  => Carrier (Log s :+: sig) (CollectLogMessagesC s m) where
+  => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
 
   eff ::
        (Log s :+: sig) (CollectLogMessagesC s m) a

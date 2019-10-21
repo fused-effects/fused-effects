@@ -17,7 +17,7 @@ module Control.Effect.Lift
   Lift(..)
 , sendM
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

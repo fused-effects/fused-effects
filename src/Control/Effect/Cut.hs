@@ -18,7 +18,7 @@ module Control.Effect.Cut
 , call
 , cut
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

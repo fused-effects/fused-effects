@@ -10,7 +10,7 @@ module Control.Carrier.Interpret
 , Reifies
 , Handler
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
@@ -88,6 +88,6 @@ instance MonadUnliftIO m => MonadUnliftIO (InterpretC s sig m) where
   withRunInIO inner = InterpretC $ withRunInIO $ \run -> inner (\ (InterpretC m) -> run m)
   {-# INLINE withRunInIO #-}
 
-instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Carrier sig m) => Carrier (eff :+: sig) (InterpretC s eff m) where
+instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
   eff (L eff)   = runHandler (getConst (reflect @s)) eff
   eff (R other) = InterpretC (eff (handleCoercible other))
