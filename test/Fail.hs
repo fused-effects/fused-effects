@@ -29,7 +29,7 @@ tests = testGroup "Fail" $
 
 
 gen :: MonadFail m => Gen String -> GenM m -> GenM m
-gen e _ = GenM $ \ _ -> label "fail" Fail.fail <*> e
+gen e = genM $ \ _ _ -> label "fail" Fail.fail <*> e
 
 
 test

@@ -43,7 +43,7 @@ gen
   => Gen r
   -> GenM m
   -> GenM m
-gen r (GenM m) = GenM $ \ a -> choice
+gen r = genM $ \ m a -> choice
   [ label "asks" (asks @r) <*> fn a
   , label "local" local <*> fn r <*> m a
   ]

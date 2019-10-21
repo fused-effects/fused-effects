@@ -46,7 +46,7 @@ gen
   -> Gen b
   -> GenM m
   -> GenM m
-gen w b (GenM m) = GenM $ \ a -> choice
+gen w b = genM $ \ m a -> choice
   [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w)
   , atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
   , label "censor" censor <*> fn w <*> m a

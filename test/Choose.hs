@@ -29,7 +29,7 @@ tests = testGroup "Choose"
 
 
 gen :: Has Choose sig m => GenM m -> GenM m
-gen (GenM m) = GenM $ \ a -> addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a)
+gen = genM $ \ m a -> addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a)
 
 
 test

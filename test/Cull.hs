@@ -31,7 +31,7 @@ tests = testGroup "Cull"
 
 gen :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenM m
 gen = choiceM
-  [ \ (GenM m) -> GenM $ \ a -> label "cull" cull <*> m a
+  [ genM $ \ m a -> label "cull" cull <*> m a
   , NonDet.gen
   ]
 

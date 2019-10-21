@@ -29,7 +29,7 @@ tests = testGroup "Fresh"
 
 
 gen :: Has Fresh sig m => GenM m -> GenM m
-gen _ = GenM $ \ a -> atom "fmap" fmap <*> fn a <*> label "fresh" fresh
+gen = genM $ \ _ a -> atom "fmap" fmap <*> fn a <*> label "fresh" fresh
 
 
 test

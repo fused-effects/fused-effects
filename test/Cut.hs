@@ -37,8 +37,8 @@ tests = testGroup "Cut"
 
 gen :: (Has Cut sig m, Has NonDet sig m) => GenM m -> GenM m
 gen = choiceM
-  [ \ (GenM m) -> GenM $ \ a -> label "call" call <*> m a
-  , \ _        -> GenM $ \ _ -> label "cutfail" cutfail
+  [ genM $ \ m a -> label "call" call <*> m a
+  , genM $ \ _ _ -> label "cutfail" cutfail
   , NonDet.gen
   ]
 
