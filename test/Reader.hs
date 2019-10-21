@@ -25,7 +25,7 @@ tests = testGroup "Reader"
     , testMonadFix
     , testReader
     ] >>= ($ runR (uncurry ReaderC.runReader . lower))
-  , testGroup "(->)"          $ testReader (runR (uncurry (fmap PureC . (&))           . lower))
+  , testGroup "(->)"          $ testReader (runR (uncurry (fmap pure . (&))            . lower))
   , testGroup "ReaderT"       $ testReader (runR (uncurry (flip ReaderT.runReaderT)    . lower))
   , testGroup "RWST (Lazy)"   $ testReader (runR (uncurry (runRWST LazyRWST.runRWST)   . lower))
   , testGroup "RWST (Strict)" $ testReader (runR (uncurry (runRWST StrictRWST.runRWST) . lower))
