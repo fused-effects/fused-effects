@@ -27,13 +27,13 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
-    Cut.test (Hom (local (id @R))) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    Cut.test (local (id @R)) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
   , testGroup "CutC · ReaderC" $
-    Cut.test (Hom (local (id @R))) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+    Cut.test (local (id @R)) (m (\ a -> gen0 ++ Reader.gen0 r a) (\ m a -> genN m a ++ Reader.genN r m a)) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
-  testMonad    run = Monad.test        (m (const gen0) genN) a b c (identity <*> unit) run
-  -- testMonadFix run = MonadFix.test     (m (const gen0) genN) a b   (identity <*> unit) run
-  testCut      run = Cut.test (Hom id) (m (const gen0) genN) a b   (identity <*> unit) run
+  testMonad    run = Monad.test    (m (const gen0) genN) a b c (identity <*> unit) run
+  -- testMonadFix run = MonadFix.test (m (const gen0) genN) a b   (identity <*> unit) run
+  testCut      run = Cut.test id   (m (const gen0) genN) a b   (identity <*> unit) run
 
 
 gen0 :: (Has Cut sig m, Has NonDet sig m) => [Gen (m a)]
@@ -43,7 +43,7 @@ genN :: (Has Cut sig m, Has NonDet sig m) => GenM m -> Gen a -> [Gen (m a)]
 genN m a = (label "call" call <*> m a) : NonDet.genN m a
 
 
-newtype Hom m = Hom (forall a . m a -> m a)
+type Hom m = (forall a . m a -> m a)
 
 test
   :: forall a b m f sig
@@ -55,7 +55,7 @@ test
   -> Gen (f ())
   -> Run f [] m
   -> [TestTree]
-test (Hom hom) m a b i (Run runCut)
+test hom m a b i (Run runCut)
   = testProperty "cutfail annihilates >>=" (forall (i :. fn @a (m a) :. Nil)
     (\ i k -> runCut ((hom cutfail >>= k) <$ i) === runCut (hom cutfail <$ i)))
   : testProperty "cutfail annihilates <|>" (forall (i :. m a :. Nil)
