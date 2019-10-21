@@ -41,11 +41,7 @@ tests = testGroup "Writer"
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
-gen0
-  :: Has (Writer w) sig m
-  => Gen w
-  -> Gen a
-  -> [Gen (m a)]
+gen0 :: Has (Writer w) sig m => Gen w -> Gen a -> [Gen (m a)]
 gen0 w a = [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w) ]
 
 genN
