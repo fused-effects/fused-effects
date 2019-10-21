@@ -303,7 +303,3 @@ runNest (NestC a) = a
 
 newtype NestC a = NestC a
   deriving (Eq, Functor, Show)
-
-instance Applicative NestC where
-  pure = NestC
-  NestC f <*> NestC a = NestC (f a)
