@@ -48,7 +48,7 @@ gen
   => Gen s
   -> GenM m
   -> GenM m
-gen s = genM $ \ _ a -> choice
+gen s _ = GenM $ \ a -> choice
   [ label "gets" (gets @s) <*> fn a
   , infixL 4 "<$" (<$) <*> a <*> (label "put" put <*> s)
   ]

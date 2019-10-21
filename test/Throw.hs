@@ -27,7 +27,7 @@ tests = testGroup "Throw" $
 
 
 gen :: Has (Throw e) sig m => Gen e -> GenM m -> GenM m
-gen e = genM $ \ _ _ -> label "throwError" throwError <*> e
+gen e _ = GenM $ \ _ -> label "throwError" throwError <*> e
 
 
 test

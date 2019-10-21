@@ -29,7 +29,7 @@ tests = testGroup "Empty"
 
 
 gen :: Has Empty sig m => GenM m -> GenM m
-gen = genM $ \ _ _ -> label "empty" empty
+gen _ = GenM $ \ _ -> label "empty" empty
 
 
 test

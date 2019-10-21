@@ -15,7 +15,7 @@ gen
   => Gen e
   -> GenM m
   -> GenM m
-gen _ = genM $ \ m a -> label "catchError" catchError <*> m a <*> fn @e (m a)
+gen _ (GenM m) = GenM $ \ a -> label "catchError" catchError <*> m a <*> fn @e (m a)
 
 
 test
