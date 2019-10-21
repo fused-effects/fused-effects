@@ -27,13 +27,13 @@ tests = testGroup "NonDet"
     ] >>= ($ runL Church.NonDetC.runNonDetA)
   , testGroup "[]" $ testNonDet (runL pure)
   ] where
-  testMonad    run = Monad.test    (m (const gen0) genN) a b c initial run
-  testMonadFix run = MonadFix.test (m (const gen0) genN) a b   initial run
-  testNonDet   run = NonDet.test   (m (const gen0) genN) a b   initial run
+  testMonad    run = Monad.test    (m gen0 genN) a b c initial run
+  testMonadFix run = MonadFix.test (m gen0 genN) a b   initial run
+  testNonDet   run = NonDet.test   (m gen0 genN) a b   initial run
   initial = identity <*> unit
 
 
-gen0 :: Has NonDet sig m => [Gen (m a)]
+gen0 :: Has NonDet sig m => Gen a -> [Gen (m a)]
 gen0 = Empty.gen0
 
 genN :: Has NonDet sig m => GenM m -> Gen a -> [Gen (m a)]

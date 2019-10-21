@@ -25,9 +25,9 @@ tests = testGroup "Cull"
     , testCull
     ] >>= ($ runL CullC.runCullA)
   ] where
-  testMonad    run = Monad.test    (m (const NonDet.gen0) genN) a b c initial run
-  testMonadFix run = MonadFix.test (m (const NonDet.gen0) genN) a b   initial run
-  testCull     run = Cull.test     (m (const NonDet.gen0) genN) a b   initial run
+  testMonad    run = Monad.test    (m NonDet.gen0 genN) a b c initial run
+  testMonadFix run = MonadFix.test (m NonDet.gen0 genN) a b   initial run
+  testCull     run = Cull.test     (m NonDet.gen0 genN) a b   initial run
   initial = identity <*> unit
 
 

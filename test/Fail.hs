@@ -22,15 +22,15 @@ tests = testGroup "Fail" $
     , testFail
     ] >>= ($ runL FailC.runFail)
   ] where
-  testMonad    run = Monad.test    (m (\ _ -> gen0 e) (\ _ _ -> [])) a b c initial run
-  testMonadFix run = MonadFix.test (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   initial run
-  testFail     run = Fail.test e   (m (\ _ -> gen0 e) (\ _ _ -> [])) a b   initial run
+  testMonad    run = Monad.test    (m (gen0 e) (\ _ _ -> [])) a b c initial run
+  testMonadFix run = MonadFix.test (m (gen0 e) (\ _ _ -> [])) a b   initial run
+  testFail     run = Fail.test e   (m (gen0 e) (\ _ _ -> [])) a b   initial run
   initial = identity <*> unit
   e = string (Range.linear 0 50) unicode
 
 
-gen0 :: MonadFail m => Gen String -> [Gen (m a)]
-gen0 e = [ label "fail" Fail.fail <*> e ]
+gen0 :: MonadFail m => Gen String -> Gen a -> [Gen (m a)]
+gen0 e _ = [ label "fail" Fail.fail <*> e ]
 
 
 test
