@@ -50,6 +50,7 @@ module Gen
 , Gen.integral
 , Gen.unicode
 , Gen.string
+, Gen.subterm2
 , Fn.Arg
 , Fn.Vary
 , Gen.fn
