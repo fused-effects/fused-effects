@@ -77,7 +77,7 @@ import GHC.Stack
 import GHC.TypeLits
 import Hedgehog
 import qualified Hedgehog.Function as Fn
-import Hedgehog.Gen
+import Hedgehog.Gen as Hedgehog
 import Hedgehog.Range
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
@@ -89,7 +89,7 @@ m
   -> GenM m                                              -- ^ A computation generator.
 m terminals nonterminals = m where
   m :: GenM m
-  m = \ a -> Comp1 $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
+  m = \ a -> Comp1 $ scale (`div` 2) $ recursive Hedgehog.choice
     (unComp1 <$> ((Gen.label "pure" pure <*> a) : terminals a))
     ( unComp1 (addLabel ">>" (Gen.subtermM2 (m a) (m a) (\ a b -> infixL 1 ">>" (>>) <*> term a <*> term b)))
     : (unComp1 <$> nonterminals m a))
@@ -161,27 +161,27 @@ fn :: (Fn.Arg a, Fn.Vary a, Show a) => GenTerm b -> GenTerm (a -> b)
 fn b = Comp1 (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT (unComp1 b))))
 
 termFn :: GenTerm b -> GenTerm (a -> b)
-termFn b = Comp1 $ recursive Hedgehog.Gen.choice
+termFn b = Comp1 $ recursive Hedgehog.choice
   [ unComp1 (atom "const" const <*> b) ]
   []
 
 choice :: [GenTerm a] -> GenTerm a
-choice = Comp1 . Hedgehog.Gen.choice . Prelude.map unComp1
+choice = Comp1 . Hedgehog.choice . Prelude.map unComp1
 
 integral :: (Integral a, Show a) => Range a -> GenTerm a
-integral range = Comp1 (showing <$> Hedgehog.Gen.integral range)
+integral range = Comp1 (showing <$> Hedgehog.integral range)
 
 unicode :: GenTerm Char
-unicode = Comp1 (showing <$> Hedgehog.Gen.unicode)
+unicode = Comp1 (showing <$> Hedgehog.unicode)
 
 string :: Range Int -> GenTerm Char -> GenTerm String
-string range cs = Comp1 (showing <$> Hedgehog.Gen.string range (runTerm <$> unComp1 cs))
+string range cs = Comp1 (showing <$> Hedgehog.string range (runTerm <$> unComp1 cs))
 
 subtermM :: GenTerm a -> (Term a -> GenTerm a) -> GenTerm a
-subtermM t f = Comp1 (Hedgehog.Gen.subtermM (unComp1 t) (unComp1 . f))
+subtermM t f = Comp1 (Hedgehog.subtermM (unComp1 t) (unComp1 . f))
 
 subtermM2 :: GenTerm a -> GenTerm a -> (Term a -> Term a -> GenTerm a) -> GenTerm a
-subtermM2 t1 t2 f = Comp1 (Hedgehog.Gen.subtermM2 (unComp1 t1) (unComp1 t2) (fmap unComp1 . f))
+subtermM2 t1 t2 f = Comp1 (Hedgehog.subtermM2 (unComp1 t1) (unComp1 t2) (fmap unComp1 . f))
 
 
 -- | This captures the shape of the handler function passed to the "Monad" & "MonadFix" tests.
