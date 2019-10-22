@@ -3,7 +3,7 @@ module Inference
 ( example
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import Control.Carrier.Reader
 import Test.Tasty
 import Test.Tasty.QuickCheck
@@ -43,5 +43,5 @@ newtype HasEnv env m a = HasEnv { runHasEnv :: m a }
   deriving (Applicative, Functor, Monad)
 
 -- | The 'Carrier' instance for 'HasEnv' simply delegates all effects to the underlying carrier.
-instance Carrier sig m => Carrier sig (HasEnv env m) where
+instance Algebra sig m => Algebra sig (HasEnv env m) where
   eff = HasEnv . eff . handleCoercible

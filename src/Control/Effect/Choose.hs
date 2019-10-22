@@ -23,12 +23,12 @@ module Control.Effect.Choose
   -- * Choosing semigroup
 , Choosing(..)
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import Control.Effect.Empty
 import Data.Bool (bool)
 import Data.List.NonEmpty (NonEmpty (..))

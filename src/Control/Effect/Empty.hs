@@ -18,12 +18,12 @@ module Control.Effect.Empty
 , empty
 , guard
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import GHC.Generics (Generic1)
 
 -- | @since 1.0.0.0
