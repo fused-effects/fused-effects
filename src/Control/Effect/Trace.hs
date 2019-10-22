@@ -16,12 +16,12 @@ module Control.Effect.Trace
   Trace(..)
 , trace
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import GHC.Generics (Generic1)
 
 -- | @since 0.1.0.0

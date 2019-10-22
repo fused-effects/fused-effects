@@ -109,7 +109,7 @@ myFunction :: Shared sig m => Int -> m ()
 Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`:
 
 ```haskell
-example1 :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
+example1 :: (Algebra sig m, Effect sig) => [a] -> m (Int, ())
 example1 list = runState 0 $ do
   i <- get @Int
   put (i + length list)
@@ -120,7 +120,7 @@ example1 list = runState 0 $ do
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
 ```haskell
-example2 :: (Carrier sig m, Effect sig) => m (Int, ())
+example2 :: (Algebra sig m, Effect sig) => m (Int, ())
 example2 = runReader "hello" . runState 0 $ do
   list <- ask
   put (length (list :: String))
@@ -250,7 +250,7 @@ Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a si
 newtype Wrapper s m a = Wrapper { runWrapper :: m a }
   deriving (Applicative, Functor, Monad)
 
-instance Carrier sig m => Carrier sig (Wrapper s m) where …
+instance Algebra sig m => Algebra sig (Wrapper s m) where …
 
 getState :: Has (State s) sig m => Wrapper s m s
 getState = get

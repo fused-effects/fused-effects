@@ -17,12 +17,12 @@ module Control.Effect.Lift
   Lift(..)
 , sendM
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import GHC.Generics
 
 -- | @since 0.1.0.0

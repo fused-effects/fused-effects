@@ -13,12 +13,12 @@ module Control.Effect.Catch
   Catch(..)
 , catchError
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 
 -- | 'Catch' effects can be used alongside 'Control.Effect.Throw.Throw' to provide recoverable exceptions.
 --

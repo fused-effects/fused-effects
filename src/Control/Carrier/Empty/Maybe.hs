@@ -15,7 +15,7 @@ module Control.Carrier.Empty.Maybe
 , module Control.Effect.Empty
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 import Control.Effect.Empty
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
@@ -46,7 +46,7 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Empty :+: sig) (EmptyC m) where
+instance (Algebra sig m, Effect sig) => Algebra (Empty :+: sig) (EmptyC m) where
   eff (L Empty) = EmptyC (MaybeT (pure Nothing))
   eff (R other) = EmptyC (MaybeT (eff (handle (Just ()) (maybe (pure Nothing) runEmpty) other)))
   {-# INLINE eff #-}
