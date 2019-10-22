@@ -244,19 +244,19 @@ term :: Term a -> GenTerm a
 term = Comp1 . pure
 
 atom :: String -> a -> GenTerm a
-atom s = Comp1 . pure . Pure (const (showString s))
+atom s = term . Pure (const (showString s))
 
 label :: String -> a -> GenTerm a
 label s = addLabel s . atom s
 
 infixL :: Int -> String -> (a -> b -> c) -> GenTerm (a -> b -> c)
-infixL p s f = Comp1 (pure (InfixL p s f))
+infixL p s f = term (InfixL p s f)
 
 infixR :: Int -> String -> (a -> b -> c) -> GenTerm (a -> b -> c)
-infixR p s f = Comp1 (pure (InfixR p s f))
+infixR p s f = term (InfixR p s f)
 
 pair :: GenTerm (a -> b -> (a, b))
-pair = Comp1 (pure Pair)
+pair = term Pair
 
 addLabel :: String -> GenTerm a -> GenTerm a
 addLabel s = Comp1 . (>>= (<$ tell (Set.singleton (fromString s)))) . unComp1
