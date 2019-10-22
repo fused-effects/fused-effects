@@ -37,7 +37,7 @@ gen0 :: (Has Cull sig m, Has NonDet sig m) => GenTerm a -> [GenTerm (m a)]
 gen0 = NonDet.gen0
 
 genN :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenTerm a -> [GenTerm (m a)]
-genN m a = (label "cull" cull <*> m a) : NonDet.genN m a
+genN m a = addLabel "cull" (subterm (m a) (Pure (const (showString "cull")) cull <*>)) : NonDet.genN m a
 
 
 test
