@@ -33,6 +33,7 @@ module Gen
 , Rec(..)
 , forall
   -- * Showing generated values
+, showing
 , GenTerm
 , atom
 , Gen.label
