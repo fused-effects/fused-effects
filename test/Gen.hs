@@ -87,7 +87,7 @@ m terminals nonterminals = m where
   m :: GenM m
   m = \ a -> Comp1 $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
     (unComp1 <$> ((Gen.label "pure" pure <*> a) : terminals a))
-    ( unComp1 (addLabel ">>" (Comp1 (subterm2 (unComp1 (m a)) (unComp1 (m a)) (\ a b -> InfixL 1 ">>" (>>) <*> a <*> b))))
+    ( unComp1 (addLabel ">>" (Gen.subterm2 (m a) (m a) (\ a b -> InfixL 1 ">>" (>>) <*> a <*> b)))
     : (unComp1 <$> nonterminals m a))
 
 -- | Computation generators are higher-order generators of computations in some monad @m@.
@@ -172,6 +172,9 @@ unicode = Comp1 (showing <$> Hedgehog.Gen.unicode)
 
 string :: Range Int -> GenTerm Char -> GenTerm String
 string range cs = Comp1 (showing <$> Hedgehog.Gen.string range (runTerm <$> unComp1 cs))
+
+subterm2 :: GenTerm a -> GenTerm a -> (Term a -> Term a -> Term a) -> GenTerm a
+subterm2 t1 t2 f = Comp1 (Hedgehog.Gen.subterm2 (unComp1 t1) (unComp1 t2) f)
 
 
 -- | This captures the shape of the handler function passed to the "Monad" & "MonadFix" tests.
