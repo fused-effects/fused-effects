@@ -29,16 +29,16 @@ tests = testGroup "Choose"
   initial = identity <*> unit
 
 
-genN :: Has Choose sig m => GenM m -> Gen a -> [Gen (m a)]
+genN :: Has Choose sig m => GenM m -> GenTerm a -> [GenTerm (m a)]
 genN m a = [ addLabel "<|>" (infixL 3 "<|>" (<|>) <*> m a <*> m a) ]
 
 
 test
   :: (Has Choose sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
-  -> Gen a
-  -> Gen b
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm (f ())
   -> Run f [] m
   -> [TestTree]
 test m a b i (Run runChoose) =

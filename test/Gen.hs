@@ -69,8 +69,7 @@ import Data.String (fromString)
 import GHC.Generics ((:.:)(..))
 import GHC.Stack
 import GHC.TypeLits
-import Hedgehog hiding (Gen)
-import qualified Hedgehog
+import Hedgehog
 import qualified Hedgehog.Function as Fn
 import Hedgehog.Gen
 import Hedgehog.Range
@@ -79,21 +78,21 @@ import Hedgehog.Range
 m
   :: forall m
   .  Monad m
-  => (forall a . Gen a -> [Gen (m a)])
-  -> (forall a . GenM m -> Gen a -> [Gen (m a)]) -- ^ A higher-order computation generator using any effects in @m@.
-  -> GenM m                                      -- ^ A computation generator.
+  => (forall a . GenTerm a -> [GenTerm (m a)])
+  -> (forall a . GenM m -> GenTerm a -> [GenTerm (m a)]) -- ^ A higher-order computation generator using any effects in @m@.
+  -> GenM m                                              -- ^ A computation generator.
 m terminals nonterminals = m where
   m :: GenM m
-  m = \ a -> Gen $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
-    (runGen <$> ((Gen.label "pure" pure <*> a) : terminals a))
-    ( (runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> m a <*> m a)))
-    : (runGen <$> nonterminals m a))
+  m = \ a -> Comp1 $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
+    (unComp1 <$> ((Gen.label "pure" pure <*> a) : terminals a))
+    ( (unComp1 (addLabel ">>" (infixL 1 ">>" (>>) <*> m a <*> m a)))
+    : (unComp1 <$> nonterminals m a))
 
 -- | Computation generators are higher-order generators of computations in some monad @m@.
-type GenM m = (forall a . Gen a -> Gen (m a))
+type GenM m = (forall a . GenTerm a -> GenTerm (m a))
 
 
-genT :: KnownSymbol s => Gen (T s)
+genT :: KnownSymbol s => GenTerm (T s)
 genT = Gen.integral (linear 0 100)
 
 newtype T (a :: Symbol) = T { unT :: Integer }
@@ -111,66 +110,66 @@ instance Monoid (T a) where
 instance KnownSymbol s => Show (T s) where
   showsPrec d = showsUnaryWith showsPrec (symbolVal (Proxy @s)) d . unT
 
-a :: Gen A
+a :: GenTerm A
 a = genT
 
 type A = T "A"
 
-b :: Gen B
+b :: GenTerm B
 b = genT
 
 type B = T "B"
 
-c :: Gen C
+c :: GenTerm C
 c = genT
 
 type C = T "C"
 
-e :: Gen E
+e :: GenTerm E
 e = genT
 
 type E = T "E"
 
-r :: Gen R
+r :: GenTerm R
 r = genT
 
 type R = T "R"
 
-s :: Gen S
+s :: GenTerm S
 s = genT
 
 type S = T "S"
 
-w :: Gen W
+w :: GenTerm W
 w = genT
 
 type W = T "W"
 
-unit :: Gen ()
+unit :: GenTerm ()
 unit = atom "()" ()
 
-identity :: Gen (a -> Identity a)
+identity :: GenTerm (a -> Identity a)
 identity = atom "Identity" Identity
 
-fn :: (Fn.Arg a, Fn.Vary a, Show a) => Gen b -> Gen (a -> b)
-fn b = Gen (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT (runGen b))))
+fn :: (Fn.Arg a, Fn.Vary a, Show a) => GenTerm b -> GenTerm (a -> b)
+fn b = Comp1 (lift (fmap (fmap runTerm) . showingFn <$> Fn.fn (fst <$> runWriterT (unComp1 b))))
 
-termFn :: Gen b -> Gen (a -> b)
-termFn b = Gen $ recursive Hedgehog.Gen.choice
-  [ runGen (atom "const" const <*> b) ]
+termFn :: GenTerm b -> GenTerm (a -> b)
+termFn b = Comp1 $ recursive Hedgehog.Gen.choice
+  [ unComp1 (atom "const" const <*> b) ]
   []
 
-choice :: [Gen a] -> Gen a
-choice = Gen . Hedgehog.Gen.choice . Prelude.map runGen
+choice :: [GenTerm a] -> GenTerm a
+choice = Comp1 . Hedgehog.Gen.choice . Prelude.map unComp1
 
-integral :: (Integral a, Show a) => Range a -> Gen a
-integral range = Gen (showing <$> Hedgehog.Gen.integral range)
+integral :: (Integral a, Show a) => Range a -> GenTerm a
+integral range = Comp1 (showing <$> Hedgehog.Gen.integral range)
 
-unicode :: Gen Char
-unicode = Gen (showing <$> Hedgehog.Gen.unicode)
+unicode :: GenTerm Char
+unicode = Comp1 (showing <$> Hedgehog.Gen.unicode)
 
-string :: Range Int -> Gen Char -> Gen String
-string range cs = Gen (showing <$> Hedgehog.Gen.string range (runTerm <$> runGen cs))
+string :: Range Int -> GenTerm Char -> GenTerm String
+string range cs = Comp1 (showing <$> Hedgehog.Gen.string range (runTerm <$> unComp1 cs))
 
 
 -- | This captures the shape of the handler function passed to the "Monad" & "MonadFix" tests.
@@ -204,9 +203,9 @@ class Forall g f | g -> f, f -> g where
 instance Forall (Rec '[]) (PropertyT IO ()) where
   forall' Nil = id
 
-instance (Forall (Rec gs) b) => Forall (Rec (Gen a ': gs)) (a -> b) where
+instance (Forall (Rec gs) b) => Forall (Rec (GenTerm a ': gs)) (a -> b) where
   forall' (g :. gs) f = do
-    HideLabels (a, labels) <- Hedgehog.forAll (HideLabels <$> runWriterT (runGen g))
+    HideLabels (a, labels) <- Hedgehog.forAll (HideLabels <$> runWriterT (unComp1 g))
     traverse_ Hedgehog.label labels
     forall' gs (f (runTerm a))
 
@@ -225,23 +224,23 @@ showingFn = Pure . flip showsPrec <*> Fn.apply
 
 type GenTerm = WriterT (Set.Set LabelName) Gen :.: Term
 
-atom :: String -> a -> Gen a
-atom s = Gen . pure . Pure (const (showString s))
+atom :: String -> a -> GenTerm a
+atom s = Comp1 . pure . Pure (const (showString s))
 
-label :: String -> a -> Gen a
+label :: String -> a -> GenTerm a
 label s = addLabel s . atom s
 
-infixL :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
-infixL p s f = Gen (pure (InfixL p s f))
+infixL :: Int -> String -> (a -> b -> c) -> GenTerm (a -> b -> c)
+infixL p s f = Comp1 (pure (InfixL p s f))
 
-infixR :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
-infixR p s f = Gen (pure (InfixR p s f))
+infixR :: Int -> String -> (a -> b -> c) -> GenTerm (a -> b -> c)
+infixR p s f = Comp1 (pure (InfixR p s f))
 
-pair :: Gen (a -> b -> (a, b))
-pair = Gen (pure Pair)
+pair :: GenTerm (a -> b -> (a, b))
+pair = Comp1 (pure Pair)
 
-addLabel :: String -> Gen a -> Gen a
-addLabel s = Gen . (>>= (<$ tell (Set.singleton (fromString s)))) . runGen
+addLabel :: String -> GenTerm a -> GenTerm a
+addLabel s = Comp1 . (>>= (<$ tell (Set.singleton (fromString s)))) . unComp1
 
 
 data Term a where
@@ -280,11 +279,3 @@ instance Show (Term a) where
     InfixL p s _ :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
     InfixR p s _ :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
     f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)
-
-
-newtype Gen a = Gen { runGen :: WriterT (Set.Set LabelName) Hedgehog.Gen (Term a) }
-  deriving (Functor)
-
-instance Applicative Gen where
-  pure = Gen . pure . pure
-  Gen m1 <*> Gen m2 = Gen ((<*>) <$> m1 <*> m2)

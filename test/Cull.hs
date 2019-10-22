@@ -33,19 +33,19 @@ tests = testGroup "Cull"
   initial = identity <*> unit
 
 
-gen0 :: (Has Cull sig m, Has NonDet sig m) => Gen a -> [Gen (m a)]
+gen0 :: (Has Cull sig m, Has NonDet sig m) => GenTerm a -> [GenTerm (m a)]
 gen0 = NonDet.gen0
 
-genN :: (Has Cull sig m, Has NonDet sig m) => GenM m -> Gen a -> [Gen (m a)]
+genN :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenTerm a -> [GenTerm (m a)]
 genN m a = (label "cull" cull <*> m a) : NonDet.genN m a
 
 
 test
   :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
-  -> Gen a
-  -> Gen b
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm (f ())
   -> Run f [] m
   -> [TestTree]
 test m a b i (Run runCull)
