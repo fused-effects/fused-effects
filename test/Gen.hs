@@ -35,7 +35,6 @@ module Gen
   -- * Showing generated values
 , showing
 , GenTerm
-, term
 , atom
 , Gen.label
 , infixL
