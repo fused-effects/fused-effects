@@ -56,7 +56,6 @@ module Gen
 , Gen.fn
 , termFn
 , Fn.apply
-, (:.:)(..)
 ) where
 
 import Control.Applicative
