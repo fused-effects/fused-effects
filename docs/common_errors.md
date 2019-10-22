@@ -18,7 +18,7 @@ data Fail m k
 newtype FailC m a = FailC { runFailC :: m (Either String a) }
 ```
 
-Declaring a `Algebra` instance will fail:
+Declaring an `Algebra` instance will fail:
 
 ```haskell
 instance (Algebra sig m, Effect sig)
