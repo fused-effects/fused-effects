@@ -41,6 +41,7 @@ module Gen
 , infixR
 , pair
 , addLabel
+, Term(..)
   -- * Re-exports
 , Gen
 , (===)
