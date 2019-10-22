@@ -11,8 +11,8 @@ module Control.Carrier.Throw.Either
 , module Control.Effect.Throw
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative)
-import Control.Carrier.Class
 import Control.Carrier.Error.Either
 import Control.Effect.Throw
 import Control.Monad (MonadPlus)
@@ -29,6 +29,6 @@ runThrow (ThrowC m) = runError m
 newtype ThrowC e m a = ThrowC (ErrorC e m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Carrier sig m, Effect sig) => Carrier (Throw e :+: sig) (ThrowC e m) where
+instance (Algebra sig m, Effect sig) => Algebra (Throw e :+: sig) (ThrowC e m) where
   eff (L (Throw e)) = ThrowC (throwError e)
   eff (R other)     = ThrowC (eff (R (handleCoercible other)))

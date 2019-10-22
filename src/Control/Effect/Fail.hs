@@ -17,7 +17,7 @@ module Control.Effect.Fail
 , pattern Fail
 , Fail.MonadFail(..)
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where

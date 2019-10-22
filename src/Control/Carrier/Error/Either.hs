@@ -11,8 +11,8 @@ module Control.Carrier.Error.Either
 , module Control.Effect.Error
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
 import Control.Effect.Error
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
@@ -51,6 +51,6 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 -- | 'ErrorC' passes 'MonadPlus' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
-instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
+instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (ErrorC e m) where
   eff = ErrorC . eff . handleCoercible
   {-# INLINE eff #-}
