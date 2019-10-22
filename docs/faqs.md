@@ -1,8 +1,11 @@
 # FAQs
 
-## Why are you reimplementing types equivalent to those provided by `transformers`? Why not use `StateT` instead of defining a separate `StateC` type?
+## Why is `Algebra` called `Algebra`, and not something more specific to the interpretation of effects?
 
-Were we to reuse the `transfomers` interface, we would elide a few manual instances, but we would still require a newtype wrapper so as to avoid orphan `Algebra` instances, so the degree of reuse would be minimal. Additionally, in many cases, the `transformers` interface is not as good as it could be: it is an old and venerable library, under significant backwards-compatibility constraints. Defining new monads rather than reusing existing ones allows us to paper over many of the issues present in `transformers`, such as:
-* Ergonomics: the order of arguments in `runState` and `runReader` makes it difficult to compose these functions without using `flip` every time.
-* Correctness: the `Writer` provided by `transformers` leaks space.
-* Implementation ease: the `handle` function for stateful variables is more comfortable if we reverse the order of the tuple members associated with the `StateT` transformer.
+In previous versions of `fused-effects`, `Algebra` was called Carrier. The authors chose to rename this to keep it in line with the literature (the corresponding typeclass is called `TermAlgebra` in _Fusion for Free_), emphasize the importance of morphisms over objects, and emphasize its similarity to the common Haskell idiom of [F-algebras](https://www.schoolofhaskell.com/user/bartosz/understanding-algebras). The term “algebra” stems from the Arabic جبر, _jabr_, which roughly translates to “reunion” or “restoration”. This propery is visible in the definition of the `Carrier` class’s `eff` method:
+
+```haskell
+eff :: sig m a -> m a
+```
+
+Like the traditional encoding of F-algebras (`f a -> a`), this describes a function that reunites an effect signature `sig` with its monadic context `m`.
