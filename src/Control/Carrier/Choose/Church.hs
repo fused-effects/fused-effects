@@ -24,6 +24,7 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.BinaryTree.NonEmpty
 import Data.List.NonEmpty (NonEmpty(..), head, tail)
 import qualified Data.Semigroup as S
 import Prelude hiding (head, tail)
@@ -85,24 +86,3 @@ instance (Algebra sig m, Effect sig) => Algebra (Choose :+: sig) (ChooseC m) whe
   eff (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
   eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (Leaf ()) (fmap join . traverse (runChoose (liftA2 Fork) (pure . Leaf))) other) >>= fold fork leaf
   {-# INLINE eff #-}
-
-
-data BinaryTree a = Leaf a | Fork (BinaryTree a) (BinaryTree a)
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-instance Applicative BinaryTree where
-  pure = Leaf
-  {-# INLINE pure #-}
-  f <*> a = fold Fork (<$> a) f
-  {-# INLINE (<*>) #-}
-
-instance Monad BinaryTree where
-  a >>= f = fold Fork f a
-  {-# INLINE (>>=) #-}
-
-
-fold :: (b -> b -> b) -> (a -> b) -> BinaryTree a -> b
-fold fork leaf = go where
-  go (Leaf a)   = leaf a
-  go (Fork a b) = fork (go a) (go b)
-{-# INLINE fold #-}
