@@ -54,7 +54,9 @@ runCutA = runCut (liftA2 (<|>)) (pure . pure) (pure empty)
 runCutM :: (Monad m, Monoid b) => (a -> b) -> CutC m a -> m b
 runCutM leaf = runCut (liftA2 mappend) (pure . leaf) (pure mempty)
 
--- | @since 1.0.0.0
+-- | A carrier for nondeterminism with committed choice. Note that the semantics of committed choice are provided by 'runCut', so care should be taken not to subvert them by incautious manipulation of the underlying 'NonDetC'.
+--
+-- @since 1.0.0.0
 newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus)
 
