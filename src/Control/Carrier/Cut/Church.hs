@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
 --
@@ -25,6 +25,7 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Maybe (fromJust)
 
 -- | Run a 'Cut' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'.
 --
@@ -60,8 +61,16 @@ runCutM leaf = runCut (liftA2 mappend) (pure . leaf) (pure mempty)
 newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus)
 
--- | Separate fixpoints are computed for each branch.
-deriving instance MonadFix m => MonadFix (CutC m)
+-- | A single fixpoint is shared between all branches.
+instance MonadFix m => MonadFix (CutC m) where
+  mfix f = CutC $ NonDetC $ \ fork leaf nil ->
+    mfix (runNonDet
+      (liftA2 Fork)
+      (pure . Leaf)
+      (pure Nil)
+      . out . f . fromJust . fold (<|>) Just Nothing)
+    >>= fold fork leaf nil where
+    out (CutC m) = m
 
 instance MonadTrans CutC where
   lift = CutC . lift . lift
@@ -74,3 +83,31 @@ instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m
   eff (R (L (R (Choose k)))) = k True <|> k False
   eff (R (R other))          = CutC (eff (R (R (handleCoercible other))))
   {-# INLINE eff #-}
+
+
+data BinaryTree a = Nil | Leaf a | Fork (BinaryTree a) (BinaryTree a)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+instance Applicative BinaryTree where
+  pure = Leaf
+  {-# INLINE pure #-}
+  f <*> a = fold Fork (<$> a) Nil f
+  {-# INLINE (<*>) #-}
+
+instance Alternative BinaryTree where
+  empty = Nil
+  {-# INLINE empty #-}
+  (<|>) = Fork
+  {-# INLINE (<|>) #-}
+
+instance Monad BinaryTree where
+  a >>= f = fold Fork f Nil a
+  {-# INLINE (>>=) #-}
+
+
+fold :: (b -> b -> b) -> (a -> b) -> b -> BinaryTree a -> b
+fold fork leaf nil = go where
+  go Nil        = nil
+  go (Leaf a)   = leaf a
+  go (Fork a b) = fork (go a) (go b)
+{-# INLINE fold #-}
