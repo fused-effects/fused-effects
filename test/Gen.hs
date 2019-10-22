@@ -87,7 +87,7 @@ m terminals nonterminals = m where
   m :: GenM m
   m = \ a -> Comp1 $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
     (unComp1 <$> ((Gen.label "pure" pure <*> a) : terminals a))
-    ( (unComp1 (addLabel ">>" (infixL 1 ">>" (>>) <*> m a <*> m a)))
+    ( unComp1 (addLabel ">>" (infixL 1 ">>" (>>) <*> m a <*> m a))
     : (unComp1 <$> nonterminals m a))
 
 -- | Computation generators are higher-order generators of computations in some monad @m@.
