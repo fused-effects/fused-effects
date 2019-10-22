@@ -54,7 +54,7 @@ genN
   -> [GenTerm (m a)]
 genN w b m a =
   [ atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
-  , Comp1 $ unComp1 (label "censor" censor <*> fn w) >>= \ censor -> unComp1 (subterm (m a) (censor <*>))
+  , subtermM (m a) (\ m -> label "censor" censor <*> fn w <*> term m)
   ]
 
 
