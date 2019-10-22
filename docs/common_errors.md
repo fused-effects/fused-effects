@@ -6,7 +6,7 @@ is an attempt to enumerate and explicate the things that can go wrong
 when using or extending this library. (It is also very much a work in
 progress.)
 
-## I'm getting kind errors when implementing a `Algebra` instance!
+## I'm getting kind errors when implementing an `Algebra` instance!
 
 Given an effect datatype that doesn’t use the `m` parameter:
 
