@@ -33,6 +33,7 @@ module Gen
 , Rec(..)
 , forall
   -- * Showing generated values
+, GenTerm
 , atom
 , Gen.label
 , infixL
@@ -65,6 +66,7 @@ import Data.Proxy
 import qualified Data.Semigroup as S
 import qualified Data.Set as Set
 import Data.String (fromString)
+import GHC.Generics ((:.:)(..))
 import GHC.Stack
 import GHC.TypeLits
 import Hedgehog hiding (Gen)
@@ -219,6 +221,9 @@ showing = Pure . flip showsPrec <*> id
 
 showingFn :: (Show a, Show b) => Fn.Fn a b -> Term (a -> b)
 showingFn = Pure . flip showsPrec <*> Fn.apply
+
+
+type GenTerm = Gen :.: Term
 
 atom :: String -> a -> Gen a
 atom s = Gen . pure . Pure (const (showString s))
