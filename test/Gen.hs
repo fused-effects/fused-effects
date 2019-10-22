@@ -35,6 +35,7 @@ module Gen
   -- * Showing generated values
 , showing
 , GenTerm
+, term
 , atom
 , Gen.label
 , infixL
@@ -238,6 +239,9 @@ showingFn = Pure . flip showsPrec <*> Fn.apply
 
 
 type GenTerm = WriterT (Set.Set LabelName) Gen :.: Term
+
+term :: Term a -> GenTerm a
+term = Comp1 . pure
 
 atom :: String -> a -> GenTerm a
 atom s = Comp1 . pure . Pure (const (showString s))
