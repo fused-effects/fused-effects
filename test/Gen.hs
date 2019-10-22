@@ -177,8 +177,8 @@ unicode = Comp1 (showing <$> Hedgehog.unicode)
 string :: Range Int -> GenTerm Char -> GenTerm String
 string range cs = Comp1 (showing <$> Hedgehog.string range (runTerm <$> unComp1 cs))
 
-subtermM :: GenTerm a -> (Term a -> GenTerm a) -> GenTerm a
-subtermM t f = Comp1 (Hedgehog.subtermM (unComp1 t) (unComp1 . f))
+subtermM :: GenTerm a -> (GenTerm a -> GenTerm a) -> GenTerm a
+subtermM t f = Comp1 (Hedgehog.subtermM (unComp1 t) (unComp1 . f . term))
 
 subtermM2 :: GenTerm a -> GenTerm a -> (GenTerm a -> GenTerm a -> GenTerm a) -> GenTerm a
 subtermM2 t1 t2 f = Comp1 (Hedgehog.subtermM2 (unComp1 t1) (unComp1 t2) (fmap unComp1 . f `on` term))
