@@ -65,6 +65,7 @@ import Control.Carrier.Pure
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Writer
 import Data.Foldable (traverse_)
+import Data.Function (on)
 import Data.Functor.Classes (showsUnaryWith)
 import Data.Functor.Identity
 import Data.Proxy
@@ -90,7 +91,7 @@ m terminals nonterminals = m where
   m :: GenM m
   m = \ a -> Comp1 $ scale (`div` 2) $ recursive Hedgehog.choice
     (unComp1 <$> ((Gen.label "pure" pure <*> a) : terminals a))
-    ( unComp1 (addLabel ">>" (Gen.subtermM2 (m a) (m a) (\ a b -> infixL 1 ">>" (>>) <*> term a <*> term b)))
+    ( unComp1 (addLabel ">>" (Gen.subtermM2 (m a) (m a) (\ a b -> infixL 1 ">>" (>>) <*> a <*> b)))
     : (unComp1 <$> nonterminals m a))
 
 -- | Computation generators are higher-order generators of computations in some monad @m@.
@@ -179,8 +180,8 @@ string range cs = Comp1 (showing <$> Hedgehog.string range (runTerm <$> unComp1 
 subtermM :: GenTerm a -> (Term a -> GenTerm a) -> GenTerm a
 subtermM t f = Comp1 (Hedgehog.subtermM (unComp1 t) (unComp1 . f))
 
-subtermM2 :: GenTerm a -> GenTerm a -> (Term a -> Term a -> GenTerm a) -> GenTerm a
-subtermM2 t1 t2 f = Comp1 (Hedgehog.subtermM2 (unComp1 t1) (unComp1 t2) (fmap unComp1 . f))
+subtermM2 :: GenTerm a -> GenTerm a -> (GenTerm a -> GenTerm a -> GenTerm a) -> GenTerm a
+subtermM2 t1 t2 f = Comp1 (Hedgehog.subtermM2 (unComp1 t1) (unComp1 t2) (fmap unComp1 . f `on` term))
 
 
 -- | This captures the shape of the handler function passed to the "Monad" & "MonadFix" tests.

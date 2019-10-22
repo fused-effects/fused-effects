@@ -30,7 +30,7 @@ tests = testGroup "Choose"
 
 
 genN :: Has Choose sig m => GenM m -> GenTerm a -> [GenTerm (m a)]
-genN m a = [ addLabel "<|>" (subtermM2 (m a) (m a) (\ a b -> infixL 3 "<|>" (<|>) <*> term a <*> term b)) ]
+genN m a = [ addLabel "<|>" (subtermM2 (m a) (m a) (\ a b -> infixL 3 "<|>" (<|>) <*> a <*> b)) ]
 
 
 test
