@@ -6,7 +6,7 @@ is an attempt to enumerate and explicate the things that can go wrong
 when using or extending this library. (It is also very much a work in
 progress.)
 
-## I'm getting kind errors when implementing a `Carrier` instance!
+## I'm getting kind errors when implementing an `Algebra` instance!
 
 Given an effect datatype that doesn’t use the `m` parameter:
 
@@ -18,23 +18,23 @@ data Fail m k
 newtype FailC m a = FailC { runFailC :: m (Either String a) }
 ```
 
-Declaring a `Carrier` instance will fail:
+Declaring an `Algebra` instance will fail:
 
 ```haskell
-instance (Carrier sig m, Effect sig)
-    => Carrier (Fail :+: sig) (FailC m) where…
+instance (Algebra sig m, Effect sig)
+    => Algebra (Fail :+: sig) (FailC m) where…
 ```
 
 ```
 • Expected kind ‘(* -> *) -> * -> *’,
     but ‘Fail :+: sig’ has kind ‘* -> * -> *’
-• In the first argument of ‘Carrier’, namely ‘(Fail :+: sig)’
+• In the first argument of ‘Algebra’, namely ‘(Fail :+: sig)’
   In the instance declaration for
-    ‘Carrier (Fail :+: sig) (FailC m)
+    ‘Algebra (Fail :+: sig) (FailC m)
 ```
 
 This is because the `m` parameter to `Fail` is inferred to be of kind `*`:
-though `Carrier` expects an `m` of kind `* -> *`, `m` is never referenced in
+though `Algebra` expects an `m` of kind `* -> *`, `m` is never referenced in
 the definition of `Fail`, so GHC makes an understandable but incorrect inference.
 An explicit kind annotation on `m` fixes the problem.
 

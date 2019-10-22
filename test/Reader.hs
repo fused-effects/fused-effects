@@ -41,26 +41,26 @@ tests = testGroup "Reader"
 gen0
   :: forall r m a sig
   .  (Has (Reader r) sig m, Arg r, Show r, Vary r)
-  => Gen r
-  -> Gen a
-  -> [Gen (m a)]
+  => GenTerm r
+  -> GenTerm a
+  -> [GenTerm (m a)]
 gen0 _ a = [ label "asks" (asks @r) <*> fn a ]
 
 genN
   :: (Has (Reader r) sig m, Arg r, Show r, Vary r)
-  => Gen r
+  => GenTerm r
   -> GenM m
-  -> Gen a
-  -> [Gen (m a)]
-genN r m a = [ label "local" local <*> fn r <*> m a ]
+  -> GenTerm a
+  -> [GenTerm (m a)]
+genN r m a = [ subtermM (m a) (label "local" local <*> fn r <*>) ]
 
 
 test
   :: (Has (Reader r) sig m, Arg r, Eq a, Show a, Show r, Vary r, Functor f)
-  => Gen r
+  => GenTerm r
   -> GenM m
-  -> Gen a
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm (f ())
   -> Run (f :.: (,) r) Identity m
   -> [TestTree]
 test r m a i (Run runReader) =

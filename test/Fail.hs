@@ -29,18 +29,18 @@ tests = testGroup "Fail" $
   e = string (Range.linear 0 50) unicode
 
 
-gen0 :: MonadFail m => Gen String -> Gen a -> [Gen (m a)]
+gen0 :: MonadFail m => GenTerm String -> GenTerm a -> [GenTerm (m a)]
 gen0 e _ = [ label "fail" Fail.fail <*> e ]
 
 
 test
   :: forall m a b f
   .  (MonadFail m, Arg a, Eq b, Show a, Show b, Vary a, Functor f)
-  => Gen String
+  => GenTerm String
   -> GenM m
-  -> Gen a
-  -> Gen b
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm (f ())
   -> Run f (Either String) m
   -> [TestTree]
 test msg m _ b i (Run runFail) =

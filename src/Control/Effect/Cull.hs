@@ -14,12 +14,12 @@ module Control.Effect.Cull
   Cull(..)
 , cull
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 
 -- | 'Cull' effects are used with 'Choose' to provide control over branching.
 --

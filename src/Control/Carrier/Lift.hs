@@ -11,8 +11,8 @@ module Control.Carrier.Lift
 , module Control.Effect.Lift
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
 import Control.Effect.Lift
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
@@ -34,7 +34,7 @@ newtype LiftC m a = LiftC (m a)
 instance MonadTrans LiftC where
   lift = LiftC
 
-instance Monad m => Carrier (Lift m) (LiftC m) where
+instance Monad m => Algebra (Lift m) (LiftC m) where
   eff = LiftC . (>>= runM) . unLift
 
 instance MonadUnliftIO m => MonadUnliftIO (LiftC m) where

@@ -45,9 +45,9 @@ tests = testGroup "State"
 gen0
   :: forall s m a sig
   .  (Has (State s) sig m, Arg s, Show s, Vary s)
-  => Gen s
-  -> Gen a
-  -> [Gen (m a)]
+  => GenTerm s
+  -> GenTerm a
+  -> [GenTerm (m a)]
 gen0 s a =
   [ label "gets" (gets @s) <*> fn a
   , infixL 4 "<$" (<$) <*> a <*> (label "put" put <*> s)
@@ -57,8 +57,8 @@ gen0 s a =
 test
   :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s)
   => GenM m
-  -> Gen a
-  -> Gen s
+  -> GenTerm a
+  -> GenTerm s
   -> Run ((,) s) ((,) s) m
   -> [TestTree]
 test m a s (Run runState) =

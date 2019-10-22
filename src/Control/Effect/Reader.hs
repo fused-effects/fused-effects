@@ -22,12 +22,12 @@ module Control.Effect.Reader
 , asks
 , local
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier.Class
+import Control.Algebra
 
 -- | @since 0.1.0.0
 data Reader r m k

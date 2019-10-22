@@ -41,29 +41,29 @@ tests = testGroup "Writer"
   runRWST f m = (\ (a, _, w) -> (w, a)) <$> f m () ()
 
 
-gen0 :: Has (Writer w) sig m => Gen w -> Gen a -> [Gen (m a)]
+gen0 :: Has (Writer w) sig m => GenTerm w -> GenTerm a -> [GenTerm (m a)]
 gen0 w a = [ infixL 4 "<$" (<$) <*> a <*> (label "tell" tell <*> w) ]
 
 genN
   :: forall w b m a sig
   .  (Has (Writer w) sig m, Arg b, Arg w, Show b, Show w, Vary b, Vary w)
-  => Gen w
-  -> Gen b
+  => GenTerm w
+  -> GenTerm b
   -> GenM m
-  -> Gen a
-  -> [Gen (m a)]
+  -> GenTerm a
+  -> [GenTerm (m a)]
 genN w b m a =
   [ atom "fmap" fmap <*> fn a <*> (label "listen" (listen @w) <*> m b)
-  , label "censor" censor <*> fn w <*> m a
+  , subtermM (m a) (label "censor" censor <*> fn w <*>)
   ]
 
 
 test
   :: (Has (Writer w) sig m, Arg w, Eq a, Eq w, Monoid w, Show a, Show w, Vary w, Functor f)
-  => Gen w
+  => GenTerm w
   -> GenM m
-  -> Gen a
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm (f ())
   -> Run f ((,) w) m
   -> [TestTree]
 test w m a i (Run runWriter) =

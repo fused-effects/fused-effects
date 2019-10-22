@@ -15,8 +15,8 @@ module Control.Carrier.Cut.Church
 , module Control.Effect.NonDet
 ) where
 
+import Control.Algebra
 import Control.Applicative (liftA2)
-import Control.Carrier.Class
 import Control.Carrier.NonDet.Church
 import Control.Carrier.State.Strict
 import Control.Effect.Cut
@@ -67,7 +67,7 @@ instance MonadTrans CutC where
   lift = CutC . lift . lift
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Cut :+: NonDet :+: sig) (CutC m) where
+instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)            = CutC (put True *> empty)
   eff (L (Call (CutC m) k))  = CutC (NonDetC (\ fork leaf nil -> StateC $ \ prune -> (,) prune <$> evalState prune (runNonDet fork leaf nil m))) >>= k
   eff (R (L (L Empty)))      = empty

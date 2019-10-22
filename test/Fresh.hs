@@ -29,15 +29,15 @@ tests = testGroup "Fresh"
   n = Gen.integral (R.linear 0 100)
 
 
-gen :: Has Fresh sig m => Gen a -> [Gen (m a)]
+gen :: Has Fresh sig m => GenTerm a -> [GenTerm (m a)]
 gen a = [ atom "fmap" fmap <*> fn a <*> label "fresh" fresh ]
 
 
 test
   :: (Has Fresh sig m, Functor f)
   => GenM m
-  -> Gen a
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm (f ())
   -> Run f ((,) Int) m
   -> [TestTree]
 test m a i (Run runFresh) =

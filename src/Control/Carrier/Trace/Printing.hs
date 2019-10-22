@@ -11,8 +11,8 @@ module Control.Carrier.Trace.Printing
 , module Control.Effect.Trace
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier.Class
 import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
@@ -49,7 +49,7 @@ instance MonadUnliftIO m => MonadUnliftIO (TraceC m) where
   withRunInIO inner = TraceC $ withRunInIO $ \run -> inner (run . runTrace)
   {-# INLINE withRunInIO #-}
 
-instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceC m) where
+instance (MonadIO m, Algebra sig m) => Algebra (Trace :+: sig) (TraceC m) where
   eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
   eff (R other)       = TraceC (eff (handleCoercible other))
   {-# INLINE eff #-}

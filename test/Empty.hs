@@ -29,7 +29,7 @@ tests = testGroup "Empty"
   initial = identity <*> unit
 
 
-gen0 :: Has Empty sig m => Gen a -> [Gen (m a)]
+gen0 :: Has Empty sig m => GenTerm a -> [GenTerm (m a)]
 gen0 _ = [ label "empty" empty ]
 
 
@@ -37,9 +37,9 @@ test
   :: forall a b m f sig
   .  (Has Empty sig m, Arg a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
-  -> Gen a
-  -> Gen b
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm (f ())
   -> Run f [] m
   -> [TestTree]
 test m _ b i (Run runEmpty) =
