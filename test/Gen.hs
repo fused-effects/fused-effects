@@ -2,6 +2,7 @@
 {-# OPTIONS_GHC -Wno-identities #-}
 module Gen
 ( module Control.Carrier.Pure
+, Identity(..)
   -- * Polymorphic generation & instantiation
 , m
 , GenM
@@ -25,12 +26,9 @@ module Gen
 , identity
   -- * Handlers
 , Run(..)
-, type RunL
-, pattern RunL
-, type RunR
-, pattern RunR
-, type RunC
-, pattern RunC
+, runL
+, runR
+, runC
   -- * Generation
 , Rec(..)
 , forall
@@ -39,6 +37,7 @@ module Gen
 , Gen.label
 , infixL
 , infixR
+, pair
 , addLabel
   -- * Re-exports
 , Gen
@@ -78,17 +77,15 @@ import Hedgehog.Range
 m
   :: forall m
   .  Monad m
-  => (GenM m -> GenM m) -- ^ A higher-order computation generator using any effects in @m@.
-  -> GenM m             -- ^ A computation generator.
-m with = m where
+  => (forall a . Gen a -> [Gen (m a)])
+  -> (forall a . GenM m -> Gen a -> [Gen (m a)]) -- ^ A higher-order computation generator using any effects in @m@.
+  -> GenM m                                      -- ^ A computation generator.
+m terminals nonterminals = m where
   m :: GenM m
-  m a = Gen $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
-    [ runGen (Gen.label "pure" pure <*> a) ]
-    [ frequency
-      [ (3, runGen (with m a))
-      , (1, runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> m a <*> m a)))
-      ]
-    ]
+  m = \ a -> Gen $ scale (`div` 2) $ recursive Hedgehog.Gen.choice
+    (runGen <$> ((Gen.label "pure" pure <*> a) : terminals a))
+    ( (runGen (addLabel ">>" (infixL 1 ">>" (>>) <*> m a <*> m a)))
+    : (runGen <$> nonterminals m a))
 
 -- | Computation generators are higher-order generators of computations in some monad @m@.
 type GenM m = (forall a . Gen a -> Gen (m a))
@@ -177,47 +174,17 @@ string range cs = Gen (showing <$> Hedgehog.Gen.string range (runTerm <$> runGen
 -- | This captures the shape of the handler function passed to the "Monad" & "MonadFix" tests.
 newtype Run f g m = Run (forall a . f (m a) -> PureC (g a))
 
--- | The type of handlers with output state, but no input state (e.g. 'Control.Carrier.Error.Either.ErrorC').
-type RunL g m = Run Identity g m
-
 -- | Handlers with output state, but no input state (e.g. 'Control.Carrier.Error.Either.ErrorC').
-pattern RunL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
-pattern RunL run <- Run ((.# Identity) -> run) where
-  RunL run = Run (run . runIdentity)
-
-{-# COMPLETE RunL #-}
-
--- | The type of handlers with input state, but no output state (e.g. 'Control.Carrier.Reader.ReaderC').
-type RunR f m = Run f Identity m
+runL :: (forall a . m a -> PureC (f a)) -> Run Identity f m
+runL run = Run (run . runIdentity)
 
 -- | Handlers with input state, but no output state (e.g. 'Control.Carrier.Reader.ReaderC').
-pattern RunR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
-pattern RunR run <- Run ((fmap runIdentity #.) -> run) where
-  RunR run = Run (fmap Identity . run)
-
-{-# COMPLETE RunR #-}
-
--- | The type of handlers with curried input state (e.g. 'Control.Carrier.Reader.ReaderC', 'Control.Carrier.State.Strict.StateC').
-type RunC s f m = Run ((,) s) f m
+runR :: (forall a . f (m a) -> PureC a) -> Run f Identity m
+runR run = Run (fmap Identity . run)
 
 -- | Handlers with curried input state (e.g. 'Control.Carrier.Reader.ReaderC', 'Control.Carrier.State.Strict.StateC').
-pattern RunC :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m
-pattern RunC run <- Run (curry' -> run) where
-  RunC run = Run (uncurry run)
-
-{-# COMPLETE RunC #-}
-
-
--- Regrettable necessities for composing rank-n functions.
-
-(.#) :: (forall a . f (m a) -> PureC (g a)) -> (forall a . m a -> f (m a)) -> (forall a . m a -> PureC (g a))
-(f .# g) m = f (g m)
-
-(#.) :: (forall a . PureC (g a) -> PureC a) -> (forall a . f (m a) -> PureC (g a)) -> (forall a . f (m a) -> PureC a)
-(f #. g) m = f (g m)
-
-curry' :: (forall a . (s, m a) -> PureC (g a)) -> (forall a . s -> m a -> PureC (g a))
-curry' f = \ s m -> f (s, m)
+runC :: (forall a . s -> m a -> PureC (f a)) -> Run ((,) s) f m
+runC run = Run (uncurry run)
 
 
 infixr 5 :.
@@ -265,14 +232,18 @@ infixL p s f = Gen (pure (InfixL p s f))
 infixR :: Int -> String -> (a -> b -> c) -> Gen (a -> b -> c)
 infixR p s f = Gen (pure (InfixR p s f))
 
+pair :: Gen (a -> b -> (a, b))
+pair = Gen (pure Pair)
+
 addLabel :: String -> Gen a -> Gen a
-addLabel s = Gen . (>>= \ a -> a <$ tell (Set.singleton (fromString s))) . runGen
+addLabel s = Gen . (>>= (<$ tell (Set.singleton (fromString s)))) . runGen
 
 
 data Term a where
   Pure :: (Int -> ShowS) -> a -> Term a
   InfixL :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
   InfixR :: Int -> String -> (a -> b -> c) -> Term (a -> b -> c)
+  Pair :: Term (a -> b -> (a, b))
   (:<*>) :: Term (a -> b) -> Term a -> Term b
 
 infixl 4 :<*>
@@ -282,6 +253,7 @@ runTerm = \case
   Pure _ a -> a
   InfixL _ _ f -> f
   InfixR _ _ f -> f
+  Pair -> (,)
   f :<*> a -> runTerm f $ runTerm a
 
 instance Functor Term where
@@ -296,8 +268,10 @@ instance Show (Term a) where
     Pure s _ -> s d
     InfixL _ s _ -> showParen True (showString s)
     InfixR _ s _ -> showParen True (showString s)
+    Pair -> showParen True (showString ",")
     InfixL p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
     InfixR p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
+    Pair :<*> a :<*> b -> showParen True (showsPrec 0 a . showString ", " . showsPrec 0 b)
     InfixL p s _ :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
     InfixR p s _ :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
     f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)
