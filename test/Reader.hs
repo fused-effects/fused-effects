@@ -52,7 +52,7 @@ genN
   -> GenM m
   -> GenTerm a
   -> [GenTerm (m a)]
-genN r m a = [ Comp1 $ unComp1 (label "local" local <*> fn r) >>= \ local -> unComp1 (subterm (m a) (local <*>)) ]
+genN r m a = [ subtermM (m a) ((label "local" local <*> fn r <*>) . Comp1 . pure) ]
 
 
 test
