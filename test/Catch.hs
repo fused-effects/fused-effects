@@ -16,7 +16,7 @@ genN
   -> GenM m
   -> GenTerm a
   -> [GenTerm (m a)]
-genN _ m a = [ label "catchError" catchError <*> m a <*> fn @e (m a) ]
+genN _ m a = [ subtermM (m a) (\ m' -> label "catchError" catchError <*> Comp1 (pure m') <*> fn @e (m a)) ]
 
 
 test
