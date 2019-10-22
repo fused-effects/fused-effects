@@ -223,7 +223,7 @@ showingFn :: (Show a, Show b) => Fn.Fn a b -> Term (a -> b)
 showingFn = Pure . flip showsPrec <*> Fn.apply
 
 
-type GenTerm = Gen :.: Term
+type GenTerm = WriterT (Set.Set LabelName) Gen :.: Term
 
 atom :: String -> a -> Gen a
 atom s = Gen . pure . Pure (const (showString s))
