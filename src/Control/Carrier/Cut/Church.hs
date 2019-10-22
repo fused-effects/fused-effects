@@ -56,12 +56,10 @@ runCutM leaf = runCut (liftA2 mappend) (pure . leaf) (pure mempty)
 
 -- | @since 1.0.0.0
 newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus)
 
 -- | Separate fixpoints are computed for each branch.
 deriving instance MonadFix m => MonadFix (CutC m)
-
-instance MonadPlus (CutC m)
 
 instance MonadTrans CutC where
   lift = CutC . lift . lift
