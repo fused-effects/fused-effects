@@ -51,6 +51,7 @@ module Gen
 , Gen.unicode
 , Gen.string
 , Gen.subterm
+, Gen.subtermM
 , Gen.subterm2
 , Fn.Arg
 , Fn.Vary
@@ -178,6 +179,9 @@ string range cs = Comp1 (showing <$> Hedgehog.Gen.string range (runTerm <$> unCo
 
 subterm :: GenTerm a -> (Term a -> Term a) -> GenTerm a
 subterm t f = Comp1 (Hedgehog.Gen.subterm (unComp1 t) f)
+
+subtermM :: GenTerm a -> (Term a -> GenTerm a) -> GenTerm a
+subtermM t f = Comp1 (Hedgehog.Gen.subtermM (unComp1 t) (unComp1 . f))
 
 subterm2 :: GenTerm a -> GenTerm a -> (Term a -> Term a -> Term a) -> GenTerm a
 subterm2 t1 t2 f = Comp1 (Hedgehog.Gen.subterm2 (unComp1 t1) (unComp1 t2) f)
