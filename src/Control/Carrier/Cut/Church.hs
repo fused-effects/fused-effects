@@ -60,7 +60,10 @@ instance Alternative (CutC m) where
   CutC l <|> CutC r = CutC $ do
     l' <- l
     prune <- NonDetC (\ _ leaf _ -> StateC (runState <*> leaf))
-    if prune then pure l' else pure l' <|> r
+    if prune then
+      pure l'
+    else
+      pure l' <|> r
   {-# INLINE (<|>) #-}
 
 -- | Separate fixpoints are computed for each branch.
