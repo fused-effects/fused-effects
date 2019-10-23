@@ -47,7 +47,7 @@
 
 ## Overview
 
-`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides a framework for encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It was developed as a part of the [`semantic`](https://github.com/github/semantic) program analysis, but is suitable for general use in hobbyist, research, or industrial contexts.
+`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides a framework for encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It was developed as a part of the [`semantic`](https://github.com/github/semantic) program analysis toolkit, but is suitable for general use in hobbyist, research, or industrial contexts.
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead. For those interested, this [talk at Strange Loop](https://www.youtube.com/watch?v=vfDazZfxlNs) outlines the history of and motivation behind effect systems and `fused-effects` itself.
 
@@ -62,7 +62,7 @@ These roles are performed by the effect and carrier types, respectively. Effects
 
 ### Higher-order effects
 
-Unlike some other effect systems, `fused-effects` offers _higher-order_ (or _scoped_) effects in addition to first-order algebraic effects. In a strictly first-order algebraic effect system, operations (like `local` or `catchError`) which specify some action limited to a given scope must be implemented as interpreters, hard-coding their meaning in precisely the manner algebraic effects were designed to avoid. By specifying effects as higher-order functors, these operations are likewise able to be given a variety of interpretations. This means, for example, that you can introspect and redefine both the `local` and `ask` operations provided by the `Reader` effect, rather than solely `ask` (as is the case with certain formulations of algebraic effects).
+Unlike some other effect systems, `fused-effects` offers _higher-order_ (or _scoped_) effects in addition to first-order algebraic effects. In a strictly first-order algebraic effect system, operations like `local` or `catchError`, which specify some action limited to a given scope, must be implemented as interpreters, hard-coding their meaning in precisely the manner algebraic effects were designed to avoid. By specifying effects as higher-order functors, this limitation is removed, meaning that these operations admit a variety of interpretations. This means, for example, that you can introspect and redefine both the `local` and `ask` operations provided by the `Reader` effect, rather than solely `ask` (as is the case with certain formulations of algebraic effects).
 
 As Nicolas Wu et al. showed in _[Effect Handlers in Scope][]_, this has implications for the expressiveness of effect systems. It also has the benefit of making effect handling more consistent, since scoped operations are just syntax which can be interpreted like any other, and are thus simpler to reason about.
 
@@ -303,16 +303,13 @@ Thus, the approaches aren’t mutually exclusive; consumers are free to decide w
 
 Unlike `fused-effects`, `mtl` provides a `ContT` monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects.
 
-Finally, thanks to the fusion and inlining of carriers, `fused-effects` is approximately as fast as `mtl` (see [benchmarks](#benchmarks)).
+Finally, thanks to the fusion and inlining of carriers, `fused-effects` is only marginally slower than equivalent `mtl` code (see [benchmarks](#benchmarks)).
 
 [`mtl`]: http://hackage.haskell.org/package/mtl
-
 
 #### Comparison to `freer-simple`
 
 Like [`freer-simple`][], `fused-effects` uses an initial encoding of library- and user-defined effects as syntax which can then be given different interpretations. In `freer-simple`, this is done with a family of interpreter functions (which cover a variety of needs, and which can be extended for more bespoke needs), whereas in `fused-effects` this is done with `Carrier` instances for `newtype`s.
-
-(Though note that as of `fused-effects` 0.3.1, it is possible to define handlers using `runInterpret` in a manner analogous to `freer-simple`’s `interpret`, with the caveat that its use of higher-order functions defeats the fusion and inlining of `Carrier` instances which makes `fused-effects` so efficient.)
 
 Unlike `fused-effects`, in `freer-simple`, scoped operations like `catchError` and `local` are implemented as interpreters, and can therefore not be given new interpretations.
 
@@ -330,4 +327,4 @@ As of GHC 8.8, `fused-effects` outperforms `polysemy`, though new effects take m
 
 #### Comparison to `eff`.
 
-
+[`eff`](https://github.com/lexi-lambda/eff) is similar in many ways to `fused-effects`, but is slightly more performant due to its representation of effects as typeclasses. This approach lets GHC generate better code in exchange for sacrificing the flexibility associated with effects represented as data types. `eff` also uses the `monad-control` package to lift effects between contexts rather than implementing an `Algebra`-style class itself.
