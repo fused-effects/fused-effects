@@ -49,17 +49,17 @@ runCutM leaf = runCut (liftA2 mappend) (pure . leaf) (pure mempty)
 newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
-instance Alternative (CutC m) where
+instance (Carrier sig m, Effect sig) => Alternative (CutC m) where
   empty = CutC empty
   {-# INLINE empty #-}
-  CutC l <|> CutC r = CutC $ NonDetC $ \ fork leaf nil -> StateC $ \ prune ->
-    runState prune (fork (runNonDet fork leaf nil l) (if prune then nil else runNonDet fork leaf nil r))
+  CutC l <|> CutC r = CutC $ get >>= \ prune ->
+    l <|> if prune then empty else r
   {-# INLINE (<|>) #-}
 
 -- | Separate fixpoints are computed for each branch.
 deriving instance MonadFix m => MonadFix (CutC m)
 
-instance MonadPlus (CutC m)
+instance (Carrier sig m, Effect sig) => MonadPlus (CutC m)
 
 instance MonadTrans CutC where
   lift = CutC . lift . lift
