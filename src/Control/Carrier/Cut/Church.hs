@@ -79,7 +79,7 @@ instance MonadTrans CutC where
 
 instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
   eff (L Cutfail)            = CutC (put True *> empty)
-  eff (L (Call (CutC m) k))  = CutC (NonDetC (\ fork leaf nil -> StateC $ \ prune -> (,) prune <$> evalState prune (runNonDet fork leaf nil m))) >>= k
+  eff (L (Call (CutC m) k))  = CutC (get >>= \ prune -> m <* put (prune :: Bool)) >>= k
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
   eff (R (R other))          = CutC (eff (R (R (handleCoercible other))))
