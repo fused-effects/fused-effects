@@ -96,13 +96,13 @@ instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m
   {-# INLINE eff #-}
 
 
-data BinaryTree a = Fail | Nil | Leaf a | Fork (BinaryTree a) (BinaryTree a)
+data BinaryTree a = Nil | Leaf a | Fork (BinaryTree a) (BinaryTree a)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 instance Applicative BinaryTree where
   pure = Leaf
   {-# INLINE pure #-}
-  f <*> a = fold Fork (<$> a) Nil Fail f
+  f <*> a = fold Fork (<$> a) Nil f
   {-# INLINE (<*>) #-}
 
 instance Alternative BinaryTree where
@@ -112,13 +112,12 @@ instance Alternative BinaryTree where
   {-# INLINE (<|>) #-}
 
 instance Monad BinaryTree where
-  a >>= f = fold Fork f Nil Fail a
+  a >>= f = fold Fork f Nil a
   {-# INLINE (>>=) #-}
 
 
-fold :: (b -> b -> b) -> (a -> b) -> b -> b -> BinaryTree a -> b
-fold fork leaf nil fail = go where
-  go Fail       = fail
+fold :: (b -> b -> b) -> (a -> b) -> b -> BinaryTree a -> b
+fold fork leaf nil = go where
   go Nil        = nil
   go (Leaf a)   = leaf a
   go (Fork a b) = fork (go a) (go b)
