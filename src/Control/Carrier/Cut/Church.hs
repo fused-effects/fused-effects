@@ -61,7 +61,10 @@ newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
 instance Alternative (CutC m) where
   empty = CutC empty
   {-# INLINE empty #-}
-  CutC l <|> CutC r = CutC $ l <|> r
+  CutC l <|> CutC r = CutC $ do
+    l' <- l
+    prune <- NonDetC (\ _ leaf _ -> StateC (runState <*> leaf))
+    if prune then pure l' else pure l' <|> r
   {-# INLINE (<|>) #-}
 
 -- | Separate fixpoints are computed for each branch.
