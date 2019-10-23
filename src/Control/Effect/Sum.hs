@@ -23,7 +23,10 @@ data (f :+: g) (m :: * -> *) k
 
 infixr 4 :+:
 
-instance (HFunctor f, HFunctor g) => HFunctor (f :+: g)
+instance (HFunctor f, HFunctor g) => HFunctor (f :+: g) where
+  hmap f (L l) = L (hmap f l)
+  hmap f (R r) = R (hmap f r)
+
 instance (Effect f, Effect g)     => Effect   (f :+: g)
 
 

@@ -1,4 +1,5 @@
 {-# LANGUAGE DefaultSignatures, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators #-}
+{-# OPTIONS_GHC -Wno-redundant-constraints #-} -- for the default signature for hmap
 
 -- | Provides the 'HFunctor' and 'Effect' classes that effect types implement.
 --
@@ -27,8 +28,8 @@ class HFunctor h where
   --
   -- A definition for 'hmap' over first-order effects can be derived automatically provided a 'Generic1' instance is available.
   hmap :: (Monad m, Functor n) => (forall x . m x -> n x) -> (h m a -> h n a)
-  default hmap :: (Monad m, Functor n, Generic1 (h m), Generic1 (h n), GHFunctor m n (Rep1 (h m)) (Rep1 (h n))) => (forall x . m x -> n x) -> (h m a -> h n a)
-  hmap f = to1 . ghmap f . from1
+  default hmap :: (Monad m, Functor n, Functor (h n), Effect h) => (forall x . m x -> n x) -> (h m a -> h n a)
+  hmap = hmapDefault
   {-# INLINE hmap #-}
 
 
