@@ -70,8 +70,10 @@ instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
 -- | A single fixpoint is shared between all branches.
 instance MonadFix m => MonadFix (CutC m) where
   mfix f = CutC $ \ cons nil fail -> mfix
-    (runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail) . f . run . runCut (<$) (error "mfix CutC: empty") (error "mfix CutC: cutfail"))
+    (toCut . f . run . fromCut)
     >>= run . runCut (fmap . cons) (pure nil) (pure fail) where
+    toCut = runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)
+    fromCut = runCut (<$) (error "mfix CutC: empty") (error "mfix CutC: cutfail")
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (CutC m) where
