@@ -25,7 +25,7 @@ import GHC.Generics
 class HFunctor h where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   --
-  -- A definition for 'hmap' over first-order effects can be derived automatically provided a 'Generic1' instance is available.
+  -- A definition for 'hmap' over first-order effects can be derived automatically provided an 'Effect' instance is available.
   hmap :: (Monad m, Functor n) => (forall x . m x -> n x) -> (h m a -> h n a)
   default hmap :: (Monad m, Functor n, Functor (h n), Effect h) => (forall x . m x -> n x) -> (h m a -> h n a)
   hmap = hmapDefault
