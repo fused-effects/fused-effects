@@ -67,14 +67,11 @@ instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
   fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
--- | Separate fixpoints are computed for each branch.
+-- | A single fixpoint is shared between all branches.
 instance MonadFix m => MonadFix (CutC m) where
-  mfix f = CutC $ \ cons nil fail ->
-    mfix (runCutA . f . head)
-    >>= runCut cons nil fail . foldr
-      (\ a _ -> pure a <|> mfix (liftAll . fmap tail . runCutA . f))
-      empty where
-    liftAll m = CutC $ \ cons nil _ -> m >>= foldr cons nil
+  mfix f = CutC $ \ cons nil fail -> mfix
+    (runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail) . f . run . runCut (<$) undefined undefined)
+    >>= run . runCut (fmap . cons) (pure nil) (pure fail) where
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (CutC m) where
