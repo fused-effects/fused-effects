@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
 --
@@ -16,58 +16,114 @@ module Control.Carrier.Cut.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (liftA2)
-import Control.Carrier.NonDet.Church
-import Control.Carrier.State.Strict
+import Control.Monad (join)
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Semigroup as S
 
--- | Run a 'Cut' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'.
+-- | Run a 'Cut' effect with continuations respectively interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
 --
 -- @since 1.0.0.0
-runCut :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CutC m a -> m b
-runCut fork leaf nil (CutC m) = runNonDet fork leaf nil (evalState False m)
+runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
+runCut cons nil fail (CutC runCutC) = runCutC cons nil fail
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 --
 -- @since 1.0.0.0
 runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
-runCutA = runCut (liftA2 (<|>)) (pure . pure) (pure empty)
+runCutA = runCut (fmap . (<|>) . pure) (pure empty) (pure empty)
 
 -- | Run a 'Cut' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
-runCutM leaf = runCut (liftA2 mappend) (pure . leaf) (pure mempty)
+runCutM leaf = runCut (fmap . mappend . leaf) (pure mempty) (pure mempty)
 
 -- | @since 1.0.0.0
-newtype CutC m a = CutC (StateC Bool (NonDetC m) a)
-  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
+newtype CutC m a = CutC (forall b . (a -> m b -> m b) -> m b -> m b -> m b)
+  deriving (Functor)
+
+instance Applicative (CutC m) where
+  pure a = CutC (\ cons nil _ -> cons a nil)
+  {-# INLINE pure #-}
+  CutC f <*> CutC a = CutC $ \ cons nil fail ->
+    f (\ f' fs -> a (cons . f') fs fail) nil fail
+  {-# INLINE (<*>) #-}
 
 instance Alternative (CutC m) where
-  empty = CutC empty
+  empty = CutC (\ _ nil _ -> nil)
   {-# INLINE empty #-}
-  CutC l <|> CutC r = CutC $ StateC $ \ prune ->
-    runState prune l <|> if prune then empty else runState prune r
+  CutC l <|> CutC r = CutC (\ cons nil fail -> l cons (r cons nil fail) fail)
   {-# INLINE (<|>) #-}
 
+instance Monad (CutC m) where
+  CutC a >>= f = CutC $ \ cons nil fail ->
+    a (\ a' as -> runCut cons as fail (f a')) nil fail
+  {-# INLINE (>>=) #-}
+
+instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
+  fail s = lift (Fail.fail s)
+  {-# INLINE fail #-}
+
 -- | Separate fixpoints are computed for each branch.
-deriving instance MonadFix m => MonadFix (CutC m)
+instance MonadFix m => MonadFix (CutC m) where
+  mfix f = CutC $ \ cons nil fail ->
+    mfix (runCutA . f . head)
+    >>= runCut cons nil fail . foldr
+      (\ a _ -> pure a <|> mfix (liftAll . fmap tail . runCutA . f))
+      empty where
+    liftAll m = CutC $ \ cons nil _ -> m >>= foldr cons nil
+  {-# INLINE mfix #-}
+
+instance MonadIO m => MonadIO (CutC m) where
+  liftIO io = lift (liftIO io)
+  {-# INLINE liftIO #-}
 
 instance MonadPlus (CutC m)
 
 instance MonadTrans CutC where
-  lift = CutC . lift . lift
+  lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
   {-# INLINE lift #-}
 
 instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
-  eff (L Cutfail)            = CutC (put True *> empty)
-  eff (L (Call m k))         = m <* CutC (put False) >>= k
+  eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
+  eff (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CutC (eff (R (R (handleCoercible other))))
+  eff (R (R other))          = CutC $ \ cons nil fail -> eff (handle (Cons () Nil) (fmap join . traverse (runCut (fmap . Cons) (pure Nil) (pure Fail))) other) >>= fold cons nil fail
   {-# INLINE eff #-}
+
+
+data List a = Fail | Nil | Cons a (List a)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
+
+instance S.Semigroup (List a) where
+  Fail      <> b = b
+  Nil       <> b = b
+  Cons a as <> b = Cons a (as <> b)
+
+instance Applicative List where
+  pure a = Cons a Nil
+  {-# INLINE pure #-}
+  Fail      <*> _ = Fail
+  Nil       <*> _ = Nil
+  Cons f fs <*> a = (f <$> a) <> (fs <*> a)
+  {-# INLINE (<*>) #-}
+
+instance Monad List where
+  Fail      >>= _ = Fail
+  Nil       >>= _ = Nil
+  Cons a as >>= f = f a <> (as >>= f)
+  {-# INLINE (>>=) #-}
+
+
+fold :: (a -> b -> b) -> b -> b -> List a -> b
+fold cons nil fail = go where
+  go Fail        = fail
+  go Nil         = nil
+  go (Cons a as) = cons a (go as)
+{-# INLINE fold #-}
