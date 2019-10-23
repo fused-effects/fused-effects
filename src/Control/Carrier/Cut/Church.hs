@@ -71,6 +71,7 @@ instance MonadFix m => MonadFix (CutC m) where
       . out . f . head . fold (++) pure [])
     >>= fold fork leaf nil where
     out (CutC m) = m
+  {-# INLINE mfix #-}
 
 instance MonadTrans CutC where
   lift = CutC . lift . lift
