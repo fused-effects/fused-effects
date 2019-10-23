@@ -19,7 +19,6 @@ module Control.Carrier.Choose.Church
 import Control.Algebra
 import Control.Applicative (liftA2)
 import Control.Effect.Choose
-import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -34,7 +33,7 @@ import Prelude hiding (head, tail)
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf (ChooseC runChooseC) = runChooseC fork leaf
 
--- | Run a 'Choose' effect, passing results to the supplied function, and merging branches together using 'S.<>'.
+-- | Run a 'Choose' effect, mapping results into a 'S.Semigroup'.
 --
 -- @since 1.0.0.0
 runChooseS :: (S.Semigroup b, Applicative m) => (a -> m b) -> ChooseC m a -> m b
@@ -83,26 +82,5 @@ instance MonadTrans ChooseC where
 
 instance (Algebra sig m, Effect sig) => Algebra (Choose :+: sig) (ChooseC m) where
   eff (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
-  eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (Leaf ()) (fmap join . traverse (runChoose (liftA2 Fork) (pure . Leaf))) other) >>= fold fork leaf
+  eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (pure ()) (runChoose (liftA2 (<|>)) (runChoose (liftA2 (<|>)) (pure . pure))) other) >>= runChoose fork leaf
   {-# INLINE eff #-}
-
-
-data BinaryTree a = Leaf a | Fork (BinaryTree a) (BinaryTree a)
-  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
-
-instance Applicative BinaryTree where
-  pure = Leaf
-  {-# INLINE pure #-}
-  f <*> a = fold Fork (<$> a) f
-  {-# INLINE (<*>) #-}
-
-instance Monad BinaryTree where
-  a >>= f = fold Fork f a
-  {-# INLINE (>>=) #-}
-
-
-fold :: (b -> b -> b) -> (a -> b) -> BinaryTree a -> b
-fold fork leaf = go where
-  go (Leaf a)   = leaf a
-  go (Fork a b) = fork (go a) (go b)
-{-# INLINE fold #-}

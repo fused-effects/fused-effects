@@ -38,7 +38,7 @@ runCull fork leaf nil (CullC m) = runNonDet fork leaf nil (runReader False m)
 runCullA :: (Alternative f, Applicative m) => CullC m a -> m (f a)
 runCullA = runCull (liftA2 (<|>)) (pure . pure) (pure empty)
 
--- | Run a 'Cull' effect, mapping the result into a 'Monoid'.
+-- | Run a 'Cull' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b

@@ -35,7 +35,7 @@ runCut cons nil fail (CutC runCutC) = runCutC cons nil fail
 runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
 runCutA = runCut (fmap . (<|>) . pure) (pure empty) (pure empty)
 
--- | Run a 'Cut' effect, modeling choice and failure with '<>' and 'mempty' and embedding results with the passed function.
+-- | Run a 'Cut' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b

@@ -119,6 +119,7 @@ test-suite test
     Choose
     Cull
     Cut
+    Cut.Church
     Empty
     Error
     Fail
