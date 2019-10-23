@@ -64,7 +64,10 @@ newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
 -- | A single fixpoint is shared between all branches.
 instance MonadFix m => MonadFix (CutC m) where
   mfix f = CutC $ NonDetC $ \ fork leaf nil ->
-    mfix (runNonDetA
+    mfix (runNonDet
+      (liftA2 Fork)
+      (pure . Leaf)
+      (pure Nil)
       . out . f . head . fold (++) pure [])
     >>= fold fork leaf nil where
     out (CutC m) = m
