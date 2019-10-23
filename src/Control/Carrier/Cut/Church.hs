@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveTraversable, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
 --
@@ -25,8 +25,6 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.BinaryTree
-import Data.Maybe (fromJust)
 
 -- | Run a 'Cut' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'.
 --
@@ -62,16 +60,8 @@ runCutM leaf = runCut (liftA2 mappend) (pure . leaf) (pure mempty)
 newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus)
 
--- | A single fixpoint is shared between all branches.
-instance MonadFix m => MonadFix (CutC m) where
-  mfix f = CutC $ NonDetC $ \ fork leaf nil ->
-    mfix (runNonDet
-      (liftA2 Fork)
-      (pure . Leaf)
-      (pure Nil)
-      . out . f . fromJust . fold (<|>) Just Nothing)
-    >>= fold fork leaf nil where
-    out (CutC m) = m
+-- | Separate fixpoints are computed for each branch.
+deriving instance MonadFix m => MonadFix (CutC m)
 
 instance MonadTrans CutC where
   lift = CutC . lift . lift
