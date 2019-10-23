@@ -26,7 +26,6 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.BinaryTree
-import Data.Maybe (fromJust)
 
 -- | Run a 'Cut' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'.
 --
@@ -69,7 +68,7 @@ instance MonadFix m => MonadFix (CutC m) where
       (liftA2 Fork)
       (pure . Leaf)
       (pure Nil)
-      . out . f . fromJust . fold (<|>) Just Nothing)
+      . out . f . head . fold (++) pure [])
     >>= fold fork leaf nil where
     out (CutC m) = m
 
