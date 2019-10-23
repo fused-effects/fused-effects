@@ -25,7 +25,6 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.BinaryTree
 
 -- | Run a 'NonDet' effect, using the provided functions to interpret choice, leaf results, and failure.
 --
@@ -110,5 +109,5 @@ instance MonadTrans NonDetC where
 instance (Algebra sig m, Effect sig) => Algebra (NonDet :+: sig) (NonDetC m) where
   eff (L (L Empty))      = empty
   eff (L (R (Choose k))) = k True <|> k False
-  eff (R other)          = NonDetC $ \ fork leaf nil -> eff (handle (Leaf ()) (fmap join . traverse runNonDetA) other) >>= fold fork leaf nil
+  eff (R other)          = NonDetC $ \ fork leaf nil -> eff (handle (pure ()) (fmap join . runNonDetA) other) >>= runNonDet fork leaf nil
   {-# INLINE eff #-}
