@@ -27,18 +27,18 @@ tests = testGroup "Throw" $
   initial = identity <*> unit
 
 
-gen0 :: Has (Throw e) sig m => Gen e -> Gen a -> [Gen (m a)]
+gen0 :: Has (Throw e) sig m => GenTerm e -> GenTerm a -> [GenTerm (m a)]
 gen0 e _ = [ label "throwError" throwError <*> e ]
 
 
 test
   :: forall e m a b f sig
   .  (Has (Throw e) sig m, Arg a, Eq b, Eq e, Show a, Show b, Show e, Vary a, Functor f)
-  => Gen e
+  => GenTerm e
   -> GenM m
-  -> Gen a
-  -> Gen b
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm (f ())
   -> Run f (Either e) m
   -> [TestTree]
 test e m _ b i (Run runThrow) =

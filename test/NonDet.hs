@@ -34,19 +34,19 @@ tests = testGroup "NonDet"
   initial = identity <*> unit
 
 
-gen0 :: Has NonDet sig m => Gen a -> [Gen (m a)]
+gen0 :: Has NonDet sig m => GenTerm a -> [GenTerm (m a)]
 gen0 = Empty.gen0
 
-genN :: Has NonDet sig m => GenM m -> Gen a -> [Gen (m a)]
+genN :: Has NonDet sig m => GenM m -> GenTerm a -> [GenTerm (m a)]
 genN = Choose.genN
 
 
 test
   :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
-  -> Gen a
-  -> Gen b
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm (f ())
   -> Run f [] m
   -> [TestTree]
 test m
