@@ -24,7 +24,6 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.BinaryTree.NonEmpty
 import Data.List.NonEmpty (NonEmpty(..), head, tail)
 import qualified Data.Semigroup as S
 import Prelude hiding (head, tail)
@@ -84,5 +83,5 @@ instance MonadTrans ChooseC where
 
 instance (Algebra sig m, Effect sig) => Algebra (Choose :+: sig) (ChooseC m) where
   eff (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
-  eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (Leaf ()) (fmap join . traverse (runChoose (liftA2 Fork) (pure . Leaf))) other) >>= fold fork leaf
+  eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (pure ()) (fmap join . runChoose (liftA2 (<|>)) (pure . pure)) other) >>= runChoose fork leaf
   {-# INLINE eff #-}
