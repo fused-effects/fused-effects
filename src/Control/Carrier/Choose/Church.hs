@@ -18,13 +18,12 @@ module Control.Carrier.Choose.Church
 
 import Control.Algebra
 import Control.Applicative (liftA2)
-import Control.Carrier.Pure
 import Control.Effect.Choose
+import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Coerce (coerce)
 import Data.List.NonEmpty (NonEmpty(..), head, tail)
 import qualified Data.Semigroup as S
 import Prelude hiding (head, tail)
@@ -84,10 +83,5 @@ instance MonadTrans ChooseC where
 
 instance (Algebra sig m, Effect sig) => Algebra (Choose :+: sig) (ChooseC m) where
   eff (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
-  eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (pure ()) (fold (liftA2 (<|>)) (runChoose (liftA2 (<|>)) (pure . pure))) other) >>= fold fork leaf
+  eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (pure ()) (fmap join . runChoose (liftA2 (<|>)) (pure . pure)) other) >>= runChoose fork leaf
   {-# INLINE eff #-}
-
-
-fold :: (b -> b -> b) -> (a -> b) -> ChooseC PureC a -> b
-fold fork leaf = run . runChoose (coerce fork) (coerce leaf)
-{-# INLINE fold #-}
