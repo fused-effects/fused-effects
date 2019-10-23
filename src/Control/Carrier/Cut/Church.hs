@@ -106,6 +106,12 @@ instance Applicative BinaryTree where
   f <*> a = fold Fork (<$> a) Nil Fail f
   {-# INLINE (<*>) #-}
 
+instance Alternative BinaryTree where
+  empty = Nil
+  {-# INLINE empty #-}
+  (<|>) = Fork
+  {-# INLINE (<|>) #-}
+
 instance Monad BinaryTree where
   a >>= f = fold Fork f Nil Fail a
   {-# INLINE (>>=) #-}
