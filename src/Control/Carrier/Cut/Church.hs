@@ -25,7 +25,6 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.BinaryTree
 
 -- | Run a 'Cut' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'.
 --
@@ -64,8 +63,8 @@ newtype CutC m a = CutC (NonDetC (StateC Bool m) a)
 -- | A single fixpoint is shared between all branches.
 instance MonadFix m => MonadFix (CutC m) where
   mfix f = CutC $ NonDetC $ \ fork leaf nil -> mfix
-    (runNonDetA . out . f . head . fold (++) pure [])
-    >>= fold fork leaf nil where
+    (runNonDetA . out . f . head)
+    >>= foldr (fork . leaf) nil where
     out (CutC m) = m
   {-# INLINE mfix #-}
 
