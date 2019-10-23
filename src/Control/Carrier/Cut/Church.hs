@@ -25,18 +25,13 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Function (on)
 
 -- | Run a 'Cut' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'.
 --
 -- @since 1.0.0.0
 runCut :: Monad m => (m b -> m b -> m b) -> (a -> m b) -> m b -> CutC m a -> m b
-runCut fork leaf nil (CutC m) = evalState False (runNonDet (\ l r -> StateC $ \ prune -> do
-  (prune', l') <- runState prune l
-  if prune' then
-    pure (prune', l')
-  else do
-    (prune'', r') <- runState prune r
-    (,) prune'' <$> fork (pure l') (pure r')) (lift . leaf) (lift nil) m)
+runCut fork leaf nil (CutC m) = evalState False (runNonDet (fmap lift . fork `on` evalState False) (lift . leaf) (lift nil) m)
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 --
