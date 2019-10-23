@@ -42,28 +42,20 @@
 [Contributed packages]: https://github.com/fused-effects/fused-effects#contributed-packages
 [Comparison to `mtl`]: https://github.com/fused-effects/fused-effects#comparison-to-mtl
 [Comparison to `freer-simple`]: https://github.com/fused-effects/fused-effects#comparison-to-freer-simple
+[Comparison to `polysemy`]: https://github.com/fused-effects/fused-effects#comparison-to-polysemy
 
 
 ## Overview
 
-`fused-effects` is an effect system for Haskell that values expressivity, efficiency, and rigor. The former is achieved by encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, while the latter is the result of [fusing](#fusion) effect handlers all the way through computations.
+`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides a framework for encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It was developed as a part of the [`semantic`](https://github.com/github/semantic) program analysis, but is suitable for general use in hobbyist, research, or industrial contexts.
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead. For those interested, this [talk at Strange Loop](https://www.youtube.com/watch?v=vfDazZfxlNs) outlines the history of and motivation behind effect systems and `fused-effects` itself.
-
-## Organization
-
-`fused-effects` provides two module hierarchies:
-
-* those under `Control.Effect`, which provide _effect types_ and functions that invoke effectful actions corresponding to an effect’s capabilities.
-* those under `Control.Carrier`, which provide _carrier types_ capable of executing the effects described by a given effect type.
-
-An additional module, `Control.Algebra`, provides the `Algebra` interface that carrier types implement to provide an interpretation of a given effect. You shouldn’t need to import it unless you’re defining your own effects.
 
 ### Algebraic effects
 
 In `fused-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them. Thus, a program written using the syntax of an effect can be given different meanings by using different effect handlers.
 
-These roles are performed by the effect and carrier types, respectively. Effects are datatypes with one constructor for each action. Carriers are generally `newtype`s, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Each carrier handles one effect, but multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax. For more information about the `Algebra` class, consult [the FAQs][].
+These roles are performed by the effect and carrier types, respectively. Effects are datatypes with one constructor for each action, invoked using the `send` builtin. Carriers are generally `newtype`s, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Each carrier handles one effect, but multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax. For more information about the `Algebra` class, consult [the FAQs][].
 
 [the FAQs]: https://github.com/fused-effects/fused-effects/blob/master/docs/defining_effects.md
 
@@ -83,23 +75,49 @@ Instead, computations are performed in a carrier type for the syntax, typically 
 
 Since the interpretation of effects is written as a typeclass instance which `ghc` is eager to inline, performance is excellent: approximately on par with `mtl`.
 
-Finally, since the fusion of carrier algebras occurs as a result of the selection of the carriers, it doesn’t depend on complex `RULES` pragmas, making it very easy to reason about and tune.
+Finally, since the fusion of carrier algebras occurs as a result of the selection of the carriers, it doesn’t depend on complex `RULES` pragmas, making it easy to reason about and tune.
 
 
 ## Usage
 
-### Using built-in effects
+### Package organization
 
-Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `fused-effects`, this is done by means of a `Has` constraint to require the effect’s presence in a _signature_, and to relate the signature to the _carrier_ you’re computing in. For example, to use a `State` effect managing a `String`, one would write:
+The `fused-effects` package is organized into two module hierarchies:
+* those under `Control.Effect`, which provide _effect types_ and functions that invoke effectful actions corresponding to an effect’s capabilities.
+* those under `Control.Carrier`, which provide _carrier types_ capable of executing the effects described by a given effect type.
+
+An additional module, `Control.Algebra`, provides the `Algebra` interface that carrier types implement to provide an interpretation of a given effect. You shouldn’t need to import it unless you’re defining your own effects.
+
+### Picking a carrier
+
+The first step in using an effect is picking an appropriate carrier type. For this example, we’ll use the strict `State` carrier provided in `Control.Carrier.State.Strict`:
+
+```haskell
+{-# LANGUAGE TypeApplications #-}
+import Control.Carrier.State.Strict
+```
+
+This invocation imports the `StateC` carrier type, the `runState` function to invoke a `StateC`, and the `evalState` and `execState` helper functions. In addition, it exports the contents of the `Control.Effect.State` module, which provides functions for state manipulation:
+
+```haskell
+get :: Has (State s) sig m => m s
+put :: Has (State s) sig m => s -> m ()
+```
+
+The `Has` constraint requires a given effect (here `State`) to be present in a _signature_ (`sig`), and relates that signature to be present in a _carrier type_ (`m`). We generally, but not always, program against an abstract carrier type, usually called `m`, as carrier types always implement the `Monad` typeclass. We can build monadic actions by combining and composing these functions:
 
 ```haskell
 action :: Has (State String) sig m => m ()
+action = put "Hello, fused-effects!"
 ```
 
-Multiple effects can be required simply by adding more `Has` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
+To add effects to a given computation, add more `Has` constraints to the signature/carrier pair `sig` and `m`. For example, to add a `Reader` effect managing an `Int`, we would write:
 
 ```haskell
 action :: (Has (State String) sig m, Has (Reader Int) sig m) => m ()
+action = do
+  item <- ask @Int
+  put ("Read integer from context: " <> show item)
 ```
 
 Different effects make different operations available; see the documentation for individual effects for more information about their operations. Note that we generally don’t program against an explicit list of effect components: we take the typeclass-oriented approach, adding new constraints to `sig` as new capabilities become necessary. If you want to name and share some predefined list of effects, it’s best to use the `-XConstraintKinds` extension to GHC, capturing the elements of `sig` as a type synonym of kind `Constraint`:
@@ -185,7 +203,7 @@ The process of defining new effects is outlined in [`docs/defining_effects.md`][
 
 ## Project overview
 
-This project builds a Haskell package named `fused-effects`. The library’s sources are in [`src`][], with doctests (property tests written in documentation comments) attached to most functions. Unit tests are in [`test`][], and library usage examples are in [`examples`][]. Further documentation can be found in [`docs`][].
+This project builds a Haskell package named `fused-effects`. The library’s sources are in [`src`][]. Unit tests are in [`test`][], and library usage examples are in [`examples`][]. Further documentation can be found in [`docs`][].
 
 This project adheres to the Contributor Covenant [code of conduct][]. By participating, you are expected to uphold this code.
 
@@ -283,7 +301,7 @@ instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
 
 Thus, the approaches aren’t mutually exclusive; consumers are free to decide which approach makes the most sense for their situation.
 
-Unlike `fused-effects`, `mtl` provides a `ContT` monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects. Further, `fused-effects` provides a relatively large palette of these, including resumable exceptions, tracing, resource management, and others, as well as tools to define your own.
+Unlike `fused-effects`, `mtl` provides a `ContT` monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects.
 
 Finally, thanks to the fusion and inlining of carriers, `fused-effects` is approximately as fast as `mtl` (see [benchmarks](#benchmarks)).
 
