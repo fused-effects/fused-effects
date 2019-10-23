@@ -36,7 +36,7 @@ runCut fork leaf nil (CutC m) = evalState False (runNonDet (\ l r -> StateC $ \ 
     pure (prune', l')
   else do
     (prune'', r') <- runState prune' r
-    (,) prune'' <$> (pure l' `fork` pure r')) (lift . leaf) (lift nil) m)
+    (,) prune'' <$> fork (pure l') (pure r')) (lift . leaf) (lift nil) m)
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 --
