@@ -19,7 +19,6 @@ module Control.Carrier.Choose.Church
 import Control.Algebra
 import Control.Applicative (liftA2)
 import Control.Effect.Choose
-import Control.Monad (join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -83,5 +82,5 @@ instance MonadTrans ChooseC where
 
 instance (Algebra sig m, Effect sig) => Algebra (Choose :+: sig) (ChooseC m) where
   eff (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
-  eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (pure ()) (fmap join . runChoose (liftA2 (<|>)) (pure . pure)) other) >>= runChoose fork leaf
+  eff (R other)      = ChooseC $ \ fork leaf -> eff (handle (pure ()) (runChoose (liftA2 (<|>)) (runChoose (liftA2 (<|>)) (pure . pure))) other) >>= runChoose fork leaf
   {-# INLINE eff #-}
