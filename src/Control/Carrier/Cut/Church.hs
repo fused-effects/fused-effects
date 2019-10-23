@@ -89,5 +89,5 @@ instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m
   eff (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   eff (R (L (L Empty)))      = empty
   eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutA) other) >>= foldr cons nil
+  eff (R (R other))          = CutC $ \ cons nil fail -> eff (handle (pure ()) (runCut (fmap . (<|>)) (pure empty) (pure cutfail)) other) >>= runCut cons nil fail
   {-# INLINE eff #-}
