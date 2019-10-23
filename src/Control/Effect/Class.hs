@@ -24,8 +24,8 @@ class HFunctor h where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
   --
   -- A definition for 'hmap' over first-order effects can be derived automatically provided a 'Generic1' instance is available.
-  hmap :: Monad m => (forall x . m x -> n x) -> (h m a -> h n a)
-  default hmap :: (Monad m, Generic1 (h m), Generic1 (h n), GHFunctor m n (Rep1 (h m)) (Rep1 (h n))) => (forall x . m x -> n x) -> (h m a -> h n a)
+  hmap :: (Monad m, Functor n) => (forall x . m x -> n x) -> (h m a -> h n a)
+  default hmap :: (Monad m, Functor n, Generic1 (h m), Generic1 (h n), GHFunctor m n (Rep1 (h m)) (Rep1 (h n))) => (forall x . m x -> n x) -> (h m a -> h n a)
   hmap f = to1 . ghmap f . from1
   {-# INLINE hmap #-}
 
@@ -35,7 +35,7 @@ class HFunctor h where
 --   This is applicable whenever @f@ is 'Coercible' to @g@, e.g. simple @newtype@s.
 --
 -- @since 1.0.0.0
-handleCoercible :: (HFunctor sig, Monad f, Coercible f g) => sig f a -> sig g a
+handleCoercible :: (HFunctor sig, Monad f, Functor g, Coercible f g) => sig f a -> sig g a
 handleCoercible = hmap coerce
 {-# INLINE handleCoercible #-}
 
@@ -67,7 +67,7 @@ class HFunctor sig => Effect sig where
 -- | Generic implementation of 'HFunctor'.
 class GHFunctor m m' rep rep' where
   -- | Generic implementation of 'hmap'.
-  ghmap :: Monad m => (forall x . m x -> m' x) -> (rep a -> rep' a)
+  ghmap :: (Monad m, Functor m') => (forall x . m x -> m' x) -> (rep a -> rep' a)
 
 instance GHFunctor m m' rep rep' => GHFunctor m m' (M1 i c rep) (M1 i c rep') where
   ghmap f = M1 . ghmap f . unM1
