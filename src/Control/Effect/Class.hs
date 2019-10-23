@@ -32,6 +32,7 @@ class HFunctor h where
   {-# INLINE hmap #-}
 
 
+-- | A default definition for 'hmap' using an 'Effect' instance for the signature.
 hmapDefault :: (Effect sig, Functor n, Functor (sig n), Monad m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
 hmapDefault f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
 
