@@ -21,7 +21,6 @@ import Control.Carrier.Pure (PureC, run)
 import Control.Effect.Class
 import Control.Effect.Pure
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
-import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
