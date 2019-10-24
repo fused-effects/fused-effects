@@ -88,6 +88,9 @@ instance MonadTransState ((,) s) (State.Strict.StateT s) where
 instance Monoid w => MonadTransState ((,) w) (Writer.Lazy.WriterT w) where
   threading handle = Writer.Lazy.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Writer.Lazy.runWriterT x))
 
+instance Monoid w => MonadTransState ((,) w) (Writer.Strict.WriterT w) where
+  threading handle = Writer.Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Writer.Strict.runWriterT x))
+
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
 --
