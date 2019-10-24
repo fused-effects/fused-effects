@@ -26,6 +26,7 @@ infixr 4 :+:
 instance (Effect l, Effect r) => Effect (l :+: r) where
   type Constrain (l :+: r) = (Constrain l & Constrain r)
 
+-- | Conjunction of constraints. Used to ensure that both sides of a sum can constrain the state functor.
 class (c1 f, c2 f) => (c1 & c2) (f :: * -> *)
 instance (c1 f, c2 f) => (c1 & c2) f
 
