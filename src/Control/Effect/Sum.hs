@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
 
 -- | Operations on /sums/, combining effects into a /signature/.
 --
@@ -24,11 +24,8 @@ data (l :+: r) (m :: * -> *) k
 infixr 4 :+:
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
-  type Constrain (l :+: r) = (Constrain l & Constrain r)
+  type Constrain (l :+: r) f = (Constrain l f, Constrain r f)
 
--- | Conjunction of constraints. Used to ensure that both sides of a sum can constrain the state functor.
-class (c1 f, c2 f) => (c1 & c2) (f :: * -> *)
-instance (c1 f, c2 f) => (c1 & c2) f
 
 -- | The class of types present in a signature.
 --
