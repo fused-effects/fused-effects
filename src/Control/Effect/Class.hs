@@ -28,6 +28,8 @@ import GHC.Generics
 -- @since 1.0.0.0
 class Constrain sig Identity => Effect sig where
   -- | Constrain the type of state algebras can pass to 'handle'.
+  --
+  -- Defaults to 'Functor'. Some effects may require a more restrictive constraint to thread handlers through. It is recommended, but not enforced, that imposed constraints be subclasses of 'Functor' wherever possible to ensure compatibility with the broadest variety of algebras.
   type Constrain sig (f :: (* -> *)) :: Constraint
   type Constrain sig f = Functor f
 
