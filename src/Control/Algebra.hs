@@ -82,6 +82,9 @@ instance MonadTransState Identity (Reader.ReaderT r) where
 instance MonadTransState ((,) s) (State.Lazy.StateT s) where
   threading handle = State.Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s))
 
+instance MonadTransState ((,) s) (State.Strict.StateT s) where
+  threading handle = State.Strict.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s))
+
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
 --
