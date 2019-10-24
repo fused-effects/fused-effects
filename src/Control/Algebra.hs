@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances #-}
 
 {- | The 'Algebra' class is the mechanism with which effects are interpreted.
 
@@ -10,6 +10,7 @@ module Control.Algebra
 ( Algebra(..)
 , Has
 , send
+, handleIdentity
   -- * Re-exports
 , (:+:) (..)
 , run
@@ -65,6 +66,11 @@ type Has eff sig m = (Members eff sig, Algebra sig m)
 send :: (Member eff sig, Algebra sig m) => eff m a -> m a
 send = eff . inj
 {-# INLINE send #-}
+
+
+handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
+handleIdentity f = fmap runIdentity . send . handle (Identity ()) (fmap Identity . f . runIdentity)
+{-# INLINE handleIdentity #-}
 
 
 -- base
