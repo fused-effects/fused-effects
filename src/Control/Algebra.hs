@@ -66,6 +66,9 @@ instance Algebra Pure PureC where
 class (Functor f, MonadTrans t) => MonadTransState f t | t -> f where
   threading :: Monad m => (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
 
+instance MonadTransState (Either e) (Except.ExceptT e) where
+  threading handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
+
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
 --
