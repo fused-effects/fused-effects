@@ -87,7 +87,7 @@ lazy
   -> [TestTree]
 lazy s (Run run) =
   [ testProperty "fmap is non-strict" . forall (a :. s :. Nil) $
-    \ a s -> void . eval . run $ (const a <$> pure (error "insufficiently lazy")) <$ s
+    \ a s -> void . eval . run $ (const a <$> problematic) <$ s
   , testProperty "pure and <*> are non-strict" . forall (s :. Nil) $
     \ s -> void . eval . run $ problematic <$ s
   ]
