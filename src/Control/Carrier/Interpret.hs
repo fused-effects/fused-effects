@@ -56,7 +56,7 @@ reify a k = unsafeCoerce (Magic k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: (Effect eff, Constrain eff Identity, Monad m)
+  :: (Effect eff, Monad m)
   => (forall x . eff m x -> m x)
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
@@ -68,7 +68,7 @@ runInterpret f m = reify (Handler (InterpretC . fmap runIdentity . f . handle (I
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: (Effect eff, Constrain eff Identity, Monad m)
+  :: (Effect eff, Monad m)
   => (forall x . s -> eff (StateC s m) x -> m (s, x))
   -> s
   -> (forall t . Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
@@ -90,6 +90,6 @@ instance MonadUnliftIO m => MonadUnliftIO (InterpretC s sig m) where
   withRunInIO inner = InterpretC $ withRunInIO $ \run -> inner (\ (InterpretC m) -> run m)
   {-# INLINE withRunInIO #-}
 
-instance (Effect sig, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
+instance (Effect eff, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
   alg (L eff)   = runHandler (getConst (reflect @s)) eff
   alg (R other) = InterpretC (handleCoercible other)

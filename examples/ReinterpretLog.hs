@@ -201,7 +201,7 @@ newtype CollectLogMessagesC s m a
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
-     (Algebra sig m, Effect sig, Constrain sig ((,) [s]))
+     (Algebra sig m, Constrain sig ((,) [s]))
      -- ...the 'CollectLogMessagesC s m' monad can interpret 'Log s :+: sig'
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where

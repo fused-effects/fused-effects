@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
 
 {- | The 'Algebra' class is the mechanism with which effects are interpreted.
 
@@ -51,7 +51,7 @@ import Data.Tuple (swap)
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
 --
 -- @since 1.0.0.0
-class Monad m => Algebra sig m | m -> sig where
+class (Effect sig, Monad m) => Algebra sig m | m -> sig where
   type Suspend m :: * -> *
   type Suspend m = Identity
 
@@ -126,16 +126,16 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 
 -- transformers
 
-instance (Algebra sig m, Effect sig, Constrain sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
+instance (Algebra sig m, Constrain sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
   type Suspend (Except.ExceptT e m) = Either e
   alg (L (L (Throw e)))     = Except.throwE e
   alg (L (R (Catch m h k))) = Except.catchE m h >>= k
   alg (R other)             = Except.ExceptT $ alg (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
 
-instance (Algebra sig m, Effect sig) => Algebra sig (Identity.IdentityT m) where
+instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . handleCoercible
 
-instance (Algebra sig m, Effect sig) => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
+instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg (L (Ask       k)) = Reader.ask >>= k
   alg (L (Local f m k)) = Reader.local f m >>= k
   alg (R other)         = Reader.ReaderT $ \ r -> handleIdentity (flip Reader.runReaderT r) other
@@ -147,7 +147,7 @@ toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
-instance (Algebra sig m, Effect sig, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
+instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
   type Suspend (RWS.Lazy.RWST r w s m) = RWSTF w s
   alg (L (Ask       k))      = RWS.Lazy.ask >>= k
   alg (L (Local f m k))      = RWS.Lazy.local f m >>= k
@@ -158,7 +158,7 @@ instance (Algebra sig m, Effect sig, Constrain sig (RWSTF w s), Monoid w) => Alg
   alg (R (R (L (Put s k))))  = RWS.Lazy.put s *> k
   alg (R (R (R other)))      = RWS.Lazy.RWST $ \ r s -> unRWSTF <$> alg (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s) other)
 
-instance (Algebra sig m, Effect sig, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
+instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
   type Suspend (RWS.Strict.RWST r w s m) = RWSTF w s
   alg (L (Ask       k))      = RWS.Strict.ask >>= k
   alg (L (Local f m k))      = RWS.Strict.local f m >>= k
@@ -169,26 +169,26 @@ instance (Algebra sig m, Effect sig, Constrain sig (RWSTF w s), Monoid w) => Alg
   alg (R (R (L (Put s k))))  = RWS.Strict.put s *> k
   alg (R (R (R other)))      = RWS.Strict.RWST $ \ r s -> unRWSTF <$> alg (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s) other)
 
-instance (Algebra sig m, Effect sig, Constrain sig ((,) s)) => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
+instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
   type Suspend (State.Lazy.StateT s m) = (,) s
   alg (L (Get   k)) = State.Lazy.get >>= k
   alg (L (Put s k)) = State.Lazy.put s *> k
   alg (R other)     = State.Lazy.StateT $ \ s -> swap <$> alg (handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s) other)
 
-instance (Algebra sig m, Effect sig, Constrain sig ((,) s)) => Algebra (State s :+: sig) (State.Strict.StateT s m) where
+instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (State.Strict.StateT s m) where
   type Suspend (State.Strict.StateT s m) = (,) s
   alg (L (Get   k)) = State.Strict.get >>= k
   alg (L (Put s k)) = State.Strict.put s *> k
   alg (R other)     = State.Strict.StateT $ \ s -> swap <$> alg (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
 
-instance (Algebra sig m, Effect sig, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
+instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
   type Suspend (Writer.Lazy.WriterT w m) = (,) w
   alg (L (Tell w k))     = Writer.Lazy.tell w *> k
   alg (L (Listen m k))   = Writer.Lazy.listen m >>= uncurry (flip k)
   alg (L (Censor f m k)) = Writer.Lazy.censor f m >>= k
   alg (R other)          = Writer.Lazy.WriterT $ swap <$> alg (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Lazy.runWriterT x) other)
 
-instance (Algebra sig m, Effect sig, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Strict.WriterT w m) where
+instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Strict.WriterT w m) where
   type Suspend (Writer.Strict.WriterT w m) = (,) w
   alg (L (Tell w k))     = Writer.Strict.tell w *> k
   alg (L (Listen m k))   = Writer.Strict.listen m >>= uncurry (flip k)
