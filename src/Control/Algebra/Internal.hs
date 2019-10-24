@@ -70,6 +70,7 @@ instance Functor f => Effect f Empty
 -- @since 0.1.0.0
 type NonDet = Empty Sum.:+: Choose
 
+
 instance (Effect f l, Effect f r) => Effect f (l Sum.:+: r)
 
 
