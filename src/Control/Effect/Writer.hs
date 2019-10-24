@@ -28,7 +28,7 @@ module Control.Effect.Writer
 ) where
 
 import Control.Algebra
-import Control.Effect.Internal (Writer(..))
+import Control.Effect.Writer.Internal (Writer(..))
 
 -- | Write a value to the log.
 --
