@@ -4,7 +4,8 @@
 --
 -- @since 1.0.0.0
 module Control.Algebra.Internal
-( Effect(..)
+( -- * Effect class
+  Effect(..)
 , hmap
   -- * Effects
 , Catch(..)
