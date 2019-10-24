@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, DeriveFunctor, DeriveGeneric, EmptyCase, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, RankNTypes, TypeOperators #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, DeriveGeneric, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, RankNTypes, StandaloneDeriving, TypeOperators #-}
 
 -- | Provides the 'Effect' class that effect types implement.
 --
@@ -10,6 +10,7 @@ module Control.Algebra.Internal
 , Choose(..)
 , Empty(..)
 , NonDet
+, Reader(..)
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
@@ -69,6 +70,17 @@ instance Functor f => Effect f Empty
 --
 -- @since 0.1.0.0
 type NonDet = Empty Sum.:+: Choose
+
+-- | @since 0.1.0.0
+data Reader r m k
+  = Ask (r -> m k)
+  | forall b . Local (r -> r) (m b) (b -> m k)
+
+deriving instance Functor m => Functor (Reader r m)
+
+instance Functor f => Effect f (Reader r) where
+  handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
+  handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
 
 
 instance (Effect f l, Effect f r) => Effect f (l Sum.:+: r)
