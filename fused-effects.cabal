@@ -89,7 +89,6 @@ library
     Control.Effect.Choose.Internal
     Control.Effect.Empty.Internal
     Control.Effect.Error.Internal
-    Control.Effect.Internal
     Control.Effect.Lift.Internal
     Control.Effect.NonDet.Internal
     Control.Effect.Reader.Internal
