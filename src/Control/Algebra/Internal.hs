@@ -11,6 +11,7 @@ module Control.Algebra.Internal
 , Empty(..)
 , NonDet
 , Reader(..)
+, State(..)
 , Writer(..)
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
@@ -82,6 +83,14 @@ deriving instance Functor m => Functor (Reader r m)
 instance Functor f => Effect f (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
+
+-- | @since 0.1.0.0
+data State s m k
+  = Get (s -> m k)
+  | Put s (m k)
+  deriving (Functor, Generic1)
+
+instance Functor f => Effect f (State s)
 
 -- | @since 0.1.0.0
 data Writer w m k

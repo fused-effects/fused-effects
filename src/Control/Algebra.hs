@@ -26,7 +26,6 @@ import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)
 import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
 import Control.Effect.Pure
-import {-# SOURCE #-} Control.Effect.State (State(..))
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import {-# SOURCE #-} Control.Effect.Throw (Throw(..))
 import Control.Monad ((<=<), join)
