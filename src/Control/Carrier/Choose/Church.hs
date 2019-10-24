@@ -80,7 +80,7 @@ instance MonadTrans ChooseC where
   lift m = ChooseC (\ _ leaf -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect (ChooseC m) sig) => Algebra (Choose :+: sig) (ChooseC m) where
+instance (Algebra sig m, Effect sig, Constrain sig (ChooseC m)) => Algebra (Choose :+: sig) (ChooseC m) where
   type Suspend (ChooseC m) = ChooseC m
   alg (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
   alg (R other)      = ChooseC $ \ fork leaf -> alg (handle (pure ()) (runChoose (liftA2 (<|>)) (runChoose (liftA2 (<|>)) (pure . pure))) other) >>= runChoose fork leaf

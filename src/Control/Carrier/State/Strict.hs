@@ -112,7 +112,7 @@ instance MonadTrans (StateC s) where
   lift m = StateC (\ s -> (,) s <$> m)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect ((,) s) sig) => Algebra (State s :+: sig) (StateC s m) where
+instance (Algebra sig m, Effect sig, Constrain sig ((,) s)) => Algebra (State s :+: sig) (StateC s m) where
   type Suspend (StateC s m) = (,) s
   alg (L (Get   k)) = StateC (\ s -> runState s (k s))
   alg (L (Put s k)) = StateC (\ _ -> runState s k)

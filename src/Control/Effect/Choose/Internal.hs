@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
 module Control.Effect.Choose.Internal
 ( Choose(..)
 ) where
@@ -11,4 +11,4 @@ newtype Choose m k
   = Choose (Bool -> m k)
   deriving (Functor, Generic1)
 
-instance Functor f => Effect f Choose
+instance Effect Choose

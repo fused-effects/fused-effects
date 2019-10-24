@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
 module Control.Effect.Writer.Internal
 ( Writer(..)
 ) where
@@ -13,7 +13,7 @@ data Writer w m k
 
 deriving instance Functor m => Functor (Writer w m)
 
-instance Functor f => Effect f (Writer w) where
+instance Effect (Writer w) where
   handle state handler (Tell w     k) = Tell w                          (handler (k <$ state))
   handle state handler (Listen   m k) = Listen   (handler (m <$ state)) (fmap handler . fmap . k)
   handle state handler (Censor f m k) = Censor f (handler (m <$ state)) (handler . fmap k)

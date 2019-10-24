@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures #-}
 module Control.Effect.Throw.Internal
 ( Throw(..)
 ) where
@@ -11,4 +11,4 @@ data Throw e (m :: * -> *) k
   = Throw e
   deriving (Functor, Generic1)
 
-instance Functor f => Effect f (Throw e)
+instance Effect (Throw e)

@@ -51,7 +51,7 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 -- | 'ErrorC' passes 'MonadPlus' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
-instance (Algebra sig m, Effect Identity sig, Effect (Either e) sig) => Algebra (Error e :+: sig) (ErrorC e m) where
+instance (Algebra sig m, Effect sig, Constrain sig Identity, Constrain sig (Either e)) => Algebra (Error e :+: sig) (ErrorC e m) where
   type Suspend (ErrorC e m) = Either e
   alg (L (L op)) = ErrorC (handleCoercible op)
   alg (L (R op)) = ErrorC (handleCoercible op)

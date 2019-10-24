@@ -46,7 +46,7 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
 
-instance (Algebra sig m, Effect Maybe sig) => Algebra (Empty :+: sig) (EmptyC m) where
+instance (Algebra sig m, Effect sig, Constrain sig Maybe) => Algebra (Empty :+: sig) (EmptyC m) where
   type Suspend (EmptyC m) = Maybe
   alg (L Empty) = EmptyC (MaybeT (pure Nothing))
   alg (R other) = EmptyC (MaybeT (alg (handle (Just ()) (maybe (pure Nothing) runEmpty) other)))

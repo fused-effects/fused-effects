@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
 module Control.Effect.State.Internal
 ( State(..)
 ) where
@@ -12,4 +12,4 @@ data State s m k
   | Put s (m k)
   deriving (Functor, Generic1)
 
-instance Functor f => Effect f (State s)
+instance Effect (State s)

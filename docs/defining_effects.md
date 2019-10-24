@@ -41,7 +41,7 @@ data Teletype m k
 and then defining `Effect`, using the default definition for `handle`:
 
 ```haskell
-instance Functor f => Effect f Teletype
+instance Effect Teletype
 ```
 
 Now that we have our effect datatype, we can give definitions for `read` and `write`:

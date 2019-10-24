@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
 module Control.Effect.Lift.Internal
 ( Lift(..)
 ) where
@@ -10,4 +10,4 @@ import GHC.Generics (Generic1)
 newtype Lift sig m k = Lift { unLift :: sig (m k) }
   deriving (Functor, Generic1)
 
-instance (Functor f, Functor m) => Effect f (Lift m)
+instance Functor m => Effect (Lift m)

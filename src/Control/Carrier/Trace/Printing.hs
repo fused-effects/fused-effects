@@ -49,7 +49,7 @@ instance MonadUnliftIO m => MonadUnliftIO (TraceC m) where
   withRunInIO inner = TraceC $ withRunInIO $ \run -> inner (run . runTrace)
   {-# INLINE withRunInIO #-}
 
-instance (MonadIO m, Algebra sig m, Effect Identity sig) => Algebra (Trace :+: sig) (TraceC m) where
+instance (MonadIO m, Algebra sig m, Effect sig, Constrain sig Identity) => Algebra (Trace :+: sig) (TraceC m) where
   alg (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
   alg (R other)       = TraceC (handleCoercible other)
   {-# INLINE alg #-}
