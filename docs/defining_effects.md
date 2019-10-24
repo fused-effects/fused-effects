@@ -69,12 +69,12 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 instance (Algebra sig m, MonadIO m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
   alg (L (Read    k)) = TeletypeIOC (liftIO getLine      >>= runTeletypeIOC . k)
   alg (L (Write s k)) = TeletypeIOC (liftIO (putStrLn s) >>  runTeletypeIOC   k)
-  alg (R other)       = TeletypeIOC (alg (handleCoercible other))
+  alg (R other)       = TeletypeIOC (handleIdentity runTeletypeIOC other)
 ```
 
 Here, `alg` is responsible for handling effectful computations. Since the `Algebra` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `alg` has two parts: a handler for `Teletype`, and a handler for teletype effects that might be embedded inside other effects in the signature.
 
-In this case, since the `Teletype` carrier is just a thin wrapper around the underlying computation, we can use `handleCoercible` to handle any embedded `TeletypeIOC` carriers by simply mapping `coerce` over them.
+In this case, since the `Teletype` carrier is just a thin wrapper around the underlying computation, we can use `handleIdentity` to handle any embedded `TeletypeIOC` carriers by simply mapping `runTeletypeIOC` over them.
 
 That leaves `Teletype` effects themselves, which are handled with one case per constructor. Since we’re assuming the existence of a `MonadIO` instance for the underlying computation, we can use `liftIO` to inject the `getLine` and `putStrLn` actions into it, and then proceed with the continuations, unwrapping them in the process.
 
@@ -98,5 +98,5 @@ This allows us to use `liftIO` directly on the carrier itself, instead of only i
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
   alg (L (Read    k)) = liftIO getLine      >>= k
   alg (L (Write s k)) = liftIO (putStrLn s) >>  k
-  alg (R other)       = TeletypeIOC (alg (handleCoercible other))
+  alg (R other)       = TeletypeIOC (handleIdentity runTeletypeIOC other)
 ```

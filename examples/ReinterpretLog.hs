@@ -163,7 +163,7 @@ newtype ReinterpretLogC s t m a
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects, one of which
      -- is 'Log t'...
-     Has (Log t) sig m
+     (Has (Log t) sig m, Effect sig)
      -- ... the 'ReinterpretLogC s t m' monad can interpret 'Log s :+: sig'
      -- effects
   => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
@@ -179,7 +179,7 @@ instance
         unReinterpretLogC k
 
     R other ->
-      ReinterpretLogC (alg (R (handleCoercible other)))
+      ReinterpretLogC (handleIdentity unReinterpretLogC other)
 
 -- The 'ReinterpretLogC' runner.
 reinterpretLog ::
@@ -216,7 +216,7 @@ instance
         unCollectLogMessagesC k
 
     R other ->
-      CollectLogMessagesC (alg (R (handleCoercible other)))
+      CollectLogMessagesC (handleIdentity unCollectLogMessagesC other)
 
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages ::
