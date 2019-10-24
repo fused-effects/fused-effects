@@ -35,7 +35,6 @@ data Cut m k
 
 deriving instance Functor m => Functor (Cut m)
 
-instance HFunctor Cut
 instance Effect Cut where
   handle _     _       Cutfail    = Cutfail
   handle state handler (Call m k) = Call (handler (m <$ state)) (handler . fmap k)

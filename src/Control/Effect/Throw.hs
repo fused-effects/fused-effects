@@ -27,8 +27,7 @@ data Throw e (m :: * -> *) k
   = Throw e
   deriving (Functor, Generic1)
 
-instance HFunctor (Throw e)
-instance Effect   (Throw e)
+instance Effect (Throw e)
 
 
 -- | Throw an error, escaping the current computation up to the nearest 'Control.Effect.Catch.catchError' (if any).

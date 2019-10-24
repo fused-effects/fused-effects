@@ -1,13 +1,12 @@
 {-# LANGUAGE DefaultSignatures, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-} -- for the default signature for hmap
 
--- | Provides the 'HFunctor' and 'Effect' classes that effect types implement.
+-- | Provides the 'Effect' class that effect types implement.
 --
 -- @since 1.0.0.0
 module Control.Effect.Class
-( HFunctor(..)
-, hmapDefault
-, Effect(..)
+( Effect(..)
+, hmap
 -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
@@ -15,27 +14,6 @@ module Control.Effect.Class
 import Data.Coerce
 import Data.Functor.Identity
 import GHC.Generics
-
--- | Higher-order functors of kind @(* -> *) -> (* -> *)@ map functors to functors.
---
---   All effects must be 'HFunctor's.
---
--- @since 1.0.0.0
-class HFunctor h where
-  -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
-  --
-  -- A definition for 'hmap' over first-order effects can be derived automatically provided an 'Effect' instance is available.
-  hmap :: (Monad m, Functor n) => (forall x . m x -> n x) -> (h m a -> h n a)
-  default hmap :: (Monad m, Functor n, Functor (h n), Effect h) => (forall x . m x -> n x) -> (h m a -> h n a)
-  hmap = hmapDefault
-  {-# INLINE hmap #-}
-
-
--- | A default definition for 'hmap' using an 'Effect' instance for the signature.
-hmapDefault :: (Effect sig, Functor n, Functor (sig n), Monad m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
-hmapDefault f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
-{-# INLINE hmapDefault #-}
-
 
 -- | The class of effect types, which must:
 --
@@ -59,6 +37,13 @@ class Effect sig where
                  -> sig n (f a)
   handle state handler = to1 . ghandle state handler . from1
   {-# INLINE handle #-}
+
+-- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
+--
+-- @since 1.0.0.0
+hmap :: (Effect sig, Functor n, Functor (sig n), Monad m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
+hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
+{-# INLINE hmap #-}
 
 
 -- | Generic implementation of 'Effect'.

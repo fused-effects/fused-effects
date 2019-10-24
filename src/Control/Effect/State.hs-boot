@@ -8,5 +8,4 @@ data State s m k
   = Get (s -> m k)
   | Put s (m k)
 
-instance HFunctor (State s)
-instance Effect   (State s)
+instance Effect (State s)

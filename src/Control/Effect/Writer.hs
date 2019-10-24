@@ -37,7 +37,6 @@ data Writer w m k
 
 deriving instance Functor m => Functor (Writer w m)
 
-instance HFunctor (Writer w)
 instance Effect (Writer w) where
   handle state handler (Tell w     k) = Tell w                          (handler (k <$ state))
   handle state handler (Listen   m k) = Listen   (handler (m <$ state)) (fmap handler . fmap . k)

@@ -9,5 +9,4 @@ import Control.Effect.Class
 data Catch e m k
   = forall b . Catch (m b) (e -> m b) (b -> m k)
 
-instance HFunctor (Catch e)
-instance Effect   (Catch e)
+instance Effect (Catch e)

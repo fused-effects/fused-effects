@@ -10,5 +10,4 @@ data Writer w m k
   | forall a . Listen (m a) (w -> a -> m k)
   | forall a . Censor (w -> w) (m a) (a -> m k)
 
-instance HFunctor (Writer w)
-instance Effect   (Writer w)
+instance Effect (Writer w)

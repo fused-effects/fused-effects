@@ -31,7 +31,7 @@ data Teletype m k
   = Read (String -> m k)
   | Write String (m k)
   deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving anyclass (Effect)
 
 read :: Has Teletype sig m => m String
 read = send (Read pure)

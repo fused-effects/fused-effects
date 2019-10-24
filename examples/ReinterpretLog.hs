@@ -108,7 +108,7 @@ runApplication =
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a (m k)
   deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving anyclass (Effect)
 
 -- Log an 'a'.
 log :: Has (Log a) sig m
