@@ -50,11 +50,12 @@ hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentit
 -- | Generic implementation of 'Effect'.
 class GEffect m m' rep rep' where
   -- | Generic implementation of 'handle'.
-  ghandle :: (Functor f, Monad m)
-          => f ()
-          -> (forall x . f (m x) -> m' (f x))
-          -> rep a
-          -> rep' (f a)
+  ghandle
+    :: (Functor f, Monad m)
+    => f ()
+    -> (forall x . f (m x) -> m' (f x))
+    -> rep a
+    -> rep' (f a)
 
 instance GEffect m m' rep rep' => GEffect m m' (M1 i c rep) (M1 i c rep') where
   ghandle state handler = M1 . ghandle state handler . unM1
