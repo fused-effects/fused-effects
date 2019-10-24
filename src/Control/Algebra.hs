@@ -66,40 +66,40 @@ instance Algebra Pure PureC where
 
 
 class (Functor f, MonadTrans t) => MonadTransState f t | t -> f where
-  liftThread :: Monad m => (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
+  liftHandle :: Monad m => (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
 
 instance MonadTransState (Either e) (Except.ExceptT e) where
-  liftThread handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
+  liftHandle handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
 
 instance MonadTransState Identity Identity.IdentityT where
-  liftThread handle = Identity.IdentityT (runIdentity <$> handle (Identity ()) (fmap Identity . Identity.runIdentityT . runIdentity))
+  liftHandle handle = Identity.IdentityT (runIdentity <$> handle (Identity ()) (fmap Identity . Identity.runIdentityT . runIdentity))
 
 instance MonadTransState Maybe Maybe.MaybeT where
-  liftThread handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
+  liftHandle handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
 
 instance MonadTransState Identity (Reader.ReaderT r) where
-  liftThread handle = Reader.ReaderT (\ r -> runIdentity <$> handle (Identity ()) (fmap Identity . flip Reader.runReaderT r . runIdentity))
+  liftHandle handle = Reader.ReaderT (\ r -> runIdentity <$> handle (Identity ()) (fmap Identity . flip Reader.runReaderT r . runIdentity))
 
 instance Monoid w => MonadTransState (RWSTF w s) (RWS.Lazy.RWST r w s) where
-  liftThread handle = RWS.Lazy.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s))
+  liftHandle handle = RWS.Lazy.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s))
 
 instance Monoid w => MonadTransState (RWSTF w s) (RWS.Strict.RWST r w s) where
-  liftThread handle = RWS.Strict.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s))
+  liftHandle handle = RWS.Strict.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s))
 
 instance MonadTransState ((,) s) (Lazy.StateT s) where
-  liftThread handle = Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Lazy.runStateT x s))
+  liftHandle handle = Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Lazy.runStateT x s))
 
 instance MonadTransState ((,) s) (Strict.StateT s) where
-  liftThread handle = Strict.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Strict.runStateT x s))
+  liftHandle handle = Strict.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Strict.runStateT x s))
 
 instance Monoid w => MonadTransState ((,) w) (Lazy.WriterT w) where
-  liftThread handle = Lazy.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Lazy.runWriterT x))
+  liftHandle handle = Lazy.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Lazy.runWriterT x))
 
 instance Monoid w => MonadTransState ((,) w) (Strict.WriterT w) where
-  liftThread handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
+  liftHandle handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
 
 threading :: (Effect eff, Constrain eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
-threading op = liftThread (\ s dist -> handle s dist op)
+threading op = liftHandle (\ s dist -> handle s dist op)
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
