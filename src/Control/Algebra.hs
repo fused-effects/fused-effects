@@ -81,7 +81,7 @@ handle state handler = send . thread state handler
 {-# INLINE handle #-}
 
 handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
-handleIdentity f = fmap runIdentity . send . thread (Identity ()) (fmap Identity . f . runIdentity)
+handleIdentity f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE handleIdentity #-}
 
 -- | Thread a 'Coercible' carrier through an 'Effect'.
