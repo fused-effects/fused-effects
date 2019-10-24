@@ -68,6 +68,7 @@ library
     -- Effects
     Control.Effect.Catch
     Control.Effect.Choose
+    Control.Effect.Class
     Control.Effect.Cull
     Control.Effect.Cut
     Control.Effect.Empty
