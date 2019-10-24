@@ -16,8 +16,8 @@ module Control.Algebra
 , module Control.Effect.Class
 ) where
 
+import Control.Algebra.Internal
 import Control.Carrier.Pure (PureC, run)
-import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
 import {-# SOURCE #-} Control.Effect.Empty (Empty(..))

@@ -3,7 +3,7 @@ module Control.Effect.Error
 ( Error
 ) where
 
-import {-# SOURCE #-} Control.Effect.Catch (Catch)
+import Control.Algebra.Internal (Catch)
 import Control.Effect.Sum
 import {-# SOURCE #-} Control.Effect.Throw (Throw)
 
