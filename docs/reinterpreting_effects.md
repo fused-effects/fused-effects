@@ -62,7 +62,7 @@ feels natural to work with:
 
 ``` haskell
 -- | The basic fact that we will retrieve.
-data CatFact = CatFact
+newtype CatFact = CatFact
   { catFact :: String
   } deriving (Show)
 
@@ -97,14 +97,14 @@ As you can hopefully see, we've decomposed the original problem into several sma
 
 ### The production use-case
 
-Now that we have these 2 mini-DSL effect types established, we need to stitch them together.
+Now that we have these two mini-DSL effect types established, we need to stitch them together.
 
 Let's take a moment to think about what could go wrong with an HTTP API from which we plan to fetch some JSON and convert it into a list of `CatFact`s.
 
 We can conceive that the server might occasionally return a malformed JSON response:
 
 ``` haskell
-data JsonParseError = JsonParseError String
+newtype JsonParseError = JsonParseError String
   deriving (Show, Eq)
 
 decodeOrThrow :: (Has (Throw JsonParseError) sig m, FromJSON a) => L.ByteString -> m a
@@ -114,7 +114,7 @@ decodeOrThrow = either (throwError . JsonParseError) pure . eitherDecode
 A more HTTP-centric issue is that we might receive a content type we can't use. In this case, anything that's not `application/json`:
 
 ``` haskell
-data InvalidContentType = InvalidContentType String
+newtype InvalidContentType = InvalidContentType String
   deriving (Show, Eq)
 
 ```
@@ -192,7 +192,7 @@ handlePrint r =
     Left invalidContentTypeError -> print invalidContentTypeError
     Right ok -> case ok of
       Left jsonParseError -> print jsonParseError
-      Right facts -> mapM_ (putStrLn . catFact) facts
+      Right facts -> traverse (putStrLn . catFact) facts
 
 catFactsRunner :: (Effect sig, Has Http sig m) => m (Either InvalidContentType (Either JsonParseError [CatFact]))
 catFactsRunner =
