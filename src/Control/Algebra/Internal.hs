@@ -9,6 +9,7 @@ module Control.Algebra.Internal
   -- * Effects
 , Choose(..)
 , Empty(..)
+, NonDet
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
@@ -63,6 +64,11 @@ data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
 instance Functor f => Effect f Empty
+
+-- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
+--
+-- @since 0.1.0.0
+type NonDet = Empty Sum.:+: Choose
 
 instance (Effect f l, Effect f r) => Effect f (l Sum.:+: r)
 

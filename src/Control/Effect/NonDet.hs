@@ -30,17 +30,13 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Algebra
+import Control.Algebra.Internal
 import Control.Applicative (Alternative(..), optional)
 import Control.Effect.Choose (Choose(..))
 import Control.Effect.Empty (Empty(..))
 import Control.Monad (MonadPlus(..), guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))
-
--- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
---
--- @since 0.1.0.0
-type NonDet = Empty :+: Choose
 
 -- | Nondeterministically choose an element from a 'Foldable' collection.
 -- This can be used to emulate the style of nondeterminism associated with

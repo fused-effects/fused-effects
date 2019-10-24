@@ -25,7 +25,6 @@ import {-# SOURCE #-} Control.Carrier.Pure (run)
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)
 import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
-import {-# SOURCE #-} Control.Effect.NonDet (NonDet)
 import Control.Effect.Pure
 import {-# SOURCE #-} Control.Effect.Reader (Reader(..))
 import {-# SOURCE #-} Control.Effect.State (State(..))
