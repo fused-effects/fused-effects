@@ -76,6 +76,9 @@ instance MonadTransState Identity Identity.IdentityT where
 instance MonadTransState Maybe Maybe.MaybeT where
   threading handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
 
+instance MonadTransState Identity (Reader.ReaderT r) where
+  threading handle = Reader.ReaderT (\ r -> runIdentity <$> handle (Identity ()) (fmap Identity . flip Reader.runReaderT r . runIdentity))
+
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
 --
