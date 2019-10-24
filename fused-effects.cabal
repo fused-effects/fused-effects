@@ -89,6 +89,7 @@ library
     Control.Effect.Choose.Internal
     Control.Effect.Empty.Internal
     Control.Effect.Internal
+    Control.Effect.Lift.Internal
   build-depends:
       base           >= 4.9 && < 4.14
     , deepseq       ^>= 1.4.3

@@ -2,7 +2,6 @@
 module Control.Effect.Internal
 ( -- * Effects
   Error
-, Lift(..)
 , NonDet
 , Reader(..)
 , State(..)
@@ -19,14 +18,6 @@ import GHC.Generics (Generic1)
 
 -- | @since 0.1.0.0
 type Error e = Throw e :+: Catch e
-
-
--- | @since 0.1.0.0
-newtype Lift sig m k = Lift { unLift :: sig (m k) }
-  deriving (Functor, Generic1)
-
-instance Functor m => HFunctor (Lift m)
-instance Functor m => Effect   (Lift m)
 
 
 -- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
