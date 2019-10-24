@@ -14,6 +14,7 @@ module Control.Algebra.Internal
 , Error
 , Lift(..)
 , NonDet
+, Pure
 , Reader(..)
 , State(..)
 , Throw(..)
@@ -102,6 +103,12 @@ instance (Functor f, Functor m) => Effect f (Lift m)
 --
 -- @since 0.1.0.0
 type NonDet = Empty Sum.:+: Choose
+
+-- | @since 0.3.0.0
+data Pure (m :: * -> *) k
+  deriving (Functor, Generic1)
+
+instance Functor f => Effect f Pure
 
 -- | @since 0.1.0.0
 data Reader r m k
