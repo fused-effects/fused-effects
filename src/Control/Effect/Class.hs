@@ -1,5 +1,3 @@
-{-# OPTIONS_HADDOCK home #-}
-
 -- | Provides the 'Effect' class that effect types implement.
 --
 -- @since 1.0.0.0
