@@ -45,7 +45,6 @@ library
   hs-source-dirs: src
   exposed-modules:
     Control.Algebra
-    Control.Algebra.Internal
     -- Carriers
     Control.Carrier.Choose.Church
     Control.Carrier.Cull.Church
@@ -85,6 +84,8 @@ library
     Control.Effect.Throw
     Control.Effect.Trace
     Control.Effect.Writer
+  other-modules:
+    Control.Algebra.Internal
   build-depends:
       base           >= 4.9 && < 4.14
     , unliftio-core ^>= 0.1.2
