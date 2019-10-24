@@ -43,10 +43,10 @@ import qualified Control.Monad.Trans.Maybe as Maybe
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Control.Monad.Trans.RWS.Lazy as RWS.Lazy
 import qualified Control.Monad.Trans.RWS.Strict as RWS.Strict
-import qualified Control.Monad.Trans.State.Lazy as State.Lazy
-import qualified Control.Monad.Trans.State.Strict as State.Strict
-import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
-import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
+import qualified Control.Monad.Trans.State.Lazy as Lazy
+import qualified Control.Monad.Trans.State.Strict as Strict
+import qualified Control.Monad.Trans.Writer.Lazy as Lazy
+import qualified Control.Monad.Trans.Writer.Strict as Strict
 import Data.Coerce
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Semigroup as S
@@ -79,17 +79,17 @@ instance MonadTransState Maybe Maybe.MaybeT where
 instance MonadTransState Identity (Reader.ReaderT r) where
   threading handle = Reader.ReaderT (\ r -> runIdentity <$> handle (Identity ()) (fmap Identity . flip Reader.runReaderT r . runIdentity))
 
-instance MonadTransState ((,) s) (State.Lazy.StateT s) where
-  threading handle = State.Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s))
+instance MonadTransState ((,) s) (Lazy.StateT s) where
+  threading handle = Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Lazy.runStateT x s))
 
-instance MonadTransState ((,) s) (State.Strict.StateT s) where
-  threading handle = State.Strict.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s))
+instance MonadTransState ((,) s) (Strict.StateT s) where
+  threading handle = Strict.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Strict.runStateT x s))
 
-instance Monoid w => MonadTransState ((,) w) (Writer.Lazy.WriterT w) where
-  threading handle = Writer.Lazy.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Writer.Lazy.runWriterT x))
+instance Monoid w => MonadTransState ((,) w) (Lazy.WriterT w) where
+  threading handle = Lazy.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Lazy.runWriterT x))
 
-instance Monoid w => MonadTransState ((,) w) (Writer.Strict.WriterT w) where
-  threading handle = Writer.Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Writer.Strict.runWriterT x))
+instance Monoid w => MonadTransState ((,) w) (Strict.WriterT w) where
+  threading handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
@@ -199,24 +199,24 @@ instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (R (L (Put s k))))  = RWS.Strict.put s *> k
   alg (R (R (R other)))      = RWS.Strict.RWST $ \ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s) other
 
-instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
-  alg (L (Get   k)) = State.Lazy.get >>= k
-  alg (L (Put s k)) = State.Lazy.put s *> k
-  alg (R other)     = State.Lazy.StateT $ \ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s) other
+instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (Lazy.StateT s m) where
+  alg (L (Get   k)) = Lazy.get >>= k
+  alg (L (Put s k)) = Lazy.put s *> k
+  alg (R other)     = Lazy.StateT $ \ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Lazy.runStateT x s) other
 
-instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (State.Strict.StateT s m) where
-  alg (L (Get   k)) = State.Strict.get >>= k
-  alg (L (Put s k)) = State.Strict.put s *> k
-  alg (R other)     = State.Strict.StateT $ \ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other
+instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (Strict.StateT s m) where
+  alg (L (Get   k)) = Strict.get >>= k
+  alg (L (Put s k)) = Strict.put s *> k
+  alg (R other)     = Strict.StateT $ \ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Strict.runStateT x s) other
 
-instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
-  alg (L (Tell w k))     = Writer.Lazy.tell w *> k
-  alg (L (Listen m k))   = Writer.Lazy.listen m >>= uncurry (flip k)
-  alg (L (Censor f m k)) = Writer.Lazy.censor f m >>= k
-  alg (R other)          = Writer.Lazy.WriterT $ swap <$> handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Lazy.runWriterT x) other
+instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Lazy.WriterT w m) where
+  alg (L (Tell w k))     = Lazy.tell w *> k
+  alg (L (Listen m k))   = Lazy.listen m >>= uncurry (flip k)
+  alg (L (Censor f m k)) = Lazy.censor f m >>= k
+  alg (R other)          = Lazy.WriterT $ swap <$> handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Lazy.runWriterT x) other
 
-instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Strict.WriterT w m) where
-  alg (L (Tell w k))     = Writer.Strict.tell w *> k
-  alg (L (Listen m k))   = Writer.Strict.listen m >>= uncurry (flip k)
-  alg (L (Censor f m k)) = Writer.Strict.censor f m >>= k
-  alg (R other)          = Writer.Strict.WriterT $ swap <$> handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s $!) <$> Writer.Strict.runWriterT x) other
+instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Strict.WriterT w m) where
+  alg (L (Tell w k))     = Strict.tell w *> k
+  alg (L (Listen m k))   = Strict.listen m >>= uncurry (flip k)
+  alg (L (Censor f m k)) = Strict.censor f m >>= k
+  alg (R other)          = Strict.WriterT $ swap <$> handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s $!) <$> Strict.runWriterT x) other
