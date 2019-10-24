@@ -23,7 +23,6 @@ module Control.Algebra
 import Control.Algebra.Internal
 import {-# SOURCE #-} Control.Carrier.Pure (run)
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
-import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)
 import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
 import {-# SOURCE #-} Control.Effect.NonDet (NonDet)
