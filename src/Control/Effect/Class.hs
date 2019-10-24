@@ -45,7 +45,7 @@ hmapDefault f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . run
 -- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'handle' provided a 'Generic1' instance is available for the effect.
 --
 -- @since 1.0.0.0
-class HFunctor sig => Effect sig where
+class Effect sig where
   -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
   handle :: (Functor f, Monad m)
          => f ()
