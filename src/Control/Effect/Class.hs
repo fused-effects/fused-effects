@@ -26,6 +26,7 @@ import GHC.Generics
 class Constrain sig Identity => Effect sig where
   type Constrain sig :: (* -> *) -> Constraint
   type Constrain sig = Functor
+
   -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
   handle
     :: (Monad m, Constrain sig f)
