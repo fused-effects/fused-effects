@@ -1,5 +1,4 @@
 {-# LANGUAGE DefaultSignatures, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators #-}
-{-# OPTIONS_GHC -Wno-redundant-constraints #-} -- for the default signature for hmap
 
 -- | Provides the 'Effect' class that effect types implement.
 --
