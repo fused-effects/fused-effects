@@ -8,7 +8,7 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 -}
 module Control.Algebra
 ( Algebra(..)
-, AlgebraTrans(..)
+, MonadTransState(..)
 , Has
 , send
 , handle
@@ -63,8 +63,8 @@ instance Algebra Pure PureC where
   {-# INLINE alg #-}
 
 
-class (Functor f, MonadTrans t) => AlgebraTrans f t | t -> f where
-  threading :: (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
+class (Functor f, MonadTrans t) => MonadTransState f t | t -> f where
+  threading :: Monad m => (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
