@@ -72,7 +72,7 @@ instance (Algebra sig m, MonadIO m) => Algebra (Teletype :+: sig) (TeletypeIOC m
   alg (R other)       = TeletypeIOC (alg (handleCoercible other))
 ```
 
-Here, `eff` is responsible for handling effectful computations. Since the `Algebra` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `eff` has two parts: a handler for `Teletype`, and a handler for teletype effects that might be embedded inside other effects in the signature.
+Here, `alg` is responsible for handling effectful computations. Since the `Algebra` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `alg` has two parts: a handler for `Teletype`, and a handler for teletype effects that might be embedded inside other effects in the signature.
 
 In this case, since the `Teletype` carrier is just a thin wrapper around the underlying computation, we can use `handleCoercible` to handle any embedded `TeletypeIOC` carriers by simply mapping `coerce` over them.
 
