@@ -12,17 +12,17 @@ module Control.Algebra
 , send
 , handleIdentity
 , handleCoercible
+, Effect(..)
+, hmap
   -- * Re-exports
 , (:+:) (..)
 , run
 , Identity
-, module Control.Effect.Class
 ) where
 
 import Control.Algebra.Internal
 import {-# SOURCE #-} Control.Carrier.Pure (run)
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
-import Control.Effect.Class
 import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)
 import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
