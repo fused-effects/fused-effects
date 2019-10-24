@@ -86,7 +86,6 @@ library
     Control.Effect.Writer
   build-depends:
       base           >= 4.9 && < 4.14
-    , deepseq       ^>= 1.4.3
     , unliftio-core ^>= 0.1.2
     , transformers   >= 0.4 && < 0.6
 
