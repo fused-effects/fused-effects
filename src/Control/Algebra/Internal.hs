@@ -13,6 +13,7 @@ module Control.Algebra.Internal
 , NonDet
 , Reader(..)
 , State(..)
+, Throw(..)
 , Writer(..)
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
@@ -98,6 +99,13 @@ data State s m k
   deriving (Functor, Generic1)
 
 instance Functor f => Effect f (State s)
+
+-- | @since 1.0.0.0
+data Throw e (m :: * -> *) k
+  = Throw e
+  deriving (Functor, Generic1)
+
+instance Functor f => Effect f (Throw e)
 
 -- | @since 0.1.0.0
 data Writer w m k

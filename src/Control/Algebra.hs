@@ -26,7 +26,6 @@ import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)
 import Control.Effect.Pure
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
-import {-# SOURCE #-} Control.Effect.Throw (Throw(..))
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
