@@ -131,7 +131,6 @@ instance
      -- So long as the 'm' monad can interpret the 'sig' effects (and also
      -- perform IO)...
      ( Algebra sig m
-     , Effect sig
      , MonadIO m
      )
      -- ... the 'LogStdoutC m' monad can interpret 'Log String :+: sig' effects
@@ -164,7 +163,7 @@ newtype ReinterpretLogC s t m a
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects, one of which
      -- is 'Log t'...
-     (Has (Log t) sig m, Effect sig)
+     Has (Log t) sig m
      -- ... the 'ReinterpretLogC s t m' monad can interpret 'Log s :+: sig'
      -- effects
   => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
@@ -200,9 +199,7 @@ newtype CollectLogMessagesC s m a
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
-     ( Algebra sig m
-     , Effect sig
-     )
+     Algebra sig m
      -- ...the 'CollectLogMessagesC s m' monad can interpret 'Log s :+: sig'
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where

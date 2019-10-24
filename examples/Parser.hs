@@ -102,7 +102,7 @@ parse input = (>>= exhaustive) . runState input . runParseC
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving newtype (Alternative, Applicative, Functor, Monad)
 
-instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) (ParseC m) where
+instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
   alg (L (Satisfy p k)) = do
     input <- ParseC get
     case input of
