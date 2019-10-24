@@ -19,9 +19,9 @@ module Control.Algebra
 , module Control.Effect.Class
 ) where
 
+import Control.Algebra.Internal
 import {-# SOURCE #-} Control.Carrier.Pure (run)
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
-import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
 import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)

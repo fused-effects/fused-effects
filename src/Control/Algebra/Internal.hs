@@ -1,4 +1,4 @@
-{-# LANGUAGE DefaultSignatures, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators #-}
+{-# LANGUAGE DefaultSignatures, DeriveFunctor, DeriveGeneric, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators #-}
 
 -- | Provides the 'Effect' class that effect types implement.
 --
@@ -6,6 +6,8 @@
 module Control.Algebra.Internal
 ( Effect(..)
 , hmap
+  -- * Effects
+, Choose(..)
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
@@ -45,6 +47,14 @@ class Functor f => Effect f sig where
 hmap :: (Effect Identity sig, Functor n, Functor (sig n), Monad m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
 hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE hmap #-}
+
+
+-- | @since 1.0.0.0
+newtype Choose m k
+  = Choose (Bool -> m k)
+  deriving (Functor, Generic1)
+
+instance Functor f => Effect f Choose
 
 
 -- | Generic implementation of 'Effect'.
