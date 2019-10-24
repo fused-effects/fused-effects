@@ -1,13 +1,15 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, ExistentialQuantification, KindSignatures, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, ExistentialQuantification, KindSignatures, StandaloneDeriving, TypeOperators #-}
 module Control.Algebra.Internal
 ( -- * Effects
   Catch(..)
 , Choose(..)
 , Empty(..)
 , Lift(..)
+, NonDet
 ) where
 
 import Control.Effect.Class
+import Control.Effect.Sum ((:+:))
 import GHC.Generics (Generic1)
 
 -- | 'Catch' effects can be used alongside 'Control.Effect.Throw.Throw' to provide recoverable exceptions.
@@ -48,3 +50,9 @@ newtype Lift sig m k = Lift { unLift :: sig (m k) }
 
 instance Functor m => HFunctor (Lift m)
 instance Functor m => Effect   (Lift m)
+
+
+-- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
+--
+-- @since 0.1.0.0
+type NonDet = Empty :+: Choose
