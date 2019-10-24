@@ -57,7 +57,7 @@ class Monad m => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
 
-handleIdentity :: (Monad m, Effect Identity eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
+handleIdentity :: (Algebra sig' m, Effect Identity eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
 handleIdentity f = fmap runIdentity . alg . inj . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE handleIdentity #-}
 
@@ -66,7 +66,7 @@ handleIdentity f = fmap runIdentity . alg . inj . handle (Identity ()) (fmap Ide
 --   This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
 --
 -- @since 1.0.0.0
-handleCoercible :: (Monad m, Effect Identity eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
+handleCoercible :: (Algebra sig' m, Effect Identity eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
 handleCoercible = handleIdentity coerce
 {-# INLINE handleCoercible #-}
 
@@ -85,13 +85,13 @@ handleCoercible = handleIdentity coerce
 class Functor f => Effect f sig where
   -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
   handle
-    :: Monad m
+    :: Algebra sig' m
     => f ()
     -> (forall x . f (m x) -> n (f x))
     -> sig m a
     -> sig n (f a)
   default handle
-    :: (Monad m, Generic1 (sig m), Generic1 (sig n), GEffect f m n (Rep1 (sig m)) (Rep1 (sig n)))
+    :: (Algebra sig' m, Generic1 (sig m), Generic1 (sig n), GEffect f m n (Rep1 (sig m)) (Rep1 (sig n)))
     => f ()
     -> (forall x . f (m x) -> n (f x))
     -> sig m a
@@ -102,7 +102,7 @@ class Functor f => Effect f sig where
 -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
 --
 -- @since 1.0.0.0
-hmap :: (Effect Identity sig, Functor n, Functor (sig n), Monad m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
+hmap :: (Effect Identity sig, Functor n, Functor (sig n), Algebra sig' m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
 hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE hmap #-}
 
@@ -310,7 +310,7 @@ instance (Algebra sig m, Effect ((,) w) sig, Monoid w) => Algebra (Writer w Sum.
 class GEffect f m m' rep rep' where
   -- | Generic implementation of 'handle'.
   ghandle
-    :: Monad m
+    :: Algebra sig m
     => f ()
     -> (forall x . f (m x) -> m' (f x))
     -> rep a
