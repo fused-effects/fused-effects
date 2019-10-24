@@ -4,7 +4,8 @@
 --
 -- @since 1.0.0.0
 module Control.Effect.Class
-( Effect(..)
+( -- * 'Effect' class
+  Effect(..)
 , hmap
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
