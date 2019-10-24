@@ -10,6 +10,7 @@ module Control.Algebra.Internal
 , Catch(..)
 , Choose(..)
 , Empty(..)
+, Error
 , Lift(..)
 , NonDet
 , Reader(..)
@@ -81,6 +82,9 @@ data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
 instance Functor f => Effect f Empty
+
+-- | @since 0.1.0.0
+type Error e = Throw e Sum.:+: Catch e
 
 -- | @since 0.1.0.0
 newtype Lift sig m k = Lift { unLift :: sig (m k) }

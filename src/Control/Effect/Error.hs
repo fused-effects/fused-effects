@@ -21,8 +21,6 @@ module Control.Effect.Error
 ) where
 
 import Control.Algebra
+import Control.Algebra.Internal
 import Control.Effect.Catch
 import Control.Effect.Throw
-
--- | @since 0.1.0.0
-type Error e = Throw e :+: Catch e
