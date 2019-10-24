@@ -4,7 +4,7 @@
 module Control.Effect.Class
 ( Effect(..)
 , hmap
--- * Generic deriving of 'Effect' instances.
+  -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
 
