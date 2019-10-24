@@ -131,6 +131,7 @@ instance
      -- So long as the 'm' monad can interpret the 'sig' effects (and also
      -- perform IO)...
      ( Algebra sig m
+     , Effect sig
      , MonadIO m
      )
      -- ... the 'LogStdoutC m' monad can interpret 'Log String :+: sig' effects
@@ -144,7 +145,7 @@ instance
         runLogStdout k
 
     R other ->
-      LogStdoutC (alg (hmap runLogStdout other))
+      LogStdoutC (handleCoercible other)
 
 -- The 'LogStdoutC' runner.
 runLogStdout ::

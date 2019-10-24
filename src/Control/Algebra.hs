@@ -126,10 +126,10 @@ instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (Except.Except
 instance (Algebra sig m, Effect sig) => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . handleCoercible
 
-instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
+instance (Algebra sig m, Effect sig) => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg (L (Ask       k)) = Reader.ask >>= k
   alg (L (Local f m k)) = Reader.local f m >>= k
-  alg (R other)         = Reader.ReaderT $ \ r -> alg (hmap (flip Reader.runReaderT r) other)
+  alg (R other)         = Reader.ReaderT $ \ r -> handleIdentity (flip Reader.runReaderT r) other
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
