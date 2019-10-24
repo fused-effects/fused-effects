@@ -12,10 +12,10 @@ module Control.Algebra
 , send
 , handleIdentity
 , handleCoercible
-, Effect(..)
-, hmap
   -- * Re-exports
 , (:+:) (..)
+, Effect(..)
+, hmap
 , run
 , Identity
 ) where
