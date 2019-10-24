@@ -19,7 +19,6 @@ module Control.Algebra
 import Control.Algebra.Internal
 import Control.Carrier.Pure (PureC, run)
 import Control.Effect.Class
-import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)
 import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
 import {-# SOURCE #-} Control.Effect.NonDet (NonDet)

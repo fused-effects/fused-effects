@@ -1,8 +1,9 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, ExistentialQuantification, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, ExistentialQuantification, KindSignatures, StandaloneDeriving #-}
 module Control.Algebra.Internal
 ( -- * Effects
   Catch(..)
 , Choose(..)
+, Empty(..)
 ) where
 
 import Control.Effect.Class
@@ -30,3 +31,11 @@ newtype Choose m k
 
 instance HFunctor Choose
 instance Effect   Choose
+
+
+-- | @since 1.0.0.0
+data Empty (m :: * -> *) k = Empty
+  deriving (Functor, Generic1)
+
+instance HFunctor Empty
+instance Effect   Empty
