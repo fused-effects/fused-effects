@@ -161,7 +161,7 @@ The nice aspect of this is that we have neatly contained the failure scenarios t
 
 Now we need to support performing HTTP requests:
 
-```
+``` haskell
 runHttp :: HttpC m a -> m a
 runHttp = runHttpC
 
