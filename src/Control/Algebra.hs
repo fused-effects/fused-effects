@@ -16,7 +16,7 @@ module Control.Algebra
 , module Control.Effect.Class
 ) where
 
-import {-# SOURCE #-} Control.Carrier.Pure (run)
+import Control.Carrier.Pure (PureC, run)
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
@@ -51,6 +51,11 @@ import Data.Tuple (swap)
 class (HFunctor sig, Monad m) => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
+
+instance Algebra Pure PureC where
+  alg v = case v of {}
+  {-# INLINE alg #-}
+
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
 --
