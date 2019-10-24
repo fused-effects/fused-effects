@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
-
 {- | An effect providing access to an immutable (but locally-modifiable) context value.
 
 This effect is similar to the traditional @MonadReader@ typeclass, though it allows the presence of multiple @Reader t@ effects.
@@ -28,17 +26,7 @@ module Control.Effect.Reader
 ) where
 
 import Control.Algebra
-
--- | @since 0.1.0.0
-data Reader r m k
-  = Ask (r -> m k)
-  | forall b . Local (r -> r) (m b) (b -> m k)
-
-deriving instance Functor m => Functor (Reader r m)
-
-instance Effect (Reader r) where
-  handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
-  handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
+import Control.Effect.Reader.Internal (Reader(..))
 
 -- | Retrieve the environment value.
 --
