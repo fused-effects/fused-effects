@@ -24,7 +24,6 @@ import Control.Algebra.Internal
 import Control.Carrier.Pure (PureC, run)
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)
-import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
 import Control.Effect.Pure
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import {-# SOURCE #-} Control.Effect.Throw (Throw(..))

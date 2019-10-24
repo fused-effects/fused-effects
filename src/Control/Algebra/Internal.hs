@@ -9,6 +9,7 @@ module Control.Algebra.Internal
   -- * Effects
 , Choose(..)
 , Empty(..)
+, Lift(..)
 , NonDet
 , Reader(..)
 , State(..)
@@ -67,6 +68,12 @@ data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
 instance Functor f => Effect f Empty
+
+-- | @since 0.1.0.0
+newtype Lift sig m k = Lift { unLift :: sig (m k) }
+  deriving (Functor, Generic1)
+
+instance (Functor f, Functor m) => Effect f (Lift m)
 
 -- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
 --
