@@ -45,6 +45,7 @@ library
   hs-source-dirs: src
   exposed-modules:
     Control.Algebra
+    Control.Algebra.Internal
     -- Carriers
     Control.Carrier.Choose.Church
     Control.Carrier.Cull.Church
