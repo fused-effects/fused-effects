@@ -43,7 +43,6 @@ instance (Algebra sig m, Constrain sig (Either String)) => Fail.MonadFail (FailC
   {-# INLINE fail #-}
 
 instance (Algebra sig m, Constrain sig (Either String)) => Algebra (Fail :+: sig) (FailC m) where
-  type Suspend (FailC m) = Either String
   alg (L op) = FailC (handleCoercible op)
   alg (R op) = FailC (handleCoercible op)
   {-# INLINE alg #-}

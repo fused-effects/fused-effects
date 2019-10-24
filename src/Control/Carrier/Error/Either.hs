@@ -52,7 +52,6 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Algebra sig m, Constrain sig (Either e)) => Algebra (Error e :+: sig) (ErrorC e m) where
-  type Suspend (ErrorC e m) = Either e
   alg (L (L op)) = ErrorC (handleCoercible op)
   alg (L (R op)) = ErrorC (handleCoercible op)
   alg (R op)     = ErrorC (handleCoercible op)
