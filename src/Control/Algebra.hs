@@ -55,6 +55,7 @@ import Data.Tuple (swap)
 class Monad m => Algebra sig m | m -> sig where
   type Suspend m :: * -> *
   type Suspend m = Identity
+
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
 
