@@ -136,15 +136,15 @@ instance
      -- ... the 'LogStdoutC m' monad can interpret 'Log String :+: sig' effects
   => Algebra (Log String :+: sig) (LogStdoutC m) where
 
-  eff :: (Log String :+: sig) (LogStdoutC m) a -> LogStdoutC m a
-  eff = \case
+  alg :: (Log String :+: sig) (LogStdoutC m) a -> LogStdoutC m a
+  alg = \case
     L (Log message k) ->
       LogStdoutC $ do
         liftIO (putStrLn message)
         runLogStdout k
 
     R other ->
-      LogStdoutC (eff (hmap runLogStdout other))
+      LogStdoutC (alg (hmap runLogStdout other))
 
 -- The 'LogStdoutC' runner.
 runLogStdout ::
@@ -168,10 +168,10 @@ instance
      -- effects
   => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
 
-  eff ::
+  alg ::
        (Log s :+: sig) (ReinterpretLogC s t m) a
     -> ReinterpretLogC s t m a
-  eff = \case
+  alg = \case
     L (Log s k) ->
       ReinterpretLogC $ do
         f <- ask @(s -> t)
@@ -179,7 +179,7 @@ instance
         unReinterpretLogC k
 
     R other ->
-      ReinterpretLogC (eff (R (handleCoercible other)))
+      ReinterpretLogC (alg (R (handleCoercible other)))
 
 -- The 'ReinterpretLogC' runner.
 reinterpretLog ::
@@ -206,17 +206,17 @@ instance
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
 
-  eff ::
+  alg ::
        (Log s :+: sig) (CollectLogMessagesC s m) a
     -> CollectLogMessagesC s m a
-  eff = \case
+  alg = \case
     L (Log s k) ->
       CollectLogMessagesC $ do
         tell [s]
         unCollectLogMessagesC k
 
     R other ->
-      CollectLogMessagesC (eff (R (handleCoercible other)))
+      CollectLogMessagesC (alg (R (handleCoercible other)))
 
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages ::

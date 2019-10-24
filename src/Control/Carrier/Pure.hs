@@ -63,5 +63,5 @@ instance MonadFix PureC where
   {-# INLINE mfix #-}
 
 instance Algebra Pure PureC where
-  eff v = case v of {}
-  {-# INLINE eff #-}
+  alg v = case v of {}
+  {-# INLINE alg #-}

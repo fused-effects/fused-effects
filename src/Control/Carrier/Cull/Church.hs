@@ -69,8 +69,8 @@ instance MonadTrans CullC where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, Effect sig) => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
-  eff (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
-  eff (R (L (L Empty)))      = empty
-  eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CullC (eff (R (R (handleCoercible other))))
-  {-# INLINE eff #-}
+  alg (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
+  alg (R (L (L Empty)))      = empty
+  alg (R (L (R (Choose k)))) = k True <|> k False
+  alg (R (R other))          = CullC (alg (R (R (handleCoercible other))))
+  {-# INLINE alg #-}
