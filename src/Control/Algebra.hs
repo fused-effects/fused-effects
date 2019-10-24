@@ -21,7 +21,6 @@ import Control.Carrier.Pure (PureC, run)
 import Control.Effect.Class
 import {-# SOURCE #-} Control.Effect.Error (Error)
 import Control.Effect.Pure
-import {-# SOURCE #-} Control.Effect.State (State(..))
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import {-# SOURCE #-} Control.Effect.Throw (Throw(..))
 import {-# SOURCE #-} Control.Effect.Writer (Writer(..))

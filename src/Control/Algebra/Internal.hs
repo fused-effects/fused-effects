@@ -7,6 +7,7 @@ module Control.Algebra.Internal
 , Lift(..)
 , NonDet
 , Reader(..)
+, State(..)
 ) where
 
 import Control.Effect.Class
@@ -73,3 +74,13 @@ instance HFunctor (Reader r) where
 instance Effect (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
+
+
+-- | @since 0.1.0.0
+data State s m k
+  = Get (s -> m k)
+  | Put s (m k)
+  deriving (Functor, Generic1)
+
+instance HFunctor (State s)
+instance Effect   (State s)
