@@ -4,7 +4,6 @@ module Control.Effect.Error
 ) where
 
 import Control.Algebra.Internal
-import {-# SOURCE #-} Control.Effect.Catch (Catch)
 import Control.Effect.Sum
 
 type Error e = Throw e :+: Catch e

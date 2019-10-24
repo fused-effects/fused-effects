@@ -7,6 +7,7 @@ module Control.Algebra.Internal
 ( Effect(..)
 , hmap
   -- * Effects
+, Catch(..)
 , Choose(..)
 , Empty(..)
 , Lift(..)
@@ -56,6 +57,17 @@ hmap :: (Effect Identity sig, Functor n, Functor (sig n), Monad m) => (forall x 
 hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE hmap #-}
 
+
+-- | 'Catch' effects can be used alongside 'Control.Effect.Throw.Throw' to provide recoverable exceptions.
+--
+-- @since 1.0.0.0
+data Catch e m k
+  = forall b . Catch (m b) (e -> m b) (b -> m k)
+
+deriving instance Functor m => Functor (Catch e m)
+
+instance Functor f => Effect f (Catch e) where
+  handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
 -- | @since 1.0.0.0
 newtype Choose m k
