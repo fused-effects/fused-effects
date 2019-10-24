@@ -45,7 +45,7 @@ import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Semigroup as S
 import Data.Tuple (swap)
 
--- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'eff' method.
+-- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
 --
 -- @since 1.0.0.0
 class (HFunctor sig, Monad m) => Algebra sig m | m -> sig where
