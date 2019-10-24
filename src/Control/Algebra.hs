@@ -82,6 +82,9 @@ instance MonadTransState Identity (Reader.ReaderT r) where
 instance Monoid w => MonadTransState (RWSTF w s) (RWS.Lazy.RWST r w s) where
   threading handle = RWS.Lazy.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s))
 
+instance Monoid w => MonadTransState (RWSTF w s) (RWS.Strict.RWST r w s) where
+  threading handle = RWS.Strict.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s))
+
 instance MonadTransState ((,) s) (Lazy.StateT s) where
   threading handle = Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Lazy.runStateT x s))
 
