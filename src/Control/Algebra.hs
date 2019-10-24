@@ -11,6 +11,7 @@ module Control.Algebra
 , Has
 , send
 , handleIdentity
+, handleCoercible
   -- * Re-exports
 , (:+:) (..)
 , run
@@ -42,6 +43,7 @@ import qualified Control.Monad.Trans.State.Lazy as State.Lazy
 import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
+import Data.Coerce
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Semigroup as S
 import Data.Tuple (swap)
@@ -71,6 +73,15 @@ send = alg . inj
 handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
 handleIdentity f = fmap runIdentity . send . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE handleIdentity #-}
+
+-- | Thread a 'Coercible' carrier through an 'Effect'.
+--
+--   This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
+--
+-- @since 1.0.0.0
+handleCoercible :: (Monad m, Effect eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
+handleCoercible = handleIdentity coerce
+{-# INLINE handleCoercible #-}
 
 
 -- base
