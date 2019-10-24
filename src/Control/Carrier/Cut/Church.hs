@@ -91,5 +91,5 @@ instance (Algebra sig m, Constrain sig (CutC m)) => Algebra (Cut :+: NonDet :+: 
   alg (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   alg (R (L (L Empty)))      = empty
   alg (R (L (R (Choose k)))) = k True <|> k False
-  alg (R (R other))          = CutC $ \ cons nil fail -> alg (handle (pure ()) (runCut (fmap . (<|>)) (pure empty) (pure cutfail)) other) >>= runCut cons nil fail
+  alg (R (R other))          = CutC $ \ cons nil fail -> alg (thread (pure ()) (runCut (fmap . (<|>)) (pure empty) (pure cutfail)) other) >>= runCut cons nil fail
   {-# INLINE alg #-}

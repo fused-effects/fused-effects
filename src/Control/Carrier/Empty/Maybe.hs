@@ -48,5 +48,5 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
 
 instance (Algebra sig m, Constrain sig Maybe) => Algebra (Empty :+: sig) (EmptyC m) where
   alg (L Empty) = EmptyC (MaybeT (pure Nothing))
-  alg (R other) = EmptyC (MaybeT (alg (handle (Just ()) (maybe (pure Nothing) runEmpty) other)))
+  alg (R other) = EmptyC (MaybeT (alg (thread (Just ()) (maybe (pure Nothing) runEmpty) other)))
   {-# INLINE alg #-}

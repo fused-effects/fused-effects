@@ -82,5 +82,5 @@ instance MonadTrans ChooseC where
 
 instance (Algebra sig m, Constrain sig (ChooseC m)) => Algebra (Choose :+: sig) (ChooseC m) where
   alg (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
-  alg (R other)      = ChooseC $ \ fork leaf -> alg (handle (pure ()) (runChoose (liftA2 (<|>)) (runChoose (liftA2 (<|>)) (pure . pure))) other) >>= runChoose fork leaf
+  alg (R other)      = ChooseC $ \ fork leaf -> alg (thread (pure ()) (runChoose (liftA2 (<|>)) (runChoose (liftA2 (<|>)) (pure . pure))) other) >>= runChoose fork leaf
   {-# INLINE alg #-}
