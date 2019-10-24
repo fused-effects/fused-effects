@@ -10,6 +10,7 @@ module Control.Algebra
 ( Algebra(..)
 , Has
 , send
+, handle
 , handleIdentity
 , handleCoercible
   -- * Re-exports
@@ -74,6 +75,10 @@ send :: (Member eff sig, Algebra sig m) => eff m a -> m a
 send = alg . inj
 {-# INLINE send #-}
 
+
+handle :: (Monad m, Effect eff, Constrain eff f, Member eff sig, Algebra sig n) => f () -> (forall x . f (m x) -> n (f x)) -> eff m a -> n (f a)
+handle state handler = send . thread state handler
+{-# INLINE handle #-}
 
 handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
 handleIdentity f = fmap runIdentity . send . thread (Identity ()) (fmap Identity . f . runIdentity)
