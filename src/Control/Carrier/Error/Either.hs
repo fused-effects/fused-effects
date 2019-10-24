@@ -52,5 +52,5 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (ErrorC e m) where
-  eff = ErrorC . eff . handleCoercible
-  {-# INLINE eff #-}
+  alg = ErrorC . alg . handleCoercible
+  {-# INLINE alg #-}

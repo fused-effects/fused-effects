@@ -103,13 +103,13 @@ newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving newtype (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) (ParseC m) where
-  eff (L (Satisfy p k)) = do
+  alg (L (Satisfy p k)) = do
     input <- ParseC get
     case input of
       c:cs | p c -> ParseC (put cs) *> k c
       _          -> empty
-  eff (R other)         = ParseC (eff (R (handleCoercible other)))
-  {-# INLINE eff #-}
+  alg (R other)         = ParseC (alg (R (handleCoercible other)))
+  {-# INLINE alg #-}
 
 
 expr :: (Alternative m, Has Cut sig m, Has Symbol sig m) => m Int

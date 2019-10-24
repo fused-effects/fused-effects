@@ -89,5 +89,5 @@ instance MonadUnliftIO m => MonadUnliftIO (InterpretC s sig m) where
   {-# INLINE withRunInIO #-}
 
 instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
-  eff (L eff)   = runHandler (getConst (reflect @s)) eff
-  eff (R other) = InterpretC (eff (handleCoercible other))
+  alg (L eff)   = runHandler (getConst (reflect @s)) eff
+  alg (R other) = InterpretC (alg (handleCoercible other))
