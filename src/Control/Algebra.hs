@@ -21,6 +21,7 @@ import Control.Effect.Catch.Internal
 import Control.Effect.Choose.Internal
 import Control.Effect.Class
 import Control.Effect.Empty.Internal
+import Control.Effect.Error.Internal
 import Control.Effect.Internal
 import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal

@@ -1,18 +1,10 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, ExistentialQuantification, KindSignatures, StandaloneDeriving, TypeOperators #-}
 module Control.Effect.Internal
 ( -- * Effects
-  Error
-, Writer(..)
+  Writer(..)
 ) where
 
-import Control.Effect.Catch.Internal
 import Control.Effect.Class
-import Control.Effect.Sum ((:+:))
-import Control.Effect.Throw.Internal
-
--- | @since 0.1.0.0
-type Error e = Throw e :+: Catch e
-
 
 -- | @since 0.1.0.0
 data Writer w m k

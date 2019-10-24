@@ -19,5 +19,5 @@ module Control.Effect.Error
 ) where
 
 import Control.Effect.Catch
-import Control.Effect.Internal (Error)
+import Control.Effect.Error.Internal (Error)
 import Control.Effect.Throw
