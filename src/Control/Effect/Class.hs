@@ -21,6 +21,8 @@ import GHC.Generics
 --   1. Be functorial in their last two arguments, and
 --   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
 --
+-- Effects may additionally constrain the types of state that they support threading through their actions by defining an instance of the associated 'Constrain' type family. If no definition is given, it defaults to 'Functor'.
+--
 -- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'handle' provided a 'Generic1' instance is available for the effect.
 --
 -- @since 1.0.0.0
