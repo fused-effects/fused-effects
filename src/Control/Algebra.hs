@@ -23,6 +23,7 @@ import Control.Effect.Class
 import Control.Effect.Empty.Internal
 import Control.Effect.Internal
 import Control.Effect.Lift.Internal
+import Control.Effect.NonDet.Internal
 import Control.Effect.Pure
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import Control.Monad ((<=<), join)

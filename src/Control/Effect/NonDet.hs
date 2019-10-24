@@ -31,7 +31,7 @@ import Control.Algebra
 import Control.Applicative (Alternative(..), optional)
 import Control.Effect.Choose (Choose(..))
 import Control.Effect.Empty (Empty(..))
-import Control.Effect.Internal (NonDet)
+import Control.Effect.NonDet.Internal (NonDet)
 import Control.Monad (MonadPlus(..), guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))

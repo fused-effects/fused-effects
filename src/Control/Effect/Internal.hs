@@ -2,7 +2,6 @@
 module Control.Effect.Internal
 ( -- * Effects
   Error
-, NonDet
 , Reader(..)
 , State(..)
 , Throw(..)
@@ -10,20 +9,12 @@ module Control.Effect.Internal
 ) where
 
 import Control.Effect.Catch.Internal
-import Control.Effect.Choose.Internal
 import Control.Effect.Class
-import Control.Effect.Empty.Internal
 import Control.Effect.Sum ((:+:))
 import GHC.Generics (Generic1)
 
 -- | @since 0.1.0.0
 type Error e = Throw e :+: Catch e
-
-
--- | The nondeterminism effect is the composition of 'Empty' and 'Choose' effects.
---
--- @since 0.1.0.0
-type NonDet = Empty :+: Choose
 
 
 -- | @since 0.1.0.0

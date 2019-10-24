@@ -90,6 +90,7 @@ library
     Control.Effect.Empty.Internal
     Control.Effect.Internal
     Control.Effect.Lift.Internal
+    Control.Effect.NonDet.Internal
   build-depends:
       base           >= 4.9 && < 4.14
     , deepseq       ^>= 1.4.3
