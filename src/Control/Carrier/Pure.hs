@@ -11,6 +11,7 @@ module Control.Carrier.Pure
 , module Control.Effect.Pure
 ) where
 
+import Control.Algebra.Internal (Algebra(..))
 import Control.Applicative
 import Control.Effect.Pure
 import Control.Monad.Fix
@@ -60,3 +61,7 @@ instance Monad PureC where
 instance MonadFix PureC where
   mfix f = PureC (fix (run . f))
   {-# INLINE mfix #-}
+
+instance Algebra Pure PureC where
+  alg v = case v of {}
+  {-# INLINE alg #-}
