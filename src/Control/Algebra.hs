@@ -27,9 +27,9 @@ import Control.Effect.NonDet.Internal
 import Control.Effect.Pure
 import Control.Effect.Reader.Internal
 import Control.Effect.State.Internal
+import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import Control.Effect.Throw.Internal
 import Control.Effect.Writer.Internal
-import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
