@@ -16,14 +16,14 @@ import Data.Kind (Constraint)
 import GHC.Generics (Generic1)
 
 -- | Higher-order sums are used to combine multiple effects into a signature, typically by chaining on the right.
-data (f :+: g) (m :: * -> *) k
-  = L (f m k)
-  | R (g m k)
+data (l :+: r) (m :: * -> *) k
+  = L (l m k)
+  | R (r m k)
   deriving (Eq, Foldable, Functor, Generic1, Ord, Show, Traversable)
 
 infixr 4 :+:
 
-instance (Effect f, Effect g) => Effect (f :+: g)
+instance (Effect l, Effect r) => Effect (l :+: r)
 
 
 -- | The class of types present in a signature.
