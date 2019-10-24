@@ -26,6 +26,8 @@ import Data.Coerce
 import Data.Functor.Identity
 import GHC.Generics
 
+-- Effect class
+
 -- | The class of effect types, which must:
 --
 --   1. Be functorial in their last two arguments, and
@@ -58,6 +60,9 @@ hmap :: (Effect Identity sig, Functor n, Functor (sig n), Monad m) => (forall x 
 hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE hmap #-}
 
+
+
+-- Effects
 
 -- | 'Catch' effects can be used alongside 'Control.Effect.Throw.Throw' to provide recoverable exceptions.
 --
@@ -140,6 +145,8 @@ instance Functor f => Effect f (Writer w) where
 
 instance (Effect f l, Effect f r) => Effect f (l Sum.:+: r)
 
+
+-- Generic derivation
 
 -- | Generic implementation of 'Effect'.
 class GEffect f m m' rep rep' where
