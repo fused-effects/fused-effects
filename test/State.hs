@@ -1,4 +1,4 @@
-{-# LANGUAGE DataKinds, FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module State
 ( tests
 , gen0
