@@ -21,7 +21,7 @@ module Control.Algebra
 ) where
 
 import Control.Algebra.Internal
-import {-# SOURCE #-} Control.Carrier.Pure (run)
+import Control.Carrier.Pure (PureC, run)
 import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)
 import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
@@ -55,6 +55,10 @@ class Monad m => Algebra sig m | m -> sig where
 
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
+
+instance Algebra Pure PureC where
+  alg v = case v of {}
+  {-# INLINE alg #-}
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
 --
