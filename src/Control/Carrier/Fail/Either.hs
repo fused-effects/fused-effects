@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for a 'Fail' effect, returning the result as an 'Either' 'String'. Failed computations will return a 'Left' containing the 'String' value passed to 'Fail.fail'.
 --
@@ -43,6 +43,7 @@ instance Algebra sig m => Fail.MonadFail (FailC m) where
   {-# INLINE fail #-}
 
 instance Algebra sig m => Algebra (Fail :+: sig) (FailC m) where
+  type Suspend (FailC m) = Either String
   alg (L op) = FailC (handleCoercible op)
   alg (R op) = FailC (handleCoercible op)
   {-# INLINE alg #-}
