@@ -8,3 +8,4 @@ import Control.Effect.Class
 data Empty (m :: * -> *) k = Empty
 
 instance HFunctor Empty
+instance Effect   Empty

@@ -9,3 +9,4 @@ data State s m k
   | Put s (m k)
 
 instance HFunctor (State s)
+instance Effect   (State s)
