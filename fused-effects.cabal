@@ -93,6 +93,7 @@ library
     Control.Effect.NonDet.Internal
     Control.Effect.Reader.Internal
     Control.Effect.State.Internal
+    Control.Effect.Throw.Internal
   build-depends:
       base           >= 4.9 && < 4.14
     , deepseq       ^>= 1.4.3

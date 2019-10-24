@@ -2,26 +2,16 @@
 module Control.Effect.Internal
 ( -- * Effects
   Error
-, Throw(..)
 , Writer(..)
 ) where
 
 import Control.Effect.Catch.Internal
 import Control.Effect.Class
 import Control.Effect.Sum ((:+:))
-import GHC.Generics (Generic1)
+import Control.Effect.Throw.Internal
 
 -- | @since 0.1.0.0
 type Error e = Throw e :+: Catch e
-
-
--- | @since 1.0.0.0
-data Throw e (m :: * -> *) k
-  = Throw e
-  deriving (Functor, Generic1)
-
-instance HFunctor (Throw e)
-instance Effect   (Throw e)
 
 
 -- | @since 0.1.0.0
