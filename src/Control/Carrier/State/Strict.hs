@@ -76,7 +76,7 @@ instance Monad m => Applicative (StateC s m) where
     (s', f') <- f s
     (s'', a') <- a s'
     let fa = f' a'
-    fa `seq` pure (s'', fa)
+    pure (s'', fa)
   {-# INLINE (<*>) #-}
   m *> k = m >>= \_ -> k
   {-# INLINE (*>) #-}
