@@ -70,6 +70,9 @@ class (Functor f, MonadTrans t) => MonadTransState f t | t -> f where
 instance MonadTransState (Either e) (Except.ExceptT e) where
   threading handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
 
+instance MonadTransState Identity Identity.IdentityT where
+  threading handle = Identity.IdentityT (runIdentity <$> handle (Identity ()) (fmap Identity . Identity.runIdentityT . runIdentity))
+
 instance MonadTransState Maybe Maybe.MaybeT where
   threading handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
 
