@@ -22,7 +22,6 @@ import Control.Effect.Class
 import {-# SOURCE #-} Control.Effect.Error (Error)
 import Control.Effect.Pure
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
-import {-# SOURCE #-} Control.Effect.Throw (Throw(..))
 import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity

@@ -8,6 +8,7 @@ module Control.Algebra.Internal
 , NonDet
 , Reader(..)
 , State(..)
+, Throw(..)
 ) where
 
 import Control.Effect.Class
@@ -84,3 +85,12 @@ data State s m k
 
 instance HFunctor (State s)
 instance Effect   (State s)
+
+
+-- | @since 1.0.0.0
+data Throw e (m :: * -> *) k
+  = Throw e
+  deriving (Functor, Generic1)
+
+instance HFunctor (Throw e)
+instance Effect   (Throw e)
