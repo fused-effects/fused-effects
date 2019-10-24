@@ -72,5 +72,5 @@ instance (Algebra sig m, Effect sig) => Algebra (Cull :+: NonDet :+: sig) (CullC
   alg (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
   alg (R (L (L Empty)))      = empty
   alg (R (L (R (Choose k)))) = k True <|> k False
-  alg (R (R other))          = CullC (alg (R (R (handleCoercible other))))
+  alg (R (R other))          = CullC (handleIdentity (\ (CullC m) -> m) other)
   {-# INLINE alg #-}

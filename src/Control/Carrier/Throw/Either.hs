@@ -31,4 +31,4 @@ newtype ThrowC e m a = ThrowC (ErrorC e m a)
 
 instance (Algebra sig m, Effect sig) => Algebra (Throw e :+: sig) (ThrowC e m) where
   alg (L (Throw e)) = ThrowC (throwError e)
-  alg (R other)     = ThrowC (alg (R (handleCoercible other)))
+  alg (R other)     = ThrowC (handleIdentity (\ (ThrowC m) -> m) other)
