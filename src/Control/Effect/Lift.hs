@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
 
 {- | Provides a mechanism to kick off the evaluation of an effect stack that takes place in a monadic context.
 
@@ -29,7 +29,7 @@ import GHC.Generics
 newtype Lift sig m k = Lift { unLift :: sig (m k) }
   deriving (Functor, Generic1)
 
-instance Functor m => Effect (Lift m)
+instance (Functor f, Functor m) => Effect f (Lift m)
 
 -- | Given a @Lift n@ constraint in a signature carried by @m@, 'sendM'
 -- promotes arbitrary actions of type @n a@ to @m a@. It is spiritually

@@ -40,7 +40,7 @@ newtype Choose m k
   = Choose (Bool -> m k)
   deriving (Functor, Generic1)
 
-instance Effect Choose
+instance Functor f => Effect f Choose
 
 -- | Nondeterministically choose between two computations.
 --

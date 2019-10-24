@@ -1,3 +1,4 @@
+{-# LANGUAGE FlexibleInstances, MultiParamTypeClasses #-}
 module Control.Effect.State
 ( State(..)
 ) where
@@ -8,4 +9,4 @@ data State s m k
   = Get (s -> m k)
   | Put s (m k)
 
-instance Effect (State s)
+instance Functor f => Effect f (State s)

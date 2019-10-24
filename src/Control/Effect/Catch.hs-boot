@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE ExistentialQuantification, FlexibleInstances, MultiParamTypeClasses #-}
 module Control.Effect.Catch
 ( Catch(..)
 ) where
@@ -9,4 +9,4 @@ import Control.Effect.Class
 data Catch e m k
   = forall b . Catch (m b) (e -> m b) (b -> m k)
 
-instance Effect (Catch e)
+instance Functor f => Effect f (Catch e)

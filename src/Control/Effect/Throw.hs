@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses #-}
 
 {- | An effect for polymorphic failure.
 
@@ -27,7 +27,7 @@ data Throw e (m :: * -> *) k
   = Throw e
   deriving (Functor, Generic1)
 
-instance Effect (Throw e)
+instance Functor f => Effect f (Throw e)
 
 
 -- | Throw an error, escaping the current computation up to the nearest 'Control.Effect.Catch.catchError' (if any).

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
 
 {- | An effect that provides a record of 'String' values ("traces") aggregate during the execution of a given computation.
 
@@ -31,7 +31,7 @@ data Trace m k = Trace
   }
   deriving (Functor, Generic1)
 
-instance Effect Trace
+instance Functor f => Effect f Trace
 
 -- | Append a message to the trace log.
 --

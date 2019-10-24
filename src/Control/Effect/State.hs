@@ -39,7 +39,7 @@ data State s m k
   | Put s (m k)
   deriving (Functor, Generic1)
 
-instance Effect (State s)
+instance Functor f => Effect f (State s)
 
 
 -- | Get the current state value.

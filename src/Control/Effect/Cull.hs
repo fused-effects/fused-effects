@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving #-}
 {- | Provides an effect to cull choices in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
 
 Computations run inside a call to 'cull' will return at most one result.
@@ -29,7 +29,7 @@ data Cull m k
 
 deriving instance Functor m => Functor (Cull m)
 
-instance Effect Cull where
+instance Functor f => Effect f Cull where
   handle state handler (Cull m k) = Cull (handler (m <$ state)) (handler . fmap k)
   {-# INLINE handle #-}
 

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses #-}
 
 {- | An effect modelling nondeterminism without choice (success or failure).
 
@@ -30,7 +30,7 @@ import GHC.Generics (Generic1)
 data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
-instance Effect Empty
+instance Functor f => Effect f Empty
 
 -- | Abort the computation.
 --

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, StandaloneDeriving #-}
 
 {- | An effect modelling catchable failure when used with 'Control.Effect.Throw.Throw'.
 
@@ -28,7 +28,7 @@ data Catch e m k
 
 deriving instance Functor m => Functor (Catch e m)
 
-instance Effect (Catch e) where
+instance Functor f => Effect f (Catch e) where
   handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
 

@@ -23,7 +23,7 @@ data (l :+: r) (m :: * -> *) k
 
 infixr 4 :+:
 
-instance (Effect l, Effect r) => Effect (l :+: r)
+instance (Effect f l, Effect f r) => Effect f (l :+: r)
 
 
 -- | The class of types present in a signature.

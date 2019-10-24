@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses #-}
 
 {- | This effect provides source to an infinite source of 'Int' values, suitable for generating "fresh" values to uniquely identify data without needing to invoke random numbers or impure IO.
 
@@ -25,7 +25,7 @@ data Fresh m k
   = Fresh (Int -> m k)
   deriving (Functor, Generic1)
 
-instance Effect Fresh
+instance Functor f => Effect f Fresh
 
 
 -- | Produce a fresh (i.e. unique) 'Int'.

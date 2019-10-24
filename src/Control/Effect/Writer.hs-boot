@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE ExistentialQuantification, FlexibleInstances, MultiParamTypeClasses #-}
 module Control.Effect.Writer
 ( Writer(..)
 ) where
@@ -10,4 +10,4 @@ data Writer w m k
   | forall a . Listen (m a) (w -> a -> m k)
   | forall a . Censor (w -> w) (m a) (a -> m k)
 
-instance Effect (Writer w)
+instance Functor f => Effect f (Writer w)
