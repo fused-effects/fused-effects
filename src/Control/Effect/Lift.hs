@@ -21,7 +21,7 @@ module Control.Effect.Lift
 ) where
 
 import Control.Algebra
-import Control.Algebra.Internal (Lift(..))
+import Control.Effect.Internal (Lift(..))
 
 -- | Given a @Lift n@ constraint in a signature carried by @m@, 'sendM'
 -- promotes arbitrary actions of type @n a@ to @m a@. It is spiritually

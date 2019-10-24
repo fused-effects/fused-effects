@@ -18,6 +18,6 @@ module Control.Effect.Error
 , module Control.Effect.Catch
 ) where
 
-import Control.Algebra.Internal (Error)
 import Control.Effect.Catch
+import Control.Effect.Internal (Error)
 import Control.Effect.Throw

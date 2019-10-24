@@ -18,7 +18,7 @@ module Control.Effect.Throw
 ) where
 
 import Control.Algebra
-import Control.Algebra.Internal (Throw(..))
+import Control.Effect.Internal (Throw(..))
 
 -- | Throw an error, escaping the current computation up to the nearest 'Control.Effect.Catch.catchError' (if any).
 --

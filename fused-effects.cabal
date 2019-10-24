@@ -85,7 +85,7 @@ library
     Control.Effect.Trace
     Control.Effect.Writer
   other-modules:
-    Control.Algebra.Internal
+    Control.Effect.Internal
   build-depends:
       base           >= 4.9 && < 4.14
     , deepseq       ^>= 1.4.3

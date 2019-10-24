@@ -26,7 +26,7 @@ module Control.Effect.Reader
 ) where
 
 import Control.Algebra
-import Control.Algebra.Internal (Reader(..))
+import Control.Effect.Internal (Reader(..))
 
 -- | Retrieve the environment value.
 --

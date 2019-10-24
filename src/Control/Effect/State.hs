@@ -29,7 +29,7 @@ module Control.Effect.State
 ) where
 
 import Control.Algebra
-import Control.Algebra.Internal (State(..))
+import Control.Effect.Internal (State(..))
 
 -- | Get the current state value.
 --

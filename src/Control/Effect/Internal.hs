@@ -1,5 +1,5 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, ExistentialQuantification, KindSignatures, StandaloneDeriving, TypeOperators #-}
-module Control.Algebra.Internal
+module Control.Effect.Internal
 ( -- * Effects
   Catch(..)
 , Choose(..)

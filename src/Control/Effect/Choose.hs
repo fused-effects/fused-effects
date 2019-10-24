@@ -29,8 +29,8 @@ module Control.Effect.Choose
 ) where
 
 import Control.Algebra
-import Control.Algebra.Internal (Choose(..))
 import Control.Effect.Empty
+import Control.Effect.Internal (Choose(..))
 import Data.Bool (bool)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Semigroup as S

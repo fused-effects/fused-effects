@@ -28,10 +28,10 @@ module Control.Effect.NonDet
 ) where
 
 import Control.Algebra
-import Control.Algebra.Internal (NonDet)
 import Control.Applicative (Alternative(..), optional)
 import Control.Effect.Choose (Choose(..))
 import Control.Effect.Empty (Empty(..))
+import Control.Effect.Internal (NonDet)
 import Control.Monad (MonadPlus(..), guard)
 import Data.Coerce
 import Data.Monoid (Alt(..))

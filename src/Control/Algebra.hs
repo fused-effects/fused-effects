@@ -16,9 +16,9 @@ module Control.Algebra
 , module Control.Effect.Class
 ) where
 
-import Control.Algebra.Internal
 import Control.Carrier.Pure (PureC, run)
 import Control.Effect.Class
+import Control.Effect.Internal
 import Control.Effect.Pure
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import Control.Monad ((<=<), join)

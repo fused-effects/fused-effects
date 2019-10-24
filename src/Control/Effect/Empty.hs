@@ -22,7 +22,7 @@ module Control.Effect.Empty
 ) where
 
 import Control.Algebra
-import Control.Algebra.Internal (Empty(..))
+import Control.Effect.Internal (Empty(..))
 
 -- | Abort the computation.
 --
