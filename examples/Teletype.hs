@@ -46,7 +46,7 @@ runTeletypeIO = runTeletypeIOC
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving newtype (Applicative, Functor, Monad, MonadIO)
 
-instance (MonadIO m, Algebra sig m, Effect sig, Constrain sig Identity) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
+instance (MonadIO m, Algebra sig m, Effect sig) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
   alg (L (Read    k)) = liftIO getLine      >>= k
   alg (L (Write s k)) = liftIO (putStrLn s) >>  k
   alg (R other)       = TeletypeIOC (handleCoercible other)
@@ -58,7 +58,7 @@ runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
   deriving newtype (Applicative, Functor, Monad)
 
-instance (Algebra sig m, Effect sig, Constrain sig Identity, Constrain sig ((,) [String])) => Algebra (Teletype :+: sig) (TeletypeRetC m) where
+instance (Algebra sig m, Effect sig, Constrain sig ((,) [String])) => Algebra (Teletype :+: sig) (TeletypeRetC m) where
   alg (L (Read    k)) = do
     i <- TeletypeRetC get
     case i of

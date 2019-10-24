@@ -79,7 +79,7 @@ send = alg . inj
 {-# INLINE send #-}
 
 
-handleIdentity :: (Monad m, Effect eff, Constrain eff Identity, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
+handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
 handleIdentity f = fmap runIdentity . send . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE handleIdentity #-}
 
@@ -88,7 +88,7 @@ handleIdentity f = fmap runIdentity . send . handle (Identity ()) (fmap Identity
 --   This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
 --
 -- @since 1.0.0.0
-handleCoercible :: (Monad m, Effect eff, Constrain eff Identity, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
+handleCoercible :: (Monad m, Effect eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
 handleCoercible = handleIdentity coerce
 {-# INLINE handleCoercible #-}
 
@@ -133,10 +133,10 @@ instance (Algebra sig m, Effect sig, Constrain sig (Either e)) => Algebra (Error
   alg (L (R (Catch m h k))) = Except.catchE m h >>= k
   alg (R other)             = Except.ExceptT $ alg (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
 
-instance (Algebra sig m, Effect sig, Constrain sig Identity) => Algebra sig (Identity.IdentityT m) where
+instance (Algebra sig m, Effect sig) => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . handleCoercible
 
-instance (Algebra sig m, Effect sig, Constrain sig Identity) => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
+instance (Algebra sig m, Effect sig) => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg (L (Ask       k)) = Reader.ask >>= k
   alg (L (Local f m k)) = Reader.local f m >>= k
   alg (R other)         = Reader.ReaderT $ \ r -> handleIdentity (flip Reader.runReaderT r) other

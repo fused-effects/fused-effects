@@ -81,5 +81,5 @@ instance Applicative (Cod m) where
 instance Monad (Cod m) where
   Cod a >>= f = Cod (\ k -> a (runCod k . f))
 
-instance (Algebra sig m, Effect sig, Constrain sig Identity) => Algebra sig (Cod m) where
+instance (Algebra sig m, Effect sig) => Algebra sig (Cod m) where
   alg op = Cod (\ k -> alg (handle (Identity ()) (runCod (pure . Identity) . runIdentity) op) >>= k . runIdentity)
