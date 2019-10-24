@@ -13,6 +13,7 @@ module Control.Algebra.Internal
 , GEffect(..)
 ) where
 
+import qualified Control.Effect.Sum as Sum
 import Data.Coerce
 import Data.Functor.Identity
 import GHC.Generics
@@ -62,6 +63,8 @@ data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
 instance Functor f => Effect f Empty
+
+instance (Effect f l, Effect f r) => Effect f (l Sum.:+: r)
 
 
 -- | Generic implementation of 'Effect'.
