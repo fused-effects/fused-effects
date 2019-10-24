@@ -183,4 +183,4 @@ instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :
   alg (L (Tell w k))     = Writer.Strict.tell w *> k
   alg (L (Listen m k))   = Writer.Strict.listen m >>= uncurry (flip k)
   alg (L (Censor f m k)) = Writer.Strict.censor f m >>= k
-  alg (R other)          = Writer.Strict.WriterT $ swap <$> alg (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Strict.runWriterT x) other)
+  alg (R other)          = Writer.Strict.WriterT $ swap <$> alg (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s $!) <$> Writer.Strict.runWriterT x) other)
