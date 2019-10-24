@@ -39,6 +39,7 @@ import Data.Functor.Identity
 import Control.Monad.Trans.Class
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Identity as Identity
+import qualified Control.Monad.Trans.Maybe as Maybe
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Control.Monad.Trans.RWS.Lazy as RWS.Lazy
 import qualified Control.Monad.Trans.RWS.Strict as RWS.Strict
@@ -68,6 +69,9 @@ class (Functor f, MonadTrans t) => MonadTransState f t | t -> f where
 
 instance MonadTransState (Either e) (Except.ExceptT e) where
   threading handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
+
+instance MonadTransState Maybe Maybe.MaybeT where
+  threading handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
