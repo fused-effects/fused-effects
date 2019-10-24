@@ -1,8 +1,7 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, ExistentialQuantification, KindSignatures, StandaloneDeriving, TypeOperators #-}
 module Control.Effect.Internal
 ( -- * Effects
-  Choose(..)
-, Empty(..)
+  Empty(..)
 , Error
 , Lift(..)
 , NonDet
@@ -13,18 +12,10 @@ module Control.Effect.Internal
 ) where
 
 import Control.Effect.Catch.Internal
+import Control.Effect.Choose.Internal
 import Control.Effect.Class
 import Control.Effect.Sum ((:+:))
 import GHC.Generics (Generic1)
-
--- | @since 1.0.0.0
-newtype Choose m k
-  = Choose (Bool -> m k)
-  deriving (Functor, Generic1)
-
-instance HFunctor Choose
-instance Effect   Choose
-
 
 -- | @since 1.0.0.0
 data Empty (m :: * -> *) k = Empty
