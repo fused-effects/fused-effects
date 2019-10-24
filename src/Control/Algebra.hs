@@ -52,7 +52,7 @@ import Data.Tuple (swap)
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
 --
 -- @since 1.0.0.0
-class (Effect (Suspend m) sig, Monad m) => Algebra sig m | m -> sig where
+class Monad m => Algebra sig m | m -> sig where
   type Suspend m :: * -> *
   type Suspend m = Identity
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).

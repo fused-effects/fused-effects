@@ -90,6 +90,6 @@ instance MonadUnliftIO m => MonadUnliftIO (InterpretC s sig m) where
   withRunInIO inner = InterpretC $ withRunInIO $ \run -> inner (\ (InterpretC m) -> run m)
   {-# INLINE withRunInIO #-}
 
-instance (Effect Identity eff, Effect Identity sig, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
+instance (Effect Identity sig, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
   alg (L eff)   = runHandler (getConst (reflect @s)) eff
   alg (R other) = InterpretC (handleCoercible other)
