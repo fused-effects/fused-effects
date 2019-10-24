@@ -11,6 +11,7 @@ module Control.Algebra.Internal
 , Empty(..)
 , NonDet
 , Reader(..)
+, Writer(..)
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
@@ -81,6 +82,20 @@ deriving instance Functor m => Functor (Reader r m)
 instance Functor f => Effect f (Reader r) where
   handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
   handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
+
+-- | @since 0.1.0.0
+data Writer w m k
+  = Tell w (m k)
+  | forall a . Listen (m a) (w -> a -> m k)
+  | forall a . Censor (w -> w) (m a) (a -> m k)
+
+deriving instance Functor m => Functor (Writer w m)
+
+instance Functor f => Effect f (Writer w) where
+  handle state handler (Tell w     k) = Tell w                          (handler (k <$ state))
+  handle state handler (Listen   m k) = Listen   (handler (m <$ state)) (fmap handler . fmap . k)
+  handle state handler (Censor f m k) = Censor f (handler (m <$ state)) (handler . fmap k)
+  {-# INLINE handle #-}
 
 
 instance (Effect f l, Effect f r) => Effect f (l Sum.:+: r)

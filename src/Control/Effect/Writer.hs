@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, StandaloneDeriving #-}
-
 {- | An effect allowing writes to an accumulated quantity alongside a computed value. A 'Writer' @w@ effect keeps track of a monoidal datum of type @w@ and strictly appends to that monoidal value with the 'tell' effect. Writes to that value can be detected and intercepted with the 'listen' and 'censor' effects.
 
 Predefined carriers:
@@ -28,20 +26,7 @@ module Control.Effect.Writer
 ) where
 
 import Control.Algebra
-
--- | @since 0.1.0.0
-data Writer w m k
-  = Tell w (m k)
-  | forall a . Listen (m a) (w -> a -> m k)
-  | forall a . Censor (w -> w) (m a) (a -> m k)
-
-deriving instance Functor m => Functor (Writer w m)
-
-instance Functor f => Effect f (Writer w) where
-  handle state handler (Tell w     k) = Tell w                          (handler (k <$ state))
-  handle state handler (Listen   m k) = Listen   (handler (m <$ state)) (fmap handler . fmap . k)
-  handle state handler (Censor f m k) = Censor f (handler (m <$ state)) (handler . fmap k)
-  {-# INLINE handle #-}
+import Control.Algebra.Internal
 
 -- | Write a value to the log.
 --

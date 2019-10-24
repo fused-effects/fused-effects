@@ -29,7 +29,6 @@ import Control.Effect.Pure
 import {-# SOURCE #-} Control.Effect.State (State(..))
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import {-# SOURCE #-} Control.Effect.Throw (Throw(..))
-import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
