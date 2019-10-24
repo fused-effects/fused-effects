@@ -60,7 +60,7 @@ instance Effect   Choose
 --
 -- @since 1.0.0.0
 (<|>) :: Has Choose sig m => m a -> m a -> m a
-(<|>) a b = send (Choose (bool b a))
+a <|> b = send (Choose (bool b a))
 
 infixl 3 <|>
 
