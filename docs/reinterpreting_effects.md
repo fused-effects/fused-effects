@@ -207,16 +207,18 @@ main = runHttp catFactsRunner >>= handlePrint
 
 Produces:
 
-> The Bengal is the result of crossbreeding between domestic cats and Asian leopard cats, and its name is derived from the scientific name for the Asian leopard cat (Felis bengalensis).
-> A happy cat holds her tail high and steady.
-> Kittens remain with their mother till the age of 9 weeks.
-> Recent studies have shown that cats can see blue and green. There is disagreement as to whether they can see red.
-> A steady diet of dog food may cause blindness in your cat - it lacks taurine.
-> Cat owners are 25% likely to pick George Harrison as their favorite Beatle.
-> The catnip plant contains an oil called hepetalactone which does for cats what marijuana does to some people. Not all cats react to it those that do appear to enter a trancelike state. A positive reaction takes the form of the cat sniffing the catnip, then licking, biting, chewing it, rub & rolling on it repeatedly, purring, meowing & even leaping in the air.
-> The color of the points in Siamese cats is heat related. Cool areas are darker.
-> Cats have free-floating clavicle bones that attach their shoulders to their forelimbs, which allows them to squeeze through very small spaces.
-> Wikipedia has a recording of a cat meowing, because why not?
+```
+The Bengal is the result of crossbreeding between domestic cats and Asian leopard cats, and its name is derived from the scientific name for the Asian leopard cat (Felis bengalensis).
+A happy cat holds her tail high and steady.
+Kittens remain with their mother till the age of 9 weeks.
+Recent studies have shown that cats can see blue and green. There is disagreement as to whether they can see red.
+A steady diet of dog food may cause blindness in your cat - it lacks taurine.
+Cat owners are 25% likely to pick George Harrison as their favorite Beatle.
+The catnip plant contains an oil called hepetalactone which does for cats what marijuana does to some people. Not all cats react to it those that do appear to enter a trancelike state. A positive reaction takes the form of the cat sniffing the catnip, then licking, biting, chewing it, rub & rolling on it repeatedly, purring, meowing & even leaping in the air.
+The color of the points in Siamese cats is heat related. Cool areas are darker.
+Cats have free-floating clavicle bones that attach their shoulders to their forelimbs, which allows them to squeeze through very small spaces.
+Wikipedia has a recording of a cat meowing, because why not?
+```
 
 ### Testing with alternative effect handlers
 
