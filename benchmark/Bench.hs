@@ -82,4 +82,4 @@ instance Monad (Cod m) where
   Cod a >>= f = Cod (\ k -> a (runCod k . f))
 
 instance (Algebra sig m, Effect sig) => Algebra sig (Cod m) where
-  eff op = Cod (\ k -> eff (handle (Identity ()) (runCod (pure . Identity) . runIdentity) op) >>= k . runIdentity)
+  alg op = Cod (\ k -> alg (handle (Identity ()) (runCod (pure . Identity) . runIdentity) op) >>= k . runIdentity)

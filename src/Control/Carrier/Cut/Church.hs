@@ -87,9 +87,9 @@ instance MonadTrans CutC where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
-  eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
-  eff (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
-  eff (R (L (L Empty)))      = empty
-  eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CutC $ \ cons nil fail -> eff (handle (pure ()) (runCut (fmap . (<|>)) (pure empty) (pure cutfail)) other) >>= runCut cons nil fail
-  {-# INLINE eff #-}
+  alg (L Cutfail)    = CutC $ \ _    _   fail -> fail
+  alg (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
+  alg (R (L (L Empty)))      = empty
+  alg (R (L (R (Choose k)))) = k True <|> k False
+  alg (R (R other))          = CutC $ \ cons nil fail -> alg (handle (pure ()) (runCut (fmap . (<|>)) (pure empty) (pure cutfail)) other) >>= runCut cons nil fail
+  {-# INLINE alg #-}

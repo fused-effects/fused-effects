@@ -50,7 +50,7 @@ import Data.Tuple (swap)
 -- @since 1.0.0.0
 class (HFunctor sig, Monad m) => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
-  eff :: sig m a -> m a
+  alg :: sig m a -> m a
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
 --
@@ -63,56 +63,56 @@ type Has eff sig m = (Members eff sig, Algebra sig m)
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
 send :: (Member eff sig, Algebra sig m) => eff m a -> m a
-send = eff . inj
+send = alg . inj
 {-# INLINE send #-}
 
 
 -- base
 
 instance Algebra (Lift IO) IO where
-  eff = join . unLift
+  alg = join . unLift
 
 instance Algebra Pure Identity where
-  eff v = case v of {}
+  alg v = case v of {}
 
 instance Algebra Choose NonEmpty where
-  eff (Choose m) = m True S.<> m False
+  alg (Choose m) = m True S.<> m False
 
 instance Algebra Empty Maybe where
-  eff Empty = Nothing
+  alg Empty = Nothing
 
 instance Algebra (Error e) (Either e) where
-  eff (L (Throw e))     = Left e
-  eff (R (Catch m h k)) = either (k <=< h) k m
+  alg (L (Throw e))     = Left e
+  alg (R (Catch m h k)) = either (k <=< h) k m
 
 instance Algebra (Reader r) ((->) r) where
-  eff (Ask       k) r = k r r
-  eff (Local f m k) r = k (m (f r)) r
+  alg (Ask       k) r = k r r
+  alg (Local f m k) r = k (m (f r)) r
 
 instance Algebra NonDet [] where
-  eff (L Empty)      = []
-  eff (R (Choose k)) = k True ++ k False
+  alg (L Empty)      = []
+  alg (R (Choose k)) = k True ++ k False
 
 instance Monoid w => Algebra (Writer w) ((,) w) where
-  eff (Tell w (w', k))    = (mappend w w', k)
-  eff (Listen (w, a) k)   = let (w', a') = k w a in (mappend w w', a')
-  eff (Censor f (w, a) k) = let (w', a') = k a in (mappend (f w) w', a')
+  alg (Tell w (w', k))    = (mappend w w', k)
+  alg (Listen (w, a) k)   = let (w', a') = k w a in (mappend w w', a')
+  alg (Censor f (w, a) k) = let (w', a') = k a in (mappend (f w) w', a')
 
 
 -- transformers
 
 instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
-  eff (L (L (Throw e)))     = Except.throwE e
-  eff (L (R (Catch m h k))) = Except.catchE m h >>= k
-  eff (R other)             = Except.ExceptT $ eff (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
+  alg (L (L (Throw e)))     = Except.throwE e
+  alg (L (R (Catch m h k))) = Except.catchE m h >>= k
+  alg (R other)             = Except.ExceptT $ alg (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
 
 instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
-  eff = Identity.IdentityT . eff . handleCoercible
+  alg = Identity.IdentityT . alg . handleCoercible
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
-  eff (L (Ask       k)) = Reader.ask >>= k
-  eff (L (Local f m k)) = Reader.local f m >>= k
-  eff (R other)         = Reader.ReaderT $ \ r -> eff (hmap (flip Reader.runReaderT r) other)
+  alg (L (Ask       k)) = Reader.ask >>= k
+  alg (L (Local f m k)) = Reader.local f m >>= k
+  alg (R other)         = Reader.ReaderT $ \ r -> alg (hmap (flip Reader.runReaderT r) other)
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
@@ -122,43 +122,43 @@ toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
 instance (Algebra sig m, Effect sig, Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
-  eff (L (Ask       k))      = RWS.Lazy.ask >>= k
-  eff (L (Local f m k))      = RWS.Lazy.local f m >>= k
-  eff (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
-  eff (R (L (Listen m k)))   = RWS.Lazy.listen m >>= uncurry (flip k)
-  eff (R (L (Censor f m k))) = RWS.Lazy.censor f m >>= k
-  eff (R (R (L (Get   k))))  = RWS.Lazy.get >>= k
-  eff (R (R (L (Put s k))))  = RWS.Lazy.put s *> k
-  eff (R (R (R other)))      = RWS.Lazy.RWST $ \ r s -> unRWSTF <$> eff (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s) other)
+  alg (L (Ask       k))      = RWS.Lazy.ask >>= k
+  alg (L (Local f m k))      = RWS.Lazy.local f m >>= k
+  alg (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
+  alg (R (L (Listen m k)))   = RWS.Lazy.listen m >>= uncurry (flip k)
+  alg (R (L (Censor f m k))) = RWS.Lazy.censor f m >>= k
+  alg (R (R (L (Get   k))))  = RWS.Lazy.get >>= k
+  alg (R (R (L (Put s k))))  = RWS.Lazy.put s *> k
+  alg (R (R (R other)))      = RWS.Lazy.RWST $ \ r s -> unRWSTF <$> alg (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s) other)
 
 instance (Algebra sig m, Effect sig, Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
-  eff (L (Ask       k))      = RWS.Strict.ask >>= k
-  eff (L (Local f m k))      = RWS.Strict.local f m >>= k
-  eff (R (L (Tell w k)))     = RWS.Strict.tell w *> k
-  eff (R (L (Listen m k)))   = RWS.Strict.listen m >>= uncurry (flip k)
-  eff (R (L (Censor f m k))) = RWS.Strict.censor f m >>= k
-  eff (R (R (L (Get   k))))  = RWS.Strict.get >>= k
-  eff (R (R (L (Put s k))))  = RWS.Strict.put s *> k
-  eff (R (R (R other)))      = RWS.Strict.RWST $ \ r s -> unRWSTF <$> eff (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s) other)
+  alg (L (Ask       k))      = RWS.Strict.ask >>= k
+  alg (L (Local f m k))      = RWS.Strict.local f m >>= k
+  alg (R (L (Tell w k)))     = RWS.Strict.tell w *> k
+  alg (R (L (Listen m k)))   = RWS.Strict.listen m >>= uncurry (flip k)
+  alg (R (L (Censor f m k))) = RWS.Strict.censor f m >>= k
+  alg (R (R (L (Get   k))))  = RWS.Strict.get >>= k
+  alg (R (R (L (Put s k))))  = RWS.Strict.put s *> k
+  alg (R (R (R other)))      = RWS.Strict.RWST $ \ r s -> unRWSTF <$> alg (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s) other)
 
 instance (Algebra sig m, Effect sig) => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
-  eff (L (Get   k)) = State.Lazy.get >>= k
-  eff (L (Put s k)) = State.Lazy.put s *> k
-  eff (R other)     = State.Lazy.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s) other)
+  alg (L (Get   k)) = State.Lazy.get >>= k
+  alg (L (Put s k)) = State.Lazy.put s *> k
+  alg (R other)     = State.Lazy.StateT $ \ s -> swap <$> alg (handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s) other)
 
 instance (Algebra sig m, Effect sig) => Algebra (State s :+: sig) (State.Strict.StateT s m) where
-  eff (L (Get   k)) = State.Strict.get >>= k
-  eff (L (Put s k)) = State.Strict.put s *> k
-  eff (R other)     = State.Strict.StateT $ \ s -> swap <$> eff (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
+  alg (L (Get   k)) = State.Strict.get >>= k
+  alg (L (Put s k)) = State.Strict.put s *> k
+  alg (R other)     = State.Strict.StateT $ \ s -> swap <$> alg (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
 
 instance (Algebra sig m, Effect sig, Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
-  eff (L (Tell w k))     = Writer.Lazy.tell w *> k
-  eff (L (Listen m k))   = Writer.Lazy.listen m >>= uncurry (flip k)
-  eff (L (Censor f m k)) = Writer.Lazy.censor f m >>= k
-  eff (R other)          = Writer.Lazy.WriterT $ swap <$> eff (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Lazy.runWriterT x) other)
+  alg (L (Tell w k))     = Writer.Lazy.tell w *> k
+  alg (L (Listen m k))   = Writer.Lazy.listen m >>= uncurry (flip k)
+  alg (L (Censor f m k)) = Writer.Lazy.censor f m >>= k
+  alg (R other)          = Writer.Lazy.WriterT $ swap <$> alg (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Lazy.runWriterT x) other)
 
 instance (Algebra sig m, Effect sig, Monoid w) => Algebra (Writer w :+: sig) (Writer.Strict.WriterT w m) where
-  eff (L (Tell w k))     = Writer.Strict.tell w *> k
-  eff (L (Listen m k))   = Writer.Strict.listen m >>= uncurry (flip k)
-  eff (L (Censor f m k)) = Writer.Strict.censor f m >>= k
-  eff (R other)          = Writer.Strict.WriterT $ swap <$> eff (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Strict.runWriterT x) other)
+  alg (L (Tell w k))     = Writer.Strict.tell w *> k
+  alg (L (Listen m k))   = Writer.Strict.listen m >>= uncurry (flip k)
+  alg (L (Censor f m k)) = Writer.Strict.censor f m >>= k
+  alg (R other)          = Writer.Strict.WriterT $ swap <$> alg (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Strict.runWriterT x) other)
