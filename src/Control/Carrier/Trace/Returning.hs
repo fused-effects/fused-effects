@@ -42,4 +42,4 @@ newtype TraceC m a = TraceC (WriterC (Endo [String]) m a)
 
 instance (Algebra sig m, Effect sig) => Algebra (Trace :+: sig) (TraceC m) where
   alg (L (Trace m k)) = TraceC (tell (Endo (m :))) *> k
-  alg (R other)       = TraceC (handleIdentity (\ (TraceC m) -> m) other)
+  alg (R other)       = TraceC (handleCoercible other)

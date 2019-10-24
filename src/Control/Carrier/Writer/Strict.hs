@@ -66,5 +66,5 @@ instance (Monoid w, Algebra sig m, Effect sig) => Algebra (Writer w :+: sig) (Wr
     let w'' = mappend w (f w')
     w'' `seq` pure (w'', a)))
     >>= k
-  alg (R other)          = WriterC (handleIdentity (\ (WriterC m) -> m) other)
+  alg (R other)          = WriterC (handleCoercible other)
   {-# INLINE alg #-}

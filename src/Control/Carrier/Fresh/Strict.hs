@@ -54,5 +54,5 @@ newtype FreshC m a = FreshC (StateC Int m a)
 
 instance (Algebra sig m, Effect sig) => Algebra (Fresh :+: sig) (FreshC m) where
   alg (L (Fresh k)) = FreshC (get <* modify (+ (1 :: Int))) >>= k
-  alg (R other)     = FreshC (handleIdentity (\ (FreshC m) -> m) other)
+  alg (R other)     = FreshC (handleCoercible other)
   {-# INLINE alg #-}

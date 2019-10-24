@@ -24,6 +24,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
 import Data.Functor.Identity (Identity(..))
 import Unsafe.Coerce (unsafeCoerce)
@@ -59,7 +60,7 @@ runInterpret
   => (forall x . eff m x -> m x)
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
-runInterpret f m = reify (Handler (InterpretC . fmap runIdentity . f . handle (Identity ()) (fmap Identity . (\ (InterpretC m) -> m) . runIdentity))) (go m) where
+runInterpret f m = reify (Handler (InterpretC . fmap runIdentity . f . handle (Identity ()) (fmap Identity . coerce))) (go m) where
   go :: InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
 
@@ -91,4 +92,4 @@ instance MonadUnliftIO m => MonadUnliftIO (InterpretC s sig m) where
 
 instance (HFunctor eff, Effect sig, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
   alg (L eff)   = runHandler (getConst (reflect @s)) eff
-  alg (R other) = InterpretC (handleIdentity (\ (InterpretC m) -> m) other)
+  alg (R other) = InterpretC (handleCoercible other)

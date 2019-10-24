@@ -108,7 +108,7 @@ instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) 
     case input of
       c:cs | p c -> ParseC (put cs) *> k c
       _          -> empty
-  alg (R other)         = ParseC (handleIdentity runParseC other)
+  alg (R other)         = ParseC (handleCoercible other)
   {-# INLINE alg #-}
 
 

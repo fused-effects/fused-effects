@@ -52,7 +52,7 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (ErrorC e m) where
-  alg (L (L op)) = ErrorC (handleIdentity (\ (ErrorC m) -> m) op)
-  alg (L (R op)) = ErrorC (handleIdentity (\ (ErrorC m) -> m) op)
-  alg (R op)     = ErrorC (handleIdentity (\ (ErrorC m) -> m) op)
+  alg (L (L op)) = ErrorC (handleCoercible op)
+  alg (L (R op)) = ErrorC (handleCoercible op)
+  alg (R op)     = ErrorC (handleCoercible op)
   {-# INLINE alg #-}

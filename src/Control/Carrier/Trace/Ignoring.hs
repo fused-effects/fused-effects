@@ -50,5 +50,5 @@ instance MonadUnliftIO m => MonadUnliftIO (TraceC m) where
 
 instance (Algebra sig m, Effect sig) => Algebra (Trace :+: sig) (TraceC m) where
   alg (L trace) = traceCont trace
-  alg (R other) = TraceC (handleIdentity runTrace other)
+  alg (R other) = TraceC (handleCoercible other)
   {-# INLINE alg #-}

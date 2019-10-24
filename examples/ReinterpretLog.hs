@@ -179,7 +179,7 @@ instance
         unReinterpretLogC k
 
     R other ->
-      ReinterpretLogC (handleIdentity unReinterpretLogC other)
+      ReinterpretLogC (handleCoercible other)
 
 -- The 'ReinterpretLogC' runner.
 reinterpretLog ::
@@ -216,7 +216,7 @@ instance
         unCollectLogMessagesC k
 
     R other ->
-      CollectLogMessagesC (handleIdentity unCollectLogMessagesC other)
+      CollectLogMessagesC (handleCoercible other)
 
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages ::
