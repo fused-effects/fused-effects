@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses #-}
-
 {- | An effect for polymorphic failure.
 
 Predefined carriers:
@@ -20,15 +18,7 @@ module Control.Effect.Throw
 ) where
 
 import Control.Algebra
-import GHC.Generics (Generic1)
-
--- | @since 1.0.0.0
-data Throw e (m :: * -> *) k
-  = Throw e
-  deriving (Functor, Generic1)
-
-instance Functor f => Effect f (Throw e)
-
+import Control.Effect.Throw.Internal (Throw(..))
 
 -- | Throw an error, escaping the current computation up to the nearest 'Control.Effect.Catch.catchError' (if any).
 --
