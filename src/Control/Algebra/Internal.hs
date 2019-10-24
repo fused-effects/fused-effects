@@ -4,6 +4,7 @@ module Control.Algebra.Internal
   Catch(..)
 , Choose(..)
 , Empty(..)
+, Lift(..)
 ) where
 
 import Control.Effect.Class
@@ -39,3 +40,11 @@ data Empty (m :: * -> *) k = Empty
 
 instance HFunctor Empty
 instance Effect   Empty
+
+
+-- | @since 0.1.0.0
+newtype Lift sig m k = Lift { unLift :: sig (m k) }
+  deriving (Functor, Generic1)
+
+instance Functor m => HFunctor (Lift m)
+instance Functor m => Effect   (Lift m)
