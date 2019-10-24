@@ -85,6 +85,7 @@ library
     Control.Effect.Trace
     Control.Effect.Writer
   other-modules:
+    Control.Effect.Catch.Internal
     Control.Effect.Internal
   build-depends:
       base           >= 4.9 && < 4.14

@@ -17,6 +17,7 @@ module Control.Algebra
 ) where
 
 import Control.Carrier.Pure (PureC, run)
+import Control.Effect.Catch.Internal
 import Control.Effect.Class
 import Control.Effect.Internal
 import Control.Effect.Pure

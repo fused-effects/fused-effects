@@ -17,7 +17,7 @@ module Control.Effect.Catch
 ) where
 
 import Control.Algebra
-import Control.Effect.Internal (Catch(..))
+import Control.Effect.Catch.Internal (Catch(..))
 
 -- | Run a computation which can throw errors with a handler to run on error.
 --
