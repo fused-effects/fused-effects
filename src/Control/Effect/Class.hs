@@ -24,16 +24,18 @@ import GHC.Generics
 -- @since 1.0.0.0
 class Effect sig where
   -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
-  handle :: (Functor f, Monad m)
-         => f ()
-         -> (forall x . f (m x) -> n (f x))
-         -> sig m a
-         -> sig n (f a)
-  default handle :: (Functor f, Monad m, Generic1 (sig m), Generic1 (sig n), GEffect m n (Rep1 (sig m)) (Rep1 (sig n)))
-                 => f ()
-                 -> (forall x . f (m x) -> n (f x))
-                 -> sig m a
-                 -> sig n (f a)
+  handle
+    :: (Functor f, Monad m)
+    => f ()
+    -> (forall x . f (m x) -> n (f x))
+    -> sig m a
+    -> sig n (f a)
+  default handle
+    :: (Functor f, Monad m, Generic1 (sig m), Generic1 (sig n), GEffect m n (Rep1 (sig m)) (Rep1 (sig n)))
+    => f ()
+    -> (forall x . f (m x) -> n (f x))
+    -> sig m a
+    -> sig n (f a)
   handle state handler = to1 . ghandle state handler . from1
   {-# INLINE handle #-}
 
