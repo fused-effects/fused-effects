@@ -3,7 +3,7 @@ module Control.Effect.NonDet
 ( NonDet
 ) where
 
-import {-# SOURCE #-} Control.Effect.Choose (Choose)
+import Control.Algebra.Internal (Choose)
 import {-# SOURCE #-} Control.Effect.Empty (Empty)
 import Control.Effect.Sum
 

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | An effect modelling nondeterminism without failure (one or more successful results).
 
@@ -29,19 +29,11 @@ module Control.Effect.Choose
 ) where
 
 import Control.Algebra
+import Control.Algebra.Internal (Choose(..))
 import Control.Effect.Empty
 import Data.Bool (bool)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Semigroup as S
-import GHC.Generics (Generic1)
-
--- | @since 1.0.0.0
-newtype Choose m k
-  = Choose (Bool -> m k)
-  deriving (Functor, Generic1)
-
-instance HFunctor Choose
-instance Effect   Choose
 
 -- | Nondeterministically choose between two computations.
 --

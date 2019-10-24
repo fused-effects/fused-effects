@@ -18,7 +18,6 @@ module Control.Algebra
 
 import Control.Algebra.Internal
 import Control.Carrier.Pure (PureC, run)
-import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
 import Control.Effect.Class
 import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
 import {-# SOURCE #-} Control.Effect.Error (Error)
