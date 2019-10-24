@@ -7,7 +7,6 @@
 module Control.Effect.Class
 ( HFunctor(..)
 , hmapDefault
-, handleCoercible
 , Effect(..)
 -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
@@ -36,16 +35,6 @@ class HFunctor h where
 hmapDefault :: (Effect sig, Functor n, Functor (sig n), Monad m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
 hmapDefault f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE hmapDefault #-}
-
-
--- | Thread a 'Coercible' carrier through an 'HFunctor'.
---
---   This is applicable whenever @f@ is 'Coercible' to @g@, e.g. simple @newtype@s.
---
--- @since 1.0.0.0
-handleCoercible :: (HFunctor sig, Monad f, Functor g, Coercible f g) => sig f a -> sig g a
-handleCoercible = hmap coerce
-{-# INLINE handleCoercible #-}
 
 
 -- | The class of effect types, which must:
