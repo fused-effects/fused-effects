@@ -1,4 +1,5 @@
 {-# LANGUAGE DefaultSignatures, DeriveFunctor, DeriveGeneric, EmptyCase, ExistentialQuantification, FlexibleContexts, FlexibleInstances, FunctionalDependencies, KindSignatures, RankNTypes, StandaloneDeriving, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# OPTIONS_HADDOCK not-home #-}
 
 -- | Provides the 'Effect' class that effect types implement.
 --
