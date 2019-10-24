@@ -46,8 +46,8 @@ tests = testGroup "State"
   testMonad    run = Monad.test    (m (gen0 s) (\ _ _ -> [])) a b c (pair <*> s <*> unit) run
   testMonadFix run = MonadFix.test (m (gen0 s) (\ _ _ -> [])) a b   (pair <*> s <*> unit) run
   testState    run = State.test    (m (gen0 s) (\ _ _ -> [])) a               s           run
-  testLazy     run = lazy                                     a     (pair <*> s <*> unit) run
-  testStrict   run = strict                                   a     (pair <*> s <*> unit) run
+  testLazy     run = lazy                                           (pair <*> s <*> unit) run
+  testStrict   run = strict                                         (pair <*> s <*> unit) run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
@@ -81,12 +81,11 @@ problematic :: Applicative f => f a
 problematic = (pure (error "should immediately")) <*> pure (error "terminate")
 
 lazy
-  :: forall m a f g . (Monad m, Functor f)
-  => GenTerm a
-  -> GenTerm (f ())
+  :: (Monad m, Functor f)
+  => GenTerm (f ())
   -> Run f g m
   -> [TestTree]
-lazy _a s (Run run) =
+lazy s (Run run) =
   [ testProperty "fmap is non-strict" . forall (a :. s :. Nil) $
     \ a s -> void . eval . run $ (const a <$> pure (error "insufficiently lazy")) <$ s
   , testProperty "pure and <*> are non-strict" . forall (s :. Nil) $
@@ -94,12 +93,11 @@ lazy _a s (Run run) =
   ]
 
 strict
-  :: forall m a f g . (Traversable f, Monad m)
-  => GenTerm a
-  -> GenTerm (f ())
+  :: (Traversable f, Monad m)
+  => GenTerm (f ())
   -> Run f g m
   -> [TestTree]
-strict _a s (Run run) =
+strict s (Run run) =
   [ testProperty "pure and <*> are strict" . forall (s :. Nil) $
-    \ s -> (liftIO . try @SomeException . evaluate . run $ (problematic <$ s)) >>= assert . isLeft
+    \ s -> (liftIO . try @SomeException . evaluate . run $ problematic <$ s) >>= assert . isLeft
   ]
