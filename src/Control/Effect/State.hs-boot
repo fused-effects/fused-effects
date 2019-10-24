@@ -3,7 +3,7 @@ module Control.Effect.State
 ( State(..)
 ) where
 
-import Control.Effect.Class
+import Control.Algebra.Internal
 
 data State s m k
   = Get (s -> m k)

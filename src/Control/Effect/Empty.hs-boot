@@ -3,7 +3,7 @@ module Control.Effect.Empty
 ( Empty(..)
 ) where
 
-import Control.Effect.Class
+import Control.Algebra.Internal
 
 data Empty (m :: * -> *) k = Empty
 

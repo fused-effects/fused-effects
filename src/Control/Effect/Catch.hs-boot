@@ -3,7 +3,7 @@ module Control.Effect.Catch
 ( Catch(..)
 ) where
 
-import Control.Effect.Class
+import Control.Algebra.Internal
 
 -- | 'Catch' effects can be used alongside 'Control.Effect.Throw.Throw' to provide recoverable exceptions.
 data Catch e m k

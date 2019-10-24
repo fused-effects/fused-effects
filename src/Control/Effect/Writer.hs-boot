@@ -3,7 +3,7 @@ module Control.Effect.Writer
 ( Writer(..)
 ) where
 
-import Control.Effect.Class
+import Control.Algebra.Internal
 
 data Writer w m k
   = Tell w (m k)

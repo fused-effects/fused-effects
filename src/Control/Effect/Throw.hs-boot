@@ -3,7 +3,7 @@ module Control.Effect.Throw
 ( Throw(..)
 ) where
 
-import Control.Effect.Class
+import Control.Algebra.Internal
 
 data Throw e (m :: * -> *) k
   = Throw e

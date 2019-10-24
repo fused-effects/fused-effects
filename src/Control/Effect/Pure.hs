@@ -17,7 +17,7 @@ module Control.Effect.Pure
   Pure
 ) where
 
-import Control.Effect.Class
+import Control.Algebra.Internal
 import GHC.Generics (Generic1)
 
 -- | @since 0.3.0.0

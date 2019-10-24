@@ -3,7 +3,7 @@ module Control.Effect.Reader
 ( Reader(..)
 ) where
 
-import Control.Effect.Class
+import Control.Algebra.Internal
 
 data Reader r m k
   = Ask (r -> m k)

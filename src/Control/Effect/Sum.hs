@@ -11,7 +11,7 @@ module Control.Effect.Sum
 , (:+:)(..)
 ) where
 
-import Control.Effect.Class
+import Control.Algebra.Internal
 import Data.Kind (Constraint)
 import GHC.Generics (Generic1)
 
