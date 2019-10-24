@@ -15,7 +15,6 @@ module Control.Algebra
   -- * Re-exports
 , (:+:) (..)
 , run
-, Identity
 , module Control.Effect.Class
 ) where
 
