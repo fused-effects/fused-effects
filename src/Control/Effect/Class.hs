@@ -58,7 +58,7 @@ hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentit
 class GEffect f m m' rep rep' where
   -- | Generic implementation of 'handle'.
   ghandle
-    :: (Monad m)
+    :: Monad m
     => f ()
     -> (forall x . f (m x) -> m' (f x))
     -> rep a
