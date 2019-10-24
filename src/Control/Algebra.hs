@@ -8,6 +8,7 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 -}
 module Control.Algebra
 ( Algebra(..)
+, AlgebraTrans(..)
 , Has
 , send
 , handle
@@ -35,6 +36,7 @@ import Control.Effect.Throw.Internal
 import Control.Effect.Writer.Internal
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity
+import Control.Monad.Trans.Class
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Identity as Identity
 import qualified Control.Monad.Trans.Reader as Reader
@@ -59,6 +61,10 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
 instance Algebra Pure PureC where
   alg v = case v of {}
   {-# INLINE alg #-}
+
+
+class (Functor f, MonadTrans t) => AlgebraTrans f t | t -> f where
+  threading :: (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
