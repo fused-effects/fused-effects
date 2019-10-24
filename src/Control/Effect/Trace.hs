@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
 
 {- | An effect that provides a record of 'String' values ("traces") aggregate during the execution of a given computation.
 

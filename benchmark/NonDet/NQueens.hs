@@ -1,7 +1,3 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes,
-             TypeApplications, TypeOperators, UndecidableInstances #-}
-{-# OPTIONS_GHC -Wno-redundant-constraints #-}
-
 -- Based largely on the implementation by Sreekar Shastry,
 -- available at https://github.com/sshastry/queenslogic
 

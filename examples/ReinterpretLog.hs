@@ -10,11 +10,8 @@
 --   structured log messages as strings.
 
 
-{-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveFunctor              #-}
 {-# LANGUAGE DeriveGeneric              #-}
-{-# LANGUAGE DerivingStrategies         #-}
-{-# LANGUAGE FlexibleContexts           #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE InstanceSigs               #-}
@@ -107,8 +104,9 @@ runApplication =
 -- Log an 'a', then continue with 'k'.
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a (m k)
-  deriving stock (Functor, Generic1)
-  deriving anyclass (Effect)
+  deriving (Functor, Generic1)
+
+instance Effect (Log a)
 
 -- Log an 'a'.
 log :: Has (Log a) sig m
@@ -125,7 +123,7 @@ log x =
 -- Carrier one: log strings to stdout.
 newtype LogStdoutC m a
   = LogStdoutC (m a)
-  deriving newtype (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadIO)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects (and also
@@ -158,7 +156,7 @@ runLogStdout (LogStdoutC m) =
 -- using a function (provided at runtime) from 's' to 't'.
 newtype ReinterpretLogC s t m a
   = ReinterpretLogC { unReinterpretLogC :: ReaderC (s -> t) m a }
-  deriving newtype (Applicative, Functor, Monad, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadIO)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects, one of which
@@ -195,7 +193,7 @@ reinterpretLog f =
 -- example's test spec.
 newtype CollectLogMessagesC s m a
   = CollectLogMessagesC { unCollectLogMessagesC :: WriterC [s] m a }
-  deriving newtype (Applicative, Functor, Monad)
+  deriving (Applicative, Functor, Monad)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
