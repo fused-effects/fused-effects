@@ -9,7 +9,7 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 module Control.Algebra
 ( Algebra(..)
 , MonadTransState(..)
-, threading
+, handling
 , Has
 , send
 , handle
@@ -98,8 +98,8 @@ instance Monoid w => MonadTransState ((,) w) (Lazy.WriterT w) where
 instance Monoid w => MonadTransState ((,) w) (Strict.WriterT w) where
   liftHandle handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
 
-threading :: (Effect eff, Constrain eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
-threading op = liftHandle (\ s dist -> handle s dist op)
+handling :: (Effect eff, Constrain eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
+handling op = liftHandle (\ s dist -> handle s dist op)
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
@@ -172,7 +172,7 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 instance (Algebra sig m, Constrain sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
   alg (L (L (Throw e)))     = Except.throwE e
   alg (L (R (Catch m h k))) = Except.catchE m h >>= k
-  alg (R other)             = threading other
+  alg (R other)             = handling other
 
 instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . handleCoercible
@@ -180,7 +180,7 @@ instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
 instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg (L (Ask       k)) = Reader.ask >>= k
   alg (L (Local f m k)) = Reader.local f m >>= k
-  alg (R other)         = threading other
+  alg (R other)         = handling other
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
@@ -197,7 +197,7 @@ instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (L (Censor f m k))) = RWS.Lazy.censor f m >>= k
   alg (R (R (L (Get   k))))  = RWS.Lazy.get >>= k
   alg (R (R (L (Put s k))))  = RWS.Lazy.put s *> k
-  alg (R (R (R other)))      = threading other
+  alg (R (R (R other)))      = handling other
 
 instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
   alg (L (Ask       k))      = RWS.Strict.ask >>= k
@@ -207,26 +207,26 @@ instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (L (Censor f m k))) = RWS.Strict.censor f m >>= k
   alg (R (R (L (Get   k))))  = RWS.Strict.get >>= k
   alg (R (R (L (Put s k))))  = RWS.Strict.put s *> k
-  alg (R (R (R other)))      = threading other
+  alg (R (R (R other)))      = handling other
 
 instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (Lazy.StateT s m) where
   alg (L (Get   k)) = Lazy.get >>= k
   alg (L (Put s k)) = Lazy.put s *> k
-  alg (R other)     = threading other
+  alg (R other)     = handling other
 
 instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (Strict.StateT s m) where
   alg (L (Get   k)) = Strict.get >>= k
   alg (L (Put s k)) = Strict.put s *> k
-  alg (R other)     = threading other
+  alg (R other)     = handling other
 
 instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Lazy.WriterT w m) where
   alg (L (Tell w k))     = Lazy.tell w *> k
   alg (L (Listen m k))   = Lazy.listen m >>= uncurry (flip k)
   alg (L (Censor f m k)) = Lazy.censor f m >>= k
-  alg (R other)          = threading other
+  alg (R other)          = handling other
 
 instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Strict.WriterT w m) where
   alg (L (Tell w k))     = Strict.tell w *> k
   alg (L (Listen m k))   = Strict.listen m >>= uncurry (flip k)
   alg (L (Censor f m k)) = Strict.censor f m >>= k
-  alg (R other)          = threading other
+  alg (R other)          = handling other
