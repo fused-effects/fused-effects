@@ -25,6 +25,7 @@ tests = testGroup "State"
     [ testMonad
     , testMonadFix
     , testState
+    , testLazy
     ] >>= ($ runC LazyStateC.runState)
   , testGroup "StateC (Strict)" $
     [ testMonad
@@ -39,8 +40,19 @@ tests = testGroup "State"
   testMonad    run = Monad.test    (m (gen0 s) (\ _ _ -> [])) a b c (pair <*> s <*> unit) run
   testMonadFix run = MonadFix.test (m (gen0 s) (\ _ _ -> [])) a b   (pair <*> s <*> unit) run
   testState    run = State.test    (m (gen0 s) (\ _ _ -> [])) a               s           run
+  testLazy     run = lazy                                     a     (pair <*> s <*> unit) run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
+lazy
+  :: forall m a f g . (Monad m, Eq (g a), Show (g a), Functor f)
+  => GenTerm a
+  -> GenTerm (f ())
+  -> Run f g m
+  -> [TestTree]
+lazy a s (Run run) =
+  [ testProperty "const a <$> pure ⊥ = a" . forall (a :. s :. Nil) $
+    \ a s -> run ((const a <$> pure (error "insufficiently lazy")) <$ s) === run (pure a <$ s)
+  ]
 
 gen0
   :: forall s m a sig
@@ -52,6 +64,7 @@ gen0 s a =
   [ label "gets" (gets @s) <*> fn a
   , infixL 4 "<$" (<$) <*> a <*> (label "put" put <*> s)
   ]
+
 
 
 test
