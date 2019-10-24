@@ -4,6 +4,7 @@ module Control.Algebra.Internal
   Catch(..)
 , Choose(..)
 , Empty(..)
+, Error
 , Lift(..)
 , NonDet
 , Reader(..)
@@ -45,6 +46,10 @@ data Empty (m :: * -> *) k = Empty
 
 instance HFunctor Empty
 instance Effect   Empty
+
+
+-- | @since 0.1.0.0
+type Error e = Throw e :+: Catch e
 
 
 -- | @since 0.1.0.0

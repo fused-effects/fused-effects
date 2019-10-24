@@ -19,7 +19,6 @@ module Control.Algebra
 import Control.Algebra.Internal
 import Control.Carrier.Pure (PureC, run)
 import Control.Effect.Class
-import {-# SOURCE #-} Control.Effect.Error (Error)
 import Control.Effect.Pure
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
