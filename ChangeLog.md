@@ -22,13 +22,13 @@
 
 - Defines an `evalFresh` handler for `Control.Carrier.Strict.FreshC`, taking the initial value. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
 
-- Adds a `CanHandle` associated type family to `Effect`, allowing effects to constrain the types of context which carriers can pass to them. This allows `Effect` to subsume `HFunctor`, and e.g. for operations to return collections of results in a functor. ([#296](https://github.com/fused-effects/fused-effects/pull/296))
+- Adds a `CanThread` associated type family to `Effect`, allowing effects to constrain the types of context which carriers can pass to them. This allows `Effect` to subsume `HFunctor`, and e.g. for operations to return collections of results in a functor. ([#296](https://github.com/fused-effects/fused-effects/pull/296))
 
 ## Backwards-incompatible changes
 
 - Renames the `Carrier` class to `Algebra` and its `eff` method to `alg`, and moved the responsibilities of `Control.Carrier` to `Control.Algebra`. This makes the library more consistent with the literature and encourages a style of naming that focuses on morphisms rather than objects. ([#285](https://github.com/fused-effects/fused-effects/pull/285), [#294](https://github.com/fused-effects/fused-effects/pull/294))
 
-- Due to the new capabilities of `Effect`, `Algebra` instances which formerly required `Effect` constraints will likely now require a `CanHandle` constraint for the context functor that they (or an underlying carrier) thread through other effects. ([#296](https://github.com/fused-effects/fused-effects/pull/296))
+- Due to the new capabilities of `Effect`, `Algebra` instances which formerly required `Effect` constraints will likely now require a `CanThread` constraint for the context functor that they (or an underlying carrier) thread through other effects. ([#296](https://github.com/fused-effects/fused-effects/pull/296))
 
 - Adds a `Monad` constraint on the result of `handle`’s distributive law, allowing `Effect` instances greater latitude. This is unlikely to affect usage of the library since carriers are already monads. ([#296](https://github.com/fused-effects/fused-effects/pull/296))
 

@@ -38,11 +38,11 @@ runFail (FailC m) = runThrow m
 newtype FailC m a = FailC (ThrowC String m a)
   deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Algebra sig m, CanHandle sig (Either String)) => Fail.MonadFail (FailC m) where
+instance (Algebra sig m, CanThread sig (Either String)) => Fail.MonadFail (FailC m) where
   fail = send . Fail
   {-# INLINE fail #-}
 
-instance (Algebra sig m, CanHandle sig (Either String)) => Algebra (Fail :+: sig) (FailC m) where
+instance (Algebra sig m, CanThread sig (Either String)) => Algebra (Fail :+: sig) (FailC m) where
   -- NB: 'send' (& thus 'handleCoercible') can’t send sums, so we decompose the sum manually.
   alg (L op) = FailC (handleCoercible op)
   alg (R op) = FailC (handleCoercible op)

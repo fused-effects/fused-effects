@@ -24,7 +24,7 @@ data (l :+: r) (m :: * -> *) k
 infixr 4 :+:
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
-  type CanHandle (l :+: r) f = (CanHandle l f, CanHandle r f)
+  type CanThread (l :+: r) f = (CanThread l f, CanThread r f)
 
 
 -- | The class of types present in a signature.

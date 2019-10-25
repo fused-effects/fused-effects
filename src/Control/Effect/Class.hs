@@ -20,17 +20,17 @@ import GHC.Generics
 --   1. Be functorial in their last two arguments, and
 --   2. Support threading effects in higher-order positions through using the carrier’s suspended context.
 --
--- Effects may additionally constrain the types of context that they support threading through their actions by defining an instance of the associated 'CanHandle' type family. If no definition is given, it defaults to 'Functor'.
+-- Effects may additionally constrain the types of context that they support threading through their actions by defining an instance of the associated 'CanThread' type family. If no definition is given, it defaults to 'Functor'.
 --
 -- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'thread' provided a 'Generic1' instance is available for the effect.
 --
 -- @since 1.0.0.0
-class CanHandle sig Identity => Effect sig where
+class CanThread sig Identity => Effect sig where
   -- | Constrain the type of context algebras can pass to 'thread'.
   --
   -- Defaults to 'Functor'. Some effects may require a more restrictive constraint to thread handlers through. It is recommended, but not enforced, that imposed constraints be subclasses of 'Functor' wherever possible to ensure compatibility with the broadest variety of algebras.
-  type CanHandle sig (ctx :: (* -> *)) :: Constraint
-  type CanHandle sig ctx = Functor ctx
+  type CanThread sig (ctx :: (* -> *)) :: Constraint
+  type CanThread sig ctx = Functor ctx
 
   -- | Handle any effects in a signature by threading the algebra’s handler all the way through to the continuation, starting from some initial context.
   --
@@ -45,7 +45,7 @@ class CanHandle sig Identity => Effect sig where
   --
   -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
   thread
-    :: (Monad m, Monad n, CanHandle sig ctx)
+    :: (Monad m, Monad n, CanThread sig ctx)
     => ctx ()                              -- ^ The initial context.
     -> (forall x . ctx (m x) -> n (ctx x)) -- ^ A handler for actions in a context, producing actions with a derived context.
     -> sig m a                             -- ^ The effect to thread the handler through.
@@ -107,6 +107,6 @@ instance Functor ctx => GEffect ctx m m' (Rec1 m) (Rec1 m') where
   gthread state handler = Rec1 . handler . (<$ state) . unRec1
   {-# INLINE gthread #-}
 
-instance (Effect sig, CanHandle sig ctx) => GEffect ctx m m' (Rec1 (sig m)) (Rec1 (sig m')) where
+instance (Effect sig, CanThread sig ctx) => GEffect ctx m m' (Rec1 (sig m)) (Rec1 (sig m')) where
   gthread state handler = Rec1 . thread state handler . unRec1
   {-# INLINE gthread #-}

@@ -80,7 +80,7 @@ send = alg . inj
 {-# INLINE send #-}
 
 
-handle :: (Monad m, Effect eff, CanHandle eff f, Member eff sig, Algebra sig n) => f () -> (forall x . f (m x) -> n (f x)) -> eff m a -> n (f a)
+handle :: (Monad m, Effect eff, CanThread eff f, Member eff sig, Algebra sig n) => f () -> (forall x . f (m x) -> n (f x)) -> eff m a -> n (f a)
 handle state handler = send . thread state handler
 {-# INLINE handle #-}
 
@@ -137,7 +137,7 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 
 -- transformers
 
-instance (Algebra sig m, CanHandle sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
+instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
   alg (L (L (Throw e)))     = Except.throwE e
   alg (L (R (Catch m h k))) = Except.catchE m h >>= k
   alg (R other)             = Except.ExceptT $ handle (Right ()) (either (pure . Left) Except.runExceptT) other
@@ -157,7 +157,7 @@ toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
-instance (Algebra sig m, CanHandle sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
+instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
   alg (L (Ask       k))      = RWS.Lazy.ask >>= k
   alg (L (Local f m k))      = RWS.Lazy.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
@@ -167,7 +167,7 @@ instance (Algebra sig m, CanHandle sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (R (L (Put s k))))  = RWS.Lazy.put s *> k
   alg (R (R (R other)))      = RWS.Lazy.RWST $ \ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s) other
 
-instance (Algebra sig m, CanHandle sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
+instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
   alg (L (Ask       k))      = RWS.Strict.ask >>= k
   alg (L (Local f m k))      = RWS.Strict.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Strict.tell w *> k
@@ -177,23 +177,23 @@ instance (Algebra sig m, CanHandle sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (R (L (Put s k))))  = RWS.Strict.put s *> k
   alg (R (R (R other)))      = RWS.Strict.RWST $ \ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s) other
 
-instance (Algebra sig m, CanHandle sig ((,) s)) => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
+instance (Algebra sig m, CanThread sig ((,) s)) => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
   alg (L (Get   k)) = State.Lazy.get >>= k
   alg (L (Put s k)) = State.Lazy.put s *> k
   alg (R other)     = State.Lazy.StateT $ \ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s) other
 
-instance (Algebra sig m, CanHandle sig ((,) s)) => Algebra (State s :+: sig) (State.Strict.StateT s m) where
+instance (Algebra sig m, CanThread sig ((,) s)) => Algebra (State s :+: sig) (State.Strict.StateT s m) where
   alg (L (Get   k)) = State.Strict.get >>= k
   alg (L (Put s k)) = State.Strict.put s *> k
   alg (R other)     = State.Strict.StateT $ \ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other
 
-instance (Algebra sig m, CanHandle sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
+instance (Algebra sig m, CanThread sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
   alg (L (Tell w k))     = Writer.Lazy.tell w *> k
   alg (L (Listen m k))   = Writer.Lazy.listen m >>= uncurry (flip k)
   alg (L (Censor f m k)) = Writer.Lazy.censor f m >>= k
   alg (R other)          = Writer.Lazy.WriterT $ swap <$> handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Lazy.runWriterT x) other
 
-instance (Algebra sig m, CanHandle sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Strict.WriterT w m) where
+instance (Algebra sig m, CanThread sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Strict.WriterT w m) where
   alg (L (Tell w k))     = Writer.Strict.tell w *> k
   alg (L (Listen m k))   = Writer.Strict.listen m >>= uncurry (flip k)
   alg (L (Censor f m k)) = Writer.Strict.censor f m >>= k

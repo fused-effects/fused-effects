@@ -109,7 +109,7 @@ myFunction :: Shared sig m => Int -> m ()
 Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`:
 
 ```haskell
-example1 :: (Algebra sig m, CanHandle sig ((,) Int)) => [a] -> m (Int, ())
+example1 :: (Algebra sig m, CanThread sig ((,) Int)) => [a] -> m (Int, ())
 example1 list = runState 0 $ do
   i <- get @Int
   put (i + length list)
@@ -120,7 +120,7 @@ example1 list = runState 0 $ do
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
 ```haskell
-example2 :: (Algebra sig m, CanHandle sig ((,) Int)) => m (Int, ())
+example2 :: (Algebra sig m, CanThread sig ((,) Int)) => m (Int, ())
 example2 = runReader "hello" . runState 0 $ do
   list <- ask
   put (length (list :: String))
