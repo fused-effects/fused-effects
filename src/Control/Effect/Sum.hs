@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveGeneric, DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
 
 -- | Operations on /sums/, combining effects into a /signature/.
 --
@@ -9,8 +9,6 @@ module Control.Effect.Sum
 , Members
   -- * Sums
 , (:+:)(..)
-  -- * Union constraints
-, type (&)
 ) where
 
 import Control.Effect.Class
@@ -27,10 +25,6 @@ infixr 4 :+:
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
   type CanHandle (l :+: r) f = (CanHandle l f, CanHandle r f)
-
-
-class    (cl ctx, cr ctx) => (cl & cr) (ctx :: * -> *)
-instance (cl ctx, cr ctx) => (cl & cr) (ctx :: * -> *)
 
 
 -- | The class of types present in a signature.
