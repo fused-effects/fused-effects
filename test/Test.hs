@@ -6,6 +6,7 @@ import qualified Choose
 import qualified Cull
 import qualified Cut
 import qualified Cut.Church
+import qualified Effect
 import qualified Empty
 import qualified Error
 import qualified Fresh
@@ -24,6 +25,7 @@ main = defaultMain $ testGroup "unit tests"
   , Cull.tests
   , Cut.tests
   , Cut.Church.tests
+  , Effect.tests
   , Empty.tests
   , Error.tests
   , Fresh.tests

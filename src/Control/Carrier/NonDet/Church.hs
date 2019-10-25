@@ -105,7 +105,7 @@ instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf _ -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Constrain sig (NonDetC m)) => Algebra (NonDet :+: sig) (NonDetC m) where
+instance (Algebra sig m, CanHandle sig (NonDetC m)) => Algebra (NonDet :+: sig) (NonDetC m) where
   alg (L (L Empty))      = empty
   alg (L (R (Choose k))) = k True <|> k False
   alg (R other)          = NonDetC $ \ fork leaf nil -> handle (pure ()) (runNonDet (liftA2 (<|>)) runNonDetA (pure empty)) other >>= runNonDet fork leaf nil
