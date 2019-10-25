@@ -25,6 +25,7 @@ tests = testGroup "Effect"
   sum i = Sum (i :: Int)
 
 
+-- | An effect to return the results of all of the nondeterministic branches computed within its scope.
 data All m k = forall a . All (m a) ([a] -> m k)
 
 deriving instance Functor m => Functor (All m)
