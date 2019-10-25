@@ -35,7 +35,7 @@ deriving instance Functor m => Functor (All m)
 -- Intuitively, we can think of this as saying that if there are 'Control.Effect.State.State' effects present in @m@, collecting all of their results—joining the branches—requires us to merge the states monoidally; if there are 'Control.Effect.Error.Error' effects, it requires that they’ve all succeeded.
 instance Effect All where
   type CanThread All f = Applicative f
-  handle ctx hdl (All m k) = All (hdl (m <$ ctx)) (hdl . fmap k . sequenceA)
+  thread ctx hdl (All m k) = All (hdl (m <$ ctx)) (hdl . fmap k . sequenceA)
 
 all :: Has All sig m => m a -> m [a]
 all m = send (All m pure)
@@ -65,5 +65,5 @@ data Thread m k
 -- We don’t go as far as to define a carrier because cooperative multithreading is a bit more of an example than a test, and I don’t care to run 'Control.Concurrent.forkIO' in the unit tests. At any rate, the existence of this instance is test enough for what we’re trying to do.
 instance Effect Thread where
   type CanThread Thread f = f ~ Identity
-  handle ctx hdl (Fork m k) = Fork (runIdentity <$> hdl (m <$ ctx)) (hdl (k <$ ctx))
-  handle ctx hdl (Yield  k) = Yield                                 (hdl (k <$ ctx))
+  thread ctx hdl (Fork m k) = Fork (runIdentity <$> hdl (m <$ ctx)) (hdl (k <$ ctx))
+  thread ctx hdl (Yield  k) = Yield                                 (hdl (k <$ ctx))
