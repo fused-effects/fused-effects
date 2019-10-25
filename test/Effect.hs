@@ -65,5 +65,5 @@ data Thread m k
 -- We don’t go as far as to define a carrier because cooperative multithreading is a bit more of an example than a test, and I don’t care to run 'Control.Concurrent.forkIO' in the unit tests. At any rate, the existence of this instance is test enough for what we’re trying to do.
 instance Effect Thread where
   type Constrain Thread f = f ~ Identity
-  handle ctx hdl (Fork m k) = Fork (runIdentity <$> (hdl (m <$ ctx))) (hdl (k <$ ctx))
-  handle ctx hdl (Yield  k) = Yield                                   (hdl (k <$ ctx))
+  handle ctx hdl (Fork m k) = Fork (runIdentity <$> hdl (m <$ ctx)) (hdl (k <$ ctx))
+  handle ctx hdl (Yield  k) = Yield                                 (hdl (k <$ ctx))
