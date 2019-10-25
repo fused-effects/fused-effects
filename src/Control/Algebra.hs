@@ -51,7 +51,7 @@ import Data.Tuple (swap)
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
 --
 -- @since 1.0.0.0
-class (Effect sig, Monad m) => Algebra sig m | m -> sig where
+class Monad m => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
 
@@ -84,7 +84,7 @@ send = alg . inj
 -- This is useful for carriers taking some input but not modifying the output. When @m@ is coercible to @n@, 'handleCoercible' may be more appropriate.
 --
 -- @since 1.0.0.0
-handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
+handleIdentity :: (Monad m, Effect c eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
 handleIdentity f = fmap runIdentity . send . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE handleIdentity #-}
 
@@ -93,7 +93,7 @@ handleIdentity f = fmap runIdentity . send . handle (Identity ()) (fmap Identity
 -- This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
 --
 -- @since 1.0.0.0
-handleCoercible :: (Monad m, Effect eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
+handleCoercible :: (Monad m, Effect c eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
 handleCoercible = handleIdentity coerce
 {-# INLINE handleCoercible #-}
 
@@ -132,15 +132,15 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 
 -- transformers
 
-instance (Algebra sig m, CanHandle sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
+instance (Algebra sig m, Effect c sig, c (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
   alg (L (L (Throw e)))     = Except.throwE e
   alg (L (R (Catch m h k))) = Except.catchE m h >>= k
   alg (R other)             = Except.ExceptT $ alg (handle (Right ()) (either (pure . Left) Except.runExceptT) other)
 
-instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
+instance (Algebra sig m, Effect c sig) => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . handleCoercible
 
-instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
+instance (Algebra sig m, Effect c sig) => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg (L (Ask       k)) = Reader.ask >>= k
   alg (L (Local f m k)) = Reader.local f m >>= k
   alg (R other)         = Reader.ReaderT $ \ r -> handleIdentity (flip Reader.runReaderT r) other
@@ -152,7 +152,7 @@ toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
-instance (Algebra sig m, CanHandle sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
+instance (Algebra sig m, Effect c sig, c (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
   alg (L (Ask       k))      = RWS.Lazy.ask >>= k
   alg (L (Local f m k))      = RWS.Lazy.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
@@ -162,7 +162,7 @@ instance (Algebra sig m, CanHandle sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (R (L (Put s k))))  = RWS.Lazy.put s *> k
   alg (R (R (R other)))      = RWS.Lazy.RWST $ \ r s -> unRWSTF <$> alg (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s) other)
 
-instance (Algebra sig m, CanHandle sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
+instance (Algebra sig m, Effect c sig, c (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
   alg (L (Ask       k))      = RWS.Strict.ask >>= k
   alg (L (Local f m k))      = RWS.Strict.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Strict.tell w *> k
@@ -172,23 +172,23 @@ instance (Algebra sig m, CanHandle sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (R (L (Put s k))))  = RWS.Strict.put s *> k
   alg (R (R (R other)))      = RWS.Strict.RWST $ \ r s -> unRWSTF <$> alg (handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s) other)
 
-instance (Algebra sig m, CanHandle sig ((,) s)) => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
+instance (Algebra sig m, Effect c sig, c ((,) s)) => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
   alg (L (Get   k)) = State.Lazy.get >>= k
   alg (L (Put s k)) = State.Lazy.put s *> k
   alg (R other)     = State.Lazy.StateT $ \ s -> swap <$> alg (handle (s, ()) (\ (s, x) -> swap <$> State.Lazy.runStateT x s) other)
 
-instance (Algebra sig m, CanHandle sig ((,) s)) => Algebra (State s :+: sig) (State.Strict.StateT s m) where
+instance (Algebra sig m, Effect c sig, c ((,) s)) => Algebra (State s :+: sig) (State.Strict.StateT s m) where
   alg (L (Get   k)) = State.Strict.get >>= k
   alg (L (Put s k)) = State.Strict.put s *> k
   alg (R other)     = State.Strict.StateT $ \ s -> swap <$> alg (handle (s, ()) (\ (s, x) -> swap <$> State.Strict.runStateT x s) other)
 
-instance (Algebra sig m, CanHandle sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
+instance (Algebra sig m, Effect c sig, c ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
   alg (L (Tell w k))     = Writer.Lazy.tell w *> k
   alg (L (Listen m k))   = Writer.Lazy.listen m >>= uncurry (flip k)
   alg (L (Censor f m k)) = Writer.Lazy.censor f m >>= k
   alg (R other)          = Writer.Lazy.WriterT $ swap <$> alg (handle (mempty, ()) (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Lazy.runWriterT x) other)
 
-instance (Algebra sig m, CanHandle sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Strict.WriterT w m) where
+instance (Algebra sig m, Effect c sig, c ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Writer.Strict.WriterT w m) where
   alg (L (Tell w k))     = Writer.Strict.tell w *> k
   alg (L (Listen m k))   = Writer.Strict.listen m >>= uncurry (flip k)
   alg (L (Censor f m k)) = Writer.Strict.censor f m >>= k
