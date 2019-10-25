@@ -10,6 +10,7 @@ module Control.Algebra
 ( Algebra(..)
 , MonadTransContext(..)
 , handling
+, liftIdentity
 , TransC(..)
 , Has
 , send
@@ -195,6 +196,12 @@ instance Monoid w => MonadTransContext ((,) w) (Strict.WriterT w) where
 handling :: (Effect eff, CanThread eff ctx, MonadTransContext ctx t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
 handling op = liftHandle (\ s dist -> handle s dist op)
 
+liftIdentity
+  :: Functor m
+  => (Identity () -> (forall a . Identity (t m a) -> m (Identity a)) -> m (Identity a))
+  -> (forall a . t m a -> m a)
+  -> m a
+liftIdentity handle f = runIdentity <$> handle (Identity ()) (fmap Identity . f . runIdentity)
 
 newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
   deriving (Applicative, Functor, Monad, MonadTrans)
