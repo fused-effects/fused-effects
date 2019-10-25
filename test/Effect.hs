@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeApplications, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeFamilies, TypeOperators, UndecidableInstances #-}
 module Effect
 ( tests
 ) where
@@ -16,12 +16,13 @@ import Test.Tasty.HUnit
 tests :: TestTree
 tests = testGroup "Effect"
   [ testCase "allows effects to constrain the state functor" $ do
-    let bs = run . runAll . runState @(Sum Int) 0 $ do
+    let bs = run . runAll . runState (sum 0) $ do
           s <- pure "hello" <|> pure "world"
-          bs <- all (foldMapA (\ (c, i) -> c <$ put (Sum @Int i)) (zip s [1..]))
-          bs <$ put (Sum @Int 1) <|> pure bs
+          bs <- all (foldMapA (\ (c, i) -> c <$ put (sum i)) (zip s [1..]))
+          bs <$ put (sum 1) <|> pure bs
     bs @?= [(Sum 1, "hello"), (Sum 15, "hello"), (Sum 1, "world"), (Sum 15, "world")]
-  ]
+  ] where
+  sum i = Sum (i :: Int)
 
 
 data All m k = forall a . All (m a) ([a] -> m k)
