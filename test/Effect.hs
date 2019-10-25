@@ -60,3 +60,9 @@ instance Effect Thread where
   type Constrain Thread f = f ~ Identity
   handle ctx hdl (Fork m k) = Fork (runIdentity <$> (hdl (m <$ ctx))) (hdl (k <$ ctx))
   handle ctx hdl (Yield  k) = Yield                                   (hdl (k <$ ctx))
+
+fork :: Has Thread sig m => m () -> m ()
+fork m = send (Fork m (pure ()))
+
+yield :: Has Thread sig m => m ()
+yield = send (Yield (pure ()))
