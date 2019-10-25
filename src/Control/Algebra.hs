@@ -75,6 +75,11 @@ send = alg . inj
 {-# INLINE send #-}
 
 
+-- | Thread a stateless handler for a carrier through an effect and eliminate it with the carrier’s algebra.
+--
+-- This is useful for carriers taking some input but not modifying the output. When @m@ is coercible to @n@, 'handleCoercible' may be more appropriate.
+--
+-- @since 1.0.0.0
 handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
 handleIdentity f = fmap runIdentity . send . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE handleIdentity #-}
