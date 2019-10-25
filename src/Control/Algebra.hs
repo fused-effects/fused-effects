@@ -124,27 +124,25 @@ toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
-instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
+instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s) (RWS.Lazy.RWST r w s m) where
   type Context (RWS.Lazy.RWST r w s m) = RWSTF w s
   alg (L (Ask       k))      = RWS.Lazy.ask >>= k
   alg (L (Local f m k))      = RWS.Lazy.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
   alg (R (L (Listen m k)))   = RWS.Lazy.listen m >>= uncurry (flip k)
   alg (R (L (Censor f m k))) = RWS.Lazy.censor f m >>= k
-  alg (R (R (L (Get   k))))  = RWS.Lazy.get >>= k
-  alg (R (R (L (Put s k))))  = RWS.Lazy.put s *> k
-  alg (R (R (R other)))      = handling other
+  alg (R (R (Get   k)))      = RWS.Lazy.get >>= k
+  alg (R (R (Put s k)))      = RWS.Lazy.put s *> k
 
-instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
+instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s) (RWS.Strict.RWST r w s m) where
   type Context (RWS.Strict.RWST r w s m) = RWSTF w s
   alg (L (Ask       k))      = RWS.Strict.ask >>= k
   alg (L (Local f m k))      = RWS.Strict.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Strict.tell w *> k
   alg (R (L (Listen m k)))   = RWS.Strict.listen m >>= uncurry (flip k)
   alg (R (L (Censor f m k))) = RWS.Strict.censor f m >>= k
-  alg (R (R (L (Get   k))))  = RWS.Strict.get >>= k
-  alg (R (R (L (Put s k))))  = RWS.Strict.put s *> k
-  alg (R (R (R other)))      = handling other
+  alg (R (R (Get   k)))      = RWS.Strict.get >>= k
+  alg (R (R (Put s k)))      = RWS.Strict.put s *> k
 
 instance Monad m => Algebra (State s) (Lazy.StateT s m) where
   type Context (Lazy.StateT s m) = (,) s
