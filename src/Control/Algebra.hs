@@ -140,10 +140,9 @@ instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (R (L (Put s k))))  = RWS.Strict.put s *> k
   alg (R (R (R other)))      = handling other
 
-instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (Lazy.StateT s m) where
-  alg (L (Get   k)) = Lazy.get >>= k
-  alg (L (Put s k)) = Lazy.put s *> k
-  alg (R other)     = handling other
+instance Monad m => Algebra (State s) (Lazy.StateT s m) where
+  alg (Get   k) = Lazy.get >>= k
+  alg (Put s k) = Lazy.put s *> k
 
 instance Monad m => Algebra (State s) (Strict.StateT s m) where
   alg (Get   k) = Strict.get >>= k
