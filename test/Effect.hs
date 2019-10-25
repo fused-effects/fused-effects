@@ -55,6 +55,7 @@ data Thread m k
   | Yield (m k)
   deriving (Functor)
 
+-- | This demonstrates that we can use '~' to define 'Constrain', enforcing the absence of state or control that would get dropped.
 instance Effect Thread where
   type Constrain Thread f = f ~ Identity
   handle ctx hdl (Fork m k) = Fork (runIdentity <$> (hdl (m <$ ctx))) (hdl (k <$ ctx))
