@@ -19,6 +19,11 @@ tests = testGroup "Effect"
       v <- try (put (s 2) *> liftIO (Exc.throwIO (Err "test")) *> put (s 3))
       either (pure . Exc.displayException @Err) (pure . show) v
     x @?= s 0
+  , testCase "allows arbitrary state above effects requiring Functor" $ do
+    x <- liftIO . runCatchIO . execState (s 0) $ do
+      put (s 1)
+      (put (s 2) *> liftIO (Exc.throwIO (Err "test")) *> put (s 3)) `catchIO` \ (Err _) -> pure ()
+    x @?= s 1
   ] where
   s :: Int -> Sum Int
   s = Sum
