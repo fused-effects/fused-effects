@@ -34,6 +34,17 @@ class Constrain sig Identity => Effect sig where
   type Constrain sig f = Functor f
 
   -- | Handle any effects in a signature by threading the algebra’s state all the way through to the continuation.
+  --
+  -- The handler is required to adhere to the following laws:
+  --
+  -- @
+  -- handler . 'fmap' 'pure' = 'pure'
+  -- @
+  -- @
+  -- handler . 'fmap' (k '=<<') = handler . 'fmap' k 'Control.Monad.<=<' handler
+  -- @
+  --
+  -- respectively expressing that the handler does not alter the state of pure computations, and that the handler distributes over monadic composition.
   handle
     :: (Monad m, Constrain sig f)
     => f ()
