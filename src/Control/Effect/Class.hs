@@ -30,8 +30,8 @@ class Constrain sig Identity => Effect sig where
   -- | Constrain the type of context algebras can pass to 'handle'.
   --
   -- Defaults to 'Functor'. Some effects may require a more restrictive constraint to thread handlers through. It is recommended, but not enforced, that imposed constraints be subclasses of 'Functor' wherever possible to ensure compatibility with the broadest variety of algebras.
-  type Constrain sig (f :: (* -> *)) :: Constraint
-  type Constrain sig f = Functor f
+  type Constrain sig (ctx :: (* -> *)) :: Constraint
+  type Constrain sig ctx = Functor ctx
 
   -- | Handle any effects in a signature by threading the algebra’s context all the way through to the continuation.
   --
@@ -46,17 +46,17 @@ class Constrain sig Identity => Effect sig where
   --
   -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
   handle
-    :: (Monad m, Constrain sig f)
-    => f ()
-    -> (forall x . f (m x) -> n (f x))
+    :: (Monad m, Constrain sig ctx)
+    => ctx ()
+    -> (forall x . ctx (m x) -> n (ctx x))
     -> sig m a
-    -> sig n (f a)
+    -> sig n (ctx a)
   default handle
-    :: (Monad m, Generic1 (sig m), Generic1 (sig n), GEffect f m n (Rep1 (sig m)) (Rep1 (sig n)))
-    => f ()
-    -> (forall x . f (m x) -> n (f x))
+    :: (Monad m, Generic1 (sig m), Generic1 (sig n), GEffect ctx m n (Rep1 (sig m)) (Rep1 (sig n)))
+    => ctx ()
+    -> (forall x . ctx (m x) -> n (ctx x))
     -> sig m a
-    -> sig n (f a)
+    -> sig n (ctx a)
   handle state handler = to1 . ghandle state handler . from1
   {-# INLINE handle #-}
 
@@ -69,52 +69,52 @@ hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentit
 
 
 -- | Generic implementation of 'Effect'.
-class GEffect f m m' rep rep' where
+class GEffect ctx m m' rep rep' where
   -- | Generic implementation of 'handle'.
   ghandle
     :: Monad m
-    => f ()
-    -> (forall x . f (m x) -> m' (f x))
+    => ctx ()
+    -> (forall x . ctx (m x) -> m' (ctx x))
     -> rep a
-    -> rep' (f a)
+    -> rep' (ctx a)
 
-instance GEffect f m m' rep rep' => GEffect f m m' (M1 i c' rep) (M1 i c' rep') where
+instance GEffect ctx m m' rep rep' => GEffect ctx m m' (M1 i c' rep) (M1 i c' rep') where
   ghandle state handler = M1 . ghandle state handler . unM1
   {-# INLINE ghandle #-}
 
-instance (GEffect f m m' l l', GEffect f m m' r r') => GEffect f m m' (l :+: r) (l' :+: r') where
+instance (GEffect ctx m m' l l', GEffect ctx m m' r r') => GEffect ctx m m' (l :+: r) (l' :+: r') where
   ghandle state handler (L1 l) = L1 (ghandle state handler l)
   ghandle state handler (R1 r) = R1 (ghandle state handler r)
   {-# INLINE ghandle #-}
 
-instance (GEffect f m m' l l', GEffect f m m' r r') => GEffect f m m' (l :*: r) (l' :*: r') where
+instance (GEffect ctx m m' l l', GEffect ctx m m' r r') => GEffect ctx m m' (l :*: r) (l' :*: r') where
   ghandle state handler (l :*: r) = ghandle state handler l :*: ghandle state handler r
   {-# INLINE ghandle #-}
 
-instance GEffect f m m' V1 V1 where
+instance GEffect ctx m m' V1 V1 where
   ghandle _ _ v = case v of {}
   {-# INLINE ghandle #-}
 
-instance GEffect f m m' U1 U1 where
+instance GEffect ctx m m' U1 U1 where
   ghandle _ _ = coerce
   {-# INLINE ghandle #-}
 
-instance GEffect f m m' (K1 R k) (K1 R k) where
+instance GEffect ctx m m' (K1 R k) (K1 R k) where
   ghandle _ _ = coerce
   {-# INLINE ghandle #-}
 
-instance Functor f => GEffect f m m' Par1 Par1 where
+instance Functor ctx => GEffect ctx m m' Par1 Par1 where
   ghandle state _ = Par1 . (<$ state) . unPar1
   {-# INLINE ghandle #-}
 
-instance (Functor g, GEffect f m m' h h') => GEffect f m m' (g :.: h) (g :.: h') where
+instance (Functor g, GEffect ctx m m' h h') => GEffect ctx m m' (g :.: h) (g :.: h') where
   ghandle state handler = Comp1 . fmap (ghandle state handler) . unComp1
   {-# INLINE ghandle #-}
 
-instance Functor f => GEffect f m m' (Rec1 m) (Rec1 m') where
+instance Functor ctx => GEffect ctx m m' (Rec1 m) (Rec1 m') where
   ghandle state handler = Rec1 . handler . (<$ state) . unRec1
   {-# INLINE ghandle #-}
 
-instance (Effect sig, Constrain sig f) => GEffect f m m' (Rec1 (sig m)) (Rec1 (sig m')) where
+instance (Effect sig, Constrain sig ctx) => GEffect ctx m m' (Rec1 (sig m)) (Rec1 (sig m')) where
   ghandle state handler = Rec1 . handle state handler . unRec1
   {-# INLINE ghandle #-}
