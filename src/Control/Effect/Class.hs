@@ -19,21 +19,21 @@ import GHC.Generics
 -- | The class of effect types, which must:
 --
 --   1. Be functorial in their last two arguments, and
---   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
+--   2. Support threading effects in higher-order positions through using the carrier’s suspended context.
 --
--- Effects may additionally constrain the types of state that they support threading through their actions by defining an instance of the associated 'Constrain' type family. If no definition is given, it defaults to 'Functor'.
+-- Effects may additionally constrain the types of context that they support threading through their actions by defining an instance of the associated 'Constrain' type family. If no definition is given, it defaults to 'Functor'.
 --
 -- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'handle' provided a 'Generic1' instance is available for the effect.
 --
 -- @since 1.0.0.0
 class Constrain sig Identity => Effect sig where
-  -- | Constrain the type of state algebras can pass to 'handle'.
+  -- | Constrain the type of context algebras can pass to 'handle'.
   --
   -- Defaults to 'Functor'. Some effects may require a more restrictive constraint to thread handlers through. It is recommended, but not enforced, that imposed constraints be subclasses of 'Functor' wherever possible to ensure compatibility with the broadest variety of algebras.
   type Constrain sig (f :: (* -> *)) :: Constraint
   type Constrain sig f = Functor f
 
-  -- | Handle any effects in a signature by threading the algebra’s state all the way through to the continuation.
+  -- | Handle any effects in a signature by threading the algebra’s context all the way through to the continuation.
   --
   -- The handler is required to adhere to the following laws:
   --
@@ -44,7 +44,7 @@ class Constrain sig Identity => Effect sig where
   -- handler . 'fmap' (k '=<<') = handler . 'fmap' k 'Control.Monad.<=<' handler
   -- @
   --
-  -- respectively expressing that the handler does not alter the state of pure computations, and that the handler distributes over monadic composition.
+  -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
   handle
     :: (Monad m, Constrain sig f)
     => f ()
