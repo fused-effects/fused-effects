@@ -31,7 +31,7 @@ deriving instance Functor m => Functor (All m)
 
 instance Effect All where
   type Constrain All f = Applicative f
-  handle state handler (All m k) = All (handler (m <$ state)) (handler . fmap k . sequenceA)
+  handle ctx handler (All m k) = All (handler (m <$ ctx)) (handler . fmap k . sequenceA)
 
 all :: Has All sig m => m a -> m [a]
 all m = send (All m pure)
