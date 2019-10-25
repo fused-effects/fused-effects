@@ -46,13 +46,13 @@ class Constrain sig Identity => Effect sig where
   --
   -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
   handle
-    :: (Monad m, Constrain sig ctx)
+    :: (Monad m, Monad n, Constrain sig ctx)
     => ctx ()
     -> (forall x . ctx (m x) -> n (ctx x))
     -> sig m a
     -> sig n (ctx a)
   default handle
-    :: (Monad m, Generic1 (sig m), Generic1 (sig n), GEffect ctx m n (Rep1 (sig m)) (Rep1 (sig n)))
+    :: (Monad m, Monad n, Generic1 (sig m), Generic1 (sig n), GEffect ctx m n (Rep1 (sig m)) (Rep1 (sig n)))
     => ctx ()
     -> (forall x . ctx (m x) -> n (ctx x))
     -> sig m a
@@ -63,7 +63,7 @@ class Constrain sig Identity => Effect sig where
 -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
 --
 -- @since 1.0.0.0
-hmap :: (Effect sig, Functor n, Functor (sig n), Monad m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
+hmap :: (Effect sig, Monad n, Functor (sig n), Monad m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
 hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE hmap #-}
 
@@ -72,7 +72,7 @@ hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentit
 class GEffect ctx m m' rep rep' where
   -- | Generic implementation of 'handle'.
   ghandle
-    :: Monad m
+    :: (Monad m, Monad m')
     => ctx ()
     -> (forall x . ctx (m x) -> m' (ctx x))
     -> rep a
