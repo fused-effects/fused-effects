@@ -167,7 +167,6 @@ instance (Monoid w, Monad m) => Algebra (Writer w) (Strict.WriterT w m) where
   alg (Censor f m k) = Strict.censor f m >>= k
 
 
-
 class (Functor ctx, MonadTrans t) => MonadTransContext ctx t | t -> ctx where
   liftHandle :: Monad m => (ctx () -> (forall a . ctx (t m a) -> m (ctx a)) -> m (ctx a)) -> t m a
 
