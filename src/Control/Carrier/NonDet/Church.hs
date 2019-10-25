@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances #-}
 
 {- | Provides 'NonDetC', a carrier for 'NonDet' effects providing choice and failure.
 
@@ -106,6 +106,7 @@ instance MonadTrans NonDetC where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, CanHandle sig (NonDetC m)) => Algebra (NonDet :+: sig) (NonDetC m) where
+  type Context (NonDetC m) = NonDetC m
   alg (L (L Empty))      = empty
   alg (L (R (Choose k))) = k True <|> k False
   alg (R other)          = NonDetC $ \ fork leaf nil -> alg (handle (pure ()) (runNonDet (liftA2 (<|>)) runNonDetA (pure empty)) other) >>= runNonDet fork leaf nil

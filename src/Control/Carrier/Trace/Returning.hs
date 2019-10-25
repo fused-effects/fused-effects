@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for the 'Control.Effect.Trace' effect that aggregates and returns all traced values.
 --
@@ -41,5 +41,6 @@ newtype TraceC m a = TraceC (WriterC (Endo [String]) m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Algebra sig m, CanHandle sig ((,) (Endo [String]))) => Algebra (Trace :+: sig) (TraceC m) where
+  type Context (TraceC m) = ((,) (Endo [String]))
   alg (L (Trace m k)) = TraceC (tell (Endo (m :))) *> k
   alg (R other)       = TraceC (handleCoercible other)
