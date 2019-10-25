@@ -66,87 +66,6 @@ instance Algebra Pure PureC where
   {-# INLINE alg #-}
 
 
-class (Functor f, MonadTrans t) => MonadTransState f t | t -> f where
-  liftHandle :: Monad m => (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
-
-instance MonadTransState (Either e) (Except.ExceptT e) where
-  liftHandle handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
-
-instance MonadTransState Identity Identity.IdentityT where
-  liftHandle handle = Identity.IdentityT (runIdentity <$> handle (Identity ()) (fmap Identity . Identity.runIdentityT . runIdentity))
-
-instance MonadTransState Maybe Maybe.MaybeT where
-  liftHandle handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
-
-instance MonadTransState Identity (Reader.ReaderT r) where
-  liftHandle handle = Reader.ReaderT (\ r -> runIdentity <$> handle (Identity ()) (fmap Identity . flip Reader.runReaderT r . runIdentity))
-
-instance Monoid w => MonadTransState (RWSTF w s) (RWS.Lazy.RWST r w s) where
-  liftHandle handle = RWS.Lazy.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s))
-
-instance Monoid w => MonadTransState (RWSTF w s) (RWS.Strict.RWST r w s) where
-  liftHandle handle = RWS.Strict.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s))
-
-instance MonadTransState ((,) s) (Lazy.StateT s) where
-  liftHandle handle = Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Lazy.runStateT x s))
-
-instance MonadTransState ((,) s) (Strict.StateT s) where
-  liftHandle handle = Strict.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Strict.runStateT x s))
-
-instance Monoid w => MonadTransState ((,) w) (Lazy.WriterT w) where
-  liftHandle handle = Lazy.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Lazy.runWriterT x))
-
-instance Monoid w => MonadTransState ((,) w) (Strict.WriterT w) where
-  liftHandle handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
-
-handling :: (Effect eff, Constrain eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
-handling op = liftHandle (\ s dist -> handle s dist op)
-
-
-newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
-  deriving (Applicative, Functor, Monad, MonadTrans)
-
-instance MonadTransState f t => MonadTransState f (TransC t) where
-  liftHandle handle = TransC (liftHandle (\ s dist -> handle s (dist . fmap runTrans)))
-
-instance (MonadTransState f t, Constrain r f, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
-  alg (L op) = TransC (handleCoercible op)
-  alg (R op) = handling op
-
-
--- | @m@ is a carrier for @sig@ containing @eff@.
---
--- Note that if @eff@ is a sum, it will be decomposed into multiple 'Member' constraints. While this technically allows one to combine multiple unrelated effects into a single 'Has' constraint, doing so has two significant drawbacks:
---
--- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles.
---
--- 2. It defeats @ghc@’s warnings for redundant constraints, and thus can lead to a proliferation of redundant constraints as code is changed.
-type Has eff sig m = (Members eff sig, Algebra sig m)
-
--- | Construct a request for an effect to be interpreted by some handler later on.
-send :: (Member eff sig, Algebra sig m) => eff m a -> m a
-send = alg . inj
-{-# INLINE send #-}
-
-
-handle :: (Monad m, Effect eff, Constrain eff f, Member eff sig, Algebra sig n) => f () -> (forall x . f (m x) -> n (f x)) -> eff m a -> n (f a)
-handle state handler = send . thread state handler
-{-# INLINE handle #-}
-
-handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
-handleIdentity f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
-{-# INLINE handleIdentity #-}
-
--- | Thread a 'Coercible' carrier through an 'Effect'.
---
---   This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
---
--- @since 1.0.0.0
-handleCoercible :: (Monad m, Effect eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
-handleCoercible = handleIdentity coerce
-{-# INLINE handleCoercible #-}
-
-
 -- base
 
 instance Algebra (Lift IO) IO where
@@ -242,3 +161,85 @@ instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :
   alg (L (Listen m k))   = Strict.listen m >>= uncurry (flip k)
   alg (L (Censor f m k)) = Strict.censor f m >>= k
   alg (R other)          = handling other
+
+
+
+class (Functor f, MonadTrans t) => MonadTransState f t | t -> f where
+  liftHandle :: Monad m => (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
+
+instance MonadTransState (Either e) (Except.ExceptT e) where
+  liftHandle handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
+
+instance MonadTransState Identity Identity.IdentityT where
+  liftHandle handle = Identity.IdentityT (runIdentity <$> handle (Identity ()) (fmap Identity . Identity.runIdentityT . runIdentity))
+
+instance MonadTransState Maybe Maybe.MaybeT where
+  liftHandle handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
+
+instance MonadTransState Identity (Reader.ReaderT r) where
+  liftHandle handle = Reader.ReaderT (\ r -> runIdentity <$> handle (Identity ()) (fmap Identity . flip Reader.runReaderT r . runIdentity))
+
+instance Monoid w => MonadTransState (RWSTF w s) (RWS.Lazy.RWST r w s) where
+  liftHandle handle = RWS.Lazy.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s))
+
+instance Monoid w => MonadTransState (RWSTF w s) (RWS.Strict.RWST r w s) where
+  liftHandle handle = RWS.Strict.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s))
+
+instance MonadTransState ((,) s) (Lazy.StateT s) where
+  liftHandle handle = Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Lazy.runStateT x s))
+
+instance MonadTransState ((,) s) (Strict.StateT s) where
+  liftHandle handle = Strict.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Strict.runStateT x s))
+
+instance Monoid w => MonadTransState ((,) w) (Lazy.WriterT w) where
+  liftHandle handle = Lazy.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Lazy.runWriterT x))
+
+instance Monoid w => MonadTransState ((,) w) (Strict.WriterT w) where
+  liftHandle handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
+
+handling :: (Effect eff, Constrain eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
+handling op = liftHandle (\ s dist -> handle s dist op)
+
+
+newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
+  deriving (Applicative, Functor, Monad, MonadTrans)
+
+instance MonadTransState f t => MonadTransState f (TransC t) where
+  liftHandle handle = TransC (liftHandle (\ s dist -> handle s (dist . fmap runTrans)))
+
+instance (MonadTransState f t, Constrain r f, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
+  alg (L op) = TransC (handleCoercible op)
+  alg (R op) = handling op
+
+
+-- | @m@ is a carrier for @sig@ containing @eff@.
+--
+-- Note that if @eff@ is a sum, it will be decomposed into multiple 'Member' constraints. While this technically allows one to combine multiple unrelated effects into a single 'Has' constraint, doing so has two significant drawbacks:
+--
+-- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles.
+--
+-- 2. It defeats @ghc@’s warnings for redundant constraints, and thus can lead to a proliferation of redundant constraints as code is changed.
+type Has eff sig m = (Members eff sig, Algebra sig m)
+
+-- | Construct a request for an effect to be interpreted by some handler later on.
+send :: (Member eff sig, Algebra sig m) => eff m a -> m a
+send = alg . inj
+{-# INLINE send #-}
+
+
+handle :: (Monad m, Effect eff, Constrain eff f, Member eff sig, Algebra sig n) => f () -> (forall x . f (m x) -> n (f x)) -> eff m a -> n (f a)
+handle state handler = send . thread state handler
+{-# INLINE handle #-}
+
+handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
+handleIdentity f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
+{-# INLINE handleIdentity #-}
+
+-- | Thread a 'Coercible' carrier through an 'Effect'.
+--
+--   This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
+--
+-- @since 1.0.0.0
+handleCoercible :: (Monad m, Effect eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
+handleCoercible = handleIdentity coerce
+{-# INLINE handleCoercible #-}
