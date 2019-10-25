@@ -5,7 +5,7 @@
 -- @since 1.0.0.0
 module Control.Effect.Class
 ( Effect(..)
--- * Generic deriving of 'Effect' instances.
+  -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
 
