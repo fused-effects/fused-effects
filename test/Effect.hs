@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeApplications, TypeFamilies, TypeOperators, UndecidableInstances #-}
 module Effect
 ( tests
 ) where
@@ -6,12 +6,22 @@ module Effect
 import Control.Algebra
 import Control.Applicative (Alternative(..))
 import Control.Carrier.NonDet.Church
+import Control.Carrier.State.Strict
 import Control.Monad.Trans.Class
+import Data.Monoid (Sum(..))
+import Prelude hiding (all)
 import Test.Tasty
+import Test.Tasty.HUnit
 
 tests :: TestTree
 tests = testGroup "Effect"
-  []
+  [ testCase "allows effects to constrain the state functor" $ do
+    let bs = run . runAll . runState @(Sum Int) 0 $ do
+          s <- pure "hello" <|> pure "world"
+          bs <- all (foldMapA (\ (c, i) -> c <$ put (Sum @Int i)) (zip s [1..]))
+          bs <$ put (Sum @Int 1) <|> pure bs
+    bs @?= [(Sum 1, "hello"), (Sum 15, "hello"), (Sum 1, "world"), (Sum 15, "world")]
+  ]
 
 
 data All m k = forall a . All (m a) ([a] -> m k)
@@ -21,6 +31,9 @@ deriving instance Functor m => Functor (All m)
 instance Effect All where
   type Constrain All f = Applicative f
   handle state handler (All m k) = All (handler (m <$ state)) (handler . fmap k . sequenceA)
+
+all :: Has All sig m => m a -> m [a]
+all m = send (All m pure)
 
 
 runAll :: Applicative m => AllC m a -> m [a]
