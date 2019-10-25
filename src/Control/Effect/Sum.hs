@@ -24,7 +24,7 @@ data (l :+: r) (m :: * -> *) k
 infixr 4 :+:
 
 instance (Effect l, Effect r) => Effect (l :+: r) where
-  type Constrain (l :+: r) f = (Constrain l f, Constrain r f)
+  type CanHandle (l :+: r) f = (CanHandle l f, CanHandle r f)
 
 
 -- | The class of types present in a signature.
