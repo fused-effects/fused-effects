@@ -8,6 +8,7 @@ import Control.Applicative (Alternative(..))
 import Control.Carrier.NonDet.Church
 import Control.Carrier.State.Strict
 import Control.Monad.Trans.Class
+import Data.Functor.Identity
 import Data.Monoid (Sum(..))
 import Prelude hiding (all)
 import Test.Tasty
@@ -48,3 +49,14 @@ instance Algebra sig m => Algebra (All :+: NonDet :+: sig) (AllC m) where
   alg (R (L (L e))) = handleCoercible e
   alg (R (L (R c))) = handleCoercible c
   alg (R (R other)) = handleCoercible other
+
+
+data Thread m k
+  = Fork (m ()) (m k)
+  | Yield (m k)
+  deriving (Functor)
+
+instance Effect Thread where
+  type Constrain Thread f = f ~ Identity
+  handle ctx hdl (Fork m k) = Fork (runIdentity <$> (hdl (m <$ ctx))) (hdl (k <$ ctx))
+  handle ctx hdl (Yield  k) = Yield                                   (hdl (k <$ ctx))
