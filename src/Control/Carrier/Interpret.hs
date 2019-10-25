@@ -24,7 +24,9 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
+import Data.Functor.Identity (Identity(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | A @Handler@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
@@ -54,11 +56,11 @@ reify a k = unsafeCoerce (Magic k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: (HFunctor eff, Monad m)
+  :: (Effect eff, Monad m)
   => (forall x . eff m x -> m x)
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
-runInterpret f m = reify (Handler (InterpretC . f . handleCoercible)) (go m) where
+runInterpret f m = reify (Handler (InterpretC . fmap runIdentity . f . handle (Identity ()) (fmap Identity . coerce))) (go m) where
   go :: InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
 
@@ -66,7 +68,7 @@ runInterpret f m = reify (Handler (InterpretC . f . handleCoercible)) (go m) whe
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: (HFunctor eff, Monad m)
+  :: (Effect eff, Monad m)
   => (forall x . s -> eff (StateC s m) x -> m (s, x))
   -> s
   -> (forall t . Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
@@ -88,6 +90,6 @@ instance MonadUnliftIO m => MonadUnliftIO (InterpretC s sig m) where
   withRunInIO inner = InterpretC $ withRunInIO $ \run -> inner (\ (InterpretC m) -> run m)
   {-# INLINE withRunInIO #-}
 
-instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
+instance (Effect eff, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
   alg (L eff)   = runHandler (getConst (reflect @s)) eff
-  alg (R other) = InterpretC (alg (handleCoercible other))
+  alg (R other) = InterpretC (handleCoercible other)

@@ -31,7 +31,7 @@ data Teletype m k
   = Read (String -> m k)
   | Write String (m k)
   deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving anyclass (Effect)
 
 read :: Has Teletype sig m => m String
 read = send (Read pure)
@@ -49,7 +49,7 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
   alg (L (Read    k)) = liftIO getLine      >>= k
   alg (L (Write s k)) = liftIO (putStrLn s) >>  k
-  alg (R other)       = TeletypeIOC (alg (handleCoercible other))
+  alg (R other)       = TeletypeIOC (handleCoercible other)
 
 
 runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
@@ -58,11 +58,11 @@ runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
   deriving newtype (Applicative, Functor, Monad)
 
-instance (Algebra sig m, Effect sig) => Algebra (Teletype :+: sig) (TeletypeRetC m) where
+instance Algebra sig m => Algebra (Teletype :+: sig) (TeletypeRetC m) where
   alg (L (Read    k)) = do
     i <- TeletypeRetC get
     case i of
       []  -> k ""
       h:t -> TeletypeRetC (put t) *> k h
   alg (L (Write s k)) = TeletypeRetC (tell [s]) *> k
-  alg (R other)       = TeletypeRetC (alg (R (R (handleCoercible other))))
+  alg (R other)       = TeletypeRetC (handleCoercible other)

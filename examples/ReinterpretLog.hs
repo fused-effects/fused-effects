@@ -108,7 +108,7 @@ runApplication =
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a (m k)
   deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving anyclass (Effect)
 
 -- Log an 'a'.
 log :: Has (Log a) sig m
@@ -144,7 +144,7 @@ instance
         runLogStdout k
 
     R other ->
-      LogStdoutC (alg (hmap runLogStdout other))
+      LogStdoutC (handleCoercible other)
 
 -- The 'LogStdoutC' runner.
 runLogStdout ::
@@ -179,7 +179,7 @@ instance
         unReinterpretLogC k
 
     R other ->
-      ReinterpretLogC (alg (R (handleCoercible other)))
+      ReinterpretLogC (handleCoercible other)
 
 -- The 'ReinterpretLogC' runner.
 reinterpretLog ::
@@ -199,9 +199,7 @@ newtype CollectLogMessagesC s m a
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
-     ( Algebra sig m
-     , Effect sig
-     )
+     Algebra sig m
      -- ...the 'CollectLogMessagesC s m' monad can interpret 'Log s :+: sig'
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
@@ -216,7 +214,7 @@ instance
         unCollectLogMessagesC k
 
     R other ->
-      CollectLogMessagesC (alg (R (handleCoercible other)))
+      CollectLogMessagesC (handleCoercible other)
 
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages ::

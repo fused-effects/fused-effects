@@ -29,6 +29,6 @@ runThrow (ThrowC m) = runError m
 newtype ThrowC e m a = ThrowC (ErrorC e m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Algebra sig m, Effect sig) => Algebra (Throw e :+: sig) (ThrowC e m) where
+instance Algebra sig m => Algebra (Throw e :+: sig) (ThrowC e m) where
   alg (L (Throw e)) = ThrowC (throwError e)
-  alg (R other)     = ThrowC (alg (R (handleCoercible other)))
+  alg (R other)     = ThrowC (handleCoercible other)

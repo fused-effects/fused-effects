@@ -44,4 +44,4 @@ newtype HasEnv env m a = HasEnv { runHasEnv :: m a }
 
 -- | The 'Carrier' instance for 'HasEnv' simply delegates all effects to the underlying carrier.
 instance Algebra sig m => Algebra sig (HasEnv env m) where
-  alg = HasEnv . alg . handleCoercible
+  alg = HasEnv . handleCoercible

@@ -3,3 +3,4 @@
 dist-newstyle
 stack.yaml
 cabal.project.local
+.ghci
