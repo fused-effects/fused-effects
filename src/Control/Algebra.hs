@@ -104,11 +104,10 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 
 -- transformers
 
-instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
+instance Algebra sig m => Algebra (Error e) (Except.ExceptT e m) where
   type Context (Except.ExceptT e m) = Either e
-  alg (L (L (Throw e)))     = Except.throwE e
-  alg (L (R (Catch m h k))) = Except.catchE m h >>= k
-  alg (R other)             = handling other
+  alg (L (Throw e))     = Except.throwE e
+  alg (R (Catch m h k)) = Except.catchE m h >>= k
 
 instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . handleCoercible

@@ -60,5 +60,5 @@ instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) 
   -- NB: 'send' (& thus 'handleCoercible') can’t send sums, so we decompose the sum manually.
   alg (L (L op)) = ErrorC (handleCoercible op)
   alg (L (R op)) = ErrorC (handleCoercible op)
-  alg (R op)     = ErrorC (handleCoercible op)
+  alg (R op)     = handling op
   {-# INLINE alg #-}
