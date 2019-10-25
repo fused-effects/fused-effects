@@ -29,7 +29,6 @@ jobs:
 
     - name: Build
       run: |
-        export PATH="/opt/ghc/bin:$PATH"
         cabal v2-build --config-file=cabal.config
         cabal v2-haddock --config-file=cabal.config
         cabal v2-sdist --config-file=cabal.config
@@ -37,6 +36,5 @@ jobs:
 
     - name: Run tests
       run: |
-        export PATH="/opt/ghc/bin:$PATH"
         cabal v2-run --config-file=cabal.config test
         cabal v2-run --config-file=cabal.config examples
