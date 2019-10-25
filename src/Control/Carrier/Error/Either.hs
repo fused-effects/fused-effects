@@ -20,6 +20,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Except
+import Data.Coerce
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
@@ -50,6 +51,9 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 
 -- | 'ErrorC' passes 'MonadPlus' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
+
+instance MonadTransContext (Either e) (ErrorC e) where
+  liftHandle handle = ErrorC (liftHandle (\ ctx dst -> handle ctx (dst . coerce)))
 
 instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (ErrorC e m) where
   type Context (ErrorC e m) = Either e
