@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
-
 {- | An effect that adds a mutable, updatable state value to a given computation.
 
 Not all computations require a full-fledged state effect: read-only state is better served by 'Control.Effect.Reader.Reader', and append-only state without reads is better served by 'Control.Effect.Writer.Writer'.
@@ -12,6 +10,8 @@ Predefined carriers:
 * "Control.Monad.Trans.RWS.Strict"
 * "Control.Monad.Trans.State.Lazy"
 * "Control.Monad.Trans.State.Strict"
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.State
@@ -23,23 +23,13 @@ module Control.Effect.State
 , modify
 , modifyLazy
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier
-import GHC.Generics (Generic1)
-
--- | @since 0.1.0.0
-data State s m k
-  = Get (s -> m k)
-  | Put s (m k)
-  deriving (Functor, Generic1)
-
-instance HFunctor (State s)
-instance Effect   (State s)
-
+import Control.Algebra
+import Control.Effect.State.Internal (State(..))
 
 -- | Get the current state value.
 --

@@ -8,6 +8,8 @@ Predefined carriers:
 
 * "Control.Carrier.Pure"
 * 'Data.Functor.Identity.Identity'
+
+@since 0.3.0.0
 -}
 
 module Control.Effect.Pure
@@ -22,5 +24,4 @@ import GHC.Generics (Generic1)
 data Pure (m :: * -> *) k
   deriving (Functor, Generic1)
 
-instance HFunctor Pure
-instance Effect   Pure
+instance Effect Pure

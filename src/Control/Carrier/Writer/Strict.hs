@@ -1,8 +1,10 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 {- | A carrier for 'Writer' effects. This carrier performs its append operations strictly and thus avoids the space leaks inherent in lazy writer monads.
 
 This implementation is based on a post Gabriel Gonzalez made to the Haskell mailing list: <https://mail.haskell.org/pipermail/libraries/2013-March/019528.html>
+
+@since 1.0.0.0
 -}
 
 module Control.Carrier.Writer.Strict
@@ -14,8 +16,8 @@ module Control.Carrier.Writer.Strict
 , module Control.Effect.Writer
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier
 import Control.Carrier.State.Strict
 import Control.Effect.Writer
 import Control.Monad (MonadPlus(..))
@@ -33,7 +35,7 @@ import Control.Monad.Trans.Class
 -- 'runWriter' ('pure' a) = 'pure' ('mempty', a)
 -- @
 runWriter :: Monoid w => WriterC w m a -> m (w, a)
-runWriter = runState mempty . runWriterC
+runWriter (WriterC m) = runState mempty m
 {-# INLINE runWriter #-}
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
@@ -47,25 +49,22 @@ execWriter = fmap fst . runWriter
 
 
 -- | A space-efficient carrier for 'Writer' effects, implemented atop "Control.Carrier.State.Strict".
-newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
+--
+-- @since 1.0.0.0
+newtype WriterC w m a = WriterC (StateC w m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Monoid w, Carrier sig m, Effect sig) => Carrier (Writer w :+: sig) (WriterC w m) where
-  eff (L (Tell w     k)) = WriterC $ do
-    modify (`mappend` w)
-    runWriterC k
-  eff (L (Listen   m k)) = WriterC $ do
-    w <- get
-    put (mempty :: w)
-    a <- runWriterC m
-    w' <- get
-    modify (mappend (w :: w))
-    runWriterC (k w' a)
-  eff (L (Censor f m k)) = WriterC $ do
-    w <- get
-    put (mempty :: w)
-    a <- runWriterC m
-    modify (mappend w . f)
-    runWriterC (k a)
-  eff (R other)          = WriterC (eff (R (handleCoercible other)))
-  {-# INLINE eff #-}
+instance (Monoid w, Algebra sig m) => Algebra (Writer w :+: sig) (WriterC w m) where
+  alg (L (Tell w     k)) = WriterC (modify (`mappend` w)) >> k
+  alg (L (Listen   m k)) = WriterC (StateC (\ w -> do
+    (w', a) <- runWriter m
+    let w'' = mappend w w'
+    w'' `seq` pure (w'', (w', a))))
+    >>= uncurry k
+  alg (L (Censor f m k)) = WriterC (StateC (\ w -> do
+    (w', a) <- runWriter m
+    let w'' = mappend w (f w')
+    w'' `seq` pure (w'', a)))
+    >>= k
+  alg (R other)          = WriterC (handleCoercible other)
+  {-# INLINE alg #-}

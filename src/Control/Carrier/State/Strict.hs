@@ -3,6 +3,8 @@
 {- | A carrier for the 'State' effect. It evaluates its inner state strictly, which is the correct choice for the majority of use cases.
 
 Note that the parameter order in 'runState', 'evalState', and 'execState' is reversed compared the equivalent functions provided by @transformers@. This is an intentional decision made to enable the composition of effect handlers with '.' without invoking 'flip'.
+
+@since 1.0.0.0
 -}
 module Control.Carrier.State.Strict
 ( -- * Strict state carrier
@@ -14,8 +16,8 @@ module Control.Carrier.State.Strict
 , module Control.Effect.State
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
@@ -37,7 +39,7 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runState :: s -> StateC s m a -> m (s, a)
-runState s x = runStateC x s
+runState s (StateC runStateC) = runStateC s
 {-# INLINE[3] runState #-}
 
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
@@ -64,7 +66,7 @@ execState s = fmap fst . runState s
 
 
 -- | @since 1.0.0.0
-newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
+newtype StateC s m a = StateC (s -> m (s, a))
   deriving (Functor)
 
 instance Monad m => Applicative (StateC s m) where
@@ -73,8 +75,7 @@ instance Monad m => Applicative (StateC s m) where
   StateC f <*> StateC a = StateC $ \ s -> do
     (s', f') <- f s
     (s'', a') <- a s'
-    let fa = f' a'
-    fa `seq` pure (s'', fa)
+    pure (s'', f' a')
   {-# INLINE (<*>) #-}
   m *> k = m >>= \_ -> k
   {-# INLINE (*>) #-}
@@ -88,8 +89,7 @@ instance (Alternative m, Monad m) => Alternative (StateC s m) where
 instance Monad m => Monad (StateC s m) where
   StateC m >>= f = StateC $ \ s -> do
     (s', a) <- m s
-    let fa = f a
-    fa `seq` runState s' fa
+    runState s' (f a)
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
@@ -110,8 +110,8 @@ instance MonadTrans (StateC s) where
   lift m = StateC (\ s -> (,) s <$> m)
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (State s :+: sig) (StateC s m) where
-  eff (L (Get   k)) = StateC (\ s -> runState s (k s))
-  eff (L (Put s k)) = StateC (\ _ -> runState s k)
-  eff (R other)     = StateC (\ s -> eff (handle (s, ()) (uncurry runState) other))
-  {-# INLINE eff #-}
+instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
+  alg (L (Get   k)) = StateC (\ s -> runState s (k s))
+  alg (L (Put s k)) = StateC (\ _ -> runState s k)
+  alg (R other)     = StateC (\ s -> alg (handle (s, ()) (uncurry runState) other))
+  {-# INLINE alg #-}

@@ -5,6 +5,7 @@ module Main
 import qualified Choose
 import qualified Cull
 import qualified Cut
+import qualified Cut.Church
 import qualified Empty
 import qualified Error
 import qualified Fresh
@@ -22,6 +23,7 @@ main = defaultMain $ testGroup "unit tests"
   [ Choose.tests
   , Cull.tests
   , Cut.tests
+  , Cut.Church.tests
   , Empty.tests
   , Error.tests
   , Fresh.tests

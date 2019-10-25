@@ -1,35 +1,23 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleContexts, StandaloneDeriving #-}
-
 {- | An effect modelling catchable failure when used with 'Control.Effect.Throw.Throw'.
 
 Predefined carriers:
 
 * "Control.Carrier.Error.Either" (with 'Control.Effect.Throw.Throw')
+
+@since 1.0.0.0
 -}
 module Control.Effect.Catch
 ( -- * Catch effect
   Catch(..)
 , catchError
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier
-
--- | 'Catch' effects can be used alongside 'Control.Effect.Throw.Throw' to provide recoverable exceptions.
-data Catch e m k
-  = forall b . Catch (m b) (e -> m b) (b -> m k)
-
-deriving instance Functor m => Functor (Catch e m)
-
-instance HFunctor (Catch e) where
-  hmap f (Catch m h k) = Catch (f m) (f . h) (f . k)
-
-instance Effect (Catch e) where
-  handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
-
+import Control.Algebra
+import Control.Effect.Catch.Internal (Catch(..))
 
 -- | Run a computation which can throw errors with a handler to run on error.
 --

@@ -24,6 +24,14 @@
 
 ## Backwards-incompatible changes
 
+- Renames the `Carrier` class to `Algebra` and its `eff` method to `alg`, and moved the responsibilities of `Control.Carrier` to `Control.Algebra`. This makes the library more consistent with the literature and encourages a style of naming that focuses on morphisms rather than objects. ([#285](https://github.com/fused-effects/fused-effects/pull/285), [#294](https://github.com/fused-effects/fused-effects/pull/294))
+
+- Removes the `HFunctor` class. Effects now need only provide an instance of `Effect`. ([#295](https://github.com/fused-effects/fused-effects/pull/295))
+
+- Changes `handleCoercible` to invoke `send`, simplifying the idiom for reinterpreting effects. ([#295](https://github.com/fused-effects/fused-effects/pull/295))
+
+- Defines a `handleIdentity` handler for effects which do not produce output wrapped in a functor. ([#295](https://github.com/fused-effects/fused-effects/pull/295))
+
 - Fixes unlawful behaviour in the `Applicative` instance for `ErrorC`, which had different behaviour between `<*>` and `ap` in the presence of a divergent rhs. In order to accomplish this, `ErrorC` has been defined as a wrapper around `Control.Monad.Trans.Except.ExceptT`. ([#228](https://github.com/fused-effects/fused-effects/pull/228))
 
 - Improves the performance of `runInterpret` using reflection, changing its signature slightly ([#193](https://github.com/fused-effects/fused-effects/pull/193), h/t [@ocharles](https://github.com/ocharles)).

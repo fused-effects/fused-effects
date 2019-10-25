@@ -12,12 +12,12 @@ module Control.Effect.Fresh
   Fresh(..)
 , fresh
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier
+import Control.Algebra
 import GHC.Generics (Generic1)
 
 -- | @since 0.1.0.0
@@ -25,8 +25,7 @@ data Fresh m k
   = Fresh (Int -> m k)
   deriving (Functor, Generic1)
 
-instance HFunctor Fresh
-instance Effect   Fresh
+instance Effect Fresh
 
 
 -- | Produce a fresh (i.e. unique) 'Int'.

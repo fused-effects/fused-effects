@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts, KindSignatures #-}
-
 {- | An effect modelling nondeterminism without choice (success or failure).
 
 This can be seen as similar to 'Control.Effect.Fail.Fail', but without an error message. The 'Control.Effect.NonDet.NonDet' effect is the composition of 'Empty' and 'Control.Effect.Choice.Choice'.
@@ -8,6 +6,8 @@ Predefined carriers:
 
 * "Control.Carrier.Empty.Maybe".
 * If 'Empty' is the last effect in a stack, it can be interpreted directly to a 'Maybe'.
+
+@since 1.0.0.0
 -}
 
 module Control.Effect.Empty
@@ -16,20 +16,13 @@ module Control.Effect.Empty
 , empty
 , guard
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier
-import GHC.Generics (Generic1)
-
--- | @since 1.0.0.0
-data Empty (m :: * -> *) k = Empty
-  deriving (Functor, Generic1)
-
-instance HFunctor Empty
-instance Effect   Empty
+import Control.Algebra
+import Control.Effect.Empty.Internal (Empty(..))
 
 -- | Abort the computation.
 --

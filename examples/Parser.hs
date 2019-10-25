@@ -3,7 +3,7 @@ module Parser
 ( example
 ) where
 
-import Control.Carrier
+import Control.Algebra
 import Control.Carrier.Cut.Church
 import Control.Carrier.NonDet.Church
 import Control.Carrier.State.Strict
@@ -79,7 +79,7 @@ example = testGroup "parser"
 
 data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
   deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving anyclass (Effect)
 
 satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char
 satisfy p = send (Satisfy p pure)
@@ -102,14 +102,14 @@ parse input = (>>= exhaustive) . runState input . runParseC
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving newtype (Alternative, Applicative, Functor, Monad)
 
-instance (Alternative m, Carrier sig m, Effect sig) => Carrier (Symbol :+: sig) (ParseC m) where
-  eff (L (Satisfy p k)) = do
+instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
+  alg (L (Satisfy p k)) = do
     input <- ParseC get
     case input of
       c:cs | p c -> ParseC (put cs) *> k c
       _          -> empty
-  eff (R other)         = ParseC (eff (R (handleCoercible other)))
-  {-# INLINE eff #-}
+  alg (R other)         = ParseC (handleCoercible other)
+  {-# INLINE alg #-}
 
 
 expr :: (Alternative m, Has Cut sig m, Has Symbol sig m) => m Int

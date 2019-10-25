@@ -4,7 +4,7 @@ module Fusion
 ( tests
 ) where
 
-import Control.Carrier
+import Control.Algebra
 import Control.Carrier.Error.Either
 import Control.Carrier.State.Strict
 import Test.Inspection as Inspection
@@ -22,8 +22,8 @@ tests = testGroup "fusion"
   , testCase "eliminates catch and throw" $
     failureOf $(inspectTest $ 'throwing `doesNotUse` ''ErrorC)
     @?= Nothing
-  , testCase "eliminates calls to eff" $
-    failureOf $(inspectTest $ 'countDown `doesNotUse` 'eff)
+  , testCase "eliminates calls to alg" $
+    failureOf $(inspectTest $ 'countDown `doesNotUse` 'alg)
     @?= Nothing
   ]
 

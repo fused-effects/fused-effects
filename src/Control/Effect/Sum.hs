@@ -1,6 +1,8 @@
 {-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, KindSignatures, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
 
 -- | Operations on /sums/, combining effects into a /signature/.
+--
+-- @since 0.1.0.0
 module Control.Effect.Sum
 ( -- * Membership
   Member(..)
@@ -21,8 +23,7 @@ data (f :+: g) (m :: * -> *) k
 
 infixr 4 :+:
 
-instance (HFunctor f, HFunctor g) => HFunctor (f :+: g)
-instance (Effect f, Effect g)     => Effect   (f :+: g)
+instance (Effect f, Effect g) => Effect (f :+: g)
 
 
 -- | The class of types present in a signature.
@@ -30,6 +31,8 @@ instance (Effect f, Effect g)     => Effect   (f :+: g)
 --   This is based on Wouter Swierstra’s design described in [Data types à la carte](http://www.cs.ru.nl/~W.Swierstra/Publications/DataTypesALaCarte.pdf). As described therein, overlapping instances are required in order to distinguish e.g. left-occurrence from right-recursion.
 --
 --   It should not generally be necessary for you to define new 'Member' instances, but these are not specifically prohibited if you wish to get creative.
+--
+-- @since 0.1.0.0
 class Member (sub :: (* -> *) -> (* -> *)) sup where
   -- | Inject a member of a signature into the signature.
   inj :: sub m a -> sup m a
@@ -61,7 +64,9 @@ instance {-# OVERLAPPABLE #-}
 
 -- | Decompose sums on the left into multiple 'Member' constraints.
 --
--- Note that while this, and by extension 'Control.Carrier.Has', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
+-- Note that while this, and by extension 'Control.Algebra.Has', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
+--
+-- @since 1.0.0.0
 type family Members sub sup :: Constraint where
   Members (l :+: r) u = (Members l u, Members r u)
   Members t         u = Member t u

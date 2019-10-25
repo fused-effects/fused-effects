@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Fresh.Strict
 ( -- * Fresh carrier
   runFresh
@@ -10,8 +12,8 @@ module Control.Carrier.Fresh.Strict
 , module Control.Effect.Fresh
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier
 import Control.Carrier.State.Strict
 import Control.Effect.Fresh
 import Control.Monad (MonadPlus(..))
@@ -31,7 +33,7 @@ import Control.Monad.Trans.Class
 --
 -- @since 0.1.0.0
 runFresh :: Int -> FreshC m a -> m (Int, a)
-runFresh n = runState n . runFreshC
+runFresh n (FreshC m) = runState n m
 
 -- | Run a 'Fresh' effect counting up from an initial value, and forgetting the final value.
 --
@@ -44,16 +46,13 @@ runFresh n = runState n . runFreshC
 --
 -- @since 1.0.0.0
 evalFresh :: Functor m => Int -> FreshC m a -> m a
-evalFresh n = evalState n . runFreshC
+evalFresh n (FreshC m) = evalState n m
 
 -- | @since 1.0.0.0
-newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
+newtype FreshC m a = FreshC (StateC Int m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Carrier sig m, Effect sig) => Carrier (Fresh :+: sig) (FreshC m) where
-  eff (L (Fresh   k)) = FreshC $ do
-    i <- get
-    put (succ i)
-    runFreshC (k i)
-  eff (R other)       = FreshC (eff (R (handleCoercible other)))
-  {-# INLINE eff #-}
+instance Algebra sig m => Algebra (Fresh :+: sig) (FreshC m) where
+  alg (L (Fresh k)) = FreshC (get <* modify (+ (1 :: Int))) >>= k
+  alg (R other)     = FreshC (handleCoercible other)
+  {-# INLINE alg #-}

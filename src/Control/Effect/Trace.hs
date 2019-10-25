@@ -7,6 +7,8 @@ Predefined carriers:
 * "Control.Carrier.Trace.Printing", which logs to stderr in a 'Control.Monad.IO.Class.MonadIO' context.
 * "Control.Carrier.Trace.Returning", which aggregates all traces in a @[String].
 * "Control.Carrier.Trace.Ignoring", which discards all traced values.
+
+@since 0.1.0.0
 -}
 
 module Control.Effect.Trace
@@ -14,12 +16,12 @@ module Control.Effect.Trace
   Trace(..)
 , trace
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier
+import Control.Algebra
 import GHC.Generics (Generic1)
 
 -- | @since 0.1.0.0
@@ -29,8 +31,7 @@ data Trace m k = Trace
   }
   deriving (Functor, Generic1)
 
-instance HFunctor Trace
-instance Effect   Trace
+instance Effect Trace
 
 -- | Append a message to the trace log.
 --

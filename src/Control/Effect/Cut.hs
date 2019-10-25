@@ -7,6 +7,8 @@ Computations that signal failure with 'cutfail' prevent backtracking within the 
 Predefined carriers:
 
 * "Control.Carrier.Cut.Church"
+
+@since 0.1.2.0
 -}
 
 module Control.Effect.Cut
@@ -16,13 +18,13 @@ module Control.Effect.Cut
 , call
 , cut
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier
 
 -- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
 --
@@ -32,11 +34,6 @@ data Cut m k
   | forall a . Call (m a) (a -> m k)
 
 deriving instance Functor m => Functor (Cut m)
-
-instance HFunctor Cut where
-  hmap _ Cutfail    = Cutfail
-  hmap f (Call m k) = Call (f m) (f . k)
-  {-# INLINE hmap #-}
 
 instance Effect Cut where
   handle _     _       Cutfail    = Cutfail
@@ -50,7 +47,6 @@ instance Effect Cut where
 -- @
 -- 'cutfail' '>>=' k = 'cutfail'
 -- @
---
 -- @
 -- 'cutfail' '<|>' m = 'cutfail'
 -- @

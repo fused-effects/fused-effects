@@ -1,7 +1,8 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Reader' effects.
-
+--
+-- @since 1.0.0.0
 module Control.Carrier.Reader
 ( -- * Reader carrier
   runReader
@@ -10,8 +11,8 @@ module Control.Carrier.Reader
 , module Control.Effect.Reader
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier
 import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
@@ -34,11 +35,11 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.0.0
 runReader :: r -> ReaderC r m a -> m a
-runReader r c = runReaderC c r
+runReader r (ReaderC runReaderC) = runReaderC r
 {-# INLINE runReader #-}
 
 -- | @since 1.0.0.0
-newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
+newtype ReaderC r m a = ReaderC (r -> m a)
   deriving (Functor)
 
 instance Applicative m => Applicative (ReaderC r m) where
@@ -85,8 +86,8 @@ instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
   withRunInIO inner = ReaderC $ \r -> withRunInIO $ \go -> inner (go . runReader r)
   {-# INLINE withRunInIO #-}
 
-instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
-  eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
-  eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
-  eff (R other)         = ReaderC (\ r -> eff (hmap (runReader r) other))
-  {-# INLINE eff #-}
+instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m) where
+  alg (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
+  alg (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
+  alg (R other)         = ReaderC (\ r -> handleIdentity (runReader r) other)
+  {-# INLINE alg #-}

@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Cull' and 'NonDet' effects used in tandem (@Cull :+: NonDet@).
+--
+-- @since 1.0.0.0
 module Control.Carrier.Cull.Church
 ( -- * Cull carrier
   runCull
@@ -13,8 +15,8 @@ module Control.Carrier.Cull.Church
 , module Control.Effect.NonDet
 ) where
 
+import Control.Algebra
 import Control.Applicative (liftA2)
-import Control.Carrier
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
 import Control.Effect.Cull
@@ -24,11 +26,11 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | Run a 'Cull' effect with the supplied continuations for '<|>', 'pure', and 'empty'. Branches outside of any 'cull' block will not be pruned.
+-- | Run a 'Cull' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'. Branches outside of any 'cull' block will not be pruned.
 --
 -- @since 1.0.0.0
 runCull :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CullC m a -> m b
-runCull fork leaf nil = runNonDet fork leaf nil . runReader False . runCullC
+runCull fork leaf nil (CullC m) = runNonDet fork leaf nil (runReader False m)
 
 -- | Run a 'Cull' effect, interpreting the result into an 'Alternative' functor. Choice is handled with '<|>', embedding with 'pure', and failure with 'empty'.
 --
@@ -36,25 +38,25 @@ runCull fork leaf nil = runNonDet fork leaf nil . runReader False . runCullC
 runCullA :: (Alternative f, Applicative m) => CullC m a -> m (f a)
 runCullA = runCull (liftA2 (<|>)) (pure . pure) (pure empty)
 
--- | Run a 'Cull' effect, mapping the result into a 'Monoid'.
+-- | Run a 'Cull' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
 runCullM leaf = runCull (liftA2 mappend) (pure . leaf) (pure mempty)
 
 -- | @since 1.0.0.0
-newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
+newtype CullC m a = CullC (ReaderC Bool (NonDetC m) a)
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
 instance Alternative (CullC m) where
   empty = CullC empty
   {-# INLINE empty #-}
-  l <|> r = CullC $ ReaderC $ \ cull ->
+  CullC l <|> CullC r = CullC $ ReaderC $ \ cull ->
     if cull then
       NonDetC $ \ fork leaf nil ->
-        runNonDetC (runReader cull (runCullC l)) fork leaf (runNonDetC (runReader cull (runCullC r)) fork leaf nil)
+        runNonDet fork leaf (runNonDet fork leaf nil (runReader cull r)) (runReader cull l)
     else
-      runReader cull (runCullC l) <|> runReader cull (runCullC r)
+      runReader cull l <|> runReader cull r
   {-# INLINE (<|>) #-}
 
 -- | Separate fixpoints are computed for each branch.
@@ -66,9 +68,9 @@ instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
 
-instance (Carrier sig m, Effect sig) => Carrier (Cull :+: NonDet :+: sig) (CullC m) where
-  eff (L (Cull m k))         = CullC (local (const True) (runCullC m)) >>= k
-  eff (R (L (L Empty)))      = empty
-  eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CullC (eff (R (R (handleCoercible other))))
-  {-# INLINE eff #-}
+instance Algebra sig m => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
+  alg (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
+  alg (R (L (L Empty)))      = empty
+  alg (R (L (R (Choose k)))) = k True <|> k False
+  alg (R (R other))          = CullC (handleCoercible other)
+  {-# INLINE alg #-}

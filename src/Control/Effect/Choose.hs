@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | An effect modelling nondeterminism without failure (one or more successful results).
 
@@ -8,6 +8,8 @@ Predefined carriers:
 
 * "Control.Carrier.Choose.Church".
 * If 'Choose' is the last effect in a stack, it can be interpreted directly to a 'NonEmpty'.
+
+@since 1.0.0.0
 -}
 
 module Control.Effect.Choose
@@ -21,25 +23,17 @@ module Control.Effect.Choose
   -- * Choosing semigroup
 , Choosing(..)
   -- * Re-exports
-, Carrier
+, Algebra
 , Has
 , run
 ) where
 
-import Control.Carrier
+import Control.Algebra
+import Control.Effect.Choose.Internal (Choose(..))
 import Control.Effect.Empty
 import Data.Bool (bool)
 import Data.List.NonEmpty (NonEmpty (..))
 import qualified Data.Semigroup as S
-import GHC.Generics (Generic1)
-
--- | @since 1.0.0.0
-newtype Choose m k
-  = Choose (Bool -> m k)
-  deriving (Functor, Generic1)
-
-instance HFunctor Choose
-instance Effect   Choose
 
 -- | Nondeterministically choose between two computations.
 --
@@ -58,7 +52,7 @@ instance Effect   Choose
 --
 -- @since 1.0.0.0
 (<|>) :: Has Choose sig m => m a -> m a -> m a
-(<|>) a b = send (Choose (bool b a))
+a <|> b = send (Choose (bool b a))
 
 infixl 3 <|>
 

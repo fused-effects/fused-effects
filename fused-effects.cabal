@@ -44,10 +44,9 @@ library
   import:         common
   hs-source-dirs: src
   exposed-modules:
+    Control.Algebra
     -- Carriers
-    Control.Carrier
     Control.Carrier.Choose.Church
-    Control.Carrier.Class
     Control.Carrier.Cull.Church
     Control.Carrier.Cut.Church
     Control.Carrier.Empty.Maybe
@@ -85,9 +84,19 @@ library
     Control.Effect.Throw
     Control.Effect.Trace
     Control.Effect.Writer
+  other-modules:
+    Control.Effect.Catch.Internal
+    Control.Effect.Choose.Internal
+    Control.Effect.Empty.Internal
+    Control.Effect.Error.Internal
+    Control.Effect.Lift.Internal
+    Control.Effect.NonDet.Internal
+    Control.Effect.Reader.Internal
+    Control.Effect.State.Internal
+    Control.Effect.Throw.Internal
+    Control.Effect.Writer.Internal
   build-depends:
       base           >= 4.9 && < 4.14
-    , deepseq       ^>= 1.4.3
     , unliftio-core ^>= 0.1.2
     , transformers   >= 0.4 && < 0.6
 
@@ -120,11 +129,15 @@ test-suite test
     Choose
     Cull
     Cut
+    Cut.Church
     Empty
     Error
+    Fail
     Fresh
     Fusion
     Gen
+    Monad
+    MonadFix
     NonDet
     NonDet.Church
     Reader

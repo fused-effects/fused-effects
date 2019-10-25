@@ -1,6 +1,8 @@
 {-# LANGUAGE EmptyCase, MultiParamTypeClasses #-}
 
 -- | A carrier for pure effects, used to kick off a stack of effects with 'run'.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Pure
 ( -- * Pure carrier
   run
@@ -10,7 +12,6 @@ module Control.Carrier.Pure
 ) where
 
 import Control.Applicative
-import Control.Carrier.Class
 import Control.Effect.Pure
 import Control.Monad.Fix
 import Data.Coerce
@@ -19,11 +20,11 @@ import Data.Coerce
 --
 -- @since 1.0.0.0
 run :: PureC a -> a
-run = runPureC
+run (PureC a) = a
 {-# INLINE run #-}
 
 -- | @since 1.0.0.0
-newtype PureC a = PureC { runPureC :: a }
+newtype PureC a = PureC a
   deriving (Eq, Show)
 
 instance Functor PureC where
@@ -57,9 +58,5 @@ instance Monad PureC where
   {-# INLINE (>>=) #-}
 
 instance MonadFix PureC where
-  mfix f = PureC (fix (runPureC . f))
+  mfix f = PureC (fix (run . f))
   {-# INLINE mfix #-}
-
-instance Carrier Pure PureC where
-  eff v = case v of {}
-  {-# INLINE eff #-}
