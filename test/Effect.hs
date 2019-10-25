@@ -4,7 +4,6 @@ module Effect
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
 import Control.Carrier.NonDet.Church
 import Control.Carrier.State.Strict
 import Control.Monad.Trans.Class
