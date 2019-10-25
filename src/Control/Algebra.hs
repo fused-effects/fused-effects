@@ -148,11 +148,10 @@ instance Monad m => Algebra (State s) (Strict.StateT s m) where
   alg (Get   k) = Strict.get >>= k
   alg (Put s k) = Strict.put s *> k
 
-instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Lazy.WriterT w m) where
-  alg (L (Tell w k))     = Lazy.tell w *> k
-  alg (L (Listen m k))   = Lazy.listen m >>= uncurry (flip k)
-  alg (L (Censor f m k)) = Lazy.censor f m >>= k
-  alg (R other)          = handling other
+instance (Monoid w, Monad m) => Algebra (Writer w) (Lazy.WriterT w m) where
+  alg (Tell w k)     = Lazy.tell w *> k
+  alg (Listen m k)   = Lazy.listen m >>= uncurry (flip k)
+  alg (Censor f m k) = Lazy.censor f m >>= k
 
 instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Strict.WriterT w m) where
   alg (L (Tell w k))     = Strict.tell w *> k
