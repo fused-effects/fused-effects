@@ -33,7 +33,7 @@ class Constrain sig Identity => Effect sig where
   type Constrain sig (ctx :: (* -> *)) :: Constraint
   type Constrain sig ctx = Functor ctx
 
-  -- | Handle any effects in a signature by threading the algebra’s context all the way through to the continuation.
+  -- | Handle any effects in a signature by threading the algebra’s handler all the way through to the continuation, starting from some initial context.
   --
   -- The handler is required to adhere to the following laws:
   --
