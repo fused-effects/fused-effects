@@ -10,6 +10,7 @@ module Control.Algebra
 ( Algebra(..)
 , MonadTransState(..)
 , handling
+, CompC(..)
 , TransC(..)
 , Has
 , send
@@ -194,6 +195,10 @@ instance Monoid w => MonadTransState ((,) w) (Strict.WriterT w) where
 
 handling :: (Effect eff, Constrain eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
 handling op = liftHandle (\ s dist -> handle s dist op)
+
+
+newtype CompC m n a = CompC { runComp :: m (n a) }
+  deriving (Functor)
 
 
 newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
