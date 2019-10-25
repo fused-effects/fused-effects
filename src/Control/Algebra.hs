@@ -243,7 +243,7 @@ handle state handler = send . thread state handler
 --
 -- @since 1.0.0.0
 handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
-handleIdentity f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
+handleIdentity f op = liftIdentity (\ ctx dst -> handle ctx dst op) f
 {-# INLINE handleIdentity #-}
 
 -- | Thread a 'Coercible' carrier through an 'Effect'.
