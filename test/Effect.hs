@@ -23,6 +23,9 @@ instance Effect (Try e) where
   type Constrain (Try e) f = Applicative f
   handle state handler (Try m k) = Try (handler (m <$ state)) (handler . fmap k . sequenceA)
 
+try :: Has (Try e) sig m => m a -> m (Either e a)
+try m = send (Try m pure)
+
 
 newtype TryC e m a = TryC { runTry :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
