@@ -75,8 +75,7 @@ instance Monad m => Applicative (StateC s m) where
   StateC f <*> StateC a = StateC $ \ s -> do
     (s', f') <- f s
     (s'', a') <- a s'
-    let fa = f' a'
-    fa `seq` pure (s'', fa)
+    pure (s'', f' a')
   {-# INLINE (<*>) #-}
   m *> k = m >>= \_ -> k
   {-# INLINE (*>) #-}
@@ -90,8 +89,7 @@ instance (Alternative m, Monad m) => Alternative (StateC s m) where
 instance Monad m => Monad (StateC s m) where
   StateC m >>= f = StateC $ \ s -> do
     (s', a) <- m s
-    let fa = f a
-    fa `seq` runState s' fa
+    runState s' (f a)
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
