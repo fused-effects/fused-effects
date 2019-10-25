@@ -161,8 +161,8 @@ instance (Monoid w, Monad m) => Algebra (Writer w) (Strict.WriterT w m) where
 
 
 
-class (Functor f, MonadTrans t) => MonadTransContext f t | t -> f where
-  liftHandle :: Monad m => (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
+class (Functor ctx, MonadTrans t) => MonadTransContext ctx t | t -> ctx where
+  liftHandle :: Monad m => (ctx () -> (forall a . ctx (t m a) -> m (ctx a)) -> m (ctx a)) -> t m a
 
 instance MonadTransContext (Either e) (Except.ExceptT e) where
   liftHandle handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
@@ -194,7 +194,7 @@ instance Monoid w => MonadTransContext ((,) w) (Lazy.WriterT w) where
 instance Monoid w => MonadTransContext ((,) w) (Strict.WriterT w) where
   liftHandle handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
 
-handling :: (Effect eff, CanThread eff f, MonadTransContext f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
+handling :: (Effect eff, CanThread eff ctx, MonadTransContext ctx t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
 handling op = liftHandle (\ s dist -> handle s dist op)
 
 
@@ -209,10 +209,10 @@ instance (Applicative m, Applicative n) => Applicative (CompC m n) where
 newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
   deriving (Applicative, Functor, Monad, MonadTrans)
 
-instance MonadTransContext f t => MonadTransContext f (TransC t) where
+instance MonadTransContext ctx t => MonadTransContext ctx (TransC t) where
   liftHandle handle = TransC (liftHandle (\ s dist -> handle s (dist . fmap runTrans)))
 
-instance (MonadTransContext f t, CanThread r f, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
+instance (MonadTransContext ctx t, CanThread r ctx, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
   alg (L op) = TransC (handleCoercible op)
   alg (R op) = handling op
 
@@ -236,7 +236,7 @@ send = alg . inj
 {-# INLINE send #-}
 
 
-handle :: (Monad m, Effect eff, CanThread eff f, Member eff sig, Algebra sig n) => f () -> (forall x . f (m x) -> n (f x)) -> eff m a -> n (f a)
+handle :: (Monad m, Effect eff, CanThread eff ctx, Member eff sig, Algebra sig n) => ctx () -> (forall x . ctx (m x) -> n (ctx x)) -> eff m a -> n (ctx a)
 handle state handler = send . thread state handler
 {-# INLINE handle #-}
 
