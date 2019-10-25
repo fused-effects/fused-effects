@@ -58,3 +58,11 @@ deriving instance Functor m => Functor (CatchIO m)
 
 instance Effect CatchIO where
   handle state handler (CatchIO m h k) = CatchIO (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
+
+
+newtype CatchIOC m a = CatchIOC { runCatchIO :: m a }
+  deriving (Applicative, Functor, Monad, MonadIO)
+
+instance Algebra (CatchIO :+: Lift IO) (CatchIOC IO) where
+  alg (L (CatchIO m h k)) = liftIO (runCatchIO m `Exc.catch` (runCatchIO . h)) >>= k
+  alg (R other)           = CatchIOC (handleCoercible other)
