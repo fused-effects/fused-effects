@@ -197,10 +197,10 @@ handling :: (Effect eff, CanThread eff ctx, MonadTransContext ctx t, Member eff 
 handling op = liftHandle (\ s dist -> handle s dist op)
 
 liftIdentity
-  :: Functor m
-  => (Identity () -> (forall a . Identity (t m a) -> m (Identity a)) -> m (Identity a))
-  -> (forall a . t m a -> m a)
-  -> m a
+  :: Functor n
+  => (Identity () -> (forall a . Identity (m a) -> n (Identity a)) -> n (Identity a))
+  -> (forall a . m a -> n a)
+  -> n a
 liftIdentity handle f = runIdentity <$> handle (Identity ()) (fmap Identity . f . runIdentity)
 
 newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
