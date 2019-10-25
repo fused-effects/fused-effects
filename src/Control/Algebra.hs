@@ -10,6 +10,7 @@ module Control.Algebra
 ( Algebra(..)
 , MonadTransState(..)
 , handling
+, TransC(..)
 , Has
 , send
 , handle
