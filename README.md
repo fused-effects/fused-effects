@@ -328,3 +328,5 @@ As of GHC 8.8, `fused-effects` outperforms `polysemy`, though new effects take m
 #### Comparison to `eff`.
 
 [`eff`](https://github.com/lexi-lambda/eff) is similar in many ways to `fused-effects`, but is slightly more performant due to its representation of effects as typeclasses. This approach lets GHC generate better code in exchange for sacrificing the flexibility associated with effects represented as data types. `eff` also uses the `monad-control` package to lift effects between contexts rather than implementing an `Algebra`-style class itself.
+
+### Acknowledgements
