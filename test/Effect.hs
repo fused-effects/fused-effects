@@ -50,6 +50,7 @@ instance Algebra sig m => Algebra (All :+: NonDet :+: sig) (AllC m) where
   alg (R (R other)) = handleCoercible other
 
 
+-- | A threading effect, much like in /Effect Handlers in Scope/. Note that the 'Fork' constructor takes an action producing @()@, which therefore can’t have any stateful handlers run inside it, but could still run e.g. 'Control.Carrier.Reader.ReaderC'.
 data Thread m k
   = Fork (m ()) (m k)
   | Yield (m k)
