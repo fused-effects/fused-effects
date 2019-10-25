@@ -23,7 +23,6 @@ module Control.Algebra
 , module Control.Effect.Class
 ) where
 
-import Control.Applicative (liftA2)
 import Control.Carrier.Pure (PureC, run)
 import Control.Effect.Catch.Internal
 import Control.Effect.Choose.Internal
@@ -200,10 +199,6 @@ handling op = liftHandle (\ s dist -> handle s dist op)
 
 newtype CompC m n a = CompC { runComp :: m (n a) }
   deriving (Functor)
-
-instance (Applicative m, Applicative n) => Applicative (CompC m n) where
-  pure = CompC . pure . pure
-  CompC f <*> CompC a = CompC (liftA2 (<*>) f a)
 
 
 newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
