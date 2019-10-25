@@ -57,6 +57,9 @@ deriving instance Functor m => Functor (CatchIO m)
 instance Effect CatchIO where
   handle state handler (CatchIO m h k) = CatchIO (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
 
+catchIO :: (Exc.Exception e, Has CatchIO sig m) => m a -> (e -> m a) -> m a
+catchIO m h = send (CatchIO m h pure)
+
 
 newtype CatchIOC m a = CatchIOC { runCatchIO :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
