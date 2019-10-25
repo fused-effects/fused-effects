@@ -8,7 +8,7 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 -}
 module Control.Algebra
 ( Algebra(..)
-, MonadTransState(..)
+, MonadTransContext(..)
 , handling
 , CompC(..)
 , TransC(..)
@@ -161,40 +161,40 @@ instance (Monoid w, Monad m) => Algebra (Writer w) (Strict.WriterT w m) where
 
 
 
-class (Functor f, MonadTrans t) => MonadTransState f t | t -> f where
+class (Functor f, MonadTrans t) => MonadTransContext f t | t -> f where
   liftHandle :: Monad m => (f () -> (forall a . f (t m a) -> m (f a)) -> m (f a)) -> t m a
 
-instance MonadTransState (Either e) (Except.ExceptT e) where
+instance MonadTransContext (Either e) (Except.ExceptT e) where
   liftHandle handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
 
-instance MonadTransState Identity Identity.IdentityT where
+instance MonadTransContext Identity Identity.IdentityT where
   liftHandle handle = Identity.IdentityT (runIdentity <$> handle (Identity ()) (fmap Identity . Identity.runIdentityT . runIdentity))
 
-instance MonadTransState Maybe Maybe.MaybeT where
+instance MonadTransContext Maybe Maybe.MaybeT where
   liftHandle handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
 
-instance MonadTransState Identity (Reader.ReaderT r) where
+instance MonadTransContext Identity (Reader.ReaderT r) where
   liftHandle handle = Reader.ReaderT (\ r -> runIdentity <$> handle (Identity ()) (fmap Identity . flip Reader.runReaderT r . runIdentity))
 
-instance Monoid w => MonadTransState (RWSTF w s) (RWS.Lazy.RWST r w s) where
+instance Monoid w => MonadTransContext (RWSTF w s) (RWS.Lazy.RWST r w s) where
   liftHandle handle = RWS.Lazy.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s))
 
-instance Monoid w => MonadTransState (RWSTF w s) (RWS.Strict.RWST r w s) where
+instance Monoid w => MonadTransContext (RWSTF w s) (RWS.Strict.RWST r w s) where
   liftHandle handle = RWS.Strict.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s))
 
-instance MonadTransState ((,) s) (Lazy.StateT s) where
+instance MonadTransContext ((,) s) (Lazy.StateT s) where
   liftHandle handle = Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Lazy.runStateT x s))
 
-instance MonadTransState ((,) s) (Strict.StateT s) where
+instance MonadTransContext ((,) s) (Strict.StateT s) where
   liftHandle handle = Strict.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Strict.runStateT x s))
 
-instance Monoid w => MonadTransState ((,) w) (Lazy.WriterT w) where
+instance Monoid w => MonadTransContext ((,) w) (Lazy.WriterT w) where
   liftHandle handle = Lazy.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Lazy.runWriterT x))
 
-instance Monoid w => MonadTransState ((,) w) (Strict.WriterT w) where
+instance Monoid w => MonadTransContext ((,) w) (Strict.WriterT w) where
   liftHandle handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
 
-handling :: (Effect eff, CanThread eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
+handling :: (Effect eff, CanThread eff f, MonadTransContext f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
 handling op = liftHandle (\ s dist -> handle s dist op)
 
 
@@ -209,10 +209,10 @@ instance (Applicative m, Applicative n) => Applicative (CompC m n) where
 newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
   deriving (Applicative, Functor, Monad, MonadTrans)
 
-instance MonadTransState f t => MonadTransState f (TransC t) where
+instance MonadTransContext f t => MonadTransContext f (TransC t) where
   liftHandle handle = TransC (liftHandle (\ s dist -> handle s (dist . fmap runTrans)))
 
-instance (MonadTransState f t, CanThread r f, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
+instance (MonadTransContext f t, CanThread r f, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
   alg (L op) = TransC (handleCoercible op)
   alg (R op) = handling op
 
