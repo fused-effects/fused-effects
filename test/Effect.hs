@@ -49,3 +49,12 @@ newtype TryC m a = TryC { runTry :: m a }
 instance Algebra (Try :+: Lift IO) (TryC IO) where
   alg (L (Try m k)) = liftIO (Exc.try (runTry m)) >>= k
   alg (R other)     = TryC (handleCoercible other)
+
+
+data CatchIO m k
+  = forall e a . Exc.Exception e => CatchIO (m a) (e -> m a) (a -> m k)
+
+deriving instance Functor m => Functor (CatchIO m)
+
+instance Effect CatchIO where
+  handle state handler (CatchIO m h k) = CatchIO (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
