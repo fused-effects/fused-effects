@@ -86,7 +86,7 @@ handleIdentity f = fmap runIdentity . send . handle (Identity ()) (fmap Identity
 
 -- | Thread a 'Coercible' carrier through an 'Effect'.
 --
---   This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
+-- This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
 --
 -- @since 1.0.0.0
 handleCoercible :: (Monad m, Effect eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
