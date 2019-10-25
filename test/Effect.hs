@@ -1,11 +1,10 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeApplications, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeApplications, TypeFamilies #-}
 module Effect
 ( tests
 ) where
 
 import Control.Algebra
 import Control.Carrier.State.Strict
-import Control.Effect.Lift
 import Control.Monad.IO.Class
 import qualified Control.Exception as Exc
 import Data.Monoid (Sum(..))
@@ -46,9 +45,8 @@ try m = send (Try m pure)
 newtype TryC m a = TryC { runTry :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance Algebra (Try :+: Lift IO) (TryC IO) where
-  alg (L (Try m k)) = liftIO (Exc.try (runTry m)) >>= k
-  alg (R other)     = TryC (handleCoercible other)
+instance Algebra Try (TryC IO) where
+  alg (Try m k) = liftIO (Exc.try (runTry m)) >>= k
 
 
 data CatchIO m k
@@ -63,6 +61,5 @@ instance Effect CatchIO where
 newtype CatchIOC m a = CatchIOC { runCatchIO :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance Algebra (CatchIO :+: Lift IO) (CatchIOC IO) where
-  alg (L (CatchIO m h k)) = liftIO (runCatchIO m `Exc.catch` (runCatchIO . h)) >>= k
-  alg (R other)           = CatchIOC (handleCoercible other)
+instance Algebra CatchIO (CatchIOC IO) where
+  alg (CatchIO m h k) = liftIO (runCatchIO m `Exc.catch` (runCatchIO . h)) >>= k
