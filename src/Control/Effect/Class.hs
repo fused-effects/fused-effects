@@ -6,7 +6,6 @@
 module Control.Effect.Class
 ( -- * 'Effect' class
   Effect(..)
-, hmap
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
@@ -59,13 +58,6 @@ class Constrain sig Identity => Effect sig where
     -> sig n (ctx a)
   handle state handler = to1 . ghandle state handler . from1
   {-# INLINE handle #-}
-
--- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
---
--- @since 1.0.0.0
-hmap :: (Effect sig, Monad n, Functor (sig n), Monad m) => (forall x . m x -> n x) -> (sig m a -> sig n a)
-hmap f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
-{-# INLINE hmap #-}
 
 
 -- | Generic implementation of 'Effect'.

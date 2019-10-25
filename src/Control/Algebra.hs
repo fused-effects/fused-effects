@@ -64,24 +64,33 @@ instance Algebra Pure PureC where
 --
 -- Note that if @eff@ is a sum, it will be decomposed into multiple 'Member' constraints. While this technically allows one to combine multiple unrelated effects into a single 'Has' constraint, doing so has two significant drawbacks:
 --
--- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles.
+-- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles when overused.
 --
 -- 2. It defeats @ghc@’s warnings for redundant constraints, and thus can lead to a proliferation of redundant constraints as code is changed.
+--
+-- @since 1.0.0.0
 type Has eff sig m = (Members eff sig, Algebra sig m)
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
+--
+-- @since 0.1.0.0
 send :: (Member eff sig, Algebra sig m) => eff m a -> m a
 send = alg . inj
 {-# INLINE send #-}
 
 
+-- | Thread a stateless handler for a carrier through an effect and eliminate it with the carrier’s algebra.
+--
+-- This is useful for carriers taking some input but not modifying the output. When @m@ is coercible to @n@, 'handleCoercible' may be more appropriate.
+--
+-- @since 1.0.0.0
 handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
 handleIdentity f = fmap runIdentity . send . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE handleIdentity #-}
 
 -- | Thread a 'Coercible' carrier through an 'Effect'.
 --
---   This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
+-- This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
 --
 -- @since 1.0.0.0
 handleCoercible :: (Monad m, Effect eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a
