@@ -16,20 +16,20 @@ module Control.Algebra
 , module Control.Effect.Class
 ) where
 
-import {-# SOURCE #-} Control.Carrier.Pure (run)
-import {-# SOURCE #-} Control.Effect.Catch (Catch(..))
-import {-# SOURCE #-} Control.Effect.Choose (Choose(..))
+import Control.Carrier.Pure (PureC, run)
+import Control.Effect.Catch.Internal
+import Control.Effect.Choose.Internal
 import Control.Effect.Class
-import {-# SOURCE #-} Control.Effect.Empty (Empty(..))
-import {-# SOURCE #-} Control.Effect.Error (Error)
-import {-# SOURCE #-} Control.Effect.Lift (Lift(..))
-import {-# SOURCE #-} Control.Effect.NonDet (NonDet)
+import Control.Effect.Empty.Internal
+import Control.Effect.Error.Internal
+import Control.Effect.Lift.Internal
+import Control.Effect.NonDet.Internal
 import Control.Effect.Pure
-import {-# SOURCE #-} Control.Effect.Reader (Reader(..))
-import {-# SOURCE #-} Control.Effect.State (State(..))
+import Control.Effect.Reader.Internal
+import Control.Effect.State.Internal
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
-import {-# SOURCE #-} Control.Effect.Throw (Throw(..))
-import {-# SOURCE #-} Control.Effect.Writer (Writer(..))
+import Control.Effect.Throw.Internal
+import Control.Effect.Writer.Internal
 import Control.Monad ((<=<), join)
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
@@ -51,6 +51,11 @@ import Data.Tuple (swap)
 class (HFunctor sig, Monad m) => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
+
+instance Algebra Pure PureC where
+  alg v = case v of {}
+  {-# INLINE alg #-}
+
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
 --
