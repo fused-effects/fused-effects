@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
+{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
 
 {- | The 'Algebra' class is the mechanism with which effects are interpreted.
 
@@ -100,6 +100,17 @@ instance Monoid w => MonadTransState ((,) w) (Strict.WriterT w) where
 
 handling :: (Effect eff, Constrain eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
 handling op = liftHandle (\ s dist -> handle s dist op)
+
+
+newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
+  deriving (Applicative, Functor, Monad, MonadTrans)
+
+instance MonadTransState f t => MonadTransState f (TransC t) where
+  liftHandle handle = TransC (liftHandle (\ s dist -> handle s (dist . fmap runTrans)))
+
+instance (MonadTransState f t, Constrain r f, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
+  alg (L op) = TransC (handleCoercible op)
+  alg (R op) = handling op
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
