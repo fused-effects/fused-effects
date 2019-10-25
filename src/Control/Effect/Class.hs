@@ -6,8 +6,6 @@
 module Control.Effect.Class
 ( -- * 'Effect' class
   Effect(..)
-  -- * Union constraints
-, type (&)
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
@@ -60,10 +58,6 @@ class CanHandle sig Identity => Effect sig where
     -> sig n (ctx a)
   handle state handler = to1 . ghandle state handler . from1
   {-# INLINE handle #-}
-
-
-class    (cl ctx, cr ctx) => (cl & cr) (ctx :: * -> *)
-instance (cl ctx, cr ctx) => (cl & cr) (ctx :: * -> *)
 
 
 -- | Generic implementation of 'Effect'.
