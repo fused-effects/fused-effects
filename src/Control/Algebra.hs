@@ -102,7 +102,7 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 
 -- transformers
 
-instance (Algebra sig m, Constrain sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
+instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
   alg (L (L (Throw e)))     = Except.throwE e
   alg (L (R (Catch m h k))) = Except.catchE m h >>= k
   alg (R other)             = handling other
@@ -121,7 +121,7 @@ toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
-instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
+instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
   alg (L (Ask       k))      = RWS.Lazy.ask >>= k
   alg (L (Local f m k))      = RWS.Lazy.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
@@ -131,7 +131,7 @@ instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (R (L (Put s k))))  = RWS.Lazy.put s *> k
   alg (R (R (R other)))      = handling other
 
-instance (Algebra sig m, Constrain sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
+instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
   alg (L (Ask       k))      = RWS.Strict.ask >>= k
   alg (L (Local f m k))      = RWS.Strict.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Strict.tell w *> k
@@ -194,7 +194,7 @@ instance Monoid w => MonadTransState ((,) w) (Lazy.WriterT w) where
 instance Monoid w => MonadTransState ((,) w) (Strict.WriterT w) where
   liftHandle handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
 
-handling :: (Effect eff, Constrain eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
+handling :: (Effect eff, CanThread eff f, MonadTransState f t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
 handling op = liftHandle (\ s dist -> handle s dist op)
 
 
@@ -212,7 +212,7 @@ newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
 instance MonadTransState f t => MonadTransState f (TransC t) where
   liftHandle handle = TransC (liftHandle (\ s dist -> handle s (dist . fmap runTrans)))
 
-instance (MonadTransState f t, Constrain r f, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
+instance (MonadTransState f t, CanThread r f, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
   alg (L op) = TransC (handleCoercible op)
   alg (R op) = handling op
 
@@ -221,28 +221,37 @@ instance (MonadTransState f t, Constrain r f, Algebra l (t m), Algebra r m) => A
 --
 -- Note that if @eff@ is a sum, it will be decomposed into multiple 'Member' constraints. While this technically allows one to combine multiple unrelated effects into a single 'Has' constraint, doing so has two significant drawbacks:
 --
--- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles.
+-- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles when overused.
 --
 -- 2. It defeats @ghc@’s warnings for redundant constraints, and thus can lead to a proliferation of redundant constraints as code is changed.
+--
+-- @since 1.0.0.0
 type Has eff sig m = (Members eff sig, Algebra sig m)
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
+--
+-- @since 0.1.0.0
 send :: (Member eff sig, Algebra sig m) => eff m a -> m a
 send = alg . inj
 {-# INLINE send #-}
 
 
-handle :: (Monad m, Effect eff, Constrain eff f, Member eff sig, Algebra sig n) => f () -> (forall x . f (m x) -> n (f x)) -> eff m a -> n (f a)
+handle :: (Monad m, Effect eff, CanThread eff f, Member eff sig, Algebra sig n) => f () -> (forall x . f (m x) -> n (f x)) -> eff m a -> n (f a)
 handle state handler = send . thread state handler
 {-# INLINE handle #-}
 
+-- | Thread a stateless handler for a carrier through an effect and eliminate it with the carrier’s algebra.
+--
+-- This is useful for carriers taking some input but not modifying the output. When @m@ is coercible to @n@, 'handleCoercible' may be more appropriate.
+--
+-- @since 1.0.0.0
 handleIdentity :: (Monad m, Effect eff, Member eff sig, Algebra sig n) => (forall x . m x -> n x) -> eff m a -> n a
 handleIdentity f = fmap runIdentity . handle (Identity ()) (fmap Identity . f . runIdentity)
 {-# INLINE handleIdentity #-}
 
 -- | Thread a 'Coercible' carrier through an 'Effect'.
 --
---   This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
+-- This is applicable whenever @m@ is 'Coercible' to @n@, e.g. simple @newtype@s.
 --
 -- @since 1.0.0.0
 handleCoercible :: (Monad m, Effect eff, Member eff sig, Algebra sig n, Coercible m n) => eff m a -> n a

@@ -59,7 +59,7 @@ runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
   deriving (Applicative, Functor, Monad)
 
-instance (Algebra sig m, Constrain sig ((,) [String])) => Algebra (Teletype :+: sig) (TeletypeRetC m) where
+instance (Algebra sig m, CanThread sig ((,) [String])) => Algebra (Teletype :+: sig) (TeletypeRetC m) where
   alg (L (Read    k)) = do
     i <- TeletypeRetC get
     case i of
