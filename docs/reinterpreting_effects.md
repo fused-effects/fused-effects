@@ -1,6 +1,6 @@
 # Reinterpreting effects
 
-This article assumes you are already familiar with [defining effects and their handlers](https://github.com/fused-effects/fused-effects#defining-new-effects).
+This article assumes you are already familiar with [defining effects and their handlers](defining_effects.md).
 
 One of the nice aspects of effects is that they can support multiple effect handlers. Effects only specify actions, they don't actually perform them. Therefore, it's possible to "reinterpret" effects. There are multiple senses in which an effect can be reinterpreted:
 
@@ -9,7 +9,7 @@ One of the nice aspects of effects is that they can support multiple effect hand
 
 Let's explore both of these effect interpretation strategies with a small motivating example:
 
-> We would like to implement a client library for an [HTTP-based API that provides interesting cat facts](https://alexwohlbruck.github.io/cat-facts/docs/).
+✨ We would like to implement a client library for an [HTTP-based API that provides interesting cat facts](https://alexwohlbruck.github.io/cat-facts/docs/). ✨
 
 Let's break down some of the properties of the API client that would be desirable for a production use case:
 
@@ -91,7 +91,7 @@ sendRequest :: Has Http sig m => HTTP.Request -> m (HTTP.Response L.ByteString)
 sendRequest r = send (SendRequest r pure)
 ```
 
-As you can hopefully see, we've decomposed the original problem into several small effects that take care of a different layer of the original problem description. Now let's take a look at how we can compose them together to achieve our original goals.
+The listFacts function provides the ‘what’ of this API, and the sendRequest function provides the ‘how’. In decomposing this problem into a set of effects, each responsible for a single layer of the original problem description, we provide ourselves with a flexible, composable vocabulary rather than a single monolithic action.
 
 ## "Stacking" effects
 
@@ -124,10 +124,7 @@ will actually return JSON, so for this implementation we have to account for fai
 a great opportunity to see how effect handlers can actually rely on *multiple underlying effects*!
 
 ``` haskell
-runCatFactsApi :: CatFactsApiC m a -> m a
-runCatFactsApi = runCatFactsApiC
-
-newtype CatFactsApiC m a = CatFactsApiC { runCatFactsApiC :: m a }
+newtype CatFactsApi m a = CatFactsApi { runCatFactsApi :: m a }
  deriving newtype
       ( Monad
       , Functor
@@ -139,16 +136,18 @@ newtype CatFactsApiC m a = CatFactsApiC { runCatFactsApiC :: m a }
 catFactsEndpoint :: HTTP.Request
 catFactsEndpoint = HTTP.parseRequest_ "https://cat-fact.herokuapp.com/facts/random"
 
-instance ( Has (Http :+: Throw JsonParseError :+: Throw InvalidContentType) sig m
+instance ( Has Http sig m
+         , Has (Throw JsonParseError) sig m
+         , Has (Throw InvalidContentType) sig m
          , Algebra sig m
          ) =>
-         Algebra (CatFactClient :+: sig) (CatFactsApiC m) where
+         Algebra (CatFactClient :+: sig) (CatFactsApi m) where
   eff (L (ListFacts numberOfFacts k)) = do
     resp <- sendRequest (catFactsEndpoint { HTTP.queryString = "?amount=" <> B.pack (show numberOfFacts) })
     case lookup hContentType (HTTP.responseHeaders resp) of
       Just "application/json; charset=utf-8" -> decodeOrThrow (HTTP.responseBody resp) >>= k
       other -> throwError (InvalidContentType (show other))
-  eff (R other) = CatFactsApiC (eff (handleCoercible other))
+  eff (R other) = CatFactsApi (eff (handleCoercible other))
 ```
 
 We implement a `CatFacts` effect handler that depends on _three_ underlying effects:
@@ -162,10 +161,8 @@ The nice aspect of this is that we have neatly contained the failure scenarios t
 Now we need to support performing HTTP requests:
 
 ``` haskell
-runHttp :: HttpC m a -> m a
-runHttp = runHttpC
 
-newtype HttpC m a = HttpC { runHttpC :: m a }
+newtype HttpClient m a = HttpClient { runHttp :: m a }
  deriving newtype
       ( Monad
       , Functor
@@ -174,14 +171,14 @@ newtype HttpC m a = HttpC { runHttpC :: m a }
       , Alternative
       )
 
-instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (HttpC m) where
+instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (HttpClient m) where
   eff (L (SendRequest req k)) = liftIO (HTTP.getGlobalManager >>= HTTP.httpLbs req) >>= k
-  eff (R other) = HttpC (eff (handleCoercible other))
+  eff (R other) = HttpClient (eff (handleCoercible other))
 ```
 
-Note for the above code snippets how the `CatFactsApiC` carrier delegates fetching JSON to any other effect that supports retrieving JSON given an HTTP request specification.
+Note for the above code snippets how the `CatFactsApi` carrier delegates fetching JSON to any other effect that supports retrieving JSON given an HTTP request specification.
 
-Note as well that `CatFactsApiC` itself doesn't know how to perform an HTTP request. It delegates the request itself to a handler that implements the `Algebra` class for `(Http :+: sig)`.
+Note as well that `CatFactsApi` itself doesn't know how to perform an HTTP request. It delegates the request itself to a handler that implements the `Algebra` class for `(Http :+: sig)`.
 
 Putting it all together for the actual production use case:
 
@@ -230,7 +227,7 @@ to surface from least-pure parts of code. In this case, we should therefore impl
 to experiment with the most failure-prone area: the network itself.
 
 ``` haskell
-newtype MockHttpC m a = MockHttpC { runMockHttpC :: ReaderC (HTTP.Request -> IO (HTTP.Response L.ByteString)) m a }
+newtype MockHttpClient m a = MockHttpClient { runMockHttpClient :: ReaderC (HTTP.Request -> IO (HTTP.Response L.ByteString)) m a }
  deriving newtype
       ( Monad
       , Functor
@@ -240,11 +237,11 @@ newtype MockHttpC m a = MockHttpC { runMockHttpC :: ReaderC (HTTP.Request -> IO 
       )
 
 runMockHttp :: (HTTP.Request -> IO (HTTP.Response L.ByteString)) -> MockHttpC m a -> m a
-runMockHttp responder m = runReader responder (runMockHttpC m)
+runMockHttp responder m = runReader responder (runMockHttpClient m)
 
-instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (MockHttpC m) where
-  eff (L (SendRequest req k)) = MockHttpC ask >>= \responder -> liftIO (responder req) >>= k
-  eff (R other) = MockHttpC (eff (R (handleCoercible other)))
+instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (MockHttpClient m) where
+  eff (L (SendRequest req k)) = MockHttpClient ask >>= \responder -> liftIO (responder req) >>= k
+  eff (R other) = MockHttpClient (eff (R (handleCoercible other)))
 
 faultyNetwork :: HTTP.Request -> IO (HTTP.Response L.ByteString)
 faultyNetwork req = throwIO (HTTP.HttpExceptionRequest req HTTP.ConnectionTimeout)
