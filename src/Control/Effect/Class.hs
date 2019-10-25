@@ -11,7 +11,6 @@ module Control.Effect.Class
 ) where
 
 import Data.Coerce
-import Data.Functor.Identity
 import GHC.Generics
 
 -- | The class of effect types, which must:
