@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveGeneric, DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DeriveGeneric, DeriveTraversable, FlexibleInstances, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
 
 -- | Operations on /sums/, combining effects into a /signature/.
 --
@@ -23,7 +23,8 @@ data (l :+: r) (m :: * -> *) k
 
 infixr 4 :+:
 
-instance (Effect cl l, Effect cr r) => Effect (cl & cr) (l :+: r)
+instance (Effect l, Effect r) => Effect (l :+: r) where
+  type CanHandle (l :+: r) = CanHandle l & CanHandle r
 
 
 -- | The class of types present in a signature.

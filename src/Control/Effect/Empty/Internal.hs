@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures, MultiParamTypeClasses #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures #-}
 module Control.Effect.Empty.Internal
 ( Empty(..)
 ) where
@@ -10,4 +10,4 @@ import GHC.Generics (Generic1)
 data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
-instance Effect Functor Empty
+instance Effect Empty
