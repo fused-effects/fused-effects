@@ -30,6 +30,9 @@ data All m k = forall a . All (m a) ([a] -> m k)
 
 deriving instance Functor m => Functor (All m)
 
+-- | Note that since the continuation takes @[a]@, our 'Effect' instance will have to produce a continuation taking @[f a]@ given one taking @[a]@, for which purpose we use 'sequenceA'. That necessitates an 'Applicative' instance for @f@, so we specialize 'Constrain' for this effect to strengthen the constraint.
+--
+-- Intuitively, we can think of this as saying that if there are 'Control.Effect.State.State' effects present in @m@, collecting all of their results—joining the branches—requires us to merge the states monoidally; if there are 'Control.Effect.Error.Error' effects, it requires that they’ve all succeeded.
 instance Effect All where
   type Constrain All f = Applicative f
   handle ctx hdl (All m k) = All (hdl (m <$ ctx)) (hdl . fmap k . sequenceA)
