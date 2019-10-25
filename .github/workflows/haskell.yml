@@ -5,32 +5,28 @@ on: [push, pull_request]
 jobs:
   build:
     name: ghc ${{ matrix.ghc }}
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-16.04
     strategy:
       matrix:
         ghc: ["8.2.2", "8.4.4", "8.6.5", "8.8.1"]
-        cabal-install: ["3.0"]
+        cabal: ["3.0"]
 
     steps:
     - uses: actions/checkout@master
       if: github.event_name != 'pull_request' || github.event.action == 'opened' || github.event.action == 'synchronize'
-    - uses: robrix/setup-cabal@fdc1f92
+
+    - uses: actions/setup-haskell@v1
+      name: Setup Haskell
       with:
         ghc-version: ${{ matrix.ghc }}
-    - name: Install cabal-install & ghc
-      run: |
-        sudo add-apt-repository ppa:hvr/ghc
-        sudo apt-get update
-        sudo apt-get install ghc-${{ matrix.ghc }} cabal-install-${{ matrix.cabal-install }}
-        export PATH="/opt/ghc/bin:$PATH"
-        cabal --version
-        ghc --version
+        cabal-version: ${{ matrix.cabal }}
+
     - name: Install dependencies
       run: |
-        export PATH="/opt/ghc/bin:$PATH"
         cabal v2-update --config-file=cabal.config
         cabal v2-configure --config-file=cabal.config --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
         cabal v2-build --config-file=cabal.config --only-dependencies
+
     - name: Build
       run: |
         export PATH="/opt/ghc/bin:$PATH"
@@ -38,6 +34,7 @@ jobs:
         cabal v2-haddock --config-file=cabal.config
         cabal v2-sdist --config-file=cabal.config
         cabal check --config-file=cabal.config
+
     - name: Run tests
       run: |
         export PATH="/opt/ghc/bin:$PATH"
