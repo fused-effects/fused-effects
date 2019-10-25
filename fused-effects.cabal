@@ -130,6 +130,7 @@ test-suite test
     Cull
     Cut
     Cut.Church
+    Effect
     Empty
     Error
     Fail
