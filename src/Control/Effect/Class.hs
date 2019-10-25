@@ -47,9 +47,9 @@ class Constrain sig Identity => Effect sig where
   -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
   handle
     :: (Monad m, Monad n, Constrain sig ctx)
-    => ctx ()
-    -> (forall x . ctx (m x) -> n (ctx x))
-    -> sig m a
+    => ctx ()                              -- ^ The initial context.
+    -> (forall x . ctx (m x) -> n (ctx x)) -- ^ A handler for actions in a context, producing actions with a derived context.
+    -> sig m a                             -- ^ The effect to thread the handler through.
     -> sig n (ctx a)
   default handle
     :: (Monad m, Monad n, Generic1 (sig m), Generic1 (sig n), GEffect ctx m n (Rep1 (sig m)) (Rep1 (sig n)))
