@@ -145,10 +145,9 @@ instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (La
   alg (L (Put s k)) = Lazy.put s *> k
   alg (R other)     = handling other
 
-instance (Algebra sig m, Constrain sig ((,) s)) => Algebra (State s :+: sig) (Strict.StateT s m) where
-  alg (L (Get   k)) = Strict.get >>= k
-  alg (L (Put s k)) = Strict.put s *> k
-  alg (R other)     = handling other
+instance Monad m => Algebra (State s) (Strict.StateT s m) where
+  alg (Get   k) = Strict.get >>= k
+  alg (Put s k) = Strict.put s *> k
 
 instance (Algebra sig m, Constrain sig ((,) w), Monoid w) => Algebra (Writer w :+: sig) (Lazy.WriterT w m) where
   alg (L (Tell w k))     = Lazy.tell w *> k
