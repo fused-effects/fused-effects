@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
+{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
 
 {- | The 'Algebra' class is the mechanism with which effects are interpreted.
 
@@ -59,6 +59,9 @@ import Data.Tuple (swap)
 --
 -- @since 1.0.0.0
 class (Effect sig, Monad m) => Algebra sig m | m -> sig where
+  type Context m :: * -> *
+  type Context m = Identity
+
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
 
@@ -102,6 +105,7 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 -- transformers
 
 instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m) where
+  type Context (Except.ExceptT e m) = Either e
   alg (L (L (Throw e)))     = Except.throwE e
   alg (L (R (Catch m h k))) = Except.catchE m h >>= k
   alg (R other)             = handling other
@@ -121,6 +125,7 @@ toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
 instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
+  type Context (RWS.Lazy.RWST r w s m) = RWSTF w s
   alg (L (Ask       k))      = RWS.Lazy.ask >>= k
   alg (L (Local f m k))      = RWS.Lazy.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
@@ -131,6 +136,7 @@ instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (R (R other)))      = handling other
 
 instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
+  type Context (RWS.Strict.RWST r w s m) = RWSTF w s
   alg (L (Ask       k))      = RWS.Strict.ask >>= k
   alg (L (Local f m k))      = RWS.Strict.local f m >>= k
   alg (R (L (Tell w k)))     = RWS.Strict.tell w *> k
@@ -141,19 +147,23 @@ instance (Algebra sig m, CanThread sig (RWSTF w s), Monoid w) => Algebra (Reader
   alg (R (R (R other)))      = handling other
 
 instance Monad m => Algebra (State s) (Lazy.StateT s m) where
+  type Context (Lazy.StateT s m) = (,) s
   alg (Get   k) = Lazy.get >>= k
   alg (Put s k) = Lazy.put s *> k
 
 instance Monad m => Algebra (State s) (Strict.StateT s m) where
+  type Context (Strict.StateT s m) = (,) s
   alg (Get   k) = Strict.get >>= k
   alg (Put s k) = Strict.put s *> k
 
 instance (Monoid w, Monad m) => Algebra (Writer w) (Lazy.WriterT w m) where
+  type Context (Lazy.WriterT w m) = (,) w
   alg (Tell w k)     = Lazy.tell w *> k
   alg (Listen m k)   = Lazy.listen m >>= uncurry (flip k)
   alg (Censor f m k) = Lazy.censor f m >>= k
 
 instance (Monoid w, Monad m) => Algebra (Writer w) (Strict.WriterT w m) where
+  type Context (Strict.WriterT w m) = (,) w
   alg (Tell w k)     = Strict.tell w *> k
   alg (Listen m k)   = Strict.listen m >>= uncurry (flip k)
   alg (Censor f m k) = Strict.censor f m >>= k

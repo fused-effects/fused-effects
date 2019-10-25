@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for an 'Error' effect.
 --
@@ -52,6 +52,7 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (ErrorC e m) where
+  type Context (ErrorC e m) = Either e
   -- NB: 'send' (& thus 'handleCoercible') can’t send sums, so we decompose the sum manually.
   alg (L (L op)) = ErrorC (handleCoercible op)
   alg (L (R op)) = ErrorC (handleCoercible op)
