@@ -108,10 +108,9 @@ instance (Algebra sig m, Constrain sig (Either e)) => Algebra (Error e :+: sig) 
 instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . handleCoercible
 
-instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
-  alg (L (Ask       k)) = Reader.ask >>= k
-  alg (L (Local f m k)) = Reader.local f m >>= k
-  alg (R other)         = handling other
+instance Monad m => Algebra (Reader r) (Reader.ReaderT r m) where
+  alg (Ask       k) = Reader.ask >>= k
+  alg (Local f m k) = Reader.local f m >>= k
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
