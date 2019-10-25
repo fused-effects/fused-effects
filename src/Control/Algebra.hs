@@ -167,13 +167,13 @@ instance MonadTransContext (Either e) (Except.ExceptT e) where
   liftHandle handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
 
 instance MonadTransContext Identity Identity.IdentityT where
-  liftHandle handle = Identity.IdentityT (runIdentity <$> handle (Identity ()) (fmap Identity . Identity.runIdentityT . runIdentity))
+  liftHandle handle = Identity.IdentityT (liftIdentity handle Identity.runIdentityT)
 
 instance MonadTransContext Maybe Maybe.MaybeT where
   liftHandle handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
 
 instance MonadTransContext Identity (Reader.ReaderT r) where
-  liftHandle handle = Reader.ReaderT (\ r -> runIdentity <$> handle (Identity ()) (fmap Identity . flip Reader.runReaderT r . runIdentity))
+  liftHandle handle = Reader.ReaderT (\ r -> liftIdentity handle (flip Reader.runReaderT r))
 
 instance Monoid w => MonadTransContext (RWSTF w s) (RWS.Lazy.RWST r w s) where
   liftHandle handle = RWS.Lazy.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s))
