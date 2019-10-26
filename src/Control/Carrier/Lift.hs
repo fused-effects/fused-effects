@@ -16,7 +16,7 @@ module Control.Carrier.Lift
 import Control.Algebra
 import Control.Applicative (Alternative)
 import Control.Effect.Lift
-import Control.Monad (MonadPlus)
+import Control.Monad (MonadPlus, (<=<))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -36,7 +36,7 @@ instance MonadTrans LiftC where
   lift = LiftC
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
-  alg = LiftC . (>>= runM) . unLift
+  alg = LiftC . (runM <=< unLift)
 
 
 newtype UnliftC m a = UnliftC { runUnlift :: m a }
