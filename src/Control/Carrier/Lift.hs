@@ -14,9 +14,9 @@ module Control.Carrier.Lift
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative)
 import Control.Effect.Lift
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
