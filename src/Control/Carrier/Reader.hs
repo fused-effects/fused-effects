@@ -80,6 +80,10 @@ instance MonadTrans (ReaderC r) where
   lift = ReaderC . const
   {-# INLINE lift #-}
 
+instance MonadTransContext (ReaderC r) where
+  liftHandle handle = ReaderC (\ r -> liftIdentity handle (runReader r))
+  {-# INLINE liftHandle #-}
+
 instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
   askUnliftIO = ReaderC $ \r -> withUnliftIO $ \u -> pure (UnliftIO (\(ReaderC x) -> unliftIO u (x r)))
   {-# INLINE askUnliftIO #-}
