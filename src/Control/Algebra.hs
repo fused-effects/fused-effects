@@ -42,6 +42,7 @@ import qualified Control.Monad.Trans.State.Lazy as State.Lazy
 import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
+import Control.Monad.Trans.Control
 import Data.Coerce
 import Data.Functor.Identity
 import Data.List.NonEmpty (NonEmpty)
@@ -144,7 +145,7 @@ instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
 instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg (L (Ask       k)) = Reader.ask >>= k
   alg (L (Local f m k)) = Reader.local f m >>= k
-  alg (R other)         = Reader.ReaderT $ \ r -> handleIdentity (flip Reader.runReaderT r) other
+  alg (R other)         = liftWith $ \ dst -> handleIdentity dst other
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
