@@ -1,3 +1,4 @@
+{-# LANGUAGE ExistentialQuantification, RankNTypes #-}
 {- | Provides a mechanism to kick off the evaluation of an effect stack that takes place in a monadic context.
 
 'Lift' effects are always the last effect in a given effect stack. These stacks are invoked with 'Control.Carrier.Lift.runM' or 'Control.Algebra.run'.
@@ -31,3 +32,7 @@ import Control.Effect.Lift.Internal (Lift(..))
 -- @since 1.0.0.0
 sendM :: (Has (Lift n) sig m, Functor n) => n a -> m a
 sendM = send . Lift . fmap pure
+
+
+data Unlift sig m k
+  = forall a . Unlift ((forall a . m a -> sig a) -> m a) (a -> m k)
