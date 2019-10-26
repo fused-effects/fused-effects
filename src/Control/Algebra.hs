@@ -12,7 +12,6 @@ module Control.Algebra
 , MonadTransContext(..)
 , handling
 , liftIdentity
-, TransC(..)
 , Has
 , send
 , handle
@@ -216,17 +215,6 @@ liftIdentity
   -> (forall a . m a -> n a)
   -> n a
 liftIdentity handle f = runIdentity <$> handle (Identity ()) (fmap Identity . f . runIdentity)
-
-newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
-  deriving (Applicative, Functor, Monad, MonadTrans)
-
-instance (MonadTransContext t, Functor (Context t)) => MonadTransContext (TransC t) where
-  type Context (TransC t) = Context t
-  liftHandle handle = TransC (liftHandle (\ s dist -> handle s (dist . fmap runTrans)))
-
-instance (MonadTransContext t, Functor (Context t), CanThread r (Context t), Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
-  alg (L op) = TransC (handleCoercible op)
-  alg (R op) = handling op
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
