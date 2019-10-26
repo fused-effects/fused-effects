@@ -32,7 +32,7 @@ import Control.Monad.Trans.Class
 -- @
 --
 -- @since 0.1.0.0
-runFresh :: Int -> FreshC m a -> m (Int, a)
+runFresh :: Functor m => Int -> FreshC m a -> m (Int, a)
 runFresh n (FreshC m) = runState n m
 
 -- | Run a 'Fresh' effect counting up from an initial value, and forgetting the final value.

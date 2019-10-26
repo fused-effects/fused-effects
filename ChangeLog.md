@@ -80,6 +80,8 @@
 
 - Redefines `Lazy.StateC` as a type & pattern synonym of `Lazy.StateT`. ([#305](https://github.com/fused-effects/fused-effects/pull/305))
 
+- Redefines `Strict.StateC` as a type & pattern synonym of `Strict.StateT`. ([#305](https://github.com/fused-effects/fused-effects/pull/305))
+
 
 # v0.5.0.1
 

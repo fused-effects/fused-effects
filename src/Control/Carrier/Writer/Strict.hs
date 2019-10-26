@@ -34,7 +34,7 @@ import Control.Monad.Trans.Class
 -- @
 -- 'runWriter' ('pure' a) = 'pure' ('mempty', a)
 -- @
-runWriter :: Monoid w => WriterC w m a -> m (w, a)
+runWriter :: (Monoid w, Functor m) => WriterC w m a -> m (w, a)
 runWriter (WriterC m) = runState mempty m
 {-# INLINE runWriter #-}
 
