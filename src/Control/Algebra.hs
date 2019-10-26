@@ -33,7 +33,6 @@ import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import Control.Effect.Throw.Internal
 import Control.Effect.Writer.Internal
 import Control.Monad ((<=<), join)
-import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Identity as Identity
 import qualified Control.Monad.Trans.Reader as Reader
@@ -44,6 +43,7 @@ import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
 import Data.Coerce
+import Data.Functor.Identity
 import Data.List.NonEmpty (NonEmpty)
 import qualified Data.Semigroup as S
 import Data.Tuple (swap)
