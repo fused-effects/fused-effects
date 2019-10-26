@@ -114,7 +114,6 @@ instance MonadTrans (StateC s) where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, CanThread sig ((,) s)) => Algebra (State s :+: sig) (StateC s m) where
-  type Context (StateC s m) = ((,) s)
   alg (L (Get   k)) = StateC (\ s -> runState s (k s))
   alg (L (Put s k)) = StateC (\ _ -> runState s k)
   alg (R other)     = StateC (\ s -> handle (s, ()) (uncurry runState) other)

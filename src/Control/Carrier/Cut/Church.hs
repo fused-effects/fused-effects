@@ -87,7 +87,6 @@ instance MonadTrans CutC where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, CanThread sig (CutC m)) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
-  type Context (CutC m) = CutC m
   alg (L Cutfail)    = CutC $ \ _    _   fail -> fail
   alg (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   alg (R (L (L Empty)))      = empty

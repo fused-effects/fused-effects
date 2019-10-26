@@ -56,7 +56,6 @@ instance MonadTransContext (Either e) (ErrorC e) where
   liftHandle handle = ErrorC (liftHandle (\ ctx dst -> handle ctx (dst . coerce)))
 
 instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (ErrorC e m) where
-  type Context (ErrorC e m) = Either e
   -- NB: 'send' (& thus 'handleCoercible') can’t send sums, so we decompose the sum manually.
   alg (L (L op)) = ErrorC (handleCoercible op)
   alg (L (R op)) = ErrorC (handleCoercible op)

@@ -47,7 +47,6 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   {-# INLINE fail #-}
 
 instance (Algebra sig m, CanThread sig Maybe) => Algebra (Empty :+: sig) (EmptyC m) where
-  type Context (EmptyC m) = Maybe
   alg (L Empty) = EmptyC (MaybeT (pure Nothing))
   alg (R other) = EmptyC (MaybeT (handle (Just ()) (maybe (pure Nothing) runEmpty) other))
   {-# INLINE alg #-}
