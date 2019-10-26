@@ -70,10 +70,10 @@ hmap
 hmap f = fmap runIdentity . thread (Identity ()) (fmap Identity . f . runIdentity)
 
 liftIdentity
-  :: Functor n
-  => (Identity () -> (forall a . Identity (m a) -> n (Identity a)) -> n (Identity a))
+  :: (Functor n, Functor o)
+  => (Identity () -> (forall a . Identity (m a) -> n (Identity a)) -> o (Identity a))
   -> (forall a . m a -> n a)
-  -> n a
+  -> o a
 liftIdentity handle f = runIdentity <$> handle (Identity ()) (fmap Identity . f . runIdentity)
 
 
