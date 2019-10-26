@@ -72,8 +72,8 @@ instance MonadTrans CullC where
 
 instance MonadTransContext CullC where
   type Context CullC = NonDetC PureC
-  liftHandle handle = CullC $ liftHandle $ \ _ dst -> liftHandle $ \ ctx' dst' ->
-    fmap pure <$> handle ctx' (dst' . fmap (fmap runIdentity . dst . pure . out)) where
+  liftHandle handle = CullC $ liftHandle $ \ ctxR dstR -> liftHandle $ \ ctxND dstND ->
+    fmap pure <$> handle ctxND (dstND . fmap (fmap runIdentity . dstR . (<$ ctxR) . out)) where
     out (CullC m) = m
   {-# INLINE liftHandle #-}
 
