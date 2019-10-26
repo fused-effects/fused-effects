@@ -6,6 +6,7 @@
 module Control.Effect.Class
 ( -- * 'Effect' class
   Effect(..)
+, hmap
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
@@ -58,6 +59,14 @@ class CanThread sig Identity => Effect sig where
     -> sig n (ctx a)
   thread state handler = to1 . gthread state handler . from1
   {-# INLINE thread #-}
+
+
+hmap
+  :: (Effect sig, Monad m, Monad n, Functor (sig n))
+  => (forall a . m a -> n a)
+  -> sig m a
+  -> sig n a
+hmap f = fmap runIdentity . thread (Identity ()) (fmap Identity . f . runIdentity)
 
 
 -- | Generic implementation of 'Effect'.
