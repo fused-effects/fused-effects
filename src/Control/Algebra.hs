@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
+{-# LANGUAGE ConstraintKinds, DefaultSignatures, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
 
 {- | The 'Algebra' class is the mechanism with which effects are interpreted.
 
@@ -60,6 +60,12 @@ import Data.Tuple (swap)
 class (Effect sig, Monad m) => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
+  default alg
+    :: (AlgebraTrans eff t, CanThread sig' (Context t), Algebra sig' n, m ~ t n, sig ~ (eff :+: sig'))
+    => sig m a
+    -> m a
+  alg (L l) = liftAlg l
+  alg (R r) = liftHandle (\ ctx dst -> alg (thread ctx dst r))
 
 class MonadTransContext t => AlgebraTrans eff t | t -> eff where
   liftAlg :: (Algebra sig m, CanThread sig (Context t)) => eff (t m) a -> t m a
