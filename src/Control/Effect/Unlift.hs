@@ -1,4 +1,12 @@
 {-# LANGUAGE ExistentialQuantification, RankNTypes, TypeFamilies #-}
+{- | 'Unlift' effects allow inner contexts to run actions in outer contexts.
+
+Predefined carriers:
+
+* "Control.Carrier.Unlift"
+
+@since 1.0.0.0
+-}
 module Control.Effect.Unlift
 ( -- * Unlift effect
   Unlift(..)
