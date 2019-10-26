@@ -93,3 +93,4 @@ instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
 instance AlgebraTrans (Reader r) (ReaderC r) where
   liftAlg (Ask       k) = ReaderC (\ r -> runReader r (k r))
   liftAlg (Local f m k) = ReaderC (\ r -> runReader (f r) m) >>= k
+  {-# INLINE liftAlg #-}
