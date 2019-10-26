@@ -93,7 +93,6 @@ library
     Control.Effect.Reader.Internal
     Control.Effect.State.Internal
     Control.Effect.Throw.Internal
-    Control.Effect.Unlift.Internal
     Control.Effect.Writer.Internal
   build-depends:
       base          >= 4.9 && < 4.14
