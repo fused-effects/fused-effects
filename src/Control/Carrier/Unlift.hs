@@ -25,5 +25,5 @@ instance MonadTrans UnliftC where
   lift = UnliftC
 
 instance Algebra sig m => Algebra (Unlift m :+: sig) (UnliftC m) where
-  alg (L (Unlift with k)) = with runUnlift >>= k
+  alg (L (Unlift with k)) = UnliftC (with runUnlift) >>= k
   alg (R other)           = UnliftC (handleCoercible other)
