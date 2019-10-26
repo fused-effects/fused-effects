@@ -26,7 +26,6 @@ import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
-import Data.Functor.Identity (Identity(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | A @Handler@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
