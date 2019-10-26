@@ -1,4 +1,4 @@
-{-# LANGUAGE ExplicitForAll, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ExplicitForAll, PatternSynonyms, ViewPatterns #-}
 
 {- | A carrier for the 'State' effect that refrains from evaluating its state until necessary. This is less efficient than "Control.Carrier.State.Strict" but allows some cyclic computations to terminate that would loop infinitely in a strict state carrier.
 
@@ -12,19 +12,16 @@ module Control.Carrier.State.Lazy
   runState
 , evalState
 , execState
-, StateC(..)
+, StateC
+, pattern StateC
   -- * State effect
 , module Control.Effect.State
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
 import Control.Effect.State
-import Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import qualified Control.Monad.Trans.State.Lazy as T
+import Data.Tuple (swap)
 
 -- | Run a lazy 'State' effect, yielding the result value and the final state. More programs terminate with lazy state than strict state, but injudicious use of lazy state may lead to thunk buildup.
 --
@@ -39,7 +36,7 @@ import Control.Monad.Trans.Class
 -- @
 --
 -- @since 1.0.0.0
-runState :: s -> StateC s m a -> m (s, a)
+runState :: forall s m a . Functor m => s -> StateC s m a -> m (s, a)
 runState s (StateC runStateC) = runStateC s
 {-# INLINE[3] runState #-}
 
@@ -66,55 +63,10 @@ execState s = fmap fst . runState s
 {-# INLINE[3] execState #-}
 
 -- | @since 1.0.0.0
-newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
+type StateC = T.StateT
 
-instance Functor m => Functor (StateC s m) where
-  fmap f m = StateC $ \ s -> (\ ~(s', a) -> (s', f a)) <$> runState s m
-  {-# INLINE fmap #-}
+pattern StateC :: Functor m => (s -> m (s, a)) -> StateC s m a
+pattern StateC run <- T.StateT (fmap (fmap swap) -> run) where
+  StateC run = T.StateT (fmap swap . run)
 
-instance Monad m => Applicative (StateC s m) where
-  pure a = StateC $ \ s -> pure (s, a)
-  {-# INLINE pure #-}
-  StateC mf <*> StateC mx = StateC $ \ s -> do
-    ~(s',  f) <- mf s
-    ~(s'', x) <- mx s'
-    pure (s'', f x)
-  {-# INLINE (<*>) #-}
-  m *> k = m >>= \_ -> k
-  {-# INLINE (*>) #-}
-
-instance Monad m => Monad (StateC s m) where
-  m >>= k = StateC $ \ s -> do
-    ~(s', a) <- runState s m
-    runState s' (k a)
-  {-# INLINE (>>=) #-}
-
-instance (Alternative m, Monad m) => Alternative (StateC s m) where
-  empty = StateC (const empty)
-  {-# INLINE empty #-}
-  StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
-  {-# INLINE (<|>) #-}
-
-instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
-  fail s = StateC (const (Fail.fail s))
-  {-# INLINE fail #-}
-
-instance MonadFix m => MonadFix (StateC s m) where
-  mfix f = StateC (\ s -> mfix (runState s . f . snd))
-  {-# INLINE mfix #-}
-
-instance MonadIO m => MonadIO (StateC s m) where
-  liftIO io = StateC (\ s -> (,) s <$> liftIO io)
-  {-# INLINE liftIO #-}
-
-instance (Alternative m, Monad m) => MonadPlus (StateC s m)
-
-instance MonadTrans (StateC s) where
-  lift m = StateC (\ s -> (,) s <$> m)
-  {-# INLINE lift #-}
-
-instance (Algebra sig m, CanHandle sig ((,) s)) => Algebra (State s :+: sig) (StateC s m) where
-  alg (L (Get   k)) = StateC (\ s -> runState s (k s))
-  alg (L (Put s k)) = StateC (\ _ -> runState s k)
-  alg (R other)     = StateC (\ s -> alg (handle (s, ()) (uncurry runState) other))
-  {-# INLINE alg #-}
+{-# COMPLETE StateC #-}
