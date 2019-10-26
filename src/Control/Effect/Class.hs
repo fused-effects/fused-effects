@@ -7,6 +7,7 @@ module Control.Effect.Class
 ( -- * 'Effect' class
   Effect(..)
 , hmap
+, liftIdentity
   -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
@@ -67,6 +68,13 @@ hmap
   -> sig m a
   -> sig n a
 hmap f = fmap runIdentity . thread (Identity ()) (fmap Identity . f . runIdentity)
+
+liftIdentity
+  :: Functor n
+  => (Identity () -> (forall a . Identity (m a) -> n (Identity a)) -> n (Identity a))
+  -> (forall a . m a -> n a)
+  -> n a
+liftIdentity handle f = runIdentity <$> handle (Identity ()) (fmap Identity . f . runIdentity)
 
 
 -- | Generic implementation of 'Effect'.
