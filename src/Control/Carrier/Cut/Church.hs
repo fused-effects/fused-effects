@@ -16,12 +16,15 @@ module Control.Carrier.Cut.Church
 ) where
 
 import Control.Algebra
+import Control.Applicative (liftA2)
+import Control.Carrier.Pure
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
 
 -- | Run a 'Cut' effect with continuations respectively interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
 --
@@ -85,6 +88,12 @@ instance MonadPlus (CutC m)
 instance MonadTrans CutC where
   lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
   {-# INLINE lift #-}
+
+instance MonadTransContext CutC where
+  type Context CutC = CutC PureC
+  liftHandle handle = CutC $ \ cons nil fail -> handle (pure ()) dst >>= run . runCut (coerce cons) (coerce nil) (coerce fail) where
+    dst = run . runCut (fmap . liftA2 (<|>) . runCutA) (pure (pure empty)) (pure (pure cutfail))
+  {-# INLINE liftHandle #-}
 
 instance (Algebra sig m, CanThread sig (CutC m)) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
   alg (L Cutfail)    = CutC $ \ _    _   fail -> fail
