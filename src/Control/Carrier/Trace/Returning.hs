@@ -38,8 +38,7 @@ runTrace (TraceC m) = first (($[]) . appEndo) <$> runWriter m
 
 -- | @since 1.0.0.0
 newtype TraceC m a = TraceC (WriterC (Endo [String]) m a)
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans, MonadTransContext)
 
-instance (Algebra sig m, CanThread sig ((,) (Endo [String]))) => Algebra (Trace :+: sig) (TraceC m) where
-  alg (L (Trace m k)) = TraceC (tell (Endo (m :))) *> k
-  alg (R other)       = TraceC (handleCoercible other)
+instance AlgebraTrans Trace TraceC where
+  liftAlg (Trace m k) = TraceC (tell (Endo (m :))) *> k
