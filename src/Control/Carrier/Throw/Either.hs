@@ -31,3 +31,4 @@ newtype ThrowC e m a = ThrowC (ErrorC e m a)
 
 instance AlgebraTrans (Throw e) (ThrowC e) where
   liftAlg (Throw e) = ThrowC (throwError e)
+  {-# INLINE liftAlg #-}
