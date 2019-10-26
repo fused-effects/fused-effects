@@ -112,9 +112,6 @@ instance AlgebraTrans (Error e) (Except.ExceptT e) where
   liftAlg (L (Throw e))     = Except.throwE e
   liftAlg (R (Catch m h k)) = Except.catchE m h >>= k
 
-instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
-  alg = Identity.IdentityT . handleCoercible
-
 instance Monad m => Algebra (Reader r) (Reader.ReaderT r m) where
   alg (Ask       k) = Reader.ask >>= k
   alg (Local f m k) = Reader.local f m >>= k
