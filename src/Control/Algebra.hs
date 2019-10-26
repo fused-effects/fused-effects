@@ -64,7 +64,7 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
   alg :: sig m a -> m a
 
 class MonadTransContext t => AlgebraTrans eff t | t -> eff where
-  liftAlg :: Algebra sig m => (eff :+: sig) (t m) a -> t m a
+  liftAlg :: Algebra sig m => eff (t m) a -> t m a
 
 instance Algebra Pure PureC where
   alg v = case v of {}
