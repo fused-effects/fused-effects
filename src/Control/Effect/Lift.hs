@@ -16,6 +16,7 @@ module Control.Effect.Lift
 ( -- * Lift effect
   Lift(..)
 , sendM
+, withUnlift
   -- * Re-exports
 , Algebra
 , Has
@@ -44,3 +45,6 @@ instance Functor m => Functor (Unlift sig m) where
 instance Effect (Unlift sig) where
   type CanHandle (Unlift sig) ctx = ctx ~ Identity
   handle ctx dst (Unlift with k) = Unlift (\ run -> dst (with (run . fmap runIdentity . dst . (<$ ctx)) <$ ctx)) (dst . fmap k)
+
+withUnlift :: Has (Unlift n) sig m => ((forall a . m a -> n a) -> m a) -> m a
+withUnlift with = send (Unlift with pure)
