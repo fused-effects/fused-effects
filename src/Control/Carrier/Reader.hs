@@ -38,3 +38,5 @@ type ReaderC = T.ReaderT
 
 pattern ReaderC :: (r -> m a) -> ReaderC r m a
 pattern ReaderC run = T.ReaderT run
+
+{-# COMPLETE ReaderC #-}
