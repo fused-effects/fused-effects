@@ -110,7 +110,7 @@ instance MonadTrans NonDetC where
 instance MonadTransContext NonDetC where
   type Context NonDetC = NonDetC PureC
   liftHandle handle = NonDetC $ \ fork leaf nil -> handle (pure ()) dst >>= run . runNonDet (coerce fork) (coerce leaf) (coerce nil) where
-    dst = run . runNonDet (liftA2 (liftA2 (<|>))) (PureC . runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)) (pure (pure empty))
+    dst = run . runNonDet (liftA2 (liftA2 (<|>))) (PureC . runNonDetA) (pure (pure empty))
   {-# INLINE liftHandle #-}
 
 instance AlgebraTrans NonDet NonDetC where
