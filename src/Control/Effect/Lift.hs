@@ -16,6 +16,8 @@ module Control.Effect.Lift
 ( -- * Lift effect
   Lift(..)
 , sendM
+  -- * Unlift effect
+, Unlift(..)
 , withUnlift
   -- * Re-exports
 , Algebra
