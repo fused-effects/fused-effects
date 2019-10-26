@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, PatternSynonyms, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 -- | A carrier for 'Reader' effects.
 --
