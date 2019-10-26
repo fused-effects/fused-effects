@@ -8,7 +8,6 @@ import Control.Carrier.Interpret
 import Control.Carrier.State.Strict
 import Control.Carrier.Writer.Strict
 import Control.Monad (ap, replicateM_)
-import Data.Functor.Identity
 import Data.Monoid (Sum(..))
 import Gauge
 
