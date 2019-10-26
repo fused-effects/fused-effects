@@ -22,6 +22,8 @@
 
 - Defines an `evalFresh` handler for `Control.Carrier.Strict.FreshC`, taking the initial value. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
 
+- Adds an `Unlift` effect, allowing inner contexts to run actions in outer contexts, e.g. to interoperate with `Control.Exception`. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
+
 ## Backwards-incompatible changes
 
 - Renames the `Carrier` class to `Algebra` and its `eff` method to `alg`, and moved the responsibilities of `Control.Carrier` to `Control.Algebra`. This makes the library more consistent with the literature and encourages a style of naming that focuses on morphisms rather than objects. ([#285](https://github.com/fused-effects/fused-effects/pull/285), [#294](https://github.com/fused-effects/fused-effects/pull/294))
