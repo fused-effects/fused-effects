@@ -102,8 +102,9 @@ handleCoercible = handleIdentity coerce
 
 -- base
 
-instance Algebra (Lift IO) IO where
-  alg = join . unLift
+instance Algebra (Lift IO :+: Unlift IO) IO where
+  alg (L (Lift m))        = join m
+  alg (R (Unlift with k)) = with id >>= k
 
 instance Algebra (Lift Identity) Identity where
   alg = join . unLift
