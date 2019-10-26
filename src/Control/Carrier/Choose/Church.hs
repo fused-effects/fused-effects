@@ -18,11 +18,13 @@ module Control.Carrier.Choose.Church
 
 import Control.Algebra
 import Control.Applicative (liftA2)
+import Control.Carrier.Pure
 import Control.Effect.Choose
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
 import Data.List.NonEmpty (NonEmpty(..), head, tail)
 import qualified Data.Semigroup as S
 import Prelude hiding (head, tail)
@@ -80,8 +82,9 @@ instance MonadTrans ChooseC where
   lift m = ChooseC (\ _ leaf -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, CanHandle sig (ChooseC m)) => Algebra (Choose :+: sig) (ChooseC m) where
-  type Context (ChooseC m) = ChooseC m
+instance (Algebra sig m, CanHandle sig (ChooseC PureC)) => Algebra (Choose :+: sig) (ChooseC m) where
+  type Context (ChooseC m) = ChooseC PureC
   alg (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
-  alg (R other)      = ChooseC $ \ fork leaf -> alg (handle (pure ()) (runChoose (liftA2 (<|>)) (runChoose (liftA2 (<|>)) (pure . pure))) other) >>= runChoose fork leaf
+  alg (R other)      = ChooseC $ \ fork leaf -> alg (handle (pure ()) dst other) >>= run . runChoose (coerce fork) (coerce leaf) where
+    dst = run . runChoose (liftA2 (liftA2 (<|>))) (pure . runChoose (liftA2 (<|>)) (pure . pure))
   {-# INLINE alg #-}
