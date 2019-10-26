@@ -109,6 +109,10 @@ instance Algebra sig m => Algebra (Error e) (Except.ExceptT e m) where
   alg (L (Throw e))     = Except.throwE e
   alg (R (Catch m h k)) = Except.catchE m h >>= k
 
+instance AlgebraTrans (Error e) (Except.ExceptT e) where
+  liftAlg (L (Throw e))     = Except.throwE e
+  liftAlg (R (Catch m h k)) = Except.catchE m h >>= k
+
 instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . handleCoercible
 
