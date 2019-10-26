@@ -43,6 +43,10 @@ instance MonadTrans TraceC where
   lift = TraceC
   {-# INLINE lift #-}
 
+instance MonadTransContext TraceC where
+  liftHandle handle = TraceC (liftIdentity handle runTrace)
+  {-# INLINE liftHandle #-}
+
 instance MonadUnliftIO m => MonadUnliftIO (TraceC m) where
   askUnliftIO = TraceC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runTrace))
   {-# INLINE askUnliftIO #-}
