@@ -26,6 +26,7 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Functor.Identity
 
 -- | Run a 'Cull' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'. Branches outside of any 'cull' block will not be pruned.
 --
@@ -68,6 +69,13 @@ instance MonadPlus (CullC m)
 instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
+
+instance MonadTransContext CullC where
+  type Context CullC = NonDetC PureC
+  liftHandle handle = CullC $ liftHandle $ \ _ dst -> liftHandle $ \ ctx' dst' ->
+    fmap pure <$> handle ctx' (dst' . fmap (fmap runIdentity . dst . pure . out)) where
+    out (CullC m) = m
+  {-# INLINE liftHandle #-}
 
 instance (Algebra sig m, CanThread sig (NonDetC PureC)) => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
   alg (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
