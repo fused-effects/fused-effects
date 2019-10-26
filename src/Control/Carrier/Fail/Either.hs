@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for a 'Fail' effect, returning the result as an 'Either' 'String'. Failed computations will return a 'Left' containing the 'String' value passed to 'Fail.fail'.
 --
@@ -20,6 +20,7 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
@@ -36,14 +37,12 @@ runFail (FailC m) = runThrow m
 
 -- | @since 1.0.0.0
 newtype FailC m a = FailC (ThrowC String m a)
-  deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans, MonadTransContext)
 
 instance (Algebra sig m, CanThread sig (Either String)) => Fail.MonadFail (FailC m) where
   fail = send . Fail
   {-# INLINE fail #-}
 
-instance (Algebra sig m, CanThread sig (Either String)) => Algebra (Fail :+: sig) (FailC m) where
-  -- NB: 'send' (& thus 'handleCoercible') can’t send sums, so we decompose the sum manually.
-  alg (L op) = FailC (handleCoercible op)
-  alg (R op) = FailC (handleCoercible op)
-  {-# INLINE alg #-}
+instance AlgebraTrans Fail FailC where
+  liftAlg = FailC . liftAlg . hmap coerce
+  {-# INLINE liftAlg #-}
