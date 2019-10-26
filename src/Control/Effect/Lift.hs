@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification, RankNTypes #-}
+{-# LANGUAGE ExistentialQuantification, RankNTypes, TypeFamilies #-}
 {- | Provides a mechanism to kick off the evaluation of an effect stack that takes place in a monadic context.
 
 'Lift' effects are always the last effect in a given effect stack. These stacks are invoked with 'Control.Carrier.Lift.runM' or 'Control.Algebra.run'.
@@ -24,6 +24,7 @@ module Control.Effect.Lift
 
 import Control.Algebra
 import Control.Effect.Lift.Internal (Lift(..))
+import Data.Functor.Identity
 
 -- | Given a @Lift n@ constraint in a signature carried by @m@, 'sendM'
 -- promotes arbitrary actions of type @n a@ to @m a@. It is spiritually
@@ -39,3 +40,7 @@ data Unlift sig m k
 
 instance Functor m => Functor (Unlift sig m) where
   fmap f (Unlift with k) = Unlift with (fmap f . k)
+
+instance Effect (Unlift sig) where
+  type CanHandle (Unlift sig) ctx = ctx ~ Identity
+  handle ctx dst (Unlift with k) = Unlift (\ run -> dst (with (run . fmap runIdentity . dst . (<$ ctx)) <$ ctx)) (dst . fmap k)
