@@ -42,7 +42,7 @@ instance Monad m => Algebra (Lift m) (LiftC m) where
 instance MonadUnliftIO m => MonadUnliftIO (LiftC m) where
   askUnliftIO = LiftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runM))
   {-# INLINE askUnliftIO #-}
-  withRunInIO inner = LiftC $ withRunInIO $ \run -> inner (run . runM)
+  withRunInIO = wrappedWithRunInIO LiftC runM
   {-# INLINE withRunInIO #-}
 
 
@@ -55,7 +55,7 @@ instance MonadTrans UnliftC where
 instance MonadUnliftIO m => MonadUnliftIO (UnliftC m) where
   askUnliftIO = UnliftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runUnlift))
   {-# INLINE askUnliftIO #-}
-  withRunInIO inner = UnliftC $ withRunInIO $ \run -> inner (run . runUnlift)
+  withRunInIO = wrappedWithRunInIO UnliftC runUnlift
   {-# INLINE withRunInIO #-}
 
 instance Monad m => Algebra (Unlift m) (UnliftC m) where
