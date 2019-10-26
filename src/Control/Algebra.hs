@@ -65,6 +65,10 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
 class MonadTransContext t => AlgebraTrans eff t | t -> eff where
   liftAlg :: Algebra sig m => eff (t m) a -> t m a
 
+instance {-# OVERLAPPABLE #-} (AlgebraTrans eff t, Effect eff, Monad (t m), CanThread sig (Context t), Algebra sig m) => Algebra (eff :+: sig) (t m) where
+  alg (L l) = liftAlg l
+  alg (R r) = liftHandle (\ ctx dst -> alg (thread ctx dst r))
+
 instance Algebra Pure PureC where
   alg v = case v of {}
   {-# INLINE alg #-}
@@ -103,10 +107,6 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 
 
 -- transformers
-
-instance Algebra sig m => Algebra (Error e) (Except.ExceptT e m) where
-  alg (L (Throw e))     = Except.throwE e
-  alg (R (Catch m h k)) = Except.catchE m h >>= k
 
 instance AlgebraTrans (Error e) (Except.ExceptT e) where
   liftAlg (L (Throw e))     = Except.throwE e
