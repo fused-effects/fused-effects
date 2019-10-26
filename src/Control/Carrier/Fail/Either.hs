@@ -20,7 +20,6 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Coerce (coerce)
 
 -- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
@@ -44,5 +43,5 @@ instance (Algebra sig m, CanThread sig (Either String)) => Fail.MonadFail (FailC
   {-# INLINE fail #-}
 
 instance AlgebraTrans Fail FailC where
-  liftAlg = FailC . liftAlg . hmap coerce
+  liftAlg = FailC . handleCoercible
   {-# INLINE liftAlg #-}
