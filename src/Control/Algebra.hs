@@ -10,15 +10,15 @@ module Control.Algebra
 ( Algebra(..)
 , Has
 , send
+, run
 , handleIdentity
 , handleCoercible
   -- * Re-exports
 , (:+:) (..)
-, run
+, Identity(..)
 , module Control.Effect.Class
 ) where
 
-import Control.Carrier.Pure (PureC, run)
 import Control.Effect.Catch.Internal
 import Control.Effect.Choose.Internal
 import Control.Effect.Class
@@ -55,10 +55,6 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
 
-instance Algebra Pure PureC where
-  alg v = case v of {}
-  {-# INLINE alg #-}
-
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
 --
@@ -77,6 +73,11 @@ type Has eff sig m = (Members eff sig, Algebra sig m)
 send :: (Member eff sig, Algebra sig m) => eff m a -> m a
 send = alg . inj
 {-# INLINE send #-}
+
+
+run :: Identity a -> a
+run = runIdentity
+{-# INLINE run #-}
 
 
 -- | Thread a stateless handler for a carrier through an effect and eliminate it with the carrier’s algebra.

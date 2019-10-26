@@ -19,7 +19,6 @@ module Control.Carrier.NonDet.Church
 
 import Control.Algebra
 import Control.Applicative (liftA2)
-import Control.Carrier.Pure
 import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
@@ -107,9 +106,9 @@ instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf _ -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, CanHandle sig (NonDetC PureC)) => Algebra (NonDet :+: sig) (NonDetC m) where
+instance (Algebra sig m, CanHandle sig (NonDetC Identity)) => Algebra (NonDet :+: sig) (NonDetC m) where
   alg (L (L Empty))      = empty
   alg (L (R (Choose k))) = k True <|> k False
   alg (R other)          = NonDetC $ \ fork leaf nil -> alg (handle (pure ()) dst other) >>= run . runNonDet (coerce fork) (coerce leaf) (coerce nil) where
-    dst = run . runNonDet (liftA2 (liftA2 (<|>))) (PureC . runNonDetA) (pure (pure empty))
+    dst = run . runNonDet (liftA2 (liftA2 (<|>))) (pure . runNonDetA) (pure (pure empty))
   {-# INLINE alg #-}

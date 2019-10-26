@@ -7,7 +7,6 @@ import Control.Algebra
 import Control.Carrier.NonDet.Church
 import Control.Carrier.State.Strict
 import Control.Monad.Trans.Class
-import Data.Functor.Identity
 import Data.Monoid (Sum(..))
 import Prelude hiding (all)
 import Test.Tasty
