@@ -16,9 +16,6 @@ module Control.Effect.Lift
 ( -- * Lift effect
   Lift(..)
 , sendM
-  -- * Unlift effect
-, Unlift(..)
-, withUnlift
   -- * Re-exports
 , Algebra
 , Has
@@ -26,7 +23,7 @@ module Control.Effect.Lift
 ) where
 
 import Control.Algebra
-import Control.Effect.Lift.Internal (Lift(..), Unlift(..))
+import Control.Effect.Lift.Internal (Lift(..))
 
 -- | Given a @Lift n@ constraint in a signature carried by @m@, 'sendM'
 -- promotes arbitrary actions of type @n a@ to @m a@. It is spiritually
@@ -35,7 +32,3 @@ import Control.Effect.Lift.Internal (Lift(..), Unlift(..))
 -- @since 1.0.0.0
 sendM :: (Has (Lift n) sig m, Functor n) => n a -> m a
 sendM = send . Lift . fmap pure
-
-
-withUnlift :: Has (Unlift n) sig m => ((forall a . m a -> n a) -> m a) -> m a
-withUnlift with = send (Unlift with pure)

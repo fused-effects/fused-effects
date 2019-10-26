@@ -16,6 +16,7 @@ module Control.Carrier.Lift
 import Control.Algebra
 import Control.Applicative (Alternative)
 import Control.Effect.Lift
+import Control.Effect.Unlift
 import Control.Monad (MonadPlus, join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
