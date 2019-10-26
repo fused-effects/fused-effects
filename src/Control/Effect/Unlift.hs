@@ -34,6 +34,12 @@ instance Effect (Unlift sig) where
 
 -- | Run actions in an outer context.
 --
+-- This can be used to provide interoperation with @base@ functionality like 'Control.Exception.finally':
+--
+-- @
+-- 'withUnlift' $ \ run -> 'Control.Monad.IO.Class.liftIO' ('Control.Exception.finally' (run m) (run cleanup))
+-- @
+--
 -- @since 1.0.0.0
 withUnlift :: Has (Unlift n) sig m => ((forall a . m a -> n a) -> m a) -> m a
 withUnlift with = send (Unlift with pure)
