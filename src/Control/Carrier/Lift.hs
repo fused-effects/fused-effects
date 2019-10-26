@@ -34,11 +34,11 @@ newtype LiftC m a = LiftC (m a)
 instance MonadTrans LiftC where
   lift = LiftC
 
-instance Monad m => Algebra (Lift m) (LiftC m) where
-  alg = LiftC . (>>= runM) . unLift
-
 instance MonadUnliftIO m => MonadUnliftIO (LiftC m) where
   askUnliftIO = LiftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runM))
   {-# INLINE askUnliftIO #-}
   withRunInIO inner = LiftC $ withRunInIO $ \run -> inner (run . runM)
   {-# INLINE withRunInIO #-}
+
+instance Monad m => Algebra (Lift m) (LiftC m) where
+  alg = LiftC . (>>= runM) . unLift
