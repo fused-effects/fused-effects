@@ -8,6 +8,7 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 -}
 module Control.Algebra
 ( Algebra(..)
+, AlgebraTrans(..)
 , MonadTransContext(..)
 , handling
 , liftIdentity
@@ -61,6 +62,9 @@ import Data.Tuple (swap)
 class (Effect sig, Monad m) => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
+
+class MonadTransContext t => AlgebraTrans eff t | t -> eff where
+  liftAlg :: Effect sig => (forall a . sig m a -> m a) -> (eff :+: sig) (t m) a -> t m a
 
 instance Algebra Pure PureC where
   alg v = case v of {}
