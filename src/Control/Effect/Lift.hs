@@ -36,3 +36,6 @@ sendM = send . Lift . fmap pure
 
 data Unlift sig m k
   = forall a . Unlift ((forall a . m a -> sig a) -> m a) (a -> m k)
+
+instance Functor m => Functor (Unlift sig m) where
+  fmap f (Unlift with k) = Unlift with (fmap f . k)
