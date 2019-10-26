@@ -156,40 +156,50 @@ instance (Monoid w, Monad m) => Algebra (Writer w) (Strict.WriterT w m) where
   alg (Censor f m k) = Strict.censor f m >>= k
 
 
-class (Functor ctx, MonadTrans t) => MonadTransContext ctx t | t -> ctx where
-  liftHandle :: Monad m => (ctx () -> (forall a . ctx (t m a) -> m (ctx a)) -> m (ctx a)) -> t m a
+class MonadTrans t => MonadTransContext t where
+  type Context t :: * -> *
+  type Context t = Identity
+  liftHandle :: Monad m => (Context t () -> (forall a . Context t (t m a) -> m (Context t a)) -> m (Context t a)) -> t m a
 
-instance MonadTransContext (Either e) (Except.ExceptT e) where
+instance MonadTransContext (Except.ExceptT e) where
+  type Context (Except.ExceptT e) = Either e
   liftHandle handle = Except.ExceptT (handle (Right ()) (either (pure . Left) Except.runExceptT))
 
-instance MonadTransContext Identity Identity.IdentityT where
+instance MonadTransContext Identity.IdentityT where
   liftHandle handle = Identity.IdentityT (liftIdentity handle Identity.runIdentityT)
 
-instance MonadTransContext Maybe Maybe.MaybeT where
+instance MonadTransContext Maybe.MaybeT where
+  type Context Maybe.MaybeT = Maybe
   liftHandle handle = Maybe.MaybeT (handle (Just ()) (maybe (pure Nothing) Maybe.runMaybeT))
 
-instance MonadTransContext Identity (Reader.ReaderT r) where
+instance MonadTransContext (Reader.ReaderT r) where
   liftHandle handle = Reader.ReaderT (\ r -> liftIdentity handle (flip Reader.runReaderT r))
 
-instance Monoid w => MonadTransContext (RWSTF w s) (RWS.Lazy.RWST r w s) where
+instance Monoid w => MonadTransContext (RWS.Lazy.RWST r w s) where
+  type Context (RWS.Lazy.RWST r w s) = RWSTF w s
   liftHandle handle = RWS.Lazy.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s))
 
-instance Monoid w => MonadTransContext (RWSTF w s) (RWS.Strict.RWST r w s) where
+instance Monoid w => MonadTransContext (RWS.Strict.RWST r w s) where
+  type Context (RWS.Strict.RWST r w s) = RWSTF w s
   liftHandle handle = RWS.Strict.RWST (\ r s -> unRWSTF <$> handle (RWSTF ((), s, mempty)) (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s))
 
-instance MonadTransContext ((,) s) (Lazy.StateT s) where
+instance MonadTransContext (Lazy.StateT s) where
+  type Context (Lazy.StateT s) = (,) s
   liftHandle handle = Lazy.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Lazy.runStateT x s))
 
-instance MonadTransContext ((,) s) (Strict.StateT s) where
+instance MonadTransContext (Strict.StateT s) where
+  type Context (Strict.StateT s) = (,) s
   liftHandle handle = Strict.StateT (\ s -> swap <$> handle (s, ()) (\ (s, x) -> swap <$> Strict.runStateT x s))
 
-instance Monoid w => MonadTransContext ((,) w) (Lazy.WriterT w) where
+instance Monoid w => MonadTransContext (Lazy.WriterT w) where
+  type Context (Lazy.WriterT w) = (,) w
   liftHandle handle = Lazy.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Lazy.runWriterT x))
 
-instance Monoid w => MonadTransContext ((,) w) (Strict.WriterT w) where
+instance Monoid w => MonadTransContext (Strict.WriterT w) where
+  type Context (Strict.WriterT w) = (,) w
   liftHandle handle = Strict.WriterT (swap <$> handle (mempty, ()) (\ (w, x) -> swap . fmap (mappend w) <$> Strict.runWriterT x))
 
-handling :: (Effect eff, CanThread eff ctx, MonadTransContext ctx t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
+handling :: (Effect eff, CanThread eff (Context t), MonadTransContext t, Member eff sig, Algebra sig m, Monad (t m)) => eff (t m) a -> t m a
 handling op = liftHandle (\ s dist -> handle s dist op)
 
 liftIdentity
@@ -202,10 +212,11 @@ liftIdentity handle f = runIdentity <$> handle (Identity ()) (fmap Identity . f 
 newtype TransC t (m :: * -> *) a = TransC { runTrans :: t m a }
   deriving (Applicative, Functor, Monad, MonadTrans)
 
-instance MonadTransContext ctx t => MonadTransContext ctx (TransC t) where
+instance (MonadTransContext t, Functor (Context t)) => MonadTransContext (TransC t) where
+  type Context (TransC t) = Context t
   liftHandle handle = TransC (liftHandle (\ s dist -> handle s (dist . fmap runTrans)))
 
-instance (MonadTransContext ctx t, CanThread r ctx, Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
+instance (MonadTransContext t, Functor (Context t), CanThread r (Context t), Algebra l (t m), Algebra r m) => Algebra (l :+: r) (TransC t m) where
   alg (L op) = TransC (handleCoercible op)
   alg (R op) = handling op
 

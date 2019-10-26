@@ -52,7 +52,8 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 -- | 'ErrorC' passes 'MonadPlus' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
-instance MonadTransContext (Either e) (ErrorC e) where
+instance MonadTransContext (ErrorC e) where
+  type Context (ErrorC e) = Either e
   liftHandle handle = ErrorC (liftHandle (\ ctx dst -> handle ctx (dst . coerce)))
 
 instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (ErrorC e m) where
