@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Lift' allowing monadic actions to be lifted into a larger context with 'sendM'.
 --
@@ -58,5 +58,6 @@ instance MonadUnliftIO m => MonadUnliftIO (UnliftC m) where
   withRunInIO = wrappedWithRunInIO UnliftC runUnlift
   {-# INLINE withRunInIO #-}
 
-instance Monad m => Algebra (Unlift m) (UnliftC m) where
-  alg (Unlift with k) = with runUnlift >>= k
+instance Algebra sig m => Algebra (Unlift m :+: sig) (UnliftC m) where
+  alg (L (Unlift with k)) = with runUnlift >>= k
+  alg (R other)           = UnliftC (handleCoercible other)
