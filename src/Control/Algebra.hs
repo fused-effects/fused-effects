@@ -9,6 +9,7 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 module Control.Algebra
 ( Algebra(..)
 , AlgebraTrans(..)
+, algDefault
 , MonadTransContext(..)
 , handling
 , Has
@@ -66,6 +67,14 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
     -> m a
   alg (L l) = liftAlg l
   alg (R r) = liftHandle (\ ctx dst -> alg (thread ctx dst r))
+
+algDefault
+  :: (AlgebraTrans eff t, CanThread sig (Context t), Monad (t m), Algebra sig m)
+  => (eff :+: sig) (t m) a
+  -> t m a
+algDefault (L l) = liftAlg l
+algDefault (R r) = liftHandle (\ ctx dst -> alg (thread ctx dst r))
+
 
 class MonadTransContext t => AlgebraTrans eff t | t -> eff where
   liftAlg :: (Algebra sig m, CanThread sig (Context t)) => eff (t m) a -> t m a
