@@ -63,7 +63,7 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
   alg :: sig m a -> m a
 
 class MonadTransContext t => AlgebraTrans eff t | t -> eff where
-  liftAlg :: Algebra sig m => eff (t m) a -> t m a
+  liftAlg :: (Algebra sig m, CanThread sig (Context t)) => eff (t m) a -> t m a
 
 instance {-# OVERLAPPABLE #-} (AlgebraTrans eff t, Effect eff, Monad (t m), CanThread sig (Context t), Algebra sig m) => Algebra (eff :+: sig) (t m) where
   alg (L l) = liftAlg l
