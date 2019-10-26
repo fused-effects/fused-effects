@@ -57,3 +57,6 @@ instance MonadUnliftIO m => MonadUnliftIO (UnliftC m) where
   {-# INLINE askUnliftIO #-}
   withRunInIO inner = UnliftC $ withRunInIO $ \run -> inner (run . runUnlift)
   {-# INLINE withRunInIO #-}
+
+instance MonadUnliftIO m => Algebra (Unlift IO) (UnliftC m) where
+  alg (Unlift with k) = askUnliftIO >>= \ un -> with (unliftIO un) >>= k
