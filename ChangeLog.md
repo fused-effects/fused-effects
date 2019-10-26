@@ -74,6 +74,9 @@
 
 - Removes the `Pure` effect. It’s unlikely that this will require changes, as `Pure` had no operations, but `Lift Identity` should be used instead. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
 
+- Removes `MonadUnliftIO` instances as they’ve been subsumed by `Unlift`. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
+
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
