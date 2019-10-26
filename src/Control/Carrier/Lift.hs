@@ -20,7 +20,6 @@ import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
-import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
@@ -39,24 +38,12 @@ instance MonadTrans LiftC where
 instance Monad m => Algebra (Lift m) (LiftC m) where
   alg = LiftC . (>>= runM) . unLift
 
-instance MonadUnliftIO m => MonadUnliftIO (LiftC m) where
-  askUnliftIO = LiftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runM))
-  {-# INLINE askUnliftIO #-}
-  withRunInIO = wrappedWithRunInIO LiftC runM
-  {-# INLINE withRunInIO #-}
-
 
 newtype UnliftC m a = UnliftC { runUnlift :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans UnliftC where
   lift = UnliftC
-
-instance MonadUnliftIO m => MonadUnliftIO (UnliftC m) where
-  askUnliftIO = UnliftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runUnlift))
-  {-# INLINE askUnliftIO #-}
-  withRunInIO = wrappedWithRunInIO UnliftC runUnlift
-  {-# INLINE withRunInIO #-}
 
 instance Algebra sig m => Algebra (Unlift m :+: sig) (UnliftC m) where
   alg (L (Unlift with k)) = with runUnlift >>= k
