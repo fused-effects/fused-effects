@@ -44,7 +44,7 @@ runAll :: Applicative m => AllC m a -> m [a]
 runAll (AllC m) = runNonDetA m
 
 newtype AllC m a = AllC (NonDetC m a)
-  deriving (Alternative, Applicative, Functor, Monad, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, MonadPlus, MonadTrans)
 
 instance Algebra sig m => Algebra (All :+: NonDet :+: sig) (AllC m) where
   alg (L (All m k)) = lift (runAll m) >>= k
