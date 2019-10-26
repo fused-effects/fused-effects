@@ -19,11 +19,13 @@ module Control.Carrier.NonDet.Church
 
 import Control.Algebra
 import Control.Applicative (liftA2)
+import Control.Carrier.Pure
 import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
 
 -- | Run a 'NonDet' effect, using the provided functions to interpret choice, leaf results, and failure.
 --
@@ -104,6 +106,12 @@ instance MonadPlus (NonDetC m)
 instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf _ -> m >>= leaf)
   {-# INLINE lift #-}
+
+instance MonadTransContext NonDetC where
+  type Context NonDetC = NonDetC PureC
+  liftHandle handle = NonDetC $ \ fork leaf nil -> handle (pure ()) dst >>= run . runNonDet (coerce fork) (coerce leaf) (coerce nil) where
+    dst = run . runNonDet (liftA2 (liftA2 (<|>))) (PureC . runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)) (pure (pure empty))
+  {-# INLINE liftHandle #-}
 
 instance (Algebra sig m, CanThread sig (NonDetC m)) => Algebra (NonDet :+: sig) (NonDetC m) where
   alg (L (L Empty))      = empty
