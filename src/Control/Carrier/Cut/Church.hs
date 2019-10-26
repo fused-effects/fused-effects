@@ -92,7 +92,7 @@ instance MonadTrans CutC where
 instance MonadTransContext CutC where
   type Context CutC = CutC PureC
   liftHandle handle = CutC $ \ cons nil fail -> handle (pure ()) dst >>= run . runCut (coerce cons) (coerce nil) (coerce fail) where
-    dst = run . runCut (fmap . liftA2 (<|>) . runCutA) (pure (pure empty)) (pure (pure cutfail))
+    dst = run . runCut (fmap . liftA2 (<|>) . runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)) (pure (pure empty)) (pure (pure cutfail))
   {-# INLINE liftHandle #-}
 
 instance AlgebraTrans (Cut :+: NonDet) CutC where
