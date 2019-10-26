@@ -70,10 +70,6 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
 class MonadTransContext t => AlgebraTrans eff t | t -> eff where
   liftAlg :: (Algebra sig m, CanThread sig (Context t)) => eff (t m) a -> t m a
 
-instance {-# OVERLAPPABLE #-} (AlgebraTrans eff t, Effect eff, Monad (t m), CanThread sig (Context t), Algebra sig m) => Algebra (eff :+: sig) (t m) where
-  alg (L l) = liftAlg l
-  alg (R r) = liftHandle (\ ctx dst -> alg (thread ctx dst r))
-
 instance Algebra Pure PureC where
   alg v = case v of {}
   {-# INLINE alg #-}
@@ -113,9 +109,13 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 
 -- transformers
 
+instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (Except.ExceptT e m)
+
 instance AlgebraTrans (Error e) (Except.ExceptT e) where
   liftAlg (L (Throw e))     = Except.throwE e
   liftAlg (R (Catch m h k)) = Except.catchE m h >>= k
+
+instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m)
 
 instance AlgebraTrans (Reader r) (Reader.ReaderT r) where
   liftAlg (Ask       k) = Reader.ask >>= k
@@ -128,6 +128,8 @@ toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
+instance (Monoid w, Algebra sig m, CanThread sig (RWSTF w s)) => Algebra ((Reader r :+: Writer w :+: State s) :+: sig) (RWS.Lazy.RWST r w s m)
+
 instance Monoid w => AlgebraTrans (Reader r :+: Writer w :+: State s) (RWS.Lazy.RWST r w s) where
   liftAlg (L (Ask       k))      = RWS.Lazy.ask >>= k
   liftAlg (L (Local f m k))      = RWS.Lazy.local f m >>= k
@@ -136,6 +138,8 @@ instance Monoid w => AlgebraTrans (Reader r :+: Writer w :+: State s) (RWS.Lazy.
   liftAlg (R (L (Censor f m k))) = RWS.Lazy.censor f m >>= k
   liftAlg (R (R (Get   k)))      = RWS.Lazy.get >>= k
   liftAlg (R (R (Put s k)))      = RWS.Lazy.put s *> k
+
+instance (Monoid w, Algebra sig m, CanThread sig (RWSTF w s)) => Algebra ((Reader r :+: Writer w :+: State s) :+: sig) (RWS.Strict.RWST r w s m)
 
 instance Monoid w => AlgebraTrans (Reader r :+: Writer w :+: State s) (RWS.Strict.RWST r w s) where
   liftAlg (L (Ask       k))      = RWS.Strict.ask >>= k
@@ -146,18 +150,26 @@ instance Monoid w => AlgebraTrans (Reader r :+: Writer w :+: State s) (RWS.Stric
   liftAlg (R (R (Get   k)))      = RWS.Strict.get >>= k
   liftAlg (R (R (Put s k)))      = RWS.Strict.put s *> k
 
+instance (Algebra sig m, CanThread sig ((,) s)) => Algebra (State s :+: sig) (Lazy.StateT s m)
+
 instance AlgebraTrans (State s) (Lazy.StateT s) where
   liftAlg (Get   k) = Lazy.get >>= k
   liftAlg (Put s k) = Lazy.put s *> k
+
+instance (Algebra sig m, CanThread sig ((,) s)) => Algebra (State s :+: sig) (Strict.StateT s m)
 
 instance AlgebraTrans (State s) (Strict.StateT s) where
   liftAlg (Get   k) = Strict.get >>= k
   liftAlg (Put s k) = Strict.put s *> k
 
+instance (Monoid w, Algebra sig m, CanThread sig ((,) w)) => Algebra (Writer w :+: sig) (Lazy.WriterT w m)
+
 instance Monoid w => AlgebraTrans (Writer w) (Lazy.WriterT w) where
   liftAlg (Tell w k)     = Lazy.tell w *> k
   liftAlg (Listen m k)   = Lazy.listen m >>= uncurry (flip k)
   liftAlg (Censor f m k) = Lazy.censor f m >>= k
+
+instance (Monoid w, Algebra sig m, CanThread sig ((,) w)) => Algebra (Writer w :+: sig) (Strict.WriterT w m)
 
 instance Monoid w => AlgebraTrans (Writer w) (Strict.WriterT w) where
   liftAlg (Tell w k)     = Strict.tell w *> k

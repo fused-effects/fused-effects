@@ -77,6 +77,8 @@ instance MonadTransContext CullC where
     out (CullC m) = m
   {-# INLINE liftHandle #-}
 
+instance (Algebra sig m, CanThread sig (NonDetC PureC)) => Algebra ((Cull :+: NonDet) :+: sig) (CullC m)
+
 instance AlgebraTrans (Cull :+: NonDet) CullC where
   liftAlg (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
   liftAlg (R (L Empty))      = empty

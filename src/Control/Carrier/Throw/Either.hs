@@ -29,6 +29,8 @@ runThrow (ThrowC m) = runError m
 newtype ThrowC e m a = ThrowC (ErrorC e m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans, MonadTransContext)
 
+instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Throw e :+: sig) (ThrowC e m)
+
 instance AlgebraTrans (Throw e) (ThrowC e) where
   liftAlg (Throw e) = ThrowC (throwError e)
   {-# INLINE liftAlg #-}

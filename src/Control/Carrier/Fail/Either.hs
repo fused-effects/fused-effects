@@ -42,6 +42,8 @@ instance (Algebra sig m, CanThread sig (Either String)) => Fail.MonadFail (FailC
   fail = send . Fail
   {-# INLINE fail #-}
 
+instance (Algebra sig m, CanThread sig (Either String)) => Algebra (Fail :+: sig) (FailC m)
+
 instance AlgebraTrans Fail FailC where
   liftAlg = FailC . handleCoercible
   {-# INLINE liftAlg #-}

@@ -113,6 +113,8 @@ instance MonadTransContext NonDetC where
     dst = run . runNonDet (liftA2 (liftA2 (<|>))) (PureC . runNonDetA) (pure (pure empty))
   {-# INLINE liftHandle #-}
 
+instance (Algebra sig m, CanThread sig (NonDetC PureC)) => Algebra (NonDet :+: sig) (NonDetC m)
+
 instance AlgebraTrans NonDet NonDetC where
   liftAlg (L Empty)      = empty
   liftAlg (R (Choose k)) = k True <|> k False

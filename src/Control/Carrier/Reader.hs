@@ -90,6 +90,8 @@ instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
   withRunInIO inner = ReaderC $ \r -> withRunInIO $ \go -> inner (go . runReader r)
   {-# INLINE withRunInIO #-}
 
+instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m)
+
 instance AlgebraTrans (Reader r) (ReaderC r) where
   liftAlg op = ReaderC $ \ r -> case op of
     Ask       k -> runReader r (k r)
