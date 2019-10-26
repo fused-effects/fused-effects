@@ -81,6 +81,7 @@ library
     Control.Effect.Sum
     Control.Effect.Throw
     Control.Effect.Trace
+    Control.Effect.Unlift
     Control.Effect.Writer
   other-modules:
     Control.Effect.Catch.Internal
