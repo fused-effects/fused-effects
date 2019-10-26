@@ -20,6 +20,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Except
+import Data.Coerce (coerce)
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
@@ -51,9 +52,6 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 -- | 'ErrorC' passes 'MonadPlus' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
-instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Error e :+: sig) (ErrorC e m) where
-  -- NB: 'send' (& thus 'handleCoercible') can’t send sums, so we decompose the sum manually.
-  alg (L (L op)) = ErrorC (handleCoercible op)
-  alg (L (R op)) = ErrorC (handleCoercible op)
-  alg (R op)     = handling op
-  {-# INLINE alg #-}
+instance AlgebraTrans (Error e) (ErrorC e) where
+  liftAlg = ErrorC . liftAlg . hmap coerce
+  {-# INLINE liftAlg #-}
