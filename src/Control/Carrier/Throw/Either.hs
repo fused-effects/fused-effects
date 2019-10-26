@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 {- | A carrier for a 'Throw' effect.
 
 @since 1.0.0.0
@@ -27,8 +27,7 @@ runThrow (ThrowC m) = runError m
 
 -- | @since 1.0.0.0
 newtype ThrowC e m a = ThrowC (ErrorC e m a)
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans, MonadTransContext)
 
-instance (Algebra sig m, CanThread sig (Either e)) => Algebra (Throw e :+: sig) (ThrowC e m) where
-  alg (L (Throw e)) = ThrowC (throwError e)
-  alg (R other)     = ThrowC (handleCoercible other)
+instance AlgebraTrans (Throw e) (ThrowC e) where
+  liftAlg (Throw e) = ThrowC (throwError e)
