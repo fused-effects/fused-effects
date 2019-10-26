@@ -65,8 +65,7 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
     :: (AlgebraTrans eff t, CanThread sig' (Context t), Algebra sig' n, m ~ t n, sig ~ (eff :+: sig'))
     => sig m a
     -> m a
-  alg (L l) = liftAlg l
-  alg (R r) = liftHandle (\ ctx dst -> alg (thread ctx dst r))
+  alg = algDefault
 
 algDefault
   :: (AlgebraTrans eff t, CanThread sig (Context t), Monad (t m), Algebra sig m)
