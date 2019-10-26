@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
 
 -- | A carrier for 'Lift' allowing monadic actions to be lifted into a larger context with 'sendM'.
 --
@@ -7,8 +7,6 @@ module Control.Carrier.Lift
 ( -- * Lift carrier
   runM
 , LiftC(..)
-  -- * Unlift carrier
-, UnliftC(..)
   -- * Lift effect
 , module Control.Effect.Lift
 ) where
@@ -16,7 +14,6 @@ module Control.Carrier.Lift
 import Control.Algebra
 import Control.Applicative (Alternative)
 import Control.Effect.Lift
-import Control.Effect.Unlift
 import Control.Monad (MonadPlus, join)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
@@ -38,14 +35,3 @@ instance MonadTrans LiftC where
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
   alg = join . LiftC . unLift
-
-
-newtype UnliftC m a = UnliftC { runUnlift :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
-
-instance MonadTrans UnliftC where
-  lift = UnliftC
-
-instance Algebra sig m => Algebra (Unlift m :+: sig) (UnliftC m) where
-  alg (L (Unlift with k)) = with runUnlift >>= k
-  alg (R other)           = UnliftC (handleCoercible other)
