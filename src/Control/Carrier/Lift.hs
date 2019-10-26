@@ -7,6 +7,8 @@ module Control.Carrier.Lift
 ( -- * Lift carrier
   runM
 , LiftC(..)
+  -- * Unlift carrier
+, UnliftC(..)
   -- * Lift effect
 , module Control.Effect.Lift
 ) where
@@ -41,4 +43,17 @@ instance MonadUnliftIO m => MonadUnliftIO (LiftC m) where
   askUnliftIO = LiftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runM))
   {-# INLINE askUnliftIO #-}
   withRunInIO inner = LiftC $ withRunInIO $ \run -> inner (run . runM)
+  {-# INLINE withRunInIO #-}
+
+
+newtype UnliftC m a = UnliftC { runUnlift :: m a }
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
+
+instance MonadTrans UnliftC where
+  lift = UnliftC
+
+instance MonadUnliftIO m => MonadUnliftIO (UnliftC m) where
+  askUnliftIO = UnliftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runUnlift))
+  {-# INLINE askUnliftIO #-}
+  withRunInIO inner = UnliftC $ withRunInIO $ \run -> inner (run . runUnlift)
   {-# INLINE withRunInIO #-}
