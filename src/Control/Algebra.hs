@@ -112,9 +112,9 @@ instance AlgebraTrans (Error e) (Except.ExceptT e) where
   liftAlg (L (Throw e))     = Except.throwE e
   liftAlg (R (Catch m h k)) = Except.catchE m h >>= k
 
-instance Monad m => Algebra (Reader r) (Reader.ReaderT r m) where
-  alg (Ask       k) = Reader.ask >>= k
-  alg (Local f m k) = Reader.local f m >>= k
+instance AlgebraTrans (Reader r) (Reader.ReaderT r) where
+  liftAlg (Ask       k) = Reader.ask >>= k
+  liftAlg (Local f m k) = Reader.local f m >>= k
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
@@ -123,41 +123,41 @@ toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
-instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s) (RWS.Lazy.RWST r w s m) where
-  alg (L (Ask       k))      = RWS.Lazy.ask >>= k
-  alg (L (Local f m k))      = RWS.Lazy.local f m >>= k
-  alg (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
-  alg (R (L (Listen m k)))   = RWS.Lazy.listen m >>= uncurry (flip k)
-  alg (R (L (Censor f m k))) = RWS.Lazy.censor f m >>= k
-  alg (R (R (Get   k)))      = RWS.Lazy.get >>= k
-  alg (R (R (Put s k)))      = RWS.Lazy.put s *> k
+instance Monoid w => AlgebraTrans (Reader r :+: Writer w :+: State s) (RWS.Lazy.RWST r w s) where
+  liftAlg (L (Ask       k))      = RWS.Lazy.ask >>= k
+  liftAlg (L (Local f m k))      = RWS.Lazy.local f m >>= k
+  liftAlg (R (L (Tell w k)))     = RWS.Lazy.tell w *> k
+  liftAlg (R (L (Listen m k)))   = RWS.Lazy.listen m >>= uncurry (flip k)
+  liftAlg (R (L (Censor f m k))) = RWS.Lazy.censor f m >>= k
+  liftAlg (R (R (Get   k)))      = RWS.Lazy.get >>= k
+  liftAlg (R (R (Put s k)))      = RWS.Lazy.put s *> k
 
-instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s) (RWS.Strict.RWST r w s m) where
-  alg (L (Ask       k))      = RWS.Strict.ask >>= k
-  alg (L (Local f m k))      = RWS.Strict.local f m >>= k
-  alg (R (L (Tell w k)))     = RWS.Strict.tell w *> k
-  alg (R (L (Listen m k)))   = RWS.Strict.listen m >>= uncurry (flip k)
-  alg (R (L (Censor f m k))) = RWS.Strict.censor f m >>= k
-  alg (R (R (Get   k)))      = RWS.Strict.get >>= k
-  alg (R (R (Put s k)))      = RWS.Strict.put s *> k
+instance Monoid w => AlgebraTrans (Reader r :+: Writer w :+: State s) (RWS.Strict.RWST r w s) where
+  liftAlg (L (Ask       k))      = RWS.Strict.ask >>= k
+  liftAlg (L (Local f m k))      = RWS.Strict.local f m >>= k
+  liftAlg (R (L (Tell w k)))     = RWS.Strict.tell w *> k
+  liftAlg (R (L (Listen m k)))   = RWS.Strict.listen m >>= uncurry (flip k)
+  liftAlg (R (L (Censor f m k))) = RWS.Strict.censor f m >>= k
+  liftAlg (R (R (Get   k)))      = RWS.Strict.get >>= k
+  liftAlg (R (R (Put s k)))      = RWS.Strict.put s *> k
 
-instance Monad m => Algebra (State s) (Lazy.StateT s m) where
-  alg (Get   k) = Lazy.get >>= k
-  alg (Put s k) = Lazy.put s *> k
+instance AlgebraTrans (State s) (Lazy.StateT s) where
+  liftAlg (Get   k) = Lazy.get >>= k
+  liftAlg (Put s k) = Lazy.put s *> k
 
-instance Monad m => Algebra (State s) (Strict.StateT s m) where
-  alg (Get   k) = Strict.get >>= k
-  alg (Put s k) = Strict.put s *> k
+instance AlgebraTrans (State s) (Strict.StateT s) where
+  liftAlg (Get   k) = Strict.get >>= k
+  liftAlg (Put s k) = Strict.put s *> k
 
-instance (Monoid w, Monad m) => Algebra (Writer w) (Lazy.WriterT w m) where
-  alg (Tell w k)     = Lazy.tell w *> k
-  alg (Listen m k)   = Lazy.listen m >>= uncurry (flip k)
-  alg (Censor f m k) = Lazy.censor f m >>= k
+instance Monoid w => AlgebraTrans (Writer w) (Lazy.WriterT w) where
+  liftAlg (Tell w k)     = Lazy.tell w *> k
+  liftAlg (Listen m k)   = Lazy.listen m >>= uncurry (flip k)
+  liftAlg (Censor f m k) = Lazy.censor f m >>= k
 
-instance (Monoid w, Monad m) => Algebra (Writer w) (Strict.WriterT w m) where
-  alg (Tell w k)     = Strict.tell w *> k
-  alg (Listen m k)   = Strict.listen m >>= uncurry (flip k)
-  alg (Censor f m k) = Strict.censor f m >>= k
+instance Monoid w => AlgebraTrans (Writer w) (Strict.WriterT w) where
+  liftAlg (Tell w k)     = Strict.tell w *> k
+  liftAlg (Listen m k)   = Strict.listen m >>= uncurry (flip k)
+  liftAlg (Censor f m k) = Strict.censor f m >>= k
 
 
 class MonadTrans t => MonadTransContext t where
