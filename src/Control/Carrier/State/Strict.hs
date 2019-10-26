@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleInstances, MultiParamTypeClasses, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 {- | A carrier for the 'State' effect. It evaluates its inner state strictly, which is the correct choice for the majority of use cases.
 
@@ -111,7 +111,6 @@ instance MonadTrans (StateC s) where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, CanHandle sig ((,) s)) => Algebra (State s :+: sig) (StateC s m) where
-  type Context (StateC s m) = ((,) s)
   alg (L (Get   k)) = StateC (\ s -> runState s (k s))
   alg (L (Put s k)) = StateC (\ _ -> runState s k)
   alg (R other)     = StateC (\ s -> alg (handle (s, ()) (uncurry runState) other))

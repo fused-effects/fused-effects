@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
 --
@@ -90,7 +90,6 @@ instance MonadTrans CutC where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, CanHandle sig (CutC PureC)) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
-  type Context (CutC m) = CutC PureC
   alg (L Cutfail)    = CutC $ \ _    _   fail -> fail
   alg (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
   alg (R (L (L Empty)))      = empty
