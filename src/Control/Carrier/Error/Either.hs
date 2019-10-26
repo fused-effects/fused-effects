@@ -20,7 +20,6 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Except
-import Data.Coerce (coerce)
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
@@ -53,5 +52,6 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance AlgebraTrans (Error e) (ErrorC e) where
-  liftAlg = ErrorC . liftAlg . hmap coerce
+  liftAlg (L l) = ErrorC (handleCoercible l)
+  liftAlg (R r) = ErrorC (handleCoercible r)
   {-# INLINE liftAlg #-}
