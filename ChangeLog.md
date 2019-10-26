@@ -77,6 +77,7 @@
 - Removes `PureC` in favour of `Data.Functor.Identity.Identity`. Note that `run` is still provided as a synonym for `runIdentity`. ([#305](https://github.com/fused-effects/fused-effects/pull/305))
 
 - Redefines `ReaderC` as a type & pattern synonym of `ReaderT`. ([#305](https://github.com/fused-effects/fused-effects/pull/305))
+
 - Redefines `Lazy.StateC` as a type & pattern synonym of `Lazy.StateT`. ([#305](https://github.com/fused-effects/fused-effects/pull/305))
 
 
