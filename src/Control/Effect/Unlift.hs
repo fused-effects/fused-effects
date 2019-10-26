@@ -32,5 +32,8 @@ instance Effect (Unlift sig) where
   handle ctx dst (Unlift with k) = Unlift (\ run -> dst (with (run . fmap runIdentity . dst . (<$ ctx)) <$ ctx)) (dst . fmap k)
 
 
+-- | Run actions in an outer context.
+--
+-- @since 1.0.0.0
 withUnlift :: Has (Unlift n) sig m => ((forall a . m a -> n a) -> m a) -> m a
 withUnlift with = send (Unlift with pure)
