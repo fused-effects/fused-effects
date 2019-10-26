@@ -20,6 +20,7 @@ module Control.Effect.Unlift
 import Control.Algebra
 import Data.Functor.Identity
 
+-- | @since 1.0.0.0
 data Unlift sig m k
   = forall a . Unlift ((forall a . m a -> sig a) -> m a) (a -> m k)
 
