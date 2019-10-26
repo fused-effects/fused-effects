@@ -1,4 +1,7 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+-- | A carrier for 'Unlift', allowing monadic actions to be run in an outer context using 'withUnlift'.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Unlift
 ( -- * Unlift carrier
   UnliftC(..)
