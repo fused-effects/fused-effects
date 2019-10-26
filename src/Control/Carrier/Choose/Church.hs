@@ -86,6 +86,7 @@ instance MonadTransContext ChooseC where
   type Context ChooseC = ChooseC PureC
   liftHandle handle = ChooseC $ \ fork leaf -> handle (pure ()) dst >>= run . runChoose (coerce fork) (coerce leaf) where
     dst = run . runChoose (liftA2 (liftA2 (<|>))) (PureC . runChoose (liftA2 (<|>)) (pure . pure))
+  {-# INLINE liftHandle #-}
 
 instance AlgebraTrans Choose ChooseC where
   liftAlg (Choose k) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
