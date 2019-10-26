@@ -67,7 +67,7 @@ hmap
   => (forall a . m a -> n a)
   -> sig m a
   -> sig n a
-hmap f = fmap runIdentity . thread (Identity ()) (fmap Identity . f . runIdentity)
+hmap f op = liftIdentity (\ ctx dst -> thread ctx dst op) f
 
 liftIdentity
   :: (Functor n, Functor o)
