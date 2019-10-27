@@ -22,7 +22,18 @@ import GHC.Generics
 --
 -- @since 1.0.0.0
 class Effect sig where
-  -- | Handle any effects in a signature by threading the carrier’s context all the way through to the continuation.
+  -- | Handle any effects in a signature by threading the algebra’s handler all the way through to the continuation, starting from some initial context.
+  --
+  -- The handler is required to adhere to the following laws:
+  --
+  -- @
+  -- handler . 'fmap' 'pure' = 'pure'
+  -- @
+  -- @
+  -- handler . 'fmap' (k '=<<') = handler . 'fmap' k 'Control.Monad.<=<' handler
+  -- @
+  --
+  -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
   thread
     :: (Functor ctx, Monad m)
     => ctx ()
