@@ -14,11 +14,12 @@ module Control.Carrier.Lift
 import Control.Algebra
 import Control.Applicative (Alternative)
 import Control.Effect.Lift
-import Control.Monad (MonadPlus, join)
+import Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Functor.Identity
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 --
@@ -27,11 +28,11 @@ runM :: LiftC m a -> m a
 runM (LiftC m) = m
 
 -- | @since 1.0.0.0
-newtype LiftC m a = LiftC (m a)
+newtype LiftC m a = LiftC { runUnlift :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans LiftC where
   lift = LiftC
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
-  alg = join . LiftC . unLift
+  alg (LiftWith with k) = LiftC (with (Identity ()) (fmap Identity . runUnlift . runIdentity)) >>= k . runIdentity

@@ -63,7 +63,6 @@ library
     Control.Carrier.Trace.Ignoring
     Control.Carrier.Trace.Printing
     Control.Carrier.Trace.Returning
-    Control.Carrier.Unlift
     Control.Carrier.Writer.Strict
     -- Effects
     Control.Effect.Catch
@@ -82,7 +81,6 @@ library
     Control.Effect.Sum
     Control.Effect.Throw
     Control.Effect.Trace
-    Control.Effect.Unlift
     Control.Effect.Writer
   other-modules:
     Control.Effect.Catch.Internal
@@ -94,7 +92,6 @@ library
     Control.Effect.Reader.Internal
     Control.Effect.State.Internal
     Control.Effect.Throw.Internal
-    Control.Effect.Unlift.Internal
     Control.Effect.Writer.Internal
   build-depends:
       base          >= 4.9 && < 4.14

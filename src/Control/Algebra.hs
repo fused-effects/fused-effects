@@ -29,9 +29,8 @@ import Control.Effect.Reader.Internal
 import Control.Effect.State.Internal
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import Control.Effect.Throw.Internal
-import Control.Effect.Unlift.Internal
 import Control.Effect.Writer.Internal
-import Control.Monad ((<=<), join)
+import Control.Monad ((<=<))
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Identity as Identity
@@ -103,9 +102,8 @@ handleCoercible = handleIdentity coerce
 
 -- base
 
-instance Algebra (Lift IO :+: Unlift IO) IO where
-  alg (L (Lift m))        = join m
-  alg (R (Unlift with k)) = with (Identity ()) coerce >>= k . runIdentity
+instance Algebra (Lift IO) IO where
+  alg (LiftWith with k) = with (Identity ()) coerce >>= k . runIdentity
 
 instance Algebra (Lift Identity) Identity where
   alg = join . unLift
