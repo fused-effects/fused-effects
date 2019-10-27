@@ -12,6 +12,7 @@ module Control.Effect.Exception
 , handle
 , handleJust
 , try
+, tryJust
 , onException
 , bracket
 , finally
@@ -89,6 +90,12 @@ handleJust p = flip (catchJust p)
 -- @since 1.0.0.0
 try :: (Exc.Exception e, Has (Lift IO) sig m) => m a -> m (Either e a)
 try m = (Right <$> m) `catch` (pure . Left)
+
+-- | See @"Control.Exception".'Exc.tryJust'@.
+--
+-- @since 1.0.0.0
+tryJust :: (Exc.Exception e, Has (Lift IO) sig m) => (e -> Maybe b) -> m a -> m (Either b a)
+tryJust p m = catchJust p (Right <$> m) (pure . Left)
 
 -- | See @"Control.Exception".'Exc.onException'@.
 --
