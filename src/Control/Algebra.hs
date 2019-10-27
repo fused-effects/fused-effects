@@ -106,7 +106,7 @@ instance Algebra (Lift IO) IO where
   alg (LiftWith with k) = with (Identity ()) coerce >>= k . runIdentity
 
 instance Algebra (Lift Identity) Identity where
-  alg = join . unLift
+  alg (LiftWith with k) = with (Identity ()) coerce >>= k . runIdentity
 
 instance Algebra Choose NonEmpty where
   alg (Choose m) = m True S.<> m False
