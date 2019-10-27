@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification, RankNTypes, TypeFamilies #-}
+{-# LANGUAGE ExistentialQuantification, RankNTypes #-}
 {- | 'Unlift' effects allow inner contexts to run actions in outer contexts.
 
 Predefined carriers:
@@ -18,18 +18,19 @@ module Control.Effect.Unlift
 ) where
 
 import Control.Algebra
-import Data.Functor.Identity
+import Data.Functor.Compose
 
 -- | @since 1.0.0.0
 data Unlift sig m k
-  = forall a . Unlift ((forall a . m a -> sig a) -> sig a) (a -> m k)
+  = forall a . Unlift
+    (forall ctx . Functor ctx => ctx () -> (forall a . ctx (m a) -> sig (ctx a)) -> sig (ctx a))
+    (a -> m k)
 
 instance Functor m => Functor (Unlift sig m) where
   fmap f (Unlift with k) = Unlift with (fmap f . k)
 
-instance Effect (Unlift sig) where
-  type CanHandle (Unlift sig) ctx = ctx ~ Identity
-  handle ctx dst (Unlift with k) = Unlift (\ run -> with (run . fmap runIdentity . dst . (<$ ctx))) (dst . (<$ ctx) . k)
+instance Functor sig => Effect (Unlift sig) where
+  handle ctx dst (Unlift with k) = Unlift (\ ctx' dst' -> getCompose <$> with (Compose (ctx <$ ctx')) (fmap Compose . dst' . fmap dst . getCompose)) (dst . fmap k)
 
 
 -- | Run actions in an outer context.
@@ -41,5 +42,8 @@ instance Effect (Unlift sig) where
 -- @
 --
 -- @since 1.0.0.0
-withUnlift :: Has (Unlift n) sig m => ((forall a . m a -> n a) -> n a) -> m a
+withUnlift
+  :: Has (Unlift n) sig m
+  => (forall ctx . Functor ctx => ctx () -> (forall a . ctx (m a) -> n (ctx a)) -> n (ctx a))
+  -> m a
 withUnlift with = send (Unlift with pure)
