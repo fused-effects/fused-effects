@@ -4,8 +4,8 @@ This article assumes you are already familiar with [defining effects and their h
 
 One of the nice aspects of effects is that they can support multiple effect handlers. Effects only specify actions, they don't actually perform them. Therefore, it's possible to "reinterpret" effects. There are multiple senses in which an effect can be reinterpreted:
 
-- Implementing an effect in terms of other effects. "Stacking" effects is a powerful tool for cleanly dividing implementations into the relevant abstraction layers with minimal leakage of implementation details.
-- Rewriting an effect and/or performing actions with the effect value and then performing the originally intended effect. This technique is conceptually similar to the middleware pattern commonly used in web applications.
+- Implementing an effect in terms of other effects. "Reinterpreting" effects is a powerful tool for cleanly dividing implementations into the relevant abstraction layers with minimal leakage of implementation details.
+- Rewriting an effect and/or performing actions with the effect value and then performing the originally intended effect. This technique is conceptually similar to the middleware pattern commonly used in web applications. This known as *interposition* (see works by Oleg Kiselyov et al.)
 
 Let's explore both of these effect interpretation strategies with a small motivating example:
 
@@ -56,9 +56,7 @@ import Network.HTTP.Types.Status
 import Network.HTTP.Types.Version
 ```
 
-Since one of the best parts about effects is being able to think at a domain language level,
-let's start with defining the desired data which we wish to retrieve and an interface that
-feels natural to work with:
+Since one of the best parts about effects is being able to think at a domain language level,let's start with defining the desired data which we wish to retrieve and an interface that feels natural to work with:
 
 ``` haskell
 -- | The basic fact that we will retrieve.
@@ -118,9 +116,7 @@ newtype InvalidContentType = InvalidContentType String
   deriving (Show, Eq)
 ```
 
-Now we need to support fetching JSON given an HTTP request. We have no guarantee that an arbitrary HTTP request
-will actually return JSON, so for this implementation we have to account for failure conditions. This provides
-a great opportunity to see how effect handlers can actually rely on *multiple underlying effects*!
+Now we need to support fetching JSON given an HTTP request. We have no guarantee that an arbitrary HTTP request will actually return JSON, so for this implementation we have to account for failure conditions. This provides a great opportunity to see how effect handlers can actually rely on *multiple underlying effects*!
 
 ``` haskell
 newtype CatFactsApi m a = CatFactsApi { runCatFactsApi :: m a }
@@ -217,12 +213,9 @@ Wikipedia has a recording of a cat meowing, because why not?
 
 ### Testing with alternative effect handlers
 
-Per point 2. of our initial implementation criteria, we want to be able to simulate failure cases for testing purposes. This is a great
-case for swapping in an alternative effect handler for our HTTP layer.
+Per point 2. of our initial implementation criteria, we want to be able to simulate failure cases for testing purposes. This is a great case for swapping in an alternative effect handler for our HTTP layer.
 
-This time let's go from the bottom up. In situations where IO is involved, failure scenarios tend
-to surface from least-pure parts of code. In this case, we should therefore implement some facilities
-to experiment with the most failure-prone area: the network itself.
+This time let's go from the bottom up. In situations where IO is involved, failure scenarios tend to surface from least-pure parts of code. In this case, we should therefore implement some facilities to experiment with the most failure-prone area: the network itself.
 
 ``` haskell
 newtype MockHttpClient m a = MockHttpClient { runMockHttpClient :: ReaderC (HTTP.Request -> IO (HTTP.Response L.ByteString)) m a }
@@ -257,16 +250,14 @@ wrongContentType req = pure resp
       }
 
 badJson :: HTTP.Request -> IO (HTTP.Response L.ByteString)
-badJson req = pure resp
-  where
-    resp = Response
-      { responseStatus = ok200
-      , responseVersion = http11
-      , responseHeaders = [("Content-Type", "application/json; charset=utf-8")]
-      , responseBody = "{}"
-      , responseCookieJar = mempty
-      , responseClose' = ResponseClose (pure ())
-      }
+badJson req = pure Response
+  { responseStatus = ok200
+  , responseVersion = http11
+  , responseHeaders = [("Content-Type", "application/json; charset=utf-8")]
+  , responseBody = "{}"
+  , responseCookieJar = mempty
+  , responseClose' = ResponseClose (pure ())
+  }
 ```
 
 Let's update our `main` function and watch it in action:
@@ -287,8 +278,7 @@ JsonParseError "Error in $: parsing [] failed, expected Array, but encountered O
 InvalidContentType "Just \"text/xml\""
 ```
 
-With effects, we have fine-grained ways of testing slices of our API. All that's needed
-to turn an integration test into a unit test or vice versa is a different set of `Algebra`-implementing effect handlers!
+With effects, we have fine-grained ways of testing slices of our API. All that's needed to turn an integration test into a unit test or vice versa is a different set of `Algebra`-implementing effect handlers!
 
 ## Observing & altering effects
 
@@ -298,7 +288,7 @@ operational metrics (like request timings), so let's look at how to build a sort
 
 `InterpretC` is an effect carrier that is intended for prototyping new effects that passes a callback function each
 occurence of the specified effect type that is called via `send`. One trick that can be useful is to intercept an effect,
-operate on the effect, and then re-`send` the effect. In other words, it's perfectly valid to have multiple handlers
+operate on the effect, and then re-`send` the effect (a.k.a. interposition). In other words, it's perfectly valid to have multiple handlers
 for the same effect type and dispatch to the ones higher in the effect stack! Let's use this approach to time and log
 our HTTP requests:
 
@@ -347,7 +337,7 @@ Since cats are so good at hiding illness, even a single instance of a symptom sh
 
 ### Conclusion
 
-Reviewing our initial criteria, we have an eminently extensible system that lets us maintain a healthy separation of concerns--
+Reviewing our initial criteria, we have an eminently extensible system that lets us maintain a healthy separation of concerns–
 All while still allowing non-invasive behavior changes through the ability to intercept, rewrite, and resend effects!
 
 - [x] We would like to have our cat facts API be able to support different cat fact data sources in the future.
