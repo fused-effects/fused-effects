@@ -158,6 +158,18 @@ test-suite test
     , transformers
 
 
+test-suite readme
+  import:      common
+  type:        exitcode-stdio-1.0
+  main-is:     README.lhs
+  ghc-options: -pgmL markdown-unlit
+  build-depends:
+      base
+    , fused-effects
+  build-tool-depends:
+      markdown-unlit:markdown-unlit
+
+
 benchmark benchmark
   import:         common
   type:           exitcode-stdio-1.0
