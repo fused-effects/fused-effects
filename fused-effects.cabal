@@ -134,6 +134,7 @@ test-suite test
     Fresh
     Fusion
     Gen
+    Lift
     Monad
     MonadFix
     NonDet
