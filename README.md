@@ -117,7 +117,8 @@ type Shared sig m
     , Has (Writer [String]) sig m
     )
 
-myFunction :: Shared sig m => Int -> m ()
+action3 :: Shared sig m => m ()
+action3 = ask >>= \ i -> put (replicate i '?') >> tell [ "put " ++ show i ++ " '?'s" ]
 ```
 
 ### Running effects
