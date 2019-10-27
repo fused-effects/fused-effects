@@ -76,6 +76,9 @@ import Prelude hiding (ioError)
 throwIO :: (Exc.Exception e, Has (Lift IO) sig m) => e -> m a
 throwIO = sendM . Exc.throwIO
 
+-- | See @"Control.Exception".'Exc.ioError'@.
+--
+-- @since 1.0.0.0
 ioError :: Has (Lift IO) sig m => IOError -> m a
 ioError = sendM . Exc.ioError
 
