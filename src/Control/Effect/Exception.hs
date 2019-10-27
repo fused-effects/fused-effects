@@ -7,6 +7,7 @@ module Control.Effect.Exception
   Exc.Exception(..)
 , Exc.SomeException(..)
 , throwIO
+, ioError
 , throwTo
 , catch
 , catches
@@ -44,12 +45,16 @@ module Control.Effect.Exception
 import Control.Concurrent (ThreadId)
 import Control.Effect.Lift
 import qualified Control.Exception as Exc
+import Prelude hiding (ioError)
 
 -- | See @"Control.Exception".'Exc.throwIO'@.
 --
 -- @since 1.0.0.0
 throwIO :: (Exc.Exception e, Has (Lift IO) sig m) => e -> m a
 throwIO = sendM . Exc.throwIO
+
+ioError :: Has (Lift IO) sig m => IOError -> m a
+ioError = sendM . Exc.ioError
 
 -- | See @"Control.Exception".'Exc.throwTo'@.
 --
