@@ -76,7 +76,6 @@ library
     Control.Effect.Fresh
     Control.Effect.Lift
     Control.Effect.NonDet
-    Control.Effect.Pure
     Control.Effect.Reader
     Control.Effect.State
     Control.Effect.Sum
