@@ -70,6 +70,8 @@
 
 - Removes `PureC`; `Data.Functor.Identity.Identity` should be used instead. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
 
+- Removes the `Pure` effect. It’s unlikely that this will require changes, as `Pure` had no operations, but `Lift Identity` should be used instead. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
