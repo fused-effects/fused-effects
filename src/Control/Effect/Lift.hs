@@ -1,6 +1,6 @@
 {- | Provides a mechanism to kick off the evaluation of an effect stack that takes place in a monadic context.
 
-'Lift' effects are always the last effect in a given effect stack. These stacks are invoked with 'Control.Effect.Lift.runM'.
+'Lift' effects are always the last effect in a given effect stack. These stacks are invoked with 'Control.Carrier.Lift.runM'.
 
 Predefined carriers:
 
