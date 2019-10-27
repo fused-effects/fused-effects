@@ -6,6 +6,7 @@ Predefined carriers:
 
 * "Control.Carrier.Lift"
 * 'IO'
+* 'Data.Functor.Identity.Identity'
 
 @since 0.1.0.0
 -}
