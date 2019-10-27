@@ -250,7 +250,8 @@ Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a si
 newtype Wrapper s m a = Wrapper { runWrapper :: m a }
   deriving (Applicative, Functor, Monad)
 
-instance Algebra sig m => Algebra sig (Wrapper s m) where …
+instance Algebra sig m => Algebra sig (Wrapper s m) where
+  alg = Wrapper . handleCoercible
 
 getState :: Has (State s) sig m => Wrapper s m s
 getState = get
