@@ -55,5 +55,8 @@ liftWith
 liftWith with = send (LiftWith with pure)
 
 
+-- | See 'Control.Exception.catch'.
+--
+-- @since 1.0.0.0
 catch :: (Exc.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
 catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `Exc.catch` (run . (<$ ctx) . h)
