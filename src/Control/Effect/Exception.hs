@@ -7,6 +7,7 @@ module Control.Effect.Exception
   Exc.Exception(..)
 , Exc.SomeException(..)
 , throwIO
+, throwTo
 , catch
 , catches
 , Handler(..)
@@ -40,6 +41,7 @@ module Control.Effect.Exception
 , run
 ) where
 
+import Control.Concurrent (ThreadId)
 import Control.Effect.Lift
 import qualified Control.Exception as Exc
 
@@ -48,6 +50,12 @@ import qualified Control.Exception as Exc
 -- @since 1.0.0.0
 throwIO :: (Exc.Exception e, Has (Lift IO) sig m) => e -> m a
 throwIO = sendM . Exc.throwIO
+
+-- | See @"Control.Exception".'Exc.throwTo'@.
+--
+-- @since 1.0.0.0
+throwTo :: (Exc.Exception e, Has (Lift IO) sig m) => ThreadId -> e -> m ()
+throwTo thread = sendM . Exc.throwTo thread
 
 -- | See @"Control.Exception".'Exc.catch'@.
 --
