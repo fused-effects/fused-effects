@@ -166,6 +166,7 @@ test-suite readme
   build-depends:
       base
     , fused-effects
+    , mtl           ^>= 2.2
   build-tool-depends:
       markdown-unlit:markdown-unlit ^>= 0.5
 

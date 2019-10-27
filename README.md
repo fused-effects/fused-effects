@@ -55,6 +55,7 @@ Imports, hidden from the rendered markdown.
 
 ```haskell
 import Control.Algebra
+import qualified Control.Monad.State.Class as MTL
 ```
 -->
 
