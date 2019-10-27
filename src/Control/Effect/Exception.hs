@@ -59,11 +59,11 @@ deriving instance Functor m => Functor (Handler m)
 --
 -- @since 1.0.0.0
 catchJust
-  :: Exc.Exception e
+  :: (Exc.Exception e, Has (Lift IO) sig m)
   => (e -> Maybe b)
-  -> IO a
-  -> (b -> IO a)
-  -> IO a
+  -> m a
+  -> (b -> m a)
+  -> m a
 catchJust p m h = liftWith $ \ ctx run -> Exc.catchJust p (run (m <$ ctx)) (run . (<$ ctx) . h)
 
 -- | See @"Control.Exception".'Exc.handle'@.
