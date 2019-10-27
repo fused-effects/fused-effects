@@ -24,6 +24,7 @@ module Control.Effect.Lift
 , try
 , onException
 , bracket
+, finally
 , mask
   -- * Re-exports
 , Algebra
@@ -97,6 +98,16 @@ bracket acquire release m = mask $ \ restore -> do
   a <- acquire
   r <- restore (m a) `onException` release a
   r <$ release a
+
+-- | See @"Control.Exception".'Exc.finally'@.
+--
+-- @since 1.0.0.0
+finally
+  :: Has (Lift IO) sig m
+  => m a
+  -> m b
+  -> m a
+finally m sequel = mask $ \ restore -> (restore m `onException` sequel) <* sequel
 
 -- | See @"Control.Exception".'Exc.mask'@.
 --
