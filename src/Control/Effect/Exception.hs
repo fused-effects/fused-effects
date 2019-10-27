@@ -6,6 +6,7 @@ module Control.Effect.Exception
 ( -- * Lifted "Control.Exception" operations
   throwIO
 , catch
+, catches
 , Handler(..)
 , try
 , onException
@@ -36,6 +37,13 @@ throwIO = sendM . Exc.throwIO
 -- @since 1.0.0.0
 catch :: (Exc.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
 catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `Exc.catch` (run . (<$ ctx) . h)
+
+-- | See @"Control.Exception".'Exc.catches'@.
+--
+-- @since 1.0.0.0
+catches :: Has (Lift IO) sig m => m a -> [Handler m a] -> m a
+catches m hs = liftWith $ \ ctx run ->
+  Exc.catches (run (m <$ ctx)) (map (\ (Handler h) -> Exc.Handler (run . (<$ ctx) . h)) hs)
 
 -- | See @"Control.Exception".'Exc.Handler'@.
 --
