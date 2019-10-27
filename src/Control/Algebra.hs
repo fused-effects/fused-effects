@@ -8,17 +8,17 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 -}
 module Control.Algebra
 ( Algebra(..)
+, run
 , Has
 , send
 , handleIdentity
 , handleCoercible
   -- * Re-exports
 , (:+:) (..)
-, run
 , module Control.Effect.Class
 ) where
 
-import Control.Carrier.Pure (PureC, run)
+import Control.Carrier.Pure (PureC(..))
 import Control.Effect.Catch.Internal
 import Control.Effect.Choose.Internal
 import Control.Effect.Class
@@ -58,6 +58,14 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
 instance Algebra Pure PureC where
   alg v = case v of {}
   {-# INLINE alg #-}
+
+
+-- | Run an action exhausted of effects to produce its final result value.
+--
+-- @since 1.0.0.0
+run :: PureC a -> a
+run (PureC a) = a
+{-# INLINE run #-}
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.

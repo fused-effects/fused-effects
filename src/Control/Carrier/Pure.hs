@@ -5,8 +5,7 @@
 -- @since 1.0.0.0
 module Control.Carrier.Pure
 ( -- * Pure carrier
-  run
-, PureC(..)
+  PureC(..)
   -- * Pure effect
 , module Control.Effect.Pure
 ) where
@@ -15,13 +14,6 @@ import Control.Applicative
 import Control.Effect.Pure
 import Control.Monad.Fix
 import Data.Coerce
-
--- | Run an action exhausted of effects to produce its final result value.
---
--- @since 1.0.0.0
-run :: PureC a -> a
-run (PureC a) = a
-{-# INLINE run #-}
 
 -- | @since 1.0.0.0
 newtype PureC a = PureC a
@@ -58,5 +50,5 @@ instance Monad PureC where
   {-# INLINE (>>=) #-}
 
 instance MonadFix PureC where
-  mfix f = PureC (fix (run . f))
+  mfix f = PureC (fix ((\ (PureC a) -> a) . f))
   {-# INLINE mfix #-}
