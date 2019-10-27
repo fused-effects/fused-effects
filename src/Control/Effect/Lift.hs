@@ -23,6 +23,7 @@ module Control.Effect.Lift
 , catch
 , try
 , onException
+, bracket
 , mask
   -- * Re-exports
 , Algebra
@@ -82,6 +83,20 @@ try m = (Right <$> m) `catch` (pure . Left)
 -- @since 1.0.0.0
 onException :: Has (Lift IO) sig m => m a -> m b -> m a
 onException io what = io `catch` \e -> what >> throwIO (e :: Exc.SomeException)
+
+-- | See @"Control.Exception".'Exc.bracket'@.
+--
+-- @since 1.0.0.0
+bracket
+  :: Has (Lift IO) sig m
+  => m a
+  -> (a -> m b)
+  -> (a -> m c)
+  -> m c
+bracket acquire release m = mask $ \ restore -> do
+  a <- acquire
+  r <- restore (m a) `onException` release a
+  r <$ release a
 
 -- | See @"Control.Exception".'Exc.mask'@.
 --
