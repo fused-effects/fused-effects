@@ -23,16 +23,18 @@ import GHC.Generics
 -- @since 1.0.0.0
 class Effect sig where
   -- | Handle any effects in a signature by threading the carrier’s context all the way through to the continuation.
-  thread :: (Functor ctx, Monad m)
-         => ctx ()
-         -> (forall x . ctx (m x) -> n (ctx x))
-         -> sig m a
-         -> sig n (ctx a)
-  default thread :: (Functor ctx, Monad m, Generic1 (sig m), Generic1 (sig n), GEffect m n (Rep1 (sig m)) (Rep1 (sig n)))
-                 => ctx ()
-                 -> (forall x . ctx (m x) -> n (ctx x))
-                 -> sig m a
-                 -> sig n (ctx a)
+  thread
+    :: (Functor ctx, Monad m)
+    => ctx ()
+    -> (forall x . ctx (m x) -> n (ctx x))
+    -> sig m a
+    -> sig n (ctx a)
+  default thread
+    :: (Functor ctx, Monad m, Generic1 (sig m), Generic1 (sig n), GEffect m n (Rep1 (sig m)) (Rep1 (sig n)))
+    => ctx ()
+    -> (forall x . ctx (m x) -> n (ctx x))
+    -> sig m a
+    -> sig n (ctx a)
   thread ctx handler = to1 . gthread ctx handler . from1
   {-# INLINE thread #-}
 
