@@ -1,4 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
+-- | Operations from "Control.Exception" lifted into effectful contexts using 'Control.Effect.Lift.Lift'.
+--
+-- @since 1.0.0.0
 module Control.Effect.Exception
 ( -- * Lift effect
   Lift(..)
