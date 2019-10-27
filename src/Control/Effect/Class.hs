@@ -24,7 +24,7 @@ import GHC.Generics
 class Effect sig where
   -- | Handle any effects in a signature by threading the algebra’s handler all the way through to the continuation, starting from some initial context.
   --
-  -- The handler is required to adhere to the following laws:
+  -- The handler is expressed as a /distributive law/, and required to adhere to the following laws:
   --
   -- @
   -- handler . 'fmap' 'pure' = 'pure'
