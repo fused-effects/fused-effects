@@ -8,6 +8,7 @@ module Control.Effect.Exception
 , catch
 , catches
 , Handler(..)
+, catchJust
 , try
 , onException
 , bracket
@@ -52,6 +53,17 @@ data Handler m a
   = forall e . Exc.Exception e => Handler (e -> m a)
 
 deriving instance Functor m => Functor (Handler m)
+
+-- | See @"Control.Exception".'Exc.catchJust'@.
+--
+-- @since 1.0.0.0
+catchJust
+  :: Exc.Exception e
+  => (e -> Maybe b)
+  -> IO a
+  -> (b -> IO a)
+  -> IO a
+catchJust p m h = liftWith $ \ ctx run -> Exc.catchJust p (run (m <$ ctx)) (run . (<$ ctx) . h)
 
 -- | See @"Control.Exception".'Exc.try'@.
 --
