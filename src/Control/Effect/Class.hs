@@ -42,11 +42,12 @@ class Effect sig where
 -- | Generic implementation of 'Effect'.
 class GEffect m m' rep rep' where
   -- | Generic implementation of 'thread'.
-  gthread :: (Functor ctx, Monad m)
-          => ctx ()
-          -> (forall x . ctx (m x) -> m' (ctx x))
-          -> rep a
-          -> rep' (ctx a)
+  gthread
+    :: (Functor ctx, Monad m)
+    => ctx ()
+    -> (forall x . ctx (m x) -> m' (ctx x))
+    -> rep a
+    -> rep' (ctx a)
 
 instance GEffect m m' rep rep' => GEffect m m' (M1 i c rep) (M1 i c rep') where
   gthread ctx handler = M1 . gthread ctx handler . unM1
