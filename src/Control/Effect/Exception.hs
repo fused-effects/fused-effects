@@ -16,6 +16,7 @@ module Control.Effect.Exception
 , try
 , tryJust
 , mask
+, mask_
 , uninterruptibleMask
 , Exc.MaskingState(..)
 , getMaskingState
@@ -112,6 +113,12 @@ tryJust p m = catchJust p (Right <$> m) (pure . Left)
 mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
 mask with = liftWith $ \ ctx run -> Exc.mask $ \ restore ->
   run (with (\ m -> liftWith $ \ ctx' run' -> restore (run' (m <$ ctx'))) <$ ctx)
+
+-- | See @"Control.Exception".'Exc.mask_'@.
+--
+-- @since 1.0.0.0
+mask_ :: Has (Lift IO) sig m => m a -> m a
+mask_ m = mask $ const m
 
 -- | See @"Control.Exception".'Exc.uninterruptibleMask'@.
 --
