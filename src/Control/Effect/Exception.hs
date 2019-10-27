@@ -16,6 +16,7 @@ module Control.Effect.Exception
 , try
 , tryJust
 , mask
+, interruptible
 , allowInterrupt
 , bracket
 , bracket_
@@ -114,6 +115,12 @@ mask with = liftWith $ \ ctx run -> Exc.mask $ \ restore ->
 -- @since 1.0.0.0
 allowInterrupt :: Has (Lift IO) sig m => m ()
 allowInterrupt = sendM Exc.allowInterrupt
+
+-- | See @"Control.Exception".'Exc.interruptible'@.
+--
+-- @since 1.0.0.0
+interruptible :: Has (Lift IO) sig m => m a -> m a
+interruptible m = liftWith $ \ ctx run -> Exc.interruptible (run (m <$ ctx))
 
 -- | See @"Control.Exception".'Exc.bracket'@.
 --
