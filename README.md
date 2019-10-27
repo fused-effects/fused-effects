@@ -55,6 +55,7 @@ Setup, hidden from the rendered markdown.
 
 ```haskell
 {-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, UndecidableInstances #-}
+module Main (module Main) where
 
 import Control.Algebra
 import Control.Carrier.Lift
