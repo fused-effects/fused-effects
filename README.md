@@ -104,7 +104,8 @@ action1 = get >>= \ s -> put ("hello, " ++ s)
 Multiple effects can be required simply by adding more `Has` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
 
 ```haskell
-action :: (Has (State String) sig m, Has (Reader Int) sig m) => m ()
+action2 :: (Has (State String) sig m, Has (Reader Int) sig m) => m ()
+action2 = ask >>= \ n -> put (replicate i '!')
 ```
 
 Different effects make different operations available; see the documentation for individual effects for more information about their operations. Note that we generally don't program against an explicit list of effect components: we take the typeclass-oriented approach, adding new constraints to `sig` as new capabilities become necessary. If you want to name and share some predefined list of effects, it's best to use the `-XConstraintKinds` extension to GHC, capturing the elements of `sig` as a type synonym of kind `Constraint`:
