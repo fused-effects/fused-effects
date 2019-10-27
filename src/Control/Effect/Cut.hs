@@ -36,8 +36,8 @@ data Cut m k
 deriving instance Functor m => Functor (Cut m)
 
 instance Effect Cut where
-  handle _     _       Cutfail    = Cutfail
-  handle state handler (Call m k) = Call (handler (m <$ state)) (handler . fmap k)
+  handle _   _       Cutfail    = Cutfail
+  handle ctx handler (Call m k) = Call (handler (m <$ ctx)) (handler . fmap k)
   {-# INLINE handle #-}
 
 -- | Fail the current branch, and prevent backtracking within the nearest enclosing 'call' (if any).

@@ -14,4 +14,4 @@ data Catch e m k
 deriving instance Functor m => Functor (Catch e m)
 
 instance Effect (Catch e) where
-  handle state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)
+  handle ctx handler (Catch m h k) = Catch (handler (m <$ ctx)) (handler . (<$ ctx) . h) (handler . fmap k)

@@ -33,7 +33,7 @@ class Effect sig where
                  -> (forall x . f (m x) -> n (f x))
                  -> sig m a
                  -> sig n (f a)
-  handle state handler = to1 . ghandle state handler . from1
+  handle ctx handler = to1 . ghandle ctx handler . from1
   {-# INLINE handle #-}
 
 
@@ -47,16 +47,16 @@ class GEffect m m' rep rep' where
           -> rep' (f a)
 
 instance GEffect m m' rep rep' => GEffect m m' (M1 i c rep) (M1 i c rep') where
-  ghandle state handler = M1 . ghandle state handler . unM1
+  ghandle ctx handler = M1 . ghandle ctx handler . unM1
   {-# INLINE ghandle #-}
 
 instance (GEffect m m' l l', GEffect m m' r r') => GEffect m m' (l :+: r) (l' :+: r') where
-  ghandle state handler (L1 l) = L1 (ghandle state handler l)
-  ghandle state handler (R1 r) = R1 (ghandle state handler r)
+  ghandle ctx handler (L1 l) = L1 (ghandle ctx handler l)
+  ghandle ctx handler (R1 r) = R1 (ghandle ctx handler r)
   {-# INLINE ghandle #-}
 
 instance (GEffect m m' l l', GEffect m m' r r') => GEffect m m' (l :*: r) (l' :*: r') where
-  ghandle state handler (l :*: r) = ghandle state handler l :*: ghandle state handler r
+  ghandle ctx handler (l :*: r) = ghandle ctx handler l :*: ghandle ctx handler r
   {-# INLINE ghandle #-}
 
 instance GEffect m m' V1 V1 where
@@ -72,17 +72,17 @@ instance GEffect m m' (K1 R c) (K1 R c) where
   {-# INLINE ghandle #-}
 
 instance GEffect m m' Par1 Par1 where
-  ghandle state _ = Par1 . (<$ state) . unPar1
+  ghandle ctx _ = Par1 . (<$ ctx) . unPar1
   {-# INLINE ghandle #-}
 
 instance (Functor f, GEffect m m' g g') => GEffect m m' (f :.: g) (f :.: g') where
-  ghandle state handler = Comp1 . fmap (ghandle state handler) . unComp1
+  ghandle ctx handler = Comp1 . fmap (ghandle ctx handler) . unComp1
   {-# INLINE ghandle #-}
 
 instance GEffect m m' (Rec1 m) (Rec1 m') where
-  ghandle state handler = Rec1 . handler . (<$ state) . unRec1
+  ghandle ctx handler = Rec1 . handler . (<$ ctx) . unRec1
   {-# INLINE ghandle #-}
 
 instance Effect f => GEffect m m' (Rec1 (f m)) (Rec1 (f m')) where
-  ghandle state handler = Rec1 . handle state handler . unRec1
+  ghandle ctx handler = Rec1 . handle ctx handler . unRec1
   {-# INLINE ghandle #-}
