@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification, RankNTypes #-}
+{-# LANGUAGE RankNTypes #-}
 {- | 'Unlift' effects allow inner contexts to run actions in outer contexts.
 
 Predefined carriers:
