@@ -83,6 +83,6 @@ instance GEffect m m' (Rec1 m) (Rec1 m') where
   ghandle ctx handler = Rec1 . handler . (<$ ctx) . unRec1
   {-# INLINE ghandle #-}
 
-instance Effect f => GEffect m m' (Rec1 (f m)) (Rec1 (f m')) where
+instance Effect sig => GEffect m m' (Rec1 (sig m)) (Rec1 (sig m')) where
   ghandle ctx handler = Rec1 . handle ctx handler . unRec1
   {-# INLINE ghandle #-}
