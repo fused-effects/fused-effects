@@ -5,7 +5,7 @@
 module Control.Effect.Exception
 ( -- * Lifted "Control.Exception" operations
   Exc.Exception(..)
-, SomeException(..)
+, Exc.SomeException(..)
 , throwIO
 , catch
 , catches
