@@ -61,6 +61,9 @@ import Control.Effect.Reader
 import Control.Effect.State
 import Control.Effect.Writer
 import qualified Control.Monad.State.Class as MTL
+
+main :: IO ()
+main = pure ()
 ```
 -->
 
