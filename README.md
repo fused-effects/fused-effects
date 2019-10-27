@@ -50,6 +50,14 @@
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead.
 
+<!--
+Imports, hidden from the rendered markdown.
+
+```haskell
+import Control.Algebra
+```
+-->
+
 
 ### Algebraic effects
 
