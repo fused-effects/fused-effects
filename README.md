@@ -97,7 +97,8 @@ Finally, since the fusion of carrier algebras occurs as a result of the selectio
 Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `fused-effects`, this is done by means of a `Has` constraint to require the effect’s presence in a _signature_, and to relate the signature to the _carrier_ you’re computing in. For example, to use a `State` effect managing a `String`, one would write:
 
 ```haskell
-action :: Has (State String) sig m => m ()
+action1 :: Has (State String) sig m => m ()
+action1 = get >>= \ s -> put ("hello, " ++ s)
 ```
 
 Multiple effects can be required simply by adding more `Has` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
