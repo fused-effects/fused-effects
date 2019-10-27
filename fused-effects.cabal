@@ -167,7 +167,7 @@ test-suite readme
       base
     , fused-effects
   build-tool-depends:
-      markdown-unlit:markdown-unlit
+      markdown-unlit:markdown-unlit ^>= 0.5
 
 
 benchmark benchmark
