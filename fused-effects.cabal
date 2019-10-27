@@ -158,7 +158,7 @@ test-suite test
     , transformers
 
 
-test-suite readme
+test-suite docs
   import:      common
   type:        exitcode-stdio-1.0
   main-is:     README.lhs
