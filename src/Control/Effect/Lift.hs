@@ -18,6 +18,8 @@ module Control.Effect.Lift
   Lift(..)
 , sendM
 , liftWith
+  -- * Lifted "Control.Exception" operations
+, catch
   -- * Re-exports
 , Algebra
 , Has
@@ -26,6 +28,7 @@ module Control.Effect.Lift
 
 import Control.Algebra
 import Control.Effect.Lift.Internal (Lift(..))
+import qualified Control.Exception as Exc
 
 -- | Given a @Lift n@ constraint in a signature carried by @m@, 'sendM'
 -- promotes arbitrary actions of type @n a@ to @m a@. It is spiritually
@@ -50,3 +53,7 @@ liftWith
   => (forall ctx . Functor ctx => ctx () -> (forall a . ctx (m a) -> n (ctx a)) -> n (ctx a))
   -> m a
 liftWith with = send (LiftWith with pure)
+
+
+catch :: (Exc.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
+catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `Exc.catch` (run . (<$ ctx) . h)
