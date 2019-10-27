@@ -110,17 +110,17 @@ mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
 mask with = liftWith $ \ ctx run -> Exc.mask $ \ restore ->
   run (with (\ m -> liftWith $ \ ctx' run' -> restore (run' (m <$ ctx'))) <$ ctx)
 
--- | See @"Control.Exception".'Exc.allowInterrupt'@.
---
--- @since 1.0.0.0
-allowInterrupt :: Has (Lift IO) sig m => m ()
-allowInterrupt = sendM Exc.allowInterrupt
-
 -- | See @"Control.Exception".'Exc.interruptible'@.
 --
 -- @since 1.0.0.0
 interruptible :: Has (Lift IO) sig m => m a -> m a
 interruptible m = liftWith $ \ ctx run -> Exc.interruptible (run (m <$ ctx))
+
+-- | See @"Control.Exception".'Exc.allowInterrupt'@.
+--
+-- @since 1.0.0.0
+allowInterrupt :: Has (Lift IO) sig m => m ()
+allowInterrupt = sendM Exc.allowInterrupt
 
 -- | See @"Control.Exception".'Exc.bracket'@.
 --
