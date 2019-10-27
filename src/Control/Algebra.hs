@@ -18,7 +18,6 @@ module Control.Algebra
 , module Control.Effect.Class
 ) where
 
-import Control.Carrier.Pure (PureC(..))
 import Control.Effect.Catch.Internal
 import Control.Effect.Choose.Internal
 import Control.Effect.Class
@@ -55,16 +54,12 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
 
-instance Algebra Pure PureC where
-  alg v = case v of {}
-  {-# INLINE alg #-}
-
 
 -- | Run an action exhausted of effects to produce its final result value.
 --
 -- @since 1.0.0.0
-run :: PureC a -> a
-run (PureC a) = a
+run :: Identity a -> a
+run = runIdentity
 {-# INLINE run #-}
 
 
