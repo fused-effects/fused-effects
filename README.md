@@ -54,7 +54,7 @@ Readers already familiar with effect systems may wish to start with the [usage](
 Setup, hidden from the rendered markdown.
 
 ```haskell
-{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, UndecidableInstances #-}
 
 import Control.Algebra
 import Control.Effect.Reader
