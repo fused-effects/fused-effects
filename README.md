@@ -57,6 +57,9 @@ Setup, hidden from the rendered markdown.
 {-# LANGUAGE TypeApplications #-}
 
 import Control.Algebra
+import Control.Effect.Reader
+import Control.Effect.State
+import Control.Effect.Writer
 import qualified Control.Monad.State.Class as MTL
 ```
 -->
