@@ -16,4 +16,6 @@ instance Functor m => Functor (Lift sig m) where
   fmap f (LiftWith with k) = LiftWith with (fmap f . k)
 
 instance Functor sig => Effect (Lift sig) where
-  handle ctx dst (LiftWith with k) = LiftWith (\ ctx' dst' -> getCompose <$> with (Compose (ctx <$ ctx')) (fmap Compose . dst' . fmap dst . getCompose)) (dst . fmap k)
+  handle ctx dst (LiftWith with k) = LiftWith
+    (\ ctx' dst' -> getCompose <$> with (Compose (ctx <$ ctx')) (fmap Compose . dst' . fmap dst . getCompose))
+    (dst . fmap k)
