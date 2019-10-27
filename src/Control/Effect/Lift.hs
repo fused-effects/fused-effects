@@ -19,6 +19,7 @@ module Control.Effect.Lift
 , sendM
 , liftWith
   -- * Lifted "Control.Exception" operations
+, throwIO
 , catch
 , try
 , mask
@@ -56,6 +57,12 @@ liftWith
   -> m a
 liftWith with = send (LiftWith with pure)
 
+
+-- | See @"Control.Exception".'Exc.throwIO'@.
+--
+-- @since 1.0.0.0
+throwIO :: (Exc.Exception e, Has (Lift IO) sig m) => e -> m a
+throwIO = sendM . Exc.throwIO
 
 -- | See @"Control.Exception".'Exc.catch'@.
 --
