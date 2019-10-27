@@ -16,13 +16,13 @@ import GHC.Generics
 -- | The class of effect types, which must:
 --
 --   1. Be functorial in their last two arguments, and
---   2. Support threading effects in higher-order positions through using the carrier’s suspended state.
+--   2. Support threading effects in higher-order positions through using the carrier’s suspended context.
 --
 -- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'handle' provided a 'Generic1' instance is available for the effect.
 --
 -- @since 1.0.0.0
 class Effect sig where
-  -- | Handle any effects in a signature by threading the carrier’s state all the way through to the continuation.
+  -- | Handle any effects in a signature by threading the carrier’s context all the way through to the continuation.
   handle :: (Functor f, Monad m)
          => f ()
          -> (forall x . f (m x) -> n (f x))
