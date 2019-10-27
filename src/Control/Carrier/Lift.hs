@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
 
--- | A carrier for 'Lift' allowing monadic actions to be lifted into a larger context with 'sendM'.
+-- | A carrier for 'Lift' allowing monadic actions to be lifted from an outer context into an inner one with 'sendM', and for an inner context to run actions in an outer one with 'liftWith'.
 --
 -- @since 1.0.0.0
 module Control.Carrier.Lift
