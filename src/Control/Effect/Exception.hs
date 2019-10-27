@@ -16,6 +16,7 @@ module Control.Effect.Exception
 , try
 , tryJust
 , mask
+, Exc.MaskingState(..)
 , getMaskingState
 , interruptible
 , allowInterrupt
