@@ -15,10 +15,10 @@ module Control.Effect.Exception
 , handleJust
 , try
 , tryJust
-, onException
+, mask
 , bracket
 , finally
-, mask
+, onException
   -- * Lift effect
 , Lift(..)
 , sendM
@@ -99,11 +99,12 @@ try m = (Right <$> m) `catch` (pure . Left)
 tryJust :: (Exc.Exception e, Has (Lift IO) sig m) => (e -> Maybe b) -> m a -> m (Either b a)
 tryJust p m = catchJust p (Right <$> m) (pure . Left)
 
--- | See @"Control.Exception".'Exc.onException'@.
+-- | See @"Control.Exception".'Exc.mask'@.
 --
 -- @since 1.0.0.0
-onException :: Has (Lift IO) sig m => m a -> m b -> m a
-onException io what = io `catch` \e -> what >> throwIO (e :: Exc.SomeException)
+mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
+mask with = liftWith $ \ ctx run -> Exc.mask $ \ restore ->
+  run (with (\ m -> liftWith $ \ ctx' run' -> restore (run' (m <$ ctx'))) <$ ctx)
 
 -- | See @"Control.Exception".'Exc.bracket'@.
 --
@@ -129,9 +130,8 @@ finally
   -> m a
 finally m sequel = mask $ \ restore -> (restore m `onException` sequel) <* sequel
 
--- | See @"Control.Exception".'Exc.mask'@.
+-- | See @"Control.Exception".'Exc.onException'@.
 --
 -- @since 1.0.0.0
-mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
-mask with = liftWith $ \ ctx run -> Exc.mask $ \ restore ->
-  run (with (\ m -> liftWith $ \ ctx' run' -> restore (run' (m <$ ctx'))) <$ ctx)
+onException :: Has (Lift IO) sig m => m a -> m b -> m a
+onException io what = io `catch` \e -> what >> throwIO (e :: Exc.SomeException)
