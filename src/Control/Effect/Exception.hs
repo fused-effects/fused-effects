@@ -18,6 +18,7 @@ module Control.Effect.Exception
 , mask
 , mask_
 , uninterruptibleMask
+, uninterruptibleMask_
 , Exc.MaskingState(..)
 , getMaskingState
 , interruptible
@@ -126,6 +127,12 @@ mask_ m = mask $ const m
 uninterruptibleMask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
 uninterruptibleMask with = liftWith $ \ ctx run -> Exc.uninterruptibleMask $ \ restore ->
   run (with (\ m -> liftWith $ \ ctx' run' -> restore (run' (m <$ ctx'))) <$ ctx)
+
+-- | See @"Control.Exception".'Exc.uninterruptibleMask_'@.
+--
+-- @since 1.0.0.0
+uninterruptibleMask_ :: Has (Lift IO) sig m => m a -> m a
+uninterruptibleMask_ m = uninterruptibleMask $ const m
 
 -- | See @"Control.Exception".'Exc.getMaskingState'@.
 --
