@@ -21,7 +21,6 @@ module Control.Effect.Exception
 import Control.Effect.Lift
 import qualified Control.Exception as Exc
 
-
 -- | See @"Control.Exception".'Exc.throwIO'@.
 --
 -- @since 1.0.0.0
