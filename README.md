@@ -57,9 +57,11 @@ Setup, hidden from the rendered markdown.
 {-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, UndecidableInstances #-}
 
 import Control.Algebra
+import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Carrier.State.Strict
 import Control.Effect.Writer
+import Control.Monad.IO.Class (liftIO)
 import qualified Control.Monad.State.Class as MTL
 
 main :: IO ()
