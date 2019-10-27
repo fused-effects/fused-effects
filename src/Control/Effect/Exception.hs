@@ -9,6 +9,7 @@ module Control.Effect.Exception
 , catches
 , Handler(..)
 , catchJust
+, handle
 , try
 , onException
 , bracket
@@ -64,6 +65,12 @@ catchJust
   -> (b -> IO a)
   -> IO a
 catchJust p m h = liftWith $ \ ctx run -> Exc.catchJust p (run (m <$ ctx)) (run . (<$ ctx) . h)
+
+-- | See @"Control.Exception".'Exc.handle'@.
+--
+-- @since 1.0.0.0
+handle :: (Exc.Exception e, Has (Lift IO) sig m) => (e -> m a) -> m a -> m a
+handle = flip catch
 
 -- | See @"Control.Exception".'Exc.try'@.
 --
