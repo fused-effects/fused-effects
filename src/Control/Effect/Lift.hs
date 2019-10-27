@@ -20,6 +20,7 @@ module Control.Effect.Lift
 , liftWith
   -- * Lifted "Control.Exception" operations
 , catch
+, mask
   -- * Re-exports
 , Algebra
 , Has
@@ -60,3 +61,10 @@ liftWith with = send (LiftWith with pure)
 -- @since 1.0.0.0
 catch :: (Exc.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
 catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `Exc.catch` (run . (<$ ctx) . h)
+
+-- | See @"Control.Exception".'Exc.mask'@.
+--
+-- @since 1.0.0.0
+mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
+mask with = liftWith $ \ ctx run -> Exc.mask $ \ restore ->
+  run (with (\ m -> liftWith $ \ ctx' run' -> restore (run' (m <$ ctx'))) <$ ctx)
