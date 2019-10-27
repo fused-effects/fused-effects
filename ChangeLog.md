@@ -68,6 +68,8 @@
 
 - Removes `resetFresh`, as it was unsafe. Greater safety _and_ control over the generation of fresh values can be obtained by use of `runFresh`. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
 
+- Removes `PureC`; `Data.Functor.Identity.Identity` should be used instead. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
+
 # v0.5.0.1
 
 - Adds support for ghc 8.8.1.
