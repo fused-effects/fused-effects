@@ -28,11 +28,11 @@ runM :: LiftC m a -> m a
 runM (LiftC m) = m
 
 -- | @since 1.0.0.0
-newtype LiftC m a = LiftC { runLift :: m a }
+newtype LiftC m a = LiftC (m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans LiftC where
   lift = LiftC
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
-  alg (LiftWith with k) = LiftC (with (Identity ()) (fmap Identity . runLift . runIdentity)) >>= k . runIdentity
+  alg (LiftWith with k) = LiftC (with (Identity ()) (fmap Identity . runM . runIdentity)) >>= k . runIdentity
