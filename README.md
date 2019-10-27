@@ -51,9 +51,11 @@
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead.
 
 <!--
-Imports, hidden from the rendered markdown.
+Setup, hidden from the rendered markdown.
 
 ```haskell
+{-# LANGUAGE TypeApplications #-}
+
 import Control.Algebra
 import qualified Control.Monad.State.Class as MTL
 ```
