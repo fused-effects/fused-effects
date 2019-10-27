@@ -16,6 +16,7 @@ module Control.Effect.Exception
 , try
 , tryJust
 , mask
+, getMaskingState
 , interruptible
 , allowInterrupt
 , bracket
@@ -109,6 +110,12 @@ tryJust p m = catchJust p (Right <$> m) (pure . Left)
 mask :: Has (Lift IO) sig m => ((forall a . m a -> m a) -> m b) -> m b
 mask with = liftWith $ \ ctx run -> Exc.mask $ \ restore ->
   run (with (\ m -> liftWith $ \ ctx' run' -> restore (run' (m <$ ctx'))) <$ ctx)
+
+-- | See @"Control.Exception".'Exc.getMaskingState'@.
+--
+-- @since 1.0.0.0
+getMaskingState :: Has (Lift IO) sig m => m Exc.MaskingState
+getMaskingState = sendM Exc.getMaskingState
 
 -- | See @"Control.Exception".'Exc.interruptible'@.
 --
