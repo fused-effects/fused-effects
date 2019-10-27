@@ -25,7 +25,6 @@ import Control.Effect.Empty.Internal
 import Control.Effect.Error.Internal
 import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal
-import Control.Effect.Pure
 import Control.Effect.Reader.Internal
 import Control.Effect.State.Internal
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
@@ -106,8 +105,8 @@ handleCoercible = handleIdentity coerce
 instance Algebra (Lift IO) IO where
   alg = join . unLift
 
-instance Algebra Pure Identity where
-  alg v = case v of {}
+instance Algebra (Lift Identity) Identity where
+  alg = join . unLift
 
 instance Algebra Choose NonEmpty where
   alg (Choose m) = m True S.<> m False
