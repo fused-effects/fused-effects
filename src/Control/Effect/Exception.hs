@@ -17,6 +17,7 @@ module Control.Effect.Exception
 , tryJust
 , mask
 , bracket
+, bracket_
 , finally
 , onException
   -- * Lift effect
@@ -119,6 +120,17 @@ bracket acquire release m = mask $ \ restore -> do
   a <- acquire
   r <- restore (m a) `onException` release a
   r <$ release a
+
+-- | See @"Control.Exception".'Exc.bracket_'@.
+--
+-- @since 1.0.0.0
+bracket_
+  :: Has (Lift IO) sig m
+  => m a
+  -> m b
+  -> m c
+  -> m c
+bracket_ before after thing = bracket before (const after) (const thing)
 
 -- | See @"Control.Exception".'Exc.finally'@.
 --
