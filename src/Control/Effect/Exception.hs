@@ -4,7 +4,8 @@
 -- @since 1.0.0.0
 module Control.Effect.Exception
 ( -- * Lifted "Control.Exception" operations
-  throwIO
+  Exc.Exception(..)
+, throwIO
 , catch
 , catches
 , Handler(..)
