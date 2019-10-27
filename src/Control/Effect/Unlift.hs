@@ -22,10 +22,10 @@ import Control.Effect.Unlift.Internal (Unlift(..))
 
 -- | Run actions in an outer context.
 --
--- This can be used to provide interoperation with @base@ functionality like 'Control.Exception.finally':
+-- This can be used to provide interoperation with @base@ functionality like 'Control.Exception.catch':
 --
 -- @
--- 'liftWith' $ \ run -> 'Control.Exception.finally' (run m) (run cleanup)
+-- 'liftWith' $ \ ctx run -> 'Control.Exception.catch' (run (m <$ ctx)) (run . (<$ ctx) . h)
 -- @
 --
 -- @since 1.0.0.0
