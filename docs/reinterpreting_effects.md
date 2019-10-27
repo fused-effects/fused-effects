@@ -91,7 +91,7 @@ sendRequest :: Has Http sig m => HTTP.Request -> m (HTTP.Response L.ByteString)
 sendRequest r = send (SendRequest r pure)
 ```
 
-The listFacts function provides the ‘what’ of this API, and the sendRequest function provides the ‘how’. In decomposing this problem into a set of effects, each responsible for a single layer of the original problem description, we provide ourselves with a flexible, composable vocabulary rather than a single monolithic action.
+The `listFacts` function provides the ‘what’ of this API, and the sendRequest function provides the ‘how’. In decomposing this problem into a set of effects, each responsible for a single layer of the original problem description, we provide ourselves with a flexible, composable vocabulary rather than a single monolithic action.
 
 ## "Stacking" effects
 
@@ -116,7 +116,6 @@ A more HTTP-centric issue is that we might receive a content type we can't use. 
 ``` haskell
 newtype InvalidContentType = InvalidContentType String
   deriving (Show, Eq)
-
 ```
 
 Now we need to support fetching JSON given an HTTP request. We have no guarantee that an arbitrary HTTP request
@@ -142,12 +141,12 @@ instance ( Has Http sig m
          , Algebra sig m
          ) =>
          Algebra (CatFactClient :+: sig) (CatFactsApi m) where
-  eff (L (ListFacts numberOfFacts k)) = do
+  alg (L (ListFacts numberOfFacts k)) = do
     resp <- sendRequest (catFactsEndpoint { HTTP.queryString = "?amount=" <> B.pack (show numberOfFacts) })
     case lookup hContentType (HTTP.responseHeaders resp) of
       Just "application/json; charset=utf-8" -> decodeOrThrow (HTTP.responseBody resp) >>= k
       other -> throwError (InvalidContentType (show other))
-  eff (R other) = CatFactsApi (eff (handleCoercible other))
+  alg (R other) = CatFactsApi (handleCoercible other)
 ```
 
 We implement a `CatFacts` effect handler that depends on _three_ underlying effects:
@@ -161,7 +160,6 @@ The nice aspect of this is that we have neatly contained the failure scenarios t
 Now we need to support performing HTTP requests:
 
 ``` haskell
-
 newtype HttpClient m a = HttpClient { runHttp :: m a }
  deriving newtype
       ( Monad
@@ -172,8 +170,8 @@ newtype HttpClient m a = HttpClient { runHttp :: m a }
       )
 
 instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (HttpClient m) where
-  eff (L (SendRequest req k)) = liftIO (HTTP.getGlobalManager >>= HTTP.httpLbs req) >>= k
-  eff (R other) = HttpClient (eff (handleCoercible other))
+  alg (L (SendRequest req k)) = liftIO (HTTP.getGlobalManager >>= HTTP.httpLbs req) >>= k
+  alg (R other) = HttpClient (handleCoercible other)
 ```
 
 Note for the above code snippets how the `CatFactsApi` carrier delegates fetching JSON to any other effect that supports retrieving JSON given an HTTP request specification.
@@ -240,8 +238,8 @@ runMockHttp :: (HTTP.Request -> IO (HTTP.Response L.ByteString)) -> MockHttpC m 
 runMockHttp responder m = runReader responder (runMockHttpClient m)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (MockHttpClient m) where
-  eff (L (SendRequest req k)) = MockHttpClient ask >>= \responder -> liftIO (responder req) >>= k
-  eff (R other) = MockHttpClient (eff (R (handleCoercible other)))
+  alg (L (SendRequest req k)) = MockHttpClient ask >>= \responder -> liftIO (responder req) >>= k
+  alg (R other) = MockHttpClient (handleCoercible other)
 
 faultyNetwork :: HTTP.Request -> IO (HTTP.Response L.ByteString)
 faultyNetwork req = throwIO (HTTP.HttpExceptionRequest req HTTP.ConnectionTimeout)
