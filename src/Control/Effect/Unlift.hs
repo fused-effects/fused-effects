@@ -10,7 +10,7 @@ Predefined carriers:
 module Control.Effect.Unlift
 ( -- * Unlift effect
   Unlift(..)
-, withUnlift
+, liftWith
   -- * Re-exports
 , Algebra
 , Has
@@ -25,12 +25,12 @@ import Control.Effect.Unlift.Internal (Unlift(..))
 -- This can be used to provide interoperation with @base@ functionality like 'Control.Exception.finally':
 --
 -- @
--- 'withUnlift' $ \ run -> 'Control.Exception.finally' (run m) (run cleanup)
+-- 'liftWith' $ \ run -> 'Control.Exception.finally' (run m) (run cleanup)
 -- @
 --
 -- @since 1.0.0.0
-withUnlift
+liftWith
   :: Has (Unlift n) sig m
   => (forall ctx . Functor ctx => ctx () -> (forall a . ctx (m a) -> n (ctx a)) -> n (ctx a))
   -> m a
-withUnlift with = send (Unlift with pure)
+liftWith with = send (Unlift with pure)
