@@ -15,6 +15,7 @@ module Control.Effect.Exception
 , handleJust
 , try
 , tryJust
+, Exc.mapException
 , mask
 , mask_
 , uninterruptibleMask
