@@ -3,18 +3,18 @@
 --
 -- @since 1.0.0.0
 module Control.Effect.Exception
-( -- * Lift effect
-  Lift(..)
-, sendM
-, liftWith
-  -- * Lifted "Control.Exception" operations
-, throwIO
+( -- * Lifted "Control.Exception" operations
+  throwIO
 , catch
 , try
 , onException
 , bracket
 , finally
 , mask
+  -- * Lift effect
+, Lift(..)
+, sendM
+, liftWith
   -- * Re-exports
 , Algebra
 , Has
