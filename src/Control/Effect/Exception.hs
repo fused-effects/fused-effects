@@ -4,9 +4,7 @@
 -- @since 1.0.0.0
 module Control.Effect.Exception
 ( -- * Lifted "Control.Exception" operations
-  Exc.Exception(..)
-, Exc.SomeException(..)
-, throwIO
+  throwIO
 , ioError
 , throwTo
 , catch
@@ -18,12 +16,10 @@ module Control.Effect.Exception
 , try
 , tryJust
 , evaluate
-, Exc.mapException
 , mask
 , mask_
 , uninterruptibleMask
 , uninterruptibleMask_
-, Exc.MaskingState(..)
 , getMaskingState
 , interruptible
 , allowInterrupt
@@ -32,6 +28,7 @@ module Control.Effect.Exception
 , bracketOnError
 , finally
 , onException
+, module Control.Exception
   -- * Lift effect
 , Lift(..)
 , sendM
@@ -44,6 +41,32 @@ module Control.Effect.Exception
 
 import Control.Concurrent (ThreadId)
 import Control.Effect.Lift
+import Control.Exception hiding
+  ( throwIO
+  , ioError
+  , throwTo
+  , catch
+  , catches
+  , Handler
+  , catchJust
+  , handle
+  , handleJust
+  , try
+  , tryJust
+  , evaluate
+  , mask
+  , mask_
+  , uninterruptibleMask
+  , uninterruptibleMask_
+  , getMaskingState
+  , interruptible
+  , allowInterrupt
+  , bracket
+  , bracket_
+  , bracketOnError
+  , finally
+  , onException
+  )
 import qualified Control.Exception as Exc
 import Prelude hiding (ioError)
 
