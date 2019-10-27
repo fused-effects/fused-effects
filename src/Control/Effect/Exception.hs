@@ -15,6 +15,7 @@ module Control.Effect.Exception
 , handleJust
 , try
 , tryJust
+, evaluate
 , Exc.mapException
 , mask
 , mask_
@@ -108,6 +109,12 @@ try m = (Right <$> m) `catch` (pure . Left)
 -- @since 1.0.0.0
 tryJust :: (Exc.Exception e, Has (Lift IO) sig m) => (e -> Maybe b) -> m a -> m (Either b a)
 tryJust p m = catchJust p (Right <$> m) (pure . Left)
+
+-- | See @"Control.Exception".'Exc.evaluate'@.
+--
+-- @since 1.0.0.0
+evaluate :: Has (Lift IO) sig m => a -> m a
+evaluate = sendM . Exc.evaluate
 
 -- | See @"Control.Exception".'Exc.mask'@.
 --
