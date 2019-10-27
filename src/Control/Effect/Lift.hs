@@ -22,6 +22,7 @@ module Control.Effect.Lift
 , throwIO
 , catch
 , try
+, onException
 , mask
   -- * Re-exports
 , Algebra
@@ -75,6 +76,12 @@ catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `Exc.catch` (run . (<$ ctx) .
 -- @since 1.0.0.0
 try :: (Exc.Exception e, Has (Lift IO) sig m) => m a -> m (Either e a)
 try m = (Right <$> m) `catch` (pure . Left)
+
+-- | See @"Control.Exception".'Exc.onException'@.
+--
+-- @since 1.0.0.0
+onException :: Has (Lift IO) sig m => m a -> m b -> m a
+onException io what = io `catch` \e -> what >> throwIO (e :: Exc.SomeException)
 
 -- | See @"Control.Exception".'Exc.mask'@.
 --
