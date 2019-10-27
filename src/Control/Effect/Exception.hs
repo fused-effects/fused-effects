@@ -1,4 +1,4 @@
-{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, RankNTypes, StandaloneDeriving #-}
 -- | Operations from "Control.Exception" lifted into effectful contexts using 'Control.Effect.Lift.Lift'.
 --
 -- @since 1.0.0.0
@@ -6,6 +6,7 @@ module Control.Effect.Exception
 ( -- * Lifted "Control.Exception" operations
   throwIO
 , catch
+, Handler(..)
 , try
 , onException
 , bracket
@@ -35,6 +36,14 @@ throwIO = sendM . Exc.throwIO
 -- @since 1.0.0.0
 catch :: (Exc.Exception e, Has (Lift IO) sig m) => m a -> (e -> m a) -> m a
 catch m h = liftWith $ \ ctx run -> run (m <$ ctx) `Exc.catch` (run . (<$ ctx) . h)
+
+-- | See @"Control.Exception".'Exc.Handler'@.
+--
+-- @since 1.0.0.0
+data Handler m a
+  = forall e . Exc.Exception e => Handler (e -> m a)
+
+deriving instance Functor m => Functor (Handler m)
 
 -- | See @"Control.Exception".'Exc.try'@.
 --
