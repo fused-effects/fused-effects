@@ -30,8 +30,8 @@ data Cull m k
 deriving instance Functor m => Functor (Cull m)
 
 instance Effect Cull where
-  handle ctx handler (Cull m k) = Cull (handler (m <$ ctx)) (handler . fmap k)
-  {-# INLINE handle #-}
+  thread ctx handler (Cull m k) = Cull (handler (m <$ ctx)) (handler . fmap k)
+  {-# INLINE thread #-}
 
 -- | Cull nondeterminism in the argument, returning at most one result.
 --

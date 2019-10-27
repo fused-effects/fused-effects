@@ -25,7 +25,7 @@ The `Read` operation returns a `String`, and hence its continuation is represent
 
 On the other hand, the `Write` operation returns `()`. Since a function `() -> k` is equivalent to a (non-strict) `k`, we can omit the function parameter.
 
-In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need one other instance: `Effect`. `Effect` is used by `Algebra` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `handle` takes an initial state parameter (encoded as some arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping state functors containing unhandled computations to handled computations producing the state functor alongside any results.
+In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need one other instance: `Effect`. `Effect` is used by `Algebra` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `thread` takes the initial context (encoded as an arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping context functors containing unhandled computations to handled computations producing the context functor alongside any results.
 
 Since `Teletype` is a first-order effect (i.e., its operations don’t have any embedded computations), we can derive an `Effect` instance by first deriving a `Generic1` instance (using `-XDeriveGeneric`):
 
@@ -38,7 +38,7 @@ data Teletype m k
   deriving (Functor, Generic1)
 ```
 
-and then defining `Effect`, using the default definition for `handle`:
+and then defining `Effect`, using the default definition for `thread`:
 
 ```haskell
 instance Effect Teletype
