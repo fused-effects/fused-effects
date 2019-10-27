@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeFamilies, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for 'Cull' and 'NonDet' effects used in tandem (@Cull :+: NonDet@).
 --
@@ -18,6 +18,7 @@ module Control.Carrier.Cull.Church
 import Control.Algebra
 import Control.Applicative (liftA2)
 import Control.Carrier.NonDet.Church
+import Control.Carrier.Pure
 import Control.Carrier.Reader
 import Control.Effect.Cull
 import Control.Effect.NonDet
@@ -68,8 +69,7 @@ instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
 
-instance (Algebra sig m, CanThread sig (NonDetC m)) => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
-  type Context (CullC m) = NonDetC m
+instance (Algebra sig m, CanThread sig (NonDetC PureC)) => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
   alg (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
   alg (R (L (L Empty)))      = empty
   alg (R (L (R (Choose k)))) = k True <|> k False
