@@ -114,7 +114,7 @@ Different effects make different operations available; see the documentation for
 type Shared sig m
   = ( Has (State String) sig m
     , Has (Reader Int)   sig m
-    , Has (Writer Graph) sig m
+    , Has (Writer [String]) sig m
     )
 
 myFunction :: Shared sig m => Int -> m ()
