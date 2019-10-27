@@ -23,16 +23,16 @@ import GHC.Generics
 -- @since 1.0.0.0
 class Effect sig where
   -- | Handle any effects in a signature by threading the carrier’s context all the way through to the continuation.
-  handle :: (Functor f, Monad m)
-         => f ()
-         -> (forall x . f (m x) -> n (f x))
+  handle :: (Functor ctx, Monad m)
+         => ctx ()
+         -> (forall x . ctx (m x) -> n (ctx x))
          -> sig m a
-         -> sig n (f a)
-  default handle :: (Functor f, Monad m, Generic1 (sig m), Generic1 (sig n), GEffect m n (Rep1 (sig m)) (Rep1 (sig n)))
-                 => f ()
-                 -> (forall x . f (m x) -> n (f x))
+         -> sig n (ctx a)
+  default handle :: (Functor ctx, Monad m, Generic1 (sig m), Generic1 (sig n), GEffect m n (Rep1 (sig m)) (Rep1 (sig n)))
+                 => ctx ()
+                 -> (forall x . ctx (m x) -> n (ctx x))
                  -> sig m a
-                 -> sig n (f a)
+                 -> sig n (ctx a)
   handle ctx handler = to1 . ghandle ctx handler . from1
   {-# INLINE handle #-}
 
@@ -40,11 +40,11 @@ class Effect sig where
 -- | Generic implementation of 'Effect'.
 class GEffect m m' rep rep' where
   -- | Generic implementation of 'handle'.
-  ghandle :: (Functor f, Monad m)
-          => f ()
-          -> (forall x . f (m x) -> m' (f x))
+  ghandle :: (Functor ctx, Monad m)
+          => ctx ()
+          -> (forall x . ctx (m x) -> m' (ctx x))
           -> rep a
-          -> rep' (f a)
+          -> rep' (ctx a)
 
 instance GEffect m m' rep rep' => GEffect m m' (M1 i c rep) (M1 i c rep') where
   ghandle ctx handler = M1 . ghandle ctx handler . unM1
