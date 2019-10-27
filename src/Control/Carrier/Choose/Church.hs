@@ -23,6 +23,8 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
 import Data.List.NonEmpty (NonEmpty(..), head, tail)
 import qualified Data.Semigroup as S
 import Prelude hiding (head, tail)
@@ -82,5 +84,6 @@ instance MonadTrans ChooseC where
 
 instance Algebra sig m => Algebra (Choose :+: sig) (ChooseC m) where
   alg (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
-  alg (R other)      = ChooseC $ \ fork leaf -> alg (handle (pure ()) (runChoose (liftA2 (<|>)) (runChoose (liftA2 (<|>)) (pure . pure))) other) >>= runChoose fork leaf
+  alg (R other)      = ChooseC $ \ fork leaf -> alg (handle (pure ()) dst other) >>= runIdentity . runChoose (coerce fork) (coerce leaf) where
+    dst = runIdentity . runChoose (liftA2 (liftA2 (<|>))) (pure . runChoose (liftA2 (<|>)) (pure . pure))
   {-# INLINE alg #-}
