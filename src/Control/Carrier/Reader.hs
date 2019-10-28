@@ -1,34 +1,44 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+-- | A carrier for 'Reader' effects.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Reader
-( -- * Reader effect
-  module Control.Effect.Reader
-  -- * Reader carrier
-, runReader
+( -- * Reader carrier
+  runReader
 , ReaderC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Reader effect
+, module Control.Effect.Reader
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..), liftA2)
-import Control.Carrier
 import Control.Effect.Reader
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
-import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 
 -- | Run a 'Reader' effect with the passed environment value.
 --
---   prop> run (runReader a (pure b)) === b
+-- @
+-- 'runReader' a 'ask' = 'pure' a
+-- @
+-- @
+-- 'runReader' a ('pure' b) = 'pure' b
+-- @
+-- @
+-- 'runReader' a ('local' f m) = 'runReader' (f a) m
+-- @
+--
+-- @since 1.0.0.0
 runReader :: r -> ReaderC r m a -> m a
-runReader r c = runReaderC c r
+runReader r (ReaderC runReaderC) = runReaderC r
 {-# INLINE runReader #-}
 
-newtype ReaderC r m a = ReaderC { runReaderC :: r -> m a }
+-- | @since 1.0.0.0
+newtype ReaderC r m a = ReaderC (r -> m a)
   deriving (Functor)
 
 instance Applicative m => Applicative (ReaderC r m) where
@@ -69,20 +79,8 @@ instance MonadTrans (ReaderC r) where
   lift = ReaderC . const
   {-# INLINE lift #-}
 
-instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
-  askUnliftIO = ReaderC $ \r -> withUnliftIO $ \u -> pure (UnliftIO (\(ReaderC x) -> unliftIO u (x r)))
-  {-# INLINE askUnliftIO #-}
-  withRunInIO inner = ReaderC $ \r -> withRunInIO $ \go -> inner (go . runReader r)
-  {-# INLINE withRunInIO #-}
-
-instance Carrier sig m => Carrier (Reader r :+: sig) (ReaderC r m) where
-  eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
-  eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
-  eff (R other)         = ReaderC (\ r -> eff (hmap (runReader r) other))
-  {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
+instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m) where
+  alg (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
+  alg (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
+  alg (R other)         = ReaderC (\ r -> handleIdentity (runReader r) other)
+  {-# INLINE alg #-}

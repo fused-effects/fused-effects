@@ -1,14 +1,14 @@
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures #-}
-module Control.Effect.Pure
-( -- * Pure effect
-  Pure
+module Control.Effect.Throw.Internal
+( Throw(..)
 ) where
 
 import Control.Effect.Class
 import GHC.Generics (Generic1)
 
-data Pure (m :: * -> *) k
+-- | @since 1.0.0.0
+data Throw e (m :: * -> *) k
+  = Throw e
   deriving (Functor, Generic1)
 
-instance HFunctor Pure
-instance Effect   Pure
+instance Effect (Throw e)

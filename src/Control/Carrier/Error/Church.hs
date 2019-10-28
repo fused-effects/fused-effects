@@ -1,19 +1,15 @@
 {-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
-module Control.Effect.Error.Church
-( -- * Error effect
-  module Control.Effect.Error
-  -- * Error carrier
-, runError
+module Control.Carrier.Error.Church
+( -- * Error carrier
+  runError
 , ErrorC(..)
--- * Re-exports
-, Carrier
-, Member
-, run
+--- * Error effect
+, module Control.Effect.Error
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative (..))
-import Control.Effect.Carrier
-import Control.Effect.Error (Error (..), throwError, catchError)
+import Control.Effect.Error
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail
 import Control.Monad.Fix
@@ -70,27 +66,8 @@ instance MonadTrans (ErrorC e) where
   lift m = ErrorC $ \ _ k -> m >>= k
   {-# INLINE lift #-}
 
--- $
--- prop> (throwError e >>= applyFun f) ~= throwError e
--- prop> (throwError e `catchError` applyFun f) ~= applyFun f e
-instance (Carrier sig m, Effect sig) => Carrier (Error e :+: sig) (ErrorC e m) where
-  eff (L (Throw e))     = ErrorC $ \ h _ -> h e
-  eff (L (Catch m h k)) = ErrorC $ \ h' k' -> runError (runError h' (runError h' k' . k) . h) (runError h' k' . k) m
-  eff (R other)         = ErrorC $ \ h k -> eff (handle (Right ()) (either (pure . Left) (runError (pure . Left) (pure . Right))) other) >>= either h k
-  {-# INLINE eff #-}
-
-
--- $setup
--- >>> :seti -XFlexibleContexts
--- >>> :seti -XFlexibleInstances
--- >>> :seti -XScopedTypeVariables
--- >>> :seti -XTypeApplications
--- >>> import Test.QuickCheck
--- >>> import Control.Effect.Pure
--- >>> import Data.Function (on)
--- >>> instance (Show e, Show a) => Show (ErrorC e PureC a) where show = show . run . runError (pure . Left) (pure . Right)
--- >>> instance (Arbitrary e, Arbitrary a) => Arbitrary (ErrorC e PureC a) where arbitrary = either (throwError @e) pure <$> arbitrary ; shrink = map (either (throwError @e) pure) . shrink . run . runError (pure . Left) (pure . Right)
--- >>> :{
--- infix 4 ~=
--- (~=) = (===) `on` run . runError @Integer (pure . Left) (pure . Right)
--- :}
+instance Algebra sig m => Algebra (Error e :+: sig) (ErrorC e m) where
+  alg (L (L (Throw e)))     = ErrorC $ \ h _ -> h e
+  alg (L (R (Catch m h k))) = ErrorC $ \ h' k' -> runError (runError h' (runError h' k' . k) . h) (runError h' k' . k) m
+  alg (R other)             = ErrorC $ \ h k -> alg (thread (Right ()) (either (pure . Left) (runError (pure . Left) (pure . Right))) other) >>= either h k
+  {-# INLINE alg #-}

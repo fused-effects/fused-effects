@@ -1,6 +1,6 @@
 # A fast, flexible, fused effect system for Haskell
 
-[![Build Status](https://travis-ci.com/fused-effects/fused-effects.svg?branch=master)](https://travis-ci.com/fused-effects/fused-effects) [![hackage](https://img.shields.io/hackage/v/fused-effects.svg?color=blue&style=popout)](http://hackage.haskell.org/package/fused-effects)
+[![Build Status](https://action-badges.now.sh/fused-effects/fused-effects)](https://github.com/fused-effects/fused-effects/actions) [![hackage](https://img.shields.io/hackage/v/fused-effects.svg?color=blue&style=popout)](http://hackage.haskell.org/package/fused-effects)
 
 - [Overview][]
   - [Algebraic effects][]
@@ -50,6 +50,26 @@
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead.
 
+<!--
+Setup, hidden from the rendered markdown.
+
+```haskell
+{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, UndecidableInstances #-}
+module Main (module Main) where
+
+import Control.Algebra
+import Control.Carrier.Lift
+import Control.Carrier.Reader
+import Control.Carrier.State.Strict
+import Control.Effect.Writer
+import Control.Monad.IO.Class (liftIO)
+import qualified Control.Monad.State.Class as MTL
+
+main :: IO ()
+main = pure ()
+```
+-->
+
 
 ### Algebraic effects
 
@@ -83,13 +103,15 @@ Finally, since the fusion of carrier algebras occurs as a result of the selectio
 Like other effect systems, effects are performed in a `Monad` extended with operations relating to the effect. In `fused-effects`, this is done by means of a `Has` constraint to require the effect’s presence in a _signature_, and to relate the signature to the _carrier_ you’re computing in. For example, to use a `State` effect managing a `String`, one would write:
 
 ```haskell
-action :: Has (State String) sig m => m ()
+action1 :: Has (State String) sig m => m ()
+action1 = get >>= \ s -> put ("hello, " ++ s)
 ```
 
 Multiple effects can be required simply by adding more `Has` constraints to the context. For example, to add a `Reader` effect managing an `Int`, we would write:
 
 ```haskell
-action :: (Has (State String) sig m, Has (Reader Int) sig m) => m ()
+action2 :: (Has (State String) sig m, Has (Reader Int) sig m) => m ()
+action2 = ask >>= \ i -> put (replicate i '!')
 ```
 
 Different effects make different operations available; see the documentation for individual effects for more information about their operations. Note that we generally don't program against an explicit list of effect components: we take the typeclass-oriented approach, adding new constraints to `sig` as new capabilities become necessary. If you want to name and share some predefined list of effects, it's best to use the `-XConstraintKinds` extension to GHC, capturing the elements of `sig` as a type synonym of kind `Constraint`:
@@ -98,10 +120,11 @@ Different effects make different operations available; see the documentation for
 type Shared sig m
   = ( Has (State String) sig m
     , Has (Reader Int)   sig m
-    , Has (Writer Graph) sig m
+    , Has (Writer [String]) sig m
     )
 
-myFunction :: Shared sig m => Int -> m ()
+action3 :: Shared sig m => m ()
+action3 = ask >>= \ i -> put (replicate i '?') >> tell [ "put " ++ show i ++ " '?'s" ]
 ```
 
 ### Running effects
@@ -109,7 +132,7 @@ myFunction :: Shared sig m => Int -> m ()
 Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`:
 
 ```haskell
-example1 :: (Carrier sig m, Effect sig) => [a] -> m (Int, ())
+example1 :: Algebra sig m => [a] -> m (Int, ())
 example1 list = runState 0 $ do
   i <- get @Int
   put (i + length list)
@@ -120,7 +143,7 @@ example1 list = runState 0 $ do
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
 ```haskell
-example2 :: (Carrier sig m, Effect sig) => m (Int, ())
+example2 :: Algebra sig m => m (Int, ())
 example2 = runReader "hello" . runState 0 $ do
   list <- ask
   put (length (list :: String))
@@ -137,7 +160,7 @@ example3 = run . runReader "hello" . runState 0 $ do
   put (length (list :: String))
 ```
 
-`run` is itself actually an effect handler for the `Pure` effect, which has no operations and thus can only represent a final result value.
+`run` is itself actually an effect handler for the `Lift Identity` effect, whose only operation is to lift a result value into a computation.
 
 Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for the `LiftC` carrier to lift `putStrLn` into the middle of our computation:
 
@@ -155,7 +178,7 @@ example4 = runM . runReader "hello" . runState 0 $ do
 
 To use effects, you'll typically need `-XFlexibleContexts`.
 
-When defining your own effects, you may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case. `-XDeriveGeneric` can be used with many first-order effects to derive default implementations of `HFunctor` and `Effect`.
+When defining your own effects, you may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case. `-XDeriveGeneric` can be used with many first-order effects to derive a default definition of `Effect`.
 
 When defining carriers, you'll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), `-XFlexibleInstances` to loosen the conditions on the instance, `-XMultiParamTypeClasses` since `Carrier` takes two parameters, and `-XUndecidableInstances` to satisfy the coverage condition for this instance.
 
@@ -227,11 +250,13 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 
 * [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computations.
 * [`fused-effects-exceptions`][exc] provides handlers for exceptions thrown in the `IO` monad.
+* [`fused-effects-resumable`][] provides resumable exceptions, which can also serve as a limited form of coroutines.
 * [`fused-effects-random`][] provides a `Random` effect integrated into a `fused-effects` stack.
 
 [exc]: https://github.com/fused-effects/fused-effects-exceptions
 [felens]: http://hackage.haskell.org/package/fused-effects-lens
 [`fused-effects-random`]: https://github.com/fused-effects/fused-effects-random
+[`fused-effects-resumable`]: https://github.com/fused-effects/fused-effects-resumable
 [lens]: http://hackage.haskell.org/package/lens
 
 ### Comparison to `mtl`
@@ -248,7 +273,8 @@ Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a si
 newtype Wrapper s m a = Wrapper { runWrapper :: m a }
   deriving (Applicative, Functor, Monad)
 
-instance Carrier sig m => Carrier sig (Wrapper s m) where …
+instance Algebra sig m => Algebra sig (Wrapper s m) where
+  alg = Wrapper . handleCoercible
 
 getState :: Has (State s) sig m => Wrapper s m s
 getState = get
@@ -258,8 +284,8 @@ Indeed, `Wrapper` can now be made an instance of `MonadState`:
 
 ```haskell
 instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
-  get = Control.Effect.State.get
-  put = Control.Effect.State.put
+  get = Control.Carrier.State.Strict.get
+  put = Control.Carrier.State.Strict.put
 ```
 
 Thus, the approaches aren’t mutually exclusive; consumers are free to decide which approach makes the most sense for their situation.

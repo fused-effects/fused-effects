@@ -1,18 +1,18 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+
+-- | A carrier for the 'Control.Effect.Trace' effect that prints all traced results to stderr.
+--
+-- @since 1.0.0.0
 module Control.Carrier.Trace.Printing
-( -- * Trace effect
-  module Control.Effect.Trace
-  -- * Trace carrier
-, runTrace
+( -- * Trace carrier
+  runTrace
 , TraceC(..)
-  -- * Re-exports
-, Carrier
-, Has
-, run
+  -- * Trace effect
+, module Control.Effect.Trace
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
-import Control.Carrier
 import Control.Effect.Trace
 import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
@@ -22,17 +22,27 @@ import Control.Monad.Trans.Class
 import System.IO
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
+--
+-- @
+-- 'runTrace' ('trace' s) = 'liftIO' ('putStrLn' s)
+-- @
+-- @
+-- 'runTrace' ('pure' a) = 'pure' a
+-- @
+--
+-- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
-runTrace = runTraceC
+runTrace (TraceC m) = m
 
-newtype TraceC m a = TraceC { runTraceC :: m a }
+-- | @since 1.0.0.0
+newtype TraceC m a = TraceC (m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans TraceC where
   lift = TraceC
   {-# INLINE lift #-}
 
-instance (MonadIO m, Carrier sig m) => Carrier (Trace :+: sig) (TraceC m) where
-  eff (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
-  eff (R other)       = TraceC (eff (handleCoercible other))
-  {-# INLINE eff #-}
+instance (MonadIO m, Algebra sig m) => Algebra (Trace :+: sig) (TraceC m) where
+  alg (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
+  alg (R other)       = TraceC (handleCoercible other)
+  {-# INLINE alg #-}

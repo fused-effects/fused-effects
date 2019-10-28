@@ -41,12 +41,12 @@ common common
     ghc-options: -Wno-missing-deriving-strategies
 
 library
-  import:              common
-  hs-source-dirs:      src
+  import:         common
+  hs-source-dirs: src
   exposed-modules:
-    Control.Carrier
+    Control.Algebra
+    -- Carriers
     Control.Carrier.Choose.Church
-    Control.Carrier.Class
     Control.Carrier.Cull.Church
     Control.Carrier.Cut.Church
     Control.Carrier.Empty.Maybe
@@ -57,18 +57,16 @@ library
     Control.Carrier.Interpret
     Control.Carrier.Lift
     Control.Carrier.NonDet.Church
-    Control.Carrier.Pure
     Control.Carrier.Reader
-    Control.Carrier.Resource
-    Control.Carrier.Resumable.Either
-    Control.Carrier.Resumable.Resume
     Control.Carrier.State.Lazy
     Control.Carrier.State.Strict
+    Control.Carrier.Throw.Either
     Control.Carrier.Trace.Ignoring
     Control.Carrier.Trace.Printing
     Control.Carrier.Trace.Returning
     Control.Carrier.Writer.Strict
-    Control.Effect
+    -- Effects
+    Control.Effect.Catch
     Control.Effect.Choose
     Control.Effect.Class
     Control.Effect.Cull
@@ -79,26 +77,33 @@ library
     Control.Effect.Fresh
     Control.Effect.Lift
     Control.Effect.NonDet
-    Control.Effect.Pure
     Control.Effect.Reader
-    Control.Effect.Resource
-    Control.Effect.Resumable
     Control.Effect.State
     Control.Effect.Sum
+    Control.Effect.Throw
     Control.Effect.Trace
     Control.Effect.Writer
+  other-modules:
+    Control.Effect.Catch.Internal
+    Control.Effect.Choose.Internal
+    Control.Effect.Empty.Internal
+    Control.Effect.Error.Internal
+    Control.Effect.Lift.Internal
+    Control.Effect.NonDet.Internal
+    Control.Effect.Reader.Internal
+    Control.Effect.State.Internal
+    Control.Effect.Throw.Internal
+    Control.Effect.Writer.Internal
   build-depends:
-      base           >= 4.9 && < 4.14
-    , deepseq       ^>= 1.4.3
-    , unliftio-core ^>= 0.1.2
-    , transformers
+      base          >= 4.9 && < 4.14
+    , transformers  >= 0.4 && < 0.6
 
 
 test-suite examples
-  import:              common
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      examples
-  main-is:             Main.hs
+  import:         common
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: examples
+  main-is:        Main.hs
   other-modules:
     Inference
     Parser
@@ -107,42 +112,71 @@ test-suite examples
   build-depends:
       base
     , fused-effects
+    , hedgehog           ^>= 1
+    , hedgehog-fn        ^>= 1
     , tasty              ^>= 1.2
+    , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
-    , tasty-quickcheck   ^>= 0.10
     , transformers
 
+
 test-suite test
-  import:              common
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Test.hs
+  import:         common
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: test
+  main-is:        Test.hs
   other-modules:
+    Catch
+    Choose
+    Cull
+    Cut
+    Cut.Church
+    Empty
+    Error
+    Fail
+    Fresh
     Fusion
+    Gen
+    Lift
+    Monad
+    MonadFix
     NonDet
+    NonDet.Church
+    Reader
+    State
+    Throw
+    Writer
   build-depends:
       base
+    , containers          >= 0.5 && < 0.7
     , fused-effects
+    , hedgehog           ^>= 1
+    , hedgehog-fn        ^>= 1
     , inspection-testing ^>= 0.4
     , tasty              ^>= 1.2
+    , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
+    , transformers
 
-test-suite doctest
-  import:              common
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      test
-  main-is:             Doctest.hs
+
+test-suite docs
+  import:      common
+  type:        exitcode-stdio-1.0
+  main-is:     README.lhs
+  ghc-options: -pgmL markdown-unlit
   build-depends:
       base
-    , doctest  >= 0.7 && < 1
     , fused-effects
+    , mtl           ^>= 2.2
+  build-tool-depends:
+      markdown-unlit:markdown-unlit ^>= 0.5
 
 
 benchmark benchmark
-  import:             common
-  type:               exitcode-stdio-1.0
-  hs-source-dirs:     benchmark
-  main-is:            Bench.hs
+  import:         common
+  type:           exitcode-stdio-1.0
+  hs-source-dirs: benchmark
+  main-is:        Bench.hs
   other-modules:
     NonDet
     NonDet.NQueens

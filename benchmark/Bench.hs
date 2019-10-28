@@ -3,8 +3,8 @@ module Main
 ( main
 ) where
 
-import Control.Carrier
-import Control.Carrier.Error as Either
+import Control.Algebra
+import Control.Carrier.Error.Either as Either
 import Control.Carrier.Error.Church as Church
 import Control.Carrier.Interpret
 import Control.Carrier.State.Strict
@@ -100,5 +100,5 @@ instance Applicative (Cod m) where
 instance Monad (Cod m) where
   Cod a >>= f = Cod (\ k -> a (runCod k . f))
 
-instance (Carrier sig m, Effect sig) => Carrier sig (Cod m) where
-  eff op = Cod (\ k -> eff (handle (Identity ()) (runCod (pure . Identity) . runIdentity) op) >>= k . runIdentity)
+instance Algebra sig m => Algebra sig (Cod m) where
+  alg op = Cod (\ k -> alg (thread (Identity ()) (runCod (pure . Identity) . runIdentity) op) >>= k . runIdentity)

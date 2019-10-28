@@ -1,6 +1,12 @@
 - Adds an `Empty` effect, modelling nondeterminism without choice ([#196](https://github.com/fused-effects/fused-effects/pull/196)).
 
+- Adds an `EmptyC` carrier for `Empty`. ([#196](https://github.com/fused-effects/fused-effects/pull/196))
+
 - Adds a `Choose` effect, modelling nondeterminism without failure ([#198](https://github.com/fused-effects/fused-effects/pull/198)).
+
+- Adds a `Throw` effect, modelling failure with a value. ([#247](https://github.com/fused-effects/fused-effects/pull/247))
+
+- Adds a `Catch` effect which can be used with `Throw` (or other kinds of failure) to model recoverable failure. ([#247](https://github.com/fused-effects/fused-effects/pull/247))
 
 - Adds a `oneOf` function to `Control.Effect.NonDet` to provide an idiom for the common case of nondeterministically selecting from a container. ([#201](https://github.com/fused-effects/fused-effects/pull/201))
 
@@ -8,9 +14,24 @@
 
 - Defines a new `Has` constraint synonym, conveniently combining `Carrier` and `Member` constraints and used for all effect constructors. ([#217](https://github.com/fused-effects/fused-effects/pull/217))
 
-- Allows effects to be defined and handled as sums of other effects, while still using the constructors for the component effects. This has been used to redefine `NonDet` as a sum of `Empty` and `Choose`. ([#199](https://github.com/fused-effects/fused-effects/pull/199), [#219](https://github.com/fused-effects/fused-effects/pull/219))
+- Allows effects to be defined and handled as sums of other effects, while still using the constructors for the component effects. This has been used to redefine `NonDet` as a sum of `Empty` and `Choose`, and `Error` as a sum of `Throw` and `Catch`. ([#199](https://github.com/fused-effects/fused-effects/pull/199), [#219](https://github.com/fused-effects/fused-effects/pull/219), [#247](https://github.com/fused-effects/fused-effects/pull/247))
+
+- Defines `Carrier` instances for a number of types in `base`, including `Either`, `Maybe`, `[]`, and `IO`. ([#206](https://github.com/fused-effects/fused-effects/pull/206))
+
+- Defines `Carrier` instances for a number of types in `transformers`. ([#226](https://github.com/fused-effects/fused-effects/pull/226))
+
+- Defines an `evalFresh` handler for `Control.Carrier.Strict.FreshC`, taking the initial value. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
+
 
 ## Backwards-incompatible changes
+
+- Renames the `Carrier` class to `Algebra` and its `eff` method to `alg`, and moved the responsibilities of `Control.Carrier` to `Control.Algebra`. This makes the library more consistent with the literature and encourages a style of naming that focuses on morphisms rather than objects. ([#285](https://github.com/fused-effects/fused-effects/pull/285), [#294](https://github.com/fused-effects/fused-effects/pull/294))
+
+- Removes the `HFunctor` class. Effects now need only provide an instance of `Effect`. ([#295](https://github.com/fused-effects/fused-effects/pull/295))
+
+- Changes `handleCoercible` to invoke `send`, simplifying the idiom for reinterpreting effects. ([#295](https://github.com/fused-effects/fused-effects/pull/295))
+
+- Defines a `handleIdentity` handler for effects which do not produce output wrapped in a functor. ([#295](https://github.com/fused-effects/fused-effects/pull/295))
 
 - Fixes unlawful behaviour in the `Applicative` instance for `ErrorC`, which had different behaviour between `<*>` and `ap` in the presence of a divergent rhs. In order to accomplish this, `ErrorC` has been defined as a wrapper around `Control.Monad.Trans.Except.ExceptT`. ([#228](https://github.com/fused-effects/fused-effects/pull/228))
 
@@ -37,6 +58,25 @@
 - Removes `InterposeC` & `runInterpose` due to their inefficiency. They can be replaced with use of `InterpretC`/`runInterpret` for the desired effect. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
 
 - Removes `prj` from `Member`, as it was only used in `InterposeC` (see above), and was generally inadvisable due to its lack of modularity. ([#223](https://github.com/fused-effects/fused-effects/pull/223))
+
+- Removes the `Resource` effect and carrier. Both have been relocated to `fused-effects-exceptions`. ([#268](https://github.com/fused-effects/fused-effects/pull/268))
+
+- Redefines `Fail` as a synonym for `Throw String`. ([#247](https://github.com/fused-effects/fused-effects/pull/247))
+
+- Removes `Resumable` and its carriers. Both have been relocated to `fused-effects-resumable`; they can also be usefully and flexibly replaced by arbitrary effects, `Lift`, and `InterpretC`. ([#269](https://github.com/fused-effects/fused-effects/pull/269))
+
+- Changes `Control.Carrier.Fresh.Strict.runFresh` to take and return the initial & final values, respectively, allowing for safer operation. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
+
+- Removes `resetFresh`, as it was unsafe. Greater safety _and_ control over the generation of fresh values can be obtained by use of `runFresh`. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
+
+- Removes `PureC`; `Data.Functor.Identity.Identity` should be used instead. Note that `run` is still provided as a convenient synonym for `runIdentity`. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
+
+- Removes the `Pure` effect. It’s unlikely that this will require changes, as `Pure` had no operations, but `Lift Identity` should be used instead. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
+
+- Redefines the `Lift` effect, allowing inner contexts to run actions in outer contexts, e.g. to interoperate with `Control.Exception`. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
+
+- Removes `MonadUnliftIO` instances as they’ve been subsumed by the new definition of `Lift`. Additionally, the `ReaderT` & `IdentityT` types defined in `transformers` may be useful. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
+
 
 # v0.5.0.1
 
