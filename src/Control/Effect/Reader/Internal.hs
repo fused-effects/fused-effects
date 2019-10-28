@@ -13,5 +13,5 @@ data Reader r m k
 deriving instance Functor m => Functor (Reader r m)
 
 instance Effect Functor (Reader r) where
-  handle state handler (Ask k)       = Ask (handler . (<$ state) . k)
-  handle state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)
+  thread state handler (Ask k)       = Ask (handler . (<$ state) . k)
+  thread state handler (Local f m k) = Local f (handler (m <$ state)) (handler . fmap k)

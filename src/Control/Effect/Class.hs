@@ -20,9 +20,9 @@ import GHC.Generics
 --   1. Be functorial in their last two arguments, and
 --   2. Support threading effects in higher-order positions through using the carrier’s suspended context.
 --
--- Effects may additionally constrain the types of context that they support threading through their actions by defining an instance of the associated 'CanHandle' type family. If no definition is given, it defaults to 'Functor'.
+-- Effects may additionally constrain the types of context that they support threading through their actions by defining an instance of the associated 'CanThread' type family. If no definition is given, it defaults to 'Functor'.
 --
--- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'handle' provided a 'Generic1' instance is available for the effect.
+-- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'thread' provided a 'Generic1' instance is available for the effect.
 --
 -- @since 1.0.0.0
 class c Identity => Effect (c :: (* -> *) -> Constraint) sig | sig -> c where
@@ -38,26 +38,26 @@ class c Identity => Effect (c :: (* -> *) -> Constraint) sig | sig -> c where
   -- @
   --
   -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
-  handle
+  thread
     :: (Monad m, Monad n, c ctx)
     => ctx ()                              -- ^ The initial context.
     -> (forall x . ctx (m x) -> n (ctx x)) -- ^ A handler for actions in a context, producing actions with a derived context.
     -> sig m a                             -- ^ The effect to thread the handler through.
     -> sig n (ctx a)
-  default handle
+  default thread
     :: (Monad m, Monad n, Generic1 (sig m), Generic1 (sig n), GEffect ctx m n (Rep1 (sig m)) (Rep1 (sig n)))
     => ctx ()
     -> (forall x . ctx (m x) -> n (ctx x))
     -> sig m a
     -> sig n (ctx a)
-  handle state handler = to1 . ghandle state handler . from1
-  {-# INLINE handle #-}
+  thread state handler = to1 . gthread state handler . from1
+  {-# INLINE thread #-}
 
 
 -- | Generic implementation of 'Effect'.
 class GEffect ctx m m' rep rep' where
-  -- | Generic implementation of 'handle'.
-  ghandle
+  -- | Generic implementation of 'thread'.
+  gthread
     :: (Monad m, Monad m')
     => ctx ()
     -> (forall x . ctx (m x) -> m' (ctx x))
@@ -65,42 +65,42 @@ class GEffect ctx m m' rep rep' where
     -> rep' (ctx a)
 
 instance GEffect ctx m m' rep rep' => GEffect ctx m m' (M1 i c' rep) (M1 i c' rep') where
-  ghandle state handler = M1 . ghandle state handler . unM1
-  {-# INLINE ghandle #-}
+  gthread state handler = M1 . gthread state handler . unM1
+  {-# INLINE gthread #-}
 
 instance (GEffect ctx m m' l l', GEffect ctx m m' r r') => GEffect ctx m m' (l :+: r) (l' :+: r') where
-  ghandle state handler (L1 l) = L1 (ghandle state handler l)
-  ghandle state handler (R1 r) = R1 (ghandle state handler r)
-  {-# INLINE ghandle #-}
+  gthread state handler (L1 l) = L1 (gthread state handler l)
+  gthread state handler (R1 r) = R1 (gthread state handler r)
+  {-# INLINE gthread #-}
 
 instance (GEffect ctx m m' l l', GEffect ctx m m' r r') => GEffect ctx m m' (l :*: r) (l' :*: r') where
-  ghandle state handler (l :*: r) = ghandle state handler l :*: ghandle state handler r
-  {-# INLINE ghandle #-}
+  gthread state handler (l :*: r) = gthread state handler l :*: gthread state handler r
+  {-# INLINE gthread #-}
 
 instance GEffect ctx m m' V1 V1 where
-  ghandle _ _ v = case v of {}
-  {-# INLINE ghandle #-}
+  gthread _ _ v = case v of {}
+  {-# INLINE gthread #-}
 
 instance GEffect ctx m m' U1 U1 where
-  ghandle _ _ = coerce
-  {-# INLINE ghandle #-}
+  gthread _ _ = coerce
+  {-# INLINE gthread #-}
 
 instance GEffect ctx m m' (K1 R k) (K1 R k) where
-  ghandle _ _ = coerce
-  {-# INLINE ghandle #-}
+  gthread _ _ = coerce
+  {-# INLINE gthread #-}
 
 instance Functor ctx => GEffect ctx m m' Par1 Par1 where
-  ghandle state _ = Par1 . (<$ state) . unPar1
-  {-# INLINE ghandle #-}
+  gthread state _ = Par1 . (<$ state) . unPar1
+  {-# INLINE gthread #-}
 
 instance (Functor g, GEffect ctx m m' h h') => GEffect ctx m m' (g :.: h) (g :.: h') where
-  ghandle state handler = Comp1 . fmap (ghandle state handler) . unComp1
-  {-# INLINE ghandle #-}
+  gthread state handler = Comp1 . fmap (gthread state handler) . unComp1
+  {-# INLINE gthread #-}
 
 instance Functor ctx => GEffect ctx m m' (Rec1 m) (Rec1 m') where
-  ghandle state handler = Rec1 . handler . (<$ state) . unRec1
-  {-# INLINE ghandle #-}
+  gthread state handler = Rec1 . handler . (<$ state) . unRec1
+  {-# INLINE gthread #-}
 
 instance (Effect c sig, c ctx) => GEffect ctx m m' (Rec1 (sig m)) (Rec1 (sig m')) where
-  ghandle state handler = Rec1 . handle state handler . unRec1
-  {-# INLINE ghandle #-}
+  gthread state handler = Rec1 . thread state handler . unRec1
+  {-# INLINE gthread #-}
