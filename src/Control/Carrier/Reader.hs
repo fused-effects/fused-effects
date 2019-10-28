@@ -18,7 +18,6 @@ import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
-import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 
 -- | Run a 'Reader' effect with the passed environment value.
@@ -79,12 +78,6 @@ instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
 instance MonadTrans (ReaderC r) where
   lift = ReaderC . const
   {-# INLINE lift #-}
-
-instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
-  askUnliftIO = ReaderC $ \r -> withUnliftIO $ \u -> pure (UnliftIO (\(ReaderC x) -> unliftIO u (x r)))
-  {-# INLINE askUnliftIO #-}
-  withRunInIO inner = ReaderC $ \r -> withRunInIO $ \go -> inner (go . runReader r)
-  {-# INLINE withRunInIO #-}
 
 instance (Algebra sig m, Effect c sig) => Algebra (Reader r :+: sig) (ReaderC r m) where
   alg (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))

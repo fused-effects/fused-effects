@@ -18,7 +18,6 @@ import Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
-import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
 
 -- | Run a 'Trace' effect, ignoring all traces.
@@ -41,12 +40,6 @@ newtype TraceC m a = TraceC (m a)
 instance MonadTrans TraceC where
   lift = TraceC
   {-# INLINE lift #-}
-
-instance MonadUnliftIO m => MonadUnliftIO (TraceC m) where
-  askUnliftIO = TraceC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runTrace))
-  {-# INLINE askUnliftIO #-}
-  withRunInIO inner = TraceC $ withRunInIO $ \run -> inner (run . runTrace)
-  {-# INLINE withRunInIO #-}
 
 instance (Algebra sig m, Effect c sig) => Algebra (Trace :+: sig) (TraceC m) where
   alg (L trace) = traceCont trace

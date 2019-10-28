@@ -22,7 +22,6 @@
 
 - Defines an `evalFresh` handler for `Control.Carrier.Strict.FreshC`, taking the initial value. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
 
-- Adds a `CanThread` associated type family to `Effect`, allowing effects to constrain the types of context which carriers can pass to them. This allows `Effect` to subsume `HFunctor`, and e.g. for operations to return collections of results in a functor. ([#296](https://github.com/fused-effects/fused-effects/pull/296))
 
 ## Backwards-incompatible changes
 
@@ -77,6 +76,11 @@
 - Removes `PureC`; `Data.Functor.Identity.Identity` should be used instead. Note that `run` is still provided as a convenient synonym for `runIdentity`. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
 
 - Removes the `Pure` effect. It’s unlikely that this will require changes, as `Pure` had no operations, but `Lift Identity` should be used instead. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
+
+- Redefines the `Lift` effect, allowing inner contexts to run actions in outer contexts, e.g. to interoperate with `Control.Exception`. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
+
+- Removes `MonadUnliftIO` instances as they’ve been subsumed by the new definition of `Lift`. Additionally, the `ReaderT` & `IdentityT` types defined in `transformers` may be useful. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
+
 
 # v0.5.0.1
 
