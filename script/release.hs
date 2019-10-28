@@ -49,6 +49,18 @@ instance (Has Teletype sig m, MonadIO m) => Algebra (Step :+: sig) (LiveC m) whe
   alg (R other) = LiveC (handleCoercible other)
 
 
+newtype DryC m a = DryC { runDry :: m a }
+  deriving (Applicative, Functor, Monad, MonadIO)
+
+instance Has Teletype sig m => Algebra (Step :+: sig) (DryC m) where
+  alg (L (Manual s k)) = write s >> prompt "press enter to continue:" >> write "" >> k
+  alg (L (Command s cmd args k)) = do
+    write s
+    write $ "> " ++ cmd ++ " " ++ unwords args
+    k ""
+  alg (R other) = DryC (handleCoercible other)
+
+
 data Teletype m k
   = Prompt String (String -> m k)
   | Write String (m k)
