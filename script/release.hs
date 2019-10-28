@@ -7,6 +7,7 @@ module Main (main) where
 import Control.Algebra
 import Control.Monad.IO.Class
 import GHC.Generics (Generic1)
+import System.Process
 
 main :: IO ()
 main = runTeletype $ do
@@ -31,6 +32,18 @@ data Step m k
   deriving (Functor, Generic1)
 
 instance Effect Step
+
+
+newtype StepC m a = StepC { runStep :: m a }
+  deriving (Applicative, Functor, Monad, MonadIO)
+
+instance (Has Teletype sig m, MonadIO m) => Algebra (Step :+: sig) (StepC m) where
+  alg (L (Manual s k)) = write s >> prompt "press enter to continue:" >> write "" >> k
+  alg (L (Command s cmd args k)) = do
+    write s
+    stdout <- liftIO (readProcess cmd args "")
+    k stdout
+  alg (R other) = StepC (handleCoercible other)
 
 
 data Teletype m k
