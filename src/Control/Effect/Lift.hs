@@ -38,7 +38,7 @@ sendM m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
 
 -- | Run actions in an outer context.
 --
--- This can be used to provide interoperation with @base@ functionality like 'Control.Exception.catch':
+-- This can be used to provide interoperation with @base@ functionality like @"Control.Exception".'catch'@:
 --
 -- @
 -- 'liftWith' $ \ ctx run -> 'Control.Exception.catch' (run (m <$ ctx)) (run . (<$ ctx) . h)
