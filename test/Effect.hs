@@ -33,8 +33,7 @@ deriving instance Functor m => Functor (All m)
 -- | Note that since the continuation takes @[a]@, our 'Effect' instance will have to produce a continuation taking @[f a]@ given one taking @[a]@, for which purpose we use 'sequenceA'. That necessitates an 'Applicative' instance for @f@, so we specialize 'CanThread' for this effect to strengthen the constraint.
 --
 -- Intuitively, we can think of this as saying that if there are 'Control.Effect.State.State' effects present in @m@, collecting all of their results—joining the branches—requires us to merge the states monoidally; if there are 'Control.Effect.Error.Error' effects, it requires that they’ve all succeeded.
-instance Effect All where
-  type CanThread All f = Applicative f
+instance Effect Applicative All where
   thread ctx hdl (All m k) = All (hdl (m <$ ctx)) (hdl . fmap k . sequenceA)
 
 all :: Has All sig m => m a -> m [a]
@@ -47,7 +46,7 @@ runAll (AllC m) = runNonDetA m
 newtype AllC m a = AllC (NonDetC m a)
   deriving (Alternative, Applicative, Functor, Monad, MonadTrans)
 
-instance Algebra sig m => Algebra (All :+: NonDet :+: sig) (AllC m) where
+instance (Algebra sig m, Effect c sig) => Algebra (All :+: NonDet :+: sig) (AllC m) where
   alg (L (All m k)) = lift (runAll m) >>= k
   alg (R (L (L e))) = handleCoercible e
   alg (R (L (R c))) = handleCoercible c
@@ -63,7 +62,6 @@ data Thread m k
 -- | This demonstrates that we can use '~' to define 'CanThread', enforcing the absence of state or control that would get dropped.
 --
 -- We don’t go as far as to define a carrier because cooperative multithreading is a bit more of an example than a test, and I don’t care to run 'Control.Concurrent.forkIO' in the unit tests. At any rate, the existence of this instance is test enough for what we’re trying to do.
-instance Effect Thread where
-  type CanThread Thread f = f ~ Identity
+instance Effect ((~) Identity) Thread where
   thread ctx hdl (Fork m k) = Fork (runIdentity <$> hdl (m <$ ctx)) (hdl (k <$ ctx))
   thread ctx hdl (Yield  k) = Yield                                 (hdl (k <$ ctx))

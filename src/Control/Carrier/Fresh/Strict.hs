@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 -- | A carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
 --
@@ -52,7 +52,7 @@ evalFresh n (FreshC m) = evalState n m
 newtype FreshC m a = FreshC (StateC Int m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Algebra sig m, CanThread sig ((,) Int)) => Algebra (Fresh :+: sig) (FreshC m) where
+instance (Algebra sig m, Effect c sig, c ((,) Int)) => Algebra (Fresh :+: sig) (FreshC m) where
   alg (L (Fresh k)) = FreshC (get <* modify (+ (1 :: Int))) >>= k
   alg (R other)     = FreshC (handleCoercible other)
   {-# INLINE alg #-}

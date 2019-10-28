@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor, ExistentialQuantification, MultiParamTypeClasses, StandaloneDeriving #-}
 module Control.Effect.Catch.Internal
 ( Catch(..)
 ) where
@@ -13,5 +13,5 @@ data Catch e m k
 
 deriving instance Functor m => Functor (Catch e m)
 
-instance Effect (Catch e) where
+instance Effect Functor (Catch e) where
   thread state handler (Catch m h k) = Catch (handler (m <$ state)) (handler . (<$ state) . h) (handler . fmap k)

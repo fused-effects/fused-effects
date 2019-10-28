@@ -56,7 +56,6 @@ library
     Control.Carrier.Interpret
     Control.Carrier.Lift
     Control.Carrier.NonDet.Church
-    Control.Carrier.Pure
     Control.Carrier.Reader
     Control.Carrier.State.Lazy
     Control.Carrier.State.Strict
@@ -77,7 +76,6 @@ library
     Control.Effect.Fresh
     Control.Effect.Lift
     Control.Effect.NonDet
-    Control.Effect.Pure
     Control.Effect.Reader
     Control.Effect.State
     Control.Effect.Sum
@@ -114,10 +112,13 @@ test-suite examples
   build-depends:
       base
     , fused-effects
+    , hedgehog           ^>= 1
+    , hedgehog-fn        ^>= 1
     , tasty              ^>= 1.2
+    , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
-    , tasty-quickcheck   ^>= 0.10
     , transformers
+
 
 test-suite test
   import:         common
@@ -156,6 +157,19 @@ test-suite test
     , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
     , transformers
+
+
+test-suite docs
+  import:      common
+  type:        exitcode-stdio-1.0
+  main-is:     README.lhs
+  ghc-options: -pgmL markdown-unlit
+  build-depends:
+      base
+    , fused-effects
+    , mtl           ^>= 2.2
+  build-tool-depends:
+      markdown-unlit:markdown-unlit ^>= 0.5
 
 
 benchmark benchmark

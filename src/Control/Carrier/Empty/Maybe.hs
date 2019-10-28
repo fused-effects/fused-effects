@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 {- | A carrier for an 'Empty' effect, indicating failure with a 'Nothing' value. Users that need access to an error message should use the 'Control.Effect.Fail.Fail' effect.
 
@@ -46,7 +46,7 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
 
-instance (Algebra sig m, CanThread sig Maybe) => Algebra (Empty :+: sig) (EmptyC m) where
+instance (Algebra sig m, Effect c sig, c Maybe) => Algebra (Empty :+: sig) (EmptyC m) where
   alg (L Empty) = EmptyC (MaybeT (pure Nothing))
   alg (R other) = EmptyC (MaybeT (handle (Just ()) (maybe (pure Nothing) runEmpty) other))
   {-# INLINE alg #-}
