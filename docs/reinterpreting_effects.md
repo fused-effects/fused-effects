@@ -91,7 +91,7 @@ sendRequest :: Has Http sig m => HTTP.Request -> m (HTTP.Response L.ByteString)
 sendRequest r = send (SendRequest r pure)
 ```
 
-The `listFacts` function provides the ‘what’ of this API, and the sendRequest function provides the ‘how’. In decomposing this problem into a set of effects, each responsible for a single layer of the original problem description, we provide ourselves with a flexible, composable vocabulary rather than a single monolithic action.
+The `listFacts` function provides the ‘what’ of this API, and the `sendRequest` function provides the ‘how’. In decomposing this problem into a set of effects, each responsible for a single layer of the original problem description, we provide ourselves with a flexible, composable vocabulary rather than a single monolithic action.
 
 ## "Stacking" effects
 
