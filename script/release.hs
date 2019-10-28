@@ -25,7 +25,7 @@ steps =
   ]
 
 step :: Has Teletype sig m => String -> m ()
-step s = write s <* prompt "press enter to continue:"
+step s = write s >> prompt "press enter to continue:" >> write ""
 
 
 data Teletype m k
