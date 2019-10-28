@@ -20,8 +20,8 @@ main = runTeletype . runDry $ do
   manual "Change the version of the package in `fused-effects.cabal`."
   manual "Push the branch to GitHub and open a draft PR. Double-check the changes, comparing against a previous release PR, e.g. https://github.com/fused-effects/fused-effects/pull/80. When satisfied, mark the PR as ready for review, and request a review from a collaborator."
   (sdist, docs) <- auto "Build and prepare candidate?" $ do
-    command "cabal" ["v2-build"] >>= traverse_ write
-    let getURL = fmap join . traverse (\ s -> write s >> pure (getLast (foldMap (Last . Just) (lines s))))
+    command "cabal" ["v2-build"] >>= traverse_ writeQuoted
+    let getURL = fmap join . traverse (\ s -> writeQuoted s >> pure (getLast (foldMap (Last . Just) (lines s))))
     (,)
       <$> (command "cabal" ["v2-sdist"] >>= getURL)
       <*> (command "cabal" ["v2-haddock", "--haddock-for-hackage"] >>= getURL)
@@ -31,7 +31,8 @@ main = runTeletype . runDry $ do
   manual "Once the PR has been approved and you’re satisfied with the candidate release, merge the PR. Publish the release to Hackage by running the above commands with the addition of `--publish`."
   manual "Locally, check out `master` and pull the latest changes to your working copy. Make a new tag, e.g. `git tag x.y.z.w`."
   auto "Push tags to GitHub using `git push --tags`?" $
-    command "git" ["push", "--tags"] >>= traverse_ (write . unlines . map ("> " ++) . lines)
+    command "git" ["push", "--tags"] >>= traverse_ writeQuoted
+  where writeQuoted = write . unlines . map ("> " ++) . lines
 
 manual :: Has Teletype sig m => String -> m ()
 manual s = write s >> prompt "press enter to continue:" >> write ""
