@@ -10,7 +10,7 @@ import GHC.Generics (Generic1)
 import System.Process
 
 main :: IO ()
-main = runTeletype . runStep $ do
+main = runTeletype . runLive $ do
   manual "Determine whether the release constitutes a major, minor, or patch version bump under the PVP."
   manual "Make a branch with the name `version-x.y.z.w`."
   manual "Add a heading to the top of `ChangeLog.md` for the current version."
@@ -37,16 +37,16 @@ command :: Has Step sig m => String -> String -> [String] -> m String
 command s cmd args = send (Command s cmd args pure)
 
 
-newtype StepC m a = StepC { runStep :: m a }
+newtype LiveC m a = LiveC { runLive :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance (Has Teletype sig m, MonadIO m) => Algebra (Step :+: sig) (StepC m) where
+instance (Has Teletype sig m, MonadIO m) => Algebra (Step :+: sig) (LiveC m) where
   alg (L (Manual s k)) = write s >> prompt "press enter to continue:" >> write "" >> k
   alg (L (Command s cmd args k)) = do
     write s
     stdout <- liftIO (readProcess cmd args "")
     k stdout
-  alg (R other) = StepC (handleCoercible other)
+  alg (R other) = LiveC (handleCoercible other)
 
 
 data Teletype m k
