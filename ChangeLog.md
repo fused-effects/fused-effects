@@ -75,7 +75,7 @@
 
 - Redefines the `Lift` effect, allowing inner contexts to run actions in outer contexts, e.g. to interoperate with `Control.Exception`. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
 
-- Removes `MonadUnliftIO` instances as they’ve been subsumed by the new definition of `Lift`. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
+- Removes `MonadUnliftIO` instances as they’ve been subsumed by the new definition of `Lift`. Additionally, the `ReaderT` & `IdentityT` types defined in `transformers` may be useful. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
 
 
 # v0.5.0.1
