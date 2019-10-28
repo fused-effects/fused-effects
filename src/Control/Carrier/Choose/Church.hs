@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
 
 {- | A carrier for 'Choose' effects (nondeterminism without failure).
 
@@ -82,7 +82,7 @@ instance MonadTrans ChooseC where
   lift m = ChooseC (\ _ leaf -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, CanHandle sig (ChooseC Identity)) => Algebra (Choose :+: sig) (ChooseC m) where
+instance (Algebra sig m, Effect c sig, c (ChooseC Identity)) => Algebra (Choose :+: sig) (ChooseC m) where
   alg (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
   alg (R other)      = ChooseC $ \ fork leaf -> alg (handle (pure ()) dst other) >>= runIdentity . runChoose (coerce fork) (coerce leaf) where
     dst :: Applicative m => ChooseC Identity (ChooseC m a) -> m (ChooseC Identity a)

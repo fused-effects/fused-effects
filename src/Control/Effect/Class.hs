@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DefaultSignatures, EmptyCase, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
+{-# LANGUAGE ConstraintKinds, DefaultSignatures, EmptyCase, FlexibleContexts, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeFamilies, TypeOperators, UndecidableInstances, UndecidableSuperClasses #-}
 
 -- | Provides the 'Effect' class that effect types implement.
 --
@@ -25,13 +25,7 @@ import GHC.Generics
 -- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'handle' provided a 'Generic1' instance is available for the effect.
 --
 -- @since 1.0.0.0
-class CanHandle sig Identity => Effect sig where
-  -- | Constrain the type of context algebras can pass to 'handle'.
-  --
-  -- Defaults to 'Functor'. Some effects may require a more restrictive constraint to thread handlers through. It is recommended, but not enforced, that imposed constraints be subclasses of 'Functor' wherever possible to ensure compatibility with the broadest variety of algebras.
-  type CanHandle sig (ctx :: (* -> *)) :: Constraint
-  type CanHandle sig ctx = Functor ctx
-
+class c Identity => Effect (c :: (* -> *) -> Constraint) sig | sig -> c where
   -- | Handle any effects in a signature by threading the algebra’s handler all the way through to the continuation, starting from some initial context.
   --
   -- The handler is required to adhere to the following laws:
@@ -45,7 +39,7 @@ class CanHandle sig Identity => Effect sig where
   --
   -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
   handle
-    :: (Monad m, Monad n, CanHandle sig ctx)
+    :: (Monad m, Monad n, c ctx)
     => ctx ()                              -- ^ The initial context.
     -> (forall x . ctx (m x) -> n (ctx x)) -- ^ A handler for actions in a context, producing actions with a derived context.
     -> sig m a                             -- ^ The effect to thread the handler through.
@@ -107,6 +101,6 @@ instance Functor ctx => GEffect ctx m m' (Rec1 m) (Rec1 m') where
   ghandle state handler = Rec1 . handler . (<$ state) . unRec1
   {-# INLINE ghandle #-}
 
-instance (Effect sig, CanHandle sig ctx) => GEffect ctx m m' (Rec1 (sig m)) (Rec1 (sig m')) where
+instance (Effect c sig, c ctx) => GEffect ctx m m' (Rec1 (sig m)) (Rec1 (sig m')) where
   ghandle state handler = Rec1 . handle state handler . unRec1
   {-# INLINE ghandle #-}

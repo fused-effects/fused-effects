@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 {- | A carrier for 'Writer' effects. This carrier performs its append operations strictly and thus avoids the space leaks inherent in lazy writer monads.
 
@@ -54,7 +54,7 @@ execWriter = fmap fst . runWriter
 newtype WriterC w m a = WriterC (StateC w m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Monoid w, Algebra sig m, CanHandle sig ((,) w)) => Algebra (Writer w :+: sig) (WriterC w m) where
+instance (Monoid w, Algebra sig m, Effect c sig, c ((,) w)) => Algebra (Writer w :+: sig) (WriterC w m) where
   alg (L (Tell w     k)) = WriterC (modify (`mappend` w)) >> k
   alg (L (Listen   m k)) = WriterC (StateC (\ w -> do
     (w', a) <- runWriter m
