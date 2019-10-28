@@ -22,8 +22,6 @@
 
 - Defines an `evalFresh` handler for `Control.Carrier.Strict.FreshC`, taking the initial value. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
 
-- Adds a `Control.Effect.Exception` module, lifting & re-exporting operations & types from `Control.Exception` using the new definition of `Lift`. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
-
 
 ## Backwards-incompatible changes
 
