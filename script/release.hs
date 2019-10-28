@@ -10,7 +10,7 @@ import GHC.Generics (Generic1)
 import System.Process
 
 main :: IO ()
-main = runTeletype $ do
+main = runTeletype . runStep $ do
   manual "Determine whether the release constitutes a major, minor, or patch version bump under the PVP."
   manual "Make a branch with the name `version-x.y.z.w`."
   manual "Add a heading to the top of `ChangeLog.md` for the current version."
@@ -22,9 +22,6 @@ main = runTeletype $ do
   manual "Locally, check out `master` and pull the latest changes to your working copy. Make a new tag, e.g. `git tag x.y.z.w`."
   manual "Push tags to GitHub using `git push --tags`."
 
-manual :: Has Teletype sig m => String -> m ()
-manual s = write s >> prompt "press enter to continue:" >> write ""
-
 
 data Step m k
   = Manual String (m k)
@@ -32,6 +29,12 @@ data Step m k
   deriving (Functor, Generic1)
 
 instance Effect Step
+
+manual :: Has Step sig m => String -> m ()
+manual s = send (Manual s (pure ()))
+
+command :: Has Step sig m => String -> String -> [String] -> m String
+command s cmd args = send (Command s cmd args pure)
 
 
 newtype StepC m a = StepC { runStep :: m a }
