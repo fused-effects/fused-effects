@@ -6,6 +6,7 @@ module Main (main) where
 
 import Control.Algebra
 import Control.Monad.IO.Class
+import Data.Foldable (traverse_)
 import GHC.Generics (Generic1)
 import System.Process
 
@@ -17,24 +18,21 @@ main = runTeletype . runDry $ do
   manual "Change the version of the package in `fused-effects.cabal`."
   manual "Push the branch to GitHub and open a draft PR. Double-check the changes, comparing against a previous release PR, e.g. https://github.com/fused-effects/fused-effects/pull/80. When satisfied, mark the PR as ready for review, and request a review from a collaborator."
   auto "Build and publish candidate?" $ do
-    command "cabal" ["v2-build"] >>= whenMaybe write
-    command "cabal" ["v2-sdist"] >>= whenMaybe write
-    command "cabal" ["v2-haddock", "--haddock-for-hackage"] >>= whenMaybe write
+    command "cabal" ["v2-build"] >>= traverse_ write
+    command "cabal" ["v2-sdist"] >>= traverse_ write
+    command "cabal" ["v2-haddock", "--haddock-for-hackage"] >>= traverse_ write
   manual "Build locally using `cabal v2-build`, then collect the sources and docs with `cabal v2-sdist` and `cabal v2-haddock --haddock-for-hackage`, respectively. Note the paths to the tarballs in the output of these commands."
   manual "Publish a candidate release to Hackage with `cabal upload dist-newstyle/sdist/fused-effects-x.y.z.w.tar.gz` and `cabal upload --documentation dist-newstyle/fused-effects-x.y.z.w-docs.tar.gz`. Add a link to the candidate release in a comment on the PR."
   manual "Once the PR has been approved and you’re satisfied with the candidate release, merge the PR. Publish the release to Hackage by running the above commands with the addition of `--publish`."
   manual "Locally, check out `master` and pull the latest changes to your working copy. Make a new tag, e.g. `git tag x.y.z.w`."
   auto "Push tags to GitHub using `git push --tags`?" $
-    command "git" ["push", "--tags"] >>= whenMaybe (write . unlines . map ("> " ++) . lines)
+    command "git" ["push", "--tags"] >>= traverse_ (write . unlines . map ("> " ++) . lines)
 
 manual :: Has Teletype sig m => String -> m ()
 manual s = write s >> prompt "press enter to continue:" >> write ""
 
 auto :: (Has Command sig m, Has Teletype sig m) => String -> m a -> m a
 auto s m = write s >> prompt "press enter to run:" >> m <* write ""
-
-whenMaybe :: Applicative m => (a -> m ()) -> Maybe a -> m ()
-whenMaybe = maybe (pure ())
 
 
 data Command m k
