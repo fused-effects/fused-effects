@@ -13,9 +13,12 @@ import Test.Tasty.HUnit
 tests :: TestTree
 tests = testGroup "Lift"
   [ testCase "liftWith" $ do
-    r <- liftIO . runState "yep" $ liftWith $ \ ctx hdl ->
-      E.handle (hdl . (<$ ctx) . put . getMsg) $
-        hdl (liftIO (E.throwIO (E.AssertionFailed "nope")) <$ ctx)
+    r <- liftIO . runState "yep" $ handle (put . getMsg) $ do
+      modify ("heck " ++)
+      liftIO (E.throwIO (E.AssertionFailed "nope"))
     r @?= ("nope", ())
   ] where
   getMsg (E.AssertionFailed msg) = msg
+
+handle :: (E.Exception e, Has (Lift IO) sig m) => (e -> m a) -> m a -> m a
+handle h m = liftWith $ \ ctx run -> E.handle (run . (<$ ctx) . h) (run (m <$ ctx))
