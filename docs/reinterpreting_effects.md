@@ -20,8 +20,8 @@ Let's break down some of the properties of the API client that would be desirabl
 ### Initial setup
 
 ``` haskell
-{-# LANGUAGE ExistentialQuantification, DeriveAnyClass, DeriveFunctor,
-DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances,
+{-# LANGUAGE ExistentialQuantification, DeriveFunctor,
+DeriveGeneric, FlexibleContexts, FlexibleInstances,
 GeneralizedNewtypeDeriving, OverloadedStrings, MultiParamTypeClasses,
 RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
 module CatFacts
@@ -70,8 +70,9 @@ instance FromJSON CatFact where
 -- | Our high level effect type that will be able to target different data sources.
 data CatFactClient m k
   = ListFacts Int {- ^ Number of facts to fetch -} ([CatFact] -> m k)
-  deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving (Functor, Generic1)
+  
+instance Effect CatFactsClient
 
 listFacts :: Has CatFactClient sig m => Int -> m [CatFact]
 listFacts n = send (ListFacts n pure)
@@ -82,8 +83,9 @@ Now that we have our very simple DSL in place, let's think about the underlying 
 ``` haskell
 data Http m k
   = SendRequest HTTP.Request (HTTP.Response L.ByteString -> m k)
-  deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving (Functor, Generic1)
+
+instance Effect Http
 
 sendRequest :: Has Http sig m => HTTP.Request -> m (HTTP.Response L.ByteString)
 sendRequest r = send (SendRequest r pure)
@@ -120,13 +122,13 @@ Now we need to support fetching JSON given an HTTP request. We have no guarantee
 
 ``` haskell
 newtype CatFactsApi m a = CatFactsApi { runCatFactsApi :: m a }
- deriving newtype
-      ( Monad
-      , Functor
-      , Applicative
-      , MonadIO
-      , Alternative
-      )
+ deriving
+   ( Monad
+   , Functor
+   , Applicative
+   , MonadIO
+   , Alternative
+   )
 
 catFactsEndpoint :: HTTP.Request
 catFactsEndpoint = HTTP.parseRequest_ "https://cat-fact.herokuapp.com/facts/random"
@@ -157,13 +159,13 @@ Now we need to support performing HTTP requests:
 
 ``` haskell
 newtype HttpClient m a = HttpClient { runHttp :: m a }
- deriving newtype
-      ( Monad
-      , Functor
-      , Applicative
-      , MonadIO
-      , Alternative
-      )
+  deriving
+    ( Monad
+    , Functor
+    , Applicative
+    , MonadIO
+    , Alternative
+    )
 
 instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (HttpClient m) where
   alg (L (SendRequest req k)) = liftIO (HTTP.getGlobalManager >>= HTTP.httpLbs req) >>= k
@@ -219,13 +221,13 @@ This time let's go from the bottom up. In situations where IO is involved, failu
 
 ``` haskell
 newtype MockHttpClient m a = MockHttpClient { runMockHttpClient :: ReaderC (HTTP.Request -> IO (HTTP.Response L.ByteString)) m a }
- deriving newtype
-      ( Monad
-      , Functor
-      , Applicative
-      , MonadIO
-      , Alternative
-      )
+  deriving
+   ( Monad
+   , Functor
+   , Applicative
+   , MonadIO
+   , Alternative
+   )
 
 runMockHttp :: (HTTP.Request -> IO (HTTP.Response L.ByteString)) -> MockHttpC m a -> m a
 runMockHttp responder m = runReader responder (runMockHttpClient m)
