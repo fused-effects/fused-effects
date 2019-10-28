@@ -14,7 +14,7 @@ data Writer w m k
 deriving instance Functor m => Functor (Writer w m)
 
 instance Effect (Writer w) where
-  handle state handler (Tell w     k) = Tell w                          (handler (k <$ state))
-  handle state handler (Listen   m k) = Listen   (handler (m <$ state)) (fmap handler . fmap . k)
-  handle state handler (Censor f m k) = Censor f (handler (m <$ state)) (handler . fmap k)
-  {-# INLINE handle #-}
+  thread ctx handler (Tell w     k) = Tell w                        (handler (k <$ ctx))
+  thread ctx handler (Listen   m k) = Listen   (handler (m <$ ctx)) (fmap handler . fmap . k)
+  thread ctx handler (Censor f m k) = Censor f (handler (m <$ ctx)) (handler . fmap k)
+  {-# INLINE thread #-}

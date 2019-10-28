@@ -59,7 +59,7 @@ runInterpret
   => (forall x . eff m x -> m x)
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
-runInterpret f m = reify (Handler (InterpretC . fmap runIdentity . f . handle (Identity ()) (fmap Identity . coerce))) (go m) where
+runInterpret f m = reify (Handler (InterpretC . fmap runIdentity . f . thread (Identity ()) (fmap Identity . coerce))) (go m) where
   go :: InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
 
