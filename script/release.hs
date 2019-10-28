@@ -21,7 +21,7 @@ main = runTeletype . runDry $ do
   manual "Once the PR has been approved and you’re satisfied with the candidate release, merge the PR. Publish the release to Hackage by running the above commands with the addition of `--publish`."
   manual "Locally, check out `master` and pull the latest changes to your working copy. Make a new tag, e.g. `git tag x.y.z.w`."
   auto "Push tags to GitHub using `git push --tags`?" $
-    command "git" ["push", "--tags"] >>= write
+    command "git" ["push", "--tags"] >>= write . unlines . map ("> " ++) . lines
 
 manual :: Has Teletype sig m => String -> m ()
 manual s = write s >> prompt "press enter to continue:" >> write ""
