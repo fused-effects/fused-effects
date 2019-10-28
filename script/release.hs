@@ -10,9 +10,7 @@ import Data.Foldable (for_)
 import GHC.Generics (Generic1)
 
 main :: IO ()
-main = runTeletype . for_ steps $ \ step -> do
-  write step
-  prompt "press enter to continue: "
+main = runTeletype $ for_ steps step
 
 steps =
   [ "Determine whether the release constitutes a major, minor, or patch version bump under the PVP."
@@ -25,6 +23,9 @@ steps =
   , "Once the PR has been approved and you’re satisfied with the candidate release, merge the PR. Publish the release to Hackage by running the above commands with the addition of `--publish`."
   , "Locally, check out `master` and pull the latest changes to your working copy. Make a new tag, e.g. `git tag x.y.z.w`. Push tags to GitHub using `git push --tags`."
   ]
+
+step :: Has Teletype sig m => String -> m ()
+step s = write s <* prompt "press enter to continue:"
 
 
 data Teletype m k
