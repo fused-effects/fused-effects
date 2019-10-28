@@ -10,6 +10,7 @@
 --   structured log messages as strings.
 
 
+{-# LANGUAGE ConstraintKinds            #-}
 {-# LANGUAGE DeriveFunctor              #-}
 {-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE FlexibleInstances          #-}
@@ -106,7 +107,7 @@ data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a (m k)
   deriving (Functor, Generic1)
 
-instance Effect (Log a)
+instance Effect Functor (Log a)
 
 -- Log an 'a'.
 log :: Has (Log a) sig m
@@ -129,6 +130,7 @@ instance
      -- So long as the 'm' monad can interpret the 'sig' effects (and also
      -- perform IO)...
      ( Algebra sig m
+     , Effect c sig
      , MonadIO m
      )
      -- ... the 'LogStdoutC m' monad can interpret 'Log String :+: sig' effects
@@ -161,7 +163,9 @@ newtype ReinterpretLogC s t m a
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects, one of which
      -- is 'Log t'...
-     Has (Log t) sig m
+     ( Has (Log t) sig m
+     , Effect c sig
+     )
      -- ... the 'ReinterpretLogC s t m' monad can interpret 'Log s :+: sig'
      -- effects
   => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
@@ -197,7 +201,7 @@ newtype CollectLogMessagesC s m a
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
-     (Algebra sig m, CanThread sig ((,) [s]))
+     (Algebra sig m, Effect c sig, c ((,) [s]))
      -- ...the 'CollectLogMessagesC s m' monad can interpret 'Log s :+: sig'
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where

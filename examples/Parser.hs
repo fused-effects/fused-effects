@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 module Parser
 ( example
 ) where
@@ -109,7 +109,7 @@ example = testGroup "parser"
 data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
   deriving (Functor, Generic1)
 
-instance Effect Symbol
+instance Effect Functor Symbol
 
 satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char
 satisfy p = send (Satisfy p pure)
@@ -132,7 +132,7 @@ parse input = (>>= exhaustive) . runState input . runParseC
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
-instance (Alternative m, Algebra sig m, CanThread sig ((,) String)) => Algebra (Symbol :+: sig) (ParseC m) where
+instance (Alternative m, Algebra sig m, Effect c sig, c ((,) String)) => Algebra (Symbol :+: sig) (ParseC m) where
   alg (L (Satisfy p k)) = do
     input <- ParseC get
     case input of
