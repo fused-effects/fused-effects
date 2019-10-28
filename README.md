@@ -132,7 +132,7 @@ action3 = ask >>= \ i -> put (replicate i '?') >> tell [ "put " ++ show i ++ " '
 Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`:
 
 ```haskell
-example1 :: (Algebra sig m, CanHandle sig ((,) Int)) => [a] -> m (Int, ())
+example1 :: (Algebra sig m, Effect c sig, c ((,) Int)) => [a] -> m (Int, ())
 example1 list = runState 0 $ do
   i <- get @Int
   put (i + length list)
@@ -143,7 +143,7 @@ example1 list = runState 0 $ do
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
 ```haskell
-example2 :: (Algebra sig m, CanHandle sig ((,) Int)) => m (Int, ())
+example2 :: (Algebra sig m, Effect c sig, c ((,) Int)) => m (Int, ())
 example2 = runReader "hello" . runState 0 $ do
   list <- ask
   put (length (list :: String))
@@ -273,17 +273,17 @@ Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a si
 newtype Wrapper s m a = Wrapper { runWrapper :: m a }
   deriving (Applicative, Functor, Monad)
 
-instance Algebra sig m => Algebra sig (Wrapper s m) where
+instance (Algebra sig m, Effect c sig) => Algebra sig (Wrapper s m) where
   alg = Wrapper . handleCoercible
 
-getState :: Has (State s) sig m => Wrapper s m s
+getState :: (Has (State s) sig m, Effect c sig) => Wrapper s m s
 getState = get
 ```
 
 Indeed, `Wrapper` can now be made an instance of `MonadState`:
 
 ```haskell
-instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
+instance (Has (State s) sig m, Effect c sig) => MTL.MonadState s (Wrapper s m) where
   get = Control.Carrier.State.Strict.get
   put = Control.Carrier.State.Strict.put
 ```
