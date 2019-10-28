@@ -1,6 +1,6 @@
 # A fast, flexible, fused effect system for Haskell
 
-[![Build Status](https://travis-ci.com/fused-effects/fused-effects.svg?branch=master)](https://travis-ci.com/fused-effects/fused-effects) [![hackage](https://img.shields.io/hackage/v/fused-effects.svg?color=blue&style=popout)](http://hackage.haskell.org/package/fused-effects)
+[![Build Status](https://action-badges.now.sh/fused-effects/fused-effects)](https://github.com/fused-effects/fused-effects/actions) [![hackage](https://img.shields.io/hackage/v/fused-effects.svg?color=blue&style=popout)](http://hackage.haskell.org/package/fused-effects)
 
 - [Overview][]
   - [Algebraic effects][]
@@ -160,7 +160,7 @@ example3 = run . runReader "hello" . runState 0 $ do
   put (length (list :: String))
 ```
 
-`run` is itself actually an effect handler for the `Pure` effect, which has no operations and thus can only represent a final result value.
+`run` is itself actually an effect handler for the `Lift Identity` effect, whose only operation is to lift a result value into a computation.
 
 Alternatively, arbitrary `Monad`s can be embedded into effectful computations using the `Lift` effect. In this case, the underlying `Monad`ic computation can be extracted using `runM`. Here, we use the `MonadIO` instance for the `LiftC` carrier to lift `putStrLn` into the middle of our computation:
 

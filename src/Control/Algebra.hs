@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveFunctor, EmptyCase, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances #-}
 
 {- | The 'Algebra' class is the mechanism with which effects are interpreted.
 
@@ -8,17 +8,16 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 -}
 module Control.Algebra
 ( Algebra(..)
+, run
 , Has
 , send
 , handleIdentity
 , handleCoercible
   -- * Re-exports
 , (:+:) (..)
-, run
 , module Control.Effect.Class
 ) where
 
-import Control.Carrier.Pure (PureC, run)
 import Control.Effect.Catch.Internal
 import Control.Effect.Choose.Internal
 import Control.Effect.Class
@@ -26,7 +25,6 @@ import Control.Effect.Empty.Internal
 import Control.Effect.Error.Internal
 import Control.Effect.Lift.Internal
 import Control.Effect.NonDet.Internal
-import Control.Effect.Pure
 import Control.Effect.Reader.Internal
 import Control.Effect.State.Internal
 import Control.Effect.Sum ((:+:)(..), Member(..), Members)
@@ -55,9 +53,13 @@ class (Effect sig, Monad m) => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
 
-instance Algebra Pure PureC where
-  alg v = case v of {}
-  {-# INLINE alg #-}
+
+-- | Run an action exhausted of effects to produce its final result value.
+--
+-- @since 1.0.0.0
+run :: Identity a -> a
+run = runIdentity
+{-# INLINE run #-}
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@.
@@ -103,8 +105,8 @@ handleCoercible = handleIdentity coerce
 instance Algebra (Lift IO) IO where
   alg = join . unLift
 
-instance Algebra Pure Identity where
-  alg v = case v of {}
+instance Algebra (Lift Identity) Identity where
+  alg = join . unLift
 
 instance Algebra Choose NonEmpty where
   alg (Choose m) = m True S.<> m False
