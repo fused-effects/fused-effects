@@ -25,6 +25,14 @@ manual :: Has Teletype sig m => String -> m ()
 manual s = write s >> prompt "press enter to continue:" >> write ""
 
 
+data Step m k
+  = Manual String (m k)
+  | Command String String [String] String (String -> m k)
+  deriving (Functor, Generic1)
+
+instance Effect Step
+
+
 data Teletype m k
   = Prompt String (String -> m k)
   | Write String (m k)
