@@ -38,7 +38,7 @@ runCull fork leaf nil (CullC m) = runNonDet fork leaf nil (runReader False m)
 runCullA :: (Alternative f, Applicative m) => CullC m a -> m (f a)
 runCullA = runCull (liftA2 (<|>)) (pure . pure) (pure empty)
 
--- | Run a 'Cull' effect, mapping the result into a 'Monoid'.
+-- | Run a 'Cull' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
@@ -68,9 +68,9 @@ instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
-  eff (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
-  eff (R (L (L Empty)))      = empty
-  eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CullC (eff (R (R (handleCoercible other))))
-  {-# INLINE eff #-}
+instance Algebra sig m => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
+  alg (L (Cull (CullC m) k)) = CullC (local (const True) m) >>= k
+  alg (R (L (L Empty)))      = empty
+  alg (R (L (R (Choose k)))) = k True <|> k False
+  alg (R (R other))          = CullC (handleCoercible other)
+  {-# INLINE alg #-}

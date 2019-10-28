@@ -1,16 +1,17 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes #-}
 module NonDet
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
 import qualified Choose
-import Control.Algebra
 import qualified Control.Carrier.NonDet.Church as Church.NonDetC
 import Control.Effect.Choose
 import Control.Effect.Empty
 import Control.Effect.NonDet (NonDet)
+import Data.Semigroup as S ((<>))
 import qualified Empty
 import Gen
 import qualified Monad
@@ -24,29 +25,36 @@ tests = testGroup "NonDet"
     [ testMonad
     , testMonadFix
     , testNonDet
-    ] >>= ($ RunL Church.NonDetC.runNonDetA)
-  , testGroup "[]" $ testNonDet (RunL pure)
+    ] >>= ($ runL Church.NonDetC.runNonDetA)
+  , testGroup "[]" $ testNonDet (runL pure)
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testNonDet   run = NonDet.test   (m gen) a b                       run
+  testMonad    run = Monad.test    (m gen0 genN) a b c initial run
+  testMonadFix run = MonadFix.test (m gen0 genN) a b   initial run
+  testNonDet   run = NonDet.test   (m gen0 genN) a b   initial run
+  initial = identity <*> unit
 
 
-gen :: Has NonDet sig m => GenM m -> GenM m
-gen m a = choice [ Empty.gen m a, Choose.gen m a ]
+gen0 :: Has NonDet sig m => GenTerm a -> [GenTerm (m a)]
+gen0 = Empty.gen0
+
+genN :: Has NonDet sig m => GenM m -> GenTerm a -> [GenTerm (m a)]
+genN = Choose.genN
 
 
 test
-  :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
+  :: (Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
-  -> Gen a
-  -> Gen b
-  -> RunL [] m
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm (f ())
+  -> Run f [] m
   -> [TestTree]
-test m a b (RunL runNonDet)
-  =  testProperty "empty is the left identity of <|>"  (forall (m a :. Nil)
-    (\ m -> runNonDet (empty <|> m) === runNonDet m))
-  :  testProperty "empty is the right identity of <|>" (forall (m a :. Nil)
-    (\ m -> runNonDet (m <|> empty) === runNonDet m))
-  :  Empty.test  m a b (RunL runNonDet)
-  ++ Choose.test m a b (RunL runNonDet)
+test m
+  = (\ a _ i (Run runNonDet) ->
+    [ testProperty "empty is the left identity of <|>"  (forall (i :. m a :. Nil)
+      (\ i m -> runNonDet ((empty <|> m) <$ i) === runNonDet (m <$ i)))
+    ,  testProperty "empty is the right identity of <|>" (forall (i :. m a :. Nil)
+      (\ i m -> runNonDet ((m <|> empty) <$ i) === runNonDet (m <$ i)))
+    ])
+  S.<> Empty.test  m
+  S.<> Choose.test m

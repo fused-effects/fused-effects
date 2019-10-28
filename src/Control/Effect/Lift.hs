@@ -1,13 +1,12 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts #-}
-
 {- | Provides a mechanism to kick off the evaluation of an effect stack that takes place in a monadic context.
 
-'Lift' effects are always the last effect in a given effect stack. These stacks are invoked with 'Control.Effect.Lift.runM'. The 'Control.Effect.Pure.Pure' effect is equivalent to @Lift Identity@.
+'Lift' effects are always the last effect in a given effect stack. These stacks are invoked with 'Control.Carrier.Lift.runM' or 'Control.Algebra.run'.
 
 Predefined carriers:
 
 * "Control.Carrier.Lift"
 * 'IO'
+* 'Data.Functor.Identity.Identity'
 
 @since 0.1.0.0
 -}
@@ -23,14 +22,7 @@ module Control.Effect.Lift
 ) where
 
 import Control.Algebra
-import GHC.Generics
-
--- | @since 0.1.0.0
-newtype Lift sig m k = Lift { unLift :: sig (m k) }
-  deriving (Functor, Generic1)
-
-instance Functor m => HFunctor (Lift m)
-instance Functor m => Effect   (Lift m)
+import Control.Effect.Lift.Internal (Lift(..))
 
 -- | Given a @Lift n@ constraint in a signature carried by @m@, 'sendM'
 -- promotes arbitrary actions of type @n a@ to @m a@. It is spiritually

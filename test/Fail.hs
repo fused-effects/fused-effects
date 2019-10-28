@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Fail
 ( tests
-, gen
+, gen0
 , test
 ) where
 
@@ -20,28 +20,30 @@ tests = testGroup "Fail" $
     [ testMonad
     , testMonadFix
     , testFail
-    ] >>= ($ RunL FailC.runFail)
+    ] >>= ($ runL FailC.runFail)
   ] where
-  testMonad    run = Monad.test    (m (gen e)) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen e)) a b   (identity <*> unit) run
-  testFail     run = Fail.test e   (m (gen e)) a b                       run
+  testMonad    run = Monad.test    (m (gen0 e) (\ _ _ -> [])) a b c initial run
+  testMonadFix run = MonadFix.test (m (gen0 e) (\ _ _ -> [])) a b   initial run
+  testFail     run = Fail.test e   (m (gen0 e) (\ _ _ -> [])) a b   initial run
+  initial = identity <*> unit
   e = string (Range.linear 0 50) unicode
 
 
-gen :: MonadFail m => Gen String -> GenM m -> GenM m
-gen e _ _ = label "fail" Fail.fail <*> e
+gen0 :: MonadFail m => GenTerm String -> GenTerm a -> [GenTerm (m a)]
+gen0 e _ = [ label "fail" Fail.fail <*> e ]
 
 
 test
-  :: forall m a b
-  .  (MonadFail m, Arg a, Eq b, Show a, Show b, Vary a)
-  => Gen String
+  :: forall m a b f
+  .  (MonadFail m, Arg a, Eq b, Show a, Show b, Vary a, Functor f)
+  => GenTerm String
   -> GenM m
-  -> Gen a
-  -> Gen b
-  -> RunL (Either String) m
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm (f ())
+  -> Run f (Either String) m
   -> [TestTree]
-test msg m _ b (RunL runThrow) =
-  [ testProperty "fail annihilates >>=" . forall (msg :. fn @a (m b) :. Nil) $
-    \ s k -> runThrow (Fail.fail s >>= k) === runThrow (Fail.fail s)
+test msg m _ b i (Run runFail) =
+  [ testProperty "fail annihilates >>=" . forall (i :. msg :. fn @a (m b) :. Nil) $
+    \ i s k -> runFail ((Fail.fail s >>= k) <$ i) === runFail ((Fail.fail s) <$ i)
   ]

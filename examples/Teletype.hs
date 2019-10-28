@@ -12,26 +12,36 @@ import Control.Carrier.State.Strict
 import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class
 import GHC.Generics (Generic1)
+import Hedgehog
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
 import Test.Tasty
-import Test.Tasty.QuickCheck
+import Test.Tasty.Hedgehog
 
 example :: TestTree
 example = testGroup "teletype"
-  [ testProperty "reads" $
-    \ line -> run (runTeletypeRet [line] read) === ([], ([], line))
+  [ testProperty "reads" . property $ do
+    line <- forAll genLine
+    run (runTeletypeRet [line] read) === ([], ([], line))
 
-  , testProperty "writes" $
-    \ input output -> run (runTeletypeRet input (write output)) === ([output], (input, ()))
+  , testProperty "writes" . property $ do
+    input  <- forAll (Gen.list (Range.linear 0 10) genLine)
+    output <- forAll genLine
+    run (runTeletypeRet input (write output)) === ([output], (input, ()))
 
-  , testProperty "writes multiple things" $
-    \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) === ([output1, output2], (input, ()))
-  ]
+  , testProperty "writes multiple things" . property $ do
+    input   <- forAll (Gen.list (Range.linear 0 10) genLine)
+    output1 <- forAll genLine
+    output2 <- forAll genLine
+    run (runTeletypeRet input (write output1 >> write output2)) === ([output1, output2], (input, ()))
+  ] where
+  genLine = Gen.string (Range.linear 0 20) Gen.unicode
 
 data Teletype m k
   = Read (String -> m k)
   | Write String (m k)
   deriving stock (Functor, Generic1)
-  deriving anyclass (HFunctor, Effect)
+  deriving anyclass (Effect)
 
 read :: Has Teletype sig m => m String
 read = send (Read pure)
@@ -47,9 +57,9 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving newtype (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  eff (L (Read    k)) = liftIO getLine      >>= k
-  eff (L (Write s k)) = liftIO (putStrLn s) >>  k
-  eff (R other)       = TeletypeIOC (eff (handleCoercible other))
+  alg (L (Read    k)) = liftIO getLine      >>= k
+  alg (L (Write s k)) = liftIO (putStrLn s) >>  k
+  alg (R other)       = TeletypeIOC (handleCoercible other)
 
 
 runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
@@ -58,11 +68,11 @@ runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
   deriving newtype (Applicative, Functor, Monad)
 
-instance (Algebra sig m, Effect sig) => Algebra (Teletype :+: sig) (TeletypeRetC m) where
-  eff (L (Read    k)) = do
+instance Algebra sig m => Algebra (Teletype :+: sig) (TeletypeRetC m) where
+  alg (L (Read    k)) = do
     i <- TeletypeRetC get
     case i of
       []  -> k ""
       h:t -> TeletypeRetC (put t) *> k h
-  eff (L (Write s k)) = TeletypeRetC (tell [s]) *> k
-  eff (R other)       = TeletypeRetC (eff (R (R (handleCoercible other))))
+  alg (L (Write s k)) = TeletypeRetC (tell [s]) *> k
+  alg (R other)       = TeletypeRetC (handleCoercible other)

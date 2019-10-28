@@ -16,12 +16,15 @@ module Control.Carrier.Cut.Church
 ) where
 
 import Control.Algebra
+import Control.Applicative (liftA2)
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
 
 -- | Run a 'Cut' effect with continuations respectively interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
 --
@@ -35,7 +38,7 @@ runCut cons nil fail (CutC runCutC) = runCutC cons nil fail
 runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
 runCutA = runCut (fmap . (<|>) . pure) (pure empty) (pure empty)
 
--- | Run a 'Cut' effect, modeling choice and failure with '<>' and 'mempty' and embedding results with the passed function.
+-- | Run a 'Cut' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
@@ -67,14 +70,13 @@ instance Fail.MonadFail m => Fail.MonadFail (CutC m) where
   fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
--- | Separate fixpoints are computed for each branch.
+-- | A single fixpoint is shared between all branches.
 instance MonadFix m => MonadFix (CutC m) where
-  mfix f = CutC $ \ cons nil fail ->
-    mfix (runCutA . f . head)
-    >>= runCut cons nil fail . foldr
-      (\ a _ -> pure a <|> mfix (liftAll . fmap tail . runCutA . f))
-      empty where
-    liftAll m = CutC $ \ cons nil _ -> m >>= foldr cons nil
+  mfix f = CutC $ \ cons nil fail -> mfix
+    (toCut . f . run . fromCut)
+    >>= run . runCut (fmap . cons) (pure nil) (pure fail) where
+    toCut = runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)
+    fromCut = runCut (<$) (error "mfix CutC: empty") (error "mfix CutC: cutfail")
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (CutC m) where
@@ -87,10 +89,12 @@ instance MonadTrans CutC where
   lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
-  eff (L Cutfail)    = CutC $ \ _    _   fail -> fail
-  eff (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
-  eff (R (L (L Empty)))      = empty
-  eff (R (L (R (Choose k)))) = k True <|> k False
-  eff (R (R other))          = CutC $ \ cons nil _ -> eff (handle [()] (fmap concat . traverse runCutA) other) >>= foldr cons nil
-  {-# INLINE eff #-}
+instance Algebra sig m => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
+  alg (L Cutfail)    = CutC $ \ _    _   fail -> fail
+  alg (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
+  alg (R (L (L Empty)))      = empty
+  alg (R (L (R (Choose k)))) = k True <|> k False
+  alg (R (R other))          = CutC $ \ cons nil fail -> alg (handle (pure ()) dst other) >>= runIdentity . runCut (coerce cons) (coerce nil) (coerce fail) where
+    dst :: Applicative m => CutC Identity (CutC m a) -> m (CutC Identity a)
+    dst = runIdentity . runCut (fmap . liftA2 (<|>) . runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)) (pure (pure empty)) (pure (pure cutfail))
+  {-# INLINE alg #-}

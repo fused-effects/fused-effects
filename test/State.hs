@@ -1,7 +1,7 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module State
 ( tests
-, gen
+, gen0
 , test
 ) where
 
@@ -25,30 +25,30 @@ tests = testGroup "State"
     [ testMonad
     , testMonadFix
     , testState
-    ] >>= ($ RunC LazyStateC.runState)
+    ] >>= ($ runC LazyStateC.runState)
   , testGroup "StateC (Strict)" $
     [ testMonad
     , testMonadFix
     , testState
-    ] >>= ($ RunC StrictStateC.runState)
-  , testGroup "StateT (Lazy)"   $ testState (RunC (fmap (fmap swap) . flip LazyStateT.runStateT))
-  , testGroup "StateT (Strict)" $ testState (RunC (fmap (fmap swap) . flip StrictStateT.runStateT))
-  , testGroup "RWST (Lazy)"     $ testState (RunC (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)"   $ testState (RunC (runRWST StrictRWST.runRWST))
+    ] >>= ($ runC StrictStateC.runState)
+  , testGroup "StateT (Lazy)"   $ testState (runC (fmap (fmap swap) . flip LazyStateT.runStateT))
+  , testGroup "StateT (Strict)" $ testState (runC (fmap (fmap swap) . flip StrictStateT.runStateT))
+  , testGroup "RWST (Lazy)"     $ testState (runC (runRWST LazyRWST.runRWST))
+  , testGroup "RWST (Strict)"   $ testState (runC (runRWST StrictRWST.runRWST))
   ] where
-  testMonad    run = Monad.test    (m (gen s)) a b c (atom "(,)" (,) <*> s <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen s)) a b   (atom "(,)" (,) <*> s <*> unit) run
-  testState    run = State.test s  (m (gen s)) a                                     run
+  testMonad    run = Monad.test    (m (gen0 s) (\ _ _ -> [])) a b c (pair <*> s <*> unit) run
+  testMonadFix run = MonadFix.test (m (gen0 s) (\ _ _ -> [])) a b   (pair <*> s <*> unit) run
+  testState    run = State.test    (m (gen0 s) (\ _ _ -> [])) a               s           run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 
-gen
-  :: forall s m sig
+gen0
+  :: forall s m a sig
   .  (Has (State s) sig m, Arg s, Show s, Vary s)
-  => Gen s
-  -> GenM m
-  -> GenM m
-gen s _ a = choice
+  => GenTerm s
+  -> GenTerm a
+  -> [GenTerm (m a)]
+gen0 s a =
   [ label "gets" (gets @s) <*> fn a
   , infixL 4 "<$" (<$) <*> a <*> (label "put" put <*> s)
   ]
@@ -56,14 +56,14 @@ gen s _ a = choice
 
 test
   :: (Has (State s) sig m, Arg s, Eq a, Eq s, Show a, Show s, Vary s)
-  => Gen s
-  -> GenM m
-  -> Gen a
-  -> RunC s ((,) s) m
+  => GenM m
+  -> GenTerm a
+  -> GenTerm s
+  -> Run ((,) s) ((,) s) m
   -> [TestTree]
-test s m a (RunC runState) =
+test m a s (Run runState) =
   [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
-    \ s k -> runState s (get >>= k) === runState s (k s)
+    \ s k -> runState (s, get >>= k) === runState (s, k s)
   , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
-    \ s s' m -> runState s (put s' >> m) === runState s' m
+    \ s s' m -> runState (s, put s' >> m) === runState (s', m)
   ]

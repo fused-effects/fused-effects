@@ -75,8 +75,7 @@ instance Monad m => Applicative (StateC s m) where
   StateC f <*> StateC a = StateC $ \ s -> do
     (s', f') <- f s
     (s'', a') <- a s'
-    let fa = f' a'
-    fa `seq` pure (s'', fa)
+    pure (s'', f' a')
   {-# INLINE (<*>) #-}
   m *> k = m >>= \_ -> k
   {-# INLINE (*>) #-}
@@ -90,8 +89,7 @@ instance (Alternative m, Monad m) => Alternative (StateC s m) where
 instance Monad m => Monad (StateC s m) where
   StateC m >>= f = StateC $ \ s -> do
     (s', a) <- m s
-    let fa = f a
-    fa `seq` runState s' fa
+    runState s' (f a)
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
@@ -112,8 +110,8 @@ instance MonadTrans (StateC s) where
   lift m = StateC (\ s -> (,) s <$> m)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (State s :+: sig) (StateC s m) where
-  eff (L (Get   k)) = StateC (\ s -> runState s (k s))
-  eff (L (Put s k)) = StateC (\ _ -> runState s k)
-  eff (R other)     = StateC (\ s -> eff (handle (s, ()) (uncurry runState) other))
-  {-# INLINE eff #-}
+instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
+  alg (L (Get   k)) = StateC (\ s -> runState s (k s))
+  alg (L (Put s k)) = StateC (\ _ -> runState s k)
+  alg (R other)     = StateC (\ s -> alg (handle (s, ()) (uncurry runState) other))
+  {-# INLINE alg #-}

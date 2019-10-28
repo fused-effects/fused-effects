@@ -11,10 +11,10 @@ import Test.Tasty.Hedgehog
 test
   :: (Monad m, Arg a, Arg b, Eq (g a), Eq (g b), Eq (g c), Show a, Show b, Show (g a), Show (g b), Show (g c), Vary a, Vary b, Functor f)
   => GenM m
-  -> Gen a
-  -> Gen b
-  -> Gen c
-  -> Gen (f ())
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm c
+  -> GenTerm (f ())
   -> Run f g m
   -> [TestTree]
 test m a b c s (Run run) =

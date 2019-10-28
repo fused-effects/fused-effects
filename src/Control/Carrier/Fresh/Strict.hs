@@ -52,7 +52,7 @@ evalFresh n (FreshC m) = evalState n m
 newtype FreshC m a = FreshC (StateC Int m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Algebra sig m, Effect sig) => Algebra (Fresh :+: sig) (FreshC m) where
-  eff (L (Fresh k)) = FreshC (get <* modify (+ (1 :: Int))) >>= k
-  eff (R other)     = FreshC (eff (R (handleCoercible other)))
-  {-# INLINE eff #-}
+instance Algebra sig m => Algebra (Fresh :+: sig) (FreshC m) where
+  alg (L (Fresh k)) = FreshC (get <* modify (+ (1 :: Int))) >>= k
+  alg (R other)     = FreshC (handleCoercible other)
+  {-# INLINE alg #-}

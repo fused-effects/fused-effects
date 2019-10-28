@@ -54,17 +54,17 @@ execWriter = fmap fst . runWriter
 newtype WriterC w m a = WriterC (StateC w m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Monoid w, Algebra sig m, Effect sig) => Algebra (Writer w :+: sig) (WriterC w m) where
-  eff (L (Tell w     k)) = WriterC (modify (`mappend` w)) >> k
-  eff (L (Listen   m k)) = WriterC (StateC (\ w -> do
+instance (Monoid w, Algebra sig m) => Algebra (Writer w :+: sig) (WriterC w m) where
+  alg (L (Tell w     k)) = WriterC (modify (`mappend` w)) >> k
+  alg (L (Listen   m k)) = WriterC (StateC (\ w -> do
     (w', a) <- runWriter m
     let w'' = mappend w w'
     w'' `seq` pure (w'', (w', a))))
     >>= uncurry k
-  eff (L (Censor f m k)) = WriterC (StateC (\ w -> do
+  alg (L (Censor f m k)) = WriterC (StateC (\ w -> do
     (w', a) <- runWriter m
     let w'' = mappend w (f w')
     w'' `seq` pure (w'', a)))
     >>= k
-  eff (R other)          = WriterC (eff (R (handleCoercible other)))
-  {-# INLINE eff #-}
+  alg (R other)          = WriterC (handleCoercible other)
+  {-# INLINE alg #-}

@@ -87,7 +87,7 @@ instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
   {-# INLINE withRunInIO #-}
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m) where
-  eff (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
-  eff (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
-  eff (R other)         = ReaderC (\ r -> eff (hmap (runReader r) other))
-  {-# INLINE eff #-}
+  alg (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
+  alg (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
+  alg (R other)         = ReaderC (\ r -> handleIdentity (runReader r) other)
+  {-# INLINE alg #-}

@@ -1,7 +1,10 @@
 {-# LANGUAGE FlexibleContexts, RankNTypes #-}
+-- GHC 8.2.2 warns that the Has Cull sig m constraint on gen0 is redundant, but doesn’t typecheck without it. Newer GHCs typecheck just fine either way and also don’t warn, so … whatever?
+{-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Cull
 ( tests
-, gen
+, gen0
+, genN
 , test
 ) where
 
@@ -22,28 +25,30 @@ tests = testGroup "Cull"
     [ testMonad
     , testMonadFix
     , testCull
-    ] >>= ($ RunL CullC.runCullA)
+    ] >>= ($ runL CullC.runCullA)
   ] where
-  testMonad    run = Monad.test    (m gen) a b c (identity <*> unit) run
-  testMonadFix run = MonadFix.test (m gen) a b   (identity <*> unit) run
-  testCull     run = Cull.test     (m gen) a b                       run
+  testMonad    run = Monad.test    (m gen0 genN) a b c initial run
+  testMonadFix run = MonadFix.test (m gen0 genN) a b   initial run
+  testCull     run = Cull.test     (m gen0 genN) a b   initial run
+  initial = identity <*> unit
 
 
-gen :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenM m
-gen m a = choice
-  [ label "cull" cull <*> m a
-  , NonDet.gen m a
-  ]
+gen0 :: (Has Cull sig m, Has NonDet sig m) => GenTerm a -> [GenTerm (m a)]
+gen0 = NonDet.gen0
+
+genN :: (Has Cull sig m, Has NonDet sig m) => GenM m -> GenTerm a -> [GenTerm (m a)]
+genN m a = subtermM (m a) (label "cull" cull <*>) : NonDet.genN m a
 
 
 test
-  :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a)
+  :: (Has Cull sig m, Has NonDet sig m, Arg a, Eq a, Eq b, Show a, Show b, Vary a, Functor f)
   => GenM m
-  -> Gen a
-  -> Gen b
-  -> RunL [] m
+  -> GenTerm a
+  -> GenTerm b
+  -> GenTerm (f ())
+  -> Run f [] m
   -> [TestTree]
-test m a b (RunL runCull)
-  = testProperty "cull returns at most one success" (forall (a :. m a :. m a :. Nil)
-    (\ a m n -> runCull (cull (pure a <|> m) <|> n) === runCull (pure a <|> n)))
-  : NonDet.test m a b (RunL runCull)
+test m a b i (Run runCull)
+  = testProperty "cull returns at most one success" (forall (i :. a :. m a :. m a :. Nil)
+    (\ i a m n -> runCull ((cull (pure a <|> m) <|> n) <$ i) === runCull ((pure a <|> n) <$ i)))
+  : NonDet.test m a b i (Run runCull)
