@@ -16,6 +16,10 @@ main = runTeletype . runDry $ do
   manual "Add a heading to the top of `ChangeLog.md` for the current version."
   manual "Change the version of the package in `fused-effects.cabal`."
   manual "Push the branch to GitHub and open a draft PR. Double-check the changes, comparing against a previous release PR, e.g. https://github.com/fused-effects/fused-effects/pull/80. When satisfied, mark the PR as ready for review, and request a review from a collaborator."
+  auto "Build and publish candidate?" $ do
+    command "cabal" ["v2-build"] >>= write
+    command "cabal" ["v2-sdist"] >>= write
+    command "cabal" ["v2-haddock", "--haddock-for-hackage"] >>= write
   manual "Build locally using `cabal v2-build`, then collect the sources and docs with `cabal v2-sdist` and `cabal v2-haddock --haddock-for-hackage`, respectively. Note the paths to the tarballs in the output of these commands."
   manual "Publish a candidate release to Hackage with `cabal upload dist-newstyle/sdist/fused-effects-x.y.z.w.tar.gz` and `cabal upload --documentation dist-newstyle/fused-effects-x.y.z.w-docs.tar.gz`. Add a link to the candidate release in a comment on the PR."
   manual "Once the PR has been approved and you’re satisfied with the candidate release, merge the PR. Publish the release to Hackage by running the above commands with the addition of `--publish`."
