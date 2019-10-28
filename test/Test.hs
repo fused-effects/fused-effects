@@ -10,6 +10,7 @@ import qualified Empty
 import qualified Error
 import qualified Fresh
 import qualified Fusion
+import qualified Lift
 import qualified NonDet
 import qualified NonDet.Church
 import qualified Reader
@@ -28,6 +29,7 @@ main = defaultMain $ testGroup "unit tests"
   , Error.tests
   , Fresh.tests
   , Fusion.tests
+  , Lift.tests
   , NonDet.tests
   , NonDet.Church.tests
   , Reader.tests

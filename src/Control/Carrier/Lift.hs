@@ -1,6 +1,6 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
 
--- | A carrier for 'Lift' allowing monadic actions to be lifted into a larger context with 'sendM'.
+-- | A carrier for 'Lift' allowing monadic actions to be lifted from an outer context into an inner one with 'sendM', and for an inner context to run actions in an outer one with 'liftWith'.
 --
 -- @since 1.0.0.0
 module Control.Carrier.Lift
@@ -12,14 +12,14 @@ module Control.Carrier.Lift
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative)
 import Control.Effect.Lift
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
-import Control.Monad.IO.Unlift
 import Control.Monad.Trans.Class
+import Data.Functor.Identity
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 --
@@ -35,10 +35,4 @@ instance MonadTrans LiftC where
   lift = LiftC
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
-  alg = LiftC . (>>= runM) . unLift
-
-instance MonadUnliftIO m => MonadUnliftIO (LiftC m) where
-  askUnliftIO = LiftC $ withUnliftIO $ \u -> return (UnliftIO (unliftIO u . runM))
-  {-# INLINE askUnliftIO #-}
-  withRunInIO inner = LiftC $ withRunInIO $ \run -> inner (run . runM)
-  {-# INLINE withRunInIO #-}
+  alg (LiftWith with k) = LiftC (with (Identity ()) (fmap Identity . runM . runIdentity)) >>= k . runIdentity
