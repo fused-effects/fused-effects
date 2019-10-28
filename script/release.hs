@@ -22,16 +22,15 @@ main = runTeletype . runDry $ do
   manual "Locally, check out `master` and pull the latest changes to your working copy. Make a new tag, e.g. `git tag x.y.z.w`."
   manual "Push tags to GitHub using `git push --tags`."
 
+manual :: Has Teletype sig m => String -> m ()
+manual s = write s >> prompt "press enter to continue:" >> write ""
+
 
 data Command m k
-  = Manual String (m k)
-  | Command String String [String] (String -> m k)
+  = Command String String [String] (String -> m k)
   deriving (Functor, Generic1)
 
 instance Effect Command
-
-manual :: Has Command sig m => String -> m ()
-manual s = send (Manual s (pure ()))
 
 command :: Has Command sig m => String -> String -> [String] -> m String
 command s cmd args = send (Command s cmd args pure)
@@ -41,7 +40,6 @@ newtype LiveC m a = LiveC { runLive :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (Has Teletype sig m, MonadIO m) => Algebra (Command :+: sig) (LiveC m) where
-  alg (L (Manual s k)) = write s >> prompt "press enter to continue:" >> write "" >> k
   alg (L (Command s cmd args k)) = do
     write s
     stdout <- liftIO (readProcess cmd args "")
@@ -53,7 +51,6 @@ newtype DryC m a = DryC { runDry :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance Has Teletype sig m => Algebra (Command :+: sig) (DryC m) where
-  alg (L (Manual s k)) = write s >> prompt "press enter to continue:" >> write "" >> k
   alg (L (Command s cmd args k)) = do
     write s
     write $ "> " ++ cmd ++ " " ++ unwords args
