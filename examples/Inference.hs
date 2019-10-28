@@ -31,7 +31,7 @@ example = testGroup "inference"
 --   Like 'ask', 'askEnv' uses the same type parameter for both the 'Reader' and return types. Unlike 'ask'—which doesn’t impose any extra structure on the monad—it’s specialized to 'HasEnv', and uses the /same/ type parameter as its phantom type parameter.
 --
 --   Thus, any two calls to 'askEnv' occurring in the same 'HasEnv' context will be required to have their @env@ type parameters unify, allowing them to be inferred from context more often.
-askEnv :: Has (Reader env) sig m => HasEnv env m env
+askEnv :: (Has (Reader env) sig m, Effect c sig) => HasEnv env m env
 askEnv = ask
 
 -- | A handler for 'HasEnv' & 'ReaderC' with the same @env@ parameter.
@@ -46,5 +46,5 @@ newtype HasEnv env m a = HasEnv { runHasEnv :: m a }
   deriving (Applicative, Functor, Monad)
 
 -- | The 'Carrier' instance for 'HasEnv' simply delegates all effects to the underlying carrier.
-instance Algebra sig m => Algebra sig (HasEnv env m) where
+instance (Algebra sig m, Effect c sig) => Algebra sig (HasEnv env m) where
   alg = HasEnv . handleCoercible
