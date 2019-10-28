@@ -10,7 +10,7 @@ import GHC.Generics (Generic1)
 import System.Process
 
 main :: IO ()
-main = runTeletype . runLive $ do
+main = runTeletype . runDry $ do
   manual "Determine whether the release constitutes a major, minor, or patch version bump under the PVP."
   manual "Make a branch with the name `version-x.y.z.w`."
   manual "Add a heading to the top of `ChangeLog.md` for the current version."
@@ -23,24 +23,24 @@ main = runTeletype . runLive $ do
   manual "Push tags to GitHub using `git push --tags`."
 
 
-data Step m k
+data Command m k
   = Manual String (m k)
   | Command String String [String] (String -> m k)
   deriving (Functor, Generic1)
 
-instance Effect Step
+instance Effect Command
 
-manual :: Has Step sig m => String -> m ()
+manual :: Has Command sig m => String -> m ()
 manual s = send (Manual s (pure ()))
 
-command :: Has Step sig m => String -> String -> [String] -> m String
+command :: Has Command sig m => String -> String -> [String] -> m String
 command s cmd args = send (Command s cmd args pure)
 
 
 newtype LiveC m a = LiveC { runLive :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance (Has Teletype sig m, MonadIO m) => Algebra (Step :+: sig) (LiveC m) where
+instance (Has Teletype sig m, MonadIO m) => Algebra (Command :+: sig) (LiveC m) where
   alg (L (Manual s k)) = write s >> prompt "press enter to continue:" >> write "" >> k
   alg (L (Command s cmd args k)) = do
     write s
@@ -52,7 +52,7 @@ instance (Has Teletype sig m, MonadIO m) => Algebra (Step :+: sig) (LiveC m) whe
 newtype DryC m a = DryC { runDry :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance Has Teletype sig m => Algebra (Step :+: sig) (DryC m) where
+instance Has Teletype sig m => Algebra (Command :+: sig) (DryC m) where
   alg (L (Manual s k)) = write s >> prompt "press enter to continue:" >> write "" >> k
   alg (L (Command s cmd args k)) = do
     write s
