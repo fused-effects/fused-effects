@@ -6,7 +6,9 @@ module Main (main) where
 
 import Control.Algebra
 import Control.Monad.IO.Class
+import Control.Monad (join)
 import Data.Foldable (traverse_)
+import Data.Monoid (Last(..))
 import GHC.Generics (Generic1)
 import System.Process
 
@@ -19,7 +21,7 @@ main = runTeletype . runDry $ do
   manual "Push the branch to GitHub and open a draft PR. Double-check the changes, comparing against a previous release PR, e.g. https://github.com/fused-effects/fused-effects/pull/80. When satisfied, mark the PR as ready for review, and request a review from a collaborator."
   _ <- auto "Build and publish candidate?" $ do
     command "cabal" ["v2-build"] >>= traverse_ write
-    let getURL = traverse (\ s -> write s >> pure (last (lines s)))
+    let getURL = fmap join . traverse (\ s -> write s >> pure (getLast (foldMap (Last . Just) (lines s))))
     (,)
       <$> (command "cabal" ["v2-sdist"] >>= getURL)
       <*> (command "cabal" ["v2-haddock", "--haddock-for-hackage"] >>= getURL)
