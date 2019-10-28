@@ -112,7 +112,9 @@ test-suite examples
   build-depends:
       base
     , fused-effects
+    , hedgehog           ^>= 1
     , tasty              ^>= 1.2
+    , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
     , tasty-quickcheck   ^>= 0.10
     , transformers
