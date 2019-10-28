@@ -14,7 +14,7 @@ import System.Process
 
 main :: IO ()
 main = runTeletype . runDry $ do
-  manual "Determine whether the release constitutes a major, minor, or patch version bump under the PVP."
+  version <- prompt "Version number (w.x.y.z format, *NOT* checked): "
   manual "Make a branch with the name `version-x.y.z.w`."
   manual "Add a heading to the top of `ChangeLog.md` for the current version."
   manual "Change the version of the package in `fused-effects.cabal`."
