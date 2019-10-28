@@ -12,20 +12,30 @@ import Control.Carrier.State.Strict
 import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class
 import GHC.Generics (Generic1)
+import Hedgehog
+import qualified Hedgehog.Gen as Gen
+import qualified Hedgehog.Range as Range
 import Test.Tasty
-import Test.Tasty.QuickCheck
+import Test.Tasty.Hedgehog
 
 example :: TestTree
 example = testGroup "teletype"
-  [ testProperty "reads" $
-    \ line -> run (runTeletypeRet [line] read) === ([], ([], line))
+  [ testProperty "reads" . property $ do
+    line <- forAll genLine
+    run (runTeletypeRet [line] read) === ([], ([], line))
 
-  , testProperty "writes" $
-    \ input output -> run (runTeletypeRet input (write output)) === ([output], (input, ()))
+  , testProperty "writes" . property $ do
+    input  <- forAll (Gen.list (Range.linear 0 10) genLine)
+    output <- forAll genLine
+    run (runTeletypeRet input (write output)) === ([output], (input, ()))
 
-  , testProperty "writes multiple things" $
-    \ input output1 output2 -> run (runTeletypeRet input (write output1 >> write output2)) === ([output1, output2], (input, ()))
-  ]
+  , testProperty "writes multiple things" . property $ do
+    input   <- forAll (Gen.list (Range.linear 0 10) genLine)
+    output1 <- forAll genLine
+    output2 <- forAll genLine
+    run (runTeletypeRet input (write output1 >> write output2)) === ([output1, output2], (input, ()))
+  ] where
+  genLine = Gen.string (Range.linear 0 20) Gen.unicode
 
 data Teletype m k
   = Read (String -> m k)
