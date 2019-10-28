@@ -30,8 +30,8 @@ main = runTeletype . runDry $ do
 manual :: Has Teletype sig m => String -> m ()
 manual s = write s >> prompt "press enter to continue:" >> write ""
 
-auto :: (Has Command sig m, Has Teletype sig m) => String -> m () -> m ()
-auto s m = write s >> prompt "press enter to run:" >> m >> write ""
+auto :: (Has Command sig m, Has Teletype sig m) => String -> m a -> m a
+auto s m = write s >> prompt "press enter to run:" >> m <* write ""
 
 whenMaybe :: Applicative m => (a -> m ()) -> Maybe a -> m ()
 whenMaybe = maybe (pure ())
