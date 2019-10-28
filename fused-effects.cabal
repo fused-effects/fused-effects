@@ -72,7 +72,6 @@ library
     Control.Effect.Cut
     Control.Effect.Empty
     Control.Effect.Error
-    Control.Effect.Exception
     Control.Effect.Fail
     Control.Effect.Fresh
     Control.Effect.Lift
