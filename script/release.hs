@@ -25,6 +25,9 @@ main = runTeletype . runDry $ do
 manual :: Has Teletype sig m => String -> m ()
 manual s = write s >> prompt "press enter to continue:" >> write ""
 
+auto :: (Has Command sig m, Has Teletype sig m) => String -> m () -> m ()
+auto s m = write s >> prompt "press enter to run:" >> m
+
 
 data Command m k
   = Command String [String] (String -> m k)
