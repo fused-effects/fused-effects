@@ -27,21 +27,20 @@ manual s = write s >> prompt "press enter to continue:" >> write ""
 
 
 data Command m k
-  = Command String String [String] (String -> m k)
+  = Command String [String] (String -> m k)
   deriving (Functor, Generic1)
 
 instance Effect Command
 
-command :: Has Command sig m => String -> String -> [String] -> m String
-command s cmd args = send (Command s cmd args pure)
+command :: Has Command sig m => String -> [String] -> m String
+command cmd args = send (Command cmd args pure)
 
 
 newtype LiveC m a = LiveC { runLive :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
-instance (Has Teletype sig m, MonadIO m) => Algebra (Command :+: sig) (LiveC m) where
-  alg (L (Command s cmd args k)) = do
-    write s
+instance (Algebra sig m, MonadIO m) => Algebra (Command :+: sig) (LiveC m) where
+  alg (L (Command cmd args k)) = do
     stdout <- liftIO (readProcess cmd args "")
     k stdout
   alg (R other) = LiveC (handleCoercible other)
@@ -51,8 +50,7 @@ newtype DryC m a = DryC { runDry :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance Has Teletype sig m => Algebra (Command :+: sig) (DryC m) where
-  alg (L (Command s cmd args k)) = do
-    write s
+  alg (L (Command cmd args k)) = do
     write $ "> " ++ cmd ++ " " ++ unwords args
     k ""
   alg (R other) = DryC (handleCoercible other)
