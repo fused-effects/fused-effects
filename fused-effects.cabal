@@ -119,6 +119,7 @@ test-suite examples
     , tasty-hunit        ^>= 0.10
     , transformers
 
+
 test-suite test
   import:         common
   type:           exitcode-stdio-1.0
@@ -155,6 +156,19 @@ test-suite test
     , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
     , transformers
+
+
+test-suite docs
+  import:      common
+  type:        exitcode-stdio-1.0
+  main-is:     README.lhs
+  ghc-options: -pgmL markdown-unlit
+  build-depends:
+      base
+    , fused-effects
+    , mtl           ^>= 2.2
+  build-tool-depends:
+      markdown-unlit:markdown-unlit ^>= 0.5
 
 
 benchmark benchmark
