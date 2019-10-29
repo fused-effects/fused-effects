@@ -75,7 +75,7 @@ main = pure ()
 
 In `fused-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them.
 
-In `fused-effects`, _effect types_ provide syntax and _carrier types_ provide semantics. Effect types are datatypes with one constructor for each action, invoked using the `send` builtin. Carrier types are monads, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Carriers handle one or more effects, and multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax.
+In `fused-effects`, _effect types_ provide syntax and _carrier types_ provide semantics. Effect types are datatypes with one constructor for each action, invoked using the `send` builtin. Carrier types are monads, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Carriers can handle more than one effect, and multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax.
 
 
 ### Higher-order effects
