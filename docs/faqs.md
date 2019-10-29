@@ -23,7 +23,7 @@ ambig = do
 
 Because the `item` variable is not annotated with a concrete type, GHC will try to infer which we you meant. In this case, it is unable to, as `item` is passed to the polymorphic `show` function. Because both `Int` and `Float` values can be passed to `show`, GHC will reject this program with an error relating to ambiguous types. The `-XTypeApplications` extension to GHC provides a syntactically clean way to specify which type we meant:
 
-```
+```haskell
 okay :: (Has (State Int) sig m, Has (State Float) sig m, MonadIO m) => m ()
 okay = do
   item <- get @Int
