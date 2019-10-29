@@ -22,6 +22,7 @@
 
 - Defines an `evalFresh` handler for `Control.Carrier.Strict.FreshC`, taking the initial value. ([#267](https://github.com/fused-effects/fused-effects/pull/267))
 
+
 ## Backwards-incompatible changes
 
 - Renames the `Carrier` class to `Algebra` and its `eff` method to `alg`, and moved the responsibilities of `Control.Carrier` to `Control.Algebra`. This makes the library more consistent with the literature and encourages a style of naming that focuses on morphisms rather than objects. ([#285](https://github.com/fused-effects/fused-effects/pull/285), [#294](https://github.com/fused-effects/fused-effects/pull/294))
@@ -71,6 +72,11 @@
 - Removes `PureC`; `Data.Functor.Identity.Identity` should be used instead. Note that `run` is still provided as a convenient synonym for `runIdentity`. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
 
 - Removes the `Pure` effect. It’s unlikely that this will require changes, as `Pure` had no operations, but `Lift Identity` should be used instead. ([#307](https://github.com/fused-effects/fused-effects/pull/307))
+
+- Redefines the `Lift` effect, allowing inner contexts to run actions in outer contexts, e.g. to interoperate with `Control.Exception`. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
+
+- Removes `MonadUnliftIO` instances as they’ve been subsumed by the new definition of `Lift`. Additionally, the `ReaderT` & `IdentityT` types defined in `transformers` may be useful. ([#306](https://github.com/fused-effects/fused-effects/pull/306))
+
 
 # v0.5.0.1
 
