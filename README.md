@@ -47,7 +47,7 @@
 
 ## Overview
 
-`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides a framework for encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It was developed as a part of the [`semantic`](https://github.com/github/semantic) program analysis toolkit, but is suitable for general use in hobbyist, research, or industrial contexts.
+`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides a framework for encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It is used extensively in the [`semantic`](https://github.com/github/semantic) program analysis toolkit, but is suitable for general use in hobbyist, research, and industrial contexts.
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead. For those interested, this [talk at Strange Loop](https://www.youtube.com/watch?v=vfDazZfxlNs) outlines the history of and motivation behind effect systems and `fused-effects` itself.
 
@@ -73,9 +73,9 @@ main = pure ()
 
 ### Algebraic effects
 
-In `fused-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them. Thus, a program written using the syntax of an effect can be given different meanings by using different effect handlers.
+In `fused-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them. Thus, a program written using the syntax of an effect is given different meanings according to the semantics of the chosen effect handler.
 
-These roles are performed by the effect and carrier types, respectively. Effects are datatypes with one constructor for each action, invoked using the `send` builtin. Carriers are generally `newtype`s, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Each carrier handles one effect, but multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax. For more information about the `Algebra` class, consult [the FAQs][].
+These roles are performed by _effect types_ and _carrier types_. Effects are datatypes with one constructor for each action, invoked using the `send` builtin. Carriers are monads, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Each carrier handles one effect, but multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax. For more information about the `Algebra` class, consult [the FAQs][].
 
 [the FAQs]: https://github.com/fused-effects/fused-effects/blob/master/docs/defining_effects.md
 
@@ -103,12 +103,12 @@ Finally, since the fusion of carrier algebras occurs as a result of the selectio
 ### Package organization
 
 The `fused-effects` package is organized into two module hierarchies:
-* those under `Control.Effect`, which provide _effect types_ and functions that invoke effectful actions corresponding to an effect’s capabilities.
-* those under `Control.Carrier`, which provide _carrier types_ capable of executing the effects described by a given effect type.
+* those under `Control.Effect`, which provide effect types and functions that invoke the capabilities of these effects.
+* those under `Control.Carrier`, which provide carrier types capable of executing the effects described by a given effect type.
 
 An additional module, `Control.Algebra`, provides the `Algebra` interface that carrier types implement to provide an interpretation of a given effect. You shouldn’t need to import it unless you’re defining your own effects.
 
-### Picking a carrier
+### Invoking effects
 
 <!-- TODO all this went sideways now that the README is executable -->
 
@@ -143,7 +143,7 @@ action3 = ask @Int
 
 ### Running effects
 
-Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`:
+Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`, imported from the `Control.Carrier.State.Strict` carrier module:
 
 ```haskell
 example1 :: Algebra sig m => [a] -> m (Int, ())
@@ -159,8 +159,8 @@ Since this function returns a value in some carrier `m`, effect handlers can be 
 ```haskell
 example2 :: Algebra sig m => m (Int, ())
 example2 = runReader "hello" . runState 0 $ do
-  list <- ask
-  put (length (list :: String))
+  list <- ask @String
+  put @Int (length list)
 ```
 
 (Note that the type annotation on `list` is necessary to disambiguate the requested value, since otherwise all the typechecker knows is that it’s an arbitrary `Foldable`. For more information, see the [comparison to `mtl`](#comparison-to-mtl).)
@@ -170,8 +170,8 @@ When all effects have been handled, a computation’s final value can be extract
 ```haskell
 example3 :: (Int, ())
 example3 = run . runReader "hello" . runState 0 $ do
-  list <- ask
-  put (length (list :: String))
+  list <- ask @String
+  put @Int (length list)
 ```
 
 `run` is itself actually an effect handler for the `Lift Identity` effect, whose only operation is to lift a result value into a computation.
@@ -340,3 +340,9 @@ As of GHC 8.8, `fused-effects` outperforms `polysemy`, though new effects take m
 [`eff`](https://github.com/lexi-lambda/eff) is similar in many ways to `fused-effects`, but is slightly more performant due to its representation of effects as typeclasses. This approach lets GHC generate better code in exchange for sacrificing the flexibility associated with effects represented as data types. `eff` also uses the `monad-control` package to lift effects between contexts rather than implementing an `Algebra`-style class itself.
 
 ### Acknowledgements
+
+The authors of fused-effects would like to thank:
+
+* Tom Schrijvers, Nicholas Wu, and all their collaborators for the research that led to `fused-effects`;
+* Alexis King for thoughtful discussions about and suggestions regarding our methodology;
+* the authors of other effect libraries, including `eff`, `polysemy`, and `capabilities`, for their exploration of the space.
