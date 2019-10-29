@@ -47,7 +47,7 @@
 
 ## Overview
 
-`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides a framework for encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It is used extensively in the [`semantic`](https://github.com/github/semantic) program analysis toolkit, but is suitable for general use in hobbyist, research, and industrial contexts.
+`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides a framework for encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It is suitable for general use in hobbyist, research, and industrial contexts.
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead. For those interested, this [talk at Strange Loop](https://www.youtube.com/watch?v=vfDazZfxlNs) outlines the history of and motivation behind effect systems and `fused-effects` itself.
 
