@@ -47,7 +47,7 @@
 
 ## Overview
 
-`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides a framework for encoding [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It is suitable for general use in hobbyist, research, and industrial contexts.
+`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides an encoding of [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It is suitable for general use in hobbyist, research, and industrial contexts.
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead. For those interested, this [talk at Strange Loop](https://www.youtube.com/watch?v=vfDazZfxlNs) outlines the history of and motivation behind effect systems and `fused-effects` itself.
 
@@ -108,7 +108,7 @@ An additional module, `Control.Algebra`, provides the `Algebra` interface that c
 
 ### Invoking effects
 
-The effect types that `fused-effects` provides are similar to those provided by `mtl` or other effect systems. Each module under the `Control.Effect` hierarchy provides a set of functions that invoke effects, each mapping to a constructor of the underlying effect type. In this example, we invoke the `get` and `put` functions provided by `Control.Effect.State`, first extracting the state and then updating it with a new value:
+Each module under the `Control.Effect` hierarchy provides a set of functions that invoke effects, each mapping to a constructor of the underlying effect type. These functions are similar to, but more powerful than, those provided by `mtl`. In this example, we invoke the `get` and `put` functions provided by `Control.Effect.State`, first extracting the state and then updating it with a new value:
 
 ```haskell
 action1 :: Has (State String) sig m => m ()
