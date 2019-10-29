@@ -278,6 +278,12 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 [`fused-effects-resumable`]: https://github.com/fused-effects/fused-effects-resumable
 [lens]: http://hackage.haskell.org/package/lens
 
+### Projects using `fused-effects`
+
+* [`semantic`](http://github.com/github/semantic), a program analysis toolkit
+* [`aurapm`](https://github.com/aurapm/aura), a package manager for Arch Linux
+* [`now-haskell`](http://hackage.haskell.org/package/now-haskell), a client library for AWS Lambda
+
 ### Comparison to other effect libraries
 
 #### Comparison to `mtl`
