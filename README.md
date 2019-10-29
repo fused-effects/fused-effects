@@ -134,9 +134,10 @@ type Shared sig m
     )
 
 action3 :: Shared sig m => m ()
-action3 = ask @Int
-    >>= \ i -> put @String (replicate i '?')
-    >> tell @[String] [ "put " ++ show i ++ " '?'s" ]
+action3 = do
+  i <- ask @Int
+  put @String (replicate i '?')
+  tell @[String] [ "put " ++ show i ++ " '?'s" ]
 ```
 
 ### Running effects
