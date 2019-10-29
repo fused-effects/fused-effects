@@ -73,11 +73,9 @@ main = pure ()
 
 ### Algebraic effects
 
-In `fused-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them. Thus, a program written using the syntax of an effect is given different meanings according to the semantics of the chosen effect handler.
+In `fused-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them.
 
-These roles are performed by _effect types_ and _carrier types_. Effects are datatypes with one constructor for each action, invoked using the `send` builtin. Carriers are monads, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Each carrier handles one effect, but multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax. For more information about the `Algebra` class, consult [the FAQs][].
-
-[the FAQs]: https://github.com/fused-effects/fused-effects/blob/master/docs/defining_effects.md
+In `fused-effects`, _effect types_ provide syntax and _carrier types_ provide semantics. Effect types are datatypes with one constructor for each action, invoked using the `send` builtin. Carrier types are monads, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Carriers handle one or more effects, and multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax.
 
 
 ### Higher-order effects
@@ -110,14 +108,14 @@ An additional module, `Control.Algebra`, provides the `Algebra` interface that c
 
 ### Invoking effects
 
-<!-- TODO all this went sideways now that the README is executable -->
-
-The `Has` constraint requires a given effect (here `State`) to be present in a _signature_ (`sig`), and relates that signature to be present in a _carrier type_ (`m`). We generally, but not always, program against an abstract carrier type, usually called `m`, as carrier types always implement the `Monad` typeclass. We can build monadic actions by combining and composing these functions:
+The effect types that `fused-effects` provides are similar to those provided by `mtl` or other effect systems. Each module under the `Control.Effect` hierarchy provides a set of functions that invoke effects, each mapping to a constructor of the underlying effect type. In this example, we invoke the `get` and `put` functions provided by `Control.Effect.State`, first extracting the state and then updating it with a new value:
 
 ```haskell
 action1 :: Has (State String) sig m => m ()
-action1 = get >>= \ s -> put ("hello, " ++ s)
+action1 = get @String >>= \ s -> put ("hello, " ++ s)
 ```
+
+The `Has` constraint requires a given effect (here `State`) to be present in a _signature_ (`sig`), and relates that signature to be present in a carrier type (`m`). We generally, but not always, program against an abstract carrier type, usually called `m`, as carrier types always implement the `Monad` typeclass.
 
 To add effects to a given computation, add more `Has` constraints to the signature/carrier pair `sig` and `m`. For example, to add a `Reader` effect managing an `Int`, we would write:
 
