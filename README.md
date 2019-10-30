@@ -241,7 +241,7 @@ The package is available on [hackage][], and can be used by adding it to a compo
 
 ### Testing
 
-`fused-effects` comes with a rigorous test suite. Each law or property stated in the Haddock documentation is checked using generative tests powered by the `hedgehog`. We have a high degree of confidence in the correctness of all the carrier types provided in the `Control.Carrier` hierarchy.
+`fused-effects` comes with a rigorous test suite. Each law or property stated in the Haddock documentation is checked using generative tests powered by the `hedgehog`.
 
 ### Versioning
 
