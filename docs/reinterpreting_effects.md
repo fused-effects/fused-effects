@@ -21,7 +21,7 @@ Let's break down some of the properties of the API client that would be desirabl
 
 ``` haskell
 {-# LANGUAGE ExistentialQuantification, DeriveFunctor,
-DeriveGeneric, FlexibleContexts, FlexibleInstances,
+DeriveGeneric, FlexibleInstances,
 GeneralizedNewtypeDeriving, OverloadedStrings, MultiParamTypeClasses,
 RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
 module CatFacts
@@ -71,7 +71,7 @@ instance FromJSON CatFact where
 data CatFactClient m k
   = ListFacts Int {- ^ Number of facts to fetch -} ([CatFact] -> m k)
   deriving (Functor, Generic1)
-  
+
 instance Effect CatFactsClient
 
 listFacts :: Has CatFactClient sig m => Int -> m [CatFact]

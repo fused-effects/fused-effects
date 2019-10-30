@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Fail
 ( tests
 , gen0
