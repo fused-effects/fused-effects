@@ -71,6 +71,7 @@ main = pure ()
 ```
 -->
 
+
 ### Algebraic effects
 
 In `fused-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them.
@@ -242,7 +243,7 @@ The package is available on [hackage][], and can be used by adding it to a compo
 
 ### Testing
 
-`fused-effects` comes with a rigorous test suite. Each law or property stated in the Haddock documentation is checked using generative tests powered by the `hedgehog`.
+`fused-effects` comes with a rigorous test suite. Each law or property stated in the Haddock documentation is checked using generative tests powered by the [`hedgehog`](http://hackage.haskell.org/package/hedgehog) library.
 
 ### Versioning
 
