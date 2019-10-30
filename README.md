@@ -106,6 +106,7 @@ The `fused-effects` package is organized into two module hierarchies:
 
 An additional module, `Control.Algebra`, provides the `Algebra` interface that carrier types implement to provide an interpretation of a given effect. You shouldn’t need to import it unless you’re defining your own effects.
 
+
 ### Invoking effects
 
 Each module under the `Control.Effect` hierarchy provides a set of functions that invoke effects, each mapping to a constructor of the underlying effect type. These functions are similar to, but more powerful than, those provided by `mtl`. In this example, we invoke the `get` and `put` functions provided by `Control.Effect.State`, first extracting the state and then updating it with a new value:
