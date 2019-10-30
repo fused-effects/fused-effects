@@ -8,6 +8,7 @@ import qualified Cut
 import qualified Cut.Church
 import qualified Empty
 import qualified Error
+import qualified Fail
 import qualified Fresh
 import qualified Fusion
 import qualified Lift
@@ -27,6 +28,7 @@ main = defaultMain $ testGroup "unit tests"
   , Cut.Church.tests
   , Empty.tests
   , Error.tests
+  , Fail.tests
   , Fresh.tests
   , Fusion.tests
   , Lift.tests
