@@ -15,7 +15,7 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
-tests = testGroup "Fail" $
+tests = testGroup "Fail"
   [ testGroup "FailC" $
     [ testMonad
     , testMonadFix
