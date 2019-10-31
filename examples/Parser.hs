@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveAnyClass, DeriveGeneric, DeriveTraversable, DerivingStrategies, ExistentialQuantification, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Parser
 ( example
 ) where
@@ -107,8 +107,9 @@ example = testGroup "parser"
 
 
 data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
-  deriving stock (Functor, Generic1)
-  deriving anyclass (Effect)
+  deriving (Functor, Generic1)
+
+instance Effect Symbol
 
 satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char
 satisfy p = send (Satisfy p pure)
@@ -129,7 +130,7 @@ parse input = (>>= exhaustive) . runState input . runParseC
         exhaustive _       = empty
 
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
-  deriving newtype (Alternative, Applicative, Functor, Monad)
+  deriving (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
   alg (L (Satisfy p k)) = do
