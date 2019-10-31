@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, TypeOperators, UndecidableInstances #-}
 module Inference
 ( example
 ) where

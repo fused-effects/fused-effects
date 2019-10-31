@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
 module Fail
 ( tests
 , gen0
@@ -15,7 +15,7 @@ import Test.Tasty
 import Test.Tasty.Hedgehog
 
 tests :: TestTree
-tests = testGroup "Fail" $
+tests = testGroup "Fail"
   [ testGroup "FailC" $
     [ testMonad
     , testMonadFix
@@ -45,5 +45,5 @@ test
   -> [TestTree]
 test msg m _ b i (Run runFail) =
   [ testProperty "fail annihilates >>=" . forall (i :. msg :. fn @a (m b) :. Nil) $
-    \ i s k -> runFail ((Fail.fail s >>= k) <$ i) === runFail ((Fail.fail s) <$ i)
+    \ i s k -> runFail ((Fail.fail s >>= k) <$ i) === runFail (Fail.fail s <$ i)
   ]
