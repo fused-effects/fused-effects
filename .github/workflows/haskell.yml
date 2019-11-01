@@ -37,7 +37,7 @@ jobs:
         path: dist-newstyle
         key: ${{ runner.os }}-fused-effects-dist-${{ hashFiles('**/fused-effects.cabal') }}
 
-    - name: Install dependencies
+    - name: Install & build dependencies
       run: |
         cabal v2-update
         cabal v2-configure --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
