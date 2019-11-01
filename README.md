@@ -341,14 +341,14 @@ Finally, `fused-effects` has been [benchmarked](#benchmarks) as faster than `fre
 [`freer-simple`]: http://hackage.haskell.org/package/freer-simple
 
 
-#### Comparison to `polysemy`.
+#### Comparison to `polysemy`
 
 Like [`polysemy`](http://hackage.haskell.org/package/polysemy), `fused-effects` is a batteries-included effect system capable of scoped, reinterpretable algebraic effects.
 
 As of GHC 8.8, `fused-effects` outperforms `polysemy`, though new effects take more code to define in `fused-effects` than `polysemy` (though the `Control.Effect.Interpret` effect is suitable for rapid prototyping of new effects). Like `freer-simple` and unlike `fused-effects`, polysemy provides custom type errors if a given effect invocation is ambigous or invalid in the current context.
 
 
-#### Comparison to `eff`.
+#### Comparison to `eff`
 
 [`eff`](https://github.com/lexi-lambda/eff) is similar in many ways to `fused-effects`, but is slightly more performant due to its representation of effects as typeclasses. This approach lets GHC generate better code in exchange for sacrificing the flexibility associated with effects represented as data types. `eff` also uses the `monad-control` package to lift effects between contexts rather than implementing an `Algebra`-style class itself.
 
