@@ -24,15 +24,15 @@ jobs:
     - uses: actions/cache@preview
       with:
         path: $HOME/.cabal/packages
-        key: ${{ runner.os }}-cabal-packages-${{ hashFiles(fused-effects.cabal) }}
+        key: ${{ runner.os }}-cabal-packages-${{ hashFiles('fused-effects.cabal') }}
     - uses: actions/cache@preview
       with:
         path: $HOME/.cabal/store
-        key: ${{ runner.os }}-cabal-store-${{ hashFiles(fused-effects.cabal) }}
+        key: ${{ runner.os }}-cabal-store-${{ hashFiles('fused-effects.cabal') }}
     - uses: actions/cache@preview
       with:
         path: dist-newstyle
-        key: ${{ runner.os }}-fused-effects-dist-${{ hashFiles(fused-effects.cabal) }}
+        key: ${{ runner.os }}-fused-effects-dist-${{ hashFiles('fused-effects.cabal') }}
 
     - name: Install dependencies
       run: |
