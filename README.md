@@ -47,7 +47,7 @@
 
 ## Overview
 
-`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides an encoding of [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effect types, and generates efficient code by [fusing](#fusion) effect handlers through computations. It is suitable for general use in hobbyist, research, and industrial contexts.
+`fused-effects` is an [effect system](https://en.wikipedia.org/wiki/Effect_system) for Haskell that values expressivity, efficiency, and rigor. It provides an encoding of [algebraic](#algebraic-effects), [higher-order](#higher-order-effects) effects, includes a library of the most common effects, and generates efficient code by [fusing](#fusion) effect handlers through computations. It is suitable for use in hobbyist, research, and industrial contexts.
 
 Readers already familiar with effect systems may wish to start with the [usage](#usage) instead. For those interested, this [talk at Strange Loop](https://www.youtube.com/watch?v=vfDazZfxlNs) outlines the history of and motivation behind effect systems and `fused-effects` itself.
 
@@ -55,14 +55,13 @@ Readers already familiar with effect systems may wish to start with the [usage](
 Setup, hidden from the rendered markdown.
 
 ```haskell
-{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, UndecidableInstances #-}
 module Main (module Main) where
 
 import Control.Algebra
 import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Carrier.State.Strict
-import Control.Effect.Writer
 import Control.Monad.IO.Class (liftIO)
 import qualified Control.Monad.State.Class as MTL
 
@@ -76,7 +75,7 @@ main = pure ()
 
 In `fused-effects` and other systems with _algebraic_ (or, sometimes, _extensible_) effects, effectful programs are split into two parts: the specification (or _syntax_) of the actions to be performed, and the interpretation (or _semantics_) given to them.
 
-In `fused-effects`, _effect types_ provide syntax and _carrier types_ provide semantics. Effect types are datatypes with one constructor for each action, invoked using the `send` builtin. Carrier types are monads, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Carriers can handle more than one effect, and multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax.
+In `fused-effects`, _effect types_ provide syntax and _carrier types_ provide semantics. Effect types are datatypes with one constructor for each action, invoked using the `send` builtin. Carriers are monads, with an `Algebra` instance specifying how an effect’s constructors should be interpreted. Carriers can handle more than one effect, and multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax.
 
 
 ### Higher-order effects
@@ -102,7 +101,7 @@ Finally, since the fusion of carrier algebras occurs as a result of the selectio
 ### Package organization
 
 The `fused-effects` package is organized into two module hierarchies:
-* those under `Control.Effect`, which provide effect types and functions that invoke the capabilities of these effects.
+* those under `Control.Effect`, which provide effects and functions that invoke these effects’ capabilities.
 * those under `Control.Carrier`, which provide carrier types capable of executing the effects described by a given effect type.
 
 An additional module, `Control.Algebra`, provides the `Algebra` interface that carrier types implement to provide an interpretation of a given effect. You shouldn’t need to import it unless you’re defining your own effects.
@@ -114,7 +113,7 @@ Each module under the `Control.Effect` hierarchy provides a set of functions tha
 
 ```haskell
 action1 :: Has (State String) sig m => m ()
-action1 = get @String >>= \ s -> put ("hello, " ++ s)
+action1 = get >>= \ s -> put ("hello, " ++ s)
 ```
 
 The `Has` constraint requires a given effect (here `State`) to be present in a _signature_ (`sig`), and relates that signature to be present in a carrier type (`m`). We generally, but not always, program against an abstract carrier type, usually called `m`, as carrier types always implement the `Monad` typeclass.
@@ -123,23 +122,9 @@ To add effects to a given computation, add more `Has` constraints to the signatu
 
 ```haskell
 action2 :: (Has (State String) sig m, Has (Reader Int) sig m) => m ()
-action2 = ask @Int >>= \ i -> put @String (replicate i '!')
-```
-
-Different effects make different operations available; see the documentation for individual effects for more information about their operations. Note that we generally don’t program against an explicit list of effect components: we take the typeclass-oriented approach, adding new constraints to `sig` as new capabilities become necessary. If you want to name and share some predefined list of effects, it’s best to use the `-XConstraintKinds` extension to GHC, capturing the elements of `sig` as a type synonym of kind `Constraint`:
-
-```haskell
-type Shared sig m
-  = ( Has (State String) sig m
-    , Has (Reader Int)   sig m
-    , Has (Writer [String]) sig m
-    )
-
-action3 :: Shared sig m => m ()
-action3 = do
-  i <- ask @Int
-  put @String (replicate i '?')
-  tell @[String] [ "put " ++ show i ++ " '?'s" ]
+action2 = do
+  i <- ask
+  put (replicate i '!')
 ```
 
 ### Running effects
@@ -149,7 +134,7 @@ Effects are run with _effect handlers_, specified as functions (generally starti
 ```haskell
 example1 :: Algebra sig m => [a] -> m (Int, ())
 example1 list = runState 0 $ do
-  i <- get @Int
+  i <- get
   put (i + length list)
 ```
 
@@ -160,8 +145,8 @@ Since this function returns a value in some carrier `m`, effect handlers can be 
 ```haskell
 example2 :: Algebra sig m => m (Int, ())
 example2 = runReader "hello" . runState 0 $ do
-  list <- ask @String
-  put @Int (length list)
+  (list :: String) <- ask
+  put (length list)
 ```
 
 (Note that the type annotation on `list` is necessary to disambiguate the requested value, since otherwise all the typechecker knows is that it’s an arbitrary `Foldable`. For more information, see the [comparison to `mtl`](#comparison-to-mtl).)
@@ -171,8 +156,8 @@ When all effects have been handled, a computation’s final value can be extract
 ```haskell
 example3 :: (Int, ())
 example3 = run . runReader "hello" . runState 0 $ do
-  list <- ask @String
-  put @Int (length list)
+  (list :: String) <- ask
+  put (length list)
 ```
 
 `run` is itself actually an effect handler for the `Lift Identity` effect, whose only operation is to lift a result value into a computation.
