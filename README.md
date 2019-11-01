@@ -8,17 +8,23 @@
   - [Fusion][]
 - [Usage][]
   - [Using built-in effects][]
+  - [Invoking effects][]
   - [Running effects][]
   - [Required compiler extensions][]
   - [Defining new effects][]
+  - [Defining effect handlers][]
 - [Project overview][]
   - [Development][]
   - [Versioning][]
 - [Benchmarks][]
 - [Related work][]
   - [Contributed packages][]
+  - [Projects using `fused-effects`][]
   - [Comparison to `mtl`][]
   - [Comparison to `freer-simple`][]
+  - [Comparison to `polysemy`][]
+  - [Comparison to `eff`][]
+- [Acknowledgments][]
 
 [Overview]: https://github.com/fused-effects/fused-effects#overview
 [Algebraic effects]: https://github.com/fused-effects/fused-effects#algebraic-effects
@@ -27,6 +33,7 @@
 
 [Usage]: https://github.com/fused-effects/fused-effects#usage
 [Using built-in effects]: https://github.com/fused-effects/fused-effects#using-built-in-effects
+[Invoking effects]: https://github.com/fused-effects/fused-effects#invoking-effects
 [Running effects]: https://github.com/fused-effects/fused-effects#running-effects
 [Required compiler extensions]: https://github.com/fused-effects/fused-effects#required-compiler-extensions
 [Defining new effects]: https://github.com/fused-effects/fused-effects#defining-new-effects
@@ -40,9 +47,13 @@
 
 [Related work]: https://github.com/fused-effects/fused-effects#related-work
 [Contributed packages]: https://github.com/fused-effects/fused-effects#contributed-packages
+[Projects using `fused-effects`]: https://github.com/fused-effects/fused-effects#projects-using-fused-effects
 [Comparison to `mtl`]: https://github.com/fused-effects/fused-effects#comparison-to-mtl
 [Comparison to `freer-simple`]: https://github.com/fused-effects/fused-effects#comparison-to-freer-simple
 [Comparison to `polysemy`]: https://github.com/fused-effects/fused-effects#comparison-to-polysemy
+[Comparison to `eff`]: https://github.com/fused-effects/fused-effects#comparison-to-eff
+
+[Acknowledgments]: https://github.com/fused-effects/fused-effects#acknowledgements
 
 
 ## Overview
