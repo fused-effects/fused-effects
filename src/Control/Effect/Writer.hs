@@ -44,7 +44,7 @@ tell w = send (Tell w (pure ()))
 -- | Run a computation, returning the pair of its output and its result.
 --
 -- @
--- runWriter ('listen' m) = 'fmap' ('fst' '&&&' 'id') (runWriter m)
+-- runWriter ('listen' m) = 'fmap' ('fst' 'Control.Arrow.&&&' 'id') (runWriter m)
 -- @
 --
 -- @since 0.2.0.0
