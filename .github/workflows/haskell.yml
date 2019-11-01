@@ -24,12 +24,12 @@ jobs:
     - uses: actions/cache@preview
       name: Cache ~/.cabal/packages
       with:
-        path: $HOME/.cabal/packages
+        path: ~/.cabal/packages
         key: ${{ runner.os }}-cabal-packages-${{ hashFiles('**/fused-effects.cabal') }}
     - uses: actions/cache@preview
       name: Cache ~/.cabal/store
       with:
-        path: $HOME/.cabal/store
+        path: ~/.cabal/store
         key: ${{ runner.os }}-cabal-store-${{ hashFiles('**/fused-effects.cabal') }}
     - uses: actions/cache@preview
       name: Cache dist-newstyle
