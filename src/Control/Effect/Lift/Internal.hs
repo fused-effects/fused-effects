@@ -15,6 +15,9 @@ data Lift sig m k
 instance Functor m => Functor (Lift sig m) where
   fmap f (LiftWith with k) = LiftWith with (fmap f . k)
 
+instance HFunctor (Lift sig) where
+  hmap f (LiftWith go k) = LiftWith go (f . k)
+
 instance Functor sig => Effect (Lift sig) where
   thread ctx dst (LiftWith with k) = LiftWith
     (\ ctx' dst' -> getCompose <$> with (Compose (ctx <$ ctx')) (fmap Compose . dst' . fmap dst . getCompose))

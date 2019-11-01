@@ -10,8 +10,10 @@
 --   structured log messages as strings.
 
 
+{-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveFunctor              #-}
 {-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE InstanceSigs               #-}
@@ -104,9 +106,8 @@ runApplication =
 -- Log an 'a', then continue with 'k'.
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a (m k)
-  deriving (Functor, Generic1)
-
-instance Effect (Log a)
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor, Effect)
 
 -- Log an 'a'.
 log :: Has (Log a) sig m
@@ -142,7 +143,7 @@ instance
         runLogStdout k
 
     R other ->
-      LogStdoutC (handleCoercible other)
+      LogStdoutC (alg (hmap runLogStdout other))
 
 -- The 'LogStdoutC' runner.
 runLogStdout ::
@@ -177,7 +178,7 @@ instance
         unReinterpretLogC k
 
     R other ->
-      ReinterpretLogC (handleCoercible other)
+      ReinterpretLogC (alg (R (handleCoercible other)))
 
 -- The 'ReinterpretLogC' runner.
 reinterpretLog ::
@@ -197,7 +198,9 @@ newtype CollectLogMessagesC s m a
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
-     Algebra sig m
+     ( Algebra sig m
+     , Effect sig
+     )
      -- ...the 'CollectLogMessagesC s m' monad can interpret 'Log s :+: sig'
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
@@ -212,7 +215,7 @@ instance
         unCollectLogMessagesC k
 
     R other ->
-      CollectLogMessagesC (handleCoercible other)
+      CollectLogMessagesC (alg (R (handleCoercible other)))
 
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages ::

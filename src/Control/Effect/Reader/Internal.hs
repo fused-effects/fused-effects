@@ -12,6 +12,10 @@ data Reader r m k
 
 deriving instance Functor m => Functor (Reader r m)
 
+instance HFunctor (Reader r) where
+  hmap f (Ask k)       = Ask           (f . k)
+  hmap f (Local g m k) = Local g (f m) (f . k)
+
 instance Effect (Reader r) where
   thread ctx handler (Ask k)       = Ask                          (handler . (<$ ctx) . k)
   thread ctx handler (Local f m k) = Local f (handler (m <$ ctx)) (handler . fmap k)

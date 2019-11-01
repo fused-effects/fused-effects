@@ -11,4 +11,5 @@ data Throw e (m :: * -> *) k
   = Throw e
   deriving (Functor, Generic1)
 
-instance Effect (Throw e)
+instance HFunctor (Throw e)
+instance Effect   (Throw e)
