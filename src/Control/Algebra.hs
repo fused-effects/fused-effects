@@ -29,6 +29,7 @@ import Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import Control.Effect.Throw.Internal
 import Control.Effect.Writer.Internal
 import Control.Monad ((<=<))
+import Data.Coerce
 import Data.Functor.Identity
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Identity as Identity
