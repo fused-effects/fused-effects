@@ -16,7 +16,7 @@ instance Functor m => Functor (Lift sig m) where
   fmap f (LiftWith with k) = LiftWith with (fmap f . k)
 
 instance HFunctor (Lift sig) where
-  hmap f (LiftWith go k) = LiftWith go (f . k)
+  hmap f (LiftWith go k) = LiftWith (\c lift -> go c (lift . fmap f)) (f . k)
 
 instance Functor sig => Effect (Lift sig) where
   thread ctx dst (LiftWith with k) = LiftWith
