@@ -2,7 +2,7 @@
 
 {- | An effect providing failure with an error message.
 
-This effect is invoked through the 'Fail.fail' method from 'Fail.MonadFail'.
+This effect is invoked through the 'Control.Monad.Fail.fail' method from 'Control.Monad.Fail.MonadFail'.
 
 Predefined carriers:
 

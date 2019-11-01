@@ -26,7 +26,7 @@ module Control.Effect.Cut
 import Control.Algebra
 import Control.Applicative (Alternative(..))
 
--- | 'Cut' effects are used with 'Choose' to provide control over backtracking.
+-- | 'Cut' effects are used with 'Control.Effect.Choose' to provide control over backtracking.
 --
 -- @since 0.1.2.0
 data Cut m k

@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
--- | A carrier for a 'Fail' effect, returning the result as an 'Either' 'String'. Failed computations will return a 'Left' containing the 'String' value passed to 'Fail.fail'.
+-- | A carrier for a 'Control.Effect.Fail.Fail' effect, returning the result as an 'Either' 'String'. Failed computations will return a 'Left' containing the 'String' value passed to 'Fail.fail'.
 --
 -- @since 1.0.0.0
 module Control.Carrier.Fail.Either
@@ -21,13 +21,13 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | Run a 'Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
+-- | Run a 'Control.Effect.Fail.Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --
 -- @
 -- 'runFail' ('pure' a) = 'pure' ('Right' a)
 -- @
 -- @
--- 'runFail' ('fail' s) = 'pure' ('Left' s)
+-- 'runFail' ('Fail.fail' s) = 'pure' ('Left' s)
 -- @
 --
 -- @since 1.0.0.0
