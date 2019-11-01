@@ -55,7 +55,7 @@ Readers already familiar with effect systems may wish to start with the [usage](
 Setup, hidden from the rendered markdown.
 
 ```haskell
-{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, ScopedTypeVariables, UndecidableInstances #-}
+{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, UndecidableInstances #-}
 module Main (module Main) where
 
 import Control.Algebra
@@ -127,6 +127,7 @@ action2 = do
   put (replicate i '!')
 ```
 
+
 ### Running effects
 
 Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`, imported from the `Control.Carrier.State.Strict` carrier module:
@@ -145,8 +146,8 @@ Since this function returns a value in some carrier `m`, effect handlers can be 
 ```haskell
 example2 :: Algebra sig m => m (Int, ())
 example2 = runReader "hello" . runState 0 $ do
-  (list :: String) <- ask
-  put (length list)
+  list <- ask
+  put (length (list :: String))
 ```
 
 (Note that the type annotation on `list` is necessary to disambiguate the requested value, since otherwise all the typechecker knows is that it’s an arbitrary `Foldable`. For more information, see the [comparison to `mtl`](#comparison-to-mtl).)
@@ -156,8 +157,8 @@ When all effects have been handled, a computation’s final value can be extract
 ```haskell
 example3 :: (Int, ())
 example3 = run . runReader "hello" . runState 0 $ do
-  (list :: String) <- ask
-  put (length list)
+  list <- ask
+  put (length (list :: String))
 ```
 
 `run` is itself actually an effect handler for the `Lift Identity` effect, whose only operation is to lift a result value into a computation.
@@ -174,6 +175,7 @@ example4 = runM . runReader "hello" . runState 0 $ do
 
 (Note that we no longer need to give a type annotation for `list`, since `putStrLn` constrains the type for us.)
 
+
 ### Required compiler extensions
 
 When defining your own effects, you may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case. `-XDeriveGeneric` can be used with many first-order effects to derive a default definition of `Effect`.
@@ -188,11 +190,13 @@ The following invocation, taken from the teletype example, should suffice for mo
 {-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 ```
 
+
 ### Defining new effects
 
 The process of defining new effects is outlined in [`docs/defining_effects.md`][], using the classic `Teletype` effect as an example.
 
 [`docs/defining_effects.md`]: https://github.com/fused-effects/fused-effects/blob/master/docs/defining_effects.md
+
 
 ## Project overview
 
@@ -228,11 +232,13 @@ The package is available on [hackage][], and can be used by adding it to a compo
 
 `fused-effects` comes with a rigorous test suite. Each law or property stated in the Haddock documentation is checked using generative tests powered by the [`hedgehog`](http://hackage.haskell.org/package/hedgehog) library.
 
+
 ### Versioning
 
 `fused-effects` adheres to the [Package Versioning Policy][pvp] standard.
 
 [pvp]: https://pvp.haskell.org/faq/
+
 
 ## Benchmarks
 
@@ -246,6 +252,7 @@ To run the provided benchmark suite, use `cabal v2-bench`. You may wish to provi
 [Effect Handlers in Scope]: http://www.cs.ox.ac.uk/people/nicolas.wu/papers/Scope.pdf
 [Monad Transformers and Modular Algebraic Effects: What Binds Them Together]: http://www.cs.kuleuven.be/publicaties/rapporten/cw/CW699.pdf
 [Fusion for Free—Efficient Algebraic Effect Handlers]: https://people.cs.kuleuven.be/~tom.schrijvers/Research/papers/mpc2015.pdf
+
 
 ### Contributed packages
 
@@ -262,11 +269,13 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 [`fused-effects-resumable`]: https://github.com/fused-effects/fused-effects-resumable
 [lens]: http://hackage.haskell.org/package/lens
 
+
 ### Projects using `fused-effects`
 
 * [`semantic`](http://github.com/github/semantic), a program analysis toolkit
 * [`aurapm`](https://github.com/aurapm/aura), a package manager for Arch Linux
 * [`now-haskell`](http://hackage.haskell.org/package/now-haskell), a client library for AWS Lambda
+
 
 ### Comparison to other effect libraries
 
@@ -319,15 +328,18 @@ Finally, `fused-effects` has been [benchmarked](#benchmarks) as faster than `fre
 
 [`freer-simple`]: http://hackage.haskell.org/package/freer-simple
 
+
 #### Comparison to `polysemy`.
 
 Like [`polysemy`](http://hackage.haskell.org/package/polysemy), `fused-effects` is a batteries-included effect system capable of scoped, reinterpretable algebraic effects.
 
 As of GHC 8.8, `fused-effects` outperforms `polysemy`, though new effects take more code to define in `fused-effects` than `polysemy` (though the `Control.Effect.Interpret` effect is suitable for rapid prototyping of new effects). Like `freer-simple` and unlike `fused-effects`, polysemy provides custom type errors if a given effect invocation is ambigous or invalid in the current context.
 
+
 #### Comparison to `eff`.
 
 [`eff`](https://github.com/lexi-lambda/eff) is similar in many ways to `fused-effects`, but is slightly more performant due to its representation of effects as typeclasses. This approach lets GHC generate better code in exchange for sacrificing the flexibility associated with effects represented as data types. `eff` also uses the `monad-control` package to lift effects between contexts rather than implementing an `Algebra`-style class itself.
+
 
 ### Acknowledgements
 
