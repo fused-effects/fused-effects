@@ -21,7 +21,7 @@ module Control.Effect.Cull
 
 import Control.Algebra
 
--- | 'Cull' effects are used with 'Choose' to provide control over branching.
+-- | 'Cull' effects are used with 'Control.Effect.Choose' to provide control over branching.
 --
 -- @since 0.1.2.0
 data Cull m k
