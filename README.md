@@ -305,7 +305,7 @@ newtype Wrapper s m a = Wrapper { runWrapper :: m a }
   deriving (Applicative, Functor, Monad)
 
 instance Algebra sig m => Algebra sig (Wrapper s m) where
-  alg = Wrapper . handleCoercible
+  alg = Wrapper . alg . handleCoercible
 
 getState :: Has (State s) sig m => Wrapper s m s
 getState = get
