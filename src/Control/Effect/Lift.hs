@@ -38,7 +38,7 @@ sendM m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
 
 -- | Run actions in an outer context.
 --
--- This can be used to provide interoperation with @base@ functionality like @"Control.Exception".'catch'@:
+-- This can be used to provide interoperation with @base@ functionality like @"Control.Exception".'Control.Exception.catch'@:
 --
 -- @
 -- 'liftWith' $ \ ctx hdl -> 'Control.Exception.catch' (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
@@ -46,7 +46,7 @@ sendM m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
 --
 -- The higher-order function takes both an initial context, and a handler phrased as the same sort of distributive law as described in the documentation for 'thread'. This handler takes actions lifted into a context functor, which can be either the initial context, or the derived context produced by handling a previous action.
 --
--- As with @MonadBaseControl@, care must be taken when lifting functions like @"Control.Exception".'finally'@ which don’t use the return value of one of their actions, as this can lead to dropped effects.
+-- As with @MonadBaseControl@, care must be taken when lifting functions like @"Control.Exception".'Control.Exception.finally'@ which don’t use the return value of one of their actions, as this can lead to dropped effects.
 --
 -- @since 1.0.0.0
 liftWith
