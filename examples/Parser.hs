@@ -129,7 +129,8 @@ parse input = (>>= exhaustive) . runState input . runParseC
         exhaustive _       = empty
 
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
-  deriving (Alternative, Applicative, Functor, Monad)
+  deriving stock Functor
+  deriving newtype (Alternative, Applicative, Monad)
 
 instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) (ParseC m) where
   alg (L (Satisfy p k)) = do
