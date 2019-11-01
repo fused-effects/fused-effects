@@ -327,6 +327,7 @@ Finally, thanks to the fusion and inlining of carriers, `fused-effects` is only 
 
 [`mtl`]: http://hackage.haskell.org/package/mtl
 
+
 #### Comparison to `freer-simple`
 
 Like [`freer-simple`][], `fused-effects` uses an initial encoding of library- and user-defined effects as syntax which can then be given different interpretations. In `freer-simple`, this is done with a family of interpreter functions (which cover a variety of needs, and which can be extended for more bespoke needs), whereas in `fused-effects` this is done with `Carrier` instances for `newtype`s.
