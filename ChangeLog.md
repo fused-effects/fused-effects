@@ -25,7 +25,7 @@
 
 ## Backwards-incompatible changes
 
-- Renames the `Carrier` class to `Algebra` and its `eff` method to `alg`, and moved the responsibilities of `Control.Carrier` to `Control.Algebra`. This makes the library more consistent with the literature and encourages a style of naming that focuses on morphisms rather than objects.
+- Renames the `Carrier` class to `Algebra` and its `eff` method to `alg`, and moved the responsibilities of `Control.Carrier` to `Control.Algebra`. This makes the library more consistent with the literature and encourages a style of naming that focuses on morphisms rather than objects. ([#285](https://github.com/fused-effects/fused-effects/pull/285), [#294](https://github.com/fused-effects/fused-effects/pull/294))
 
 - Fixes unlawful behaviour in the `Applicative` instance for `ErrorC`, which had different behaviour between `<*>` and `ap` in the presence of a divergent rhs. In order to accomplish this, `ErrorC` has been defined as a wrapper around `Control.Monad.Trans.Except.ExceptT`. ([#228](https://github.com/fused-effects/fused-effects/pull/228))
 
