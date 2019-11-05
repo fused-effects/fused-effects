@@ -51,5 +51,5 @@ echo "-Wno-name-shadowing"
 echo "-Wno-safe"
 echo "-Wno-unsafe"
 
-[[ "$ghc_version" = 8.6.* ]] && echo "-Wno-star-is-type"
-[[ "$ghc_version" = 8.8.* ]] && echo "-Wno-missing-deriving-strategies"
+[[ "$ghc_version" = 8.6.* ]] && echo "-Wno-star-is-type" || true
+[[ "$ghc_version" = 8.8.* ]] && echo "-Wno-missing-deriving-strategies" || true
