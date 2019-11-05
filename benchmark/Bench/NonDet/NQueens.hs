@@ -5,7 +5,7 @@
 -- Based largely on the implementation by Sreekar Shastry,
 -- available at https://github.com/sshastry/queenslogic
 
-module NonDet.NQueens (benchmark) where
+module Bench.NonDet.NQueens (benchmark) where
 
 import Control.Applicative
 import Control.Monad (guard)

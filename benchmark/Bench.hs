@@ -12,7 +12,7 @@ import Data.Functor.Identity
 import Data.Monoid (Sum(..))
 import Gauge
 
-import qualified NonDet
+import qualified Bench.NonDet as NonDet
 
 main :: IO ()
 main = defaultMain
