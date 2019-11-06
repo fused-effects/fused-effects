@@ -82,5 +82,5 @@ instance MonadTrans (ReaderC r) where
 instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m) where
   alg (L (Ask       k)) = ReaderC (\ r -> runReader r (k r))
   alg (L (Local f m k)) = ReaderC (\ r -> runReader (f r) m) >>= k
-  alg (R other)         = ReaderC (\ r -> handleIdentity (runReader r) other)
+  alg (R other)         = ReaderC (\ r -> alg (hmap (runReader r) other))
   {-# INLINE alg #-}

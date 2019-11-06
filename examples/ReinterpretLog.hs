@@ -10,8 +10,10 @@
 --   structured log messages as strings.
 
 
+{-# LANGUAGE DeriveAnyClass             #-}
 {-# LANGUAGE DeriveFunctor              #-}
 {-# LANGUAGE DeriveGeneric              #-}
+{-# LANGUAGE DerivingStrategies         #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE InstanceSigs               #-}
@@ -104,9 +106,8 @@ runApplication =
 -- Log an 'a', then continue with 'k'.
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a (m k)
-  deriving (Functor, Generic1)
-
-instance Effect (Log a)
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor, Effect)
 
 -- Log an 'a'.
 log :: Has (Log a) sig m
@@ -123,7 +124,7 @@ log x =
 -- Carrier one: log strings to stdout.
 newtype LogStdoutC m a
   = LogStdoutC (m a)
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving newtype (Applicative, Functor, Monad, MonadIO)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects (and also
@@ -142,7 +143,7 @@ instance
         runLogStdout k
 
     R other ->
-      LogStdoutC (handleCoercible other)
+      LogStdoutC (alg (hmap runLogStdout other))
 
 -- The 'LogStdoutC' runner.
 runLogStdout ::
@@ -156,7 +157,7 @@ runLogStdout (LogStdoutC m) =
 -- using a function (provided at runtime) from 's' to 't'.
 newtype ReinterpretLogC s t m a
   = ReinterpretLogC { unReinterpretLogC :: ReaderC (s -> t) m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
+  deriving newtype (Applicative, Functor, Monad, MonadIO)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects, one of which
@@ -177,7 +178,7 @@ instance
         unReinterpretLogC k
 
     R other ->
-      ReinterpretLogC (handleCoercible other)
+      ReinterpretLogC (alg (R (handleCoercible other)))
 
 -- The 'ReinterpretLogC' runner.
 reinterpretLog ::
@@ -193,11 +194,13 @@ reinterpretLog f =
 -- example's test spec.
 newtype CollectLogMessagesC s m a
   = CollectLogMessagesC { unCollectLogMessagesC :: WriterC [s] m a }
-  deriving (Applicative, Functor, Monad)
+  deriving newtype (Applicative, Functor, Monad)
 
 instance
      -- So long as the 'm' monad can interpret the 'sig' effects...
-     Algebra sig m
+     ( Algebra sig m
+     , Effect sig
+     )
      -- ...the 'CollectLogMessagesC s m' monad can interpret 'Log s :+: sig'
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
@@ -212,7 +215,7 @@ instance
         unCollectLogMessagesC k
 
     R other ->
-      CollectLogMessagesC (handleCoercible other)
+      CollectLogMessagesC (alg (R (handleCoercible other)))
 
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages ::

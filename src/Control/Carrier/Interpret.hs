@@ -23,9 +23,7 @@ import qualified Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
-import Data.Functor.Identity (Identity(..))
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | A @Handler@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
@@ -55,11 +53,11 @@ reify a k = unsafeCoerce (Magic k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: (Effect eff, Monad m)
+  :: (HFunctor eff, Monad m)
   => (forall x . eff m x -> m x)
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
-runInterpret f m = reify (Handler (InterpretC . fmap runIdentity . f . thread (Identity ()) (fmap Identity . coerce))) (go m) where
+runInterpret f m = reify (Handler (InterpretC . f . handleCoercible)) (go m) where
   go :: InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
 
@@ -67,7 +65,7 @@ runInterpret f m = reify (Handler (InterpretC . fmap runIdentity . f . thread (I
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: (Effect eff, Monad m)
+  :: (HFunctor eff, Monad m)
   => (forall x . s -> eff (StateC s m) x -> m (s, x))
   -> s
   -> (forall t . Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
@@ -83,6 +81,6 @@ newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC (m a)
 instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
 
-instance (Effect eff, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
+instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
   alg (L eff)   = runHandler (getConst (reflect @s)) eff
-  alg (R other) = InterpretC (handleCoercible other)
+  alg (R other) = InterpretC (alg (handleCoercible other))

@@ -25,7 +25,8 @@ data Fresh m k
   = Fresh (Int -> m k)
   deriving (Functor, Generic1)
 
-instance Effect Fresh
+instance HFunctor Fresh
+instance Effect   Fresh
 
 
 -- | Produce a fresh (i.e. unique) 'Int'.

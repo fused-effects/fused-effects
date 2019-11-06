@@ -11,4 +11,5 @@ newtype Choose m k
   = Choose (Bool -> m k)
   deriving (Functor, Generic1)
 
-instance Effect Choose
+instance HFunctor Choose
+instance Effect   Choose

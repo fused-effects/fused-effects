@@ -43,5 +43,5 @@ instance MonadTrans TraceC where
 
 instance Algebra sig m => Algebra (Trace :+: sig) (TraceC m) where
   alg (L trace) = traceCont trace
-  alg (R other) = TraceC (handleCoercible other)
+  alg (R other) = TraceC (alg (handleCoercible other))
   {-# INLINE alg #-}

@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveAnyClass, DeriveGeneric, DeriveTraversable, DerivingStrategies, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Parser
 ( example
 ) where
@@ -107,9 +107,8 @@ example = testGroup "parser"
 
 
 data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
-  deriving (Functor, Generic1)
-
-instance Effect Symbol
+  deriving stock (Functor, Generic1)
+  deriving anyclass (HFunctor, Effect)
 
 satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char
 satisfy p = send (Satisfy p pure)
@@ -130,15 +129,16 @@ parse input = (>>= exhaustive) . runState input . runParseC
         exhaustive _       = empty
 
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
-  deriving (Alternative, Applicative, Functor, Monad)
+  deriving stock Functor
+  deriving newtype (Alternative, Applicative, Monad)
 
-instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
+instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) (ParseC m) where
   alg (L (Satisfy p k)) = do
     input <- ParseC get
     case input of
       c:cs | p c -> ParseC (put cs) *> k c
       _          -> empty
-  alg (R other)         = ParseC (handleCoercible other)
+  alg (R other)         = ParseC (alg (R (handleCoercible other)))
   {-# INLINE alg #-}
 
 

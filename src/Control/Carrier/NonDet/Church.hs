@@ -107,7 +107,7 @@ instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf _ -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance Algebra sig m => Algebra (NonDet :+: sig) (NonDetC m) where
+instance (Algebra sig m, Effect sig) => Algebra (NonDet :+: sig) (NonDetC m) where
   alg (L (L Empty))      = empty
   alg (L (R (Choose k))) = k True <|> k False
   alg (R other)          = NonDetC $ \ fork leaf nil -> alg (thread (pure ()) dst other) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil) where
