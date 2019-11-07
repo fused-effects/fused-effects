@@ -25,17 +25,17 @@ jobs:
       name: Cache ~/.cabal/packages
       with:
         path: ~/.cabal/packages
-        key: ${{ runner.os }}-${{ matrix.ghc }}-cabal-packages-${{ hashFiles('**/fused-effects.cabal') }}
+        key: ${{ runner.os }}-${{ matrix.ghc }}-cabal-packages
     - uses: actions/cache@preview
       name: Cache ~/.cabal/store
       with:
         path: ~/.cabal/store
-        key: ${{ runner.os }}-${{ matrix.ghc }}-cabal-store-${{ hashFiles('**/fused-effects.cabal') }}
+        key: ${{ runner.os }}-${{ matrix.ghc }}-cabal-store
     - uses: actions/cache@preview
       name: Cache dist-newstyle
       with:
         path: dist-newstyle
-        key: ${{ runner.os }}-${{ matrix.ghc }}-fused-effects-dist-${{ hashFiles('**/fused-effects.cabal') }}
+        key: ${{ runner.os }}-${{ matrix.ghc }}-fused-effects-dist
 
     - name: Install dependencies
       run: |
