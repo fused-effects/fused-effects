@@ -1,3 +1,5 @@
+# v1.0.0.0
+
 - Adds an `Empty` effect, modelling nondeterminism without choice ([#196](https://github.com/fused-effects/fused-effects/pull/196)).
 
 - Adds an `EmptyC` carrier for `Empty`. ([#196](https://github.com/fused-effects/fused-effects/pull/196))
