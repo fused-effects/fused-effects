@@ -272,12 +272,18 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 * [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computations.
 * [`fused-effects-exceptions`][exc] provides handlers for exceptions thrown in the `IO` monad.
 * [`fused-effects-resumable`][] provides resumable exceptions, which can also serve as a limited form of coroutines.
-* [`fused-effects-random`][] provides a `Random` effect integrated into a `fused-effects` stack.
+* [`fused-effects-mwc-random`][] provides a performant, high-quality source of random data, as well as values from common numerical distributions.
+* [`fused-effects-readline`][] provides a REPL effect that interfaces with [`haskeline`][] for its UI.
+* [`fused-effects-parser`][] provides parser-combinator style effects similar to parsing libraries such as [`trifecta`][].
 
 [exc]: https://github.com/fused-effects/fused-effects-exceptions
 [felens]: http://hackage.haskell.org/package/fused-effects-lens
-[`fused-effects-random`]: https://github.com/fused-effects/fused-effects-random
+[`fused-effects-mwc-random`]: https://github.com/fused-effects/fused-effects-mwc-random
 [`fused-effects-resumable`]: https://github.com/fused-effects/fused-effects-resumable
+[`fused-effects-readline`]: https://github.com/fused-effects/fused-effects-readline
+[`haskeline`]: https://hackage.haskell.org/package/haskeline
+[`fused-effects-parser`]: https://github.com/fused-effects/fused-effects-parser
+[`trifecta`]: https://hackage.haskell.org/package/trifecta
 [lens]: http://hackage.haskell.org/package/lens
 
 
