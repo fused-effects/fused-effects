@@ -296,30 +296,11 @@ Like [`mtl`][], `fused-effects` provides a library of monadic effects which can 
 
 Also like `mtl`, `fused-effects` allows scoped operations like `local` and `catchError` to be given different interpretations. As with first-order operations, `mtl` achieves this with a final tagless encoding via methods, whereas `fused-effects` achieves this with an initial algebra encoding via `Carrier` instances.
 
+In addition, `mtl` and `fused-effects` are similar in that they provide instances for the monad types defined in the `transformers` package (`Control.Monad.Reader`, `Control.Monad.Writer`, etc). This means that applications using `mtl` can migrate many existing `transformers`-based monad stacks to `fused-effects` with minimal code changes. `fused-effects` provides its own hierarchy of carrier monads (under the `Control.Carrier` namespace) that provide a more fluent interface for new code, though it may be useful to use `transformers` types when working with third-party libraries.
+
 Unlike `mtl`, effects are automatically available regardless of where they occur in the signature; in `mtl` this requires instances for all valid orderings of the transformers (O(n²) of them, in general).
 
-Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a signature. This is a tradeoff: `mtl` is able to provide excellent type inference for effectful operations like `get`, since the functional dependencies can resolve the state type from the monad type. On the other hand, this behaviour can be recovered in `fused-effects` using `newtype` wrappers with phantom type parameters and helper functions, e.g.:
-
-```haskell
-newtype Wrapper s m a = Wrapper { runWrapper :: m a }
-  deriving (Applicative, Functor, Monad)
-
-instance Algebra sig m => Algebra sig (Wrapper s m) where
-  alg = Wrapper . alg . handleCoercible
-
-getState :: Has (State s) sig m => Wrapper s m s
-getState = get
-```
-
-Indeed, `Wrapper` can now be made an instance of `MonadState`:
-
-```haskell
-instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
-  get = Control.Carrier.State.Strict.get
-  put = Control.Carrier.State.Strict.put
-```
-
-Thus, the approaches aren’t mutually exclusive; consumers are free to decide which approach makes the most sense for their situation.
+Also unlike `mtl`, there can be more than one `State` or `Reader` effect in a signature. This is a tradeoff: `mtl` is able to provide excellent type inference for effectful operations like `get`, since the functional dependencies can resolve the state type from the monad type.
 
 Unlike `fused-effects`, `mtl` provides a `ContT` monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects.
 
@@ -345,7 +326,7 @@ Finally, `fused-effects` has been [benchmarked](#benchmarks) as faster than `fre
 
 Like [`polysemy`](http://hackage.haskell.org/package/polysemy), `fused-effects` is a batteries-included effect system capable of scoped, reinterpretable algebraic effects.
 
-As of GHC 8.8, `fused-effects` outperforms `polysemy`, though new effects take more code to define in `fused-effects` than `polysemy` (though the `Control.Effect.Interpret` effect is suitable for rapid prototyping of new effects). Like `freer-simple` and unlike `fused-effects`, polysemy provides custom type errors if a given effect invocation is ambigous or invalid in the current context.
+As of GHC 8.8, `fused-effects` outperforms `polysemy`, though new effects take more code to define in `fused-effects` than `polysemy` (though the `Control.Carrer.Interpret` module provides a low-friction API for rapid prototyping of new effects). Like `freer-simple` and unlike `fused-effects`, polysemy provides custom type errors if a given effect invocation is ambigous or invalid in the current context.
 
 
 #### Comparison to `eff`

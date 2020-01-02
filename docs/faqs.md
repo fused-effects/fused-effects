@@ -31,3 +31,27 @@ okay = do
 ```
 
 The `@Int` syntax—an _explicit type application_ specifies that the return type of `get` must in this case be an `Int`. For more information about type applications, consult the [GHC manual](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/glasgow_exts.html#extension-TypeApplications).
+
+## How can I build effect stacks that interoperate correctly with `mtl`?
+
+There are two approaches: the first is to use the monadic types defined by `transformers` as the carriers for your effects. The resulting composition of monads will interoperate with `mtl` and any `mtl`-compatible library. The second is to wrap an existing monad stack with a phantom type representing some relevant effect information:
+
+```haskell
+newtype Wrapper s m a = Wrapper { runWrapper :: m a }
+  deriving (Applicative, Functor, Monad)
+
+instance Algebra sig m => Algebra sig (Wrapper s m) where
+  alg = Wrapper . alg . handleCoercible
+
+getState :: Has (State s) sig m => Wrapper s m s
+getState = get
+```
+
+Indeed, `Wrapper` can now be made an instance of `MonadState`:
+
+```haskell
+instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
+  get = Control.Carrier.State.Strict.get
+  put = Control.Carrier.State.Strict.put
+```
+
