@@ -74,7 +74,6 @@ import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Carrier.State.Strict
 import Control.Monad.IO.Class (liftIO)
-import qualified Control.Monad.State.Class as MTL
 
 main :: IO ()
 main = pure ()
