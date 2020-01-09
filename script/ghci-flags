@@ -3,53 +3,51 @@
 
 set -e
 
-cd $(dirname "$0")/..
+cd "$(dirname "$0")/.."
 
-root="$(pwd)"
 ghc_version="$(ghc --numeric-version)"
 
-if [ "$1" == "--builddir" ]; then
-  repl_builddir="$2"
-  shift 2
-else
-  repl_builddir=dist-newstyle
-fi
+# recent hie-bios requires us to output to the file at $HIE_BIOS_OUTPUT, but older builds & script/repl don’t set that var, so we default it to stdout
+output_file="${HIE_BIOS_OUTPUT:-/dev/stdout}"
 
-echo "-O0"
-echo "-ignore-dot-ghci"
+build_products_dir="dist-newstyle/build/x86_64-osx/ghc-$ghc_version/build-repl"
 
-echo "-outputdir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/fused-effects-1.0.0.0/build"
-echo "-odir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/fused-effects-1.0.0.0/build"
-echo "-hidir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/fused-effects-1.0.0.0/build"
-echo "-stubdir $repl_builddir/build/x86_64-osx/ghc-$ghc_version/fused-effects-1.0.0.0/build"
+function flags {
+  echo "-O0"
+  echo "-ignore-dot-ghci"
 
-echo "-i$root/src"
-echo "-i$root/benchmark"
-echo "-i$root/examples"
-echo "-i$root/test"
+  echo "-outputdir $build_products_dir"
+  echo "-odir $build_products_dir"
+  echo "-hidir $build_products_dir"
+  echo "-stubdir $build_products_dir"
 
-echo "-optP-include"
-echo "-optP$root/$repl_builddir/build/x86_64-osx/ghc-$ghc_version/fused-effects-1.0.0.0/build/autogen/cabal_macros.h"
+  echo "-isrc"
+  echo "-ibenchmark"
+  echo "-iexamples"
+  echo "-itest"
 
-echo "-hide-all-packages"
+  echo "-hide-all-packages"
 
-# Emit package flags from the environment file, removing comments & prefixing with -
-cabal exec --builddir=$repl_builddir -v0 bash -- -c 'cat $GHC_ENVIRONMENT' | grep -v '^--' | sed -e 's/^/-/'
+  # Emit package flags from the environment file, removing comments & prefixing with -
+  cabal v2-exec -v0 bash -- -c 'cat "$GHC_ENVIRONMENT"' | grep -v '^--' | sed -e 's/^/-/'
 
-echo "-XHaskell2010"
+  echo "-XHaskell2010"
 
-echo "-Wwarn"
+  echo "-Wwarn"
 
-echo "-Weverything"
-echo "-Wno-all-missed-specialisations"
-echo "-Wno-implicit-prelude"
-echo "-Wno-missed-specialisations"
-echo "-Wno-missing-import-lists"
-echo "-Wno-missing-local-signatures"
-echo "-Wno-monomorphism-restriction"
-echo "-Wno-name-shadowing"
-echo "-Wno-safe"
-echo "-Wno-unsafe"
+  echo "-Weverything"
+  echo "-Wno-all-missed-specialisations"
+  echo "-Wno-implicit-prelude"
+  echo "-Wno-missed-specialisations"
+  echo "-Wno-missing-import-lists"
+  echo "-Wno-missing-local-signatures"
+  echo "-Wno-monomorphism-restriction"
+  echo "-Wno-name-shadowing"
+  echo "-Wno-safe"
+  echo "-Wno-unsafe"
 
-[[ "$ghc_version" = 8.6.* ]] && echo "-Wno-star-is-type" || true
-[[ "$ghc_version" = 8.8.* ]] && echo "-Wno-missing-deriving-strategies" || true
+  [[ "$ghc_version" = 8.6.* ]] || [[ "$ghc_version" = 8.8.* ]] && echo "-Wno-star-is-type" || true
+  [[ "$ghc_version" = 8.8.* ]] && echo "-Wno-missing-deriving-strategies" || true
+}
+
+flags > "$output_file"
