@@ -24,6 +24,7 @@ module Control.Effect.State
 , modifyLazy
   -- * Re-exports
 , Algebra
+, Effect
 , Has
 , run
 ) where

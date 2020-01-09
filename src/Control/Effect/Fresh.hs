@@ -13,6 +13,7 @@ module Control.Effect.Fresh
 , fresh
   -- * Re-exports
 , Algebra
+, Effect
 , Has
 , run
 ) where

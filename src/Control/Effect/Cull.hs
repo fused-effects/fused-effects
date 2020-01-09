@@ -15,6 +15,7 @@ module Control.Effect.Cull
 , cull
   -- * Re-exports
 , Algebra
+, Effect
 , Has
 , run
 ) where
