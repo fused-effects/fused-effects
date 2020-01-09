@@ -19,6 +19,7 @@ module Control.Effect.Cut
 , cut
   -- * Re-exports
 , Algebra
+, Effect
 , Has
 , run
 ) where

@@ -20,6 +20,7 @@ module Control.Effect.NonDet
   -- * Re-exports
 , Alternative(..)
 , Algebra
+, Effect
 , Has
 , MonadPlus(..)
 , guard
