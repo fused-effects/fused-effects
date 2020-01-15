@@ -117,6 +117,12 @@ instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (Except.Except
 instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . alg . handleCoercible
 
+instance Algebra sig m => Algebra sig (Ap m) where
+  alg = Ap . alg . handleCoercible
+
+instance Algebra sig m => Algebra sig (Alt m) where
+  alg = Alt . alg . handleCoercible
+
 instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg (L (Ask       k)) = Reader.ask >>= k
   alg (L (Local f m k)) = Reader.local f m >>= k
