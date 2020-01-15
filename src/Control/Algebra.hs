@@ -41,6 +41,7 @@ import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
 import Data.List.NonEmpty (NonEmpty)
+import Data.Monoid
 import qualified Data.Semigroup as S
 import Data.Tuple (swap)
 
