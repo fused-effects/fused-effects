@@ -1,4 +1,4 @@
-{-# LANGUAGE ConstraintKinds, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE CPP, ConstraintKinds, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances #-}
 
 {- | The 'Algebra' class is the mechanism with which effects are interpreted.
 
@@ -118,8 +118,10 @@ instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (Except.Except
 instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . alg . handleCoercible
 
+#if MIN_VERSION_base(4,12,0)
 instance Algebra sig m => Algebra sig (Ap m) where
   alg = Ap . alg . handleCoercible
+#endif
 
 instance Algebra sig m => Algebra sig (Alt m) where
   alg = Alt . alg . handleCoercible
