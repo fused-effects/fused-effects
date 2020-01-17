@@ -119,10 +119,31 @@ instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . alg . handleCoercible
 
 #if MIN_VERSION_base(4,12,0)
+-- | This instance permits effectful actions to be lifted into the 'Ap' monad
+-- given a monoidal return type, which can provide clarity when chaining calls
+-- to 'mappend'.
+--
+-- > mappend <$> act1 <*> (mappend <$> act2 <*> act3)
+--
+-- is equivalent to
+--
+-- > getAp (act1 <> act2 <> act3)
+--
+-- @since 1.0.1.0
 instance Algebra sig m => Algebra sig (Ap m) where
   alg = Ap . alg . handleCoercible
 #endif
 
+-- | This instance permits effectful actions to be lifted into the 'Alt' monad,
+-- which eases the invocation of repeated alternation with '<|>':
+--
+-- > a <|> b <|> c <|> d
+--
+-- is equivalent to
+--
+-- > getAlt (mconcat [a, b, c, d])
+--
+-- @since 1.0.1.0
 instance Algebra sig m => Algebra sig (Alt m) where
   alg = Alt . alg . handleCoercible
 
