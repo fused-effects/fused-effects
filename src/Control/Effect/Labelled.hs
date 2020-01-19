@@ -16,7 +16,6 @@ module Control.Effect.Labelled
 , LabelledMember(..)
 , LabelledMembers
 , HasLabelled
-, dsend
 , runInLabel
 , InLabel(InLabel)
 , module Control.Algebra
@@ -83,12 +82,6 @@ type family LabelledMembers label sub sup = (res :: Constraint) | res -> label s
 type HasLabelled label eff sig m = (LabelledMembers label eff sig, Algebra sig m)
 
 
--- | Construct a request for an effect to be interpreted by some handler later on.
-dsend :: (LabelledMember label eff sig, Algebra sig m) => Labelled label eff m a -> m a
-dsend = alg . dinj
-{-# INLINE dsend #-}
-
-
 newtype InLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = InLabel { runInLabel :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
@@ -97,5 +90,5 @@ instance MonadTrans (InLabel sub label) where
 
 instance (LabelledMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (InLabel label sub m) where
   alg = \case
-    L sub -> InLabel (dsend @label (Labelled (handleCoercible sub)))
+    L sub -> InLabel (alg (dinj @label (Labelled (handleCoercible sub))))
     R sig -> InLabel (send (handleCoercible sig))
