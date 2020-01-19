@@ -10,7 +10,7 @@ module Control.Algebra.Dependent
 
 import Control.Effect.Sum
 
-newtype Dep (label :: k) (eff :: (* -> *) -> (* -> *)) m a = Dep { getDep :: eff m a }
+newtype Dep (label :: k) (eff :: (* -> *) -> (* -> *)) m a = Dep { runDep :: eff m a }
 
 class DMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
