@@ -14,7 +14,6 @@ module Control.Effect.Labelled
 ( runLabelled
 , Labelled(Labelled)
 , LabelledMember(..)
-, LabelledMembers
 , HasLabelled
 , runUnderLabel
 , UnderLabel(UnderLabel)
@@ -24,7 +23,6 @@ module Control.Effect.Labelled
 import Control.Algebra
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Kind (Constraint)
 
 newtype Labelled (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Labelled { runLabelled :: sub m a }
   deriving (Applicative, Effect, Functor, HFunctor, Monad, MonadFail, MonadIO, MonadTrans)
@@ -64,22 +62,10 @@ instance {-# OVERLAPPABLE #-}
   injLabelled = R . injLabelled
 
 
--- | Decompose sums on the left into multiple 'LabelledMember' constraints.
---
--- Note that while this, and by extension 'HasLabelled', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
-type family LabelledMembers label sub sup = (res :: Constraint) | res -> label sub sup where
-  LabelledMembers label (l :+: r) u = (LabelledMembers label l u, LabelledMembers label r u)
-  LabelledMembers label t         u = LabelledMember label t u
-
-
 -- | @m@ is a carrier for @sig@ containing @eff@ associated with @label@.
 --
--- Note that if @eff@ is a sum, it will be decomposed into multiple 'LabelledMember' constraints. While this technically allows one to combine multiple unrelated effects into a single 'HasLabelled' constraint, doing so has two significant drawbacks:
---
--- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles.
---
--- 2. It defeats @ghc@’s warnings for redundant constraints, and thus can lead to a proliferation of redundant constraints as code is changed.
-type HasLabelled label eff sig m = (LabelledMembers label eff sig, Algebra sig m)
+-- Note that if @eff@ is a sum, it will /not/ be decomposed into multiple 'LabelledMember' constraints. While this technically is possible, it results in unsolvable constraints, as the functional dependencies in 'Labelled' prevent assocating the same label with multiple distinct effects within a signature.
+type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 
 
 newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = UnderLabel { runUnderLabel :: m a }
