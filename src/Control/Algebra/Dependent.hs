@@ -8,7 +8,8 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Algebra.Dependent
-( Dep(..)
+( runDep
+, Dep(Dep)
 , DMember(..)
 , DMembers
 , DHas
