@@ -20,6 +20,7 @@ import Data.Kind (Constraint)
 
 newtype Dep (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Dep { runDep :: sub m a }
 
+
 class DMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
   dinj :: Dep label sub m a -> sup m a
