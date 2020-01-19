@@ -17,8 +17,8 @@ module Control.Effect.Labelled
 , DMembers
 , DHas
 , dsend
-, runInDep
-, InDep(InDep)
+, runInLabel
+, InLabel(InLabel)
 , module Control.Algebra
 ) where
 
@@ -89,13 +89,13 @@ dsend = alg . dinj
 {-# INLINE dsend #-}
 
 
-newtype InDep (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = InDep { runInDep :: m a }
+newtype InLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = InLabel { runInLabel :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance MonadTrans (InDep sub label) where
-  lift = InDep
+instance MonadTrans (InLabel sub label) where
+  lift = InLabel
 
-instance (DMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (InDep label sub m) where
+instance (DMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (InLabel label sub m) where
   alg = \case
-    L sub -> InDep (dsend @label (Labelled (handleCoercible sub)))
-    R sig -> InDep (send (handleCoercible sig))
+    L sub -> InLabel (dsend @label (Labelled (handleCoercible sub)))
+    R sig -> InLabel (send (handleCoercible sig))
