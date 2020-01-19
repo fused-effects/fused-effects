@@ -15,7 +15,7 @@ module Control.Effect.Labelled
 , Labelled(Labelled)
 , DMember(..)
 , DMembers
-, DHas
+, HasLabelled
 , dsend
 , runInLabel
 , InLabel(InLabel)
@@ -67,7 +67,7 @@ instance {-# OVERLAPPABLE #-}
 
 -- | Decompose sums on the left into multiple 'Member' constraints.
 --
--- Note that while this, and by extension 'DHas', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
+-- Note that while this, and by extension 'HasLabelled', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
 type family DMembers label sub sup = (res :: Constraint) | res -> label sub sup where
   DMembers label (l :+: r) u = (DMembers label l u, DMembers label r u)
   DMembers label t         u = DMember label t u
@@ -75,12 +75,12 @@ type family DMembers label sub sup = (res :: Constraint) | res -> label sub sup 
 
 -- | @m@ is a carrier for @sig@ containing @eff@ associated with @label@.
 --
--- Note that if @eff@ is a sum, it will be decomposed into multiple 'DMember' constraints. While this technically allows one to combine multiple unrelated effects into a single 'DHas' constraint, doing so has two significant drawbacks:
+-- Note that if @eff@ is a sum, it will be decomposed into multiple 'DMember' constraints. While this technically allows one to combine multiple unrelated effects into a single 'HasLabelled' constraint, doing so has two significant drawbacks:
 --
 -- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles.
 --
 -- 2. It defeats @ghc@’s warnings for redundant constraints, and thus can lead to a proliferation of redundant constraints as code is changed.
-type DHas label eff sig m = (DMembers label eff sig, Algebra sig m)
+type HasLabelled label eff sig m = (DMembers label eff sig, Algebra sig m)
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
