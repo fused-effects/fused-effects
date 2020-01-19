@@ -51,7 +51,7 @@ instance {-# OVERLAPPABLE #-}
 
 -- | Decompose sums on the left into multiple 'Member' constraints.
 --
--- Note that while this, and by extension 'Control.Algebra.Has', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
+-- Note that while this, and by extension 'DHas', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
 type family DMembers label sub sup = (res :: Constraint) | res -> label sub sup where
   DMembers label (l :+: r) u = (DMembers label l u, DMembers label r u)
   DMembers label t         u = DMember label t u
