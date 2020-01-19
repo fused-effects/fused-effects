@@ -1,13 +1,16 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Algebra.Dependent
-() where
+( Dep(..)
+) where
 
 import Control.Effect.Sum
+
+newtype Dep (label :: k) (eff :: (* -> *) -> (* -> *)) m a = Dep { getDep :: eff m a }
 
 class DMember (sub :: (* -> *) -> (* -> *)) sup where
   -- | Inject a member of a signature into the signature.
