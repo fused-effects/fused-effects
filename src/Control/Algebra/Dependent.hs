@@ -13,7 +13,7 @@ module Control.Algebra.Dependent
 import Control.Algebra
 import Data.Kind (Constraint)
 
-newtype Dep (label :: k) (eff :: (* -> *) -> (* -> *)) m a = Dep { runDep :: eff m a }
+newtype Dep (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Dep { runDep :: sub m a }
 
 class DMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
