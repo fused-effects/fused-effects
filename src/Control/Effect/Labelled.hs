@@ -16,8 +16,8 @@ module Control.Effect.Labelled
 , LabelledMember(..)
 , LabelledMembers
 , HasLabelled
-, runInLabel
-, InLabel(InLabel)
+, runUnderLabel
+, UnderLabel(UnderLabel)
 , module Control.Algebra
 ) where
 
@@ -82,13 +82,13 @@ type family LabelledMembers label sub sup = (res :: Constraint) | res -> label s
 type HasLabelled label eff sig m = (LabelledMembers label eff sig, Algebra sig m)
 
 
-newtype InLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = InLabel { runInLabel :: m a }
+newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = UnderLabel { runUnderLabel :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
-instance MonadTrans (InLabel sub label) where
-  lift = InLabel
+instance MonadTrans (UnderLabel sub label) where
+  lift = UnderLabel
 
-instance (LabelledMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (InLabel label sub m) where
+instance (LabelledMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
   alg = \case
-    L sub -> InLabel (alg (dinj @label (Labelled (handleCoercible sub))))
-    R sig -> InLabel (send (handleCoercible sig))
+    L sub -> UnderLabel (alg (dinj @label (Labelled (handleCoercible sub))))
+    R sig -> UnderLabel (send (handleCoercible sig))
