@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -16,9 +17,11 @@ module Control.Algebra.Dependent
 ) where
 
 import Control.Algebra
+import Control.Monad.IO.Class
 import Data.Kind (Constraint)
 
 newtype Dep (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Dep { runDep :: sub m a }
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
 
 
 class DMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
