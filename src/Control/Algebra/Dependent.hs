@@ -7,6 +7,7 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Algebra.Dependent
 ( Dep(..)
+, DMember(..)
 , dsend
 ) where
 
