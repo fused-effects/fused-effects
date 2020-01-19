@@ -10,6 +10,7 @@ module Control.Algebra.Dependent
 , DMember(..)
 , DMembers
 , dsend
+, module Control.Algebra
 ) where
 
 import Control.Algebra
