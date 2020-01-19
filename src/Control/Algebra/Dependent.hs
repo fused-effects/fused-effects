@@ -5,6 +5,8 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -92,3 +94,8 @@ newtype InDep (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = InDep
 
 instance MonadTrans (InDep sub label) where
   lift = InDep
+
+instance (DMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (InDep label sub m) where
+  alg = \case
+    L sub -> InDep (dsend @label (Dep (handleCoercible sub)))
+    R sig -> InDep (send (handleCoercible sig))
