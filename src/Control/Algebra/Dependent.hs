@@ -3,6 +3,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -25,8 +26,10 @@ import Data.Kind (Constraint)
 newtype Dep (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Dep { runDep :: sub m a }
   deriving (Applicative, Effect, Functor, HFunctor, Monad, MonadFail, MonadIO, MonadTrans)
 
-instance Algebra sig (sub m) => Algebra sig (Dep label sub m) where
-  alg = Dep . send . handleCoercible
+instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra (Dep label eff :+: sig) (Dep label sub m) where
+  alg = \case
+    L eff -> Dep (send (handleCoercible (runDep eff)))
+    R sig -> Dep (send (handleCoercible sig))
 
 
 class DMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
