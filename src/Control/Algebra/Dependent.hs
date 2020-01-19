@@ -89,3 +89,6 @@ dsend = alg . dinj
 
 newtype InDep (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = InDep { runInDep :: m a }
   deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+
+instance MonadTrans (InDep sub label) where
+  lift = InDep
