@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -12,7 +12,7 @@ import Control.Effect.Sum
 
 newtype Dep (label :: k) (eff :: (* -> *) -> (* -> *)) m a = Dep { getDep :: eff m a }
 
-class DMember label (sub :: (* -> *) -> (* -> *)) sup where
+class DMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
   dinj :: Dep label sub m a -> sup m a
 
