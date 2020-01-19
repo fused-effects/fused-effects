@@ -19,10 +19,11 @@ module Control.Algebra.Dependent
 
 import Control.Algebra
 import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 import Data.Kind (Constraint)
 
 newtype Dep (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Dep { runDep :: sub m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
 
 instance Algebra sig (sub m) => Algebra sig (Dep label sub m) where
   alg = Dep . send . handleCoercible
