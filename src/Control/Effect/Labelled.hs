@@ -65,7 +65,7 @@ instance {-# OVERLAPPABLE #-}
   dinj = R . dinj
 
 
--- | Decompose sums on the left into multiple 'Member' constraints.
+-- | Decompose sums on the left into multiple 'LabelledMember' constraints.
 --
 -- Note that while this, and by extension 'HasLabelled', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
 type family LabelledMembers label sub sup = (res :: Constraint) | res -> label sub sup where
