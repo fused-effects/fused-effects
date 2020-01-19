@@ -23,7 +23,7 @@ import Control.Monad.Trans.Class
 import Data.Kind (Constraint)
 
 newtype Dep (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Dep { runDep :: sub m a }
-  deriving (Applicative, Functor, Monad, MonadFail, MonadIO, MonadTrans)
+  deriving (Applicative, Functor, HFunctor, Monad, MonadFail, MonadIO, MonadTrans)
 
 instance Algebra sig (sub m) => Algebra sig (Dep label sub m) where
   alg = Dep . send . handleCoercible
