@@ -15,6 +15,8 @@ module Control.Algebra.Dependent
 , DMembers
 , DHas
 , dsend
+, runInDep
+, InDep(InDep)
 , module Control.Algebra
 ) where
 
@@ -83,3 +85,7 @@ type DHas label eff sig m = (DMembers label eff sig, Algebra sig m)
 dsend :: (DMember label eff sig, Algebra sig m) => Dep label eff m a -> m a
 dsend = alg . dinj
 {-# INLINE dsend #-}
+
+
+newtype InDep (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = InDep { runInDep :: m a }
+  deriving (Applicative, Functor, Monad, MonadFail, MonadIO)
