@@ -7,9 +7,10 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Algebra.Dependent
 ( Dep(..)
+, dsend
 ) where
 
-import Control.Effect.Sum
+import Control.Algebra
 import Data.Kind (Constraint)
 
 newtype Dep (label :: k) (eff :: (* -> *) -> (* -> *)) m a = Dep { runDep :: eff m a }
@@ -49,3 +50,9 @@ instance {-# OVERLAPPABLE #-}
 type family DMembers label sub sup = (res :: Constraint) | res -> label sub sup where
   DMembers label (l :+: r) u = (DMembers label l u, DMembers label r u)
   DMembers label t         u = DMember label t u
+
+
+-- | Construct a request for an effect to be interpreted by some handler later on.
+dsend :: (DMember label eff sig, Algebra sig m) => Dep label eff m a -> m a
+dsend = alg . dinj
+{-# INLINE dsend #-}
