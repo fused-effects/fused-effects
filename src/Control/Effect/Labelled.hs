@@ -10,7 +10,7 @@
 {-# LANGUAGE TypeFamilyDependencies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
-module Control.Algebra.Dependent
+module Control.Effect.Labelled
 ( runDep
 , Dep(Dep)
 , DMember(..)
