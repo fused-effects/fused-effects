@@ -11,8 +11,8 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Effect.Labelled
-( runDep
-, Dep(Dep)
+( runLabelled
+, Labelled(Labelled)
 , DMember(..)
 , DMembers
 , DHas
@@ -27,21 +27,21 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Kind (Constraint)
 
-newtype Dep (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Dep { runDep :: sub m a }
+newtype Labelled (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Labelled { runLabelled :: sub m a }
   deriving (Applicative, Effect, Functor, HFunctor, Monad, MonadFail, MonadIO, MonadTrans)
 
-instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra (Dep label eff :+: sig) (Dep label sub m) where
+instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
   alg = \case
-    L eff -> Dep (send (handleCoercible (runDep eff)))
-    R sig -> Dep (send (handleCoercible sig))
+    L eff -> Labelled (send (handleCoercible (runLabelled eff)))
+    R sig -> Labelled (send (handleCoercible sig))
 
 
 class DMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
-  dinj :: Dep label sub m a -> sup m a
+  dinj :: Labelled label sub m a -> sup m a
 
 -- | Reflexivity: @t@ is a member of itself.
-instance DMember label t (Dep label t) where
+instance DMember label t (Labelled label t) where
   dinj = id
 
 -- | Left-recursion: if @t@ is a member of @l1 ':+:' l2 ':+:' r@, then we can inject it into @(l1 ':+:' l2) ':+:' r@ by injection into a right-recursive signature, followed by left-association.
@@ -55,7 +55,7 @@ instance {-# OVERLAPPABLE #-}
 
 -- | Left-occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
 instance {-# OVERLAPPABLE #-}
-         DMember label l (Dep label l :+: r) where
+         DMember label l (Labelled label l :+: r) where
   dinj = L
 
 -- | Right-recursion: if @t@ is a member of @r@, we can inject it into @r@ in O(n), followed by lifting that into @l ':+:' r@ in O(1).
@@ -84,7 +84,7 @@ type DHas label eff sig m = (DMembers label eff sig, Algebra sig m)
 
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
-dsend :: (DMember label eff sig, Algebra sig m) => Dep label eff m a -> m a
+dsend :: (DMember label eff sig, Algebra sig m) => Labelled label eff m a -> m a
 dsend = alg . dinj
 {-# INLINE dsend #-}
 
@@ -97,5 +97,5 @@ instance MonadTrans (InDep sub label) where
 
 instance (DMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (InDep label sub m) where
   alg = \case
-    L sub -> InDep (dsend @label (Dep (handleCoercible sub)))
+    L sub -> InDep (dsend @label (Labelled (handleCoercible sub)))
     R sig -> InDep (send (handleCoercible sig))
