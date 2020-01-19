@@ -8,6 +8,7 @@
 module Control.Algebra.Dependent
 ( Dep(..)
 , DMember(..)
+, DMembers
 , dsend
 ) where
 
