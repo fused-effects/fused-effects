@@ -2,6 +2,7 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Algebra.Dependent
@@ -9,6 +10,7 @@ module Control.Algebra.Dependent
 ) where
 
 import Control.Effect.Sum
+import Data.Kind (Constraint)
 
 newtype Dep (label :: k) (eff :: (* -> *) -> (* -> *)) m a = Dep { runDep :: eff m a }
 
@@ -39,3 +41,11 @@ instance {-# OVERLAPPABLE #-}
          DMember label l r
       => DMember label l (l' :+: r) where
   dinj = R . dinj
+
+
+-- | Decompose sums on the left into multiple 'Member' constraints.
+--
+-- Note that while this, and by extension 'Control.Algebra.Has', can be used to group together multiple membership checks into a single (composite) constraint, large signatures on the left can slow compiles down due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095).
+type family DMembers label sub sup :: Constraint where
+  DMembers label (l :+: r) u = (DMembers label l u, DMembers label r u)
+  DMembers label t         u = DMember label t u
