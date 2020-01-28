@@ -12,7 +12,7 @@ jobs:
         cabal: ["3.0"]
 
     steps:
-    - uses: actions/checkout@master
+    - uses: actions/checkout@v2
       if: github.event.action == 'opened' || github.event.action == 'synchronize'
 
     - uses: actions/setup-haskell@v1
