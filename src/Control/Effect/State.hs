@@ -22,6 +22,7 @@ module Control.Effect.State
 , put
 , modify
 , modifyLazy
+, state
   -- * Re-exports
 , Algebra
 , Effect
@@ -90,3 +91,8 @@ modify f = do
 modifyLazy :: Has (State s) sig m => (s -> s) -> m ()
 modifyLazy f = get >>= put . f
 {-# INLINEABLE modifyLazy #-}
+
+state :: Has (State s) sig m => (s -> (s, a)) -> m a
+state f = do
+  (s', a) <- gets f
+  a <$ put s'
