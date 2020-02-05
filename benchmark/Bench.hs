@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -6,6 +5,8 @@
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Avoid lambda" #-}
 module Main
 ( main
 ) where
@@ -58,4 +59,4 @@ tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
 
 modLoop :: Has (State (Sum Int)) sig m => Int -> m ()
-modLoop i = replicateM_ i (modify (+ (Sum (1 :: Int))))
+modLoop i = replicateM_ i (modify (+ Sum (1 :: Int)))

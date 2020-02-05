@@ -81,7 +81,7 @@ runInterpretState
   -> m (s, a)
 runInterpretState handler state m
   = runState state
-  $ runInterpret (\e -> StateC (\s -> handler s e)) m
+  $ runInterpret (\e -> StateC (`handler` e)) m
 
 -- | @since 1.0.0.0
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC (m a)

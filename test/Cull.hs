@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 -- GHC 8.2.2 warns that the Has Cull sig m constraint on gen0 is redundant, but doesn’t typecheck without it. Newer GHCs typecheck just fine either way and also don’t warn, so … whatever?
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Cull

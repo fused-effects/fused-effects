@@ -23,8 +23,7 @@ import Control.Algebra
 import GHC.Generics (Generic1)
 
 -- | @since 0.1.0.0
-data Fresh m k
-  = Fresh (Int -> m k)
+newtype Fresh m k = Fresh (Int -> m k)
   deriving (Functor, Generic1)
 
 instance HFunctor Fresh

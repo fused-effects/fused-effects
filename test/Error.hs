@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 module Error
 ( tests
 , gen0
@@ -19,7 +21,7 @@ import           Test.Tasty
 import qualified Throw
 
 tests :: TestTree
-tests = testGroup "Error" $
+tests = testGroup "Error"
   [ testGroup "ErrorC"  $
     [ testMonad
     , testMonadFix

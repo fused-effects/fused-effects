@@ -1,5 +1,4 @@
 {-# LANGUAGE DataKinds #-}
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
@@ -10,7 +9,6 @@
 {-# LANGUAGE PatternSynonyms #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -100,7 +98,7 @@ m
   -> GenM m                                              -- ^ A computation generator.
 m terminals nonterminals = m where
   m :: GenM m
-  m = \ a -> Comp1 $ scale (`div` 2) $ recursive Hedgehog.choice
+  m a = Comp1 $ scale (`div` 2) $ recursive Hedgehog.choice
     (unComp1 <$> ((Gen.label "pure" pure <*> a) : terminals a))
     ( unComp1 (addLabel ">>" (Gen.subtermM2 (m a) (m a) (\ a b -> infixL 1 ">>" (>>) <*> a <*> b)))
     : (unComp1 <$> nonterminals m a))
@@ -301,7 +299,7 @@ instance Show (Term a) where
     Pair -> showParen True (showString ",")
     InfixL p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
     InfixR p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
-    Pair :<*> a :<*> b -> showParen True (showsPrec 0 a . showString ", " . showsPrec 0 b)
+    Pair :<*> a :<*> b -> showParen True (shows a . showString ", " . shows b)
     InfixL p s _ :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
     InfixR p s _ :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
     f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)

@@ -84,7 +84,7 @@ instance Monad m => Applicative (StateC s m) where
     ~(s'', x) <- mx s'
     pure (s'', f x)
   {-# INLINE (<*>) #-}
-  m *> k = m >>= \_ -> k
+  m *> k = m >>= const k
   {-# INLINE (*>) #-}
 
 instance Monad m => Monad (StateC s m) where

@@ -1,4 +1,3 @@
-{-# LANGUAGE TypeApplications #-}
 module Lift
 ( tests
 ) where
