@@ -1,0 +1,33 @@
+steps:
+  - simple_align:
+      cases: true
+      top_level_patterns: true
+      records: true
+
+  - imports:
+      align: file
+      list_align: after_alias
+      pad_module_names: false
+      long_list_align: new_line_multiline
+      empty_list_align: inherit
+      list_padding: 2
+      separate_lists: false
+      space_surround: false
+
+  - language_pragmas:
+      style: vertical
+      align: false
+      remove_redundant: true
+
+  - tabs:
+      spaces: 2
+
+  - trailing_whitespace: {}
+
+columns: 120
+
+newline: native
+
+language_extensions:
+- FlexibleContexts
+- MultiParamTypeClasses
