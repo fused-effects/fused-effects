@@ -3,7 +3,7 @@ module Monad
 ( test
 ) where
 
-import Control.Monad ((>=>), ap)
+import Control.Monad (ap, (>=>))
 import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog

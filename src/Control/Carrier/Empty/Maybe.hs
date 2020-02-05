@@ -1,4 +1,8 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | A carrier for an 'Empty' effect, indicating failure with a 'Nothing' value. Users that need access to an error message should use the 'Control.Effect.Fail.Fail' effect.
 
@@ -15,13 +19,13 @@ module Control.Carrier.Empty.Maybe
 , module Control.Effect.Empty
 ) where
 
-import Control.Algebra
-import Control.Effect.Empty
+import           Control.Algebra
+import           Control.Effect.Empty
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.Maybe
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Maybe
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --

@@ -1,4 +1,8 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A carrier for the 'Control.Effect.Trace' effect that aggregates and returns all traced values.
 --
@@ -11,17 +15,17 @@ module Control.Carrier.Trace.Returning
 , module Control.Effect.Trace
 ) where
 
-import Control.Algebra
-import Control.Applicative (Alternative(..))
-import Control.Carrier.Writer.Strict
-import Control.Effect.Trace
-import Control.Monad (MonadPlus(..))
+import           Control.Algebra
+import           Control.Applicative (Alternative(..))
+import           Control.Carrier.Writer.Strict
+import           Control.Effect.Trace
+import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Data.Bifunctor (first)
-import Data.Monoid (Endo(..))
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Data.Bifunctor (first)
+import           Data.Monoid (Endo(..))
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --

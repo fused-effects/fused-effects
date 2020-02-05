@@ -1,4 +1,5 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
 module Error
 ( tests
 , gen0
@@ -6,15 +7,15 @@ module Error
 , test
 ) where
 
-import qualified Control.Carrier.Error.Either as ErrorC
-import Control.Effect.Error
-import qualified Control.Monad.Trans.Except as ExceptT
 import qualified Catch
-import Data.Semigroup as S ((<>))
-import Gen
+import qualified Control.Carrier.Error.Either as ErrorC
+import           Control.Effect.Error
+import qualified Control.Monad.Trans.Except as ExceptT
+import           Data.Semigroup as S ((<>))
+import           Gen
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
+import           Test.Tasty
 import qualified Throw
 
 tests :: TestTree

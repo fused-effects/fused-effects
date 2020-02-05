@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveGeneric #-}
 module Control.Effect.Choose.Internal
 ( Choose(..)
 ) where

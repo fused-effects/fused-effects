@@ -1,4 +1,8 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
 module Reader
 ( tests
 , gen0
@@ -7,17 +11,17 @@ module Reader
 ) where
 
 import qualified Control.Carrier.Reader as ReaderC
-import Control.Effect.Reader
+import           Control.Effect.Reader
 import qualified Control.Monad.Trans.Reader as ReaderT
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
-import Data.Function ((&))
-import Gen
-import GHC.Generics ((:.:)(..))
+import           Data.Function ((&))
+import           Gen
+import           GHC.Generics ((:.:)(..))
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Reader"

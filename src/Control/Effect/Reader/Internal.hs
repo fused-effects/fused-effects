@@ -1,4 +1,6 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE StandaloneDeriving #-}
 module Control.Effect.Reader.Internal
 ( Reader(..)
 ) where

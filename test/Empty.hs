@@ -1,4 +1,7 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module Empty
 ( tests
 , gen0
@@ -6,13 +9,13 @@ module Empty
 ) where
 
 import qualified Control.Carrier.Empty.Maybe as EmptyC
-import Control.Effect.Empty
-import Data.Maybe (maybeToList)
-import Gen
+import           Control.Effect.Empty
+import           Data.Maybe (maybeToList)
+import           Gen
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty"

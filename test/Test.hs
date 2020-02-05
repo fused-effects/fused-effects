@@ -17,9 +17,9 @@ import qualified NonDet
 import qualified NonDet.Church
 import qualified Reader
 import qualified State
+import           Test.Tasty
 import qualified Throw
 import qualified Writer
-import Test.Tasty
 
 main :: IO ()
 main = defaultMain $ testGroup "unit tests"

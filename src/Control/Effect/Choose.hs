@@ -29,11 +29,11 @@ module Control.Effect.Choose
 , run
 ) where
 
-import Control.Algebra
-import Control.Effect.Choose.Internal (Choose(..))
-import Control.Effect.Empty
-import Data.Bool (bool)
-import Data.List.NonEmpty (NonEmpty (..))
+import           Control.Algebra
+import           Control.Effect.Choose.Internal (Choose(..))
+import           Control.Effect.Empty
+import           Data.Bool (bool)
+import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Semigroup as S
 
 -- | Nondeterministically choose between two computations.

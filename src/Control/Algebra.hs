@@ -1,4 +1,11 @@
-{-# LANGUAGE CPP, ConstraintKinds, DeriveFunctor, FlexibleInstances, FunctionalDependencies, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE ConstraintKinds #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | The 'Algebra' class is the mechanism with which effects are interpreted.
 
@@ -16,21 +23,19 @@ module Control.Algebra
 , module Control.Effect.Class
 ) where
 
-import Control.Effect.Catch.Internal
-import Control.Effect.Choose.Internal
-import Control.Effect.Class
-import Control.Effect.Empty.Internal
-import Control.Effect.Error.Internal
-import Control.Effect.Lift.Internal
-import Control.Effect.NonDet.Internal
-import Control.Effect.Reader.Internal
-import Control.Effect.State.Internal
-import Control.Effect.Sum ((:+:)(..), Member(..), Members)
-import Control.Effect.Throw.Internal
-import Control.Effect.Writer.Internal
-import Control.Monad ((<=<))
-import Data.Coerce
-import Data.Functor.Identity
+import           Control.Effect.Catch.Internal
+import           Control.Effect.Choose.Internal
+import           Control.Effect.Class
+import           Control.Effect.Empty.Internal
+import           Control.Effect.Error.Internal
+import           Control.Effect.Lift.Internal
+import           Control.Effect.NonDet.Internal
+import           Control.Effect.Reader.Internal
+import           Control.Effect.State.Internal
+import           Control.Effect.Sum ((:+:)(..), Member(..), Members)
+import           Control.Effect.Throw.Internal
+import           Control.Effect.Writer.Internal
+import           Control.Monad ((<=<))
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Identity as Identity
 import qualified Control.Monad.Trans.Reader as Reader
@@ -40,10 +45,12 @@ import qualified Control.Monad.Trans.State.Lazy as State.Lazy
 import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
-import Data.List.NonEmpty (NonEmpty)
-import Data.Monoid
+import           Data.Coerce
+import           Data.Functor.Identity
+import           Data.List.NonEmpty (NonEmpty)
+import           Data.Monoid
 import qualified Data.Semigroup as S
-import Data.Tuple (swap)
+import           Data.Tuple (swap)
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
 --

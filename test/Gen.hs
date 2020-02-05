@@ -1,4 +1,19 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, PatternSynonyms, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 module Gen
 ( module Data.Functor.Identity
@@ -57,24 +72,24 @@ module Gen
 , Fn.apply
 ) where
 
-import Control.Applicative
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.Writer
-import Data.Foldable (traverse_)
-import Data.Function (on)
-import Data.Functor.Classes (showsUnaryWith)
-import Data.Functor.Identity
-import Data.Proxy
+import           Control.Applicative
+import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Writer
+import           Data.Foldable (traverse_)
+import           Data.Function (on)
+import           Data.Functor.Classes (showsUnaryWith)
+import           Data.Functor.Identity
+import           Data.Proxy
 import qualified Data.Semigroup as S
 import qualified Data.Set as Set
-import Data.String (fromString)
-import GHC.Generics ((:.:)(..))
-import GHC.Stack
-import GHC.TypeLits
-import Hedgehog
+import           Data.String (fromString)
+import           GHC.Generics ((:.:)(..))
+import           GHC.Stack
+import           GHC.TypeLits
+import           Hedgehog
 import qualified Hedgehog.Function as Fn
-import Hedgehog.Gen as Hedgehog
-import Hedgehog.Range
+import           Hedgehog.Gen as Hedgehog
+import           Hedgehog.Range
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
 m

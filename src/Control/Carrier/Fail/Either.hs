@@ -1,4 +1,8 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A carrier for a 'Control.Effect.Fail.Fail' effect, returning the result as an 'Either' 'String'. Failed computations will return a 'Left' containing the 'String' value passed to 'Fail.fail'.
 --
@@ -11,15 +15,15 @@ module Control.Carrier.Fail.Either
 , module Control.Effect.Fail
 ) where
 
-import Control.Algebra
-import Control.Applicative (Alternative(..))
-import Control.Carrier.Throw.Either
-import Control.Effect.Fail
-import Control.Monad (MonadPlus(..))
+import           Control.Algebra
+import           Control.Applicative (Alternative(..))
+import           Control.Carrier.Throw.Either
+import           Control.Effect.Fail
+import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 
 -- | Run a 'Control.Effect.Fail.Fail' effect, returning failure messages in 'Left' and successful computations’ results in 'Right'.
 --

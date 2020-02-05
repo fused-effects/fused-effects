@@ -1,4 +1,8 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A carrier for an 'Error' effect.
 --
@@ -11,15 +15,15 @@ module Control.Carrier.Error.Either
 , module Control.Effect.Error
 ) where
 
-import Control.Algebra
-import Control.Applicative (Alternative(..))
-import Control.Effect.Error
-import Control.Monad (MonadPlus(..))
+import           Control.Algebra
+import           Control.Applicative (Alternative(..))
+import           Control.Effect.Error
+import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.Except
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Except
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --

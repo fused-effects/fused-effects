@@ -1,4 +1,5 @@
-{-# LANGUAGE GeneralizedNewtypeDeriving, MultiParamTypeClasses #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 
 -- | A carrier for 'Lift' allowing monadic actions to be lifted from an outer context into an inner one with 'sendM', and for an inner context to run actions in an outer one with 'liftWith'.
 --
@@ -11,15 +12,15 @@ module Control.Carrier.Lift
 , module Control.Effect.Lift
 ) where
 
-import Control.Algebra
-import Control.Applicative (Alternative)
-import Control.Effect.Lift
-import Control.Monad (MonadPlus)
+import           Control.Algebra
+import           Control.Applicative (Alternative)
+import           Control.Effect.Lift
+import           Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Data.Functor.Identity
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Data.Functor.Identity
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 --

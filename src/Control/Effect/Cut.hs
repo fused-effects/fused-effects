@@ -1,4 +1,7 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, GeneralizedNewtypeDeriving, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE StandaloneDeriving #-}
 
 {- | Provides an effect to delimit backtracking in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
 

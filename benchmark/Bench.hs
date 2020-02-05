@@ -1,15 +1,22 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Main
 ( main
 ) where
 
-import Control.Algebra
-import Control.Carrier.Interpret
-import Control.Carrier.State.Strict
-import Control.Carrier.Writer.Strict
-import Control.Monad (replicateM_)
-import Data.Monoid (Sum(..))
-import Gauge
+import           Control.Algebra
+import           Control.Carrier.Interpret
+import           Control.Carrier.State.Strict
+import           Control.Carrier.Writer.Strict
+import           Control.Monad (replicateM_)
+import           Data.Monoid (Sum(..))
+import           Gauge
 
 import qualified Bench.NonDet as NonDet
 

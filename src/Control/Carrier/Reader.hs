@@ -1,4 +1,8 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A carrier for 'Reader' effects.
 --
@@ -11,14 +15,14 @@ module Control.Carrier.Reader
 , module Control.Effect.Reader
 ) where
 
-import Control.Algebra
-import Control.Applicative (Alternative(..), liftA2)
-import Control.Effect.Reader
-import Control.Monad (MonadPlus(..))
+import           Control.Algebra
+import           Control.Applicative (Alternative(..), liftA2)
+import           Control.Effect.Reader
+import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 
 -- | Run a 'Reader' effect with the passed environment value.
 --

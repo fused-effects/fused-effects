@@ -1,4 +1,9 @@
-{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | A carrier for the 'State' effect. It evaluates its inner state strictly, which is the correct choice for the majority of use cases.
 
@@ -16,14 +21,14 @@ module Control.Carrier.State.Strict
 , module Control.Effect.State
 ) where
 
-import Control.Algebra
-import Control.Applicative (Alternative(..))
-import Control.Effect.State
-import Control.Monad (MonadPlus(..))
+import           Control.Algebra
+import           Control.Applicative (Alternative(..))
+import           Control.Effect.State
+import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 
 -- | Run a 'State' effect starting from the passed value.
 --

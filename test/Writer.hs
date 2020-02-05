@@ -1,4 +1,7 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module Writer
 ( tests
 , gen0
@@ -6,20 +9,20 @@ module Writer
 , test
 ) where
 
-import Control.Arrow ((&&&))
+import           Control.Arrow ((&&&))
 import qualified Control.Carrier.Writer.Strict as WriterC
-import Control.Effect.Writer
+import           Control.Effect.Writer
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
-import Data.Bifunctor (first)
-import Data.Tuple (swap)
-import Gen
+import           Data.Bifunctor (first)
+import           Data.Tuple (swap)
+import           Gen
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"

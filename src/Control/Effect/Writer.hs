@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, RankNTypes, StandaloneDeriving #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE RankNTypes #-}
 
 {- | An effect allowing writes to an accumulated quantity alongside a computed value. A 'Writer' @w@ effect keeps track of a monoidal datum of type @w@ and strictly appends to that monoidal value with the 'tell' effect. Writes to that value can be detected and intercepted with the 'listen' and 'censor' effects.
 

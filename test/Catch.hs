@@ -1,4 +1,6 @@
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module Catch
 ( tests
 , genN

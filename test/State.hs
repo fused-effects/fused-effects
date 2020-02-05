@@ -1,4 +1,7 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module State
 ( tests
 , gen0
@@ -7,17 +10,17 @@ module State
 
 import qualified Control.Carrier.State.Lazy as LazyStateC
 import qualified Control.Carrier.State.Strict as StrictStateC
-import Control.Effect.State
+import           Control.Effect.State
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.State.Lazy as LazyStateT
 import qualified Control.Monad.Trans.State.Strict as StrictStateT
-import Data.Tuple (swap)
-import Gen
+import           Data.Tuple (swap)
+import           Gen
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "State"

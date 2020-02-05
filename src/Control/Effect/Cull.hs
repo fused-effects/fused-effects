@@ -1,4 +1,6 @@
-{-# LANGUAGE DeriveFunctor, ExistentialQuantification, StandaloneDeriving #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {- | Provides an effect to cull choices in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
 
 Computations run inside a call to 'cull' will return at most one result.

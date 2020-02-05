@@ -1,4 +1,6 @@
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module Fail
 ( tests
 , gen0
@@ -6,13 +8,13 @@ module Fail
 ) where
 
 import qualified Control.Carrier.Fail.Either as FailC
-import Control.Effect.Fail as Fail
-import Gen
-import Hedgehog.Range as Range
+import           Control.Effect.Fail as Fail
+import           Gen
+import           Hedgehog.Range as Range
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Fail"
