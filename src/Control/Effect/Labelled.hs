@@ -69,6 +69,7 @@ type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 
 sendLabelled :: HasLabelled label eff sig m => Labelled label eff m a -> m a
 sendLabelled = alg . injLabelled
+{-# INLINABLE sendLabelled #-}
 
 
 newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = UnderLabel { runUnderLabel :: m a }
