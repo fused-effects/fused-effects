@@ -14,6 +14,7 @@ module Control.Effect.Labelled
 , Labelled(Labelled)
 , LabelledMember(..)
 , HasLabelled
+, sendLabelled
 , runUnderLabel
 , UnderLabel(UnderLabel)
 , module Control.Algebra
@@ -65,6 +66,9 @@ instance {-# OVERLAPPABLE #-}
 --
 -- Note that if @eff@ is a sum, it will /not/ be decomposed into multiple 'LabelledMember' constraints. While this technically is possible, it results in unsolvable constraints, as the functional dependencies in 'Labelled' prevent assocating the same label with multiple distinct effects within a signature.
 type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
+
+sendLabelled :: HasLabelled label eff sig m => Labelled label eff m a -> m a
+sendLabelled = alg . injLabelled
 
 
 newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = UnderLabel { runUnderLabel :: m a }
