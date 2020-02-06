@@ -97,6 +97,8 @@ modifyLazy f = get >>= put . f
 -- @
 -- 'state' f = 'gets' f '>>=' \\ (s, a) -> 'put' s '>>' 'pure' a
 -- @
+--
+-- @since 1.0.2.0
 state :: Has (State s) sig m => (s -> (s, a)) -> m a
 state f = do
   (s', a) <- gets f
