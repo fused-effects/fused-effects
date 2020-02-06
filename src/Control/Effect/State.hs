@@ -92,6 +92,7 @@ modifyLazy :: Has (State s) sig m => (s -> s) -> m ()
 modifyLazy f = get >>= put . f
 {-# INLINEABLE modifyLazy #-}
 
+-- | Compute a new state and a value in a single step.
 state :: Has (State s) sig m => (s -> (s, a)) -> m a
 state f = do
   (s', a) <- gets f
