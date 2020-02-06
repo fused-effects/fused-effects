@@ -1,3 +1,5 @@
+- Adds a `state` operation for the `State` effect.
+
 # v1.0.0.1
 
 - Adds passthrough `Algebra` instances for `Ap` and `Alt`, allowing the invocation of effects inside these structures without extraneous constructor applications.
