@@ -80,5 +80,5 @@ instance MonadTrans (UnderLabel sub label) where
 
 instance (LabelledMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
   alg = \case
-    L sub -> UnderLabel (alg (injLabelled @label (Labelled (handleCoercible sub))))
+    L sub -> UnderLabel (sendLabelled @label (Labelled (handleCoercible sub)))
     R sig -> UnderLabel (send (handleCoercible sig))
