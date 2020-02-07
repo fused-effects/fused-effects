@@ -11,6 +11,8 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 -- | Labelled effects, allowing flexible disambiguation and dependency of parametric effects.
+--
+-- @since 1.0.2.0
 module Control.Effect.Labelled
 ( runLabelled
 , Labelled(Labelled)
