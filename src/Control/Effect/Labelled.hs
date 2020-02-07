@@ -69,6 +69,7 @@ instance {-# OVERLAPPABLE #-}
 -- Note that if @eff@ is a sum, it will /not/ be decomposed into multiple 'LabelledMember' constraints. While this technically is possible, it results in unsolvable constraints, as the functional dependencies in 'Labelled' prevent assocating the same label with multiple distinct effects within a signature.
 type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 
+-- | Construct a request for a labelled effect to be interpreted by some handler later on.
 sendLabelled :: forall label eff sig m a . HasLabelled label eff sig m => eff m a -> m a
 sendLabelled = alg . injLabelled @label . Labelled
 {-# INLINABLE sendLabelled #-}
