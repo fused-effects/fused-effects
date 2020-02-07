@@ -1,4 +1,4 @@
-- Adds a `state` operation for the `State` effect.
+- Adds a `state` operation for the `State` effect. ([#353](https://github.com/fused-effects/fused-effects/pull/353))
 
 - Adds a function reassociating sums leftwards to `Control.Effect.Sum`. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
 
