@@ -1,5 +1,8 @@
 - Adds a `state` operation for the `State` effect.
 
+- Adds a function reassociating sums leftwards to `Control.Effect.Sum`. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
+
+
 # v1.0.0.1
 
 - Adds passthrough `Algebra` instances for `Ap` and `Alt`, allowing the invocation of effects inside these structures without extraneous constructor applications.
