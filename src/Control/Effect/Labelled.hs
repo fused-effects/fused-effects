@@ -41,6 +41,7 @@ instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra 
   alg = \case
     L eff -> Labelled (send (handleCoercible (runLabelled eff)))
     R sig -> Labelled (send (handleCoercible sig))
+  {-# INLINE alg #-}
 
 
 -- | The class of labelled types present in a signature.
