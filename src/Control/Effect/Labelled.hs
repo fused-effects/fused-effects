@@ -103,6 +103,7 @@ newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = 
 
 instance MonadTrans (UnderLabel sub label) where
   lift = UnderLabel
+  {-# INLINE lift #-}
 
 instance (LabelledMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
   alg = \case
