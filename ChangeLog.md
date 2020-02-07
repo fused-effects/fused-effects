@@ -4,6 +4,8 @@
 
 - Inlines `inj`. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
 
+- Adds labelled effects in `Control.Effect.Labelled`. Labelled effects allow flexible disambiguation and dependency for parametric effects, enabling better type inference, restricted usage, and associated type parameters. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
+
 
 # v1.0.0.1
 
