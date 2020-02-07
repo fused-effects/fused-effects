@@ -68,6 +68,7 @@ instance {-# OVERLAPPABLE #-}
   inj = R . inj
 
 
+-- | Reassociate a right-chained sum leftwards.
 reassociateSumL :: (l1 :+: l2 :+: r) m a -> ((l1 :+: l2) :+: r) m a
 reassociateSumL = \case
   L l     -> L (L l)
