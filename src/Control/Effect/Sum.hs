@@ -49,23 +49,27 @@ class Member (sub :: (* -> *) -> (* -> *)) sup where
 -- | Reflexivity: @t@ is a member of itself.
 instance Member t t where
   inj = id
+  {-# INLINE inj #-}
 
 -- | Left-recursion: if @t@ is a member of @l1 ':+:' l2 ':+:' r@, then we can inject it into @(l1 ':+:' l2) ':+:' r@ by injection into a right-recursive signature, followed by left-association.
 instance {-# OVERLAPPABLE #-}
          Member t (l1 :+: l2 :+: r)
       => Member t ((l1 :+: l2) :+: r) where
   inj = reassociateSumL . inj
+  {-# INLINE inj #-}
 
 -- | Left-occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
 instance {-# OVERLAPPABLE #-}
          Member l (l :+: r) where
   inj = L
+  {-# INLINE inj #-}
 
 -- | Right-recursion: if @t@ is a member of @r@, we can inject it into @r@ in O(n), followed by lifting that into @l ':+:' r@ in O(1).
 instance {-# OVERLAPPABLE #-}
          Member l r
       => Member l (l' :+: r) where
   inj = R . inj
+  {-# INLINE inj #-}
 
 
 -- | Reassociate a right-chained sum leftwards.
