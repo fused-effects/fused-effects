@@ -26,6 +26,7 @@ module Control.Effect.Labelled
 
 import Control.Algebra
 import Control.Applicative (Alternative)
+import Control.Effect.Sum (reassociateSumL)
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
@@ -61,11 +62,7 @@ instance LabelledMember label t (Labelled label t) where
 instance {-# OVERLAPPABLE #-}
          LabelledMember label t (l1 :+: l2 :+: r)
       => LabelledMember label t ((l1 :+: l2) :+: r) where
-  injLabelled = reassoc . injLabelled where
-    reassoc = \case
-      L l     -> L (L l)
-      R (L l) -> L (R l)
-      R (R r) -> R r
+  injLabelled = reassociateSumL . injLabelled
 
 -- | Left-occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
 instance {-# OVERLAPPABLE #-}

@@ -16,6 +16,7 @@ module Control.Effect.Sum
 , Members
   -- * Sums
 , (:+:)(..)
+, reassociateSumL
 ) where
 
 import Control.Effect.Class
@@ -53,11 +54,7 @@ instance Member t t where
 instance {-# OVERLAPPABLE #-}
          Member t (l1 :+: l2 :+: r)
       => Member t ((l1 :+: l2) :+: r) where
-  inj = reassoc . inj where
-    reassoc = \case
-      L l     -> L (L l)
-      R (L l) -> L (R l)
-      R (R r) -> R r
+  inj = reassociateSumL . inj
 
 -- | Left-occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
 instance {-# OVERLAPPABLE #-}
@@ -69,6 +66,13 @@ instance {-# OVERLAPPABLE #-}
          Member l r
       => Member l (l' :+: r) where
   inj = R . inj
+
+
+reassociateSumL :: (l1 :+: l2 :+: r) m a -> ((l1 :+: l2) :+: r) m a
+reassociateSumL = \case
+  L l     -> L (L l)
+  R (L l) -> L (R l)
+  R (R r) -> R r
 
 
 -- | Decompose sums on the left into multiple 'Member' constraints.
