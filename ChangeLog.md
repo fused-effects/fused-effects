@@ -2,6 +2,8 @@
 
 - Adds a function reassociating sums leftwards to `Control.Effect.Sum`. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
 
+- Inlines `inj`. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
+
 
 # v1.0.0.1
 
