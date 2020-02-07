@@ -1,6 +1,7 @@
 {-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeFamilies #-}
 {-# LANGUAGE TypeOperators #-}
@@ -53,9 +54,10 @@ instance {-# OVERLAPPABLE #-}
          Member t (l1 :+: l2 :+: r)
       => Member t ((l1 :+: l2) :+: r) where
   inj = reassoc . inj where
-    reassoc (L l)     = L (L l)
-    reassoc (R (L l)) = L (R l)
-    reassoc (R (R r)) = R r
+    reassoc = \case
+      L l     -> L (L l)
+      R (L l) -> L (R l)
+      R (R r) -> R r
 
 -- | Left-occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
 instance {-# OVERLAPPABLE #-}

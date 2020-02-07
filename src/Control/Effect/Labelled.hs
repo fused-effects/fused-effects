@@ -62,9 +62,10 @@ instance {-# OVERLAPPABLE #-}
          LabelledMember label t (l1 :+: l2 :+: r)
       => LabelledMember label t ((l1 :+: l2) :+: r) where
   injLabelled = reassoc . injLabelled where
-    reassoc (L l)     = L (L l)
-    reassoc (R (L l)) = L (R l)
-    reassoc (R (R r)) = R r
+    reassoc = \case
+      L l     -> L (L l)
+      R (L l) -> L (R l)
+      R (R r) -> R r
 
 -- | Left-occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
 instance {-# OVERLAPPABLE #-}
