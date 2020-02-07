@@ -30,6 +30,8 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
+--
+-- @since 1.0.2.0
 newtype Labelled (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Labelled { runLabelled :: sub m a }
   deriving (Applicative, Effect, Functor, HFunctor, Monad, Fail.MonadFail, MonadIO, MonadTrans)
 
@@ -40,8 +42,12 @@ instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra 
 
 
 -- | The class of labelled types present in a signature.
+--
+-- @since 1.0.2.0
 class LabelledMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
+  --
+  -- @since 1.0.2.0
   injLabelled :: Labelled label sub m a -> sup m a
 
 -- | Reflexivity: @t@ is a member of itself.
@@ -72,15 +78,21 @@ instance {-# OVERLAPPABLE #-}
 -- | @m@ is a carrier for @sig@ containing @eff@ associated with @label@.
 --
 -- Note that if @eff@ is a sum, it will /not/ be decomposed into multiple 'LabelledMember' constraints. While this technically is possible, it results in unsolvable constraints, as the functional dependencies in 'Labelled' prevent assocating the same label with multiple distinct effects within a signature.
+--
+-- @since 1.0.2.0
 type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 
 -- | Construct a request for a labelled effect to be interpreted by some handler later on.
+--
+-- @since 1.0.2.0
 sendLabelled :: forall label eff sig m a . HasLabelled label eff sig m => eff m a -> m a
 sendLabelled = alg . injLabelled @label . Labelled
 {-# INLINABLE sendLabelled #-}
 
 
 -- | A transformer to lift effectful actions to labelled effectful actions.
+--
+-- @since 1.0.2.0
 newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = UnderLabel { runUnderLabel :: m a }
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
