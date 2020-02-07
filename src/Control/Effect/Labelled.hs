@@ -57,23 +57,27 @@ class LabelledMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub 
 -- | Reflexivity: @t@ is a member of itself.
 instance LabelledMember label t (Labelled label t) where
   injLabelled = id
+  {-# INLINE injLabelled #-}
 
 -- | Left-recursion: if @t@ is a member of @l1 ':+:' l2 ':+:' r@, then we can inject it into @(l1 ':+:' l2) ':+:' r@ by injection into a right-recursive signature, followed by left-association.
 instance {-# OVERLAPPABLE #-}
          LabelledMember label t (l1 :+: l2 :+: r)
       => LabelledMember label t ((l1 :+: l2) :+: r) where
   injLabelled = reassociateSumL . injLabelled
+  {-# INLINE injLabelled #-}
 
 -- | Left-occurrence: if @t@ is at the head of a signature, we can inject it in O(1).
 instance {-# OVERLAPPABLE #-}
          LabelledMember label l (Labelled label l :+: r) where
   injLabelled = L
+  {-# INLINE injLabelled #-}
 
 -- | Right-recursion: if @t@ is a member of @r@, we can inject it into @r@ in O(n), followed by lifting that into @l ':+:' r@ in O(1).
 instance {-# OVERLAPPABLE #-}
          LabelledMember label l r
       => LabelledMember label l (l' :+: r) where
   injLabelled = R . injLabelled
+  {-# INLINE injLabelled #-}
 
 
 -- | @m@ is a carrier for @sig@ containing @eff@ associated with @label@.
