@@ -106,3 +106,4 @@ instance (LabelledMember label sub sig, HFunctor sub, Algebra sig m) => Algebra 
   alg = \case
     L sub -> UnderLabel (sendLabelled @label (handleCoercible sub))
     R sig -> UnderLabel (send (handleCoercible sig))
+  {-# INLINE alg #-}
