@@ -38,6 +38,7 @@ instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra 
     R sig -> Labelled (send (handleCoercible sig))
 
 
+-- | The class of labelled types present in a signature.
 class LabelledMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
   injLabelled :: Labelled label sub m a -> sup m a
