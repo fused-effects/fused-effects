@@ -26,6 +26,7 @@ module Control.Effect.Labelled
 
 import Control.Algebra
 import Control.Applicative (Alternative)
+import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -34,7 +35,7 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.2.0
 newtype Labelled (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Labelled { runLabelled :: sub m a }
-  deriving (Alternative, Applicative, Effect, Functor, HFunctor, Monad, Fail.MonadFail, MonadIO, MonadTrans)
+  deriving (Alternative, Applicative, Effect, Functor, HFunctor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
   alg = \case
@@ -95,7 +96,7 @@ sendLabelled = alg . injLabelled @label . Labelled
 --
 -- @since 1.0.2.0
 newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = UnderLabel { runUnderLabel :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus)
 
 instance MonadTrans (UnderLabel sub label) where
   lift = UnderLabel
