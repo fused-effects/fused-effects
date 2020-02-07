@@ -7,6 +7,7 @@
 
 - Adds passthrough `Algebra` instances for `Ap` and `Alt`, allowing the invocation of effects inside these structures without extraneous constructor applications.
 
+
 # v1.0.0.0
 
 - Adds an `Empty` effect, modelling nondeterminism without choice ([#196](https://github.com/fused-effects/fused-effects/pull/196)).
@@ -87,6 +88,7 @@
 
 - Adds support for ghc 8.8.1.
 
+
 # v0.5.0.0
 
 - Derives `Generic1` instances for all non-existentially-quantified effect datatypes.
@@ -98,6 +100,7 @@
 - Re-exports `run`, `:+:`, and `Member` from `Control.Effect.Carrier`, reducing the number of imports needed when defining new effects.
 
 - Re-exports `Carrier`, `Member`, and `run` from the various effect modules, reducing the number of imports needed when using existing effects.
+
 
 ## Backwards-incompatible changes
 
@@ -117,22 +120,26 @@
 
 - Deprecates `handlePure` in favour of `hmap`.
 
+
 # v0.4.0.0
 
 ## Backwards-incompatible changes
 
 - Removes APIs deprecated in 0.3.0.0, including `Eff`, `interpret`, `ret`, and the `handle*` family of helper functions.
 
+
 ## Other changes
 
 - Adds the ability to derive default instances of `HFunctor` and `Effect` for first-order effects, using the `-XDeriveAnyClass` extension.
 - Adds a generic `Interpose` effect that enables arbitrary "eavesdropping" on other effects.
+
 
 # 0.3.1.0
 
 - Improved speed of `Reader`, `State`, `Writer`, and `Pure` effects by defining and inlining auxiliary `Applicative` methods.
 - Adds `runInterpret` & `runInterpretState` handlers in `Control.Effect.Interpret` as a convenient way to experiment with effect handlers without defining a new carrier type and `Carrier` instance. Such handlers are somewhat less efficient than custom `Carrier`s, but allow for a smooth upgrade path when more efficiency is required.
 - Added `unliftio-core` as a dependency so as to provide a blessed API for unlift-style effects and a solution to the cubic-caller problem.
+
 
 # 0.3.0.0
 
@@ -147,6 +154,7 @@
 - Renames `Control.Effect.Void`, `Void`, and `VoidC` to `Control.Effect.Pure`, `Pure`, and `PureC` respectively.
   This is a backwards-incompatible change for code mentioning `VoidC`; it should be updated to reference `PureC` instead.
 
+
 ## Deprecations
 
 - `Eff` and `interpret`, in favour of computing directly in the carriers. This enables the compiler to perform significant optimizations; see the benchmarks for details.
@@ -157,6 +165,7 @@
 
 All deprecated APIs will be removed in the next release.
 
+
 ## Other changes
 
 - Adds a lazy `State` carrier in `Control.Effect.State.Lazy`
@@ -165,13 +174,16 @@ All deprecated APIs will be removed in the next release.
 - Moves `OnceC` from `Control.Effect.NonDet` to `Control.Effect.Cull` to avoid cyclic dependencies.
 - Adds a `runCutAll` handler for `Cut` effects, returning a collection of all results.
 
+
 # 0.2.0.2
 
 - Loosens the bounds on QuickCheck to accommodate 2.x.
 
+
 # 0.2.0.1
 
 - Fixes the benchmarks, and builds them in CI to avoid regressing them again.
+
 
 # 0.2.0.0
 
@@ -186,9 +198,11 @@ All deprecated APIs will be removed in the next release.
 - Adds `bracketOnError`, `finally`, and `onException` to `Resource`.
 - Adds `sendM` to `Lift`.
 
+
 # 0.1.2.1
 
 - Loosens the bounds on QuickCheck to accommodate 0.12.
+
 
 # 0.1.2.0
 
@@ -198,9 +212,11 @@ All deprecated APIs will be removed in the next release.
 - Adds an example of using `NonDet`, `Cut`, and a character parser effect to define parsers.
 - Fixes the table of contents links in the README.
 
+
 # 0.1.1.0
 
 - Adds a `runNonDetOnce` handler which terminates immediately upon finding a solution.
+
 
 # 0.1.0.0
 
