@@ -72,7 +72,7 @@ instance {-# OVERLAPPABLE #-}
   {-# INLINE inj #-}
 
 
--- | Reassociate a right-chained sum leftwards.
+-- | Reassociate a right-nested sum leftwards.
 --
 -- @since 1.0.2.0
 reassociateSumL :: (l1 :+: l2 :+: r) m a -> ((l1 :+: l2) :+: r) m a
