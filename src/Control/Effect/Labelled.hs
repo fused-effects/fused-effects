@@ -29,6 +29,7 @@ import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
+-- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 newtype Labelled (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Labelled { runLabelled :: sub m a }
   deriving (Applicative, Effect, Functor, HFunctor, Monad, Fail.MonadFail, MonadIO, MonadTrans)
 
