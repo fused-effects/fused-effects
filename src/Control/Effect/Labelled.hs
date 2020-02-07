@@ -79,6 +79,7 @@ sendLabelled = alg . injLabelled @label . Labelled
 {-# INLINABLE sendLabelled #-}
 
 
+-- | A transformer to lift effectful actions to labelled effectful actions.
 newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = UnderLabel { runUnderLabel :: m a }
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
