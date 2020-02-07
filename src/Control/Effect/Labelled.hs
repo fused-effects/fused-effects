@@ -1,3 +1,4 @@
+{-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -68,8 +69,8 @@ instance {-# OVERLAPPABLE #-}
 -- Note that if @eff@ is a sum, it will /not/ be decomposed into multiple 'LabelledMember' constraints. While this technically is possible, it results in unsolvable constraints, as the functional dependencies in 'Labelled' prevent assocating the same label with multiple distinct effects within a signature.
 type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 
-sendLabelled :: HasLabelled label eff sig m => Labelled label eff m a -> m a
-sendLabelled = alg . injLabelled
+sendLabelled :: forall label eff sig m a . HasLabelled label eff sig m => eff m a -> m a
+sendLabelled = alg . injLabelled @label . Labelled
 {-# INLINABLE sendLabelled #-}
 
 
@@ -81,5 +82,5 @@ instance MonadTrans (UnderLabel sub label) where
 
 instance (LabelledMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
   alg = \case
-    L sub -> UnderLabel (sendLabelled @label (Labelled (handleCoercible sub)))
+    L sub -> UnderLabel (sendLabelled @label (handleCoercible sub))
     R sig -> UnderLabel (send (handleCoercible sig))
