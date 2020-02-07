@@ -73,6 +73,7 @@ reassociateSumL = \case
   L l     -> L (L l)
   R (L l) -> L (R l)
   R (R r) -> R r
+{-# INLINE reassociateSumL #-}
 
 
 -- | Decompose sums on the left into multiple 'Member' constraints.
