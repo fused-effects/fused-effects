@@ -127,6 +127,11 @@ instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (Except.Except
   alg (L (R (Catch m h k))) = Except.catchE m h >>= k
   alg (R other)             = Except.ExceptT $ alg (thread (Right ()) (either (pure . Left) Except.runExceptT) other)
 
+instance (Algebra' sig m, Effect sig) => Algebra' (Error e :+: sig) (Except.ExceptT e m) where
+  alg' _   (L (L (Throw e)))     = Except.throwE e
+  alg' hom (L (R (Catch m h k))) = Except.catchE (hom m) (hom . h) >>= hom . k
+  alg' hom (R other)             = Except.ExceptT $ alg' id (thread (Right ()) (either (pure . Left) (Except.runExceptT . hom)) other)
+
 instance Algebra sig m => Algebra sig (Identity.IdentityT m) where
   alg = Identity.IdentityT . alg . handleCoercible
 
