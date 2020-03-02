@@ -144,7 +144,7 @@ instance Algebra' sig m => Algebra' (Error e :+: sig) (Except.ExceptT e m) where
   alg' ctx hdl = \case
     L (L (Throw e))     -> Except.throwE e
     L (R (Catch m h k)) -> Except.catchE (hdl (m <$ ctx)) (hdl . (<$ ctx) . h) >>= hdl . fmap k
-    R other             -> Except.ExceptT $ getCompose <$> alg' (Compose (Right ctx)) (fmap Compose . either (pure . Left) (Except.runExceptT . hdl) . getCompose) other
+    R other             -> Except.ExceptT $ thread' (Right ctx) (either (pure . Left) (Except.runExceptT . hdl)) other
 
 deriving instance Algebra sig m => Algebra sig (Identity.IdentityT m)
 deriving instance Algebra' sig m => Algebra' sig (Identity.IdentityT m)
