@@ -3,7 +3,9 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -163,6 +165,8 @@ instance Algebra sig m => Algebra sig (Ap m) where
 -- @since 1.0.1.0
 instance Algebra sig m => Algebra sig (Alt m) where
   alg = Alt . alg . handleCoercible
+
+deriving instance Algebra' sig m => Algebra' sig (Alt m)
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg (L (Ask       k)) = Reader.ask >>= k
