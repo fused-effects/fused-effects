@@ -139,13 +139,13 @@ instance ( Has Http sig m
          , Algebra sig m
          ) =>
          Algebra (CatFactClient :+: sig) (CatFactsApi m) where
-  alg = \case
+  alg hom = \case
     L (ListFacts numberOfFacts k) -> do
       resp <- sendRequest (catFactsEndpoint { HTTP.queryString = "?amount=" <> B.pack (show numberOfFacts) })
       case lookup hContentType (HTTP.responseHeaders resp) of
         Just "application/json; charset=utf-8" -> decodeOrThrow (HTTP.responseBody resp) >>= k
         other -> throwError (InvalidContentType (show other))
-    R other -> CatFactsApi (handleCoercible other)
+    R other -> CatFactsApi (alg (runCatFactsApi . hom) other)
 ```
 
 We implement a `CatFacts` effect handler that depends on _three_ underlying effects:
@@ -169,9 +169,9 @@ newtype HttpClient m a = HttpClient { runHttp :: m a }
     )
 
 instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (HttpClient m) where
-  alg = \case
+  alg hom = \case
     L (SendRequest req k) -> liftIO (HTTP.getGlobalManager >>= HTTP.httpLbs req) >>= k
-    R other -> HttpClient (handleCoercible other)
+    R other -> HttpClient (alg (runHttp . hom) other)
 ```
 
 Note for the above code snippets how the `CatFactsApi` carrier delegates fetching JSON to any other effect that supports retrieving JSON given an HTTP request specification.
@@ -235,9 +235,9 @@ runMockHttp :: (HTTP.Request -> IO (HTTP.Response L.ByteString)) -> MockHttpC m 
 runMockHttp responder m = runReader responder (runMockHttpClient m)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (MockHttpClient m) where
-  alg = \case
+  alg hom = \case
     L (SendRequest req k) -> MockHttpClient ask >>= \responder -> liftIO (responder req) >>= k
-    R other -> MockHttpClient (handleCoercible other)
+    R other -> MockHttpClient (alg (runMockHttpClient . hom) other)
 
 faultyNetwork :: HTTP.Request -> IO (HTTP.Response L.ByteString)
 faultyNetwork req = throwIO (HTTP.HttpExceptionRequest req HTTP.ConnectionTimeout)
