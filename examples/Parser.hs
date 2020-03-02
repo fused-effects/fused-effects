@@ -44,15 +44,14 @@ example = testGroup "parser"
     [ testProperty "matches with a predicate" . property $ do
       c <- forAll Gen.alphaNum
       f <- (. ord) <$> Fn.forAllFn predicate
-      run (runNonDetA (parse [c] (satisfy f))) === if f c then [c] else []
+      run (runNonDetA (parse [c] (satisfy f))) === [c | f c]
 
     , testProperty "fails at end of input" . property $ do
       f <- (. ord) <$> Fn.forAllFn predicate
       run (runNonDetA (parse "" (satisfy f))) === []
 
     , testProperty "fails if input remains" . property $ do
-      c1 <- forAll Gen.alphaNum
-      c2 <- forAll Gen.alphaNum
+      (c1, c2) <- forAll ((,) <$> Gen.alphaNum <*> Gen.alphaNum)
       f <- (. ord) <$> Fn.forAllFn predicate
       run (runNonDetA (parse [c1, c2] (satisfy f))) === []
 
@@ -60,7 +59,7 @@ example = testGroup "parser"
       c1 <- forAll Gen.alphaNum
       c2 <- forAll Gen.alphaNum
       f <- (. ord) <$> Fn.forAllFn predicate
-      run (runNonDetA (parse [c1, c2] ((,) <$> satisfy f <*> satisfy f))) === if f c1 && f c2 then [(c1, c2)] else []
+      run (runNonDetA (parse [c1, c2] ((,) <$> satisfy f <*> satisfy f))) === [(c1, c2) | f c1, f c2]
     ]
 
   , testGroup "factor"
