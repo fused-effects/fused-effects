@@ -25,9 +25,9 @@ The `Read` operation returns a `String`, and hence its continuation is represent
 
 On the other hand, the `Write` operation returns `()`. Since a function `() -> k` is equivalent to a (non-strict) `k`, we can omit the function parameter.
 
-In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need two other instances: `HFunctor` and `Effect`. `HFunctor`, named for “higher-order functor,” has one operation, `hmap`, which applies a function to any embedded computations inside an effect. `Effect` is used by `Algebra` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `thread` takes an initial state parameter (encoded as some arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping state functors containing unhandled computations to handled computations producing the state functor alongside any results.
+In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need one other instance: `Effect`. `Effect` is used by `Algebra` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `thread` takes an initial state parameter (encoded as some arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping state functors containing unhandled computations to handled computations producing the state functor alongside any results.
 
-Since `Teletype` is a first-order effect (i.e., its operations don’t have any embedded computations), we can derive instances both of `HFunctor` and `Effect` by first deriving a `Generic1` instance (using `-XDeriveGeneric`):
+Since `Teletype` is a first-order effect (i.e., its operations don’t have any embedded computations), we can derive an instance of `Effect` by first deriving a `Generic1` instance (using `-XDeriveGeneric`):
 
 ```haskell
 import GHC.Generics (Generic1)
@@ -38,11 +38,10 @@ data Teletype m k
   deriving (Functor, Generic1)
 ```
 
-and then defining `HFunctor` & `Effect`, leaving their methods to use the default definitions:
+and then defining `Effect`, leaving it to use the default definition of the `thread` method:
 
 ```haskell
-instance HFunctor Teletype
-instance Effect   Teletype
+instance Effect Teletype
 ```
 
 Now that we have our effect datatype, we can give definitions for `read` and `write`:
