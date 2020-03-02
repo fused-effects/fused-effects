@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -47,6 +48,7 @@ instance MonadTrans TraceC where
   {-# INLINE lift #-}
 
 instance (MonadIO m, Algebra sig m) => Algebra (Trace :+: sig) (TraceC m) where
-  alg (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
-  alg (R other)       = TraceC (alg (handleCoercible other))
+  alg = \case
+    L (Trace s k) -> liftIO (hPutStrLn stderr s) *> k
+    R other       -> TraceC (alg (handleCoercible other))
   {-# INLINE alg #-}

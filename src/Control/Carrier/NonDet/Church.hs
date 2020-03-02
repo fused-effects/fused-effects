@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
@@ -113,9 +114,11 @@ instance MonadTrans NonDetC where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, Effect sig) => Algebra (NonDet :+: sig) (NonDetC m) where
-  alg (L (L Empty))      = empty
-  alg (L (R (Choose k))) = k True <|> k False
-  alg (R other)          = NonDetC $ \ fork leaf nil -> alg (thread (pure ()) dst other) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil) where
+  alg = \case
+    L (L Empty)      -> empty
+    L (R (Choose k)) -> k True <|> k False
+    R other          -> NonDetC $ \ fork leaf nil -> alg (thread (pure ()) dst other) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
+    where
     dst :: Applicative m => NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
     dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (Identity . runNonDetA) (pure (pure empty))
   {-# INLINE alg #-}

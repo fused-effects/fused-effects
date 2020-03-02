@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -59,16 +60,17 @@ newtype WriterC w m a = WriterC (StateC w m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Monoid w, Algebra sig m, Effect sig) => Algebra (Writer w :+: sig) (WriterC w m) where
-  alg (L (Tell w     k)) = WriterC (modify (`mappend` w)) >> k
-  alg (L (Listen   m k)) = WriterC (StateC (\ w -> do
-    (w', a) <- runWriter m
-    let w'' = mappend w w'
-    w'' `seq` pure (w'', (w', a))))
-    >>= uncurry k
-  alg (L (Censor f m k)) = WriterC (StateC (\ w -> do
-    (w', a) <- runWriter m
-    let w'' = mappend w (f w')
-    w'' `seq` pure (w'', a)))
-    >>= k
-  alg (R other)          = WriterC (alg (R (handleCoercible other)))
+  alg = \case
+    L (Tell w     k) -> WriterC (modify (`mappend` w)) >> k
+    L (Listen   m k) -> WriterC (StateC (\ w -> do
+      (w', a) <- runWriter m
+      let w'' = mappend w w'
+      w'' `seq` pure (w'', (w', a))))
+      >>= uncurry k
+    L (Censor f m k) -> WriterC (StateC (\ w -> do
+      (w', a) <- runWriter m
+      let w'' = mappend w (f w')
+      w'' `seq` pure (w'', a)))
+      >>= k
+    R other          -> WriterC (alg (R (handleCoercible other)))
   {-# INLINE alg #-}

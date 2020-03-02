@@ -90,15 +90,19 @@ instance MonadTrans ChooseC where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, Effect sig) => Algebra (Choose :+: sig) (ChooseC m) where
-  alg (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
-  alg (R other)      = ChooseC $ \ fork leaf -> alg (thread (pure ()) dst other) >>= runIdentity . runChoose (coerce fork) (coerce leaf) where
+  alg = \case
+    L (Choose k) -> ChooseC $ \ fork leaf -> fork (runChoose fork leaf (k True)) (runChoose fork leaf (k False))
+    R other      -> ChooseC $ \ fork leaf -> alg (thread (pure ()) dst other) >>= runIdentity . runChoose (coerce fork) (coerce leaf)
+    where
     dst :: ChooseC Identity (ChooseC m a) -> m (ChooseC Identity a)
     dst = runIdentity . runChoose (liftA2 (liftA2 (<|>))) (pure . runChoose (liftA2 (<|>)) (pure . pure))
   {-# INLINE alg #-}
 
 instance (Algebra' sig m, Effect sig) => Algebra' (Choose :+: sig) (ChooseC m) where
-  alg' hom (L (Choose k)) = ChooseC $ \ fork leaf -> fork (runChoose fork leaf (hom (k True))) (runChoose fork leaf (hom (k False)))
-  alg' (hom :: forall x . n x -> ChooseC m x) (R other)      = ChooseC $ \ fork leaf -> alg' id (thread (pure ()) dst other) >>= runIdentity . runChoose (coerce fork) (coerce leaf) where
+  alg' (hom :: forall x . n x -> ChooseC m x) = \case
+    L (Choose k) -> ChooseC $ \ fork leaf -> fork (runChoose fork leaf (hom (k True))) (runChoose fork leaf (hom (k False)))
+    R other      -> ChooseC $ \ fork leaf -> alg' id (thread (pure ()) dst other) >>= runIdentity . runChoose (coerce fork) (coerce leaf)
+    where
     dst :: ChooseC Identity (n a) -> m (ChooseC Identity a)
     dst = runIdentity . runChoose (liftA2 (liftA2 (<|>))) (pure . runChoose (liftA2 (<|>)) (pure . pure) . hom)
   {-# INLINE alg' #-}

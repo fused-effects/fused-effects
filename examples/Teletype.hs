@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 module Teletype
 ( example
@@ -59,9 +59,10 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  alg (L (Read    k)) = liftIO getLine      >>= k
-  alg (L (Write s k)) = liftIO (putStrLn s) >>  k
-  alg (R other)       = TeletypeIOC (alg (handleCoercible other))
+  alg = \case
+    L (Read    k) -> liftIO getLine      >>= k
+    L (Write s k) -> liftIO (putStrLn s) >>  k
+    R other       -> TeletypeIOC (alg (handleCoercible other))
 
 
 runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
@@ -71,10 +72,11 @@ newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (Wr
   deriving (Applicative, Functor, Monad)
 
 instance (Algebra sig m, Effect sig) => Algebra (Teletype :+: sig) (TeletypeRetC m) where
-  alg (L (Read    k)) = do
-    i <- TeletypeRetC get
-    case i of
-      []  -> k ""
-      h:t -> TeletypeRetC (put t) *> k h
-  alg (L (Write s k)) = TeletypeRetC (tell [s]) *> k
-  alg (R other)       = TeletypeRetC (alg (R (R (handleCoercible other))))
+  alg = \case
+    L (Read    k) -> do
+      i <- TeletypeRetC get
+      case i of
+        []  -> k ""
+        h:t -> TeletypeRetC (put t) *> k h
+    L (Write s k) -> TeletypeRetC (tell [s]) *> k
+    R other       -> TeletypeRetC (alg (R (R (handleCoercible other))))

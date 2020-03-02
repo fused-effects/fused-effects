@@ -1,5 +1,6 @@
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -118,7 +119,8 @@ instance MonadTrans (StateC s) where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, Effect sig) => Algebra (State s :+: sig) (StateC s m) where
-  alg (L (Get   k)) = StateC (\ s -> runState s (k s))
-  alg (L (Put s k)) = StateC (\ _ -> runState s k)
-  alg (R other)     = StateC (\ s -> alg (thread (s, ()) (uncurry runState) other))
+  alg = \case
+    L (Get   k) -> StateC (\ s -> runState s (k s))
+    L (Put s k) -> StateC (\ _ -> runState s k)
+    R other     -> StateC (\ s -> alg (thread (s, ()) (uncurry runState) other))
   {-# INLINE alg #-}

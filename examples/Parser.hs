@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric, DeriveTraversable, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
 module Parser
 ( example
 ) where
@@ -134,12 +134,13 @@ newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) (ParseC m) where
-  alg (L (Satisfy p k)) = do
-    input <- ParseC get
-    case input of
-      c:cs | p c -> ParseC (put cs) *> k c
-      _          -> empty
-  alg (R other)         = ParseC (alg (R (handleCoercible other)))
+  alg = \case
+    L (Satisfy p k) -> do
+      input <- ParseC get
+      case input of
+        c:cs | p c -> ParseC (put cs) *> k c
+        _          -> empty
+    R other         -> ParseC (alg (R (handleCoercible other)))
   {-# INLINE alg #-}
 
 
