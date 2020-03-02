@@ -58,7 +58,7 @@ import           Data.Tuple (swap)
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
 --
 -- @since 1.0.0.0
-class (HFunctor sig, Monad m) => Algebra sig m | m -> sig where
+class Monad m => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: Monad n => (forall x . n x -> m x) -> sig n a -> m a
 
