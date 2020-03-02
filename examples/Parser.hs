@@ -1,22 +1,30 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Parser
 ( example
 ) where
 
-import Control.Algebra
-import Control.Carrier.Cut.Church
-import Control.Carrier.NonDet.Church
-import Control.Carrier.State.Strict
-import Control.Monad (replicateM)
-import Data.Char
-import Data.List (intercalate)
-import GHC.Generics (Generic1)
-import Hedgehog
+import           Control.Algebra
+import           Control.Carrier.Cut.Church
+import           Control.Carrier.NonDet.Church
+import           Control.Carrier.State.Strict
+import           Control.Monad (replicateM)
+import           Data.Char
+import           Data.List (intercalate)
+import           GHC.Generics (Generic1)
+import           Hedgehog
 import qualified Hedgehog.Function as Fn
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 example :: TestTree
 example = testGroup "parser"
@@ -93,17 +101,17 @@ example = testGroup "parser"
       run (runCutA (parse (intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as)) expr)) === [sum (map (product . map abs) as)]
     ]
   ]
+  where
+  arbNested :: Gen a -> Range.Size -> Gen [[a]]
+  arbNested _ 0 = pure []
+  arbNested g n = do
+    m <- Gen.integral (Range.linear 0 10)
+    let n' = n `div` (m + 1)
+    replicateM (Range.unSize m) (Gen.list (Range.singleton (Range.unSize n')) g)
 
-    where arbNested :: Gen a -> Range.Size -> Gen [[a]]
-          arbNested _ 0 = pure []
-          arbNested g n = do
-            m <- Gen.integral (Range.linear 0 10)
-            let n' = n `div` (m + 1)
-            replicateM (Range.unSize m) (Gen.list (Range.singleton (Range.unSize n')) g)
-
-          predicate = Fn.fn Gen.bool
-          genFactor = Gen.integral (Range.linear 0 100)
-          genFactors = Gen.list (Range.linear 0 10) genFactor
+  predicate = Fn.fn Gen.bool
+  genFactor = Gen.integral (Range.linear 0 100)
+  genFactors = Gen.list (Range.linear 0 10) genFactor
 
 
 data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
