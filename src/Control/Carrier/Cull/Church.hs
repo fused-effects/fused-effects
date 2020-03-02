@@ -14,7 +14,7 @@ module Control.Carrier.Cull.Church
   runCull
 , runCullA
 , runCullM
-, CullC(..)
+, CullC(CullC)
   -- * Cull effect
 , module Control.Effect.Cull
   -- * NonDet effects
@@ -51,7 +51,7 @@ runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
 runCullM leaf = runCull (liftA2 mappend) (pure . leaf) (pure mempty)
 
 -- | @since 1.0.0.0
-newtype CullC m a = CullC (ReaderC Bool (NonDetC m) a)
+newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
   deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadIO)
 
 instance Alternative (CullC m) where
@@ -75,9 +75,9 @@ instance MonadTrans CullC where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, Effect sig) => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
-  alg = \case
-    L (Cull (CullC m) k) -> CullC (local (const True) m) >>= k
+  alg hom = \case
+    L (Cull m k)         -> CullC (local (const True) (runCullC (hom m))) >>= hom . k
     R (L (L Empty))      -> empty
-    R (L (R (Choose k))) -> k True <|> k False
-    R (R other)          -> CullC (alg (R (R (handleCoercible other))))
+    R (L (R (Choose k))) -> hom (k True) <|> hom (k False)
+    R (R other)          -> CullC (alg (runCullC . hom) (R (R other)))
   {-# INLINE alg #-}

@@ -141,13 +141,13 @@ newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) (ParseC m) where
-  alg = \case
+  alg hom = \case
     L (Satisfy p k) -> do
       input <- ParseC get
       case input of
-        c:cs | p c -> ParseC (put cs) *> k c
+        c:cs | p c -> ParseC (put cs) *> hom (k c)
         _          -> empty
-    R other         -> ParseC (alg (R (handleCoercible other)))
+    R other         -> ParseC (alg (runParseC . hom) (R other))
   {-# INLINE alg #-}
 
 

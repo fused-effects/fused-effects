@@ -85,8 +85,8 @@ instance MonadTrans (ReaderC r) where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m) where
-  alg = \case
-    L (Ask       k) -> ReaderC (\ r -> runReader r (k r))
-    L (Local f m k) -> ReaderC (\ r -> runReader (f r) m) >>= k
-    R other         -> ReaderC (\ r -> alg (hmap (runReader r) other))
+  alg hom = \case
+    L (Ask       k) -> ReaderC (\ r -> runReader r (hom (k r)))
+    L (Local f m k) -> ReaderC (\ r -> runReader (f r) (hom m)) >>= hom . k
+    R other         -> ReaderC (\ r -> alg (runReader r . hom) other)
   {-# INLINE alg #-}

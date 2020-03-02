@@ -1,4 +1,4 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances #-}
 module Inference
 ( example
 ) where
@@ -46,5 +46,4 @@ newtype HasEnv env m a = HasEnv { runHasEnv :: m a }
   deriving (Applicative, Functor, Monad)
 
 -- | The 'Carrier' instance for 'HasEnv' simply delegates all effects to the underlying carrier.
-instance Algebra sig m => Algebra sig (HasEnv env m) where
-  alg = HasEnv . alg . handleCoercible
+deriving instance Algebra sig m => Algebra sig (HasEnv env m)

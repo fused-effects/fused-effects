@@ -117,8 +117,8 @@ instance MonadTrans (StateC s) where
   {-# INLINE lift #-}
 
 instance (Algebra sig m, Effect sig) => Algebra (State s :+: sig) (StateC s m) where
-  alg = \case
-    L (Get   k) -> StateC (\ s -> runState s (k s))
-    L (Put s k) -> StateC (\ _ -> runState s k)
-    R other     -> StateC (\ s -> alg (thread (s, ()) (uncurry runState) other))
+  alg hom = \case
+    L (Get   k) -> StateC (\ s -> runState s (hom (k s)))
+    L (Put s k) -> StateC (\ _ -> runState s (hom k))
+    R other     -> StateC (\ s -> alg id (thread (s, ()) (uncurry runState . fmap hom) other))
   {-# INLINE alg #-}

@@ -11,7 +11,7 @@
 module Control.Carrier.Throw.Either
 ( -- * Throw carrier
   runThrow
-, ThrowC(..)
+, ThrowC(ThrowC)
   -- * Throw effect
 , module Control.Effect.Throw
 ) where
@@ -31,10 +31,10 @@ runThrow :: ThrowC e m a -> m (Either e a)
 runThrow (ThrowC m) = runError m
 
 -- | @since 1.0.0.0
-newtype ThrowC e m a = ThrowC (ErrorC e m a)
+newtype ThrowC e m a = ThrowC { runThrowC :: ErrorC e m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Algebra sig m, Effect sig) => Algebra (Throw e :+: sig) (ThrowC e m) where
-  alg = \case
+  alg hom = \case
     L (Throw e) -> ThrowC (throwError e)
-    R other     -> ThrowC (alg (R (handleCoercible other)))
+    R other     -> ThrowC (alg (runThrowC . hom) (R other))

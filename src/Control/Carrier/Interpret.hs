@@ -16,7 +16,7 @@ module Control.Carrier.Interpret
 ( -- * Interpret carrier
   runInterpret
 , runInterpretState
-, InterpretC(..)
+, InterpretC(InterpretC)
 , Reifies
 , Handler
   -- * Re-exports
@@ -38,7 +38,7 @@ import           Unsafe.Coerce (unsafeCoerce)
 
 -- | A @Handler@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
 newtype Handler sig m = Handler
-  { runHandler :: forall s x . sig (InterpretC s sig m) x -> InterpretC s sig m x }
+  { runHandler :: forall s n x . Monad n => (forall y . n y -> InterpretC s sig m y) -> sig n x -> InterpretC s sig m x }
 
 
 class Reifies s a | s -> a where
@@ -63,11 +63,11 @@ reify a k = unsafeCoerce (Magic k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: (HFunctor eff, Monad m)
+  :: HFunctor eff
   => (forall x . eff m x -> m x)
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
-runInterpret f m = reify (Handler (InterpretC . f . handleCoercible)) (go m) where
+runInterpret f m = reify (Handler (\ hom -> InterpretC . f . hmap (runInterpretC . hom))) (go m) where
   go :: InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
 
@@ -75,7 +75,7 @@ runInterpret f m = reify (Handler (InterpretC . f . handleCoercible)) (go m) whe
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: (HFunctor eff, Monad m)
+  :: HFunctor eff
   => (forall x . s -> eff (StateC s m) x -> m (s, x))
   -> s
   -> (forall t . Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
@@ -85,13 +85,13 @@ runInterpretState handler state m
   $ runInterpret (\e -> StateC (`handler` e)) m
 
 -- | @since 1.0.0.0
-newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC (m a)
+newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpretC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
 
 instance (HFunctor eff, HFunctor sig, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
-  alg = \case
-    L eff   -> runHandler (getConst (reflect @s)) eff
-    R other -> InterpretC (alg (handleCoercible other))
+  alg hom = \case
+    L eff   -> runHandler (getConst (reflect @s)) hom eff
+    R other -> InterpretC (alg (runInterpretC . hom) other)

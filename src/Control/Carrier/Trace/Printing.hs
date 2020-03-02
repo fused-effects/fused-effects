@@ -48,7 +48,7 @@ instance MonadTrans TraceC where
   {-# INLINE lift #-}
 
 instance (MonadIO m, Algebra sig m) => Algebra (Trace :+: sig) (TraceC m) where
-  alg = \case
-    L (Trace s k) -> liftIO (hPutStrLn stderr s) *> k
-    R other       -> TraceC (alg (handleCoercible other))
+  alg hom = \case
+    L (Trace s k) -> liftIO (hPutStrLn stderr s) *> hom k
+    R other       -> TraceC (alg (runTrace . hom) other)
   {-# INLINE alg #-}

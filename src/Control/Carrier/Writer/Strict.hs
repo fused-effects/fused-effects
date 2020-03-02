@@ -16,7 +16,7 @@ module Control.Carrier.Writer.Strict
 ( -- * Writer carrier
   runWriter
 , execWriter
-, WriterC(..)
+, WriterC(WriterC)
   -- * Writer effect
 , module Control.Effect.Writer
 ) where
@@ -56,21 +56,21 @@ execWriter = fmap fst . runWriter
 -- | A space-efficient carrier for 'Writer' effects, implemented atop "Control.Carrier.State.Strict".
 --
 -- @since 1.0.0.0
-newtype WriterC w m a = WriterC (StateC w m a)
+newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Monoid w, Algebra sig m, Effect sig) => Algebra (Writer w :+: sig) (WriterC w m) where
-  alg = \case
-    L (Tell w     k) -> WriterC (modify (`mappend` w)) >> k
+  alg hom = \case
+    L (Tell w     k) -> WriterC (modify (`mappend` w)) >> hom k
     L (Listen   m k) -> WriterC (StateC (\ w -> do
-      (w', a) <- runWriter m
+      (w', a) <- runWriter (hom m)
       let w'' = mappend w w'
       w'' `seq` pure (w'', (w', a))))
-      >>= uncurry k
+      >>= hom . uncurry k
     L (Censor f m k) -> WriterC (StateC (\ w -> do
-      (w', a) <- runWriter m
+      (w', a) <- runWriter (hom m)
       let w'' = mappend w (f w')
       w'' `seq` pure (w'', a)))
-      >>= k
-    R other          -> WriterC (alg (R (handleCoercible other)))
+      >>= hom . k
+    R other          -> WriterC (alg (runWriterC . hom) (R other))
   {-# INLINE alg #-}
