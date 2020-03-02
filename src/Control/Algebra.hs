@@ -135,6 +135,7 @@ instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (Except.Except
     R other             -> Except.ExceptT $ alg id (thread (Right ()) (either (pure . Left) (Except.runExceptT . hom)) other)
 
 deriving instance Algebra sig m => Algebra sig (Identity.IdentityT m)
+deriving instance Algebra' sig m => Algebra' sig (Identity.IdentityT m)
 
 #if MIN_VERSION_base(4,12,0)
 -- | This instance permits effectful actions to be lifted into the 'Ap' monad
@@ -149,6 +150,7 @@ deriving instance Algebra sig m => Algebra sig (Identity.IdentityT m)
 --
 -- @since 1.0.1.0
 deriving instance Algebra sig m => Algebra sig (Ap m)
+deriving instance Algebra' sig m => Algebra' sig (Ap m)
 #endif
 
 -- | This instance permits effectful actions to be lifted into the 'Alt' monad,
@@ -162,6 +164,7 @@ deriving instance Algebra sig m => Algebra sig (Ap m)
 --
 -- @since 1.0.1.0
 deriving instance Algebra sig m => Algebra sig (Alt m)
+deriving instance Algebra' sig m => Algebra' sig (Alt m)
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg hom = \case
