@@ -22,8 +22,6 @@ import GHC.Generics
 
 -- | Higher-order functors of kind @(* -> *) -> (* -> *)@ map functors to functors.
 --
---   All effects must be 'HFunctor's.
---
 -- @since 1.0.0.0
 class HFunctor h where
   -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
@@ -43,7 +41,7 @@ class HFunctor h where
 -- All first-order effects (those without existential occurrences of @m@) admit a default definition of 'thread' provided a 'Generic1' instance is available for the effect.
 --
 -- @since 1.0.0.0
-class HFunctor sig => Effect sig where
+class Effect sig where
   -- | Handle any effects in a signature by threading the algebra’s handler all the way through to the continuation, starting from some initial context.
   --
   -- The handler is expressed as a /distributive law/, and required to adhere to the following laws:
