@@ -106,8 +106,7 @@ data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a (m k)
   deriving (Functor, Generic1)
 
-instance HFunctor (Log a)
-instance Effect   (Log a)
+instance Effect (Log a)
 
 -- Log an 'a'.
 log :: Has (Log a) sig m

@@ -33,8 +33,7 @@ data Trace m k = Trace
   }
   deriving (Functor, Generic1)
 
-instance HFunctor Trace
-instance Effect   Trace
+instance Effect Trace
 
 -- | Append a message to the trace log.
 --

@@ -42,8 +42,7 @@ data Teletype m k
   | Write String (m k)
   deriving (Functor, Generic1)
 
-instance HFunctor Teletype
-instance Effect   Teletype
+instance Effect Teletype
 
 read :: Has Teletype sig m => m String
 read = send (Read pure)
