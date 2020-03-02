@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DerivingVia #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
@@ -16,13 +16,14 @@ module Control.Carrier.Reader
 ) where
 
 import           Control.Algebra
-import           Control.Applicative (Alternative(..), liftA2)
+import           Control.Applicative (Alternative)
 import           Control.Effect.Reader
-import           Control.Monad (MonadPlus(..))
+import           Control.Monad (MonadPlus)
 import qualified Control.Monad.Fail as Fail
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
+import qualified Control.Monad.Trans.Reader as R
 
 -- | Run a 'Reader' effect with the passed environment value.
 --
@@ -43,41 +44,7 @@ runReader r (ReaderC runReaderC) = runReaderC r
 
 -- | @since 1.0.0.0
 newtype ReaderC r m a = ReaderC (r -> m a)
-  deriving (Functor)
-
-instance Applicative m => Applicative (ReaderC r m) where
-  pure = ReaderC . const . pure
-  {-# INLINE pure #-}
-  ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
-  {-# INLINE (<*>) #-}
-  ReaderC u *> ReaderC v = ReaderC $ \ r -> u r *> v r
-  {-# INLINE (*>) #-}
-  ReaderC u <* ReaderC v = ReaderC $ \ r -> u r <* v r
-  {-# INLINE (<*) #-}
-
-instance Alternative m => Alternative (ReaderC r m) where
-  empty = ReaderC (const empty)
-  {-# INLINE empty #-}
-  ReaderC l <|> ReaderC r = ReaderC (liftA2 (<|>) l r)
-  {-# INLINE (<|>) #-}
-
-instance Monad m => Monad (ReaderC r m) where
-  ReaderC a >>= f = ReaderC (\ r -> a r >>= runReader r . f)
-  {-# INLINE (>>=) #-}
-
-instance Fail.MonadFail m => Fail.MonadFail (ReaderC r m) where
-  fail = ReaderC . const . Fail.fail
-  {-# INLINE fail #-}
-
-instance MonadFix m => MonadFix (ReaderC s m) where
-  mfix f = ReaderC (\ r -> mfix (runReader r . f))
-  {-# INLINE mfix #-}
-
-instance MonadIO m => MonadIO (ReaderC r m) where
-  liftIO = ReaderC . const . liftIO
-  {-# INLINE liftIO #-}
-
-instance (Alternative m, Monad m) => MonadPlus (ReaderC r m)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus) via R.ReaderT r m
 
 instance MonadTrans (ReaderC r) where
   lift = ReaderC . const
