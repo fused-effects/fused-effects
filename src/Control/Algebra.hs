@@ -1,6 +1,7 @@
 {-# LANGUAGE CPP #-}
 {-# LANGUAGE ConstraintKinds #-}
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -19,6 +20,7 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 module Control.Algebra
 ( Algebra(..)
 , Algebra'(..)
+, thread'
 , run
 , Has
 , send
@@ -66,6 +68,9 @@ class Monad m => Algebra sig m | m -> sig where
 
 class Monad m => Algebra' sig m | m -> sig where
   alg' :: (Functor ctx, Monad n) => ctx () -> (forall x . ctx (n x) -> m (ctx x)) -> sig n a -> m (ctx a)
+
+thread' :: (Functor ctx1, Functor ctx2, Monad n, Algebra' sig m) => ctx1 (ctx2 ()) -> (forall x . ctx1 (ctx2 (n x)) -> m (ctx1 (ctx2 x))) -> sig n a -> m (ctx1 (ctx2 a))
+thread' ctx hdl = fmap getCompose . alg' (Compose ctx) (fmap Compose . hdl . getCompose)
 
 
 -- | Run an action exhausted of effects to produce its final result value.
