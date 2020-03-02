@@ -50,6 +50,7 @@ import qualified Control.Monad.Trans.State.Strict as State.Strict
 import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
 import           Data.Coerce
+import           Data.Functor.Compose
 import           Data.Functor.Identity
 import           Data.List.NonEmpty (NonEmpty)
 import           Data.Monoid
@@ -133,6 +134,12 @@ instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (Except.Except
     L (L (Throw e))     -> Except.throwE e
     L (R (Catch m h k)) -> Except.catchE (hom m) (hom . h) >>= hom . k
     R other             -> Except.ExceptT $ alg id (thread (Right ()) (either (pure . Left) (Except.runExceptT . hom)) other)
+
+instance Algebra' sig m => Algebra' (Error e :+: sig) (Except.ExceptT e m) where
+  alg' ctx hdl = \case
+    L (L (Throw e))     -> Except.throwE e
+    L (R (Catch m h k)) -> Except.catchE (hdl (m <$ ctx)) (hdl . (<$ ctx) . h) >>= hdl . fmap k
+    R other             -> Except.ExceptT $ getCompose <$> alg' (Compose (Right ctx)) (fmap Compose . either (pure . Left) (Except.runExceptT . hdl) . getCompose) other
 
 deriving instance Algebra sig m => Algebra sig (Identity.IdentityT m)
 deriving instance Algebra' sig m => Algebra' sig (Identity.IdentityT m)
