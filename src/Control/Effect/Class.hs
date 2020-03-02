@@ -10,24 +10,13 @@
 --
 -- @since 1.0.0.0
 module Control.Effect.Class
-( HFunctor(..)
-, Effect(..)
+( Effect(..)
 -- * Generic deriving of 'Effect' instances.
 , GEffect(..)
 ) where
 
 import Data.Coerce
 import GHC.Generics
-
--- | Higher-order functors of kind @(* -> *) -> (* -> *)@ map functors to functors.
---
--- @since 1.0.0.0
-class HFunctor h where
-  -- | Higher-order functor map of a natural transformation over higher-order positions within the effect.
-  --
-  -- A definition for 'hmap' over first-order effects can be derived automatically provided a 'Generic1' instance is available.
-  hmap :: Functor m => (forall x . m x -> n x) -> (h m a -> h n a)
-
 
 -- | The class of effect types, which must:
 --
