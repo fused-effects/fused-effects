@@ -21,6 +21,7 @@ module Control.Algebra
 , run
 , Has
 , send
+, send'
   -- * Re-exports
 , (:+:) (..)
 , module Control.Effect.Class
@@ -88,6 +89,11 @@ type Has eff sig m = (Members eff sig, Algebra sig m)
 send :: (Member eff sig, Algebra sig m) => eff m a -> m a
 send = alg . inj
 {-# INLINE send #-}
+
+-- | Construct a request for an effect to be interpreted by some handler later on.
+send' :: (Member eff sig, Algebra' sig m) => eff m a -> m a
+send' = alg' id . inj
+{-# INLINE send' #-}
 
 
 -- base
