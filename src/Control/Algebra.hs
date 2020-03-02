@@ -62,7 +62,7 @@ class (HFunctor sig, Monad m) => Algebra sig m | m -> sig where
 
 
 class (HFunctor sig, Monad m) => Algebra' sig m | m -> sig where
-  alg' :: (forall x . m x -> n x) -> sig m a -> n a
+  alg' :: Monad n => (forall x . m x -> n x) -> sig m a -> n a
 
 
 -- | Run an action exhausted of effects to produce its final result value.
