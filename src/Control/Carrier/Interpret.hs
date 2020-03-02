@@ -63,11 +63,10 @@ reify a k = unsafeCoerce (Magic k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: HFunctor eff
-  => (forall x . eff m x -> m x)
+  :: (forall n x . Monad n => (forall y . n y -> m y) -> eff n x -> m x)
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
-runInterpret f m = reify (Handler (\ hom -> InterpretC . f . hmap (runInterpretC . hom))) (go m) where
+runInterpret f m = reify (Handler (\ hom -> InterpretC . f (runInterpretC . hom))) (go m) where
   go :: InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
 
@@ -75,14 +74,13 @@ runInterpret f m = reify (Handler (\ hom -> InterpretC . f . hmap (runInterpretC
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: HFunctor eff
-  => (forall x . s -> eff (StateC s m) x -> m (s, x))
+  :: (forall n x . Monad n => (forall y . n y -> StateC s m y) -> s -> eff n x -> m (s, x))
   -> s
   -> (forall t . Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
   -> m (s, a)
 runInterpretState handler state m
   = runState state
-  $ runInterpret (\e -> StateC (`handler` e)) m
+  $ runInterpret (\ hom -> StateC . flip (handler hom)) m
 
 -- | @since 1.0.0.0
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpretC :: m a }
