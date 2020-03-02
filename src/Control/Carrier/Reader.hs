@@ -44,7 +44,7 @@ runReader r (ReaderC runReaderC) = runReaderC r
 
 -- | @since 1.0.0.0
 newtype ReaderC r m a = ReaderC (r -> m a)
-  deriving (Algebra' (Reader r :+: sig), Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus) via R.ReaderT r m
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus) via R.ReaderT r m
   deriving (MonadTrans) via R.ReaderT r
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m) where
