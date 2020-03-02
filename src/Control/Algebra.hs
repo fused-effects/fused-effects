@@ -62,7 +62,7 @@ class (HFunctor sig, Monad m) => Algebra sig m | m -> sig where
 
 
 class (HFunctor sig, Monad m) => Algebra' sig m | m -> sig where
-  alg' :: Monad n => (forall x . m x -> n x) -> sig m a -> n a
+  alg' :: Monad n => (forall x . n x -> m x) -> sig n a -> m a
 
 
 -- | Run an action exhausted of effects to produce its final result value.
@@ -165,9 +165,9 @@ instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg (R other)         = Reader.ReaderT $ \ r -> alg (hmap (`Reader.runReaderT` r) other)
 
 instance Algebra' sig m => Algebra' (Reader r :+: sig) (Reader.ReaderT r m) where
-  alg' hom (L (Ask       k)) = hom $ Reader.ask >>= k
-  alg' hom (L (Local f m k)) = hom $ Reader.local f m >>= k
-  alg' hom (R other)         = hom $ Reader.ReaderT $ \ r -> alg' id (hmap (`Reader.runReaderT` r) other)
+  alg' hom (L (Ask       k)) = Reader.ask >>= hom . k
+  alg' hom (L (Local f m k)) = Reader.local f (hom m) >>= hom . k
+  alg' hom (R other)         = Reader.ReaderT $ \ r -> alg' id (hmap ((`Reader.runReaderT` r) . hom) other)
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
