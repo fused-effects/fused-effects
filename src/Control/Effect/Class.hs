@@ -6,7 +6,7 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 
--- | Provides the 'HFunctor' and 'Effect' classes that effect types implement.
+-- | Provides the 'Effect' class that many effect types implement.
 --
 -- @since 1.0.0.0
 module Control.Effect.Class
