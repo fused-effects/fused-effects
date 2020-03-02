@@ -24,6 +24,7 @@ module Control.Algebra
 , run
 , Has
 , send
+, send'
   -- * Re-exports
 , (:+:) (..)
 , module Control.Effect.Class
@@ -94,6 +95,10 @@ type Has eff sig m = (Members eff sig, Algebra sig m)
 send :: (Member eff sig, Algebra sig m) => eff m a -> m a
 send = alg id . inj
 {-# INLINE send #-}
+
+send' :: (Member eff sig, Algebra' sig m) => eff m a -> m a
+send' = fmap runIdentity . alg' (Identity ()) (fmap Identity . runIdentity) . inj
+{-# INLINE send' #-}
 
 
 -- base
