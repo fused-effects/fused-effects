@@ -15,6 +15,7 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 -}
 module Control.Algebra
 ( Algebra(..)
+, Algebra'(..)
 , run
 , Has
 , send
@@ -58,6 +59,10 @@ import           Data.Tuple (swap)
 class (HFunctor sig, Monad m) => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
   alg :: sig m a -> m a
+
+
+class (HFunctor sig, Monad m) => Algebra' sig m | m -> sig where
+  alg' :: sig m a -> m a
 
 
 -- | Run an action exhausted of effects to produce its final result value.
