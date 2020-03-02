@@ -182,7 +182,7 @@ instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
 instance Algebra' sig m => Algebra' (Reader r :+: sig) (Reader.ReaderT r m) where
   alg' hom (L (Ask       k)) = Reader.ask >>= hom . k
   alg' hom (L (Local f m k)) = Reader.local f (hom m) >>= hom . k
-  alg' hom (R other)         = Reader.ReaderT $ \ r -> alg' id (hmap ((`Reader.runReaderT` r) . hom) other)
+  alg' hom (R other)         = Reader.ReaderT $ \ r -> alg' ((`Reader.runReaderT` r) . hom) other
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
