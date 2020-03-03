@@ -38,7 +38,6 @@ import           Control.Effect.State.Internal
 import           Control.Effect.Sum ((:+:)(..), Member(..), Members)
 import           Control.Effect.Throw.Internal
 import           Control.Effect.Writer.Internal
-import           Control.Monad ((<=<))
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Identity as Identity
 import qualified Control.Monad.Trans.Reader as Reader
@@ -67,7 +66,7 @@ class Monad m => Algebra sig m | m -> sig where
   -- handler . 'fmap' 'pure' = 'pure'
   -- @
   -- @
-  -- handler . 'fmap' (k '=<<') = handler . 'fmap' k '<=<' handler
+  -- handler . 'fmap' (k '=<<') = handler . 'fmap' k 'Control.Monad.<=<' handler
   -- @
   --
   -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
@@ -118,7 +117,7 @@ instance Algebra Empty Maybe where
 instance Algebra (Error e) (Either e) where
   alg ctx hdl = \case
     L (Throw e)     -> Left e
-    R (Catch m h k) -> either (hdl . fmap k <=< hdl . (<$ ctx) . h) (hdl . fmap k) (hdl (m <$ ctx))
+    R (Catch m h k) -> either (hdl . (<$ ctx) . h) pure (hdl (m <$ ctx)) >>= hdl . fmap k
 
 instance Algebra (Reader r) ((->) r) where
   alg ctx hdl = \case
