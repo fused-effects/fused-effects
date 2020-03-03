@@ -17,6 +17,7 @@ module Control.Effect.Lift
 ( -- * Lift effect
   Lift(..)
 , sendM
+, sendIO
 , liftWith
   -- * Re-exports
 , Algebra
@@ -35,6 +36,12 @@ import Control.Effect.Lift.Internal (Lift(..))
 -- @since 1.0.0.0
 sendM :: (Has (Lift n) sig m, Functor n) => n a -> m a
 sendM m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
+
+-- | A type-restricted variant of 'sendM' for 'IO' actions.
+--
+-- @since 1.0.2.0
+sendIO :: Has (Lift IO) sig m => IO a -> m a
+sendIO m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
 
 
 -- | Run actions in an outer context.
