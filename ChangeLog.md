@@ -10,6 +10,8 @@
 
 - Adds a `sendIO` operation for the `Lift IO` effect. ([#360](https://github.com/fused-effects/fused-effects/pull/360))
 
+- Inlines the `Reader` operations. ([#347](https://github.com/fused-effects/fused-effects/pull/347))
+
 
 # v1.0.0.1
 
