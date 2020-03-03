@@ -1,5 +1,6 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 -- | Labelled 'State' operations.
@@ -27,7 +28,7 @@ import           Control.Effect.State.Internal
 -- | Get the current state value.
 --
 -- @
--- runState a ('runLabelled' @_ @label ('get' @label) '>>=' k) = runState a (k a)
+-- runState a ('runLabelled' @label ('get' @label) '>>=' k) = runState a (k a)
 -- @
 --
 -- @since 1.0.2.0
@@ -49,7 +50,7 @@ gets f = runUnderLabel @label (S.gets f)
 -- | Replace the state value with a new value.
 --
 -- @
--- runState a ('runLabelled' @_ @label ('put' @label b) '>>' m) = runState b m
+-- runState a ('runLabelled' @label ('put' @label b) '>>' m) = runState b m
 -- @
 --
 -- @since 1.0.2.0
