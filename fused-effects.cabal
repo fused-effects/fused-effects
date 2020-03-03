@@ -74,6 +74,7 @@ library
     Control.Effect.Error
     Control.Effect.Fail
     Control.Effect.Fresh
+    Control.Effect.Labelled
     Control.Effect.Lift
     Control.Effect.NonDet
     Control.Effect.Reader
