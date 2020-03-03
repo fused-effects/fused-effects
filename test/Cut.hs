@@ -1,4 +1,9 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 module Cut
 ( tests
 , gen0
@@ -7,18 +12,18 @@ module Cut
 ) where
 
 import qualified Control.Carrier.Cut.Church as CutC
-import Control.Carrier.Reader
-import Control.Effect.Choose
-import Control.Effect.Cut (Cut, call, cutfail)
-import Control.Effect.NonDet (NonDet)
-import Data.Semigroup as S ((<>))
-import Gen
+import           Control.Carrier.Reader
+import           Control.Effect.Choose
+import           Control.Effect.Cut (Cut, call, cutfail)
+import           Control.Effect.NonDet (NonDet)
+import           Data.Semigroup as S ((<>))
+import           Gen
 import qualified Monad
 import qualified MonadFix
 import qualified NonDet
 import qualified Reader
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Cut"

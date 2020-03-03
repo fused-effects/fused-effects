@@ -1,15 +1,23 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Avoid lambda" #-}
 module Main
 ( main
 ) where
 
-import Control.Algebra
-import Control.Carrier.Interpret
-import Control.Carrier.State.Strict
-import Control.Carrier.Writer.Strict
-import Control.Monad (replicateM_)
-import Data.Monoid (Sum(..))
-import Gauge
+import           Control.Algebra
+import           Control.Carrier.Interpret
+import           Control.Carrier.State.Strict
+import           Control.Carrier.Writer.Strict
+import           Control.Monad (replicateM_)
+import           Data.Monoid (Sum(..))
+import           Gauge
 
 import qualified Bench.Reader as Reader
 import qualified Bench.NonDet as NonDet
@@ -53,4 +61,4 @@ tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
 
 modLoop :: Has (State (Sum Int)) sig m => Int -> m ()
-modLoop i = replicateM_ i (modify (+ (Sum (1 :: Int))))
+modLoop i = replicateM_ i (modify (+ Sum (1 :: Int)))

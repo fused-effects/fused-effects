@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveGeneric #-}
 module Control.Effect.State.Internal
 ( State(..)
 ) where

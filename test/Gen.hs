@@ -1,4 +1,17 @@
-{-# LANGUAGE DataKinds, DeriveFunctor, DeriveGeneric, FlexibleInstances, FunctionalDependencies, GADTs, GeneralizedNewtypeDeriving, KindSignatures, LambdaCase, PatternSynonyms, RankNTypes, ScopedTypeVariables, StandaloneDeriving, TypeApplications, TypeOperators, UndecidableInstances, ViewPatterns #-}
+{-# LANGUAGE DataKinds #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE PatternSynonyms #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-identities #-}
 module Gen
 ( module Data.Functor.Identity
@@ -57,24 +70,24 @@ module Gen
 , Fn.apply
 ) where
 
-import Control.Applicative
-import Control.Monad.Trans.Class
-import Control.Monad.Trans.Writer
-import Data.Foldable (traverse_)
-import Data.Function (on)
-import Data.Functor.Classes (showsUnaryWith)
-import Data.Functor.Identity
-import Data.Proxy
+import           Control.Applicative
+import           Control.Monad.Trans.Class
+import           Control.Monad.Trans.Writer
+import           Data.Foldable (traverse_)
+import           Data.Function (on)
+import           Data.Functor.Classes (showsUnaryWith)
+import           Data.Functor.Identity
+import           Data.Proxy
 import qualified Data.Semigroup as S
 import qualified Data.Set as Set
-import Data.String (fromString)
-import GHC.Generics ((:.:)(..))
-import GHC.Stack
-import GHC.TypeLits
-import Hedgehog
+import           Data.String (fromString)
+import           GHC.Generics ((:.:)(..))
+import           GHC.Stack
+import           GHC.TypeLits
+import           Hedgehog
 import qualified Hedgehog.Function as Fn
-import Hedgehog.Gen as Hedgehog
-import Hedgehog.Range
+import           Hedgehog.Gen as Hedgehog
+import           Hedgehog.Range
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
 m
@@ -85,7 +98,7 @@ m
   -> GenM m                                              -- ^ A computation generator.
 m terminals nonterminals = m where
   m :: GenM m
-  m = \ a -> Comp1 $ scale (`div` 2) $ recursive Hedgehog.choice
+  m a = Comp1 $ scale (`div` 2) $ recursive Hedgehog.choice
     (unComp1 <$> ((Gen.label "pure" pure <*> a) : terminals a))
     ( unComp1 (addLabel ">>" (Gen.subtermM2 (m a) (m a) (\ a b -> infixL 1 ">>" (>>) <*> a <*> b)))
     : (unComp1 <$> nonterminals m a))
@@ -286,7 +299,7 @@ instance Show (Term a) where
     Pair -> showParen True (showString ",")
     InfixL p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec p a . showString " " . showString s . showString " " . showsPrec (succ p) b)
     InfixR p s _ :<*> a :<*> b -> showParen (d > p) (showsPrec (succ p) a . showString " " . showString s . showString " " . showsPrec p b)
-    Pair :<*> a :<*> b -> showParen True (showsPrec 0 a . showString ", " . showsPrec 0 b)
+    Pair :<*> a :<*> b -> showParen True (shows a . showString ", " . shows b)
     InfixL p s _ :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
     InfixR p s _ :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
     f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)

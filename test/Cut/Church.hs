@@ -11,7 +11,7 @@ import Test.Tasty.HUnit
 tests :: TestTree
 tests = testGroup "Cut.Church"
   [ testCase "cutfail operates through higher-order effects" $
-    (runCutA @[] (local (id @()) cutfail <|> pure 'a')) ()
+    runCutA @[] (local (id @()) cutfail <|> pure 'a') ()
     @?=
-    (runCutA @[] (cutfail <|> pure 'a')) ()
+    runCutA @[] (cutfail <|> pure 'a') ()
   ]

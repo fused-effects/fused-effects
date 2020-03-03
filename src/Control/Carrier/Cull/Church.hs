@@ -1,4 +1,9 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A carrier for 'Cull' and 'NonDet' effects used in tandem (@Cull :+: NonDet@).
 --
@@ -15,16 +20,16 @@ module Control.Carrier.Cull.Church
 , module Control.Effect.NonDet
 ) where
 
-import Control.Algebra
-import Control.Applicative (liftA2)
-import Control.Carrier.NonDet.Church
-import Control.Carrier.Reader
-import Control.Effect.Cull
-import Control.Effect.NonDet
+import           Control.Algebra
+import           Control.Applicative (liftA2)
+import           Control.Carrier.NonDet.Church
+import           Control.Carrier.Reader
+import           Control.Effect.Cull
+import           Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 
 -- | Run a 'Cull' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'. Branches outside of any 'cull' block will not be pruned.
 --

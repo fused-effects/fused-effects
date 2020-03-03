@@ -1,14 +1,13 @@
-{-# LANGUAGE TypeApplications #-}
 module Lift
 ( tests
 ) where
 
-import Control.Carrier.State.Strict
-import Control.Effect.Lift
+import           Control.Carrier.State.Strict
+import           Control.Effect.Lift
 import qualified Control.Exception as E
-import Control.Monad.IO.Class
-import Test.Tasty
-import Test.Tasty.HUnit
+import           Control.Monad.IO.Class
+import           Test.Tasty
+import           Test.Tasty.HUnit
 
 tests :: TestTree
 tests = testGroup "Lift"

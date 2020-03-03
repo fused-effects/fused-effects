@@ -1,4 +1,6 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE KindSignatures #-}
 module Control.Effect.Empty.Internal
 ( Empty(..)
 ) where

@@ -1,4 +1,9 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A carrier for 'Cut' and 'NonDet' effects used in tandem (@Cut :+: NonDet@).
 --
@@ -15,16 +20,16 @@ module Control.Carrier.Cut.Church
 , module Control.Effect.NonDet
 ) where
 
-import Control.Algebra
-import Control.Applicative (liftA2)
-import Control.Effect.Cut
-import Control.Effect.NonDet
+import           Control.Algebra
+import           Control.Applicative (liftA2)
+import           Control.Effect.Cut
+import           Control.Effect.NonDet
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Data.Coerce (coerce)
-import Data.Functor.Identity
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Data.Coerce (coerce)
+import           Data.Functor.Identity
 
 -- | Run a 'Cut' effect with continuations respectively interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
 --

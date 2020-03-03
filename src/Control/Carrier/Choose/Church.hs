@@ -1,4 +1,10 @@
-{-# LANGUAGE DeriveTraversable, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | A carrier for 'Choose' effects (nondeterminism without failure).
 
@@ -16,18 +22,18 @@ module Control.Carrier.Choose.Church
 , module Control.Effect.Choose
 ) where
 
-import Control.Algebra
-import Control.Applicative (liftA2)
-import Control.Effect.Choose
+import           Control.Algebra
+import           Control.Applicative (liftA2)
+import           Control.Effect.Choose
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Data.Coerce (coerce)
-import Data.Functor.Identity
-import Data.List.NonEmpty (NonEmpty(..), head, tail)
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Data.Coerce (coerce)
+import           Data.Functor.Identity
+import           Data.List.NonEmpty (NonEmpty(..), head, tail)
 import qualified Data.Semigroup as S
-import Prelude hiding (head, tail)
+import           Prelude hiding (head, tail)
 
 -- | Run a 'Choose' effect with continuations respectively interpreting '<|>' and 'pure'.
 --

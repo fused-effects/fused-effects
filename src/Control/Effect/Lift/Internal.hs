@@ -1,4 +1,5 @@
-{-# LANGUAGE ExistentialQuantification, RankNTypes #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE RankNTypes #-}
 module Control.Effect.Lift.Internal
 ( Lift(..)
 ) where

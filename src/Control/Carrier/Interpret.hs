@@ -1,4 +1,13 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides an 'InterpretC' carrier capable of interpreting an arbitrary effect using a passed-in higher order function to interpret that effect. This is suitable for prototyping new effects quickly.
 
@@ -15,16 +24,16 @@ module Control.Carrier.Interpret
 , run
 ) where
 
-import Control.Algebra
-import Control.Applicative (Alternative(..))
-import Control.Carrier.State.Strict
-import Control.Monad (MonadPlus(..))
+import           Control.Algebra
+import           Control.Applicative (Alternative(..))
+import           Control.Carrier.State.Strict
+import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
-import Data.Functor.Const (Const(..))
-import Unsafe.Coerce (unsafeCoerce)
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
+import           Data.Functor.Const (Const(..))
+import           Unsafe.Coerce (unsafeCoerce)
 
 -- | A @Handler@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
 newtype Handler sig m = Handler
@@ -72,7 +81,7 @@ runInterpretState
   -> m (s, a)
 runInterpretState handler state m
   = runState state
-  $ runInterpret (\e -> StateC (\s -> handler s e)) m
+  $ runInterpret (\e -> StateC (`handler` e)) m
 
 -- | @since 1.0.0.0
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC (m a)

@@ -1,4 +1,8 @@
-{-# LANGUAGE ExplicitForAll, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | A carrier for the 'State' effect that refrains from evaluating its state until necessary. This is less efficient than "Control.Carrier.State.Strict" but allows some cyclic computations to terminate that would loop infinitely in a strict state carrier.
 
@@ -17,14 +21,14 @@ module Control.Carrier.State.Lazy
 , module Control.Effect.State
 ) where
 
-import Control.Algebra
-import Control.Applicative (Alternative(..))
-import Control.Effect.State
-import Control.Monad (MonadPlus(..))
+import           Control.Algebra
+import           Control.Applicative (Alternative(..))
+import           Control.Effect.State
+import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 
 -- | Run a lazy 'State' effect, yielding the result value and the final state. More programs terminate with lazy state than strict state, but injudicious use of lazy state may lead to thunk buildup.
 --
@@ -80,7 +84,7 @@ instance Monad m => Applicative (StateC s m) where
     ~(s'', x) <- mx s'
     pure (s'', f x)
   {-# INLINE (<*>) #-}
-  m *> k = m >>= \_ -> k
+  m *> k = m >>= const k
   {-# INLINE (*>) #-}
 
 instance Monad m => Monad (StateC s m) where

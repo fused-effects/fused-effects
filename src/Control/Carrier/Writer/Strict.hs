@@ -1,4 +1,8 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | A carrier for 'Writer' effects. This carrier performs its append operations strictly and thus avoids the space leaks inherent in lazy writer monads. These appends are left-associative; as such, @[]@ is a poor choice of monoid for computations that entail many calls to 'tell'. The [Seq](http://hackage.haskell.org/package/containersdocs/Data-Sequence.html) or [DList](http://hackage.haskell.org/package/dlist) monoids may be a superior choice.
 
@@ -16,15 +20,15 @@ module Control.Carrier.Writer.Strict
 , module Control.Effect.Writer
 ) where
 
-import Control.Algebra
-import Control.Applicative (Alternative(..))
-import Control.Carrier.State.Strict
-import Control.Effect.Writer
-import Control.Monad (MonadPlus(..))
+import           Control.Algebra
+import           Control.Applicative (Alternative(..))
+import           Control.Carrier.State.Strict
+import           Control.Effect.Writer
+import           Control.Monad (MonadPlus(..))
 import qualified Control.Monad.Fail as Fail
-import Control.Monad.Fix
-import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Class
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --

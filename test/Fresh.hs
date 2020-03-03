@@ -1,4 +1,7 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 module Fresh
 ( tests
 , gen
@@ -6,13 +9,13 @@ module Fresh
 ) where
 
 import qualified Control.Carrier.Fresh.Strict as FreshC
-import Control.Effect.Fresh
-import Gen
+import           Control.Effect.Fresh
+import           Gen
 import qualified Hedgehog.Range as R
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Fresh"
