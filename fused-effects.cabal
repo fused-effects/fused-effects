@@ -74,10 +74,13 @@ library
     Control.Effect.Error
     Control.Effect.Fail
     Control.Effect.Fresh
+    Control.Effect.Labelled
     Control.Effect.Lift
     Control.Effect.NonDet
     Control.Effect.Reader
+    Control.Effect.Reader.Labelled
     Control.Effect.State
+    Control.Effect.State.Labelled
     Control.Effect.Sum
     Control.Effect.Throw
     Control.Effect.Trace
@@ -105,6 +108,7 @@ test-suite examples
   main-is:        Main.hs
   other-modules:
     Inference
+    Labelled
     Parser
     ReinterpretLog
     Teletype
