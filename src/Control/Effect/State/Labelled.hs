@@ -7,6 +7,7 @@ module Control.Effect.State.Labelled
   State
 , get
 , gets
+, put
   -- * Re-exports
 , Algebra
 , Effect
@@ -39,3 +40,14 @@ get = runUnderLabel @_ @label S.get
 gets :: forall label s m a sig . HasLabelled label (State s) sig m => (s -> a) -> m a
 gets f = runUnderLabel @_ @label (S.gets f)
 {-# INLINEABLE gets #-}
+
+-- | Replace the state value with a new value.
+--
+-- @
+-- runState a ('runLabelled' @_ @label ('put' @label b) '>>' m) = runState b m
+-- @
+--
+-- @since 1.0.2.0
+put :: forall label s m sig . HasLabelled label (State s) sig m => s -> m ()
+put s = runUnderLabel @_ @label (S.put s)
+{-# INLINEABLE put #-}
