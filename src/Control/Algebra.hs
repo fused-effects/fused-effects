@@ -60,6 +60,17 @@ import           Data.Tuple (swap)
 -- @since 1.0.0.0
 class Monad m => Algebra sig m | m -> sig where
   -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
+  --
+  -- The handler is expressed as a /distributive law/, and required to adhere to the following laws:
+  --
+  -- @
+  -- handler . 'fmap' 'pure' = 'pure'
+  -- @
+  -- @
+  -- handler . 'fmap' (k '=<<') = handler . 'fmap' k '<=<' handler
+  -- @
+  --
+  -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
   alg :: (Functor ctx, Monad n) => ctx () -> (forall x . ctx (n x) -> m (ctx x)) -> sig n a -> m (ctx a)
 
 thread' :: (Functor ctx1, Functor ctx2, Monad n, Algebra sig m) => ctx1 (ctx2 ()) -> (forall x . ctx1 (ctx2 (n x)) -> m (ctx1 (ctx2 x))) -> sig n a -> m (ctx1 (ctx2 a))
