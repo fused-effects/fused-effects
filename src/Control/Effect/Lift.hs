@@ -51,7 +51,7 @@ sendIO = sendM
 -- This can be used to provide interoperation with @base@ functionality like @"Control.Exception".'Control.Exception.catch'@:
 --
 -- @
--- 'liftWith' $ \ ctx hdl -> 'Control.Exception.catch' (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
+-- 'liftWith' $ \\ ctx hdl -> 'Control.Exception.catch' (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
 -- @
 --
 -- The higher-order function takes both an initial context, and a handler phrased as the same sort of distributive law as described in the documentation for 'thread'. This handler takes actions lifted into a context functor, which can be either the initial context, or the derived context produced by handling a previous action.
