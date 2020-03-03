@@ -6,6 +6,7 @@ module Control.Effect.Reader.Labelled
 ( -- * Reader effect
   Reader
 , ask
+, asks
   -- * Re-exports
 , Algebra
 , Effect
@@ -26,3 +27,13 @@ import           Control.Effect.Reader.Internal
 -- @since 1.0.2.0
 ask :: forall label r m sig . HasLabelled label (Reader r) sig m => m r
 ask = runUnderLabel @_ @label R.ask
+
+-- | Project a function out of the current environment value.
+--
+-- @
+-- 'asks' @label f = 'fmap' f ('ask' @label)
+-- @
+--
+-- @since 1.0.2.0
+asks :: forall label r m a sig . HasLabelled label (Reader r) sig m => (r -> a) -> m a
+asks f = runUnderLabel @_ @label (R.asks f)
