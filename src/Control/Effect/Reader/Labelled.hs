@@ -2,6 +2,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+-- | Labelled 'Reader' operations.
+--
+-- @since 1.0.2.0
 module Control.Effect.Reader.Labelled
 ( -- * Reader effect
   Reader
