@@ -25,7 +25,6 @@ module Control.Effect.State
 , state
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where

@@ -24,7 +24,6 @@ module Control.Effect.Choose
 , Choosing(..)
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where

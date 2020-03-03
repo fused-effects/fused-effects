@@ -18,7 +18,6 @@ module Control.Effect.Trace
 , trace
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where

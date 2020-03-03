@@ -20,7 +20,6 @@ module Control.Effect.Lift
 , liftWith
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where

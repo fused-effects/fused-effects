@@ -21,7 +21,6 @@ module Control.Effect.Reader
 , local
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where
