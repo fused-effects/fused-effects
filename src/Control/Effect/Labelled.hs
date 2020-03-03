@@ -99,7 +99,7 @@ sendLabelled = alg . injLabelled @label . Labelled
 -- | A transformer to lift effectful actions to labelled effectful actions.
 --
 -- @since 1.0.2.0
-newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = UnderLabel { runUnderLabel :: m a }
+newtype UnderLabel (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) (m :: Type -> Type) a = UnderLabel { runUnderLabel :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus)
 
 instance MonadTrans (UnderLabel sub label) where
