@@ -102,3 +102,4 @@ state :: Has (State s) sig m => (s -> (s, a)) -> m a
 state f = do
   (s', a) <- gets f
   a <$ put s'
+{-# INLINEABLE state #-}

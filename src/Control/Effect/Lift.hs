@@ -17,6 +17,7 @@ module Control.Effect.Lift
 ( -- * Lift effect
   Lift(..)
 , sendM
+, sendIO
 , liftWith
   -- * Re-exports
 , Algebra
@@ -35,13 +36,21 @@ import Control.Effect.Lift.Internal (Lift(..))
 sendM :: (Has (Lift n) sig m, Functor n) => n a -> m a
 sendM m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
 
+-- | A type-restricted variant of 'sendM' for 'IO' actions.
+--
+-- This is particularly useful when you have a @'Has' ('Lift' 'IO') sig m@ constraint for the use of 'liftWith', and want to run an action abstracted over 'Control.Monad.IO.Class.MonadIO'. 'IO' has a 'Control.Monad.IO.Class.MonadIO' instance, and 'sendIO'’s type restricts the action’s type to 'IO' without further type annotations.
+--
+-- @since 1.0.2.0
+sendIO :: Has (Lift IO) sig m => IO a -> m a
+sendIO = sendM
+
 
 -- | Run actions in an outer context.
 --
 -- This can be used to provide interoperation with @base@ functionality like @"Control.Exception".'Control.Exception.catch'@:
 --
 -- @
--- 'liftWith' $ \ ctx hdl -> 'Control.Exception.catch' (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
+-- 'liftWith' $ \\ ctx hdl -> 'Control.Exception.catch' (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
 -- @
 --
 -- The higher-order function takes both an initial context, and a handler phrased as the same sort of distributive law as described in the documentation for 'alg'. This handler takes actions lifted into a context functor, which can be either the initial context, or the derived context produced by handling a previous action.
