@@ -7,6 +7,8 @@
 - Adds labelled effects in `Control.Effect.Labelled`. Labelled effects allow flexible disambiguation and dependency for parametric effects, enabling better type inference, restricted usage, and associated type parameters. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
 
 
+- Adds a `sendIO` operation for the `Lift IO` effect ([#360](https://github.com/fused-effects/fused-effects/pull/360)).
+
 # v1.0.0.1
 
 - Adds passthrough `Algebra` instances for `Ap` and `Alt`, allowing the invocation of effects inside these structures without extraneous constructor applications.
