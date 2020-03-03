@@ -1,3 +1,5 @@
+# v1.0.2.0
+
 - Adds a `state` operation for the `State` effect. ([#353](https://github.com/fused-effects/fused-effects/pull/353))
 
 - Adds a function reassociating sums leftwards to `Control.Effect.Sum`. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
@@ -6,9 +8,11 @@
 
 - Adds labelled effects in `Control.Effect.Labelled`. Labelled effects allow flexible disambiguation and dependency for parametric effects, enabling better type inference, restricted usage, and associated type parameters. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
 
-- Adds labelled interface for `Reader` and `State` effects in `Control.Effect.Reader.Labelled` and `Control.Effect.State.Labelled`. The functions in this interface are identical to their parent effect save that they accept a label parameter as an explicit type argument, suitable for use with an explicit type application; this can clean up code that would otherwise need an invocation of `runUnderLabel` to associate a labelled operation with its label.
+- Adds labelled interface for `Reader` and `State` effects in `Control.Effect.Reader.Labelled` and `Control.Effect.State.Labelled`. The functions in this interface are identical to their parent effect save that they accept a label parameter as an explicit type argument, suitable for use with an explicit type application; this can clean up code that would otherwise need an invocation of `runUnderLabel` to associate a labelled operation with its label. ([#354](https://github.com/fused-effects/fused-effects/pull/354))
 
-- Adds a `sendIO` operation for the `Lift IO` effect ([#360](https://github.com/fused-effects/fused-effects/pull/360)).
+- Adds a `sendIO` operation for the `Lift IO` effect. ([#360](https://github.com/fused-effects/fused-effects/pull/360))
+
+- Inlines the `Reader` operations. ([#347](https://github.com/fused-effects/fused-effects/pull/347))
 
 
 # v1.0.0.1
