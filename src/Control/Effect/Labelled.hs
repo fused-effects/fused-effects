@@ -45,8 +45,12 @@ import Data.Kind (Type)
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 --
 -- @since 1.0.2.0
-newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = Labelled { runLabelled :: sub m a }
+newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = Labelled (sub m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
+
+-- | @since 1.0.2.0
+runLabelled :: forall label sub m a . Labelled label sub m a -> sub m a
+runLabelled (Labelled l) = l
 
 instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
   alg ctx hdl = \case
