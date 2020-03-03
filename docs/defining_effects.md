@@ -41,16 +41,17 @@ This gives us enough to write computations using the `Teletype` effect. The next
 
 Effects only specify actions, they don’t actually perform them. That task is left up to effect handlers, typically defined as functions calling `interpret` to apply a given `Algebra` instance.
 
-Following from the above section, we can define a carrier for the `Teletype` effect which runs the calls in an underlying `MonadIO` instance:
+Following from the above section, we can define a carrier for the `Teletype` effect which runs the calls in an underlying `MonadIO` instance, accessed via our carrier’s own `GenericNewtypeDeriving`-derived instance:
 
 ```haskell
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
+  deriving (Applicative, Functor, Monad, MonadIO)
 
-instance (Algebra sig m, MonadIO m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  alg hom = \case
-    L (Read    k) -> TeletypeIOC (liftIO getLine      >>= runTeletypeIOC . k)
-    L (Write s k) -> TeletypeIOC (liftIO (putStrLn s) >>  runTeletypeIOC   k)
-    R other       -> TeletypeIOC (alg (runTeletypeIOC . hom) other)
+instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
+  alg ctx hdl = \case
+    L (Read    k) -> liftIO getLine      >>= hdl . (<$ ctx) . k
+    L (Write s k) -> liftIO (putStrLn s) >>  hdl (k <$ ctx>)
+    R other       -> TeletypeIOC (alg ctx (runTeletypeIOC . hdl) other)
 ```
 
 Here, `alg` is responsible for handling effectful computations. Since the `Algebra` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `alg` has two parts: a handler for `Teletype`, and a handler for teletype effects that might be embedded inside other effects in the signature.
@@ -64,21 +65,4 @@ By convention, we also provide a `runTeletypeIO` function. For `TeletypeIOC` thi
 ```haskell
 runTeletypeIO :: TeletypeIOC m a -> m a
 runTeletypeIO = runTeletypeIOC
-```
-
-Carrier types are also `Monad`s. Since `TeletypeIOC` is just a thin wrapper around an underlying computation, we can derive several instances using `-XGeneralizedNewtypeDeriving`:
-
-```haskell
-newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
-  deriving (Applicative, Functor, Monad, MonadIO)
-```
-
-This allows us to use `liftIO` directly on the carrier itself, instead of only in the underlying `m`; likewise with `>>=`, `>>`, and `pure`:
-
-```haskell
-instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  alg hom = \case
-    L (Read    k) -> liftIO getLine      >>= k
-    L (Write s k) -> liftIO (putStrLn s) >>  k
-    R other       -> TeletypeIOC (alg (runTeletypeIOC . hom) other)
 ```
