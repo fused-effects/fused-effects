@@ -43,7 +43,7 @@ sendM m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
 --
 -- @since 1.0.2.0
 sendIO :: Has (Lift IO) sig m => IO a -> m a
-sendIO m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
+sendIO = sendM
 
 
 -- | Run actions in an outer context.
