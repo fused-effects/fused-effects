@@ -12,6 +12,14 @@
 {-# LANGUAGE UndecidableInstances #-}
 -- | Labelled effects, allowing flexible disambiguation and dependency of parametric effects.
 --
+-- Among other things, this can be used to:
+--
+-- * Improve inference by relating parametric effect types to some arbitrary label. This can be used to lift existing effect operations, or to define new ones; cf "Control.Effect.Reader.Labelled", "Control.Effect.State.Labelled" for examples of lifting effect operations into labelled effect operations.
+--
+-- * Express stronger relationships between an effect and the context it’s run in, e.g. to give an effect shadowing semantics, allowing only one instance of it to be active at a time in a given context.
+--
+-- * Resolve ambiguous types by relating parameters to a concrete label type.
+--
 -- @since 1.0.2.0
 module Control.Effect.Labelled
 ( runLabelled
