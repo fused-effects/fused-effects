@@ -108,6 +108,7 @@ test-suite examples
   main-is:        Main.hs
   other-modules:
     Inference
+    Labelled
     Parser
     ReinterpretLog
     Teletype
