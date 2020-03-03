@@ -78,6 +78,7 @@ library
     Control.Effect.Lift
     Control.Effect.NonDet
     Control.Effect.Reader
+    Control.Effect.Reader.Labelled
     Control.Effect.State
     Control.Effect.Sum
     Control.Effect.Throw
