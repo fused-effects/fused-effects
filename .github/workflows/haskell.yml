@@ -50,4 +50,4 @@ jobs:
         cabal v2-run     --project-file=cabal.project.ci examples
         cabal v2-haddock --project-file=cabal.project.ci
         cabal v2-sdist   --project-file=cabal.project.ci
-        cabal check      --project-file=cabal.project.ci
+        cabal check
