@@ -31,6 +31,7 @@ import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Functor.Identity
 
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 --
@@ -39,9 +40,9 @@ newtype Labelled (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Labelled { run
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
-  alg hom = \case
-    L eff -> Labelled (alg (runLabelled . hom) (L (runLabelled eff)))
-    R sig -> Labelled (alg (runLabelled . hom) (R sig))
+  alg ctx hdl = \case
+    L eff -> Labelled (alg ctx (runLabelled . hdl) (L (runLabelled eff)))
+    R sig -> Labelled (alg ctx (runLabelled . hdl) (R sig))
   {-# INLINE alg #-}
 
 
@@ -91,7 +92,7 @@ type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 --
 -- @since 1.0.2.0
 sendLabelled :: forall label eff sig m a . HasLabelled label eff sig m => eff m a -> m a
-sendLabelled = alg id . injLabelled @label . Labelled
+sendLabelled = fmap runIdentity . alg (Identity ()) (fmap Identity . runIdentity) . injLabelled @label . Labelled
 {-# INLINABLE sendLabelled #-}
 
 
@@ -106,7 +107,7 @@ instance MonadTrans (UnderLabel sub label) where
   {-# INLINE lift #-}
 
 instance (LabelledMember label sub sig, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
-  alg hom = \case
-    L sub -> UnderLabel (alg (runUnderLabel . hom) (injLabelled @label (Labelled sub)))
-    R sig -> UnderLabel (alg (runUnderLabel . hom) sig)
+  alg ctx hdl = \case
+    L sub -> UnderLabel (alg ctx (runUnderLabel . hdl) (injLabelled @label (Labelled sub)))
+    R sig -> UnderLabel (alg ctx (runUnderLabel . hdl) sig)
   {-# INLINE alg #-}
