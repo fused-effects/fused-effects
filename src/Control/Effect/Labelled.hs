@@ -39,11 +39,12 @@ import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Kind (Type)
 
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 --
 -- @since 1.0.2.0
-newtype Labelled (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Labelled { runLabelled :: sub m a }
+newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = Labelled { runLabelled :: sub m a }
   deriving (Alternative, Applicative, Effect, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
@@ -56,7 +57,7 @@ instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (
 -- | The class of labelled types present in a signature.
 --
 -- @since 1.0.2.0
-class LabelledMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
+class LabelledMember label (sub :: (Type -> Type) -> (Type -> Type)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
   --
   -- @since 1.0.2.0
@@ -106,8 +107,12 @@ sendLabelled = alg id . injLabelled @label . Labelled
 -- | A transformer to lift effectful actions to labelled effectful actions.
 --
 -- @since 1.0.2.0
-newtype UnderLabel (label :: k) (sub :: (* -> *) -> (* -> *)) (m :: * -> *) a = UnderLabel { runUnderLabel :: m a }
+newtype UnderLabel (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) (m :: Type -> Type) a = UnderLabel (m a)
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus)
+
+-- | @since 1.0.2.0
+runUnderLabel :: forall label sub m a . UnderLabel label sub m a -> m a
+runUnderLabel (UnderLabel l) = l
 
 instance MonadTrans (UnderLabel sub label) where
   lift = UnderLabel
