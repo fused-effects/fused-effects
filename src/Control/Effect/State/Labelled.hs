@@ -33,7 +33,7 @@ import           Control.Effect.State.Internal
 --
 -- @since 1.0.2.0
 get :: forall label s m sig . HasLabelled label (State s) sig m => m s
-get = runUnderLabel @_ @label S.get
+get = runUnderLabel @label S.get
 {-# INLINEABLE get #-}
 
 -- | Project a function out of the current state value.
@@ -44,7 +44,7 @@ get = runUnderLabel @_ @label S.get
 --
 -- @since 1.0.2.0
 gets :: forall label s m a sig . HasLabelled label (State s) sig m => (s -> a) -> m a
-gets f = runUnderLabel @_ @label (S.gets f)
+gets f = runUnderLabel @label (S.gets f)
 {-# INLINEABLE gets #-}
 
 -- | Replace the state value with a new value.
@@ -55,7 +55,7 @@ gets f = runUnderLabel @_ @label (S.gets f)
 --
 -- @since 1.0.2.0
 put :: forall label s m sig . HasLabelled label (State s) sig m => s -> m ()
-put s = runUnderLabel @_ @label (S.put s)
+put s = runUnderLabel @label (S.put s)
 {-# INLINEABLE put #-}
 
 -- | Replace the state value with the result of applying a function to the current state value.
@@ -67,7 +67,7 @@ put s = runUnderLabel @_ @label (S.put s)
 --
 -- @since 1.0.2.0
 modify :: forall label s m sig . HasLabelled label (State s) sig m => (s -> s) -> m ()
-modify f = runUnderLabel @_ @label (S.modify f)
+modify f = runUnderLabel @label (S.modify f)
 {-# INLINEABLE modify #-}
 
 -- | Replace the state value with the result of applying a function to the current state value.
@@ -79,7 +79,7 @@ modify f = runUnderLabel @_ @label (S.modify f)
 --
 -- @since 1.0.2.0
 modifyLazy :: forall label s m sig . HasLabelled label (State s) sig m => (s -> s) -> m ()
-modifyLazy f = runUnderLabel @_ @label (S.modifyLazy f)
+modifyLazy f = runUnderLabel @label (S.modifyLazy f)
 {-# INLINEABLE modifyLazy #-}
 
 -- | Compute a new state and a value in a single step.
@@ -90,5 +90,5 @@ modifyLazy f = runUnderLabel @_ @label (S.modifyLazy f)
 --
 -- @since 1.0.2.0
 state :: forall label s m a sig . HasLabelled label (State s) sig m => (s -> (s, a)) -> m a
-state f = runUnderLabel @_ @label (S.state f)
+state f = runUnderLabel @label (S.state f)
 {-# INLINEABLE state #-}
