@@ -32,8 +32,6 @@ data Trace m k = Trace
   }
   deriving (Functor, Generic1)
 
-instance Effect Trace
-
 -- | Append a message to the trace log.
 --
 -- @since 0.1.0.0

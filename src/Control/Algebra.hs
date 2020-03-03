@@ -25,12 +25,10 @@ module Control.Algebra
 , send
   -- * Re-exports
 , (:+:) (..)
-, module Control.Effect.Class
 ) where
 
 import           Control.Effect.Catch.Internal
 import           Control.Effect.Choose.Internal
-import           Control.Effect.Class
 import           Control.Effect.Empty.Internal
 import           Control.Effect.Error.Internal
 import           Control.Effect.Lift.Internal

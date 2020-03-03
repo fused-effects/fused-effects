@@ -189,7 +189,7 @@ handlePrint r =
       Left jsonParseError -> print jsonParseError
       Right facts -> traverse (putStrLn . catFact) facts
 
-catFactsRunner :: (Effect sig, Has Http sig m) => m (Either InvalidContentType (Either JsonParseError [CatFact]))
+catFactsRunner :: Has Http sig m => m (Either InvalidContentType (Either JsonParseError [CatFact]))
 catFactsRunner =
   runError @InvalidContentType $
   runError @JsonParseError $

@@ -116,7 +116,6 @@ example = testGroup "parser"
 data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
   deriving (Functor, Generic1)
 
-instance Effect Symbol
 
 satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char
 satisfy p = send (Satisfy p pure)

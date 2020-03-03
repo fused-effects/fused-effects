@@ -17,7 +17,6 @@ module Control.Effect.Sum
 , (:+:)(..)
 ) where
 
-import Control.Effect.Class
 import Data.Kind (Constraint)
 import GHC.Generics (Generic1)
 
@@ -28,8 +27,6 @@ data (f :+: g) (m :: * -> *) k
   deriving (Eq, Foldable, Functor, Generic1, Ord, Show, Traversable)
 
 infixr 4 :+:
-
-instance (Effect f, Effect g) => Effect (f :+: g)
 
 
 -- | The class of types present in a signature.
