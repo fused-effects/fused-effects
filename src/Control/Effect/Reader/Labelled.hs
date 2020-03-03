@@ -23,6 +23,6 @@ import           Control.Effect.Reader.Internal
 -- runReader a ('runLabelled' @_ @label ('ask' @label) '>>=' k) = runReader a (k a)
 -- @
 --
--- @since 0.1.0.0
+-- @since 1.0.2.0
 ask :: forall label r m sig . HasLabelled label (Reader r) sig m => m r
 ask = runUnderLabel @_ @label R.ask
