@@ -51,8 +51,8 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (Empty :+: sig) (EmptyC m) where
-  alg hom = \case
+instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
+  alg ctx hdl = \case
     L Empty -> EmptyC (MaybeT (pure Nothing))
-    R other -> EmptyC (MaybeT (alg id (thread (Just ()) (maybe (pure Nothing) (runEmpty . hom)) other)))
+    R other -> EmptyC (MaybeT (thread' (Just ctx) (maybe (pure Nothing) (runEmpty . hdl)) other))
   {-# INLINE alg #-}

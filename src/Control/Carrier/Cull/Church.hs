@@ -74,10 +74,10 @@ instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
-  alg hom = \case
-    L (Cull m k)         -> CullC (local (const True) (runCullC (hom m))) >>= hom . k
+instance Algebra sig m => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
+  alg ctx hdl = \case
+    L (Cull m k)         -> CullC (local (const True) (runCullC (hdl (m <$ ctx)))) >>= hdl . fmap k
     R (L (L Empty))      -> empty
-    R (L (R (Choose k))) -> hom (k True) <|> hom (k False)
-    R (R other)          -> CullC (alg (runCullC . hom) (R (R other)))
+    R (L (R (Choose k))) -> hdl (k True <$ ctx) <|> hdl (k False <$ ctx)
+    R (R other)          -> CullC (alg ctx (runCullC . hdl) (R (R other)))
   {-# INLINE alg #-}

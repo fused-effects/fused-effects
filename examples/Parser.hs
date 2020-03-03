@@ -139,14 +139,14 @@ parse input = (>>= exhaustive) . runState input . runParseC
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
-instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) (ParseC m) where
-  alg hom = \case
+instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
+  alg ctx hdl = \case
     L (Satisfy p k) -> do
       input <- ParseC get
       case input of
-        c:cs | p c -> ParseC (put cs) *> hom (k c)
+        c:cs | p c -> ParseC (put cs) *> hdl (k c <$ ctx)
         _          -> empty
-    R other         -> ParseC (alg (runParseC . hom) (R other))
+    R other         -> ParseC (alg ctx (runParseC . hdl) (R other))
   {-# INLINE alg #-}
 
 

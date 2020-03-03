@@ -58,10 +58,10 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  alg hom = \case
-    L (Read    k) -> liftIO getLine      >>= hom . k
-    L (Write s k) -> liftIO (putStrLn s) >>  hom k
-    R other       -> TeletypeIOC (alg (runTeletypeIOC . hom) other)
+  alg ctx hdl = \case
+    L (Read    k) -> liftIO getLine      >>= hdl . (<$ ctx) . k
+    L (Write s k) -> liftIO (putStrLn s) >>  hdl (k <$ ctx)
+    R other       -> TeletypeIOC (alg ctx (runTeletypeIOC . hdl) other)
 
 
 runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
@@ -70,12 +70,12 @@ runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
   deriving (Applicative, Functor, Monad)
 
-instance (Algebra sig m, Effect sig) => Algebra (Teletype :+: sig) (TeletypeRetC m) where
-  alg hom = \case
+instance Algebra sig m => Algebra (Teletype :+: sig) (TeletypeRetC m) where
+  alg ctx hdl = \case
     L (Read    k) -> do
       i <- TeletypeRetC get
       case i of
-        []  -> hom (k "")
-        h:t -> TeletypeRetC (put t) *> hom (k h)
-    L (Write s k) -> TeletypeRetC (tell [s]) *> hom k
-    R other       -> TeletypeRetC (alg (runTeletypeRetC . hom) (R (R other)))
+        []  -> hdl (k "" <$ ctx)
+        h:t -> TeletypeRetC (put t) *> hdl (k h <$ ctx)
+    L (Write s k) -> TeletypeRetC (tell [s]) *> hdl (k <$ ctx)
+    R other       -> TeletypeRetC (alg ctx (runTeletypeRetC . hdl) (R (R other)))
