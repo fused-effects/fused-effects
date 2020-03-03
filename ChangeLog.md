@@ -12,6 +12,8 @@
 
 - Removes `Effect`. The new signature for `alg` (see above) obviates the need for threading handlers through _effects_, replacing that by threading them through _algebras_ instead. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
 
+- Redefines `thread` as a wrapper around `alg`, composing context functors and distributive laws together. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
+
 
 # v1.0.2.0
 
