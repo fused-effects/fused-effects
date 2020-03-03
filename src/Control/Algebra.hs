@@ -75,6 +75,7 @@ class Monad m => Algebra sig m | m -> sig where
 
 thread :: (Functor ctx1, Functor ctx2, Monad n, Algebra sig m) => ctx1 (ctx2 ()) -> (forall x . ctx1 (ctx2 (n x)) -> m (ctx1 (ctx2 x))) -> sig n a -> m (ctx1 (ctx2 a))
 thread ctx hdl = fmap getCompose . alg (Compose ctx) (fmap Compose . hdl . getCompose)
+{-# INLINE thread #-}
 
 
 -- | Run an action exhausted of effects to produce its final result value.
