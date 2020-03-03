@@ -36,7 +36,7 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.0.2.0
 newtype Labelled (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Labelled { runLabelled :: sub m a }
-  deriving (Alternative, Applicative, Effect, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
   alg hom = \case
