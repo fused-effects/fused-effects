@@ -80,6 +80,7 @@ library
     Control.Effect.Reader
     Control.Effect.Reader.Labelled
     Control.Effect.State
+    Control.Effect.State.Labelled
     Control.Effect.Sum
     Control.Effect.Throw
     Control.Effect.Trace
