@@ -31,11 +31,12 @@ import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Kind (Type)
 
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 --
 -- @since 1.0.2.0
-newtype Labelled (label :: k) (sub :: (* -> *) -> (* -> *)) m a = Labelled { runLabelled :: sub m a }
+newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = Labelled { runLabelled :: sub m a }
   deriving (Alternative, Applicative, Effect, Functor, HFunctor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
@@ -48,7 +49,7 @@ instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra 
 -- | The class of labelled types present in a signature.
 --
 -- @since 1.0.2.0
-class LabelledMember label (sub :: (* -> *) -> (* -> *)) sup | label sup -> sub where
+class LabelledMember label (sub :: (Type -> Type) -> (Type -> Type)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
   --
   -- @since 1.0.2.0
