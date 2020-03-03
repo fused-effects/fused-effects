@@ -7,6 +7,7 @@ module Control.Effect.Reader.Labelled
   Reader
 , ask
 , asks
+, local
   -- * Re-exports
 , Algebra
 , Effect
@@ -37,3 +38,13 @@ ask = runUnderLabel @_ @label R.ask
 -- @since 1.0.2.0
 asks :: forall label r m a sig . HasLabelled label (Reader r) sig m => (r -> a) -> m a
 asks f = runUnderLabel @_ @label (R.asks f)
+
+-- | Run a computation with an environment value locally modified by the passed function.
+--
+-- @
+-- runReader a ('runLabelled' @_ @label ('local' @label f m)) = runReader (f a) m
+-- @
+--
+-- @since 1.0.2.0
+local :: forall label r m a sig . HasLabelled label (Reader r) sig m => (r -> r) -> m a -> m a
+local f m = runUnderLabel @_ @label (R.local f (UnderLabel m))
