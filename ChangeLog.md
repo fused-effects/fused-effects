@@ -1,5 +1,7 @@
 - Adds a `state` operation for the `State` effect.
 
+- Adds a `sendIO` operation for the `Lift IO` effect ([#360](https://github.com/fused-effects/fused-effects/pull/360)).
+
 # v1.0.0.1
 
 - Adds passthrough `Algebra` instances for `Ap` and `Alt`, allowing the invocation of effects inside these structures without extraneous constructor applications.
