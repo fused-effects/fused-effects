@@ -2,6 +2,9 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
+-- | Labelled 'State' operations.
+--
+-- @since 1.0.2.0
 module Control.Effect.State.Labelled
 ( -- * State effect
   State
