@@ -39,6 +39,8 @@ sendM m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
 
 -- | A type-restricted variant of 'sendM' for 'IO' actions.
 --
+-- This is particularly useful when you have a @'Has' ('Lift' 'IO') sig m@ constraint for the use of 'liftWith', and want to run an action abstracted over 'Control.Monad.IO.Class.MonadIO'. 'IO' has a 'Control.Monad.IO.Class.MonadIO' instance, and 'sendIO'’s type restricts the action’s type to 'IO' without further type annotations.
+--
 -- @since 1.0.2.0
 sendIO :: Has (Lift IO) sig m => IO a -> m a
 sendIO m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
