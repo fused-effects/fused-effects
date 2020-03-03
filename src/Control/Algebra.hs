@@ -142,7 +142,7 @@ instance Algebra sig m => Algebra sig (Ap m) where
 #endif
 
 -- | This instance permits effectful actions to be lifted into the 'Alt' monad,
--- which eases the invocation of repeated alternation with '<|>':
+-- which eases the invocation of repeated alternation with 'Control.Applicative.<|>':
 --
 -- > a <|> b <|> c <|> d
 --
