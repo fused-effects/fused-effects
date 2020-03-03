@@ -6,6 +6,7 @@ module Control.Effect.State.Labelled
 ( -- * State effect
   State
 , get
+, gets
   -- * Re-exports
 , Algebra
 , Effect
@@ -27,3 +28,14 @@ import           Control.Effect.State.Internal
 get :: forall label s m sig . HasLabelled label (State s) sig m => m s
 get = runUnderLabel @_ @label S.get
 {-# INLINEABLE get #-}
+
+-- | Project a function out of the current state value.
+--
+-- @
+-- 'gets' f = 'fmap' f 'get'
+-- @
+--
+-- @since 1.0.2.0
+gets :: forall label s m a sig . HasLabelled label (State s) sig m => (s -> a) -> m a
+gets f = runUnderLabel @_ @label (S.gets f)
+{-# INLINEABLE gets #-}
