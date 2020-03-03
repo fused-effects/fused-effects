@@ -25,9 +25,9 @@ The `Read` operation returns a `String`, and hence its continuation is represent
 
 On the other hand, the `Write` operation returns `()`. Since a function `() -> k` is equivalent to a (non-strict) `k`, we can omit the function parameter.
 
-In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need two other instances: `HFunctor` and `Effect`. `HFunctor`, named for “higher-order functor,” has one operation, `hmap`, which applies a function to any embedded computations inside an effect. `Effect` is used by `Algebra` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `thread` takes an initial state parameter (encoded as some arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping state functors containing unhandled computations to handled computations producing the state functor alongside any results.
+In addition to a `Functor` instance (derived here using `-XDeriveFunctor`), we need one other instance: `Effect`. `Effect` is used by `Algebra` instances to service any requests for their effect occurring inside other computations—whether embedded or in the continuations. Since these may require some state to be maintained, `thread` takes an initial state parameter (encoded as some arbitrary functor filled with `()`), and its function is phrased as a _distributive law_, mapping state functors containing unhandled computations to handled computations producing the state functor alongside any results.
 
-Since `Teletype` is a first-order effect (i.e., its operations don’t have any embedded computations), we can derive instances both of `HFunctor` and `Effect` by first deriving a `Generic1` instance (using `-XDeriveGeneric`):
+Since `Teletype` is a first-order effect (i.e., its operations don’t have any embedded computations), we can derive an instance of `Effect` by first deriving a `Generic1` instance (using `-XDeriveGeneric`):
 
 ```haskell
 import GHC.Generics (Generic1)
@@ -38,11 +38,10 @@ data Teletype m k
   deriving (Functor, Generic1)
 ```
 
-and then defining `HFunctor` & `Effect`, leaving their methods to use the default definitions:
+and then defining `Effect`, leaving it to use the default definition of the `thread` method:
 
 ```haskell
-instance HFunctor Teletype
-instance Effect   Teletype
+instance Effect Teletype
 ```
 
 Now that we have our effect datatype, we can give definitions for `read` and `write`:
@@ -67,14 +66,15 @@ Following from the above section, we can define a carrier for the `Teletype` eff
 newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
 
 instance (Algebra sig m, MonadIO m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  alg (L (Read    k)) = TeletypeIOC (liftIO getLine      >>= runTeletypeIOC . k)
-  alg (L (Write s k)) = TeletypeIOC (liftIO (putStrLn s) >>  runTeletypeIOC   k)
-  alg (R other)       = TeletypeIOC (alg (handleCoercible other))
+  alg hom = \case
+    L (Read    k) -> TeletypeIOC (liftIO getLine      >>= runTeletypeIOC . k)
+    L (Write s k) -> TeletypeIOC (liftIO (putStrLn s) >>  runTeletypeIOC   k)
+    R other       -> TeletypeIOC (alg (runTeletypeIOC . hom) other)
 ```
 
 Here, `alg` is responsible for handling effectful computations. Since the `Algebra` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `alg` has two parts: a handler for `Teletype`, and a handler for teletype effects that might be embedded inside other effects in the signature.
 
-In this case, since the `Teletype` carrier is just a thin wrapper around the underlying computation, we can use `handleCoercible` to handle any embedded `TeletypeIOC` carriers by simply mapping `coerce` over them.
+In this case, since the `Teletype` carrier is just a thin wrapper around the underlying computation, we pass `alg` a function to unwrap any embedded `TeletypeIOC` values by simply composing `runTeletypeIOC` onto `hom`.
 
 That leaves `Teletype` effects themselves, which are handled with one case per constructor. Since we’re assuming the existence of a `MonadIO` instance for the underlying computation, we can use `liftIO` to inject the `getLine` and `putStrLn` actions into it, and then proceed with the continuations, unwrapping them in the process.
 
@@ -96,7 +96,8 @@ This allows us to use `liftIO` directly on the carrier itself, instead of only i
 
 ```haskell
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  alg (L (Read    k)) = liftIO getLine      >>= k
-  alg (L (Write s k)) = liftIO (putStrLn s) >>  k
-  alg (R other)       = TeletypeIOC (alg (handleCoercible other))
+  alg hom = \case
+    L (Read    k) -> liftIO getLine      >>= k
+    L (Write s k) -> liftIO (putStrLn s) >>  k
+    R other       -> TeletypeIOC (alg (runTeletypeIOC . hom) other)
 ```

@@ -39,11 +39,6 @@ data Cut m k
 
 deriving instance Functor m => Functor (Cut m)
 
-instance HFunctor Cut where
-  hmap _ Cutfail    = Cutfail
-  hmap f (Call m k) = Call (f m) (f . k)
-  {-# INLINE hmap #-}
-
 instance Effect Cut where
   thread _   _       Cutfail    = Cutfail
   thread ctx handler (Call m k) = Call (handler (m <$ ctx)) (handler . fmap k)

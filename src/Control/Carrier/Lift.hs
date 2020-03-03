@@ -36,4 +36,4 @@ instance MonadTrans LiftC where
   lift = LiftC
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
-  alg (LiftWith with k) = LiftC (with (Identity ()) (fmap Identity . runM . runIdentity)) >>= k . runIdentity
+  alg hom (LiftWith with k) = LiftC (with (Identity ()) (fmap Identity . runM . hom . runIdentity)) >>= hom . k . runIdentity

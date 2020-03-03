@@ -1,5 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -11,7 +12,7 @@ module Control.Carrier.Fresh.Strict
 ( -- * Fresh carrier
   runFresh
 , evalFresh
-, FreshC(..)
+, FreshC(FreshC)
   -- * Fresh effect
 , module Control.Effect.Fresh
 ) where
@@ -53,10 +54,11 @@ evalFresh :: Functor m => Int -> FreshC m a -> m a
 evalFresh n (FreshC m) = evalState n m
 
 -- | @since 1.0.0.0
-newtype FreshC m a = FreshC (StateC Int m a)
+newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Algebra sig m, Effect sig) => Algebra (Fresh :+: sig) (FreshC m) where
-  alg (L (Fresh k)) = FreshC (get <* modify (+ (1 :: Int))) >>= k
-  alg (R other)     = FreshC (alg (R (handleCoercible other)))
+  alg hom = \case
+    L (Fresh k) -> FreshC (get <* modify (+ (1 :: Int))) >>= hom . k
+    R other     -> FreshC (alg (runFreshC . hom) (R other))
   {-# INLINE alg #-}

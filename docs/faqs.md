@@ -38,10 +38,7 @@ There are two approaches: the first is to use the monadic types defined by `tran
 
 ```haskell
 newtype Wrapper s m a = Wrapper { runWrapper :: m a }
-  deriving (Applicative, Functor, Monad)
-
-instance Algebra sig m => Algebra sig (Wrapper s m) where
-  alg = Wrapper . alg . handleCoercible
+  deriving (Algebra sig, Applicative, Functor, Monad)
 
 getState :: Has (State s) sig m => Wrapper s m s
 getState = get
@@ -54,4 +51,3 @@ instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
   get = Control.Carrier.State.Strict.get
   put = Control.Carrier.State.Strict.put
 ```
-

@@ -40,12 +40,8 @@ runFail (FailC m) = runThrow m
 
 -- | @since 1.0.0.0
 newtype FailC m a = FailC (ThrowC String m a)
-  deriving (Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
+  deriving (Algebra (Fail :+: sig), Alternative, Applicative, Functor, Monad, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Algebra sig m, Effect sig) => Fail.MonadFail (FailC m) where
   fail = send . Fail
   {-# INLINE fail #-}
-
-instance (Algebra sig m, Effect sig) => Algebra (Fail :+: sig) (FailC m) where
-  alg = FailC . alg . handleCoercible
-  {-# INLINE alg #-}

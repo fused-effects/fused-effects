@@ -12,5 +12,4 @@ import GHC.Generics (Generic1)
 data Empty (m :: * -> *) k = Empty
   deriving (Functor, Generic1)
 
-instance HFunctor Empty
-instance Effect   Empty
+instance Effect Empty

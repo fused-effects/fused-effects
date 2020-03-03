@@ -45,16 +45,16 @@ import Data.Kind (Type)
 --
 -- @since 1.0.2.0
 newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = Labelled (sub m a)
-  deriving (Alternative, Applicative, Effect, Functor, HFunctor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Effect, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 -- | @since 1.0.2.0
 runLabelled :: forall label sub m a . Labelled label sub m a -> sub m a
 runLabelled (Labelled l) = l
 
-instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
-  alg = \case
-    L eff -> Labelled (send (handleCoercible (runLabelled eff)))
-    R sig -> Labelled (send (handleCoercible sig))
+instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
+  alg hom = \case
+    L eff -> Labelled (alg (runLabelled . hom) (L (runLabelled eff)))
+    R sig -> Labelled (alg (runLabelled . hom) (R sig))
   {-# INLINE alg #-}
 
 
@@ -104,7 +104,7 @@ type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 --
 -- @since 1.0.2.0
 sendLabelled :: forall label eff sig m a . HasLabelled label eff sig m => eff m a -> m a
-sendLabelled = alg . injLabelled @label . Labelled
+sendLabelled = alg id . injLabelled @label . Labelled
 {-# INLINABLE sendLabelled #-}
 
 
@@ -122,8 +122,8 @@ instance MonadTrans (UnderLabel sub label) where
   lift = UnderLabel
   {-# INLINE lift #-}
 
-instance (LabelledMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
-  alg = \case
-    L sub -> UnderLabel (sendLabelled @label (handleCoercible sub))
-    R sig -> UnderLabel (send (handleCoercible sig))
+instance (LabelledMember label sub sig, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
+  alg hom = \case
+    L sub -> UnderLabel (alg (runUnderLabel . hom) (injLabelled @label (Labelled sub)))
+    R sig -> UnderLabel (alg (runUnderLabel . hom) sig)
   {-# INLINE alg #-}

@@ -43,7 +43,7 @@ runError (ErrorC m) = runExceptT m
 
 -- | @since 0.1.0.0
 newtype ErrorC e m a = ErrorC (ExceptT e m a)
-  deriving (Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadTrans)
+  deriving (Algebra (Error e :+: sig), Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadTrans)
 
 -- | 'ErrorC' passes 'Alternative' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
 instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
@@ -54,7 +54,3 @@ instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
 
 -- | 'ErrorC' passes 'MonadPlus' operations along to the underlying monad @m@, rather than combining errors à la 'ExceptT'.
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
-
-instance (Algebra sig m, Effect sig) => Algebra (Error e :+: sig) (ErrorC e m) where
-  alg = ErrorC . alg . handleCoercible
-  {-# INLINE alg #-}

@@ -13,5 +13,4 @@ data State s m k
   | Put s (m k)
   deriving (Functor, Generic1)
 
-instance HFunctor (State s)
-instance Effect   (State s)
+instance Effect (State s)

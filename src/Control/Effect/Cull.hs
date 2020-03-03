@@ -32,10 +32,6 @@ data Cull m k
 
 deriving instance Functor m => Functor (Cull m)
 
-instance HFunctor Cull where
-  hmap f (Cull m k) = Cull (f m) (f . k)
-  {-# INLINE hmap #-}
-
 instance Effect Cull where
   thread ctx handler (Cull m k) = Cull (handler (m <$ ctx)) (handler . fmap k)
   {-# INLINE thread #-}
