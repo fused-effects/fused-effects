@@ -8,7 +8,7 @@
 
 - Adds labelled interface for `Reader` and `State` effects in `Control.Effect.Reader.Labelled` and `Control.Effect.State.Labelled`. The functions in this interface are identical to their parent effect save that they accept a label parameter as an explicit type argument, suitable for use with an explicit type application; this can clean up code that would otherwise need an invocation of `runUnderLabel` to associate a labelled operation with its label.
 
-- Adds a `sendIO` operation for the `Lift IO` effect ([#360](https://github.com/fused-effects/fused-effects/pull/360)).
+- Adds a `sendIO` operation for the `Lift IO` effect. ([#360](https://github.com/fused-effects/fused-effects/pull/360))
 
 
 # v1.0.0.1
