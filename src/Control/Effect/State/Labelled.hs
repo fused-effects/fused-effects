@@ -10,6 +10,7 @@ module Control.Effect.State.Labelled
 , put
 , modify
 , modifyLazy
+, state
   -- * Re-exports
 , Algebra
 , Effect
@@ -77,3 +78,14 @@ modify f = runUnderLabel @_ @label (S.modify f)
 modifyLazy :: forall label s m sig . HasLabelled label (State s) sig m => (s -> s) -> m ()
 modifyLazy f = runUnderLabel @_ @label (S.modifyLazy f)
 {-# INLINEABLE modifyLazy #-}
+
+-- | Compute a new state and a value in a single step.
+--
+-- @
+-- 'state' f = 'gets' f '>>=' \\ (s, a) -> 'put' s '>>' 'pure' a
+-- @
+--
+-- @since 1.0.2.0
+state :: forall label s m a sig . HasLabelled label (State s) sig m => (s -> (s, a)) -> m a
+state f = runUnderLabel @_ @label (S.state f)
+{-# INLINEABLE state #-}
