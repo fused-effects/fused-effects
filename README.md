@@ -188,7 +188,7 @@ example4 = runM . runReader "hello" . runState 0 $ do
 
 ### Required compiler extensions
 
-When defining your own effects, you may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case. `-XDeriveGeneric` can be used with many first-order effects to derive default implementation of `Effect`.
+When defining your own effects, you may need `-XKindSignatures` if GHC cannot correctly infer the type of your constructor; see the [documentation on common errors][common] for more information about this case.
 
 When defining carriers, you’ll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), `-XFlexibleInstances` to loosen the conditions on the instance, `-XMultiParamTypeClasses` since `Carrier` takes two parameters, and `-XUndecidableInstances` to satisfy the coverage condition for this instance.
 
