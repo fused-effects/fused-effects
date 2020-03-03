@@ -10,6 +10,8 @@
 
 - Removes `HFunctor`. Effects are no longer required to have `HFunctor` instances, and so the class is redundant. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
 
+- Removes `Effect`. The new signature for `alg` (see above) obviates the need for threading handlers through _effects_, replacing that by threading them through _algebras_ instead. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
+
 
 # v1.0.2.0
 
