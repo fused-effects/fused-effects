@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FlexibleInstances #-}
@@ -18,7 +17,6 @@ import           Control.Carrier.State.Strict
 import           Control.Monad (replicateM)
 import           Data.Char
 import           Data.List (intercalate)
-import           GHC.Generics (Generic1)
 import           Hedgehog
 import qualified Hedgehog.Function as Fn
 import qualified Hedgehog.Gen as Gen
@@ -114,7 +112,7 @@ example = testGroup "parser"
 
 
 data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
-  deriving (Functor, Generic1)
+  deriving (Functor)
 
 
 satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char

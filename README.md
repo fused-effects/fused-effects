@@ -197,7 +197,7 @@ When defining carriers, you’ll need `-XTypeOperators` to declare a `Carrier` i
 The following invocation, taken from the teletype example, should suffice for most use or construction of effects and carriers:
 
 ```haskell
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 ```
 
 

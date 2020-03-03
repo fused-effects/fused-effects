@@ -11,7 +11,6 @@
 
 
 {-# LANGUAGE DeriveFunctor              #-}
-{-# LANGUAGE DeriveGeneric              #-}
 {-# LANGUAGE FlexibleInstances          #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE InstanceSigs               #-}
@@ -37,7 +36,6 @@ import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class (MonadIO(..))
 import Data.Function          ((&))
 import Data.Kind              (Type)
-import GHC.Generics           (Generic1)
 import Prelude                hiding (log)
 import Test.Tasty
 import Test.Tasty.HUnit
@@ -104,7 +102,7 @@ runApplication =
 -- Log an 'a', then continue with 'k'.
 data Log (a :: Type) (m :: Type -> Type) (k :: Type)
   = Log a (m k)
-  deriving (Functor, Generic1)
+  deriving (Functor)
 
 
 -- Log an 'a'.

@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -18,13 +17,12 @@ module Control.Effect.Sum
 ) where
 
 import Data.Kind (Constraint)
-import GHC.Generics (Generic1)
 
 -- | Higher-order sums are used to combine multiple effects into a signature, typically by chaining on the right.
 data (f :+: g) (m :: * -> *) k
   = L (f m k)
   | R (g m k)
-  deriving (Eq, Foldable, Functor, Generic1, Ord, Show, Traversable)
+  deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
 
 infixr 4 :+:
 

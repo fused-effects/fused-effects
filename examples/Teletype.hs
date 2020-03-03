@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 module Teletype
 ( example
@@ -11,7 +11,6 @@ import Control.Algebra
 import Control.Carrier.State.Strict
 import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class
-import GHC.Generics (Generic1)
 import Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
@@ -40,7 +39,7 @@ example = testGroup "teletype"
 data Teletype m k
   = Read (String -> m k)
   | Write String (m k)
-  deriving (Functor, Generic1)
+  deriving (Functor)
 
 
 read :: Has Teletype sig m => m String
