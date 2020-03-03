@@ -2,6 +2,8 @@
 
 - Changes `alg`’s signature, giving it a monad homomorphism which must be applied to each computation in the signature. This change allows `Algebra` instances to be derived using `GeneralizedNewtypeDeriving` and `DerivingVia`, while also obviating the need for `hmap` or `handleCoercible`. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
 
+- Changes the signatures of `runInterpret` and `runInterpretState` analogously. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
+
 - Removes `Algebra`’s superclass constraint requiring a `HFunctor` instance for the signature. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
 
 - Removes `handleCoercible`. Algebras which formerly used it when handling the tail of the signature may now compose `coerce` onto the homomorphism passed to `alg`. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
