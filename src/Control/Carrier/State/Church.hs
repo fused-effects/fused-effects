@@ -8,6 +8,7 @@ module Control.Carrier.State.Church
 ) where
 
 import Control.Effect.State
+import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 runStateK :: (a -> s -> m r) -> StateC s m a -> s -> m r
@@ -23,6 +24,9 @@ instance Applicative (StateC s m) where
 
 instance Monad (StateC s m) where
   StateC a >>= f = StateC $ \ k -> a (runStateK k . f)
+
+instance MonadIO m => MonadIO (StateC s m) where
+  liftIO = lift . liftIO
 
 instance MonadTrans (StateC s) where
   lift m = StateC $ \ k s -> m >>= flip k s
