@@ -12,6 +12,7 @@ import Control.Applicative (Alternative(..))
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail as Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
@@ -38,6 +39,9 @@ instance Monad (StateC s m) where
 
 instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
   fail = lift . Fail.fail
+
+instance MonadFix m => MonadFix (StateC s m) where
+  mfix f = StateC $ \ k s -> mfix (runState s . f . snd) >>= uncurry (flip k)
 
 instance MonadIO m => MonadIO (StateC s m) where
   liftIO = lift . liftIO
