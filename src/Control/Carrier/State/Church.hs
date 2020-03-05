@@ -9,6 +9,7 @@ module Control.Carrier.State.Church
 
 import Control.Applicative (Alternative(..))
 import Control.Effect.State
+import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -36,6 +37,8 @@ instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
 
 instance MonadIO m => MonadIO (StateC s m) where
   liftIO = lift . liftIO
+
+instance (Alternative m, Monad m) => MonadPlus (StateC s m)
 
 instance MonadTrans (StateC s) where
   lift m = StateC $ \ k s -> m >>= flip k s
