@@ -2,7 +2,8 @@
 {-# LANGUAGE RankNTypes #-}
 module Control.Carrier.State.Church
 ( -- * State carrier
-  StateC(StateC)
+  runState
+, StateC(StateC)
   -- * State effect
 , module Control.Effect.State
 ) where
@@ -13,6 +14,9 @@ import Control.Monad (MonadPlus(..))
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+
+runState :: Applicative m => s -> StateC s m a -> m (s, a)
+runState s (StateC m) = m (\ a s -> pure (s, a)) s
 
 runStateK :: (a -> s -> m r) -> StateC s m a -> s -> m r
 runStateK k (StateC m) = m k
