@@ -7,6 +7,7 @@ module Control.Carrier.State.Church
 , module Control.Effect.State
 ) where
 
+import Control.Applicative (Alternative(..))
 import Control.Effect.State
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
@@ -22,6 +23,10 @@ instance Applicative (StateC s m) where
   pure a = StateC $ \ k s -> k a s
 
   StateC f <*> StateC a = StateC $ \ k -> f (a . (k .))
+
+instance Alternative m => Alternative (StateC s m) where
+  empty = StateC $ \ _ _ -> empty
+  StateC l <|> StateC r = StateC $ \ k s -> l k s <|> r k s
 
 instance Monad (StateC s m) where
   StateC a >>= f = StateC $ \ k -> a (runStateK k . f)
