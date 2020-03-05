@@ -9,7 +9,7 @@ module Control.Carrier.State.Church
 
 import Control.Effect.State
 
-newtype StateC s m a = StateC { runStateC :: forall r . (a -> s -> m r) -> s -> m r }
+newtype StateC s m a = StateC (forall r . (a -> s -> m r) -> s -> m r)
   deriving (Functor)
 
 instance Applicative (StateC s m) where
