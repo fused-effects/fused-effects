@@ -11,3 +11,8 @@ import Control.Effect.State
 
 newtype StateC s m a = StateC { runStateC :: forall r . (a -> s -> m r) -> s -> m r }
   deriving (Functor)
+
+instance Applicative (StateC s m) where
+  pure a = StateC $ \ k s -> k a s
+
+  StateC f <*> StateC a = StateC $ \ k -> f (a . (k .))
