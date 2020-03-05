@@ -8,6 +8,7 @@ module Control.Carrier.State.Church
 ) where
 
 import Control.Effect.State
+import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
@@ -24,6 +25,9 @@ instance Applicative (StateC s m) where
 
 instance Monad (StateC s m) where
   StateC a >>= f = StateC $ \ k -> a (runStateK k . f)
+
+instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
+  fail = lift . Fail.fail
 
 instance MonadIO m => MonadIO (StateC s m) where
   liftIO = lift . liftIO
