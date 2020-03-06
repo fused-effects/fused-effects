@@ -10,6 +10,7 @@ module State
 , test
 ) where
 
+import qualified Control.Carrier.State.Church as C.Church
 import qualified Control.Carrier.State.Lazy as C.Lazy
 import qualified Control.Carrier.State.Strict as C.Strict
 import           Control.Effect.State
@@ -26,7 +27,12 @@ import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "State"
-  [ testGroup "StateC (Lazy)"   $
+  [ testGroup "StateC (Church)"   $
+    [ testMonad
+    , testMonadFix
+    , testState
+    ] >>= ($ runC C.Church.runState)
+  , testGroup "StateC (Lazy)"   $
     [ testMonad
     , testMonadFix
     , testState
