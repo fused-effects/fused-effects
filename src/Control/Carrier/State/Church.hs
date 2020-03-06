@@ -24,6 +24,17 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
+-- | Run a 'State' effect starting from the passed value.
+--
+-- @
+-- 'runState' s ('pure' a) = 'pure' (s, a)
+-- @
+-- @
+-- 'runState' s 'get' = 'pure' (s, s)
+-- @
+-- @
+-- 'runState' s ('put' t) = 'pure' (t, ())
+-- @
 runState :: forall s m a . Applicative m => s -> StateC s m a -> m (s, a)
 runState s (StateC m) = m (\ a s -> pure (s, a)) s
 {-# INLINE runState #-}
