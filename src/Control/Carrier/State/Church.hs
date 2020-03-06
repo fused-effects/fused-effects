@@ -48,6 +48,11 @@ evalState :: forall s m a . Applicative m => s -> StateC s m a -> m a
 evalState s (StateC m) = m (const . pure) s
 {-# INLINE evalState #-}
 
+-- | Run a 'State' effect, yielding the final state and discarding the return value.
+--
+-- @
+-- 'execState' s m = 'fmap' 'fst' ('runState' s m)
+-- @
 execState :: forall s m a . Applicative m => s -> StateC s m a -> m s
 execState s (StateC m) = m (const pure) s
 {-# INLINE execState #-}
