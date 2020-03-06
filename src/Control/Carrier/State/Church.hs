@@ -1,5 +1,10 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.State.Church
 ( -- * State carrier
   runState
@@ -8,6 +13,7 @@ module Control.Carrier.State.Church
 , module Control.Effect.State
 ) where
 
+import Control.Algebra
 import Control.Applicative (Alternative(..))
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
@@ -50,3 +56,9 @@ instance (Alternative m, Monad m) => MonadPlus (StateC s m)
 
 instance MonadTrans (StateC s) where
   lift m = StateC $ \ k s -> m >>= flip k s
+
+instance (Algebra sig m, Effect sig) => Algebra (State s :+: sig) (StateC s m) where
+  alg hom = \case
+    L (Get   k) -> StateC $ \ k' s -> runState s (hom (k s)) >>= uncurry (flip k')
+    L (Put s k) -> StateC $ \ k' _ -> runState s (hom k)     >>= uncurry (flip k')
+    R other     -> StateC $ \ k  s -> alg id (thread (s, ()) (uncurry runState . fmap hom) other) >>= uncurry (flip k)
