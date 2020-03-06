@@ -10,13 +10,13 @@ module State
 , test
 ) where
 
-import qualified Control.Carrier.State.Lazy as LazyStateC
-import qualified Control.Carrier.State.Strict as StrictStateC
+import qualified Control.Carrier.State.Lazy as C.Lazy
+import qualified Control.Carrier.State.Strict as C.Strict
 import           Control.Effect.State
-import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
-import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
-import qualified Control.Monad.Trans.State.Lazy as LazyStateT
-import qualified Control.Monad.Trans.State.Strict as StrictStateT
+import qualified Control.Monad.Trans.RWS.Lazy as RWST.Lazy
+import qualified Control.Monad.Trans.RWS.Strict as RWST.Strict
+import qualified Control.Monad.Trans.State.Lazy as T.Lazy
+import qualified Control.Monad.Trans.State.Strict as T.Strict
 import           Data.Tuple (swap)
 import           Gen
 import qualified Monad
@@ -30,16 +30,16 @@ tests = testGroup "State"
     [ testMonad
     , testMonadFix
     , testState
-    ] >>= ($ runC LazyStateC.runState)
+    ] >>= ($ runC C.Lazy.runState)
   , testGroup "StateC (Strict)" $
     [ testMonad
     , testMonadFix
     , testState
-    ] >>= ($ runC StrictStateC.runState)
-  , testGroup "StateT (Lazy)"   $ testState (runC (fmap (fmap swap) . flip LazyStateT.runStateT))
-  , testGroup "StateT (Strict)" $ testState (runC (fmap (fmap swap) . flip StrictStateT.runStateT))
-  , testGroup "RWST (Lazy)"     $ testState (runC (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)"   $ testState (runC (runRWST StrictRWST.runRWST))
+    ] >>= ($ runC C.Strict.runState)
+  , testGroup "StateT (Lazy)"   $ testState (runC (fmap (fmap swap) . flip T.Lazy.runStateT))
+  , testGroup "StateT (Strict)" $ testState (runC (fmap (fmap swap) . flip T.Strict.runStateT))
+  , testGroup "RWST (Lazy)"     $ testState (runC (runRWST RWST.Lazy.runRWST))
+  , testGroup "RWST (Strict)"   $ testState (runC (runRWST RWST.Strict.runRWST))
   ] where
   testMonad    run = Monad.test    (m (gen0 s) (\ _ _ -> [])) a b c (pair <*> s <*> unit) run
   testMonadFix run = MonadFix.test (m (gen0 s) (\ _ _ -> [])) a b   (pair <*> s <*> unit) run
