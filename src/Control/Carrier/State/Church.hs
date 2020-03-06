@@ -38,6 +38,7 @@ instance Applicative (StateC s m) where
 
 instance Alternative m => Alternative (StateC s m) where
   empty = StateC $ \ _ _ -> empty
+
   StateC l <|> StateC r = StateC $ \ k s -> l k s <|> r k s
 
 instance Monad (StateC s m) where
