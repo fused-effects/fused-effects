@@ -9,6 +9,8 @@
 {- | A church-encoded carrier for the 'State' effect.
 
 Note that the parameter order in 'runState', 'evalState', and 'execState' is reversed compared the equivalent functions provided by @transformers@. This is an intentional decision made to enable the composition of effect handlers with '.' without invoking 'flip'.
+
+@since 1.1.0.0
 -}
 module Control.Carrier.State.Church
 ( -- * State carrier
@@ -40,6 +42,8 @@ import Control.Monad.Trans.Class
 -- @
 -- 'runState' s ('put' t) = 'pure' (t, ())
 -- @
+--
+-- @since 1.1.0.0
 runState :: forall s m a . Applicative m => s -> StateC s m a -> m (s, a)
 runState s (StateC m) = m (\ a s -> pure (s, a)) s
 {-# INLINE runState #-}
@@ -49,6 +53,8 @@ runState s (StateC m) = m (\ a s -> pure (s, a)) s
 -- @
 -- 'evalState' s m = 'fmap' 'snd' ('runState' s m)
 -- @
+--
+-- @since 1.1.0.0
 evalState :: forall s m a . Applicative m => s -> StateC s m a -> m a
 evalState s (StateC m) = m (const . pure) s
 {-# INLINE evalState #-}
@@ -58,10 +64,13 @@ evalState s (StateC m) = m (const . pure) s
 -- @
 -- 'execState' s m = 'fmap' 'fst' ('runState' s m)
 -- @
+--
+-- @since 1.1.0.0
 execState :: forall s m a . Applicative m => s -> StateC s m a -> m s
 execState s (StateC m) = m (const pure) s
 {-# INLINE execState #-}
 
+-- | @since 1.1.0.0
 newtype StateC s m a = StateC { runStateC :: forall r . (a -> s -> m r) -> s -> m r }
   deriving (Functor)
 
