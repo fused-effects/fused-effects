@@ -5,6 +5,11 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+
+{- | A church-encoded carrier for the 'State' effect.
+
+Note that the parameter order in 'runState', 'evalState', and 'execState' is reversed compared the equivalent functions provided by @transformers@. This is an intentional decision made to enable the composition of effect handlers with '.' without invoking 'flip'.
+-}
 module Control.Carrier.State.Church
 ( -- * State carrier
   runState
