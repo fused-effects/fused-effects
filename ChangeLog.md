@@ -1,3 +1,6 @@
+- Adds a church-encoded `State` carrier in `Control.Carrier.State.Church`. ([#363](https://github.com/fused-effects/fused-effects/pull/363))
+
+
 # Backwards-incompatible changes
 
 - Changes `alg`’s signature, giving it a monad homomorphism which must be applied to each computation in the signature. This change allows `Algebra` instances to be derived using `GeneralizedNewtypeDeriving` and `DerivingVia`, while also obviating the need for `hmap` or `handleCoercible`. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
