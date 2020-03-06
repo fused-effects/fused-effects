@@ -8,6 +8,7 @@
 module Control.Carrier.State.Church
 ( -- * State carrier
   runState
+, evalState
 , StateC(StateC)
   -- * State effect
 , module Control.Effect.State
@@ -25,6 +26,10 @@ import Control.Monad.Trans.Class
 runState :: forall s m a . Applicative m => s -> StateC s m a -> m (s, a)
 runState s (StateC m) = m (\ a s -> pure (s, a)) s
 {-# INLINE runState #-}
+
+evalState :: forall s m a . Applicative m => s -> StateC s m a -> m a
+evalState s (StateC m) = m (const . pure) s
+{-# INLINE evalState #-}
 
 newtype StateC s m a = StateC { runStateC :: forall r . (a -> s -> m r) -> s -> m r }
   deriving (Functor)
