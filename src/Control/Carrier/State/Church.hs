@@ -24,9 +24,11 @@ import Control.Monad.Trans.Class
 
 runState :: Applicative m => s -> StateC s m a -> m (s, a)
 runState s (StateC m) = m (\ a s -> pure (s, a)) s
+{-# INLINE runState #-}
 
 runStateK :: (a -> s -> m r) -> StateC s m a -> s -> m r
 runStateK k (StateC m) = m k
+{-# INLINE runStateK #-}
 
 newtype StateC s m a = StateC (forall r . (a -> s -> m r) -> s -> m r)
   deriving (Functor)
