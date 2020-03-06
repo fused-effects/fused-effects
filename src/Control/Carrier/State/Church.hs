@@ -26,11 +26,7 @@ runState :: Applicative m => s -> StateC s m a -> m (s, a)
 runState s (StateC m) = m (\ a s -> pure (s, a)) s
 {-# INLINE runState #-}
 
-runStateK :: (a -> s -> m r) -> StateC s m a -> s -> m r
-runStateK k (StateC m) = m k
-{-# INLINE runStateK #-}
-
-newtype StateC s m a = StateC (forall r . (a -> s -> m r) -> s -> m r)
+newtype StateC s m a = StateC { runStateC :: forall r . (a -> s -> m r) -> s -> m r }
   deriving (Functor)
 
 instance Applicative (StateC s m) where
@@ -48,7 +44,7 @@ instance Alternative m => Alternative (StateC s m) where
   {-# INLINE (<|>) #-}
 
 instance Monad (StateC s m) where
-  StateC a >>= f = StateC $ \ k -> a (runStateK k . f)
+  StateC a >>= f = StateC $ \ k -> a (\ a' -> runStateC (f a') k)
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
