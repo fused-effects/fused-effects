@@ -89,7 +89,7 @@ newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpret
 instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
 
-instance (Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
+instance (Reifies s (Handler eff m), Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
   alg ctx hdl = \case
     L eff   -> runHandler (getConst (reflect @s)) ctx hdl eff
     R other -> InterpretC (alg ctx (runInterpretC . hdl) other)
