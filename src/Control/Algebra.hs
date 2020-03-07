@@ -70,9 +70,9 @@ class Monad m => Algebra sig m | m -> sig where
   -- @
   --
   -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
-  alg :: (Functor ctx, Monad n) => ctx () -> (forall x . ctx (n x) -> m (ctx x)) -> sig n a -> m (ctx a)
+  alg :: Functor ctx => ctx () -> (forall x . ctx (n x) -> m (ctx x)) -> sig n a -> m (ctx a)
 
-thread :: (Functor ctx1, Functor ctx2, Monad n, Algebra sig m) => ctx1 (ctx2 ()) -> (forall x . ctx1 (ctx2 (n x)) -> m (ctx1 (ctx2 x))) -> sig n a -> m (ctx1 (ctx2 a))
+thread :: (Functor ctx1, Functor ctx2, Algebra sig m) => ctx1 (ctx2 ()) -> (forall x . ctx1 (ctx2 (n x)) -> m (ctx1 (ctx2 x))) -> sig n a -> m (ctx1 (ctx2 a))
 thread ctx hdl = fmap getCompose . alg (Compose ctx) (fmap Compose . hdl . getCompose)
 {-# INLINE thread #-}
 

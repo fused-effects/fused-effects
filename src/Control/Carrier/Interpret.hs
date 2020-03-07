@@ -38,7 +38,7 @@ import           Unsafe.Coerce (unsafeCoerce)
 
 -- | A @Handler@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
 newtype Handler sig m = Handler
-  { runHandler :: forall ctx n s x . (Functor ctx, Monad n) => ctx () -> (forall y . ctx (n y) -> InterpretC s sig m (ctx y)) -> sig n x -> InterpretC s sig m (ctx x) }
+  { runHandler :: forall ctx n s x . Functor ctx => ctx () -> (forall y . ctx (n y) -> InterpretC s sig m (ctx y)) -> sig n x -> InterpretC s sig m (ctx x) }
 
 
 class Reifies s a | s -> a where
@@ -63,7 +63,7 @@ reify a k = unsafeCoerce (Magic k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: (forall ctx n x . (Functor ctx, Monad n) => ctx () -> (forall y . ctx (n y) -> m (ctx y)) -> eff n x -> m (ctx x))
+  :: (forall ctx n x . Functor ctx => ctx () -> (forall y . ctx (n y) -> m (ctx y)) -> eff n x -> m (ctx x))
   -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
   -> m a
 runInterpret f m = reify (Handler (\ ctx hdl -> InterpretC . f ctx (runInterpretC . hdl))) (go m) where
@@ -74,7 +74,7 @@ runInterpret f m = reify (Handler (\ ctx hdl -> InterpretC . f ctx (runInterpret
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: (forall ctx n x . (Functor ctx, Monad n) => ctx () -> (forall y . ctx (n y) -> StateC s m (ctx y)) -> s -> eff n x -> m (s, ctx x))
+  :: (forall ctx n x . Functor ctx => ctx () -> (forall y . ctx (n y) -> StateC s m (ctx y)) -> s -> eff n x -> m (s, ctx x))
   -> s
   -> (forall t . Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
   -> m (s, a)
