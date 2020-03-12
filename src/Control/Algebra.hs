@@ -44,6 +44,9 @@ import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Identity as Identity
 import qualified Control.Monad.Trans.Maybe as Maybe
 import qualified Control.Monad.Trans.Reader as Reader
+#if MIN_VERSION_transformers(0,5,6)
+import qualified Control.Monad.Trans.RWS.CPS as RWS.CPS
+#endif
 import qualified Control.Monad.Trans.RWS.Lazy as RWS.Lazy
 import qualified Control.Monad.Trans.RWS.Strict as RWS.Strict
 import qualified Control.Monad.Trans.State.Lazy as State.Lazy
@@ -223,6 +226,19 @@ toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 swapAndLift :: Functor ctx => (ctx a, w) -> ctx (w, a)
 swapAndLift p = (,) (snd p) <$> fst p
 {-# INLINE swapAndLift #-}
+
+#if MIN_VERSION_transformers(0,5,6)
+instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.CPS.RWST r w s m) where
+  alg hdl sig ctx = case sig of
+    L Ask              -> RWS.CPS.asks (<$ ctx)
+    L (Local f m)      -> RWS.CPS.local f (hdl (m <$ ctx))
+    R (L (Tell w))     -> ctx <$ RWS.CPS.tell w
+    R (L (Listen m))   -> swapAndLift <$> RWS.CPS.listen (hdl (m <$ ctx))
+    R (L (Censor f m)) -> RWS.CPS.censor f (hdl (m <$ ctx))
+    R (R (L Get))      -> RWS.CPS.gets (<$ ctx)
+    R (R (L (Put s)))  -> ctx <$ RWS.CPS.put s
+    R (R (R other))    -> RWS.CPS.rwsT $ \ r s -> unRWSTF <$> thread (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.CPS.runRWST x r s) hdl other (RWSTF (ctx, s, mempty))
+#endif
 
 instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
   alg hdl sig ctx = case sig of
