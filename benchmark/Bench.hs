@@ -1,6 +1,8 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -32,26 +34,26 @@ main = defaultMain
     ]
   ,
     bgroup "Strict StateC"
-    [ bench "100"   $ whnf (run . execState @(Sum Int) 0 . modLoop) 100
-    , bench "1000"  $ whnf (run . execState @(Sum Int) 0 . modLoop) 1000
-    , bench "10000" $ whnf (run . execState @(Sum Int) 0 . modLoop) 10000
+    [ bench "100"   $ whnf (run . execState @Int 0 . modLoop) 100
+    , bench "1000"  $ whnf (run . execState @Int 0 . modLoop) 1000
+    , bench "10000" $ whnf (run . execState @Int 0 . modLoop) 10000
     ]
   ,
     bgroup "InterpretC vs InterpretStateC vs StateC"
     [ bgroup "InterpretC"
-      [ bench "100"   $ whnf (\n -> run $ evalState @(Sum Int) 0 $ runInterpret (\ hdl sig ctx -> case sig of { Get k -> get @(Sum Int) >>= hdl . (<$ ctx) . k ; Put s k -> put s >> hdl (k <$ ctx) }) $ modLoop n) 100
-      , bench "1000"  $ whnf (\n -> run $ evalState @(Sum Int) 0 $ runInterpret (\ hdl sig ctx -> case sig of { Get k -> get @(Sum Int) >>= hdl . (<$ ctx) . k ; Put s k -> put s >> hdl (k <$ ctx) }) $ modLoop n) 1000
-      , bench "10000" $ whnf (\n -> run $ evalState @(Sum Int) 0 $ runInterpret (\ hdl sig ctx -> case sig of { Get k -> get @(Sum Int) >>= hdl . (<$ ctx) . k ; Put s k -> put s >> hdl (k <$ ctx) }) $ modLoop n) 10000
+      [ bench "100"   $ whnf (\n -> run $ evalState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 100
+      , bench "1000"  $ whnf (\n -> run $ evalState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 1000
+      , bench "10000" $ whnf (\n -> run $ evalState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 10000
       ]
     , bgroup "InterpretStateC"
-      [ bench "100"   $ whnf (\n -> run $ runInterpretState (\ hdl sig s ctx -> case sig of { Get k -> runState @(Sum Int) s (hdl (k s <$ ctx)) ; Put s k -> runState s (hdl (k <$ ctx)) }) 0 $ modLoop n) 100
-      , bench "1000"  $ whnf (\n -> run $ runInterpretState (\ hdl sig s ctx -> case sig of { Get k -> runState @(Sum Int) s (hdl (k s <$ ctx)) ; Put s k -> runState s (hdl (k <$ ctx)) }) 0 $ modLoop n) 1000
-      , bench "10000" $ whnf (\n -> run $ runInterpretState (\ hdl sig s ctx -> case sig of { Get k -> runState @(Sum Int) s (hdl (k s <$ ctx)) ; Put s k -> runState s (hdl (k <$ ctx)) }) 0 $ modLoop n) 10000
+      [ bench "100"   $ whnf (\n -> run $ runInterpretState (\ _ (sig :: State Int m k) (s :: Int) ctx -> case sig of { Get -> pure (s, s <$ ctx) ; Put s -> pure (s, ctx) }) 0 $ modLoop n) 100
+      , bench "1000"  $ whnf (\n -> run $ runInterpretState (\ _ (sig :: State Int m k) (s :: Int) ctx -> case sig of { Get -> pure (s, s <$ ctx) ; Put s -> pure (s, ctx) }) 0 $ modLoop n) 1000
+      , bench "10000" $ whnf (\n -> run $ runInterpretState (\ _ (sig :: State Int m k) (s :: Int) ctx -> case sig of { Get -> pure (s, s <$ ctx) ; Put s -> pure (s, ctx) }) 0 $ modLoop n) 10000
       ]
     , bgroup "StateC"
-      [ bench "100"   $ whnf (run . evalState @(Sum Int) 0 . modLoop) 100
-      , bench "1000"  $ whnf (run . evalState @(Sum Int) 0 . modLoop) 1000
-      , bench "10000" $ whnf (run . evalState @(Sum Int) 0 . modLoop) 10000
+      [ bench "100"   $ whnf (run . evalState @Int 0 . modLoop) 100
+      , bench "1000"  $ whnf (run . evalState @Int 0 . modLoop) 1000
+      , bench "10000" $ whnf (run . evalState @Int 0 . modLoop) 10000
       ]
     ]
   ]
@@ -59,5 +61,5 @@ main = defaultMain
 tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
 
-modLoop :: Has (State (Sum Int)) sig m => Int -> m ()
-modLoop i = replicateM_ i (modify (+ Sum (1 :: Int)))
+modLoop :: Has (State Int) sig m => Int -> m ()
+modLoop i = replicateM_ i (modify (+ (1 :: Int)))
