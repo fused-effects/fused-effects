@@ -2,7 +2,7 @@
 
 - Changes `alg`’s signature, giving it an initial state, and a distributive law which must be applied to each computation in the signature. This change allows `Algebra` instances to be derived using `GeneralizedNewtypeDeriving` and `DerivingVia`, while also obviating the need for `hmap`, `handleCoercible`, or the `thread` method of `Effect`. This furthermore increases the expressiveness of effects, allowing effects with higher-order positions yielding concrete types, e.g. `m ()`, to be run anywhere in the stack, not just above any `Effect`-requiring algebras. ([#359](https://github.com/fused-effects/fused-effects/pull/359), [#361](https://github.com/fused-effects/fused-effects/pull/361))
 
-- Changes the signatures of `runInterpret` and `runInterpretState` analogously. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
+- Changes the signatures of `runInterpret` and `runInterpretState` analogously; also reorders the parameters to `runInterpretState` to take the signature before the state parameter. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
 
 - Removes `Algebra`’s superclass constraint requiring a `HFunctor` instance for the signature. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
 
