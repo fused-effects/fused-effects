@@ -116,6 +116,8 @@ run = runIdentity
 -- 1. Due to [a problem with recursive type families](https://gitlab.haskell.org/ghc/ghc/issues/8095), this can lead to significantly slower compiles.
 --
 -- 2. It defeats @ghc@’s warnings for redundant constraints, and thus can lead to a proliferation of redundant constraints as code is changed.
+--
+-- @since 1.0.0.0
 type Has eff sig m = (Members eff sig, Algebra sig m)
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
