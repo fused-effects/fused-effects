@@ -18,7 +18,8 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 @since 1.0.0.0
 -}
 module Control.Algebra
-( Algebra(..)
+( Handler
+, Algebra(..)
 , thread
 , run
 , Has
@@ -53,6 +54,8 @@ import           Data.List.NonEmpty (NonEmpty)
 import           Data.Monoid
 import qualified Data.Semigroup as S
 import           Data.Tuple (swap)
+
+type Handler ctx m n = forall x . ctx (m x) -> n (ctx x)
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
 --
