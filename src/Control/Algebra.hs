@@ -81,8 +81,8 @@ thread
      , Algebra sig m
      )
   => ctx1 (ctx2 ())
-  -> (forall x . ctx1 (n x) -> m (ctx1 x))
-  -> (forall x . ctx2 (o x) -> n (ctx2 x))
+  -> Handler ctx1 n m
+  -> Handler ctx2 o n
   -> sig o a
   -> m (ctx1 (ctx2 a))
 thread ctx hdl1 hdl2 = fmap getCompose . alg (Compose ctx) (fmap Compose . hdl1 . fmap hdl2 . getCompose)
