@@ -144,8 +144,8 @@ instance Algebra Empty Maybe where
 
 instance Algebra (Error e) (Either e) where
   alg hdl sig ctx = case sig of
-    L (Throw e)     -> Left e
-    R (Catch m h k) -> either (hdl . (<$ ctx) . h) pure (hdl (m <$ ctx)) >>= hdl . fmap k
+    L (Throw e)   -> Left e
+    R (Catch m h) -> either (hdl . (<$ ctx) . h) pure (hdl (m <$ ctx))
 
 instance Algebra (Reader r) ((->) r) where
   alg hdl sig ctx = case sig of
@@ -168,9 +168,9 @@ instance Monoid w => Algebra (Writer w) ((,) w) where
 
 instance Algebra sig m => Algebra (Error e :+: sig) (Except.ExceptT e m) where
   alg hdl sig ctx = case sig of
-    L (L (Throw e))     -> Except.throwE e
-    L (R (Catch m h k)) -> Except.catchE (hdl (m <$ ctx)) (hdl . (<$ ctx) . h) >>= hdl . fmap k
-    R other             -> Except.ExceptT $ thread (either (pure . Left) Except.runExceptT) hdl other (Right ctx)
+    L (L (Throw e))   -> Except.throwE e
+    L (R (Catch m h)) -> Except.catchE (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
+    R other           -> Except.ExceptT $ thread (either (pure . Left) Except.runExceptT) hdl other (Right ctx)
 
 deriving instance Algebra sig m => Algebra sig (Identity.IdentityT m)
 
