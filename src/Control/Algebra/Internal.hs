@@ -22,7 +22,7 @@ module Control.Algebra.Internal
 -- 'fmap' 'Data.Functor.Compose.Compose' '.' handler1 '.' 'fmap' handler2 '.' 'Data.Functor.Compose.getCompose'
 -- @
 --
--- with monad homomorphisms on the left and right:
+-- and with monad homomorphisms on the left and right:
 --
 -- @
 -- hom '.' handler
