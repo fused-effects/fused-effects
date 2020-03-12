@@ -63,7 +63,7 @@ reify a k = unsafeCoerce (Magic k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: (forall ctx n x . Functor ctx => ctx () -> (forall y . ctx (n y) -> m (ctx y)) -> eff n x -> m (ctx x))
+  :: (forall ctx n x . Functor ctx => ctx () -> Handler ctx n m -> eff n x -> m (ctx x))
   -> (forall s . Reifies s (Interpreter eff m) => InterpretC s eff m a)
   -> m a
 runInterpret f m = reify (Interpreter (\ ctx hdl -> InterpretC . f ctx (runInterpretC . hdl))) (go m) where
