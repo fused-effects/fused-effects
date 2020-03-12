@@ -1,6 +1,5 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -85,8 +84,8 @@ instance MonadTrans (ReaderC r) where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m) where
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Ask       k) -> ReaderC (\ r -> runReader r (hdl (k r <$ ctx)))
     L (Local f m k) -> ReaderC (\ r -> runReader (f r) (hdl (m <$ ctx))) >>= hdl . fmap k
-    R other         -> ReaderC (\ r -> alg (runReader r . hdl) ctx other)
+    R other         -> ReaderC (\ r -> alg (runReader r . hdl) other ctx)
   {-# INLINE alg #-}

@@ -3,7 +3,6 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -38,7 +37,7 @@ import           Unsafe.Coerce (unsafeCoerce)
 
 -- | An @Interpreter@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
 newtype Interpreter sig m = Interpreter
-  { runInterpreter :: forall ctx n s x . Functor ctx => Handler ctx n (InterpretC s sig m) -> ctx () -> sig n x -> InterpretC s sig m (ctx x) }
+  { runInterpreter :: forall ctx n s x . Functor ctx => Handler ctx n (InterpretC s sig m) -> sig n x -> ctx () -> InterpretC s sig m (ctx x) }
 
 
 class Reifies s a | s -> a where
@@ -63,10 +62,10 @@ reify a k = unsafeCoerce (Magic k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: (forall ctx n x . Functor ctx => Handler ctx n m -> ctx () -> eff n x -> m (ctx x))
+  :: (forall ctx n x . Functor ctx => Handler ctx n m -> eff n x -> ctx () -> m (ctx x))
   -> (forall s . Reifies s (Interpreter eff m) => InterpretC s eff m a)
   -> m a
-runInterpret f m = reify (Interpreter (\ hdl ctx -> InterpretC . f (runInterpretC . hdl) ctx)) (go m) where
+runInterpret f m = reify (Interpreter (\ hdl sig -> InterpretC . f (runInterpretC . hdl) sig)) (go m) where
   go :: InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
 
@@ -74,13 +73,13 @@ runInterpret f m = reify (Interpreter (\ hdl ctx -> InterpretC . f (runInterpret
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: (forall ctx n x . Functor ctx => Handler ctx n (StateC s m) -> ctx () -> s -> eff n x -> m (s, ctx x))
+  :: (forall ctx n x . Functor ctx => Handler ctx n (StateC s m) -> s -> eff n x -> ctx () -> m (s, ctx x))
   -> s
   -> (forall t . Reifies t (Interpreter eff (StateC s m)) => InterpretC t eff (StateC s m) a)
   -> m (s, a)
 runInterpretState handler state m
   = runState state
-  $ runInterpret (\ hdl ctx e -> StateC (flip (handler hdl ctx) e)) m
+  $ runInterpret (\ hdl sig ctx -> StateC (\ s -> handler hdl s sig ctx)) m
 
 -- | @since 1.0.0.0
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpretC :: m a }
@@ -90,6 +89,6 @@ instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
 
 instance (Reifies s (Interpreter eff m), Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
-  alg hdl ctx = \case
-    L eff   -> runInterpreter (getConst (reflect @s)) hdl ctx eff
-    R other -> InterpretC (alg (runInterpretC . hdl) ctx other)
+  alg hdl sig ctx = case sig of
+    L eff   -> runInterpreter (getConst (reflect @s)) hdl eff ctx
+    R other -> InterpretC (alg (runInterpretC . hdl) other ctx)

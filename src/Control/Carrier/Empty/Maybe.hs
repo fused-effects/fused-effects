@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -52,7 +51,7 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   {-# INLINE fail #-}
 
 instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L Empty -> EmptyC (MaybeT (pure Nothing))
-    R other -> EmptyC (MaybeT (thread (maybe (pure Nothing) runEmpty) hdl (Just ctx) other))
+    R other -> EmptyC (MaybeT (thread (maybe (pure Nothing) runEmpty) hdl other (Just ctx)))
   {-# INLINE alg #-}

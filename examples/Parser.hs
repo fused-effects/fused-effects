@@ -2,7 +2,6 @@
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -137,13 +136,13 @@ newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Satisfy p k) -> do
       input <- ParseC get
       case input of
         c:cs | p c -> ParseC (put cs) *> hdl (k c <$ ctx)
         _          -> empty
-    R other         -> ParseC (alg ctx (runParseC . hdl) (R other))
+    R other         -> ParseC (alg (runParseC . hdl) (R other) ctx)
   {-# INLINE alg #-}
 
 

@@ -131,14 +131,14 @@ instance
      -- ... the 'LogStdoutC m' monad can interpret 'Log String :+: sig' effects
   => Algebra (Log String :+: sig) (LogStdoutC m) where
 
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Log message k) ->
       LogStdoutC $ do
         liftIO (putStrLn message)
         runLogStdout (hdl (k <$ ctx))
 
     R other ->
-      LogStdoutC (alg ctx (runLogStdout . hdl) other)
+      LogStdoutC (alg (runLogStdout . hdl) other ctx)
 
 -- The 'LogStdoutC' runner.
 runLogStdout ::
@@ -162,7 +162,7 @@ instance
      -- effects
   => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
 
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Log s k) ->
       ReinterpretLogC $ do
         f <- ask @(s -> t)
@@ -170,7 +170,7 @@ instance
         unReinterpretLogC (hdl (k <$ ctx))
 
     R other ->
-      ReinterpretLogC (alg ctx (unReinterpretLogC . hdl) (R other))
+      ReinterpretLogC (alg (unReinterpretLogC . hdl) (R other) ctx)
 
 -- The 'ReinterpretLogC' runner.
 reinterpretLog ::
@@ -195,14 +195,14 @@ instance
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
 
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Log s k) ->
       CollectLogMessagesC $ do
         tell [s]
         unCollectLogMessagesC (hdl (k <$ ctx))
 
     R other ->
-      CollectLogMessagesC (alg ctx (unCollectLogMessagesC . hdl) (R other))
+      CollectLogMessagesC (alg (unCollectLogMessagesC . hdl) (R other) ctx)
 
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages ::

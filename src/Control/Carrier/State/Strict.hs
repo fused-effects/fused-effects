@@ -1,7 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -117,8 +116,8 @@ instance MonadTrans (StateC s) where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Get   k) -> StateC (\ s -> runState s (hdl (k s <$ ctx)))
     L (Put s k) -> StateC (\ _ -> runState s (hdl (k <$ ctx)))
-    R other     -> StateC (\ s -> thread (uncurry runState) hdl (s, ctx) other)
+    R other     -> StateC (\ s -> thread (uncurry runState) hdl other (s, ctx))
   {-# INLINE alg #-}

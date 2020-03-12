@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -35,6 +34,6 @@ newtype ThrowC e m a = ThrowC { runThrowC :: ErrorC e m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance Algebra sig m => Algebra (Throw e :+: sig) (ThrowC e m) where
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Throw e) -> ThrowC (throwError e)
-    R other     -> ThrowC (alg (runThrowC . hdl) ctx (R other))
+    R other     -> ThrowC (alg (runThrowC . hdl) (R other) ctx)

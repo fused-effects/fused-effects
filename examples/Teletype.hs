@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 module Teletype
 ( example
@@ -56,10 +56,10 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Read    k) -> liftIO getLine      >>= hdl . (<$ ctx) . k
     L (Write s k) -> liftIO (putStrLn s) >>  hdl (k <$ ctx)
-    R other       -> TeletypeIOC (alg ctx (runTeletypeIOC . hdl) other)
+    R other       -> TeletypeIOC (alg (runTeletypeIOC . hdl) other ctx)
 
 
 runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
@@ -69,11 +69,11 @@ newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (Wr
   deriving (Applicative, Functor, Monad)
 
 instance Algebra sig m => Algebra (Teletype :+: sig) (TeletypeRetC m) where
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Read    k) -> do
       i <- TeletypeRetC get
       case i of
         []  -> hdl (k "" <$ ctx)
         h:t -> TeletypeRetC (put t) *> hdl (k h <$ ctx)
     L (Write s k) -> TeletypeRetC (tell [s]) *> hdl (k <$ ctx)
-    R other       -> TeletypeRetC (alg ctx (runTeletypeRetC . hdl) (R (R other)))
+    R other       -> TeletypeRetC (alg (runTeletypeRetC . hdl) (R (R other)) ctx)

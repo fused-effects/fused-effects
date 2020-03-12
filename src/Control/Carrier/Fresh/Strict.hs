@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -58,7 +57,7 @@ newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance Algebra sig m => Algebra (Fresh :+: sig) (FreshC m) where
-  alg hdl ctx = \case
+  alg hdl sig ctx = case sig of
     L (Fresh k) -> FreshC (get <* modify (+ (1 :: Int))) >>= hdl . (<$ ctx) . k
-    R other     -> FreshC (alg (runFreshC . hdl) ctx (R other))
+    R other     -> FreshC (alg (runFreshC . hdl) (R other) ctx)
   {-# INLINE alg #-}
