@@ -1,4 +1,4 @@
-{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE GADTs #-}
 {- | Provides an effect to cull choices in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
 
 Computations run inside a call to 'cull' will return at most one result.
@@ -24,8 +24,8 @@ import Control.Algebra
 -- | 'Cull' effects are used with 'Control.Effect.Choose' to provide control over branching.
 --
 -- @since 0.1.2.0
-data Cull m k
-  = forall a . Cull (m a) (a -> m k)
+data Cull m k where
+  Cull :: m a -> Cull m a
 
 
 -- | Cull nondeterminism in the argument, returning at most one result.
@@ -36,4 +36,4 @@ data Cull m k
 --
 -- @since 0.1.2.0
 cull :: Has Cull sig m => m a -> m a
-cull m = send (Cull m pure)
+cull m = send (Cull m)
