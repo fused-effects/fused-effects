@@ -38,7 +38,7 @@ import           Unsafe.Coerce (unsafeCoerce)
 
 -- | An @Interpreter@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
 newtype Interpreter sig m = Interpreter
-  { runInterpreter :: forall ctx n s x . Functor ctx => ctx () -> (forall y . ctx (n y) -> InterpretC s sig m (ctx y)) -> sig n x -> InterpretC s sig m (ctx x) }
+  { runInterpreter :: forall ctx n s x . Functor ctx => ctx () -> Handler ctx n (InterpretC s sig m) -> sig n x -> InterpretC s sig m (ctx x) }
 
 
 class Reifies s a | s -> a where
