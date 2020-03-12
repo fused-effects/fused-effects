@@ -44,9 +44,9 @@ main = defaultMain
       , bench "10000" $ whnf (\n -> run $ evalState @(Sum Int) 0 $ runInterpret (\ hdl sig ctx -> case sig of { Get k -> get @(Sum Int) >>= hdl . (<$ ctx) . k ; Put s k -> put s >> hdl (k <$ ctx) }) $ modLoop n) 10000
       ]
     , bgroup "InterpretStateC"
-      [ bench "100"   $ whnf (\n -> run $ runInterpretState (\ hdl s sig ctx -> case sig of { Get k -> runState @(Sum Int) s (hdl (k s <$ ctx)) ; Put s k -> runState s (hdl (k <$ ctx)) }) 0 $ modLoop n) 100
-      , bench "1000"  $ whnf (\n -> run $ runInterpretState (\ hdl s sig ctx -> case sig of { Get k -> runState @(Sum Int) s (hdl (k s <$ ctx)) ; Put s k -> runState s (hdl (k <$ ctx)) }) 0 $ modLoop n) 1000
-      , bench "10000" $ whnf (\n -> run $ runInterpretState (\ hdl s sig ctx -> case sig of { Get k -> runState @(Sum Int) s (hdl (k s <$ ctx)) ; Put s k -> runState s (hdl (k <$ ctx)) }) 0 $ modLoop n) 10000
+      [ bench "100"   $ whnf (\n -> run $ runInterpretState (\ hdl sig s ctx -> case sig of { Get k -> runState @(Sum Int) s (hdl (k s <$ ctx)) ; Put s k -> runState s (hdl (k <$ ctx)) }) 0 $ modLoop n) 100
+      , bench "1000"  $ whnf (\n -> run $ runInterpretState (\ hdl sig s ctx -> case sig of { Get k -> runState @(Sum Int) s (hdl (k s <$ ctx)) ; Put s k -> runState s (hdl (k <$ ctx)) }) 0 $ modLoop n) 1000
+      , bench "10000" $ whnf (\n -> run $ runInterpretState (\ hdl sig s ctx -> case sig of { Get k -> runState @(Sum Int) s (hdl (k s <$ ctx)) ; Put s k -> runState s (hdl (k <$ ctx)) }) 0 $ modLoop n) 10000
       ]
     , bgroup "StateC"
       [ bench "100"   $ whnf (run . evalState @(Sum Int) 0 . modLoop) 100

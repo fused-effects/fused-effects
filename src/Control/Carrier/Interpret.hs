@@ -73,13 +73,13 @@ runInterpret f m = reify (Interpreter (\ hdl sig -> InterpretC . f (runInterpret
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: (forall ctx n x . Functor ctx => Handler ctx n (StateC s m) -> s -> eff n x -> ctx () -> m (s, ctx x))
+  :: (forall ctx n x . Functor ctx => Handler ctx n (StateC s m) -> eff n x -> s -> ctx () -> m (s, ctx x))
   -> s
   -> (forall t . Reifies t (Interpreter eff (StateC s m)) => InterpretC t eff (StateC s m) a)
   -> m (s, a)
 runInterpretState handler state m
   = runState state
-  $ runInterpret (\ hdl sig ctx -> StateC (\ s -> handler hdl s sig ctx)) m
+  $ runInterpret (\ hdl sig ctx -> StateC (flip (handler hdl sig) ctx)) m
 
 -- | @since 1.0.0.0
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpretC :: m a }
