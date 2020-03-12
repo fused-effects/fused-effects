@@ -52,7 +52,7 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   {-# INLINE fail #-}
 
 instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
-  alg ctx hdl = \case
+  alg hdl ctx = \case
     L Empty -> EmptyC (MaybeT (pure Nothing))
-    R other -> EmptyC (MaybeT (thread (Just ctx) (maybe (pure Nothing) runEmpty) hdl other))
+    R other -> EmptyC (MaybeT (thread (maybe (pure Nothing) runEmpty) hdl (Just ctx) other))
   {-# INLINE alg #-}

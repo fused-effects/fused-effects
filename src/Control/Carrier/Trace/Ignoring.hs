@@ -47,7 +47,7 @@ instance MonadTrans TraceC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Trace :+: sig) (TraceC m) where
-  alg ctx hdl = \case
+  alg hdl ctx = \case
     L trace -> hdl (traceCont trace <$ ctx)
-    R other -> TraceC (alg ctx (runTrace . hdl) other)
+    R other -> TraceC (alg (runTrace . hdl) ctx other)
   {-# INLINE alg #-}

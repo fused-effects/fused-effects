@@ -46,6 +46,6 @@ newtype TraceC m a = TraceC { runTraceC :: WriterC (Endo [String]) m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance Algebra sig m => Algebra (Trace :+: sig) (TraceC m) where
-  alg ctx hdl = \case
+  alg hdl ctx = \case
     L (Trace m k) -> TraceC (tell (Endo (m :))) *> hdl (k <$ ctx)
-    R other       -> TraceC (alg ctx (runTraceC . hdl) (R other))
+    R other       -> TraceC (alg (runTraceC . hdl) ctx (R other))

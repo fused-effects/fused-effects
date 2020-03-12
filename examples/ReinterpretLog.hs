@@ -131,7 +131,7 @@ instance
      -- ... the 'LogStdoutC m' monad can interpret 'Log String :+: sig' effects
   => Algebra (Log String :+: sig) (LogStdoutC m) where
 
-  alg ctx hdl = \case
+  alg hdl ctx = \case
     L (Log message k) ->
       LogStdoutC $ do
         liftIO (putStrLn message)
@@ -162,7 +162,7 @@ instance
      -- effects
   => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
 
-  alg ctx hdl = \case
+  alg hdl ctx = \case
     L (Log s k) ->
       ReinterpretLogC $ do
         f <- ask @(s -> t)
@@ -195,7 +195,7 @@ instance
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
 
-  alg ctx hdl = \case
+  alg hdl ctx = \case
     L (Log s k) ->
       CollectLogMessagesC $ do
         tell [s]

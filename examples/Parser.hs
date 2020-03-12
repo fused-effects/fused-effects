@@ -137,7 +137,7 @@ newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
 instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
-  alg ctx hdl = \case
+  alg hdl ctx = \case
     L (Satisfy p k) -> do
       input <- ParseC get
       case input of

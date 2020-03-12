@@ -60,7 +60,7 @@ newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance (Monoid w, Algebra sig m) => Algebra (Writer w :+: sig) (WriterC w m) where
-  alg ctx hdl = \case
+  alg hdl ctx = \case
     L (Tell w     k) -> WriterC (modify (`mappend` w)) >> hdl (k <$ ctx)
     L (Listen   m k) -> WriterC (StateC (\ w -> do
       (w', a) <- runWriter (hdl (m <$ ctx))
@@ -72,5 +72,5 @@ instance (Monoid w, Algebra sig m) => Algebra (Writer w :+: sig) (WriterC w m) w
       let w'' = mappend w (f w')
       w'' `seq` pure (w'', a)))
       >>= hdl . fmap k
-    R other          -> WriterC (alg ctx (runWriterC . hdl) (R other))
+    R other          -> WriterC (alg (runWriterC . hdl) ctx (R other))
   {-# INLINE alg #-}
