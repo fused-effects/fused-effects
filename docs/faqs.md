@@ -2,13 +2,23 @@
 
 ## Why is `Algebra` called `Algebra`, and not something more specific to the interpretation of effects?
 
-In previous versions of `fused-effects`, `Algebra` was called Carrier. The authors chose to rename this to keep it in line with the literature (the corresponding typeclass is called `TermAlgebra` in _Fusion for Free_), emphasize the importance of morphisms over objects, and emphasize its similarity to the common Haskell idiom of [F-algebras](https://www.schoolofhaskell.com/user/bartosz/understanding-algebras). The term “algebra” stems from the Arabic جبر, _jabr_, which roughly translates to “reunion” or “restoration”. This propery is visible in the definition of the `Carrier` class’s `eff` method:
+In previous versions of `fused-effects`, `Algebra` was called `Carrier`. The authors chose to rename this to keep it in line with the literature (the corresponding typeclass is called `TermAlgebra` in _Fusion for Free_), emphasize the importance of morphisms over objects, and emphasize its similarity to the common Haskell idiom of [F-algebras](https://www.schoolofhaskell.com/user/bartosz/understanding-algebras). The term “algebra” stems from the Arabic جبر, _jabr_, which roughly translates to “reunion” or “restoration”. This property is most clearly visible in the `alg` method’s original type signature:
 
 ```haskell
-eff :: sig m a -> m a
+alg :: sig m a -> m a
 ```
 
 Like the traditional encoding of F-algebras (`f a -> a`), this describes a function that reunites an effect signature `sig` with its monadic context `m`.
+
+In 1.1.0.0, `alg` was given an extended signature:
+
+```haskell
+alg :: Functor ctx => Handler ctx n m -> sig n a -> ctx () -> m (ctx a)
+```
+
+Ignoring `ctx` for the moment, this corresponds to higher-order _Mendler iteration_: instead of the algebra receiving a signature containing `m`s, it receives an algebra containing some other (universally quantified) type `n`, plus a handler function lowering `n` to `m`, similar to how `foldMap` takes a structure `t a` and reduces the `a`s to some `Monoid` `m` using a function `a -> m`.
+
+The context occurs in both `alg` and the handler in order to correctly lower stateful monad transformers `t m` to `m` while carrying along whatever context they need to resume: for `ExceptT e` this is `Either e`, for `StateT s` it’s `(,) s`, and so on. So all told, `alg` is a state-preserving Mendler-style `sig`-algebra.
 
 
 ## When do I need to use the type application (`@Foo`) syntax?
