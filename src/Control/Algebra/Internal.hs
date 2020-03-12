@@ -16,10 +16,10 @@ module Control.Algebra.Internal
 --
 -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
 --
--- Handlers compose with handlers, using e.g. "Data.Functor.Compose".'Compose' to ensure that the result is itself well-typed as a 'Handler':
+-- Handlers compose with handlers, using e.g. @"Data.Functor.Compose".'Data.Functor.Compose.Compose'@ to ensure that the result is itself well-typed as a 'Handler':
 --
 -- @
--- 'fmap' 'Compose' '.' handler1 '.' 'fmap' handler2 '.' 'getCompose'
+-- 'fmap' 'Data.Functor.Compose.Compose' '.' handler1 '.' 'fmap' handler2 '.' 'Data.Functor.Compose.getCompose'
 -- @
 --
 -- with monad homomorphisms on the left and right:
