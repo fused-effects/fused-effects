@@ -91,6 +91,7 @@ class Monad m => Algebra sig m | m -> sig where
   -- | Interpret an effect, running any nested actions using a 'Handler' starting from an initial state in @ctx@.
   alg :: Functor ctx => Handler ctx n m -> ctx () -> sig n a -> m (ctx a)
 
+-- | Compose and thread a pair of handlers and input state through the algebra for some underlying signature.
 thread
   :: ( Functor ctx1
      , Functor ctx2
