@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {- | Provides an effect to cull choices in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
 
 Computations run inside a call to 'cull' will return at most one result.
@@ -28,8 +26,6 @@ import Control.Algebra
 -- @since 0.1.2.0
 data Cull m k
   = forall a . Cull (m a) (a -> m k)
-
-deriving instance Functor m => Functor (Cull m)
 
 
 -- | Cull nondeterminism in the argument, returning at most one result.

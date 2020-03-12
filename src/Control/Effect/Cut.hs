@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE StandaloneDeriving #-}
 
 {- | Provides an effect to delimit backtracking in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
 
@@ -34,8 +32,6 @@ import Control.Applicative (Alternative(..))
 data Cut m k
   = Cutfail
   | forall a . Call (m a) (a -> m k)
-
-deriving instance Functor m => Functor (Cut m)
 
 
 -- | Fail the current branch, and prevent backtracking within the nearest enclosing 'call' (if any).

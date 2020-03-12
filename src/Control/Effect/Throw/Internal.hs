@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE KindSignatures #-}
 module Control.Effect.Throw.Internal
 ( Throw(..)
@@ -6,4 +5,3 @@ module Control.Effect.Throw.Internal
 
 -- | @since 1.0.0.0
 newtype Throw e (m :: * -> *) k = Throw e
-  deriving (Functor)

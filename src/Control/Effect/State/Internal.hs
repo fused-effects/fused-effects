@@ -1,4 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
 module Control.Effect.State.Internal
 ( State(..)
 ) where
@@ -7,4 +6,3 @@ module Control.Effect.State.Internal
 data State s m k
   = Get (s -> m k)
   | Put s (m k)
-  deriving (Functor)

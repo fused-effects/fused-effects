@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE StandaloneDeriving #-}
 module Control.Effect.Catch.Internal
 ( Catch(..)
 ) where
@@ -10,5 +8,3 @@ module Control.Effect.Catch.Internal
 -- @since 1.0.0.0
 data Catch e m k
   = forall b . Catch (m b) (e -> m b) (b -> m k)
-
-deriving instance Functor m => Functor (Catch e m)

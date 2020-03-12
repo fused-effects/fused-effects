@@ -1,5 +1,3 @@
-{-# LANGUAGE DeriveFunctor #-}
-
 {- | An effect that provides a record of 'String' values ("traces") aggregate during the execution of a given computation.
 
 Predefined carriers:
@@ -28,7 +26,6 @@ data Trace m k = Trace
   { traceMessage :: String
   , traceCont    :: m k
   }
-  deriving (Functor)
 
 -- | Append a message to the trace log.
 --
