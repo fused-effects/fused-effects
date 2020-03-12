@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
@@ -58,6 +59,6 @@ newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
 
 instance Algebra sig m => Algebra (Fresh :+: sig) (FreshC m) where
   alg hdl sig ctx = case sig of
-    L (Fresh k) -> FreshC (get <* modify (+ (1 :: Int))) >>= hdl . (<$ ctx) . k
-    R other     -> FreshC (alg (runFreshC . hdl) (R other) ctx)
+    L Fresh -> FreshC (gets (<$ ctx) <* modify (+ (1 :: Int)))
+    R other -> FreshC (alg (runFreshC . hdl) (R other) ctx)
   {-# INLINE alg #-}
