@@ -51,7 +51,7 @@ instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m
   alg hdl sig ctx = case sig of
     L (Read    k) -> liftIO getLine      >>= hdl . (<$ ctx) . k
     L (Write s k) -> liftIO (putStrLn s) >>  hdl (k <$ ctx>)
-    R other       -> TeletypeIOC (alg ctx (runTeletypeIOC . hdl) other)
+    R other       -> TeletypeIOC (alg (runTeletypeIOC . hdl) other ctx)
 ```
 
 Here, `alg` is responsible for handling effectful computations. Since the `Algebra` instance handles a sum (`:+:`) of `Teletype` and the remaining signature, `alg` has two parts: a handler for `Teletype`, and a handler for teletype effects that might be embedded inside other effects in the signature.
