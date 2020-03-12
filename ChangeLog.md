@@ -14,6 +14,8 @@
 
 - Redefines `thread` as a wrapper around `alg`, composing context functors and distributive laws together. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
 
+- Renames `Control.Effect.Interpret.Handler` to `Interpreter`. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
+
 
 # v1.0.2.0
 
