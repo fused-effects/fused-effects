@@ -120,5 +120,5 @@ instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
   alg ctx hdl = \case
     L (Get   k) -> StateC (\ s -> runState s (hdl (k s <$ ctx)))
     L (Put s k) -> StateC (\ _ -> runState s (hdl (k <$ ctx)))
-    R other     -> StateC (\ s -> thread (s, ctx) (uncurry runState . fmap hdl) other)
+    R other     -> StateC (\ s -> thread (s, ctx) (uncurry runState) hdl other)
   {-# INLINE alg #-}
