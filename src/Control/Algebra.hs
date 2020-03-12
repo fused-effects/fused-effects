@@ -105,6 +105,8 @@ class Monad m => Algebra sig m | m -> sig where
   -- To that end, the algebra lifts both the action @m@ and the result of the error handler @h@ into the initial context @ctx@ before lowering them with @hdl@. The continuation @k@ is 'fmap'ed into the resulting context and then itself lowered with @hdl@.
   --
   -- By contrast, the 'Throw' case can simply return a value in 'Left', since there is no continuation to call—it represents an exceptional return—and @'Left' e :: forall a . Either e a@ (i.e. 'Left' is polymorphic in @a@).
+  --
+  -- Instances for monad transformers will most likely handle a signature containing multiple effects, with the tail of the signature handled by whatever monad the transformer wraps. In these cases, the tail of the signature can be delegated most conveniently using 'thread'; see the 'Algebra' instances for @transformers@ types such as 'R.ReaderT' and 'E.ExceptT' for details.
   alg
     :: Functor ctx
     => Handler ctx n m -- ^ A 'Handler' lowering computations inside the effect into the carrier type @m@.
