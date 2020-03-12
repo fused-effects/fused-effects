@@ -149,8 +149,8 @@ instance Algebra (Error e) (Either e) where
 
 instance Algebra (Reader r) ((->) r) where
   alg hdl sig ctx = case sig of
-    Ask       k -> \ r -> hdl (k r <$ ctx) r
-    Local f m k -> \ r -> hdl (fmap k (hdl (m <$ ctx) (f r))) r
+    Ask       -> (<$ ctx)
+    Local f m -> hdl (m <$ ctx) . f
 
 instance Algebra NonDet [] where
   alg _ sig ctx = case sig of
@@ -203,9 +203,9 @@ deriving instance Algebra sig m => Algebra sig (Alt m)
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg hdl sig ctx = case sig of
-    L (Ask       k) -> Reader.ask >>= hdl . (<$ ctx) . k
-    L (Local f m k) -> Reader.local f (hdl (m <$ ctx)) >>= hdl . fmap k
-    R other         -> Reader.ReaderT $ \ r -> alg ((`Reader.runReaderT` r) . hdl) other ctx
+    L Ask         -> Reader.asks (<$ ctx)
+    L (Local f m) -> Reader.local f (hdl (m <$ ctx))
+    R other       -> Reader.ReaderT $ \ r -> alg ((`Reader.runReaderT` r) . hdl) other ctx
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
@@ -216,8 +216,8 @@ toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 
 instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Lazy.RWST r w s m) where
   alg hdl sig ctx = case sig of
-    L (Ask       k)      -> RWS.Lazy.ask >>= hdl . (<$ ctx) . k
-    L (Local f m k)      -> RWS.Lazy.local f (hdl (m <$ ctx)) >>= hdl . fmap k
+    L Ask                -> RWS.Lazy.asks (<$ ctx)
+    L (Local f m)        -> RWS.Lazy.local f (hdl (m <$ ctx))
     R (L (Tell w k))     -> RWS.Lazy.tell w *> hdl (k <$ ctx)
     R (L (Listen m k))   -> RWS.Lazy.listen (hdl (m <$ ctx)) >>= hdl . uncurry (fmap . k) . swap
     R (L (Censor f m k)) -> RWS.Lazy.censor f (hdl (m <$ ctx)) >>= hdl . fmap k
@@ -227,8 +227,8 @@ instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s
 
 instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
   alg hdl sig ctx = case sig of
-    L (Ask       k)      -> RWS.Strict.ask >>= hdl . (<$ ctx) . k
-    L (Local f m k)      -> RWS.Strict.local f (hdl (m <$ ctx)) >>= hdl . fmap k
+    L Ask                -> RWS.Strict.asks (<$ ctx)
+    L (Local f m)        -> RWS.Strict.local f (hdl (m <$ ctx))
     R (L (Tell w k))     -> RWS.Strict.tell w *> hdl (k <$ ctx)
     R (L (Listen m k))   -> RWS.Strict.listen (hdl (m <$ ctx)) >>= hdl . uncurry (fmap . k) . swap
     R (L (Censor f m k)) -> RWS.Strict.censor f (hdl (m <$ ctx)) >>= hdl . fmap k
