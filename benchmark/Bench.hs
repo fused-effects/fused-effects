@@ -41,19 +41,19 @@ main = defaultMain
   ,
     bgroup "InterpretC vs InterpretStateC vs StateC"
     [ bgroup "InterpretC"
-      [ bench "100"   $ whnf (\n -> run $ evalState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 100
-      , bench "1000"  $ whnf (\n -> run $ evalState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 1000
-      , bench "10000" $ whnf (\n -> run $ evalState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 10000
+      [ bench "100"   $ whnf (\n -> run $ execState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 100
+      , bench "1000"  $ whnf (\n -> run $ execState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 1000
+      , bench "10000" $ whnf (\n -> run $ execState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 10000
       ]
     , bgroup "InterpretStateC"
-      [ bench "100"   $ whnf (\n -> run $ runInterpretState (\ _ (sig :: State Int m k) (s :: Int) ctx -> case sig of { Get -> pure (s, s <$ ctx) ; Put s -> pure (s, ctx) }) 0 $ modLoop n) 100
-      , bench "1000"  $ whnf (\n -> run $ runInterpretState (\ _ (sig :: State Int m k) (s :: Int) ctx -> case sig of { Get -> pure (s, s <$ ctx) ; Put s -> pure (s, ctx) }) 0 $ modLoop n) 1000
-      , bench "10000" $ whnf (\n -> run $ runInterpretState (\ _ (sig :: State Int m k) (s :: Int) ctx -> case sig of { Get -> pure (s, s <$ ctx) ; Put s -> pure (s, ctx) }) 0 $ modLoop n) 10000
+      [ bench "100"   $ whnf (\n -> fst . run $ runInterpretState (\ _ (sig :: State Int m k) (s :: Int) ctx -> case sig of { Get -> pure (s, s <$ ctx) ; Put s -> pure (s, ctx) }) 0 $ modLoop n) 100
+      , bench "1000"  $ whnf (\n -> fst . run $ runInterpretState (\ _ (sig :: State Int m k) (s :: Int) ctx -> case sig of { Get -> pure (s, s <$ ctx) ; Put s -> pure (s, ctx) }) 0 $ modLoop n) 1000
+      , bench "10000" $ whnf (\n -> fst . run $ runInterpretState (\ _ (sig :: State Int m k) (s :: Int) ctx -> case sig of { Get -> pure (s, s <$ ctx) ; Put s -> pure (s, ctx) }) 0 $ modLoop n) 10000
       ]
     , bgroup "StateC"
-      [ bench "100"   $ whnf (run . evalState @Int 0 . modLoop) 100
-      , bench "1000"  $ whnf (run . evalState @Int 0 . modLoop) 1000
-      , bench "10000" $ whnf (run . evalState @Int 0 . modLoop) 10000
+      [ bench "100"   $ whnf (run . execState @Int 0 . modLoop) 100
+      , bench "1000"  $ whnf (run . execState @Int 0 . modLoop) 1000
+      , bench "10000" $ whnf (run . execState @Int 0 . modLoop) 10000
       ]
     ]
   ]
