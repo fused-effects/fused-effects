@@ -74,7 +74,7 @@ runInterpret f m = reify (Interpreter (\ ctx hdl -> InterpretC . f ctx (runInter
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: (forall ctx n x . Functor ctx => ctx () -> (forall y . ctx (n y) -> StateC s m (ctx y)) -> s -> eff n x -> m (s, ctx x))
+  :: (forall ctx n x . Functor ctx => ctx () -> Handler ctx n (StateC s m) -> s -> eff n x -> m (s, ctx x))
   -> s
   -> (forall t . Reifies t (Interpreter eff (StateC s m)) => InterpretC t eff (StateC s m) a)
   -> m (s, a)
