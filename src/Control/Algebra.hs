@@ -42,6 +42,7 @@ import           Control.Effect.Throw.Internal
 import           Control.Effect.Writer.Internal
 import qualified Control.Monad.Trans.Except as Except
 import qualified Control.Monad.Trans.Identity as Identity
+import qualified Control.Monad.Trans.Maybe as Maybe
 import qualified Control.Monad.Trans.Reader as Reader
 import qualified Control.Monad.Trans.RWS.Lazy as RWS.Lazy
 import qualified Control.Monad.Trans.RWS.Strict as RWS.Strict
@@ -200,6 +201,11 @@ deriving instance Algebra sig m => Algebra sig (Ap m)
 --
 -- @since 1.0.1.0
 deriving instance Algebra sig m => Algebra sig (Alt m)
+
+instance Algebra sig m => Algebra (Empty :+: sig) (Maybe.MaybeT m) where
+  alg hdl sig ctx = case sig of
+    L Empty -> Maybe.MaybeT (pure Nothing)
+    R other -> Maybe.MaybeT $ thread (maybe (pure Nothing) Maybe.runMaybeT) hdl other (Just ctx)
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg hdl sig ctx = case sig of
