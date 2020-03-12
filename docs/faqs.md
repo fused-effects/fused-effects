@@ -46,20 +46,34 @@ The `@Int` syntax—an _explicit type application_ specifies that the return typ
 
 ## How can I build effect stacks that interoperate correctly with `mtl`?
 
-There are two approaches: the first is to use the monadic types defined by `transformers` as the carriers for your effects. The resulting composition of monads will interoperate with `mtl` and any `mtl`-compatible library. The second is to wrap an existing monad stack with a phantom type representing some relevant effect information:
+There are three approaches:
 
-```haskell
-newtype Wrapper s m a = Wrapper { runWrapper :: m a }
-  deriving (Algebra sig, Applicative, Functor, Monad)
+1. Use the monadic types defined by `transformers` as the carriers for your effects. The resulting composition of monads will interoperate with `mtl` and any `mtl`-compatible library.
 
-getState :: Has (State s) sig m => Wrapper s m s
-getState = get
-```
+2. Wrap an existing monad stack with a phantom type representing some relevant effect information:
 
-Indeed, `Wrapper` can now be made an instance of `MonadState`:
+    ```haskell
+    newtype Wrapper s m a = Wrapper { runWrapper :: m a }
+      deriving (Algebra sig, Applicative, Functor, Monad)
 
-```haskell
-instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
-  get = Control.Carrier.State.Strict.get
-  put = Control.Carrier.State.Strict.put
-```
+    getState :: Has (State s) sig m => Wrapper s m s
+    getState = get
+    ```
+
+    Indeed, `Wrapper` can now be made an instance of `MonadState`:
+
+    ```haskell
+    instance Has (State s) sig m => MTL.MonadState s (Wrapper s m) where
+      get = Control.Effect.State.get
+      put = Control.Effect.State.put
+    ```
+
+3. Use `Control.Effect.Labelled` to define an instance for some specific label:
+
+    ```haskell
+    instance HasLabelled State (State s) sig m => MTL.MonadState s (Wrapper s m) where
+      get = Control.Effect.State.Labelled.get @State
+      put = Control.Effect.State.Labelled.put @State
+    ```
+
+    Now `Wrapper` has a `MonadState` instance whenever `m` has an appropriately-labelled `State` effect, which can be provided by the `Control.Effect.Labelled.Labelled` carrier.
