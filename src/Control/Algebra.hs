@@ -89,7 +89,12 @@ type Handler ctx m n = forall x . ctx (m x) -> n (ctx x)
 -- @since 1.0.0.0
 class Monad m => Algebra sig m | m -> sig where
   -- | Interpret an effect, running any nested actions using a 'Handler' starting from an initial state in @ctx@.
-  alg :: Functor ctx => Handler ctx n m -> ctx () -> sig n a -> m (ctx a)
+  alg
+    :: Functor ctx
+    => Handler ctx n m -- ^ A 'Handler' lowering computations inside the effect into the carrier type @m@.
+    -> ctx ()          -- ^ The initial state.
+    -> sig n a         -- ^ The effect signature to be interpreted.
+    -> m (ctx a)       -- ^ The interpretation of the effect in @m@.
 
 -- | Compose and thread a pair of handlers and input state through the algebra for some underlying signature.
 thread
