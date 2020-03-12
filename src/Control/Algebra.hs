@@ -96,6 +96,8 @@ class Monad m => Algebra sig m | m -> sig where
     -> m (ctx a)       -- ^ The interpretation of the effect in @m@.
 
 -- | Compose and thread a pair of handlers and input state through the algebra for some underlying signature.
+--
+-- @since 1.1.0.0
 thread
   :: ( Functor ctx1
      , Functor ctx2
