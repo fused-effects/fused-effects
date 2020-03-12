@@ -53,7 +53,7 @@ sendIO = sendM
 -- 'liftWith' $ \\ hdl ctx -> 'Control.Exception.catch' (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
 -- @
 --
--- The higher-order function takes both an initial context, and a handler phrased as the same sort of distributive law as described in the documentation for 'alg'. This handler takes actions lifted into a context functor, which can be either the initial context, or the derived context produced by handling a previous action.
+-- The higher-order function takes both an initial context, and a handler phrased as a distributive law (as described in the documentation for 'Handler'). This handler takes actions lifted into a context functor, which can be either the initial context, or the derived context produced by handling a previous action.
 --
 -- As with @MonadBaseControl@, care must be taken when lifting functions like @"Control.Exception".'Control.Exception.finally'@ which don’t use the return value of one of their actions, as this can lead to dropped effects.
 --
