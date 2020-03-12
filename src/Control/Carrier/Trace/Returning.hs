@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
@@ -46,5 +47,5 @@ newtype TraceC m a = TraceC { runTraceC :: WriterC (Endo [String]) m a }
 
 instance Algebra sig m => Algebra (Trace :+: sig) (TraceC m) where
   alg hdl sig ctx = case sig of
-    L (Trace m k) -> TraceC (tell (Endo (m :))) *> hdl (k <$ ctx)
-    R other       -> TraceC (alg (runTraceC . hdl) (R other) ctx)
+    L (Trace m) -> ctx <$ TraceC (tell (Endo (m :)))
+    R other     -> TraceC (alg (runTraceC . hdl) (R other) ctx)
