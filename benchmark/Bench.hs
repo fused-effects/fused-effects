@@ -33,12 +33,6 @@ main = defaultMain
     , bench "10000" $ whnf (run . execWriter @(Sum Int) . tellLoop) 10000
     ]
   ,
-    bgroup "Strict StateC"
-    [ bench "100"   $ whnf (run . execState @Int 0 . modLoop) 100
-    , bench "1000"  $ whnf (run . execState @Int 0 . modLoop) 1000
-    , bench "10000" $ whnf (run . execState @Int 0 . modLoop) 10000
-    ]
-  ,
     bgroup "InterpretC vs InterpretStateC vs StateC"
     [ bgroup "InterpretC"
       [ bench "100"   $ whnf (\n -> run $ execState @Int 0 $ runInterpret (\ _ (sig :: State Int m k) ctx -> case sig of { Get -> gets @Int (<$ ctx) ; Put s -> ctx <$ put s }) $ modLoop n) 100
