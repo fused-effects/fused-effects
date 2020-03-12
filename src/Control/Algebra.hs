@@ -221,8 +221,8 @@ instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s
     R (L (Tell w k))     -> RWS.Lazy.tell w *> hdl (k <$ ctx)
     R (L (Listen m k))   -> RWS.Lazy.listen (hdl (m <$ ctx)) >>= hdl . uncurry (fmap . k) . swap
     R (L (Censor f m k)) -> RWS.Lazy.censor f (hdl (m <$ ctx)) >>= hdl . fmap k
-    R (R (L (Get   k)))  -> RWS.Lazy.get >>= hdl . (<$ ctx) . k
-    R (R (L (Put s k)))  -> RWS.Lazy.put s *> hdl (k <$ ctx)
+    R (R (L Get))        -> RWS.Lazy.gets (<$ ctx)
+    R (R (L (Put s)))    -> ctx <$ RWS.Lazy.put s
     R (R (R other))      -> RWS.Lazy.RWST $ \ r s -> unRWSTF <$> thread (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Lazy.runRWST x r s) hdl other (RWSTF (ctx, s, mempty))
 
 instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s :+: sig) (RWS.Strict.RWST r w s m) where
@@ -232,21 +232,21 @@ instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s
     R (L (Tell w k))     -> RWS.Strict.tell w *> hdl (k <$ ctx)
     R (L (Listen m k))   -> RWS.Strict.listen (hdl (m <$ ctx)) >>= hdl . uncurry (fmap . k) . swap
     R (L (Censor f m k)) -> RWS.Strict.censor f (hdl (m <$ ctx)) >>= hdl . fmap k
-    R (R (L (Get   k)))  -> RWS.Strict.get >>= hdl . (<$ ctx) . k
-    R (R (L (Put s k)))  -> RWS.Strict.put s *> hdl (k <$ ctx)
+    R (R (L Get))        -> RWS.Strict.gets (<$ ctx)
+    R (R (L (Put s)))    -> ctx <$ RWS.Strict.put s
     R (R (R other))      -> RWS.Strict.RWST $ \ r s -> unRWSTF <$> thread (\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s) hdl other (RWSTF (ctx, s, mempty))
 
 instance Algebra sig m => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
   alg hdl sig ctx = case sig of
-    L (Get   k) -> State.Lazy.get >>= hdl . (<$ ctx) . k
-    L (Put s k) -> State.Lazy.put s *> hdl (k <$ ctx)
-    R other     -> State.Lazy.StateT $ \ s -> swap <$> thread (\ (s, x) -> swap <$> State.Lazy.runStateT x s) hdl other (s, ctx)
+    L Get     -> State.Lazy.gets (<$ ctx)
+    L (Put s) -> ctx <$ State.Lazy.put s
+    R other   -> State.Lazy.StateT $ \ s -> swap <$> thread (\ (s, x) -> swap <$> State.Lazy.runStateT x s) hdl other (s, ctx)
 
 instance Algebra sig m => Algebra (State s :+: sig) (State.Strict.StateT s m) where
   alg hdl sig ctx = case sig of
-    L (Get   k) -> State.Strict.get >>= hdl . (<$ ctx) . k
-    L (Put s k) -> State.Strict.put s *> hdl (k <$ ctx)
-    R other     -> State.Strict.StateT $ \ s -> swap <$> thread (\ (s, x) -> swap <$> State.Strict.runStateT x s) hdl other (s, ctx)
+    L Get     -> State.Strict.gets (<$ ctx)
+    L (Put s) -> ctx <$ State.Strict.put s
+    R other   -> State.Strict.StateT $ \ s -> swap <$> thread (\ (s, x) -> swap <$> State.Strict.runStateT x s) hdl other (s, ctx)
 
 instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
   alg hdl sig ctx = case sig of

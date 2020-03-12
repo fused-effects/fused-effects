@@ -1,5 +1,6 @@
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -119,7 +120,7 @@ instance MonadTrans (StateC s) where
 
 instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
   alg hdl sig ctx = case sig of
-    L (Get   k) -> StateC (\ s -> runState s (hdl (k s <$ ctx)))
-    L (Put s k) -> StateC (\ _ -> runState s (hdl (k <$ ctx)))
-    R other     -> StateC (\ s -> thread (uncurry runState) hdl other (s, ctx))
+    L Get     -> StateC (\ s -> pure (s, s <$ ctx))
+    L (Put s) -> StateC (\ _ -> pure (s, ctx))
+    R other   -> StateC (\ s -> thread (uncurry runState) hdl other (s, ctx))
   {-# INLINE alg #-}
