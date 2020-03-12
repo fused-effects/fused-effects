@@ -30,4 +30,6 @@ module Control.Algebra.Internal
 -- @
 -- handler '.' 'fmap' hom
 -- @
+--
+-- @since 1.1.0.0
 type Handler ctx m n = forall x . ctx (m x) -> n (ctx x)
