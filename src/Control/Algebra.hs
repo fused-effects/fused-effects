@@ -4,6 +4,7 @@
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -50,9 +51,8 @@ import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
 import           Data.Functor.Compose
 import           Data.Functor.Identity
-import           Data.List.NonEmpty (NonEmpty)
+import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Monoid
-import qualified Data.Semigroup as S
 import           Data.Tuple (swap)
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
@@ -137,7 +137,7 @@ instance Algebra (Lift Identity) Identity where
   alg hdl (LiftWith with k) ctx = with hdl ctx >>= hdl . fmap k
 
 instance Algebra Choose NonEmpty where
-  alg hdl (Choose m) ctx = hdl (m True <$ ctx) S.<> hdl (m False <$ ctx)
+  alg _ Choose ctx = (True <$ ctx) :| [ False <$ ctx ]
 
 instance Algebra Empty Maybe where
   alg _ Empty _ = Nothing
@@ -153,9 +153,9 @@ instance Algebra (Reader r) ((->) r) where
     Local f m k -> \ r -> hdl (fmap k (hdl (m <$ ctx) (f r))) r
 
 instance Algebra NonDet [] where
-  alg hdl sig ctx = case sig of
-    L Empty      -> []
-    R (Choose k) -> hdl (k True <$ ctx) ++ hdl (k False <$ ctx)
+  alg _ sig ctx = case sig of
+    L Empty  -> []
+    R Choose -> [ True <$ ctx, False <$ ctx ]
 
 instance Monoid w => Algebra (Writer w) ((,) w) where
   alg hdl sig ctx = case sig of
