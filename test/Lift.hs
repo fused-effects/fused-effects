@@ -20,4 +20,4 @@ tests = testGroup "Lift"
   getMsg (E.AssertionFailed msg) = msg
 
 handle :: (E.Exception e, Has (Lift IO) sig m) => (e -> m a) -> m a -> m a
-handle h m = liftWith $ \ ctx run -> E.handle (run . (<$ ctx) . h) (run (m <$ ctx))
+handle h m = liftWith $ \ run ctx -> E.handle (run . (<$ ctx) . h) (run (m <$ ctx))

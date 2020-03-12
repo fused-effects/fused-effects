@@ -34,7 +34,7 @@ import Control.Effect.Lift.Internal (Lift(..))
 --
 -- @since 1.0.0.0
 sendM :: (Has (Lift n) sig m, Functor n) => n a -> m a
-sendM m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
+sendM m = send (LiftWith (\ _ ctx -> (<$ ctx) <$> m) pure)
 
 -- | A type-restricted variant of 'sendM' for 'IO' actions.
 --
@@ -50,7 +50,7 @@ sendIO = sendM
 -- This can be used to provide interoperation with @base@ functionality like @"Control.Exception".'Control.Exception.catch'@:
 --
 -- @
--- 'liftWith' $ \\ ctx hdl -> 'Control.Exception.catch' (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
+-- 'liftWith' $ \\ hdl ctx -> 'Control.Exception.catch' (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
 -- @
 --
 -- The higher-order function takes both an initial context, and a handler phrased as the same sort of distributive law as described in the documentation for 'alg'. This handler takes actions lifted into a context functor, which can be either the initial context, or the derived context produced by handling a previous action.
@@ -60,6 +60,6 @@ sendIO = sendM
 -- @since 1.0.0.0
 liftWith
   :: Has (Lift n) sig m
-  => (forall ctx . Functor ctx => ctx () -> Handler ctx m n -> n (ctx a))
+  => (forall ctx . Functor ctx => Handler ctx m n -> ctx () -> n (ctx a))
   -> m a
 liftWith with = send (LiftWith with pure)

@@ -7,7 +7,7 @@ module Control.Effect.Lift.Internal
 -- | @since 1.0.0.0
 data Lift sig m k
   = forall a . LiftWith
-    (forall ctx . Functor ctx => ctx () -> (forall a . ctx (m a) -> sig (ctx a)) -> sig (ctx a))
+    (forall ctx . Functor ctx => (forall a . ctx (m a) -> sig (ctx a)) -> ctx () -> sig (ctx a))
     (a -> m k)
 
 instance Functor m => Functor (Lift sig m) where

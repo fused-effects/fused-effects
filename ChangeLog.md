@@ -16,6 +16,8 @@
 
 - Renames `Control.Effect.Interpret.Handler` to `Interpreter`. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
 
+- Reorders the parameters to the higher-order function passed to `Control.Effect.Lift.liftWith` for consistency with `alg` and to reflect its purpose of lifting Kleisli arrows in some underlying monad into the context modulo the context’s state. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
+
 
 # v1.0.2.0
 

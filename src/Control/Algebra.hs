@@ -131,10 +131,10 @@ send = fmap runIdentity . alg (fmap Identity . runIdentity) (Identity ()) . inj
 -- base
 
 instance Algebra (Lift IO) IO where
-  alg hdl ctx (LiftWith with k) = with ctx hdl >>= hdl . fmap k
+  alg hdl ctx (LiftWith with k) = with hdl ctx >>= hdl . fmap k
 
 instance Algebra (Lift Identity) Identity where
-  alg hdl ctx (LiftWith with k) = with ctx hdl >>= hdl . fmap k
+  alg hdl ctx (LiftWith with k) = with hdl ctx >>= hdl . fmap k
 
 instance Algebra Choose NonEmpty where
   alg hdl ctx (Choose m) = hdl (m True <$ ctx) S.<> hdl (m False <$ ctx)
