@@ -10,6 +10,7 @@ eff :: sig m a -> m a
 
 Like the traditional encoding of F-algebras (`f a -> a`), this describes a function that reunites an effect signature `sig` with its monadic context `m`.
 
+
 ## When do I need to use the type application (`@Foo`) syntax?
 
 Because a given effectful operation can have multiple `State` or `Reader` effects, your code may fail to typecheck if it invokes an ambiguous state or reader effect, such as follows:
@@ -31,6 +32,7 @@ okay = do
 ```
 
 The `@Int` syntax—an _explicit type application_ specifies that the return type of `get` must in this case be an `Int`. For more information about type applications, consult the [GHC manual](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/glasgow_exts.html#extension-TypeApplications).
+
 
 ## How can I build effect stacks that interoperate correctly with `mtl`?
 
