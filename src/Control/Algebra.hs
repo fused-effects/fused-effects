@@ -67,6 +67,21 @@ import           Data.Tuple (swap)
 -- @
 --
 -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
+--
+-- Handlers compose with handlers, using e.g. "Data.Functor.Compose".'Compose' to ensure that the result is itself well-typed as a 'Handler':
+--
+-- @
+-- 'fmap' 'Compose' '.' handler1 '.' 'fmap' handler2 '.' 'getCompose'
+-- @
+--
+-- with monad homomorphisms on the left and right:
+--
+-- @
+-- hom '.' handler
+-- @
+-- @
+-- handler '.' 'fmap' hom
+-- @
 type Handler ctx m n = forall x . ctx (m x) -> n (ctx x)
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
