@@ -73,18 +73,7 @@ type Handler ctx m n = forall x . ctx (m x) -> n (ctx x)
 --
 -- @since 1.0.0.0
 class Monad m => Algebra sig m | m -> sig where
-  -- | Construct a value in the carrier for an effect signature (typically a sum of a handled effect and any remaining effects).
-  --
-  -- The handler is expressed as a /distributive law/, and required to adhere to the following laws:
-  --
-  -- @
-  -- handler . 'fmap' 'pure' = 'pure'
-  -- @
-  -- @
-  -- handler . 'fmap' (k '=<<') = handler . 'fmap' k 'Control.Monad.<=<' handler
-  -- @
-  --
-  -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
+  -- | Interpret an effect, running any nested actions using a 'Handler' starting from an initial state in @ctx@.
   alg :: Functor ctx => ctx () -> Handler ctx n m -> sig n a -> m (ctx a)
 
 thread
