@@ -121,6 +121,8 @@ run = runIdentity
 type Has eff sig m = (Members eff sig, Algebra sig m)
 
 -- | Construct a request for an effect to be interpreted by some handler later on.
+--
+-- @since 0.1.0.0
 send :: (Member eff sig, Algebra sig m) => eff m a -> m a
 send sig = runIdentity <$> alg (fmap Identity . runIdentity) (inj sig) (Identity ())
 {-# INLINE send #-}
