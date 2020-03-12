@@ -20,7 +20,7 @@ Let's break down some of the properties of the API client that would be desirabl
 ### Initial setup
 
 ``` haskell
-{-# LANGUAGE ExistentialQuantification, DeriveFunctor, FlexibleInstances, GADTs,
+{-# LANGUAGE ExistentialQuantification, FlexibleInstances, GADTs,
 GeneralizedNewtypeDeriving, KindSignatures, OverloadedStrings, MultiParamTypeClasses,
 RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
 module CatFacts
