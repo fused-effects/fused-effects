@@ -76,7 +76,7 @@ class Monad m => Algebra sig m | m -> sig where
   --
   -- By contrast, the 'Throw' case can simply return a value in 'Left', since there is no continuation to call—it represents an exceptional return—and @'Left' e :: forall a . Either e a@ (i.e. 'Left' is polymorphic in @a@).
   --
-  -- Instances for monad transformers will most likely handle a signature containing multiple effects, with the tail of the signature handled by whatever monad the transformer wraps. In these cases, the tail of the signature can be delegated most conveniently using 'thread'; see the 'Algebra' instances for @transformers@ types such as 'R.ReaderT' and 'E.ExceptT' for details.
+  -- Instances for monad transformers will most likely handle a signature containing multiple effects, with the tail of the signature handled by whatever monad the transformer wraps. In these cases, the tail of the signature can be delegated most conveniently using 'thread'; see the 'Algebra' instances for @transformers@ types such as 'Reader.ReaderT' and 'Except.ExceptT' for details.
   alg
     :: Functor ctx
     => Handler ctx n m -- ^ A 'Handler' lowering computations inside the effect into the carrier type @m@.
