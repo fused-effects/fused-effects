@@ -88,6 +88,23 @@ type Handler ctx m n = forall x . ctx (m x) -> n (ctx x)
 -- @since 1.0.0.0
 class Monad m => Algebra sig m | m -> sig where
   -- | Interpret an effect, running any nested actions using a 'Handler' starting from an initial state in @ctx@.
+  --
+  -- Instances receive a signature of effects containing actions in @n@ which can be lowered to @m@ using the passed 'Handler' and initial context. Continuations in @n@ can be handled after mapping into contexts returned from previous actions.
+  --
+  -- For example, considering the 'Algebra' instance for @'Either' e@:
+  --
+  -- @
+  -- instance Algebra (Error e) (Either e) where
+  --   alg hdl sig ctx = case sig of
+  --     L (Throw e)     -> Left e
+  --     R (Catch m h k) -> either (hdl . (<$ ctx) . h) pure (hdl (m <$ ctx)) >>= hdl . fmap k
+  -- @
+  --
+  -- The 'Catch' case holds actions @m :: n x@ and @h :: e -> n x@ (for some existentially-quantified type @x@), and a continuation @k :: x -> n a@. The algebra must return @m (ctx a)@, so we have to ultimately use and lower the continuation in order to produce that type. The continuation takes an @x@, which we can get from either of the actions, after lowering them to values in @'Either' e@.
+  --
+  -- To that end, the algebra lifts both the action @m@ and the result of the error handler @h@ into the initial context @ctx@ before lowering them with @hdl@. The continuation @k@ is 'fmap'ed into the resulting context and then itself lowered with @hdl@.
+  --
+  -- By contrast, the 'Throw' case can simply return a value in 'Left', since there is no continuation to call—it represents an exceptional return—and @'Left' e :: forall a . Either e a@ (i.e. 'Left' is polymorphic in @a@).
   alg
     :: Functor ctx
     => Handler ctx n m -- ^ A 'Handler' lowering computations inside the effect into the carrier type @m@.
