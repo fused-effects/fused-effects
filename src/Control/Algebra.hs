@@ -60,10 +60,10 @@ import           Data.Tuple (swap)
 -- These are expected to be well-behaved /distributive laws/, and are required to adhere to the following laws:
 --
 -- @
--- handler . 'fmap' 'pure' = 'pure'
+-- handler '.' 'fmap' 'pure' = 'pure'
 -- @
 -- @
--- handler . 'fmap' (k '=<<') = handler . 'fmap' k 'Control.Monad.<=<' handler
+-- handler '.' 'fmap' (k '=<<') = handler '.' 'fmap' k 'Control.Monad.<=<' handler
 -- @
 --
 -- respectively expressing that the handler does not alter the context of pure computations, and that the handler distributes over monadic composition.
