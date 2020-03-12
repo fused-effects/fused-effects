@@ -12,6 +12,7 @@
 
 {-# LANGUAGE DeriveFunctor              #-}
 {-# LANGUAGE FlexibleInstances          #-}
+{-# LANGUAGE GADTs                      #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE InstanceSigs               #-}
 {-# LANGUAGE KindSignatures             #-}
@@ -100,9 +101,8 @@ runApplication =
 --------------------------------------------------------------------------------
 
 -- Log an 'a', then continue with 'k'.
-data Log (a :: Type) (m :: Type -> Type) (k :: Type)
-  = Log a (m k)
-  deriving (Functor)
+data Log (a :: Type) (m :: Type -> Type) (k :: Type) where
+  Log :: a -> Log a m ()
 
 
 -- Log an 'a'.
@@ -110,7 +110,7 @@ log :: Has (Log a) sig m
   => a
   -> m ()
 log x =
-  send (Log x (pure ()))
+  send (Log x)
 
 
 --------------------------------------------------------------------------------
@@ -132,10 +132,8 @@ instance
   => Algebra (Log String :+: sig) (LogStdoutC m) where
 
   alg hdl sig ctx = case sig of
-    L (Log message k) ->
-      LogStdoutC $ do
-        liftIO (putStrLn message)
-        runLogStdout (hdl (k <$ ctx))
+    L (Log message) ->
+      ctx <$ LogStdoutC (liftIO (putStrLn message))
 
     R other ->
       LogStdoutC (alg (runLogStdout . hdl) other ctx)
@@ -163,11 +161,10 @@ instance
   => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
 
   alg hdl sig ctx = case sig of
-    L (Log s k) ->
+    L (Log s) ->
       ReinterpretLogC $ do
         f <- ask @(s -> t)
-        log (f s)
-        unReinterpretLogC (hdl (k <$ ctx))
+        ctx <$ log (f s)
 
     R other ->
       ReinterpretLogC (alg (unReinterpretLogC . hdl) (R other) ctx)
@@ -196,10 +193,8 @@ instance
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
 
   alg hdl sig ctx = case sig of
-    L (Log s k) ->
-      CollectLogMessagesC $ do
-        tell [s]
-        unCollectLogMessagesC (hdl (k <$ ctx))
+    L (Log s) ->
+      ctx <$ CollectLogMessagesC (tell [s])
 
     R other ->
       CollectLogMessagesC (alg (unCollectLogMessagesC . hdl) (R other) ctx)
