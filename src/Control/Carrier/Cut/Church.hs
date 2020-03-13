@@ -57,6 +57,7 @@ newtype CutC m a = CutC (forall b . (a -> m b -> m b) -> m b -> m b -> m b)
 instance Applicative (CutC m) where
   pure a = CutC (\ cons nil _ -> cons a nil)
   {-# INLINE pure #-}
+
   CutC f <*> CutC a = CutC $ \ cons nil fail ->
     f (\ f' fs -> a (cons . f') fs fail) nil fail
   {-# INLINE (<*>) #-}
@@ -64,6 +65,7 @@ instance Applicative (CutC m) where
 instance Alternative (CutC m) where
   empty = CutC (\ _ nil _ -> nil)
   {-# INLINE empty #-}
+
   CutC l <|> CutC r = CutC (\ cons nil fail -> l cons (r cons nil fail) fail)
   {-# INLINE (<|>) #-}
 
