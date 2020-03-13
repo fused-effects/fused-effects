@@ -1,5 +1,5 @@
-{-# LANGUAGE DeriveFunctor #-}
-
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
 {- | This effect provides source to an infinite source of 'Int' values, suitable for generating "fresh" values to uniquely identify data without needing to invoke random numbers or impure IO.
 
 Predefined carriers:
@@ -18,10 +18,11 @@ module Control.Effect.Fresh
 ) where
 
 import Control.Algebra
+import Data.Kind (Type)
 
 -- | @since 0.1.0.0
-newtype Fresh m k = Fresh (Int -> m k)
-  deriving (Functor)
+data Fresh (m :: Type -> Type) k where
+  Fresh :: Fresh m Int
 
 
 -- | Produce a fresh (i.e. unique) 'Int'.
@@ -32,4 +33,4 @@ newtype Fresh m k = Fresh (Int -> m k)
 --
 -- @since 0.1.0.0
 fresh :: Has Fresh sig m => m Int
-fresh = send (Fresh pure)
+fresh = send Fresh

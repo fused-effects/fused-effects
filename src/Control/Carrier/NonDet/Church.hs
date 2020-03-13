@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -115,9 +116,9 @@ instance MonadTrans NonDetC where
 
 instance Algebra sig m => Algebra (NonDet :+: sig) (NonDetC m) where
   alg (hdl :: forall x . ctx (n x) -> NonDetC m (ctx x)) sig (ctx :: ctx ()) = case sig of
-    L (L Empty)      -> empty
-    L (R (Choose k)) -> hdl (k True <$ ctx) <|> hdl (k False <$ ctx)
-    R other          -> NonDetC $ \ fork leaf nil -> thread dst hdl other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
+    L (L Empty)  -> empty
+    L (R Choose) -> pure (True <$ ctx) <|> pure (False <$ ctx)
+    R other      -> NonDetC $ \ fork leaf nil -> thread dst hdl other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
     where
     dst :: NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
     dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (Identity . runNonDetA) (pure (pure empty))

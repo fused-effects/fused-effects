@@ -1,7 +1,9 @@
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -15,6 +17,7 @@ import           Control.Carrier.NonDet.Church
 import           Control.Carrier.State.Strict
 import           Control.Monad (replicateM)
 import           Data.Char
+import           Data.Kind (Type)
 import           Data.List (intercalate)
 import           Hedgehog
 import qualified Hedgehog.Function as Fn
@@ -110,12 +113,12 @@ example = testGroup "parser"
   genFactors = Gen.list (Range.linear 0 10) genFactor
 
 
-data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
-  deriving (Functor)
+data Symbol (m :: Type -> Type) k where
+  Satisfy :: (Char -> Bool) -> Symbol m Char
 
 
 satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char
-satisfy p = send (Satisfy p pure)
+satisfy p = send (Satisfy p)
 
 char :: Has Symbol sig m => Char -> m Char
 char = satisfy . (==)
@@ -137,12 +140,12 @@ newtype ParseC m a = ParseC { runParseC :: StateC String m a }
 
 instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
   alg hdl sig ctx = case sig of
-    L (Satisfy p k) -> do
+    L (Satisfy p) -> do
       input <- ParseC get
       case input of
-        c:cs | p c -> ParseC (put cs) *> hdl (k c <$ ctx)
+        c:cs | p c -> c <$ ctx <$ ParseC (put cs)
         _          -> empty
-    R other         -> ParseC (alg (runParseC . hdl) (R other) ctx)
+    R other       -> ParseC (alg (runParseC . hdl) (R other) ctx)
   {-# INLINE alg #-}
 
 

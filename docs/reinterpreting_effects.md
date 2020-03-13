@@ -20,8 +20,8 @@ Let's break down some of the properties of the API client that would be desirabl
 ### Initial setup
 
 ``` haskell
-{-# LANGUAGE ExistentialQuantification, DeriveFunctor, FlexibleInstances,
-GeneralizedNewtypeDeriving, OverloadedStrings, LambdaCase, MultiParamTypeClasses,
+{-# LANGUAGE ExistentialQuantification, FlexibleInstances, GADTs,
+GeneralizedNewtypeDeriving, KindSignatures, OverloadedStrings, MultiParamTypeClasses,
 RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
 module CatFacts
     ( main
@@ -29,6 +29,7 @@ module CatFacts
 -- from base
 import Control.Applicative
 import Control.Exception (throwIO)
+import Data.Kind (Type)
 -- from fused-effects
 import Control.Algebra
 import Control.Carrier.Reader
@@ -66,26 +67,25 @@ instance FromJSON CatFact where
   parseJSON = withObject "CatFact" (\o -> CatFact <$> o .: "text")
 
 -- | Our high level effect type that will be able to target different data sources.
-data CatFactClient m k
-  = ListFacts Int {- ^ Number of facts to fetch -} ([CatFact] -> m k)
-  deriving (Functor)
+data CatFactClient (m :: Type -> Type) k where
+  ListFacts :: Int {- ^ Number of facts to fetch -} -> CatFactClient m [CatFact]
 
 listFacts :: Has CatFactClient sig m => Int -> m [CatFact]
-listFacts n = send (ListFacts n pure)
+listFacts n = send (ListFacts n)
 ```
 
 Now that we have our very simple DSL in place, let's think about the underlying API: we know that it's an HTTP-based system, so let's introduce the notion of a handler that is provided a request and hands back an HTTP response.
 
 ``` haskell
-data Http m k
-  = SendRequest HTTP.Request (HTTP.Response L.ByteString -> m k)
-  deriving (Functor)
+data Http (m :: Type -> Type) k where
+  SendRequest :: HTTP.Request -> Http m (HTTP.Response L.ByteString)
 
 sendRequest :: Has Http sig m => HTTP.Request -> m (HTTP.Response L.ByteString)
-sendRequest r = send (SendRequest r pure)
+sendRequest r = send (SendRequest r)
 ```
 
 The `listFacts` function provides the ‘what’ of this API, and the `sendRequest` function provides the ‘how’. In decomposing this problem into a set of effects, each responsible for a single layer of the original problem description, we provide ourselves with a flexible, composable vocabulary rather than a single monolithic action.
+
 
 ## "Stacking" effects
 
@@ -133,13 +133,13 @@ instance ( Has Http sig m
          , Algebra sig m
          ) =>
          Algebra (CatFactClient :+: sig) (CatFactsApi m) where
-  alg hom = \case
-    L (ListFacts numberOfFacts k) -> do
+  alg hdl sig ctx = case sig of
+    L (ListFacts numberOfFacts) -> do
       resp <- sendRequest (catFactsEndpoint { HTTP.queryString = "?amount=" <> B.pack (show numberOfFacts) })
       case lookup hContentType (HTTP.responseHeaders resp) of
-        Just "application/json; charset=utf-8" -> decodeOrThrow (HTTP.responseBody resp) >>= k
+        Just "application/json; charset=utf-8" -> (<$ ctx) <$> decodeOrThrow (HTTP.responseBody resp)
         other -> throwError (InvalidContentType (show other))
-    R other -> CatFactsApi (alg (runCatFactsApi . hom) other)
+    R other -> CatFactsApi (alg (runCatFactsApi . hdl) other ctx)
 ```
 
 We implement a `CatFacts` effect handler that depends on _three_ underlying effects:
@@ -163,9 +163,9 @@ newtype HttpClient m a = HttpClient { runHttp :: m a }
     )
 
 instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (HttpClient m) where
-  alg hom = \case
-    L (SendRequest req k) -> liftIO (HTTP.getGlobalManager >>= HTTP.httpLbs req) >>= k
-    R other -> HttpClient (alg (runHttp . hom) other)
+  alg hdl sig ctx = case sig of
+    L (SendRequest req) -> (<$ ctx) <$> liftIO (HTTP.getGlobalManager >>= HTTP.httpLbs req)
+    R other -> HttpClient (alg (runHttp . hdl) other ctx)
 ```
 
 Note for the above code snippets how the `CatFactsApi` carrier delegates fetching JSON to any other effect that supports retrieving JSON given an HTTP request specification.
@@ -209,6 +209,7 @@ Cats have free-floating clavicle bones that attach their shoulders to their fore
 Wikipedia has a recording of a cat meowing, because why not?
 ```
 
+
 ### Testing with alternative effect handlers
 
 Per point 2. of our initial implementation criteria, we want to be able to simulate failure cases for testing purposes. This is a great case for swapping in an alternative effect handler for our HTTP layer.
@@ -229,9 +230,11 @@ runMockHttp :: (HTTP.Request -> IO (HTTP.Response L.ByteString)) -> MockHttpC m 
 runMockHttp responder m = runReader responder (runMockHttpClient m)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (MockHttpClient m) where
-  alg hom = \case
-    L (SendRequest req k) -> MockHttpClient ask >>= \responder -> liftIO (responder req) >>= k
-    R other -> MockHttpClient (alg (runMockHttpClient . hom) other)
+  alg hdl sig ctx = case sig of
+    L (SendRequest req) -> do
+      responder <- MockHttpClient ask
+      (<$ ctx) <$> liftIO (responder req)
+    R other -> MockHttpClient (alg (runMockHttpClient . hdl) other ctx)
 
 faultyNetwork :: HTTP.Request -> IO (HTTP.Response L.ByteString)
 faultyNetwork req = throwIO (HTTP.HttpExceptionRequest req HTTP.ConnectionTimeout)
@@ -279,6 +282,7 @@ InvalidContentType "Just \"text/xml\""
 
 With effects, we have fine-grained ways of testing slices of our API. All that's needed to turn an integration test into a unit test or vice versa is a different set of `Algebra`-implementing effect handlers!
 
+
 ## Observing & altering effects
 
 Building new effect handling algebras can be a little bit verbose. In simpler situations, we may want to simply operate
@@ -296,17 +300,17 @@ traceHttp
   :: (Has Http sig m, MonadIO m)
   => (forall s. Reifies s (Handler Http m) => InterpretC s Http m a)
   -> m a
-traceHttp = runInterpret $ \r@(SendRequest req sendResp) -> do
+traceHttp = runInterpret $ \ _ r@(SendRequest req) ctx -> do
   startTime <- liftIO getCurrentTime
   liftIO (putStr (B.unpack (HTTP.path req) ++ " ... "))
   -- Pass the request on to something that actually knows how to respond.
-  send $ SendRequest req $ \resp -> do
-    -- Once the actual response is obtained,
-    -- we can capture the end time and status of the response.
-    endTime <- liftIO getCurrentTime
-    let timeSpent = endTime `diffUTCTime` startTime
-    liftIO $ putStrLn ("[" ++ show (statusCode $ HTTP.responseStatus resp) ++ "] took " ++ show timeSpent ++ "\n\n")
-    sendResp resp
+  resp <- sendRequest req
+  -- Once the actual response is obtained,
+  -- we can capture the end time and status of the response.
+  endTime <- liftIO getCurrentTime
+  let timeSpent = endTime `diffUTCTime` startTime
+  liftIO $ putStrLn ("[" ++ show (statusCode $ HTTP.responseStatus resp) ++ "] took " ++ show timeSpent ++ "\n\n")
+  pure (resp <$ ctx)
 ```
 
 Updating our `main` function once more:
@@ -333,6 +337,7 @@ Cats have free-floating clavicle bones that attach their shoulders to their fore
 Fossil records from two million years ago show evidence of jaguars.
 Since cats are so good at hiding illness, even a single instance of a symptom should be taken very seriously.
 ```
+
 
 ### Conclusion
 

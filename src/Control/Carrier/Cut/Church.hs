@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -97,11 +98,11 @@ instance MonadTrans CutC where
 
 instance Algebra sig m => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
   alg (hdl :: forall x . ctx (n x) -> CutC m (ctx x)) sig (ctx :: ctx ()) = case sig of
-    L Cutfail    -> CutC $ \ _    _   fail -> fail
-    L (Call m k) -> CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (hdl (fmap k a))) nil nil (hdl (m <$ ctx))
-    R (L (L Empty))      -> empty
-    R (L (R (Choose k))) -> hdl (k True <$ ctx) <|> hdl (k False <$ ctx)
-    R (R other)          -> CutC $ \ cons nil fail -> thread dst hdl other (pure ctx) >>= runIdentity . runCut (coerce cons) (coerce nil) (coerce fail)
+    L Cutfail  -> CutC $ \ _    _   fail -> fail
+    L (Call m) -> CutC $ \ cons nil _    -> runCut cons nil nil (hdl (m <$ ctx))
+    R (L (L Empty))  -> empty
+    R (L (R Choose)) -> pure (True <$ ctx) <|> pure (False <$ ctx)
+    R (R other)      -> CutC $ \ cons nil fail -> thread dst hdl other (pure ctx) >>= runIdentity . runCut (coerce cons) (coerce nil) (coerce fail)
     where
     dst :: CutC Identity (CutC m a) -> m (CutC Identity a)
     dst = runIdentity . runCut (fmap . liftA2 (<|>) . runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)) (pure (pure empty)) (pure (pure cutfail))

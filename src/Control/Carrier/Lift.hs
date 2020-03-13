@@ -35,4 +35,4 @@ instance MonadTrans LiftC where
   lift = LiftC
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
-  alg hdl (LiftWith with k) ctx = LiftC (with (runM . hdl) ctx) >>= hdl . fmap k
+  alg hdl (LiftWith with) ctx = LiftC (with (runM . hdl) ctx)

@@ -34,7 +34,7 @@ import Control.Effect.Lift.Internal (Lift(..))
 --
 -- @since 1.0.0.0
 sendM :: (Has (Lift n) sig m, Functor n) => n a -> m a
-sendM m = send (LiftWith (\ _ ctx -> (<$ ctx) <$> m) pure)
+sendM m = liftWith (\ _ ctx -> (<$ ctx) <$> m)
 
 -- | A type-restricted variant of 'sendM' for 'IO' actions.
 --
@@ -62,4 +62,4 @@ liftWith
   :: Has (Lift n) sig m
   => (forall ctx . Functor ctx => Handler ctx m n -> ctx () -> n (ctx a))
   -> m a
-liftWith with = send (LiftWith with pure)
+liftWith with = send (LiftWith with)

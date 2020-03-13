@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
@@ -60,16 +61,14 @@ newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
 
 instance (Monoid w, Algebra sig m) => Algebra (Writer w :+: sig) (WriterC w m) where
   alg hdl sig ctx = case sig of
-    L (Tell w     k) -> WriterC (modify (`mappend` w)) >> hdl (k <$ ctx)
-    L (Listen   m k) -> WriterC (StateC (\ w -> do
+    L (Tell w)     -> ctx <$ WriterC (modify (`mappend` w))
+    L (Listen   m) -> WriterC . StateC $ \ w -> do
       (w', a) <- runWriter (hdl (m <$ ctx))
       let w'' = mappend w w'
-      w'' `seq` pure (w'', (w', a))))
-      >>= hdl . uncurry (fmap . k)
-    L (Censor f m k) -> WriterC (StateC (\ w -> do
+      w'' `seq` pure (w'', (,) w' <$> a)
+    L (Censor f m) -> WriterC . StateC $ \ w -> do
       (w', a) <- runWriter (hdl (m <$ ctx))
       let w'' = mappend w (f w')
-      w'' `seq` pure (w'', a)))
-      >>= hdl . fmap k
-    R other          -> WriterC (alg (runWriterC . hdl) (R other) ctx)
+      w'' `seq` pure (w'', a)
+    R other        -> WriterC (alg (runWriterC . hdl) (R other) ctx)
   {-# INLINE alg #-}

@@ -1,4 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StandaloneDeriving #-}
@@ -75,8 +76,8 @@ instance MonadTrans CullC where
 
 instance Algebra sig m => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
   alg hdl sig ctx = case sig of
-    L (Cull m k)         -> CullC (local (const True) (runCullC (hdl (m <$ ctx)))) >>= hdl . fmap k
-    R (L (L Empty))      -> empty
-    R (L (R (Choose k))) -> hdl (k True <$ ctx) <|> hdl (k False <$ ctx)
-    R (R other)          -> CullC (alg (runCullC . hdl) (R (R other)) ctx)
+    L (Cull m)       -> CullC (local (const True) (runCullC (hdl (m <$ ctx))))
+    R (L (L Empty))  -> empty
+    R (L (R Choose)) -> pure (True <$ ctx) <|> pure (False <$ ctx)
+    R (R other)      -> CullC (alg (runCullC . hdl) (R (R other)) ctx)
   {-# INLINE alg #-}
