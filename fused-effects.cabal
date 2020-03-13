@@ -68,7 +68,6 @@ library
     -- Effects
     Control.Effect.Catch
     Control.Effect.Choose
-    Control.Effect.Class
     Control.Effect.Cull
     Control.Effect.Cut
     Control.Effect.Empty
@@ -87,6 +86,7 @@ library
     Control.Effect.Trace
     Control.Effect.Writer
   other-modules:
+    Control.Algebra.Internal
     Control.Effect.Catch.Internal
     Control.Effect.Choose.Internal
     Control.Effect.Empty.Internal

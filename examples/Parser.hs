@@ -1,9 +1,9 @@
-{-# LANGUAGE DeriveGeneric #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE ExistentialQuantification #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE KindSignatures #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -17,8 +17,8 @@ import           Control.Carrier.NonDet.Church
 import           Control.Carrier.State.Strict
 import           Control.Monad (replicateM)
 import           Data.Char
+import           Data.Kind (Type)
 import           Data.List (intercalate)
-import           GHC.Generics (Generic1)
 import           Hedgehog
 import qualified Hedgehog.Function as Fn
 import qualified Hedgehog.Gen as Gen
@@ -113,13 +113,12 @@ example = testGroup "parser"
   genFactors = Gen.list (Range.linear 0 10) genFactor
 
 
-data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
-  deriving (Functor, Generic1)
+data Symbol (m :: Type -> Type) k where
+  Satisfy :: (Char -> Bool) -> Symbol m Char
 
-instance Effect Symbol
 
 satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char
-satisfy p = send (Satisfy p pure)
+satisfy p = send (Satisfy p)
 
 char :: Has Symbol sig m => Char -> m Char
 char = satisfy . (==)
@@ -139,14 +138,14 @@ parse input = (>>= exhaustive) . runState input . runParseC
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
-instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) (ParseC m) where
-  alg hom = \case
-    L (Satisfy p k) -> do
+instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
+  alg hdl sig ctx = case sig of
+    L (Satisfy p) -> do
       input <- ParseC get
       case input of
-        c:cs | p c -> ParseC (put cs) *> hom (k c)
+        c:cs | p c -> c <$ ctx <$ ParseC (put cs)
         _          -> empty
-    R other         -> ParseC (alg (runParseC . hom) (R other))
+    R other       -> ParseC (alg (runParseC . hdl) (R other) ctx)
   {-# INLINE alg #-}
 
 

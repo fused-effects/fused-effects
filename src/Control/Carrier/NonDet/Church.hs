@@ -1,6 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
-{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -114,12 +114,12 @@ instance MonadTrans NonDetC where
   lift m = NonDetC (\ _ leaf _ -> m >>= leaf)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (NonDet :+: sig) (NonDetC m) where
-  alg (hom :: forall x . n x -> NonDetC m x) = \case
-    L (L Empty)      -> empty
-    L (R (Choose k)) -> hom (k True) <|> hom (k False)
-    R other          -> NonDetC $ \ fork leaf nil -> alg id (thread (pure ()) dst other) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
+instance Algebra sig m => Algebra (NonDet :+: sig) (NonDetC m) where
+  alg (hdl :: forall x . ctx (n x) -> NonDetC m (ctx x)) sig (ctx :: ctx ()) = case sig of
+    L (L Empty)  -> empty
+    L (R Choose) -> pure (True <$ ctx) <|> pure (False <$ ctx)
+    R other      -> NonDetC $ \ fork leaf nil -> thread dst hdl other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
     where
-    dst :: NonDetC Identity (n a) -> m (NonDetC Identity a)
-    dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (Identity . runNonDetA . hom) (pure (pure empty))
+    dst :: NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
+    dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (Identity . runNonDetA) (pure (pure empty))
   {-# INLINE alg #-}

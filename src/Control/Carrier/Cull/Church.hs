@@ -1,6 +1,6 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE TypeOperators #-}
@@ -74,10 +74,10 @@ instance MonadTrans CullC where
   lift = CullC . lift . lift
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
-  alg hom = \case
-    L (Cull m k)         -> CullC (local (const True) (runCullC (hom m))) >>= hom . k
-    R (L (L Empty))      -> empty
-    R (L (R (Choose k))) -> hom (k True) <|> hom (k False)
-    R (R other)          -> CullC (alg (runCullC . hom) (R (R other)))
+instance Algebra sig m => Algebra (Cull :+: NonDet :+: sig) (CullC m) where
+  alg hdl sig ctx = case sig of
+    L (Cull m)       -> CullC (local (const True) (runCullC (hdl (m <$ ctx))))
+    R (L (L Empty))  -> empty
+    R (L (R Choose)) -> pure (True <$ ctx) <|> pure (False <$ ctx)
+    R (R other)      -> CullC (alg (runCullC . hdl) (R (R other)) ctx)
   {-# INLINE alg #-}

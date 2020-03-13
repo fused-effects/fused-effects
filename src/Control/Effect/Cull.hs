@@ -1,6 +1,4 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE ExistentialQuantification #-}
-{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE GADTs #-}
 {- | Provides an effect to cull choices in a given nondeterministic context. This effect is used in concert with 'Control.Effect.NonDet.NonDet'.
 
 Computations run inside a call to 'cull' will return at most one result.
@@ -17,7 +15,6 @@ module Control.Effect.Cull
 , cull
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where
@@ -27,14 +24,9 @@ import Control.Algebra
 -- | 'Cull' effects are used with 'Control.Effect.Choose' to provide control over branching.
 --
 -- @since 0.1.2.0
-data Cull m k
-  = forall a . Cull (m a) (a -> m k)
+data Cull m k where
+  Cull :: m a -> Cull m a
 
-deriving instance Functor m => Functor (Cull m)
-
-instance Effect Cull where
-  thread ctx handler (Cull m k) = Cull (handler (m <$ ctx)) (handler . fmap k)
-  {-# INLINE thread #-}
 
 -- | Cull nondeterminism in the argument, returning at most one result.
 --
@@ -44,4 +36,4 @@ instance Effect Cull where
 --
 -- @since 0.1.2.0
 cull :: Has Cull sig m => m a -> m a
-cull m = send (Cull m pure)
+cull m = send (Cull m)

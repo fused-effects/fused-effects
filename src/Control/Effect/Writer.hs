@@ -24,13 +24,13 @@ module Control.Effect.Writer
 , censor
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where
 
 import Control.Algebra
 import Control.Effect.Writer.Internal (Writer(..))
+import Data.Bifunctor (first)
 
 -- | Write a value to the log.
 --
@@ -40,7 +40,7 @@ import Control.Effect.Writer.Internal (Writer(..))
 --
 -- @since 0.1.0.0
 tell :: Has (Writer w) sig m => w -> m ()
-tell w = send (Tell w (pure ()))
+tell w = send (Tell w)
 {-# INLINE tell #-}
 
 -- | Run a computation, returning the pair of its output and its result.
@@ -51,18 +51,18 @@ tell w = send (Tell w (pure ()))
 --
 -- @since 0.2.0.0
 listen :: Has (Writer w) sig m => m a -> m (w, a)
-listen m = send (Listen m (curry pure))
+listen m = send (Listen m)
 {-# INLINE listen #-}
 
 -- | Run a computation, applying a function to its output and returning the pair of the modified output and its result.
 --
 -- @
--- 'listens' f m = 'fmap' ('Data.Bifunctor.first' f) ('listen' m)
+-- 'listens' f m = 'fmap' ('first' f) ('listen' m)
 -- @
 --
 -- @since 0.2.0.0
 listens :: Has (Writer w) sig m => (w -> b) -> m a -> m (b, a)
-listens f m = send (Listen m (curry pure . f))
+listens f = fmap (first f) . listen
 {-# INLINE listens #-}
 
 -- | Run a computation, modifying its output with the passed function.
@@ -73,5 +73,5 @@ listens f m = send (Listen m (curry pure . f))
 --
 -- @since 0.2.0.0
 censor :: Has (Writer w) sig m => (w -> w) -> m a -> m a
-censor f m = send (Censor f m pure)
+censor f m = send (Censor f m)
 {-# INLINE censor #-}

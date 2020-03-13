@@ -39,22 +39,23 @@ import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Functor.Identity
 import Data.Kind (Type)
 
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 --
 -- @since 1.0.2.0
 newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = Labelled (sub m a)
-  deriving (Alternative, Applicative, Effect, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 -- | @since 1.0.2.0
 runLabelled :: forall label sub m a . Labelled label sub m a -> sub m a
 runLabelled (Labelled l) = l
 
 instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
-  alg hom = \case
-    L eff -> Labelled (alg (runLabelled . hom) (L (runLabelled eff)))
-    R sig -> Labelled (alg (runLabelled . hom) (R sig))
+  alg hdl = \case
+    L eff -> Labelled . alg (runLabelled . hdl) (L (runLabelled eff))
+    R sig -> Labelled . alg (runLabelled . hdl) (R sig)
   {-# INLINE alg #-}
 
 
@@ -104,7 +105,7 @@ type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 --
 -- @since 1.0.2.0
 sendLabelled :: forall label eff sig m a . HasLabelled label eff sig m => eff m a -> m a
-sendLabelled = alg id . injLabelled @label . Labelled
+sendLabelled op = runIdentity <$> alg (fmap Identity . runIdentity) (injLabelled @label (Labelled op)) (Identity ())
 {-# INLINABLE sendLabelled #-}
 
 
@@ -123,7 +124,7 @@ instance MonadTrans (UnderLabel sub label) where
   {-# INLINE lift #-}
 
 instance (LabelledMember label sub sig, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
-  alg hom = \case
-    L sub -> UnderLabel (alg (runUnderLabel . hom) (injLabelled @label (Labelled sub)))
-    R sig -> UnderLabel (alg (runUnderLabel . hom) sig)
+  alg hdl = \case
+    L sub -> UnderLabel . alg (runUnderLabel . hdl) (injLabelled @label (Labelled sub))
+    R sig -> UnderLabel . alg (runUnderLabel . hdl) sig
   {-# INLINE alg #-}

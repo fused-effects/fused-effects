@@ -1,15 +1,11 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GADTSyntax #-}
 {-# LANGUAGE KindSignatures #-}
 module Control.Effect.Empty.Internal
 ( Empty(..)
 ) where
 
-import Control.Effect.Class
-import GHC.Generics (Generic1)
+import Data.Kind (Type)
 
 -- | @since 1.0.0.0
-data Empty (m :: * -> *) k = Empty
-  deriving (Functor, Generic1)
-
-instance Effect Empty
+data Empty (m :: Type -> Type) k where
+  Empty :: Empty m a
