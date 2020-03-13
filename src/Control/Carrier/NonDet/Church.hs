@@ -3,7 +3,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -122,6 +121,6 @@ instance Algebra sig m => Algebra (NonDet :+: sig) (NonDetC m) where
     L (R Choose) -> pure (True <$ ctx) <|> pure (False <$ ctx)
     R other      -> NonDetC $ \ fork leaf nil -> thread dst hdl other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
     where
-    dst :: NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
+    dst :: Applicative m => NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
     dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (Identity . runNonDetA) (pure (pure empty))
   {-# INLINE alg #-}
