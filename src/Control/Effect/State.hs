@@ -6,6 +6,7 @@ Predefined carriers:
 
 * "Control.Carrier.State.Strict", which is strict in its updates.
 * "Control.Carrier.State.Lazy", which is lazy in its updates. This enables more programs to terminate, such as cyclic computations expressed with @MonadFix@ or @-XRecursiveDo@, at the cost of efficiency.
+* "Control.Monad.Trans.RWS.CPS"
 * "Control.Monad.Trans.RWS.Lazy"
 * "Control.Monad.Trans.RWS.Strict"
 * "Control.Monad.Trans.State.Lazy"

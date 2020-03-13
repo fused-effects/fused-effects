@@ -11,6 +11,7 @@ module Empty
 ) where
 
 import qualified Control.Carrier.Empty.Maybe as EmptyC
+import qualified Control.Monad.Trans.Maybe as MaybeT
 import           Control.Effect.Empty
 import           Data.Maybe (maybeToList)
 import           Gen
@@ -26,6 +27,7 @@ tests = testGroup "Empty"
     , testMonadFix
     , testEmpty
     ] >>= ($ runL (fmap maybeToList . EmptyC.runEmpty))
+  , testGroup "MaybeT" $ testEmpty (runL (fmap maybeToList . MaybeT.runMaybeT))
   , testGroup "Maybe"  $ testEmpty (runL (pure . maybeToList))
   ] where
   testMonad    run = Monad.test    (m gen0 (\ _ _ -> [])) a b c initial run
