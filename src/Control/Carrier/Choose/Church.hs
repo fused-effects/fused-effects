@@ -58,6 +58,7 @@ newtype ChooseC m a = ChooseC (forall b . (m b -> m b -> m b) -> (a -> m b) -> m
 instance Applicative (ChooseC m) where
   pure a = ChooseC (\ _ leaf -> leaf a)
   {-# INLINE pure #-}
+
   ChooseC f <*> ChooseC a = ChooseC $ \ fork leaf ->
     f fork (\ f' -> a fork (leaf . f'))
   {-# INLINE (<*>) #-}
