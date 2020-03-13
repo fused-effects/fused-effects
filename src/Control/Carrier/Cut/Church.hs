@@ -3,7 +3,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -104,6 +103,6 @@ instance Algebra sig m => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
     R (L (R Choose)) -> pure (True <$ ctx) <|> pure (False <$ ctx)
     R (R other)      -> CutC $ \ cons nil fail -> thread dst hdl other (pure ctx) >>= runIdentity . runCut (coerce cons) (coerce nil) (coerce fail)
     where
-    dst :: CutC Identity (CutC m a) -> m (CutC Identity a)
+    dst :: Applicative m => CutC Identity (CutC m a) -> m (CutC Identity a)
     dst = runIdentity . runCut (fmap . liftA2 (<|>) . runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)) (pure (pure empty)) (pure (pure cutfail))
   {-# INLINE alg #-}
