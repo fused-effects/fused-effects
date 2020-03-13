@@ -6,8 +6,10 @@
 Predefined carriers:
 
 * "Control.Carrier.Writer.Strict". (A lazy carrier is not provided due to the inherent space leaks associated with lazy writer monads.)
+* "Control.Monad.Trans.RWS.CPS"
 * "Control.Monad.Trans.RWS.Lazy"
 * "Control.Monad.Trans.RWS.Strict"
+* "Control.Monad.Trans.Writer.CPS"
 * "Control.Monad.Trans.Writer.Lazy"
 * "Control.Monad.Trans.Writer.Strict"
 * If 'Writer' @w@ is the last effect in a stack, it can be interpreted to a tuple @(w, a)@ given some result type @a@ and the presence of a 'Monoid' instance for @w@.
