@@ -96,12 +96,12 @@ instance MonadTrans CutC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
-  alg hdl sig ctx = case sig of
-    L Cutfail  -> CutC $ \ _    _   fail -> fail
-    L (Call m) -> CutC $ \ cons nil _    -> runCut cons nil nil (hdl (m <$ ctx))
-    R (L (L Empty))  -> empty
-    R (L (R Choose)) -> pure (True <$ ctx) <|> pure (False <$ ctx)
-    R (R other)      -> CutC $ \ cons nil fail -> thread dst hdl other (pure ctx) >>= runIdentity . runCut (coerce cons) (coerce nil) (coerce fail)
+  alg hdl sig ctx = CutC $ \ cons nil fail -> case sig of
+    L Cutfail        -> fail
+    L (Call m)       -> runCut cons nil nil (hdl (m <$ ctx))
+    R (L (L Empty))  -> nil
+    R (L (R Choose)) -> cons (True <$ ctx) (cons (False <$ ctx) nil)
+    R (R other)      -> thread dst hdl other (pure ctx) >>= runIdentity . runCut (coerce cons) (coerce nil) (coerce fail)
     where
     dst :: Applicative m => CutC Identity (CutC m a) -> m (CutC Identity a)
     dst = runIdentity . runCut (fmap . liftA2 (<|>) . runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)) (pure (pure empty)) (pure (pure cutfail))
