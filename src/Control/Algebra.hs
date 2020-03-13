@@ -226,6 +226,9 @@ toRWSTF :: Monoid w => w -> (a, s, w) -> RWSTF w s a
 toRWSTF w (a, s, w') = RWSTF (a, s, mappend w w')
 {-# INLINE toRWSTF #-}
 
+newtype Swap s a = Swap { getSwap :: (a, s) }
+  deriving (Functor)
+
 swapAndLift :: Functor ctx => (ctx a, w) -> ctx (w, a)
 swapAndLift p = (,) (snd p) <$> fst p
 {-# INLINE swapAndLift #-}
