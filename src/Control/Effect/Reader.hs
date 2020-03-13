@@ -1,4 +1,4 @@
-{- | An effect access to an immutable (but locally-modifiable) context value.
+{- | An effect providing access to an immutable (but locally-modifiable) context value.
 
 This effect is similar to the traditional @MonadReader@ typeclass, though it allows the presence of multiple @Reader t@ effects.
 

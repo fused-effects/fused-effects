@@ -73,6 +73,6 @@ instance Algebra sig m => Algebra (Teletype :+: sig) (TeletypeRetC m) where
       i <- TeletypeRetC get
       case i of
         []  -> pure ("" <$ ctx)
-        h:t -> (h <$ ctx) <$ TeletypeRetC (put t)
+        h:t -> h <$ ctx <$ TeletypeRetC (put t)
     L (Write s) -> ctx <$ TeletypeRetC (tell [s])
     R other     -> TeletypeRetC (alg (runTeletypeRetC . hdl) (R (R other)) ctx)
