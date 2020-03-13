@@ -60,7 +60,6 @@ import           Data.Functor.Compose
 import           Data.Functor.Identity
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.Monoid
-import           Data.Tuple (swap)
 
 -- | The class of carriers (results) for algebras (effect handlers) over signatures (effects), whose actions are given by the 'alg' method.
 --
@@ -286,7 +285,7 @@ instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (Writer.CPS.Wri
     L (Tell w)     -> ctx <$ Writer.CPS.tell w
     L (Listen m)   -> swapAndLift <$> Writer.CPS.listen (hdl (m <$ ctx))
     L (Censor f m) -> Writer.CPS.censor f (hdl (m <$ ctx))
-    R other        -> Writer.CPS.writerT $ swap <$> thread (\ (s, x) -> swap . fmap (mappend s) <$> Writer.CPS.runWriterT x) hdl other (mempty, ctx)
+    R other        -> Writer.CPS.writerT $ getSwap <$> thread (\ (Swap (x, s)) -> Swap . fmap (mappend s) <$> Writer.CPS.runWriterT x) hdl other (Swap (ctx, mempty))
 #endif
 
 instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
@@ -294,11 +293,11 @@ instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.Wr
     L (Tell w)     -> ctx <$ Writer.Lazy.tell w
     L (Listen m)   -> swapAndLift <$> Writer.Lazy.listen (hdl (m <$ ctx))
     L (Censor f m) -> Writer.Lazy.censor f (hdl (m <$ ctx))
-    R other        -> Writer.Lazy.WriterT $ swap <$> thread (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Lazy.runWriterT x) hdl other (mempty, ctx)
+    R other        -> Writer.Lazy.WriterT $ getSwap <$> thread (\ (Swap (x, s)) -> Swap . fmap (mappend s) <$> Writer.Lazy.runWriterT x) hdl other (Swap (ctx, mempty))
 
 instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (Writer.Strict.WriterT w m) where
   alg hdl sig ctx = case sig of
     L (Tell w)     -> ctx <$ Writer.Strict.tell w
     L (Listen m)   -> swapAndLift <$> Writer.Strict.listen (hdl (m <$ ctx))
     L (Censor f m) -> Writer.Strict.censor f (hdl (m <$ ctx))
-    R other        -> Writer.Strict.WriterT $ swap <$> thread (\ (s, x) -> swap . fmap (mappend s) <$> Writer.Strict.runWriterT x) hdl other (mempty, ctx)
+    R other        -> Writer.Strict.WriterT $ getSwap <$> thread (\ (Swap (x, s)) -> Swap . fmap (mappend s) <$> Writer.Strict.runWriterT x) hdl other (Swap (ctx, mempty))
