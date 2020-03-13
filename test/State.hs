@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -13,6 +14,9 @@ module State
 import qualified Control.Carrier.State.Lazy as LazyStateC
 import qualified Control.Carrier.State.Strict as StrictStateC
 import           Control.Effect.State
+#if MIN_VERSION_transformers(0,5,6)
+import qualified Control.Monad.Trans.RWS.CPS as CPSRWST
+#endif
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
 import qualified Control.Monad.Trans.State.Lazy as LazyStateT
@@ -38,6 +42,9 @@ tests = testGroup "State"
     ] >>= ($ runC StrictStateC.runState)
   , testGroup "StateT (Lazy)"   $ testState (runC (fmap (fmap swap) . flip LazyStateT.runStateT))
   , testGroup "StateT (Strict)" $ testState (runC (fmap (fmap swap) . flip StrictStateT.runStateT))
+#if MIN_VERSION_transformers(0,5,6)
+  , testGroup "RWST (CPS)"      $ testState (runC (runRWST CPSRWST.runRWST))
+#endif
   , testGroup "RWST (Lazy)"     $ testState (runC (runRWST LazyRWST.runRWST))
   , testGroup "RWST (Strict)"   $ testState (runC (runRWST StrictRWST.runRWST))
   ] where
