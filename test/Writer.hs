@@ -20,6 +20,9 @@ import qualified Control.Monad.Trans.RWS.CPS as CPSRWST
 #endif
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
+#if MIN_VERSION_transformers(0,5,6)
+import qualified Control.Monad.Trans.Writer.CPS as CPSWriterT
+#endif
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
 import           Data.Bifunctor (first)
@@ -38,6 +41,9 @@ tests = testGroup "Writer"
     , testWriter
     ] >>= ($ runL WriterC.runWriter)
   , testGroup "(,)"              $ testWriter (runL pure)
+#if MIN_VERSION_transformers(0,5,6)
+  , testGroup "WriterT (CPS)"    $ testWriter (runL (fmap swap . CPSWriterT.runWriterT))
+#endif
   , testGroup "WriterT (Lazy)"   $ testWriter (runL (fmap swap . LazyWriterT.runWriterT))
   , testGroup "WriterT (Strict)" $ testWriter (runL (fmap swap . StrictWriterT.runWriterT))
 #if MIN_VERSION_transformers(0,5,6)
