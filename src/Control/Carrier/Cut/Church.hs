@@ -97,7 +97,7 @@ instance MonadTrans CutC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
-  alg (hdl :: forall x . ctx (n x) -> CutC m (ctx x)) sig (ctx :: ctx ()) = case sig of
+  alg hdl sig ctx = case sig of
     L Cutfail  -> CutC $ \ _    _   fail -> fail
     L (Call m) -> CutC $ \ cons nil _    -> runCut cons nil nil (hdl (m <$ ctx))
     R (L (L Empty))  -> empty
