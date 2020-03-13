@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -45,7 +44,7 @@ runTrace (TraceC m) = first (($[]) . appEndo) <$> runWriter m
 newtype TraceC m a = TraceC { runTraceC :: WriterC (Endo [String]) m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
-instance (Algebra sig m, Effect sig) => Algebra (Trace :+: sig) (TraceC m) where
-  alg hom = \case
-    L (Trace m k) -> TraceC (tell (Endo (m :))) *> hom k
-    R other       -> TraceC (alg (runTraceC . hom) (R other))
+instance Algebra sig m => Algebra (Trace :+: sig) (TraceC m) where
+  alg hdl sig ctx = case sig of
+    L (Trace m k) -> TraceC (tell (Endo (m :))) *> hdl (k <$ ctx)
+    R other       -> TraceC (alg (runTraceC . hdl) (R other) ctx)

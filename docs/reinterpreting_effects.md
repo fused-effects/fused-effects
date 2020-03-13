@@ -20,8 +20,7 @@ Let's break down some of the properties of the API client that would be desirabl
 ### Initial setup
 
 ``` haskell
-{-# LANGUAGE ExistentialQuantification, DeriveFunctor,
-DeriveGeneric, FlexibleInstances,
+{-# LANGUAGE ExistentialQuantification, DeriveFunctor, FlexibleInstances,
 GeneralizedNewtypeDeriving, OverloadedStrings, LambdaCase, MultiParamTypeClasses,
 RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
 module CatFacts
@@ -30,7 +29,6 @@ module CatFacts
 -- from base
 import Control.Applicative
 import Control.Exception (throwIO)
-import GHC.Generics (Generic1)
 -- from fused-effects
 import Control.Algebra
 import Control.Carrier.Reader
@@ -70,9 +68,7 @@ instance FromJSON CatFact where
 -- | Our high level effect type that will be able to target different data sources.
 data CatFactClient m k
   = ListFacts Int {- ^ Number of facts to fetch -} ([CatFact] -> m k)
-  deriving (Functor, Generic1)
-
-instance Effect CatFactsClient
+  deriving (Functor)
 
 listFacts :: Has CatFactClient sig m => Int -> m [CatFact]
 listFacts n = send (ListFacts n pure)
@@ -83,9 +79,7 @@ Now that we have our very simple DSL in place, let's think about the underlying 
 ``` haskell
 data Http m k
   = SendRequest HTTP.Request (HTTP.Response L.ByteString -> m k)
-  deriving (Functor, Generic1)
-
-instance Effect Http
+  deriving (Functor)
 
 sendRequest :: Has Http sig m => HTTP.Request -> m (HTTP.Response L.ByteString)
 sendRequest r = send (SendRequest r pure)
@@ -189,7 +183,7 @@ handlePrint r =
       Left jsonParseError -> print jsonParseError
       Right facts -> traverse (putStrLn . catFact) facts
 
-catFactsRunner :: (Effect sig, Has Http sig m) => m (Either InvalidContentType (Either JsonParseError [CatFact]))
+catFactsRunner :: Has Http sig m => m (Either InvalidContentType (Either JsonParseError [CatFact]))
 catFactsRunner =
   runError @InvalidContentType $
   runError @JsonParseError $

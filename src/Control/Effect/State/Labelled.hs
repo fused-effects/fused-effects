@@ -17,7 +17,6 @@ module Control.Effect.State.Labelled
 , state
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where

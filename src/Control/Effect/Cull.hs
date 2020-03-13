@@ -17,7 +17,6 @@ module Control.Effect.Cull
 , cull
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where
@@ -32,9 +31,6 @@ data Cull m k
 
 deriving instance Functor m => Functor (Cull m)
 
-instance Effect Cull where
-  thread ctx handler (Cull m k) = Cull (handler (m <$ ctx)) (handler . fmap k)
-  {-# INLINE thread #-}
 
 -- | Cull nondeterminism in the argument, returning at most one result.
 --

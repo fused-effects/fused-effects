@@ -13,7 +13,6 @@ module Control.Effect.Throw
 , throwError
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where

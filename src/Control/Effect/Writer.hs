@@ -24,7 +24,6 @@ module Control.Effect.Writer
 , censor
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where

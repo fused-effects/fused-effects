@@ -143,7 +143,7 @@ action2 = do
 Effects are run with _effect handlers_, specified as functions (generally starting with `run…`) unpacking some specific monad with a `Carrier` instance. For example, we can run a `State` computation using `runState`, imported from the `Control.Carrier.State.Strict` carrier module:
 
 ```haskell
-example1 :: (Algebra sig m, Effect sig) => [a] -> m (Int, ())
+example1 :: Algebra sig m => [a] -> m (Int, ())
 example1 list = runState 0 $ do
   i <- get
   put (i + length list)
@@ -154,7 +154,7 @@ example1 list = runState 0 $ do
 Since this function returns a value in some carrier `m`, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a `Reader` effect:
 
 ```haskell
-example2 :: (Algebra sig m, Effect sig) => m (Int, ())
+example2 :: Algebra sig m => m (Int, ())
 example2 = runReader "hello" . runState 0 $ do
   list <- ask
   put (length (list :: String))
@@ -188,7 +188,7 @@ example4 = runM . runReader "hello" . runState 0 $ do
 
 ### Required compiler extensions
 
-When defining your own effects, you may need `-XKindSignatures` if GHC cannot correctly infer the type of your handler; see the [documentation on common errors][common] for more information about this case. `-XDeriveGeneric` can be used with many first-order effects to derive default implementation of `Effect`.
+When defining your own effects, you may need `-XKindSignatures` if GHC cannot correctly infer the type of your constructor; see the [documentation on common errors][common] for more information about this case.
 
 When defining carriers, you’ll need `-XTypeOperators` to declare a `Carrier` instance over (`:+:`), `-XFlexibleInstances` to loosen the conditions on the instance, `-XMultiParamTypeClasses` since `Carrier` takes two parameters, and `-XUndecidableInstances` to satisfy the coverage condition for this instance.
 
@@ -197,7 +197,7 @@ When defining carriers, you’ll need `-XTypeOperators` to declare a `Carrier` i
 The following invocation, taken from the teletype example, should suffice for most use or construction of effects and carriers:
 
 ```haskell
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 ```
 
 

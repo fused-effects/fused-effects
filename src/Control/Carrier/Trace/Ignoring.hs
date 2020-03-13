@@ -1,6 +1,5 @@
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -47,7 +46,7 @@ instance MonadTrans TraceC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Trace :+: sig) (TraceC m) where
-  alg hom = \case
-    L trace -> hom (traceCont trace)
-    R other -> TraceC (alg (runTrace . hom) other)
+  alg hdl sig ctx = case sig of
+    L trace -> hdl (traceCont trace <$ ctx)
+    R other -> TraceC (alg (runTrace . hdl) other ctx)
   {-# INLINE alg #-}

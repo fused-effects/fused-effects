@@ -14,7 +14,6 @@ module Control.Effect.Reader.Labelled
 , local
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where

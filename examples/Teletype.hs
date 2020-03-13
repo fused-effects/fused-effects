@@ -1,4 +1,4 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleInstances, GeneralizedNewtypeDeriving, LambdaCase, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
 
 module Teletype
 ( example
@@ -11,7 +11,6 @@ import Control.Algebra
 import Control.Carrier.State.Strict
 import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class
-import GHC.Generics (Generic1)
 import Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
@@ -40,9 +39,8 @@ example = testGroup "teletype"
 data Teletype m k
   = Read (String -> m k)
   | Write String (m k)
-  deriving (Functor, Generic1)
+  deriving (Functor)
 
-instance Effect Teletype
 
 read :: Has Teletype sig m => m String
 read = send (Read pure)
@@ -58,10 +56,10 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  alg hom = \case
-    L (Read    k) -> liftIO getLine      >>= hom . k
-    L (Write s k) -> liftIO (putStrLn s) >>  hom k
-    R other       -> TeletypeIOC (alg (runTeletypeIOC . hom) other)
+  alg hdl sig ctx = case sig of
+    L (Read    k) -> liftIO getLine      >>= hdl . (<$ ctx) . k
+    L (Write s k) -> liftIO (putStrLn s) >>  hdl (k <$ ctx)
+    R other       -> TeletypeIOC (alg (runTeletypeIOC . hdl) other ctx)
 
 
 runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
@@ -70,12 +68,12 @@ runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
   deriving (Applicative, Functor, Monad)
 
-instance (Algebra sig m, Effect sig) => Algebra (Teletype :+: sig) (TeletypeRetC m) where
-  alg hom = \case
+instance Algebra sig m => Algebra (Teletype :+: sig) (TeletypeRetC m) where
+  alg hdl sig ctx = case sig of
     L (Read    k) -> do
       i <- TeletypeRetC get
       case i of
-        []  -> hom (k "")
-        h:t -> TeletypeRetC (put t) *> hom (k h)
-    L (Write s k) -> TeletypeRetC (tell [s]) *> hom k
-    R other       -> TeletypeRetC (alg (runTeletypeRetC . hom) (R (R other)))
+        []  -> hdl (k "" <$ ctx)
+        h:t -> TeletypeRetC (put t) *> hdl (k h <$ ctx)
+    L (Write s k) -> TeletypeRetC (tell [s]) *> hdl (k <$ ctx)
+    R other       -> TeletypeRetC (alg (runTeletypeRetC . hdl) (R (R other)) ctx)

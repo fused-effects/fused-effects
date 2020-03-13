@@ -20,7 +20,6 @@ import qualified Control.Monad.Fail as Fail
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
-import           Data.Functor.Identity
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 --
@@ -36,4 +35,4 @@ instance MonadTrans LiftC where
   lift = LiftC
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
-  alg hom (LiftWith with k) = LiftC (with (Identity ()) (fmap Identity . runM . hom . runIdentity)) >>= hom . k . runIdentity
+  alg hdl (LiftWith with k) ctx = LiftC (with (runM . hdl) ctx) >>= hdl . fmap k

@@ -21,8 +21,8 @@ newtype FailC m a = FailC { runFailC :: m (Either String a) }
 Declaring an `Algebra` instance will fail:
 
 ```haskell
-instance (Algebra sig m, Effect sig)
-    => Algebra (Fail :+: sig) (FailC m) where…
+instance Algebra sig m
+      => Algebra (Fail :+: sig) (FailC m) where…
 ```
 
 ```
