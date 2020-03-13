@@ -5,6 +5,7 @@ This can be seen as similar to 'Control.Effect.Fail.Fail', but without an error 
 Predefined carriers:
 
 * @"Control.Carrier.Empty.Maybe".'Control.Carrier.Empty.Maybe.MaybeC'@
+* @"Control.Monad.Trans.Maybe".'Control.Monad.Trans.Maybe.MaybeT'@
 * If 'Empty' is the last effect in a stack, it can be interpreted directly to a 'Maybe'.
 
 @since 1.0.0.0
