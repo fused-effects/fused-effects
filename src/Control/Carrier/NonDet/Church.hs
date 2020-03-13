@@ -117,7 +117,7 @@ instance MonadTrans NonDetC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (NonDet :+: sig) (NonDetC m) where
-  alg (hdl :: forall x . ctx (n x) -> NonDetC m (ctx x)) sig (ctx :: ctx ()) = case sig of
+  alg hdl sig ctx = case sig of
     L (L Empty)  -> empty
     L (R Choose) -> pure (True <$ ctx) <|> pure (False <$ ctx)
     R other      -> NonDetC $ \ fork leaf nil -> thread dst hdl other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
