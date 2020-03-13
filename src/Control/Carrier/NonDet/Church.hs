@@ -75,6 +75,7 @@ newtype NonDetC m a = NonDetC (forall b . (m b -> m b -> m b) -> (a -> m b) -> m
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ _ leaf _ -> leaf a)
   {-# INLINE pure #-}
+
   NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf nil ->
     f fork (\ f' -> a fork (leaf . f') nil) nil
   {-# INLINE (<*>) #-}
@@ -82,6 +83,7 @@ instance Applicative (NonDetC m) where
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ _ nil -> nil)
   {-# INLINE empty #-}
+
   NonDetC l <|> NonDetC r = NonDetC $ \ fork leaf nil -> fork (l fork leaf nil) (r fork leaf nil)
   {-# INLINE (<|>) #-}
 
