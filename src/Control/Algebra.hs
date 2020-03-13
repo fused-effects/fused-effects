@@ -51,6 +51,9 @@ import qualified Control.Monad.Trans.RWS.Lazy as RWS.Lazy
 import qualified Control.Monad.Trans.RWS.Strict as RWS.Strict
 import qualified Control.Monad.Trans.State.Lazy as State.Lazy
 import qualified Control.Monad.Trans.State.Strict as State.Strict
+#if MIN_VERSION_transformers(0,5,6)
+import qualified Control.Monad.Trans.Writer.CPS as Writer.CPS
+#endif
 import qualified Control.Monad.Trans.Writer.Lazy as Writer.Lazy
 import qualified Control.Monad.Trans.Writer.Strict as Writer.Strict
 import           Data.Functor.Compose
@@ -273,6 +276,15 @@ instance Algebra sig m => Algebra (State s :+: sig) (State.Strict.StateT s m) wh
     L Get     -> State.Strict.gets (<$ ctx)
     L (Put s) -> ctx <$ State.Strict.put s
     R other   -> State.Strict.StateT $ \ s -> swap <$> thread (\ (s, x) -> swap <$> State.Strict.runStateT x s) hdl other (s, ctx)
+
+#if MIN_VERSION_transformers(0,5,6)
+instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (Writer.CPS.WriterT w m) where
+  alg hdl sig ctx = case sig of
+    L (Tell w)     -> ctx <$ Writer.CPS.tell w
+    L (Listen m)   -> swapAndLift <$> Writer.CPS.listen (hdl (m <$ ctx))
+    L (Censor f m) -> Writer.CPS.censor f (hdl (m <$ ctx))
+    R other        -> Writer.CPS.writerT $ swap <$> thread (\ (s, x) -> swap . fmap (mappend s) <$> Writer.CPS.runWriterT x) hdl other (mempty, ctx)
+#endif
 
 instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (Writer.Lazy.WriterT w m) where
   alg hdl sig ctx = case sig of
