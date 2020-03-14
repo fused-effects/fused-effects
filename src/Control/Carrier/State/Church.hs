@@ -44,30 +44,30 @@ import Control.Monad.Trans.Class
 -- @
 --
 -- @since 1.1.0.0
-runState :: forall s m a b . (a -> s -> m b) -> s -> StateC s m a -> m b
-runState f s (StateC m) = m f s
+runState :: forall s m a b . (s -> a -> m b) -> s -> StateC s m a -> m b
+runState f s (StateC m) = m (flip f) s
 {-# INLINE runState #-}
 
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
 --
 -- @
--- 'evalState' s m = 'runState' ('const' '.' 'pure') s m
+-- 'evalState' s m = 'runState' ('const' 'pure') s m
 -- @
 --
 -- @since 1.1.0.0
 evalState :: forall s m a . Applicative m => s -> StateC s m a -> m a
-evalState = runState (const . pure)
+evalState = runState (const pure)
 {-# INLINE evalState #-}
 
 -- | Run a 'State' effect, yielding the final state and discarding the return value.
 --
 -- @
--- 'execState' s m = 'runState' ('const' 'pure') s m
+-- 'execState' s m = 'runState' ('const' '.' 'pure') s m
 -- @
 --
 -- @since 1.1.0.0
 execState :: forall s m a . Applicative m => s -> StateC s m a -> m s
-execState = runState (const pure)
+execState = runState (const . pure)
 {-# INLINE execState #-}
 
 -- | @since 1.1.0.0
@@ -97,7 +97,7 @@ instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (StateC s m) where
-  mfix f = StateC $ \ k s -> mfix (runState (flip (curry pure)) s . f . snd) >>= uncurry (flip k)
+  mfix f = StateC $ \ k s -> mfix (runState (curry pure) s . f . snd) >>= uncurry (flip k)
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (StateC s m) where
@@ -114,5 +114,5 @@ instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
   alg hdl sig ctx = StateC $ \ k s -> case sig of
     L Get     -> k (s <$ ctx) s
     L (Put s) -> k       ctx  s
-    R other   -> thread (uncurry (runState (flip (curry pure))) ~<~ hdl) other (s, ctx) >>= uncurry (flip k)
+    R other   -> thread (uncurry (runState (curry pure)) ~<~ hdl) other (s, ctx) >>= uncurry (flip k)
   {-# INLINE alg #-}

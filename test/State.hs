@@ -35,7 +35,7 @@ tests = testGroup "State"
     [ testMonad
     , testMonadFix
     , testState
-    ] >>= ($ runC (C.Church.runState (flip (curry pure))))
+    ] >>= ($ runC (C.Church.runState (curry pure)))
   , testGroup "StateC (Lazy)"   $
     [ testMonad
     , testMonadFix
