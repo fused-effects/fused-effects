@@ -5,14 +5,14 @@ module Labelled
 ( example
 ) where
 
-import Test.Tasty
-import Test.Tasty.HUnit
-import Control.Applicative
-import Control.Effect.Labelled
-import Control.Carrier.Reader
-import Control.Carrier.State.Strict
+import           Control.Applicative
+import           Control.Carrier.Reader
+import           Control.Carrier.State.Strict
+import           Control.Effect.Labelled
 import qualified Control.Effect.Reader.Labelled as L
 import qualified Control.Effect.State.Labelled as L
+import           Test.Tasty
+import           Test.Tasty.HUnit
 
 sample :: ( HasLabelled "fore" (Reader Int) sig m
           , HasLabelled "aft" (Reader Int) sig m
