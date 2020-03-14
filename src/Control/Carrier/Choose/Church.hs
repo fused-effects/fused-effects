@@ -92,9 +92,9 @@ instance MonadTrans ChooseC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Choose :+: sig) (ChooseC m) where
-  alg hdl sig ctx = case sig of
-    L Choose -> ChooseC $ \ fork leaf -> fork (leaf (True <$ ctx)) (leaf (False <$ ctx))
-    R other  -> ChooseC $ \ fork leaf -> thread dst hdl other (pure ctx) >>= runIdentity . runChoose (coerce fork) (coerce leaf)
+  alg hdl sig ctx = ChooseC $ \ fork leaf -> case sig of
+    L Choose -> fork (leaf (True <$ ctx)) (leaf (False <$ ctx))
+    R other  -> thread dst hdl other (pure ctx) >>= runIdentity . runChoose (coerce fork) (coerce leaf)
     where
     dst :: ChooseC Identity (ChooseC m a) -> m (ChooseC Identity a)
     dst = runIdentity . runChoose (liftA2 (liftA2 (<|>))) (pure . runChoose (liftA2 (<|>)) (pure . pure))
