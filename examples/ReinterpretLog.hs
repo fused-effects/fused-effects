@@ -30,7 +30,6 @@ module ReinterpretLog
   ) where
 
 import Control.Algebra
-import Control.Carrier.Lift
 import Control.Carrier.Reader
 import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class (MonadIO(..))
@@ -77,19 +76,14 @@ runApplication =
     --
     -- Here its type is:
     --
-    --   ReinterpretLogC Message String (LogStdoutC (LiftC IO)) ()
+    --   ReinterpretLogC Message String (LogStdoutC IO) ()
 
     & reinterpretLog renderLogMessage
     -- Now its type is:
     --
-    --   LogStdoutC (LiftC IO) ()
+    --   LogStdoutC IO ()
 
     & runLogStdout
-    -- Now its type is:
-    --
-    --   LiftC IO ()
-
-    & runM
     -- Now its type is:
     --
     --   IO ()
