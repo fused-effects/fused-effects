@@ -120,8 +120,8 @@ instance MonadTrans (StateC s) where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
-  alg hdl sig ctx = case sig of
-    L Get     -> StateC (\ s -> pure (s, s <$ ctx))
-    L (Put s) -> StateC (\ _ -> pure (s, ctx))
-    R other   -> StateC (\ s -> thread (uncurry runState) hdl other (s, ctx))
+  alg hdl sig ctx = StateC $ \ s -> case sig of
+    L Get     -> pure (s, s <$ ctx)
+    L (Put s) -> pure (s, ctx)
+    R other   -> thread (uncurry runState) hdl other (s, ctx)
   {-# INLINE alg #-}
