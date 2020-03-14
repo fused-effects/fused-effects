@@ -62,8 +62,12 @@ instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
 
 instance MonadFix m => MonadFix (ErrorC e m) where
   mfix f = ErrorC $ \ h k -> mfix
-    (runError (pure . Left) (pure . Right) . either (const (error "mfix (ErrorC): function returned failure")) f)
-    >>= either h k
+    (toError . f . run . fromError)
+    >>= run . runError (pure . h) (pure . k)
+    where
+    err e = ErrorC (\ h _ -> h e)
+    toError   = runError (pure . err) (pure . pure)
+    fromError = runError (const (error "mfix (ErrorC): throwError")) pure
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (ErrorC e m) where
