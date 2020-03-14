@@ -74,11 +74,11 @@ newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (Wr
   deriving (Applicative, Functor, Monad)
 
 instance Algebra sig m => Algebra (Teletype :+: sig) (TeletypeRetC m) where
-  alg hdl sig ctx = case sig of
+  alg hdl sig ctx = TeletypeRetC $ case sig of
     L Read      -> do
-      i <- TeletypeRetC get
+      i <- get
       case i of
         []  -> pure ("" <$ ctx)
-        h:t -> h <$ ctx <$ TeletypeRetC (put t)
-    L (Write s) -> ctx <$ TeletypeRetC (tell [s])
-    R other     -> TeletypeRetC (alg (runTeletypeRetC . hdl) (R (R other)) ctx)
+        h:t -> h <$ ctx <$ put t
+    L (Write s) -> ctx <$ tell [s]
+    R other     -> alg (runTeletypeRetC . hdl) (R (R other)) ctx
