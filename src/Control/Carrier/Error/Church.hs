@@ -16,7 +16,7 @@ import Control.Algebra
 import Control.Applicative (Alternative(..))
 import Control.Effect.Error
 import Control.Monad (MonadPlus)
-import Control.Monad.Fail
+import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -54,8 +54,8 @@ instance Monad (ErrorC e m) where
   ErrorC a >>= f = ErrorC $ \ h k -> a h (runError h k . f)
   {-# INLINE (>>=) #-}
 
-instance MonadFail m => MonadFail (ErrorC e m) where
-  fail s = lift (fail s)
+instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
+  fail s = lift (Fail.fail s)
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (ErrorC e m) where
