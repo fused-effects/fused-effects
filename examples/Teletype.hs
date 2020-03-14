@@ -1,21 +1,27 @@
-{-# LANGUAGE FlexibleInstances, GADTs, GeneralizedNewtypeDeriving, KindSignatures, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Teletype
 ( example
 , runTeletypeIO
 ) where
 
-import Control.Algebra
-import Control.Carrier.State.Strict
-import Control.Carrier.Writer.Strict
-import Control.Monad.IO.Class
-import Data.Kind (Type)
-import Hedgehog
+import           Control.Algebra
+import           Control.Carrier.State.Strict
+import           Control.Carrier.Writer.Strict
+import           Control.Monad.IO.Class
+import           Data.Kind (Type)
+import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import Prelude hiding (read)
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Prelude hiding (read)
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 example :: TestTree
 example = testGroup "teletype"
