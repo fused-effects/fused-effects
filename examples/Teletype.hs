@@ -8,7 +8,6 @@
 
 module Teletype
 ( example
-, runTeletypeIO
 ) where
 
 import           Control.Algebra
@@ -54,17 +53,14 @@ write :: Has Teletype sig m => String -> m ()
 write s = send (Write s)
 
 
-runTeletypeIO :: TeletypeIOC m a -> m a
-runTeletypeIO = runTeletypeIOC
-
-newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
+newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIO :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
   alg hdl sig ctx = case sig of
     L Read      -> (<$ ctx) <$> liftIO getLine
     L (Write s) -> ctx <$ liftIO (putStrLn s)
-    R other     -> TeletypeIOC (alg (runTeletypeIOC . hdl) other ctx)
+    R other     -> TeletypeIOC (alg (runTeletypeIO . hdl) other ctx)
 
 
 runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
