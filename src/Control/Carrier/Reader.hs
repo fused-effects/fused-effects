@@ -49,16 +49,20 @@ newtype ReaderC r m a = ReaderC (r -> m a)
 instance Applicative m => Applicative (ReaderC r m) where
   pure = ReaderC . const . pure
   {-# INLINE pure #-}
+
   ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
   {-# INLINE (<*>) #-}
+
   ReaderC u *> ReaderC v = ReaderC $ \ r -> u r *> v r
   {-# INLINE (*>) #-}
+
   ReaderC u <* ReaderC v = ReaderC $ \ r -> u r <* v r
   {-# INLINE (<*) #-}
 
 instance Alternative m => Alternative (ReaderC r m) where
   empty = ReaderC (const empty)
   {-# INLINE empty #-}
+
   ReaderC l <|> ReaderC r = ReaderC (liftA2 (<|>) l r)
   {-# INLINE (<|>) #-}
 
