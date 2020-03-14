@@ -285,14 +285,14 @@ instance Algebra sig m => Algebra (State s :+: sig) (State.Lazy.StateT s m) wher
   alg hdl sig ctx = case sig of
     L Get     -> State.Lazy.gets (<$ ctx)
     L (Put s) -> ctx <$ State.Lazy.put s
-    R other   -> State.Lazy.StateT $ \ s -> getSwap <$> thread ((fmap Swap . uncurry State.Lazy.runStateT . getSwap) ~<~ hdl) other (Swap (ctx, s))
+    R other   -> State.Lazy.StateT $ \ s -> getSwap <$> thread (fmap Swap . uncurry State.Lazy.runStateT . getSwap ~<~ hdl) other (Swap (ctx, s))
   {-# INLINE alg #-}
 
 instance Algebra sig m => Algebra (State s :+: sig) (State.Strict.StateT s m) where
   alg hdl sig ctx = case sig of
     L Get     -> State.Strict.gets (<$ ctx)
     L (Put s) -> ctx <$ State.Strict.put s
-    R other   -> State.Strict.StateT $ \ s -> getSwap <$> thread ((fmap Swap . uncurry State.Strict.runStateT . getSwap) ~<~ hdl) other (Swap (ctx, s))
+    R other   -> State.Strict.StateT $ \ s -> getSwap <$> thread (fmap Swap . uncurry State.Strict.runStateT . getSwap ~<~ hdl) other (Swap (ctx, s))
   {-# INLINE alg #-}
 
 #if MIN_VERSION_transformers(0,5,6)
