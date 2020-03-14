@@ -25,3 +25,4 @@ import Control.Effect.Throw.Internal (Throw(..))
 -- @since 0.1.0.0
 throwError :: Has (Throw e) sig m => e -> m a
 throwError = send . Throw
+{-# INLINE throwError #-}
