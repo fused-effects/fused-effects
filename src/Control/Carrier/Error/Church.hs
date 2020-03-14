@@ -64,7 +64,10 @@ instance MonadTrans (ErrorC e) where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Error e :+: sig) (ErrorC e m) where
-  alg (L (L (Throw e)))     = ErrorC $ \ h _ -> h e
-  alg (L (R (Catch m h k))) = ErrorC $ \ h' k' -> runError (runError h' (runError h' k' . k) . h) (runError h' k' . k) m
-  alg (R other)             = ErrorC $ \ h k -> alg (thread (Right ()) (either (pure . Left) (runError (pure . Left) (pure . Right))) other) >>= either h k
+  alg hdl sig ctx = ErrorC $ \ h k -> case sig of
+    L (L (Throw e))    -> h e
+    L (R (Catch m h')) -> runError (runError h k . lower . h') k (lower m)
+    R other            -> thread (either (pure . Left) (runError (pure . Left) (pure . Right)) ~<~ hdl) other (Right ctx) >>= either h k
+    where
+    lower = hdl . (<$ ctx)
   {-# INLINE alg #-}

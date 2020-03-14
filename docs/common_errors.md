@@ -6,14 +6,14 @@ is an attempt to enumerate and explicate the things that can go wrong
 when using or extending this library. (It is also very much a work in
 progress.)
 
+
 ## I'm getting kind errors when implementing an `Algebra` instance!
 
 Given an effect datatype that doesn’t use the `m` parameter:
 
 ```haskell
-data Fail m k
-  = Fail String
-  deriving (Functor)
+data Fail m k where
+  Fail :: String -> Fail m a
 
 newtype FailC m a = FailC { runFailC :: m (Either String a) }
 ```
@@ -39,7 +39,6 @@ the definition of `Fail`, so GHC makes an understandable but incorrect inference
 An explicit kind annotation on `m` fixes the problem.
 
 ```haskell
-data Fail (m :: * -> *) k
-  = Fail String
-  deriving (Functor)
+data Fail (m :: * -> *) k where
+  Fail :: String -> Fail m a
 ```

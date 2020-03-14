@@ -1,12 +1,12 @@
 {-# LANGUAGE TypeApplications #-}
-module NonDet
+module Bench.NonDet
 ( benchmark
 ) where
 
-import Control.Algebra
+import qualified Bench.NonDet.NQueens as NQueens
+import           Control.Algebra
 import qualified Control.Carrier.NonDet.Church as NonDet.Church
 import           Gauge hiding (benchmark)
-import qualified NonDet.NQueens as NQueens
 
 benchmark :: Gauge.Benchmark
 benchmark = bgroup "NonDet"

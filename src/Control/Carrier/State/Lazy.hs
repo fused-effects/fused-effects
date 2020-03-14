@@ -1,4 +1,9 @@
-{-# LANGUAGE ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | A carrier for the 'State' effect that refrains from evaluating its state until necessary. This is less efficient than "Control.Carrier.State.Strict" but allows some cyclic computations to terminate that would loop infinitely in a strict state carrier.
 
@@ -21,7 +26,7 @@ import Control.Algebra
 import Control.Applicative (Alternative(..))
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
+import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -75,12 +80,14 @@ instance Functor m => Functor (StateC s m) where
 instance Monad m => Applicative (StateC s m) where
   pure a = StateC $ \ s -> pure (s, a)
   {-# INLINE pure #-}
+
   StateC mf <*> StateC mx = StateC $ \ s -> do
     ~(s',  f) <- mf s
     ~(s'', x) <- mx s'
     pure (s'', f x)
   {-# INLINE (<*>) #-}
-  m *> k = m >>= \_ -> k
+
+  m *> k = m >>= const k
   {-# INLINE (*>) #-}
 
 instance Monad m => Monad (StateC s m) where
@@ -92,6 +99,7 @@ instance Monad m => Monad (StateC s m) where
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
   empty = StateC (const empty)
   {-# INLINE empty #-}
+
   StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
   {-# INLINE (<|>) #-}
 
@@ -114,7 +122,8 @@ instance MonadTrans (StateC s) where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
-  alg (L (Get   k)) = StateC (\ s -> runState s (k s))
-  alg (L (Put s k)) = StateC (\ _ -> runState s k)
-  alg (R other)     = StateC (\ s -> alg (thread (s, ()) (uncurry runState) other))
+  alg hdl sig ctx = StateC $ \ s -> case sig of
+    L Get     -> pure (s, s <$ ctx)
+    L (Put s) -> pure (s, ctx)
+    R other   -> thread (uncurry runState ~<~ hdl) other (s, ctx)
   {-# INLINE alg #-}

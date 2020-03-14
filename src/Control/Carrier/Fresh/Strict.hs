@@ -1,4 +1,9 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
 --
@@ -7,7 +12,7 @@ module Control.Carrier.Fresh.Strict
 ( -- * Fresh carrier
   runFresh
 , evalFresh
-, FreshC(..)
+, FreshC(FreshC)
   -- * Fresh effect
 , module Control.Effect.Fresh
 ) where
@@ -17,7 +22,7 @@ import Control.Applicative (Alternative(..))
 import Control.Carrier.State.Strict
 import Control.Effect.Fresh
 import Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
+import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -34,6 +39,7 @@ import Control.Monad.Trans.Class
 -- @since 0.1.0.0
 runFresh :: Int -> FreshC m a -> m (Int, a)
 runFresh n (FreshC m) = runState n m
+{-# INLINE runFresh #-}
 
 -- | Run a 'Fresh' effect counting up from an initial value, and forgetting the final value.
 --
@@ -47,12 +53,14 @@ runFresh n (FreshC m) = runState n m
 -- @since 1.0.0.0
 evalFresh :: Functor m => Int -> FreshC m a -> m a
 evalFresh n (FreshC m) = evalState n m
+{-# INLINE evalFresh #-}
 
 -- | @since 1.0.0.0
-newtype FreshC m a = FreshC (StateC Int m a)
+newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance Algebra sig m => Algebra (Fresh :+: sig) (FreshC m) where
-  alg (L (Fresh k)) = FreshC (get <* modify (+ (1 :: Int))) >>= k
-  alg (R other)     = FreshC (handleCoercible other)
+  alg hdl sig ctx = case sig of
+    L Fresh -> FreshC (gets (<$ ctx) <* modify (+ (1 :: Int)))
+    R other -> FreshC (alg (runFreshC . hdl) (R other) ctx)
   {-# INLINE alg #-}

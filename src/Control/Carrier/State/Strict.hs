@@ -1,4 +1,10 @@
-{-# LANGUAGE DeriveFunctor, ExplicitForAll, FlexibleContexts, FlexibleInstances, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE ExplicitForAll #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | A carrier for the 'State' effect. It evaluates its inner state strictly, which is the correct choice for the majority of use cases.
 
@@ -20,7 +26,7 @@ import Control.Algebra
 import Control.Applicative (Alternative(..))
 import Control.Effect.State
 import Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
+import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -72,17 +78,20 @@ newtype StateC s m a = StateC (s -> m (s, a))
 instance Monad m => Applicative (StateC s m) where
   pure a = StateC (\ s -> pure (s, a))
   {-# INLINE pure #-}
+
   StateC f <*> StateC a = StateC $ \ s -> do
     (s', f') <- f s
     (s'', a') <- a s'
     pure (s'', f' a')
   {-# INLINE (<*>) #-}
-  m *> k = m >>= \_ -> k
+
+  m *> k = m >>= const k
   {-# INLINE (*>) #-}
 
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
   empty = StateC (const empty)
   {-# INLINE empty #-}
+
   StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
   {-# INLINE (<|>) #-}
 
@@ -111,7 +120,8 @@ instance MonadTrans (StateC s) where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
-  alg (L (Get   k)) = StateC (\ s -> runState s (k s))
-  alg (L (Put s k)) = StateC (\ _ -> runState s k)
-  alg (R other)     = StateC (\ s -> alg (thread (s, ()) (uncurry runState) other))
+  alg hdl sig ctx = StateC $ \ s -> case sig of
+    L Get     -> pure (s, s <$ ctx)
+    L (Put s) -> pure (s, ctx)
+    R other   -> thread (uncurry runState ~<~ hdl) other (s, ctx)
   {-# INLINE alg #-}

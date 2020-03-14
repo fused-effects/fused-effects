@@ -1,4 +1,10 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE CPP #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 module Writer
 ( tests
 , gen0
@@ -6,20 +12,26 @@ module Writer
 , test
 ) where
 
-import Control.Arrow ((&&&))
+import           Control.Arrow ((&&&))
 import qualified Control.Carrier.Writer.Strict as WriterC
-import Control.Effect.Writer
+import           Control.Effect.Writer
+#if MIN_VERSION_transformers(0,5,6)
+import qualified Control.Monad.Trans.RWS.CPS as CPSRWST
+#endif
 import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
 import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
+#if MIN_VERSION_transformers(0,5,6)
+import qualified Control.Monad.Trans.Writer.CPS as CPSWriterT
+#endif
 import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
 import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
-import Data.Bifunctor (first)
-import Data.Tuple (swap)
-import Gen
+import           Data.Bifunctor (first)
+import           Data.Tuple (swap)
+import           Gen
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
@@ -29,8 +41,14 @@ tests = testGroup "Writer"
     , testWriter
     ] >>= ($ runL WriterC.runWriter)
   , testGroup "(,)"              $ testWriter (runL pure)
+#if MIN_VERSION_transformers(0,5,6)
+  , testGroup "WriterT (CPS)"    $ testWriter (runL (fmap swap . CPSWriterT.runWriterT))
+#endif
   , testGroup "WriterT (Lazy)"   $ testWriter (runL (fmap swap . LazyWriterT.runWriterT))
   , testGroup "WriterT (Strict)" $ testWriter (runL (fmap swap . StrictWriterT.runWriterT))
+#if MIN_VERSION_transformers(0,5,6)
+  , testGroup "RWST (CPS)"       $ testWriter (runL (runRWST CPSRWST.runRWST))
+#endif
   , testGroup "RWST (Lazy)"      $ testWriter (runL (runRWST LazyRWST.runRWST))
   , testGroup "RWST (Strict)"    $ testWriter (runL (runRWST StrictRWST.runRWST))
   ] where

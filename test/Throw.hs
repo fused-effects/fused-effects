@@ -1,4 +1,9 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 module Throw
 ( tests
 , gen0
@@ -6,15 +11,15 @@ module Throw
 ) where
 
 import qualified Control.Carrier.Throw.Either as ThrowC
-import Control.Effect.Throw
-import Gen
+import           Control.Effect.Throw
+import           Gen
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
-tests = testGroup "Throw" $
+tests = testGroup "Throw"
   [ testGroup "ThrowC" $
     [ testMonad
     , testMonadFix
@@ -43,5 +48,5 @@ test
   -> [TestTree]
 test e m _ b i (Run runThrow) =
   [ testProperty "throwError annihilates >>=" . forall (i :. e :. fn @a (m b) :. Nil) $
-    \ i e k -> runThrow ((throwError e >>= k) <$ i) === runThrow ((throwError e) <$ i)
+    \ i e k -> runThrow ((throwError e >>= k) <$ i) === runThrow (throwError e <$ i)
   ]

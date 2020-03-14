@@ -1,4 +1,8 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 {- | A carrier for an 'Empty' effect, indicating failure with a 'Nothing' value. Users that need access to an error message should use the 'Control.Effect.Fail.Fail' effect.
 
@@ -17,7 +21,7 @@ module Control.Carrier.Empty.Maybe
 
 import Control.Algebra
 import Control.Effect.Empty
-import qualified Control.Monad.Fail as Fail
+import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -39,14 +43,9 @@ runEmpty (EmptyC m) = runMaybeT m
 
 -- | @since 1.0.0.0
 newtype EmptyC m a = EmptyC (MaybeT m a)
-  deriving (Applicative, Functor, Monad, MonadFix, MonadIO, MonadTrans)
+  deriving (Algebra (Empty :+: sig), Applicative, Functor, Monad, MonadFix, MonadIO, MonadTrans)
 
 -- | 'EmptyC' passes 'Fail.MonadFail' operations along to the underlying monad @m@, rather than interpreting it as a synonym for 'empty' à la 'MaybeT'.
 instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
-
-instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
-  alg (L Empty) = EmptyC (MaybeT (pure Nothing))
-  alg (R other) = EmptyC (MaybeT (alg (thread (Just ()) (maybe (pure Nothing) runEmpty) other)))
-  {-# INLINE alg #-}

@@ -1,11 +1,10 @@
-{-# LANGUAGE FlexibleContexts #-}
 module NonDet.Church
 ( tests
 ) where
 
 import Control.Carrier.Error.Either
 import Control.Carrier.NonDet.Church
-import Control.Carrier.State.Strict
+import Control.Carrier.State.Strict hiding (state)
 import Prelude hiding (error)
 import Test.Tasty
 import Test.Tasty.HUnit

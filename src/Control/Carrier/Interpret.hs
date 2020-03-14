@@ -1,4 +1,14 @@
-{-# LANGUAGE FlexibleContexts, FlexibleInstances, FunctionalDependencies, GeneralizedNewtypeDeriving, KindSignatures, RankNTypes, ScopedTypeVariables, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE FunctionalDependencies #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | Provides an 'InterpretC' carrier capable of interpreting an arbitrary effect using a passed-in higher order function to interpret that effect. This is suitable for prototyping new effects quickly.
 
@@ -6,9 +16,9 @@ module Control.Carrier.Interpret
 ( -- * Interpret carrier
   runInterpret
 , runInterpretState
-, InterpretC(..)
+, InterpretC(InterpretC)
 , Reifies
-, Handler
+, Interpreter
   -- * Re-exports
 , Algebra
 , Has
@@ -16,21 +26,19 @@ module Control.Carrier.Interpret
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative)
 import Control.Carrier.State.Strict
-import Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.Coerce (coerce)
 import Data.Functor.Const (Const(..))
-import Data.Functor.Identity (Identity(..))
 import Unsafe.Coerce (unsafeCoerce)
 
--- | A @Handler@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
-newtype Handler sig m = Handler
-  { runHandler :: forall s x . sig (InterpretC s sig m) x -> InterpretC s sig m x }
+-- | An @Interpreter@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
+newtype Interpreter sig m = Interpreter
+  { runInterpreter :: forall ctx n s x . Functor ctx => Handler ctx n (InterpretC s sig m) -> sig n x -> ctx () -> InterpretC s sig m (ctx x) }
 
 
 class Reifies s a | s -> a where
@@ -55,34 +63,37 @@ reify a k = unsafeCoerce (Magic k) a
 --
 -- @since 1.0.0.0
 runInterpret
-  :: (Effect eff, Monad m)
-  => (forall x . eff m x -> m x)
-  -> (forall s . Reifies s (Handler eff m) => InterpretC s eff m a)
+  :: (forall ctx n x . Functor ctx => Handler ctx n m -> eff n x -> ctx () -> m (ctx x))
+  -> (forall s . Reifies s (Interpreter eff m) => InterpretC s eff m a)
   -> m a
-runInterpret f m = reify (Handler (InterpretC . fmap runIdentity . f . thread (Identity ()) (fmap Identity . coerce))) (go m) where
+runInterpret f m = reify (Interpreter (\ hdl sig -> InterpretC . f (runInterpretC . hdl) sig)) (go m) where
   go :: InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
+{-# INLINE runInterpret #-}
 
 -- | Interpret an effect using a higher-order function with some state variable.
 --
 -- @since 1.0.0.0
 runInterpretState
-  :: (Effect eff, Monad m)
-  => (forall x . s -> eff (StateC s m) x -> m (s, x))
+  :: (forall ctx n x . Functor ctx => Handler ctx n (StateC s m) -> eff n x -> s -> ctx () -> m (s, ctx x))
   -> s
-  -> (forall t . Reifies t (Handler eff (StateC s m)) => InterpretC t eff (StateC s m) a)
+  -> (forall t . Reifies t (Interpreter eff (StateC s m)) => InterpretC t eff (StateC s m) a)
   -> m (s, a)
 runInterpretState handler state m
   = runState state
-  $ runInterpret (\e -> StateC (\s -> handler s e)) m
+  $ runInterpret (\ hdl sig ctx -> StateC (flip (handler hdl sig) ctx)) m
+{-# INLINE runInterpretState #-}
 
 -- | @since 1.0.0.0
-newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC (m a)
+newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpretC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
+  {-# INLINE lift #-}
 
-instance (Effect eff, Reifies s (Handler eff m), Monad m, Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
-  alg (L eff)   = runHandler (getConst (reflect @s)) eff
-  alg (R other) = InterpretC (handleCoercible other)
+instance (Reifies s (Interpreter eff m), Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
+  alg hdl = \case
+    L eff   -> runInterpreter (getConst (reflect @s)) hdl eff
+    R other -> InterpretC . alg (runInterpretC . hdl) other
+  {-# INLINE alg #-}

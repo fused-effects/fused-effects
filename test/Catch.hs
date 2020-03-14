@@ -1,6 +1,9 @@
-{-# LANGUAGE RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
 module Catch
-( genN
+( tests
+, genN
 , test
 ) where
 
@@ -8,6 +11,11 @@ import Control.Effect.Error
 import Gen
 import Test.Tasty
 import Test.Tasty.Hedgehog
+
+tests :: TestTree
+tests = testGroup "Catch"
+  []
+
 
 genN
   :: forall e m a sig

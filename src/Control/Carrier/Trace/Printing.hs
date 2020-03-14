@@ -1,4 +1,9 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A carrier for the 'Control.Effect.Trace' effect that prints all traced results to stderr.
 --
@@ -12,10 +17,10 @@ module Control.Carrier.Trace.Printing
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative)
 import Control.Effect.Trace
-import Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -33,6 +38,7 @@ import System.IO
 -- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
 runTrace (TraceC m) = m
+{-# INLINE runTrace #-}
 
 -- | @since 1.0.0.0
 newtype TraceC m a = TraceC (m a)
@@ -43,6 +49,7 @@ instance MonadTrans TraceC where
   {-# INLINE lift #-}
 
 instance (MonadIO m, Algebra sig m) => Algebra (Trace :+: sig) (TraceC m) where
-  alg (L (Trace s k)) = liftIO (hPutStrLn stderr s) *> k
-  alg (R other)       = TraceC (handleCoercible other)
+  alg hdl sig ctx = case sig of
+    L (Trace s) -> ctx <$ liftIO (hPutStrLn stderr s)
+    R other     -> TraceC (alg (runTrace . hdl) other ctx)
   {-# INLINE alg #-}

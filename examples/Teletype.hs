@@ -1,22 +1,26 @@
-{-# LANGUAGE DeriveAnyClass, DeriveFunctor, DeriveGeneric, DerivingStrategies, FlexibleContexts, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 module Teletype
 ( example
-, runTeletypeIO
 ) where
 
-import Prelude hiding (read)
-
-import Control.Algebra
-import Control.Carrier.State.Strict
-import Control.Carrier.Writer.Strict
-import Control.Monad.IO.Class
-import GHC.Generics (Generic1)
-import Hedgehog
+import           Control.Algebra
+import           Control.Carrier.State.Strict
+import           Control.Carrier.Writer.Strict
+import           Control.Monad.IO.Class
+import           Data.Kind (Type)
+import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Prelude hiding (read)
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 example :: TestTree
 example = testGroup "teletype"
@@ -37,42 +41,40 @@ example = testGroup "teletype"
   ] where
   genLine = Gen.string (Range.linear 0 20) Gen.unicode
 
-data Teletype m k
-  = Read (String -> m k)
-  | Write String (m k)
-  deriving stock (Functor, Generic1)
-  deriving anyclass (Effect)
+data Teletype (m :: Type -> Type) k where
+  Read  ::           Teletype m String
+  Write :: String -> Teletype m ()
+
 
 read :: Has Teletype sig m => m String
-read = send (Read pure)
+read = send Read
 
 write :: Has Teletype sig m => String -> m ()
-write s = send (Write s (pure ()))
+write s = send (Write s)
 
 
-runTeletypeIO :: TeletypeIOC m a -> m a
-runTeletypeIO = runTeletypeIOC
-
-newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIOC :: m a }
-  deriving newtype (Applicative, Functor, Monad, MonadIO)
+newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIO :: m a }
+  deriving (Applicative, Functor, Monad, MonadIO)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
-  alg (L (Read    k)) = liftIO getLine      >>= k
-  alg (L (Write s k)) = liftIO (putStrLn s) >>  k
-  alg (R other)       = TeletypeIOC (handleCoercible other)
+  alg hdl sig ctx = case sig of
+    L Read      -> (<$ ctx) <$> liftIO getLine
+    L (Write s) -> ctx <$ liftIO (putStrLn s)
+    R other     -> TeletypeIOC (alg (runTeletypeIO . hdl) other ctx)
 
 
 runTeletypeRet :: [String] -> TeletypeRetC m a -> m ([String], ([String], a))
 runTeletypeRet i = runWriter . runState i . runTeletypeRetC
 
 newtype TeletypeRetC m a = TeletypeRetC { runTeletypeRetC :: StateC [String] (WriterC [String] m) a }
-  deriving newtype (Applicative, Functor, Monad)
+  deriving (Applicative, Functor, Monad)
 
 instance Algebra sig m => Algebra (Teletype :+: sig) (TeletypeRetC m) where
-  alg (L (Read    k)) = do
-    i <- TeletypeRetC get
-    case i of
-      []  -> k ""
-      h:t -> TeletypeRetC (put t) *> k h
-  alg (L (Write s k)) = TeletypeRetC (tell [s]) *> k
-  alg (R other)       = TeletypeRetC (handleCoercible other)
+  alg hdl sig ctx = TeletypeRetC $ case sig of
+    L Read      -> do
+      i <- get
+      case i of
+        []  -> pure ("" <$ ctx)
+        h:t -> h <$ ctx <$ put t
+    L (Write s) -> ctx <$ tell [s]
+    R other     -> alg (runTeletypeRetC . hdl) (R (R other)) ctx

@@ -1,4 +1,7 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 -- GHC 8.2.2 warns that the Has Cull sig m constraint on gen0 is redundant, but doesn’t typecheck without it. Newer GHCs typecheck just fine either way and also don’t warn, so … whatever?
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 module Cull
@@ -9,15 +12,15 @@ module Cull
 ) where
 
 import qualified Control.Carrier.Cull.Church as CullC
-import Control.Effect.Choose
-import Control.Effect.Cull
-import Control.Effect.NonDet (NonDet)
-import Gen
+import           Control.Effect.Choose
+import           Control.Effect.Cull
+import           Control.Effect.NonDet (NonDet)
+import           Gen
 import qualified Monad
 import qualified MonadFix
 import qualified NonDet
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Cull"
