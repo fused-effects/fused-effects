@@ -32,7 +32,6 @@ import Control.Algebra
 import Control.Carrier.Reader
 import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class (MonadIO(..))
-import Data.Function ((&))
 import Data.Kind (Type)
 import Prelude hiding (log)
 import Test.Tasty
@@ -65,23 +64,10 @@ application = do
 -- * Reinterpreting 'Log Message' effects as 'Log String' effects.
 -- * Interpreting 'Log String' effects by printing to stdout.
 runApplication :: IO ()
-runApplication =
-  application
-    -- Type inference is picking our concrete monad stack.
-    --
-    -- Here its type is:
-    --
-    --   ReinterpretLogC Message String (LogStdoutC IO) ()
-
-    & reinterpretLog renderLogMessage
-    -- Now its type is:
-    --
-    --   LogStdoutC IO ()
-
-    & runLogStdout
-    -- Now its type is:
-    --
-    --   IO ()
+runApplication
+  = runLogStdout                    -- IO ()
+  . reinterpretLog renderLogMessage -- LogStdoutC IO ()
+  $ application                     -- ReinterpretLogC Message String (LogStdoutC IO) ()
 
 
 --------------------------------------------------------------------------------
