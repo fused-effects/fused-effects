@@ -33,16 +33,20 @@ newtype ErrorC e m a = ErrorC { runErrorC :: forall b . (e -> m b) -> (a -> m b)
 instance Applicative (ErrorC e m) where
   pure a = ErrorC $ \ _ k -> k a
   {-# INLINE pure #-}
+
   ErrorC f <*> ErrorC a = ErrorC $ \ h k -> f h (\ f' -> a h (k . f'))
   {-# INLINE (<*>) #-}
+
   ErrorC a1 *> ErrorC a2 = ErrorC $ \ h k -> a1 h (const (a2 h k))
   {-# INLINE (*>) #-}
+
   ErrorC a1 <* ErrorC a2 = ErrorC $ \ h k -> a1 h (\ a1' -> a2 h (const (k a1')))
   {-# INLINE (<*) #-}
 
 instance Alternative m => Alternative (ErrorC e m) where
   empty = ErrorC $ \ _ _ -> empty
   {-# INLINE empty #-}
+
   ErrorC a <|> ErrorC b = ErrorC $ \ h k -> a h k <|> b h k
   {-# INLINE (<|>) #-}
 
