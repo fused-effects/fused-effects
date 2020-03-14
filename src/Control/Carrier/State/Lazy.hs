@@ -22,14 +22,14 @@ module Control.Carrier.State.Lazy
 , module Control.Effect.State
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Effect.State
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
+import Control.Algebra
+import Control.Applicative (Alternative(..))
+import Control.Effect.State
+import Control.Monad (MonadPlus(..))
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 -- | Run a lazy 'State' effect, yielding the result value and the final state. More programs terminate with lazy state than strict state, but injudicious use of lazy state may lead to thunk buildup.
 --
@@ -80,11 +80,13 @@ instance Functor m => Functor (StateC s m) where
 instance Monad m => Applicative (StateC s m) where
   pure a = StateC $ \ s -> pure (s, a)
   {-# INLINE pure #-}
+
   StateC mf <*> StateC mx = StateC $ \ s -> do
     ~(s',  f) <- mf s
     ~(s'', x) <- mx s'
     pure (s'', f x)
   {-# INLINE (<*>) #-}
+
   m *> k = m >>= const k
   {-# INLINE (*>) #-}
 
@@ -97,6 +99,7 @@ instance Monad m => Monad (StateC s m) where
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
   empty = StateC (const empty)
   {-# INLINE empty #-}
+
   StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
   {-# INLINE (<|>) #-}
 
@@ -119,8 +122,8 @@ instance MonadTrans (StateC s) where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
-  alg hdl sig ctx = case sig of
-    L Get     -> StateC (\ s -> pure (s, s <$ ctx))
-    L (Put s) -> StateC (\ _ -> pure (s, ctx))
-    R other   -> StateC (\ s -> thread (uncurry runState) hdl other (s, ctx))
+  alg hdl sig ctx = StateC $ \ s -> case sig of
+    L Get     -> pure (s, s <$ ctx)
+    L (Put s) -> pure (s, ctx)
+    R other   -> thread (uncurry runState ~<~ hdl) other (s, ctx)
   {-# INLINE alg #-}

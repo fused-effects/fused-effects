@@ -16,15 +16,15 @@ module Control.Carrier.Trace.Printing
 , module Control.Effect.Trace
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Effect.Trace
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           System.IO
+import Control.Algebra
+import Control.Applicative (Alternative)
+import Control.Effect.Trace
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import System.IO
 
 -- | Run a 'Trace' effect, printing traces to 'stderr'.
 --
@@ -38,6 +38,7 @@ import           System.IO
 -- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
 runTrace (TraceC m) = m
+{-# INLINE runTrace #-}
 
 -- | @since 1.0.0.0
 newtype TraceC m a = TraceC (m a)

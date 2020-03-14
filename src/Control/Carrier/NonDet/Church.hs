@@ -3,7 +3,6 @@
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -24,15 +23,15 @@ module Control.Carrier.NonDet.Church
 , module Control.Effect.NonDet
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (liftA2)
-import           Control.Effect.NonDet
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Data.Coerce (coerce)
-import           Data.Functor.Identity
+import Control.Algebra
+import Control.Applicative (liftA2)
+import Control.Effect.NonDet
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
 
 -- | Run a 'NonDet' effect, using the provided functions to interpret choice, leaf results, and failure.
 --
@@ -44,6 +43,7 @@ runNonDet
   -> NonDetC m a         -- ^ A nondeterministic computation to execute
   -> m b
 runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
+{-# INLINE runNonDet #-}
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
@@ -59,12 +59,14 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 -- @since 1.0.0.0
 runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
+{-# INLINE runNonDetA #-}
 
 -- | Run a 'NonDet' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runNonDetM :: (Applicative m, Monoid b) => (a -> b) -> NonDetC m a -> m b
 runNonDetM leaf = runNonDet (liftA2 mappend) (pure . leaf) (pure mempty)
+{-# INLINE runNonDetM #-}
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 --
@@ -75,6 +77,7 @@ newtype NonDetC m a = NonDetC (forall b . (m b -> m b -> m b) -> (a -> m b) -> m
 instance Applicative (NonDetC m) where
   pure a = NonDetC (\ _ leaf _ -> leaf a)
   {-# INLINE pure #-}
+
   NonDetC f <*> NonDetC a = NonDetC $ \ fork leaf nil ->
     f fork (\ f' -> a fork (leaf . f') nil) nil
   {-# INLINE (<*>) #-}
@@ -82,7 +85,9 @@ instance Applicative (NonDetC m) where
 instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ _ nil -> nil)
   {-# INLINE empty #-}
-  NonDetC l <|> NonDetC r = NonDetC $ \ fork leaf nil -> fork (l fork leaf nil) (r fork leaf nil)
+
+  NonDetC l <|> NonDetC r = NonDetC $ \ fork leaf nil ->
+    l fork leaf nil `fork` r fork leaf nil
   {-# INLINE (<|>) #-}
 
 instance Monad (NonDetC m) where
@@ -115,11 +120,11 @@ instance MonadTrans NonDetC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (NonDet :+: sig) (NonDetC m) where
-  alg (hdl :: forall x . ctx (n x) -> NonDetC m (ctx x)) sig (ctx :: ctx ()) = case sig of
-    L (L Empty)  -> empty
-    L (R Choose) -> pure (True <$ ctx) <|> pure (False <$ ctx)
-    R other      -> NonDetC $ \ fork leaf nil -> thread dst hdl other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
+  alg hdl sig ctx = NonDetC $ \ fork leaf nil -> case sig of
+    L (L Empty)  -> nil
+    L (R Choose) -> leaf (True <$ ctx) `fork` leaf (False <$ ctx)
+    R other      -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
     where
-    dst :: NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
-    dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (Identity . runNonDetA) (pure (pure empty))
+    dst :: Applicative m => NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
+    dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (pure . runNonDetA) (pure (pure empty))
   {-# INLINE alg #-}

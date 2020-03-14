@@ -16,17 +16,17 @@ module Control.Carrier.Trace.Returning
 , module Control.Effect.Trace
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Carrier.Writer.Strict
-import           Control.Effect.Trace
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Data.Bifunctor (first)
-import           Data.Monoid (Endo(..))
+import Control.Algebra
+import Control.Applicative (Alternative)
+import Control.Carrier.Writer.Strict
+import Control.Effect.Trace
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Bifunctor (first)
+import Data.Monoid (Endo(..))
 
 -- | Run a 'Trace' effect, returning all traces as a list.
 --
@@ -40,6 +40,7 @@ import           Data.Monoid (Endo(..))
 -- @since 1.0.0.0
 runTrace :: Functor m => TraceC m a -> m ([String], a)
 runTrace (TraceC m) = first (($[]) . appEndo) <$> runWriter m
+{-# INLINE runTrace #-}
 
 -- | @since 1.0.0.0
 newtype TraceC m a = TraceC { runTraceC :: WriterC (Endo [String]) m a }
@@ -49,3 +50,4 @@ instance Algebra sig m => Algebra (Trace :+: sig) (TraceC m) where
   alg hdl sig ctx = case sig of
     L (Trace m) -> ctx <$ TraceC (tell (Endo (m :)))
     R other     -> TraceC (alg (runTraceC . hdl) (R other) ctx)
+  {-# INLINE alg #-}

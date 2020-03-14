@@ -12,20 +12,21 @@ module Control.Carrier.Lift
 , module Control.Effect.Lift
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative)
-import           Control.Effect.Lift
-import           Control.Monad (MonadPlus)
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
+import Control.Algebra
+import Control.Applicative (Alternative)
+import Control.Effect.Lift
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 --
 -- @since 1.0.0.0
 runM :: LiftC m a -> m a
 runM (LiftC m) = m
+{-# INLINE runM #-}
 
 -- | @since 1.0.0.0
 newtype LiftC m a = LiftC (m a)
@@ -33,6 +34,8 @@ newtype LiftC m a = LiftC (m a)
 
 instance MonadTrans LiftC where
   lift = LiftC
+  {-# INLINE lift #-}
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
-  alg hdl (LiftWith with) ctx = LiftC (with (runM . hdl) ctx)
+  alg hdl (LiftWith with) = LiftC . with (runM . hdl)
+  {-# INLINE alg #-}

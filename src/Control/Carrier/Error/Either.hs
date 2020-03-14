@@ -15,15 +15,15 @@ module Control.Carrier.Error.Either
 , module Control.Effect.Error
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Effect.Error
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.Except
+import Control.Algebra
+import Control.Applicative (Alternative(..))
+import Control.Effect.Error
+import Control.Monad (MonadPlus(..))
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.Except
 
 -- | Run an 'Error' effect, returning uncaught errors in 'Left' and successful computations’ values in 'Right'.
 --
@@ -40,6 +40,7 @@ import           Control.Monad.Trans.Except
 -- @since 0.1.0.0
 runError :: ErrorC exc m a -> m (Either exc a)
 runError (ErrorC m) = runExceptT m
+{-# INLINE runError #-}
 
 -- | @since 0.1.0.0
 newtype ErrorC e m a = ErrorC (ExceptT e m a)
@@ -49,6 +50,7 @@ newtype ErrorC e m a = ErrorC (ExceptT e m a)
 instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
   empty = ErrorC (ExceptT empty)
   {-# INLINE empty #-}
+
   ErrorC (ExceptT l) <|> ErrorC (ExceptT r) = ErrorC (ExceptT (l <|> r))
   {-# INLINE (<|>) #-}
 

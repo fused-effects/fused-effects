@@ -33,3 +33,4 @@ data Trace (m :: Type -> Type) k where
 -- @since 0.1.0.0
 trace :: Has Trace sig m => String -> m ()
 trace message = send (Trace message)
+{-# INLINE trace #-}

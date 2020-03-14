@@ -35,6 +35,7 @@ import Control.Effect.Lift.Internal (Lift(..))
 -- @since 1.0.0.0
 sendM :: (Has (Lift n) sig m, Functor n) => n a -> m a
 sendM m = liftWith (\ _ ctx -> (<$ ctx) <$> m)
+{-# INLINE sendM #-}
 
 -- | A type-restricted variant of 'sendM' for 'IO' actions.
 --
@@ -43,6 +44,7 @@ sendM m = liftWith (\ _ ctx -> (<$ ctx) <$> m)
 -- @since 1.0.2.0
 sendIO :: Has (Lift IO) sig m => IO a -> m a
 sendIO = sendM
+{-# INLINE sendIO #-}
 
 
 -- | Run actions in an outer context.
@@ -63,3 +65,4 @@ liftWith
   => (forall ctx . Functor ctx => Handler ctx m n -> ctx () -> n (ctx a))
   -> m a
 liftWith with = send (LiftWith with)
+{-# INLINE liftWith #-}

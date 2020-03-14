@@ -21,15 +21,15 @@ module Control.Carrier.Writer.Strict
 , module Control.Effect.Writer
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Carrier.State.Strict
-import           Control.Effect.Writer
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
+import Control.Algebra
+import Control.Applicative (Alternative)
+import Control.Carrier.State.Strict
+import Control.Effect.Writer
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 -- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log alongside the result value.
 --

@@ -37,3 +37,4 @@ data Cull m k where
 -- @since 0.1.2.0
 cull :: Has Cull sig m => m a -> m a
 cull m = send (Cull m)
+{-# INLINE cull #-}

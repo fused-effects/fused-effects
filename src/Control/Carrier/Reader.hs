@@ -16,14 +16,14 @@ module Control.Carrier.Reader
 , module Control.Effect.Reader
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..), liftA2)
-import           Control.Effect.Reader
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
+import Control.Algebra
+import Control.Applicative (Alternative(..), liftA2)
+import Control.Effect.Reader
+import Control.Monad (MonadPlus(..))
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 -- | Run a 'Reader' effect with the passed environment value.
 --
@@ -49,16 +49,20 @@ newtype ReaderC r m a = ReaderC (r -> m a)
 instance Applicative m => Applicative (ReaderC r m) where
   pure = ReaderC . const . pure
   {-# INLINE pure #-}
+
   ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
   {-# INLINE (<*>) #-}
+
   ReaderC u *> ReaderC v = ReaderC $ \ r -> u r *> v r
   {-# INLINE (*>) #-}
+
   ReaderC u <* ReaderC v = ReaderC $ \ r -> u r <* v r
   {-# INLINE (<*) #-}
 
 instance Alternative m => Alternative (ReaderC r m) where
   empty = ReaderC (const empty)
   {-# INLINE empty #-}
+
   ReaderC l <|> ReaderC r = ReaderC (liftA2 (<|>) l r)
   {-# INLINE (<|>) #-}
 
@@ -85,8 +89,8 @@ instance MonadTrans (ReaderC r) where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m) where
-  alg hdl sig ctx = case sig of
-    L Ask         -> ReaderC (pure . (<$ ctx))
-    L (Local f m) -> ReaderC (\ r -> runReader (f r) (hdl (m <$ ctx)))
-    R other       -> ReaderC (\ r -> alg (runReader r . hdl) other ctx)
+  alg hdl sig ctx = ReaderC $ \ r -> case sig of
+    L Ask         -> pure (r <$ ctx)
+    L (Local f m) -> runReader (f r) (hdl (m <$ ctx))
+    R other       -> alg (runReader r . hdl) other ctx
   {-# INLINE alg #-}

@@ -3,6 +3,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -24,16 +25,16 @@ module Control.Carrier.Interpret
 , run
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Carrier.State.Strict
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Data.Functor.Const (Const(..))
-import           Unsafe.Coerce (unsafeCoerce)
+import Control.Algebra
+import Control.Applicative (Alternative)
+import Control.Carrier.State.Strict
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Functor.Const (Const(..))
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | An @Interpreter@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
 newtype Interpreter sig m = Interpreter
@@ -68,6 +69,7 @@ runInterpret
 runInterpret f m = reify (Interpreter (\ hdl sig -> InterpretC . f (runInterpretC . hdl) sig)) (go m) where
   go :: InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
+{-# INLINE runInterpret #-}
 
 -- | Interpret an effect using a higher-order function with some state variable.
 --
@@ -80,6 +82,7 @@ runInterpretState
 runInterpretState handler state m
   = runState state
   $ runInterpret (\ hdl sig ctx -> StateC (flip (handler hdl sig) ctx)) m
+{-# INLINE runInterpretState #-}
 
 -- | @since 1.0.0.0
 newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpretC :: m a }
@@ -87,8 +90,10 @@ newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpret
 
 instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
+  {-# INLINE lift #-}
 
 instance (Reifies s (Interpreter eff m), Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
-  alg hdl sig ctx = case sig of
-    L eff   -> runInterpreter (getConst (reflect @s)) hdl eff ctx
-    R other -> InterpretC (alg (runInterpretC . hdl) other ctx)
+  alg hdl = \case
+    L eff   -> runInterpreter (getConst (reflect @s)) hdl eff
+    R other -> InterpretC . alg (runInterpretC . hdl) other
+  {-# INLINE alg #-}

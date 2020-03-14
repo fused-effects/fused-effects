@@ -4,7 +4,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -24,30 +23,32 @@ module Control.Carrier.Choose.Church
 , module Control.Effect.Choose
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (liftA2)
-import           Control.Effect.Choose
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Data.Coerce (coerce)
-import           Data.Functor.Identity
-import           Data.List.NonEmpty (NonEmpty(..), head, tail)
-import qualified Data.Semigroup as S
-import           Prelude hiding (head, tail)
+import Control.Algebra
+import Control.Applicative (liftA2)
+import Control.Effect.Choose
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
+import Data.List.NonEmpty (NonEmpty(..), head, tail)
+import Data.Semigroup as S
+import Prelude hiding (head, tail)
 
 -- | Run a 'Choose' effect with continuations respectively interpreting '<|>' and 'pure'.
 --
 -- @since 1.0.0.0
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf (ChooseC runChooseC) = runChooseC fork leaf
+{-# INLINE runChoose #-}
 
 -- | Run a 'Choose' effect, mapping results into a 'S.Semigroup'.
 --
 -- @since 1.0.0.0
 runChooseS :: (S.Semigroup b, Applicative m) => (a -> m b) -> ChooseC m a -> m b
 runChooseS = runChoose (liftA2 (S.<>))
+{-# INLINE runChooseS #-}
 
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 --
@@ -58,6 +59,7 @@ newtype ChooseC m a = ChooseC (forall b . (m b -> m b -> m b) -> (a -> m b) -> m
 instance Applicative (ChooseC m) where
   pure a = ChooseC (\ _ leaf -> leaf a)
   {-# INLINE pure #-}
+
   ChooseC f <*> ChooseC a = ChooseC $ \ fork leaf ->
     f fork (\ f' -> a fork (leaf . f'))
   {-# INLINE (<*>) #-}
@@ -91,10 +93,10 @@ instance MonadTrans ChooseC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Choose :+: sig) (ChooseC m) where
-  alg (hdl :: forall x . ctx (n x) -> ChooseC m (ctx x)) sig (ctx :: ctx ()) = case sig of
-    L Choose -> ChooseC $ \ fork leaf -> fork (leaf (True <$ ctx)) (leaf (False <$ ctx))
-    R other  -> ChooseC $ \ fork leaf -> thread dst hdl other (pure ctx) >>= runIdentity . runChoose (coerce fork) (coerce leaf)
+  alg hdl sig ctx = ChooseC $ \ fork leaf -> case sig of
+    L Choose -> leaf (True <$ ctx) `fork` leaf (False <$ ctx)
+    R other  -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runChoose (coerce fork) (coerce leaf)
     where
-    dst :: ChooseC Identity (ChooseC m a) -> m (ChooseC Identity a)
+    dst :: Applicative m => ChooseC Identity (ChooseC m a) -> m (ChooseC Identity a)
     dst = runIdentity . runChoose (liftA2 (liftA2 (<|>))) (pure . runChoose (liftA2 (<|>)) (pure . pure))
   {-# INLINE alg #-}

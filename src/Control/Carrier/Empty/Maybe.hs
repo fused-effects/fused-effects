@@ -19,13 +19,13 @@ module Control.Carrier.Empty.Maybe
 , module Control.Effect.Empty
 ) where
 
-import           Control.Algebra
-import           Control.Effect.Empty
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Control.Monad.Trans.Maybe
+import Control.Algebra
+import Control.Effect.Empty
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Control.Monad.Trans.Maybe
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --

@@ -17,15 +17,15 @@ module Control.Carrier.Fresh.Strict
 , module Control.Effect.Fresh
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Carrier.State.Strict
-import           Control.Effect.Fresh
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
+import Control.Algebra
+import Control.Applicative (Alternative(..))
+import Control.Carrier.State.Strict
+import Control.Effect.Fresh
+import Control.Monad (MonadPlus(..))
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 -- | Run a 'Fresh' effect counting up from 0.
 --
@@ -39,6 +39,7 @@ import           Control.Monad.Trans.Class
 -- @since 0.1.0.0
 runFresh :: Int -> FreshC m a -> m (Int, a)
 runFresh n (FreshC m) = runState n m
+{-# INLINE runFresh #-}
 
 -- | Run a 'Fresh' effect counting up from an initial value, and forgetting the final value.
 --
@@ -52,6 +53,7 @@ runFresh n (FreshC m) = runState n m
 -- @since 1.0.0.0
 evalFresh :: Functor m => Int -> FreshC m a -> m a
 evalFresh n (FreshC m) = evalState n m
+{-# INLINE evalFresh #-}
 
 -- | @since 1.0.0.0
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }

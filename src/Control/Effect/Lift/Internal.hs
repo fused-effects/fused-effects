@@ -4,7 +4,7 @@ module Control.Effect.Lift.Internal
 ( Lift(..)
 ) where
 
-import Control.Algebra.Internal (Handler)
+import Control.Algebra.Handler (Handler)
 
 -- | @since 1.0.0.0
 data Lift sig m k where

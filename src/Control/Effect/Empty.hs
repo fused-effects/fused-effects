@@ -36,6 +36,7 @@ import Control.Effect.Empty.Internal (Empty(..))
 -- @since 1.0.0.0
 empty :: Has Empty sig m => m a
 empty = send Empty
+{-# INLINE empty #-}
 
 -- | Conditional failure, returning only if the condition is 'True'.
 --
@@ -43,3 +44,4 @@ empty = send Empty
 guard :: Has Empty sig m => Bool -> m ()
 guard True  = pure ()
 guard False = empty
+{-# INLINE guard #-}
