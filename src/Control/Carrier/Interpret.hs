@@ -3,6 +3,7 @@
 {-# LANGUAGE FunctionalDependencies #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
@@ -89,6 +90,6 @@ instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
 
 instance (Reifies s (Interpreter eff m), Algebra sig m) => Algebra (eff :+: sig) (InterpretC s eff m) where
-  alg hdl sig ctx = case sig of
-    L eff   -> runInterpreter (getConst (reflect @s)) hdl eff ctx
-    R other -> InterpretC (alg (runInterpretC . hdl) other ctx)
+  alg hdl = \case
+    L eff   -> runInterpreter (getConst (reflect @s)) hdl eff
+    R other -> InterpretC . alg (runInterpretC . hdl) other
