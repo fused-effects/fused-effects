@@ -103,7 +103,7 @@ log x = send (Log x)
 --------------------------------------------------------------------------------
 
 -- Carrier one: log strings to stdout.
-newtype LogStdoutC m a = LogStdoutC (m a)
+newtype LogStdoutC m a = LogStdoutC { runLogStdout :: m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance
@@ -120,17 +120,10 @@ instance
 
     R other         -> LogStdoutC (alg (runLogStdout . hdl) other ctx)
 
--- The 'LogStdoutC' runner.
-runLogStdout ::
-     LogStdoutC m a
-  -> m a
-runLogStdout (LogStdoutC m) =
-  m
-
 
 -- Carrier two: reinterpret a program that logs 's's into one that logs 't's
 -- using a function (provided at runtime) from 's' to 't'.
-newtype ReinterpretLogC s t m a = ReinterpretLogC { unReinterpretLogC :: ReaderC (s -> t) m a }
+newtype ReinterpretLogC s t m a = ReinterpretLogC { runReinterpretLogC :: ReaderC (s -> t) m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance
@@ -146,16 +139,16 @@ instance
       f <- ask @(s -> t)
       ctx <$ log (f s)
 
-    R other   -> ReinterpretLogC (alg (unReinterpretLogC . hdl) (R other) ctx)
+    R other   -> ReinterpretLogC (alg (runReinterpretLogC . hdl) (R other) ctx)
 
 -- The 'ReinterpretLogC' runner.
 reinterpretLog :: (s -> t) -> ReinterpretLogC s t m a -> m a
-reinterpretLog f = runReader f . unReinterpretLogC
+reinterpretLog f = runReader f . runReinterpretLogC
 
 
 -- Carrier three: collect log messages in a list. This is used for writing this
 -- example's test spec.
-newtype CollectLogMessagesC s m a = CollectLogMessagesC { unCollectLogMessagesC :: WriterC [s] m a }
+newtype CollectLogMessagesC s m a = CollectLogMessagesC { runCollectLogMessagesC :: WriterC [s] m a }
   deriving (Applicative, Functor, Monad)
 
 instance
@@ -168,12 +161,11 @@ instance
   alg hdl sig ctx = case sig of
     L (Log s) -> ctx <$ CollectLogMessagesC (tell [s])
 
-    R other   -> CollectLogMessagesC (alg (unCollectLogMessagesC . hdl) (R other) ctx)
+    R other   -> CollectLogMessagesC (alg (runCollectLogMessagesC . hdl) (R other) ctx)
 
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages :: CollectLogMessagesC s m a -> m ([s], a)
-collectLogMessages =
-  runWriter . unCollectLogMessagesC
+collectLogMessages = runWriter . runCollectLogMessagesC
 
 
 -- Test spec.
