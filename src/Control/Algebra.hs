@@ -104,7 +104,7 @@ thread
   -> sig o a
   -> ctx1 (ctx2 ())
   -> m (ctx1 (ctx2 a))
-thread hdl1 hdl2 sig = fmap getCompose . alg (fmap Compose . hdl1 . fmap hdl2 . getCompose) sig . Compose
+thread hdl1 hdl2 sig = fmap getCompose . alg (hdl1 ~<~ hdl2) sig . Compose
 {-# INLINE thread #-}
 
 
