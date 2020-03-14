@@ -19,7 +19,7 @@ module Control.Carrier.Reader
 import Control.Algebra
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Reader
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

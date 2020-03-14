@@ -25,7 +25,7 @@ module Control.Carrier.State.Lazy
 import Control.Algebra
 import Control.Applicative (Alternative(..))
 import Control.Effect.State
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class

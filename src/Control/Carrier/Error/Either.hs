@@ -18,7 +18,7 @@ module Control.Carrier.Error.Either
 import Control.Algebra
 import Control.Applicative (Alternative(..))
 import Control.Effect.Error
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
