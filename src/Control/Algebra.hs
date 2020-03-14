@@ -18,13 +18,14 @@ An instance of the 'Algebra' class defines an interpretation of an effect signat
 @since 1.0.0.0
 -}
 module Control.Algebra
-( Handler
-, Algebra(..)
+( Algebra(..)
 , thread
 , run
 , Has
 , send
   -- * Re-exports
+, Handler
+, (~<~)
 , (:+:) (..)
 ) where
 
