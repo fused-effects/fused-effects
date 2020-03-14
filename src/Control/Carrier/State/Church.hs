@@ -45,7 +45,7 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.1.0.0
 runState :: forall s m a . Applicative m => s -> StateC s m a -> m (s, a)
-runState s (StateC m) = m (\ a s -> pure (s, a)) s
+runState s (StateC m) = m (flip (curry pure)) s
 {-# INLINE runState #-}
 
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
