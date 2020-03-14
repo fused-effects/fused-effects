@@ -126,5 +126,5 @@ instance Algebra sig m => Algebra (NonDet :+: sig) (NonDetC m) where
     R other      -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
     where
     dst :: Applicative m => NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
-    dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (Identity . runNonDetA) (pure (pure empty))
+    dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (pure . runNonDetA) (pure (pure empty))
   {-# INLINE alg #-}
