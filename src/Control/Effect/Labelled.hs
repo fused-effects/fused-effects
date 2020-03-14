@@ -51,6 +51,7 @@ newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = La
 -- | @since 1.0.2.0
 runLabelled :: forall label sub m a . Labelled label sub m a -> sub m a
 runLabelled (Labelled l) = l
+{-# INLINE runLabelled #-}
 
 instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
   alg hdl = \case
@@ -118,6 +119,7 @@ newtype UnderLabel (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) (m :: 
 -- | @since 1.0.2.0
 runUnderLabel :: forall label sub m a . UnderLabel label sub m a -> m a
 runUnderLabel (UnderLabel l) = l
+{-# INLINE runUnderLabel #-}
 
 instance MonadTrans (UnderLabel sub label) where
   lift = UnderLabel
