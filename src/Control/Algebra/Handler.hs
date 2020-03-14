@@ -1,7 +1,7 @@
 {-# LANGUAGE RankNTypes #-}
-module Control.Algebra.Internal
+module Control.Algebra.Handler
 ( Handler
-, (<~<)
+, (~<~)
 ) where
 
 import Data.Functor.Compose
