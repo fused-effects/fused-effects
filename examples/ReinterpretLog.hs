@@ -120,12 +120,12 @@ instance
      -- effects
   => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
 
-  alg hdl sig ctx = case sig of
-    L (Log s) -> ReinterpretLogC $ do
+  alg hdl sig ctx = ReinterpretLogC $ case sig of
+    L (Log s) -> do
       f <- ask @(s -> t)
       ctx <$ log (f s)
 
-    R other   -> ReinterpretLogC (alg (runReinterpretLogC . hdl) (R other) ctx)
+    R other   -> alg (runReinterpretLogC . hdl) (R other) ctx
 
 -- The 'ReinterpretLogC' runner.
 reinterpretLog :: (s -> t) -> ReinterpretLogC s t m a -> m a
@@ -144,10 +144,10 @@ instance
      -- effects
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
 
-  alg hdl sig ctx = case sig of
-    L (Log s) -> ctx <$ CollectLogMessagesC (tell [s])
+  alg hdl sig ctx = CollectLogMessagesC $ case sig of
+    L (Log s) -> ctx <$ tell [s]
 
-    R other   -> CollectLogMessagesC (alg (runCollectLogMessagesC . hdl) (R other) ctx)
+    R other   -> alg (runCollectLogMessagesC . hdl) (R other) ctx
 
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages :: Functor m => CollectLogMessagesC s m a -> m [s]
