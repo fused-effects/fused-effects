@@ -55,7 +55,7 @@ instance Monad (ErrorC e m) where
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
-  fail s = lift (Fail.fail s)
+  fail = lift . Fail.fail
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (ErrorC e m) where
