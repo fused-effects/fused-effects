@@ -102,7 +102,7 @@ instance
   => Algebra (Log String :+: sig) (LogStdoutC m) where
 
   alg hdl sig ctx = case sig of
-    L (Log message) -> ctx <$ LogStdoutC (liftIO (putStrLn message))
+    L (Log message) -> ctx <$ liftIO (putStrLn message)
 
     R other         -> LogStdoutC (alg (runLogStdout . hdl) other ctx)
 
