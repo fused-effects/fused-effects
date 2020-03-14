@@ -34,9 +34,9 @@ numerically = liftA2 (+) (L.ask @1) (L.ask @2)
 
 readerExamples :: TestTree
 readerExamples = testGroup "Reader"
-  [ testCase "runUnderLabel"           ((run (runReader (5 :: Int) (runLabelled @"fore" (runReader (10 :: Int) (runLabelled @"aft" sample))))) @=? 15)
-  , testCase "Reader.Labelled helpers" ((run (runReader (5 :: Int) (runLabelled @"fore" (runReader (10 :: Int) (runLabelled @"aft" withHelpers))))) @=? 15)
-  , testCase "Nat labels"              ((run (runReader (5 :: Int) (runLabelled @1 (runReader (10 :: Int) (runLabelled @2 numerically))))) @=? 15)
+  [ testCase "runUnderLabel"           (run (runReader (5 :: Int) (runLabelled @"fore" (runReader (10 :: Int) (runLabelled @"aft" sample)))) @=? 15)
+  , testCase "Reader.Labelled helpers" (run (runReader (5 :: Int) (runLabelled @"fore" (runReader (10 :: Int) (runLabelled @"aft" withHelpers)))) @=? 15)
+  , testCase "Nat labels"              (run (runReader (5 :: Int) (runLabelled @1 (runReader (10 :: Int) (runLabelled @2 numerically)))) @=? 15)
   ]
 
 sampleS :: ( HasLabelled "fore" (State Int) sig m
@@ -59,9 +59,9 @@ boolean = liftA2 (+) (L.get @'True) (L.get @'False)
 
 stateExamples :: TestTree
 stateExamples = testGroup "State"
-  [ testCase "runUnderLabel"          ((run (evalState (5 :: Int) (runLabelled @"fore" (evalState (10 :: Int) (runLabelled @"aft" sampleS))))) @=? 15)
-  , testCase "State.Labelled helpers" ((run (evalState (5 :: Int) (runLabelled @"fore" (evalState (10 :: Int) (runLabelled @"aft" helpersS))))) @=? 15)
-  , testCase "Boolean labels"         ((run (evalState (5 :: Int) (runLabelled @'True (evalState (10 :: Int) (runLabelled @'False boolean))))) @=? 15)
+  [ testCase "runUnderLabel"          (run (evalState (5 :: Int) (runLabelled @"fore" (evalState (10 :: Int) (runLabelled @"aft" sampleS)))) @=? 15)
+  , testCase "State.Labelled helpers" (run (evalState (5 :: Int) (runLabelled @"fore" (evalState (10 :: Int) (runLabelled @"aft" helpersS)))) @=? 15)
+  , testCase "Boolean labels"         (run (evalState (5 :: Int) (runLabelled @'True (evalState (10 :: Int) (runLabelled @'False boolean)))) @=? 15)
   ]
 
 
