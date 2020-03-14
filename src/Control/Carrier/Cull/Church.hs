@@ -37,18 +37,21 @@ import           Control.Monad.Trans.Class
 -- @since 1.0.0.0
 runCull :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CullC m a -> m b
 runCull fork leaf nil (CullC m) = runNonDet fork leaf nil (runReader False m)
+{-# INLINE runCull #-}
 
 -- | Run a 'Cull' effect, interpreting the result into an 'Alternative' functor. Choice is handled with '<|>', embedding with 'pure', and failure with 'empty'.
 --
 -- @since 1.0.0.0
 runCullA :: (Alternative f, Applicative m) => CullC m a -> m (f a)
 runCullA = runCull (liftA2 (<|>)) (pure . pure) (pure empty)
+{-# INLINE runCullA #-}
 
 -- | Run a 'Cull' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runCullM :: (Applicative m, Monoid b) => (a -> b) -> CullC m a -> m b
 runCullM leaf = runCull (liftA2 mappend) (pure . leaf) (pure mempty)
+{-# INLINE runCullM #-}
 
 -- | @since 1.0.0.0
 newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
