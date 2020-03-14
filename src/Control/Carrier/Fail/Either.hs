@@ -37,6 +37,7 @@ import           Control.Monad.Trans.Class
 -- @since 1.0.0.0
 runFail :: FailC m a -> m (Either String a)
 runFail (FailC m) = runThrow m
+{-# INLINE runFail #-}
 
 -- | @since 1.0.0.0
 newtype FailC m a = FailC (ThrowC String m a)
