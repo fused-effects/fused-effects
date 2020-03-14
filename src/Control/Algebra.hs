@@ -28,7 +28,7 @@ module Control.Algebra
 , (:+:) (..)
 ) where
 
-import           Control.Algebra.Internal
+import           Control.Algebra.Handler
 import           Control.Effect.Catch.Internal
 import           Control.Effect.Choose.Internal
 import           Control.Effect.Empty.Internal
