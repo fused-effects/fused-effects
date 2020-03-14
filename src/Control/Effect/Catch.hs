@@ -30,3 +30,4 @@ import Control.Effect.Catch.Internal (Catch(..))
 -- @since 0.1.0.0
 catchError :: Has (Catch e) sig m => m a -> (e -> m a) -> m a
 catchError m h = send (Catch m h)
+{-# INLINE catchError #-}
