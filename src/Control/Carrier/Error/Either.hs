@@ -40,6 +40,7 @@ import           Control.Monad.Trans.Except
 -- @since 0.1.0.0
 runError :: ErrorC exc m a -> m (Either exc a)
 runError (ErrorC m) = runExceptT m
+{-# INLINE runError #-}
 
 -- | @since 0.1.0.0
 newtype ErrorC e m a = ErrorC (ExceptT e m a)
