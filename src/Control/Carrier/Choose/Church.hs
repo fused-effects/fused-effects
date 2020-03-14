@@ -4,7 +4,6 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
@@ -96,6 +95,6 @@ instance Algebra sig m => Algebra (Choose :+: sig) (ChooseC m) where
     L Choose -> fork (leaf (True <$ ctx)) (leaf (False <$ ctx))
     R other  -> thread dst hdl other (pure ctx) >>= runIdentity . runChoose (coerce fork) (coerce leaf)
     where
-    dst :: ChooseC Identity (ChooseC m a) -> m (ChooseC Identity a)
+    dst :: Applicative m => ChooseC Identity (ChooseC m a) -> m (ChooseC Identity a)
     dst = runIdentity . runChoose (liftA2 (liftA2 (<|>))) (pure . runChoose (liftA2 (<|>)) (pure . pure))
   {-# INLINE alg #-}
