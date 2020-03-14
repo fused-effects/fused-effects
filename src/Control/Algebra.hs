@@ -187,6 +187,7 @@ instance Algebra sig m => Algebra (Error e :+: sig) (Except.ExceptT e m) where
     R other           -> Except.ExceptT $ thread (either (pure . Left) Except.runExceptT ~<~ hdl) other (Right ctx)
   {-# INLINE alg #-}
 
+
 deriving instance Algebra sig m => Algebra sig (Identity.IdentityT m)
 
 #if MIN_VERSION_base(4,12,0)
@@ -216,11 +217,13 @@ deriving instance Algebra sig m => Algebra sig (Ap m)
 -- @since 1.0.1.0
 deriving instance Algebra sig m => Algebra sig (Alt m)
 
+
 instance Algebra sig m => Algebra (Empty :+: sig) (Maybe.MaybeT m) where
   alg hdl sig ctx = case sig of
     L Empty -> Maybe.MaybeT (pure Nothing)
     R other -> Maybe.MaybeT $ thread (maybe (pure Nothing) Maybe.runMaybeT ~<~ hdl) other (Just ctx)
   {-# INLINE alg #-}
+
 
 instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
   alg hdl sig ctx = case sig of
@@ -228,6 +231,7 @@ instance Algebra sig m => Algebra (Reader r :+: sig) (Reader.ReaderT r m) where
     L (Local f m) -> Reader.local f (hdl (m <$ ctx))
     R other       -> Reader.ReaderT $ \ r -> alg ((`Reader.runReaderT` r) . hdl) other ctx
   {-# INLINE alg #-}
+
 
 newtype RWSTF w s a = RWSTF { unRWSTF :: (a, s, w) }
   deriving (Functor)
@@ -281,6 +285,7 @@ instance (Algebra sig m, Monoid w) => Algebra (Reader r :+: Writer w :+: State s
     R (R (R other))    -> RWS.Strict.RWST $ \ r s -> unRWSTF <$> thread ((\ (RWSTF (x, s, w)) -> toRWSTF w <$> RWS.Strict.runRWST x r s) ~<~ hdl) other (RWSTF (ctx, s, mempty))
   {-# INLINE alg #-}
 
+
 instance Algebra sig m => Algebra (State s :+: sig) (State.Lazy.StateT s m) where
   alg hdl sig ctx = case sig of
     L Get     -> State.Lazy.gets (<$ ctx)
@@ -294,6 +299,7 @@ instance Algebra sig m => Algebra (State s :+: sig) (State.Strict.StateT s m) wh
     L (Put s) -> ctx <$ State.Strict.put s
     R other   -> State.Strict.StateT $ \ s -> getSwap <$> thread (fmap Swap . uncurry State.Strict.runStateT . getSwap ~<~ hdl) other (Swap (ctx, s))
   {-# INLINE alg #-}
+
 
 #if MIN_VERSION_transformers(0,5,6)
 instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (Writer.CPS.WriterT w m) where
