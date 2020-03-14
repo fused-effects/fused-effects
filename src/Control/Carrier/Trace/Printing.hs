@@ -38,6 +38,7 @@ import           System.IO
 -- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
 runTrace (TraceC m) = m
+{-# INLINE runTrace #-}
 
 -- | @since 1.0.0.0
 newtype TraceC m a = TraceC (m a)
