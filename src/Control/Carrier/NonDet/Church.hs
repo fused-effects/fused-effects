@@ -86,7 +86,8 @@ instance Alternative (NonDetC m) where
   empty = NonDetC (\ _ _ nil -> nil)
   {-# INLINE empty #-}
 
-  NonDetC l <|> NonDetC r = NonDetC $ \ fork leaf nil -> fork (l fork leaf nil) (r fork leaf nil)
+  NonDetC l <|> NonDetC r = NonDetC $ \ fork leaf nil ->
+    l fork leaf nil `fork` r fork leaf nil
   {-# INLINE (<|>) #-}
 
 instance Monad (NonDetC m) where
