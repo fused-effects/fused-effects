@@ -122,7 +122,7 @@ instance Algebra sig m => Algebra (NonDet :+: sig) (NonDetC m) where
   alg hdl sig ctx = NonDetC $ \ fork leaf nil -> case sig of
     L (L Empty)  -> nil
     L (R Choose) -> leaf (True <$ ctx) `fork` leaf (False <$ ctx)
-    R other      -> thread dst hdl other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
+    R other      -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
     where
     dst :: Applicative m => NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
     dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (Identity . runNonDetA) (pure (pure empty))

@@ -103,7 +103,7 @@ instance Algebra sig m => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
     L (Call m)       -> runCut cons nil nil (hdl (m <$ ctx))
     R (L (L Empty))  -> nil
     R (L (R Choose)) -> cons (True <$ ctx) (cons (False <$ ctx) nil)
-    R (R other)      -> thread dst hdl other (pure ctx) >>= runIdentity . runCut (coerce cons) (coerce nil) (coerce fail)
+    R (R other)      -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runCut (coerce cons) (coerce nil) (coerce fail)
     where
     dst :: Applicative m => CutC Identity (CutC m a) -> m (CutC Identity a)
     dst = runIdentity . runCut (fmap . liftA2 (<|>) . runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)) (pure (pure empty)) (pure (pure cutfail))
