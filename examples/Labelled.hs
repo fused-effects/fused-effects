@@ -70,4 +70,3 @@ example = testGroup "Control.Effect.Labelled"
   [ readerExamples
   , stateExamples
   ]
-
