@@ -74,8 +74,8 @@ class Monad m => Algebra sig m | m -> sig where
   --
   -- > instance Algebra (Error e) (Either e) where
   -- >   alg hdl sig ctx = case sig of
-  -- >     L (Throw e)     -> Left e
-  -- >     R (Catch m h k) -> either (hdl . (<$ ctx) . h) pure (hdl (m <$ ctx)) >>= hdl . fmap k
+  -- >     L (Throw e)   -> Left e
+  -- >     R (Catch m h) -> either (hdl . (<$ ctx) . h) pure (hdl (m <$ ctx))
   --
   -- The 'Catch' case holds actions @m :: n x@ and @h :: e -> n x@ (for some existentially-quantified type @x@), and a continuation @k :: x -> n a@. The algebra must return @m (ctx a)@, so we have to ultimately use and lower the continuation in order to produce that type. The continuation takes an @x@, which we can get from either of the actions, after lowering them to values in @'Either' e@.
   --
