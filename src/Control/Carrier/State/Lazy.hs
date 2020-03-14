@@ -80,11 +80,13 @@ instance Functor m => Functor (StateC s m) where
 instance Monad m => Applicative (StateC s m) where
   pure a = StateC $ \ s -> pure (s, a)
   {-# INLINE pure #-}
+
   StateC mf <*> StateC mx = StateC $ \ s -> do
     ~(s',  f) <- mf s
     ~(s'', x) <- mx s'
     pure (s'', f x)
   {-# INLINE (<*>) #-}
+
   m *> k = m >>= const k
   {-# INLINE (*>) #-}
 
@@ -97,6 +99,7 @@ instance Monad m => Monad (StateC s m) where
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
   empty = StateC (const empty)
   {-# INLINE empty #-}
+
   StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
   {-# INLINE (<|>) #-}
 
