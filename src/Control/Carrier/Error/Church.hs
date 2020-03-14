@@ -40,7 +40,7 @@ instance Applicative (ErrorC e m) where
   ErrorC a1 *> ErrorC a2 = ErrorC $ \ h k -> a1 h (const (a2 h k))
   {-# INLINE (*>) #-}
 
-  ErrorC a1 <* ErrorC a2 = ErrorC $ \ h k -> a1 h (\ a1' -> a2 h (const (k a1')))
+  ErrorC a1 <* ErrorC a2 = ErrorC $ \ h k -> a1 h (a2 h . const . k)
   {-# INLINE (<*) #-}
 
 instance Alternative m => Alternative (ErrorC e m) where
