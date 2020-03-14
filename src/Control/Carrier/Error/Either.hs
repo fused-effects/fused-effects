@@ -50,6 +50,7 @@ newtype ErrorC e m a = ErrorC (ExceptT e m a)
 instance (Alternative m, Monad m) => Alternative (ErrorC e m) where
   empty = ErrorC (ExceptT empty)
   {-# INLINE empty #-}
+
   ErrorC (ExceptT l) <|> ErrorC (ExceptT r) = ErrorC (ExceptT (l <|> r))
   {-# INLINE (<|>) #-}
 
