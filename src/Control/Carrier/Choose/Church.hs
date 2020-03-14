@@ -41,12 +41,14 @@ import           Prelude hiding (head, tail)
 -- @since 1.0.0.0
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf (ChooseC runChooseC) = runChooseC fork leaf
+{-# INLINE runChoose #-}
 
 -- | Run a 'Choose' effect, mapping results into a 'S.Semigroup'.
 --
 -- @since 1.0.0.0
 runChooseS :: (S.Semigroup b, Applicative m) => (a -> m b) -> ChooseC m a -> m b
 runChooseS = runChoose (liftA2 (S.<>))
+{-# INLINE runChooseS #-}
 
 -- | A carrier for 'Choose' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 --
