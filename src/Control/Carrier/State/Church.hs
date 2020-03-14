@@ -31,7 +31,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
--- | Run a 'State' effect starting from the passed value.
+-- | Run a 'State' effect starting from the passed value, applying a continuation to the final state and result.
 --
 -- @
 -- 'runState' ('curry' 'pure') s ('pure' a) = 'pure' (s, a)
