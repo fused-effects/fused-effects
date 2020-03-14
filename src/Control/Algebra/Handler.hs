@@ -42,5 +42,6 @@ type Handler ctx m n = forall x . ctx (m x) -> n (ctx x)
 -- @since 1.1.0.0
 (~<~) :: (Functor n, Functor ctx1) => Handler ctx1 m n -> Handler ctx2 l m -> Handler (Compose ctx1 ctx2) l n
 hdl1 ~<~ hdl2 = fmap Compose . hdl1 . fmap hdl2 . getCompose
+{-# INLINE (~<~) #-}
 
 infixr 1 ~<~
