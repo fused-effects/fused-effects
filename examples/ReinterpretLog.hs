@@ -164,19 +164,16 @@ instance
     R other   -> CollectLogMessagesC (alg (runCollectLogMessagesC . hdl) (R other) ctx)
 
 -- The 'CollectLogMessagesC' runner.
-collectLogMessages :: CollectLogMessagesC s m a -> m ([s], a)
-collectLogMessages = runWriter . runCollectLogMessagesC
+collectLogMessages :: Functor m => CollectLogMessagesC s m a -> m [s]
+collectLogMessages = execWriter . runCollectLogMessagesC
 
 
 -- Test spec.
 example :: TestTree
 example = testGroup "reinterpret log"
-  [ testCase "reinterprets logs" $
-    ((do
+  [ testCase "reinterprets logs" $ do
+      a <- collectLogMessages . reinterpretLog renderLogMessage $ do
         log (Debug "foo")
-        log (Info "bar"))
-      & reinterpretLog renderLogMessage
-      & collectLogMessages
-      & run)
-    @?= (["[debug] foo", "[info] bar"], ())
+        log (Info "bar")
+      a @?= ["[debug] foo", "[info] bar"]
   ]
