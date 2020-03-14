@@ -20,6 +20,8 @@ import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
 import Prelude hiding (fail)
 
 -- | Run an 'Error' effect, applying the first continuation to uncaught errors and the second continuation to successful computations’ results.
@@ -76,7 +78,9 @@ instance Algebra sig m => Algebra (Error e :+: sig) (ErrorC e m) where
   alg hdl sig ctx = ErrorC $ \ h k -> case sig of
     L (L (Throw e))    -> h e
     L (R (Catch m h')) -> runError (runError h k . lower . h') k (lower m)
-    R other            -> thread (either (pure . Left) (runError (pure . Left) (pure . Right)) ~<~ hdl) other (Right ctx) >>= either h k
+    R other            -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runError (coerce h) (coerce k)
     where
     lower = hdl . (<$ ctx)
+    dst :: Applicative m => ErrorC e Identity (ErrorC e m a) -> m (ErrorC e Identity a)
+    dst = runIdentity . runError (pure . pure . throwError) (pure . runError (pure . throwError) (pure . pure))
   {-# INLINE alg #-}
