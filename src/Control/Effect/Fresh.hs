@@ -34,3 +34,4 @@ data Fresh (m :: Type -> Type) k where
 -- @since 0.1.0.0
 fresh :: Has Fresh sig m => m Int
 fresh = send Fresh
+{-# INLINE fresh #-}
