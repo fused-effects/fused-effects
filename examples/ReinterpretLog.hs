@@ -9,7 +9,6 @@
 -- * Finally, we will bridge the two with an effect carrier that reinterprets
 --   structured log messages as strings.
 
-
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -24,10 +23,10 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 module ReinterpretLog
-  ( example
-  , application
-  , runApplication
-  ) where
+( example
+, application
+, runApplication
+) where
 
 import Control.Algebra
 import Control.Carrier.Reader
@@ -38,7 +37,6 @@ import Data.Kind (Type)
 import Prelude hiding (log)
 import Test.Tasty
 import Test.Tasty.HUnit
-
 
 --------------------------------------------------------------------------------
 -- The application
@@ -51,16 +49,13 @@ data Message
   | Info String
 
 -- Render a structured log message as a string.
-renderLogMessage ::
-     Message
-  -> String
+renderLogMessage :: Message -> String
 renderLogMessage = \case
   Debug message -> "[debug] " ++ message
   Info  message -> "[info] "  ++ message
 
 -- The application: it logs two messages, then quits.
-application :: Has (Log Message) sig m
-  => m ()
+application :: Has (Log Message) sig m => m ()
 application = do
   log (Debug "debug message")
   log (Info "info message")
@@ -99,11 +94,8 @@ data Log (a :: Type) (m :: Type -> Type) (k :: Type) where
 
 
 -- Log an 'a'.
-log :: Has (Log a) sig m
-  => a
-  -> m ()
-log x =
-  send (Log x)
+log :: Has (Log a) sig m => a -> m ()
+log x = send (Log x)
 
 
 --------------------------------------------------------------------------------
@@ -111,8 +103,7 @@ log x =
 --------------------------------------------------------------------------------
 
 -- Carrier one: log strings to stdout.
-newtype LogStdoutC m a
-  = LogStdoutC (m a)
+newtype LogStdoutC m a = LogStdoutC (m a)
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance
@@ -125,11 +116,9 @@ instance
   => Algebra (Log String :+: sig) (LogStdoutC m) where
 
   alg hdl sig ctx = case sig of
-    L (Log message) ->
-      ctx <$ LogStdoutC (liftIO (putStrLn message))
+    L (Log message) -> ctx <$ LogStdoutC (liftIO (putStrLn message))
 
-    R other ->
-      LogStdoutC (alg (runLogStdout . hdl) other ctx)
+    R other         -> LogStdoutC (alg (runLogStdout . hdl) other ctx)
 
 -- The 'LogStdoutC' runner.
 runLogStdout ::
@@ -141,8 +130,7 @@ runLogStdout (LogStdoutC m) =
 
 -- Carrier two: reinterpret a program that logs 's's into one that logs 't's
 -- using a function (provided at runtime) from 's' to 't'.
-newtype ReinterpretLogC s t m a
-  = ReinterpretLogC { unReinterpretLogC :: ReaderC (s -> t) m a }
+newtype ReinterpretLogC s t m a = ReinterpretLogC { unReinterpretLogC :: ReaderC (s -> t) m a }
   deriving (Applicative, Functor, Monad, MonadIO)
 
 instance
@@ -154,28 +142,20 @@ instance
   => Algebra (Log s :+: sig) (ReinterpretLogC s t m) where
 
   alg hdl sig ctx = case sig of
-    L (Log s) ->
-      ReinterpretLogC $ do
-        f <- ask @(s -> t)
-        ctx <$ log (f s)
+    L (Log s) -> ReinterpretLogC $ do
+      f <- ask @(s -> t)
+      ctx <$ log (f s)
 
-    R other ->
-      ReinterpretLogC (alg (unReinterpretLogC . hdl) (R other) ctx)
+    R other   -> ReinterpretLogC (alg (unReinterpretLogC . hdl) (R other) ctx)
 
 -- The 'ReinterpretLogC' runner.
-reinterpretLog ::
-     (s -> t)
-  -> ReinterpretLogC s t m a
-  -> m a
-reinterpretLog f =
-  runReader f . unReinterpretLogC
-
+reinterpretLog :: (s -> t) -> ReinterpretLogC s t m a -> m a
+reinterpretLog f = runReader f . unReinterpretLogC
 
 
 -- Carrier three: collect log messages in a list. This is used for writing this
 -- example's test spec.
-newtype CollectLogMessagesC s m a
-  = CollectLogMessagesC { unCollectLogMessagesC :: WriterC [s] m a }
+newtype CollectLogMessagesC s m a = CollectLogMessagesC { unCollectLogMessagesC :: WriterC [s] m a }
   deriving (Applicative, Functor, Monad)
 
 instance
@@ -186,16 +166,12 @@ instance
   => Algebra (Log s :+: sig) (CollectLogMessagesC s m) where
 
   alg hdl sig ctx = case sig of
-    L (Log s) ->
-      ctx <$ CollectLogMessagesC (tell [s])
+    L (Log s) -> ctx <$ CollectLogMessagesC (tell [s])
 
-    R other ->
-      CollectLogMessagesC (alg (unCollectLogMessagesC . hdl) (R other) ctx)
+    R other   -> CollectLogMessagesC (alg (unCollectLogMessagesC . hdl) (R other) ctx)
 
 -- The 'CollectLogMessagesC' runner.
-collectLogMessages ::
-     CollectLogMessagesC s m a
-  -> m ([s], a)
+collectLogMessages :: CollectLogMessagesC s m a -> m ([s], a)
 collectLogMessages =
   runWriter . unCollectLogMessagesC
 
