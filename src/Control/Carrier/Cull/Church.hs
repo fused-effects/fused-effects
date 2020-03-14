@@ -57,6 +57,7 @@ newtype CullC m a = CullC { runCullC :: ReaderC Bool (NonDetC m) a }
 instance Alternative (CullC m) where
   empty = CullC empty
   {-# INLINE empty #-}
+
   CullC l <|> CullC r = CullC $ ReaderC $ \ cull ->
     if cull then
       NonDetC $ \ fork leaf nil ->
