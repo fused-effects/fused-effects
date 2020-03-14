@@ -25,16 +25,16 @@ module Control.Carrier.Interpret
 , run
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Carrier.State.Strict
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Data.Functor.Const (Const(..))
-import           Unsafe.Coerce (unsafeCoerce)
+import Control.Algebra
+import Control.Applicative (Alternative)
+import Control.Carrier.State.Strict
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Functor.Const (Const(..))
+import Unsafe.Coerce (unsafeCoerce)
 
 -- | An @Interpreter@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
 newtype Interpreter sig m = Interpreter

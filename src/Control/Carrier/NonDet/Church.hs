@@ -23,15 +23,15 @@ module Control.Carrier.NonDet.Church
 , module Control.Effect.NonDet
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (liftA2)
-import           Control.Effect.NonDet
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Data.Coerce (coerce)
-import           Data.Functor.Identity
+import Control.Algebra
+import Control.Applicative (liftA2)
+import Control.Effect.NonDet
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
 
 -- | Run a 'NonDet' effect, using the provided functions to interpret choice, leaf results, and failure.
 --

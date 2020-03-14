@@ -16,14 +16,14 @@ module Control.Carrier.Reader
 , module Control.Effect.Reader
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..), liftA2)
-import           Control.Effect.Reader
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
+import Control.Algebra
+import Control.Applicative (Alternative(..), liftA2)
+import Control.Effect.Reader
+import Control.Monad (MonadPlus(..))
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 -- | Run a 'Reader' effect with the passed environment value.
 --

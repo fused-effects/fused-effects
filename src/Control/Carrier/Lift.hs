@@ -12,14 +12,14 @@ module Control.Carrier.Lift
 , module Control.Effect.Lift
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative)
-import           Control.Effect.Lift
-import           Control.Monad (MonadPlus)
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
+import Control.Algebra
+import Control.Applicative (Alternative)
+import Control.Effect.Lift
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 --

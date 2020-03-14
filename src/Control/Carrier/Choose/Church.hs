@@ -23,18 +23,18 @@ module Control.Carrier.Choose.Church
 , module Control.Effect.Choose
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (liftA2)
-import           Control.Effect.Choose
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Data.Coerce (coerce)
-import           Data.Functor.Identity
-import           Data.List.NonEmpty (NonEmpty(..), head, tail)
-import qualified Data.Semigroup as S
-import           Prelude hiding (head, tail)
+import Control.Algebra
+import Control.Applicative (liftA2)
+import Control.Effect.Choose
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
+import Data.List.NonEmpty (NonEmpty(..), head, tail)
+import Data.Semigroup as S
+import Prelude hiding (head, tail)
 
 -- | Run a 'Choose' effect with continuations respectively interpreting '<|>' and 'pure'.
 --
