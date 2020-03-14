@@ -37,18 +37,21 @@ import Data.Functor.Identity
 -- @since 1.0.0.0
 runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
 runCut cons nil fail (CutC runCutC) = runCutC cons nil fail
+{-# INLINE runCut #-}
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 --
 -- @since 1.0.0.0
 runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
 runCutA = runCut (fmap . (<|>) . pure) (pure empty) (pure empty)
+{-# INLINE runCutA #-}
 
 -- | Run a 'Cut' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
 runCutM leaf = runCut (fmap . mappend . leaf) (pure mempty) (pure mempty)
+{-# INLINE runCutM #-}
 
 -- | @since 1.0.0.0
 newtype CutC m a = CutC (forall b . (a -> m b -> m b) -> m b -> m b -> m b)
