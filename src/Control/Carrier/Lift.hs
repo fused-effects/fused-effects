@@ -26,6 +26,7 @@ import           Control.Monad.Trans.Class
 -- @since 1.0.0.0
 runM :: LiftC m a -> m a
 runM (LiftC m) = m
+{-# INLINE runM #-}
 
 -- | @since 1.0.0.0
 newtype LiftC m a = LiftC (m a)
@@ -33,6 +34,8 @@ newtype LiftC m a = LiftC (m a)
 
 instance MonadTrans LiftC where
   lift = LiftC
+  {-# INLINE lift #-}
 
 instance Monad m => Algebra (Lift m) (LiftC m) where
   alg hdl (LiftWith with) ctx = LiftC (with (runM . hdl) ctx)
+  {-# INLINE alg #-}
