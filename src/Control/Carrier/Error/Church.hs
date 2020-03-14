@@ -1,4 +1,9 @@
-{-# LANGUAGE DeriveFunctor, FlexibleInstances, MultiParamTypeClasses, RankNTypes, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Error.Church
 ( -- * Error carrier
   runError
@@ -8,7 +13,7 @@ module Control.Carrier.Error.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative (..))
+import Control.Applicative (Alternative(..))
 import Control.Effect.Error
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail
