@@ -5,6 +5,7 @@ This effect is similar to the traditional @MonadError@ typeclass, though it allo
 Predefined carriers:
 
 * "Control.Carrier.Error.Either".
+* "Control.Carrier.Error.Church".
 * "Control.Monad.Trans.Except".
 * If 'Error' @e@ is the last effect in a stack, it can be interpreted directly to an 'Either' @e@.
 
