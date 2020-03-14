@@ -63,7 +63,7 @@ instance MonadFix m => MonadFix (ErrorC e m) where
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (ErrorC e m) where
-  liftIO io = lift (liftIO io)
+  liftIO = lift . liftIO
   {-# INLINE liftIO #-}
 
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
