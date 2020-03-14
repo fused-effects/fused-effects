@@ -34,13 +34,13 @@ import Control.Monad.Trans.Class
 -- | Run a 'State' effect starting from the passed value.
 --
 -- @
--- 'runState' ('curry' 'pure') s ('pure' a) = 'pure' (a, s)
+-- 'runState' ('curry' 'pure') s ('pure' a) = 'pure' (s, a)
 -- @
 -- @
 -- 'runState' ('curry' 'pure') s 'get' = 'pure' (s, s)
 -- @
 -- @
--- 'runState' ('curry' 'pure') s ('put' t) = 'pure' ((), t)
+-- 'runState' ('curry' 'pure') s ('put' t) = 'pure' (t, ())
 -- @
 --
 -- @since 1.1.0.0
