@@ -45,7 +45,7 @@ import Control.Monad.Trans.Class
 --
 -- @since 1.1.0.0
 runState :: forall s m a b . (s -> a -> m b) -> s -> StateC s m a -> m b
-runState f s (StateC m) = m (flip f) s
+runState f s (StateC m) = m f s
 {-# INLINE runState #-}
 
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
@@ -71,14 +71,14 @@ execState = runState (const . pure)
 {-# INLINE execState #-}
 
 -- | @since 1.1.0.0
-newtype StateC s m a = StateC { runStateC :: forall r . (a -> s -> m r) -> s -> m r }
+newtype StateC s m a = StateC (forall r . (s -> a -> m r) -> s -> m r)
   deriving (Functor)
 
 instance Applicative (StateC s m) where
-  pure a = StateC $ \ k s -> k a s
+  pure a = StateC $ \ k s -> k s a
   {-# INLINE pure #-}
 
-  StateC f <*> StateC a = StateC $ \ k -> f (a . (k .))
+  StateC f <*> StateC a = StateC $ \ k -> f (\ s f' -> a (\ s' -> k s' . f') s)
   {-# INLINE (<*>) #-}
 
 instance Alternative m => Alternative (StateC s m) where
@@ -89,7 +89,7 @@ instance Alternative m => Alternative (StateC s m) where
   {-# INLINE (<|>) #-}
 
 instance Monad (StateC s m) where
-  StateC a >>= f = StateC $ \ k -> a (\ a' -> runStateC (f a') k)
+  StateC a >>= f = StateC $ \ k -> a (\ s -> runState k s . f)
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
@@ -97,7 +97,7 @@ instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (StateC s m) where
-  mfix f = StateC $ \ k s -> mfix (runState (curry pure) s . f . snd) >>= uncurry (flip k)
+  mfix f = StateC $ \ k s -> mfix (runState (curry pure) s . f . snd) >>= uncurry k
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (StateC s m) where
@@ -107,12 +107,12 @@ instance MonadIO m => MonadIO (StateC s m) where
 instance (Alternative m, Monad m) => MonadPlus (StateC s m)
 
 instance MonadTrans (StateC s) where
-  lift m = StateC $ \ k s -> m >>= flip k s
+  lift m = StateC $ \ k s -> m >>= k s
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
   alg hdl sig ctx = StateC $ \ k s -> case sig of
-    L Get     -> k (s <$ ctx) s
-    L (Put s) -> k       ctx  s
-    R other   -> thread (uncurry (runState (curry pure)) ~<~ hdl) other (s, ctx) >>= uncurry (flip k)
+    L Get     -> k s (s <$ ctx)
+    L (Put s) -> k s       ctx
+    R other   -> thread (uncurry (runState (curry pure)) ~<~ hdl) other (s, ctx) >>= uncurry k
   {-# INLINE alg #-}
