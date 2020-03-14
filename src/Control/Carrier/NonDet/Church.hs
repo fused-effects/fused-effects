@@ -43,6 +43,7 @@ runNonDet
   -> NonDetC m a         -- ^ A nondeterministic computation to execute
   -> m b
 runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
+{-# INLINE runNonDet #-}
 
 -- | Run a 'NonDet' effect, collecting all branches’ results into an 'Alternative' functor.
 --
@@ -58,12 +59,14 @@ runNonDet fork leaf nil (NonDetC m) = m fork leaf nil
 -- @since 1.0.0.0
 runNonDetA :: (Alternative f, Applicative m) => NonDetC m a -> m (f a)
 runNonDetA = runNonDet (liftA2 (<|>)) (pure . pure) (pure empty)
+{-# INLINE runNonDetA #-}
 
 -- | Run a 'NonDet' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runNonDetM :: (Applicative m, Monoid b) => (a -> b) -> NonDetC m a -> m b
 runNonDetM leaf = runNonDet (liftA2 mappend) (pure . leaf) (pure mempty)
+{-# INLINE runNonDetM #-}
 
 -- | A carrier for 'NonDet' effects based on Ralf Hinze’s design described in [Deriving Backtracking Monad Transformers](https://www.cs.ox.ac.uk/ralf.hinze/publications/#P12).
 --
