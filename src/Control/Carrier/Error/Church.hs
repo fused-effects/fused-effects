@@ -33,7 +33,7 @@ import Prelude hiding (fail)
 --
 -- @since 1.1.0.0
 runError :: (e -> m b) -> (a -> m b) -> ErrorC e m a -> m b
-runError h k m = runErrorC m h k
+runError fail leaf m = runErrorC m fail leaf
 {-# INLINE runError #-}
 
 -- | @since 1.1.0.0
@@ -41,31 +41,31 @@ newtype ErrorC e m a = ErrorC { runErrorC :: forall b . (e -> m b) -> (a -> m b)
   deriving (Functor)
 
 instance Applicative (ErrorC e m) where
-  pure a = ErrorC $ \ _ k -> k a
+  pure a = ErrorC $ \ _ leaf -> leaf a
   {-# INLINE pure #-}
 
-  ErrorC f <*> ErrorC a = ErrorC $ \ h k -> f h (\ f' -> a h (k . f'))
+  ErrorC f <*> ErrorC a = ErrorC $ \ fail leaf -> f fail (\ f' -> a fail (leaf . f'))
   {-# INLINE (<*>) #-}
 
-  liftA2 f (ErrorC a) (ErrorC b) = ErrorC $ \ h k ->
-    a h (\ a' -> b h (k . f a'))
+  liftA2 f (ErrorC a) (ErrorC b) = ErrorC $ \ fail leaf ->
+    a fail (\ a' -> b fail (leaf . f a'))
   {-# INLINE liftA2 #-}
 
-  ErrorC a1 *> ErrorC a2 = ErrorC $ \ h -> a1 h . const . a2 h
+  ErrorC a1 *> ErrorC a2 = ErrorC $ \ fail -> a1 fail . const . a2 fail
   {-# INLINE (*>) #-}
 
-  ErrorC a1 <* ErrorC a2 = ErrorC $ \ h k -> a1 h (a2 h . const . k)
+  ErrorC a1 <* ErrorC a2 = ErrorC $ \ fail leaf -> a1 fail (a2 fail . const . leaf)
   {-# INLINE (<*) #-}
 
 instance Alternative m => Alternative (ErrorC e m) where
   empty = ErrorC $ \ _ _ -> empty
   {-# INLINE empty #-}
 
-  ErrorC a <|> ErrorC b = ErrorC $ \ h k -> a h k <|> b h k
+  ErrorC a <|> ErrorC b = ErrorC $ \ fail leaf -> a fail leaf <|> b fail leaf
   {-# INLINE (<|>) #-}
 
 instance Monad (ErrorC e m) where
-  ErrorC a >>= f = ErrorC $ \ h k -> a h (runError h k . f)
+  ErrorC a >>= f = ErrorC $ \ fail leaf -> a fail (runError fail leaf . f)
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
@@ -73,9 +73,9 @@ instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (ErrorC e m) where
-  mfix f = ErrorC $ \ h k ->
+  mfix f = ErrorC $ \ fail leaf ->
     mfix (toError . f . run . fromError)
-    >>= run . runError (pure . h) (pure . k)
+    >>= run . runError (pure . fail) (pure . leaf)
     where
     toError   = runError (pure . throwError) (pure . pure)
     fromError = runError (const (error "mfix (ErrorC): throwError")) pure
@@ -88,14 +88,14 @@ instance MonadIO m => MonadIO (ErrorC e m) where
 instance (Alternative m, Monad m) => MonadPlus (ErrorC e m)
 
 instance MonadTrans (ErrorC e) where
-  lift m = ErrorC $ \ _ k -> m >>= k
+  lift m = ErrorC $ \ _ leaf -> m >>= leaf
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Error e :+: sig) (ErrorC e m) where
-  alg hdl sig ctx = ErrorC $ \ h k -> case sig of
-    L (L (Throw e))    -> h e
-    L (R (Catch m h')) -> runError (runError h k . lower . h') k (lower m)
-    R other            -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runError (coerce h) (coerce k)
+  alg hdl sig ctx = ErrorC $ \ fail leaf -> case sig of
+    L (L (Throw e))   -> fail e
+    L (R (Catch m h)) -> runError (runError fail leaf . lower . h) leaf (lower m)
+    R other           -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runError (coerce fail) (coerce leaf)
     where
     lower = hdl . (<$ ctx)
     dst :: Applicative m => ErrorC e Identity (ErrorC e m a) -> m (ErrorC e Identity a)
