@@ -23,7 +23,7 @@ module Control.Carrier.State.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.State
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
@@ -80,6 +80,10 @@ instance Applicative (StateC s m) where
 
   StateC f <*> StateC a = StateC $ \ k -> f (\ s f' -> a (\ s' -> k s' . f') s)
   {-# INLINE (<*>) #-}
+
+  liftA2 f (StateC a) (StateC b) = StateC $ \ k s ->
+    a (\ s' a' -> b (\ s'' -> k s'' . f a') s') s
+  {-# INLINE liftA2 #-}
 
 instance Alternative m => Alternative (StateC s m) where
   empty = StateC $ \ _ _ -> empty
