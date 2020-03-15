@@ -10,9 +10,9 @@ module Error
 ) where
 
 import qualified Catch
-import qualified Control.Carrier.Error.Either as ErrorC
+import qualified Control.Carrier.Error.Either as C.Either
 import           Control.Effect.Error
-import qualified Control.Monad.Trans.Except as ExceptT
+import qualified Control.Monad.Trans.Except as T.Except
 import           Data.Semigroup as S ((<>))
 import           Gen
 import qualified Monad
@@ -26,9 +26,9 @@ tests = testGroup "Error"
     [ testMonad
     , testMonadFix
     , testError
-    ] >>= ($ runL ErrorC.runError)
+    ] >>= ($ runL C.Either.runError)
   , testGroup "Either"  $ testError (runL pure)
-  , testGroup "ExceptT" $ testError (runL ExceptT.runExceptT)
+  , testGroup "ExceptT" $ testError (runL T.Except.runExceptT)
   ] where
   testMonad    run = Monad.test    (m (gen0 e) (genN e)) a b c initial run
   testMonadFix run = MonadFix.test (m (gen0 e) (genN e)) a b   initial run
