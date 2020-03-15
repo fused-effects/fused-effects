@@ -51,7 +51,7 @@ runState f s (StateC m) = m f s
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
 --
 -- @
--- 'evalState' s m = 'runState' ('const' 'pure') s m
+-- 'evalState' = 'runState' ('const' 'pure')
 -- @
 --
 -- @since 1.1.0.0
@@ -62,7 +62,7 @@ evalState = runState (const pure)
 -- | Run a 'State' effect, yielding the final state and discarding the return value.
 --
 -- @
--- 'execState' s m = 'runState' ('const' '.' 'pure') s m
+-- 'execState' = 'runState' ('const' '.' 'pure')
 -- @
 --
 -- @since 1.1.0.0
