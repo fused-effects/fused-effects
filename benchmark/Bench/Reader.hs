@@ -11,9 +11,11 @@ import Gauge hiding (benchmark)
 
 asking :: Has (Reader Char) sig m => Int -> m ()
 asking i = replicateM_ i (ask @Char)
+{-# INLINE asking #-}
 
 locally :: Has (Reader Char) sig m => Int -> m ()
 locally i = replicateM_ i (local @Char succ (ask @Char))
+{-# INLINE locally #-}
 
 benchmark :: Benchmark
 benchmark = bgroup "Reader"
