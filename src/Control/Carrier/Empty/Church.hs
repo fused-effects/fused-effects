@@ -64,7 +64,7 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
 instance MonadFix m => MonadFix (EmptyC m) where
   mfix f = EmptyC $ \ leaf nil ->
     mfix (toEmpty . f . run . fromEmpty)
-    >>= run . runEmpty (pure . leaf) (pure nil)
+    >>= run . runEmpty (coerce leaf) (coerce nil)
     where
     toEmpty   = runEmpty (pure . pure) (pure empty)
     fromEmpty = runEmpty pure (error "mfix (EmptyC): empty")
