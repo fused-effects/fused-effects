@@ -67,6 +67,7 @@ library
     Control.Carrier.Trace.Ignoring
     Control.Carrier.Trace.Printing
     Control.Carrier.Trace.Returning
+    Control.Carrier.Writer.Church
     Control.Carrier.Writer.Strict
     -- Effects
     Control.Effect.Catch
