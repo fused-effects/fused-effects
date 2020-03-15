@@ -6,6 +6,7 @@ module Bench.Error
 import Control.Carrier.Error.Church as Church
 import Control.Carrier.Error.Either as Either
 import Control.Monad (replicateM_)
+import Control.Monad.Trans.Except as Except
 import Gauge hiding (benchmark)
 
 benchmark :: Gauge.Benchmark
@@ -15,6 +16,7 @@ benchmark = bgroup "Error"
   , bench "Either.ErrorC IO" $ whnfAppIO  (Either.runError @Int . errorLoop) 10000
   , bench "Church.ErrorC"    $ whnf (run . Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
   , bench "Church.ErrorC IO" $ whnfAppIO  (Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
+  , bench "ExceptT"          $ whnf (run . Except.runExceptT @Int . errorLoop) 10000
   ]
 
 errorLoop :: Has (Error Int) sig m => Int -> m ()
