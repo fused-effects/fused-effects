@@ -10,10 +10,12 @@ import Gauge hiding (benchmark)
 benchmark :: Benchmark
 benchmark = bgroup "Reader"
   [ bgroup "ask"
-    [ bench "ReaderC" $ whnf (run . runReader 'c' . asking) n
+    [ bench "(->)"    $ whnf (`asking` 'c') n
+    , bench "ReaderC" $ whnf (run . runReader 'c' . asking) n
     ]
   , bgroup "local"
-    [ bench "ReaderC" $ whnf (run . runReader 'c' . locally) n
+    [ bench "(->)"    $ whnf (`locally` 'c') n
+    , bench "ReaderC" $ whnf (run . runReader 'c' . locally) n
     ]
   ]
   where
