@@ -1,2 +1,6 @@
 module Control.Carrier.Empty.Church
-() where
+( -- * Empty effect
+  module Control.Effect.Empty
+) where
+
+import Control.Effect.Empty
