@@ -15,6 +15,7 @@ module Control.Carrier.Empty.Church
 import Control.Algebra
 import Control.Applicative (liftA2)
 import Control.Effect.Empty
+import Control.Monad.Fix
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -59,6 +60,15 @@ instance Monad (EmptyC m) where
 instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
+
+instance MonadFix m => MonadFix (EmptyC m) where
+  mfix f = EmptyC $ \ leaf nil ->
+    mfix (toEmpty . f . run . fromEmpty)
+    >>= run . runEmpty (pure . leaf) (pure nil)
+    where
+    toEmpty   = runEmpty (pure . pure) (pure empty)
+    fromEmpty = runEmpty pure (error "mfix (EmptyC): empty")
+  {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (EmptyC m) where
   liftIO = lift . liftIO
