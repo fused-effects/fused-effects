@@ -7,7 +7,7 @@ import Control.Carrier.Error.Church as Church
 import Control.Carrier.Error.Cont as Cont
 import Control.Carrier.Error.CPS as CPS
 import Control.Carrier.Error.Either as Either
-import Control.Monad (replicateM_)
+import Data.Foldable (for_)
 import Control.Monad.Trans.Except as Except
 import Gauge hiding (benchmark)
 
@@ -33,5 +33,5 @@ benchmark = bgroup "Error"
   n = 10000
 
 errorLoop :: Has (Error Int) sig m => Int -> m ()
-errorLoop i = replicateM_ i (throwError i `catchError` pure @_ @Int)
+errorLoop i = for_ [1..i] (\ i -> throwError i `catchError` pure @_ @Int)
 {-# INLINE errorLoop #-}
