@@ -85,7 +85,7 @@ runInterpretState handler state m
 {-# INLINE runInterpretState #-}
 
 -- | @since 1.0.0.0
-newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpretC :: m a }
+newtype InterpretC s (sig :: (* -> *) -> (* -> *)) m a = InterpretC { runInterpretC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (InterpretC s sig) where
