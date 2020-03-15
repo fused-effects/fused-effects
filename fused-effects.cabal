@@ -184,6 +184,7 @@ benchmark benchmark
   hs-source-dirs: benchmark
   main-is:        Bench.hs
   other-modules:
+    Bench.Error
     Bench.Reader
     Bench.NonDet
     Bench.NonDet.NQueens
