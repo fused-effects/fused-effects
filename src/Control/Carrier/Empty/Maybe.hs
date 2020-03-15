@@ -45,6 +45,9 @@ runEmpty :: EmptyC m a -> m (Maybe a)
 runEmpty (EmptyC m) = runMaybeT m
 {-# INLINE runEmpty #-}
 
+-- | Run an 'Empty' effect, discarding its result.
+--
+-- This is convenient for using 'empty' to signal early returns without needing to know whether control exited normally or not.
 evalEmpty :: Functor m => EmptyC m a -> m ()
 evalEmpty = void . runEmpty
 
