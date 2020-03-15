@@ -30,6 +30,8 @@ import Data.Functor.Identity
 import Prelude hiding (fail)
 
 -- | Run an 'Error' effect, applying the first continuation to uncaught errors and the second continuation to successful computations’ results.
+--
+-- @since 1.1.0.0
 runError :: (e -> m b) -> (a -> m b) -> ErrorC e m a -> m b
 runError h k m = runErrorC m h k
 {-# INLINE runError #-}
