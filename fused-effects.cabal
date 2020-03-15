@@ -53,8 +53,6 @@ library
     Control.Carrier.Empty.Church
     Control.Carrier.Empty.Maybe
     Control.Carrier.Error.Church
-    Control.Carrier.Error.Cont
-    Control.Carrier.Error.CPS
     Control.Carrier.Error.Either
     Control.Carrier.Fail.Either
     Control.Carrier.Fresh.Strict
