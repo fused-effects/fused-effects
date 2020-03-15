@@ -46,7 +46,7 @@ instance Applicative (EmptyC m) where
   {-# INLINE (*>) #-}
 
   EmptyC a <* EmptyC b = EmptyC $ \ nil leaf ->
-    a nil (\ a' -> b nil (const (leaf a')))
+    a nil (b nil . const . leaf)
   {-# INLINE (<*) #-}
 
 instance Monad (EmptyC m) where
