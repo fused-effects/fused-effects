@@ -18,7 +18,7 @@ module Control.Carrier.Error.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Error
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
@@ -46,6 +46,10 @@ instance Applicative (ErrorC e m) where
 
   ErrorC f <*> ErrorC a = ErrorC $ \ h k -> f h (\ f' -> a h (k . f'))
   {-# INLINE (<*>) #-}
+
+  liftA2 f (ErrorC a) (ErrorC b) = ErrorC $ \ h k ->
+    a h (\ a' -> b h (k . f a'))
+  {-# INLINE liftA2 #-}
 
   ErrorC a1 *> ErrorC a2 = ErrorC $ \ h -> a1 h . const . a2 h
   {-# INLINE (*>) #-}
