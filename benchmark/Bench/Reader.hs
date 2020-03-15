@@ -6,7 +6,6 @@ module Bench.Reader
 
 import Control.Carrier.Reader
 import Control.Monad
-
 import Gauge hiding (benchmark)
 
 benchmark :: Benchmark
