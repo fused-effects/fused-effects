@@ -104,6 +104,9 @@ instance Monad m => Monad (StateC s m) where
     runState s' (k a')
   {-# INLINE (>>=) #-}
 
+  (>>) = (*>)
+  {-# INLINE (>>) #-}
+
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
   empty = lift empty
   {-# INLINE empty #-}
