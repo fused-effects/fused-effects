@@ -1,5 +1,4 @@
 {-# LANGUAGE CPP #-}
-{-# LANGUAGE NumericUnderscores #-}
 {-# LANGUAGE TypeApplications #-}
 module Bench.Writer
 ( benchmark
@@ -39,7 +38,7 @@ benchmark = bgroup "Writer"
     ]
   ]
   where
-  n = 1_000_000
+  n = 1000000
 
 tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
