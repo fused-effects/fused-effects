@@ -30,7 +30,7 @@ benchmark = bgroup "Error"
     ]
   ]
   where
-  n = 10000
+  n = 100000
 
 errorLoop :: Has (Error Int) sig m => Int -> m ()
 errorLoop i = for_ [1..i] (\ i -> throwError i `catchError` pure @_ @Int)
