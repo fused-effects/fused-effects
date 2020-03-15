@@ -1,2 +1,9 @@
 module Bench.State
-() where
+( benchmark
+) where
+
+import Gauge hiding (benchmark)
+
+benchmark :: Benchmark
+benchmark = bgroup "State"
+  []
