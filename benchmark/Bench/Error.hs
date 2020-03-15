@@ -12,7 +12,9 @@ import Gauge hiding (benchmark)
 
 benchmark :: Gauge.Benchmark
 benchmark = bgroup "Error"
+  -- baseline carrier
   [ bench "Either"           $ whnf (errorLoop :: Int -> Either Int ()) 10000
+  -- transformer carriers
   , bench "Church.ErrorC"    $ whnf (run . Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
   , bench "Church.ErrorC IO" $ whnfAppIO  (Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
   , bench "Cont.ErrorC"      $ whnf (run . Cont.runError @Int (pure . Right) . errorLoop) 10000
