@@ -35,7 +35,7 @@ import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testGroup "WriterC" $
+  [ testGroup "WriterC (Strict)" $
     [ testMonad
     , testMonadFix
     , testWriter
