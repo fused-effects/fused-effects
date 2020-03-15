@@ -13,6 +13,7 @@ module Control.Carrier.Empty.Church
 ( -- * Empty carrier
   runEmpty
 , evalEmpty
+, execEmpty
 , EmptyC(..)
   -- * Empty effect
 , module Control.Effect.Empty
@@ -54,6 +55,25 @@ runEmpty nil leaf (EmptyC m) = m nil leaf
 evalEmpty :: Applicative m => EmptyC m a -> m ()
 evalEmpty = runEmpty (pure ()) (const (pure ()))
 {-# INLINE evalEmpty #-}
+
+-- | Run an 'Empty' effect, replacing its result with a 'Bool' indicating whether control exited normally.
+--
+-- This is convenient for using 'empty' to signal early returns when all you need to know is whether control exited normally or not, and not what value it exited with.
+--
+-- @
+-- 'execEmpty' = 'runEmpty' ('pure' 'False') ('const' ('pure' 'True'))
+-- @
+-- @
+-- 'execEmpty' ('pure' a) = 'pure' 'True'
+-- @
+-- @
+-- 'execEmpty' 'empty' = 'pure' 'False'
+-- @
+--
+-- @since 1.1.0.0
+execEmpty :: Applicative m => EmptyC m a -> m Bool
+execEmpty = runEmpty (pure False) (const (pure True))
+{-# INLINE execEmpty #-}
 
 -- | @since 1.1.0.0
 newtype EmptyC m a = EmptyC (forall b . m b -> (a -> m b) -> m b)
