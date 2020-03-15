@@ -22,5 +22,5 @@ instance Applicative (ErrorC e m) where
   {-# INLINE pure #-}
 
   ErrorC f <*> ErrorC a = ErrorC $ \ k ->
-    f (\ f' -> a (\ a' -> k (f' a')))
+    f (\ f' -> a (k . f'))
   {-# INLINE (<*>) #-}
