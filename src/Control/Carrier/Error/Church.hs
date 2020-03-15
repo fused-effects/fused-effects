@@ -13,7 +13,7 @@ module Control.Carrier.Error.Church
 ( -- * Error carrier
   runError
 , ErrorC(..)
---- * Error effect
+  -- * Error effect
 , module Control.Effect.Error
 ) where
 
