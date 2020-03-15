@@ -1,3 +1,4 @@
+{-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE RankNTypes #-}
 module Control.Carrier.Error.Cont
 ( -- * Error carrier
@@ -14,3 +15,4 @@ runError f (ErrorC m) = m f
 {-# INLINE runError #-}
 
 newtype ErrorC e m a = ErrorC (forall b . (a -> m (Either e b)) -> m (Either e b))
+  deriving (Functor)
