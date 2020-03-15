@@ -27,7 +27,7 @@ instance Applicative (ErrorC e m) where
   {-# INLINE (<*>) #-}
 
   liftA2 f (ErrorC a) (ErrorC b) = ErrorC $ \ k ->
-    a (\ a' -> b (\ b' -> k (f a' b')))
+    a (\ a' -> b (k . f a'))
   {-# INLINE liftA2 #-}
 
   ErrorC a *> ErrorC b = ErrorC $ a . const . b
