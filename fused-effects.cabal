@@ -50,6 +50,7 @@ library
     Control.Carrier.Choose.Church
     Control.Carrier.Cull.Church
     Control.Carrier.Cut.Church
+    Control.Carrier.Empty.Church
     Control.Carrier.Empty.Maybe
     Control.Carrier.Error.Church
     Control.Carrier.Error.Either
