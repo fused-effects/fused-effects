@@ -65,7 +65,7 @@ instance MonadFix m => MonadFix (ErrorC e m) where
     (toError . f . run . fromError)
     >>= run . runError (pure . h) (pure . k)
     where
-    toError   = runError (\ e -> pure (ErrorC (\ h _ -> h e))) (pure . pure)
+    toError   = runError (pure . throwError) (pure . pure)
     fromError = runError (const (error "mfix (ErrorC): throwError")) pure
   {-# INLINE mfix #-}
 
