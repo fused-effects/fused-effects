@@ -10,6 +10,7 @@ module Empty
 , test
 ) where
 
+import qualified Control.Carrier.Empty.Church as C.Church
 import qualified Control.Carrier.Empty.Maybe as C.Maybe
 import qualified Control.Monad.Trans.Maybe as T.Maybe
 import           Control.Effect.Empty
@@ -22,7 +23,12 @@ import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty"
-  [ testGroup "EmptyC (Maybe)" $
+  [ testGroup "EmptyC (Church)" $
+    [ testMonad
+    , testMonadFix
+    , testEmpty
+    ] >>= ($ runL (fmap maybeToList . C.Church.runEmpty (pure Nothing) (pure . Just)))
+  , testGroup "EmptyC (Maybe)" $
     [ testMonad
     , testMonadFix
     , testEmpty
