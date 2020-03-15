@@ -1,5 +1,9 @@
 - Adds a church-encoded `State` carrier in `Control.Carrier.State.Church`. ([#363](https://github.com/fused-effects/fused-effects/pull/363))
 
+- Adds a church-encoded `Error` carrier in `Control.Carrier.Error.Church`. ([#203](https://github.com/fused-effects/fused-effects/pull/203))
+
+- Adds a church-encoded `Empty` carrier in `Control.Carrier.Empty.Church`. ([#203](https://github.com/fused-effects/fused-effects/pull/203))
+
 - Defines `Algebra` instances for `Control.Monad.Trans.Maybe.MaybeT`, `Control.Monad.Trans.RWS.CPS`, and `Control.Monad.Trans.Writer.CPS`. ([#366](https://github.com/fused-effects/fused-effects/pull/366))
 
 

@@ -50,7 +50,9 @@ library
     Control.Carrier.Choose.Church
     Control.Carrier.Cull.Church
     Control.Carrier.Cut.Church
+    Control.Carrier.Empty.Church
     Control.Carrier.Empty.Maybe
+    Control.Carrier.Error.Church
     Control.Carrier.Error.Either
     Control.Carrier.Fail.Either
     Control.Carrier.Fresh.Strict
@@ -98,7 +100,7 @@ library
     Control.Effect.Throw.Internal
     Control.Effect.Writer.Internal
   build-depends:
-      base          >= 4.9 && < 4.14
+    , base          >= 4.9 && < 4.14
     , transformers  >= 0.4 && < 0.6
 
 
@@ -114,7 +116,7 @@ test-suite examples
     ReinterpretLog
     Teletype
   build-depends:
-      base
+    , base
     , fused-effects
     , hedgehog           ^>= 1
     , hedgehog-fn        ^>= 1
@@ -151,7 +153,7 @@ test-suite test
     Throw
     Writer
   build-depends:
-      base
+    , base
     , containers          >= 0.5 && < 0.7
     , fused-effects
     , hedgehog           ^>= 1
@@ -169,7 +171,7 @@ test-suite docs
   main-is:     README.lhs
   ghc-options: -pgmL markdown-unlit
   build-depends:
-      base
+    , base
     , fused-effects
     , mtl           ^>= 2.2
   build-tool-depends:
@@ -182,13 +184,15 @@ benchmark benchmark
   hs-source-dirs: benchmark
   main-is:        Bench.hs
   other-modules:
+    Bench.Error
     Bench.Reader
     Bench.NonDet
     Bench.NonDet.NQueens
   build-depends:
-      base
+    , base
     , fused-effects
     , gauge
+    , transformers
   ghc-options:
     -threaded
     -rtsopts "-with-rtsopts=-N -A4m -n2m"

@@ -18,7 +18,7 @@ module Control.Carrier.Error.Either
 import Control.Algebra
 import Control.Applicative (Alternative(..))
 import Control.Effect.Error
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -34,7 +34,7 @@ import Control.Monad.Trans.Except
 -- 'runError' ('throwError' e) = 'pure' ('Left' e)
 -- @
 -- @
--- 'runError' ('throwError' e `catchError` 'pure') = 'pure' ('Right' e)
+-- 'runError' ('throwError' e \`'catchError'\` 'pure') = 'pure' ('Right' e)
 -- @
 --
 -- @since 0.1.0.0

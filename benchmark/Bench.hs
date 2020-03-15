@@ -20,13 +20,16 @@ import           Control.Monad (replicateM_)
 import           Data.Monoid (Sum(..))
 import           Gauge
 
-import qualified Bench.Reader as Reader
+import qualified Bench.Error as Error
 import qualified Bench.NonDet as NonDet
+import qualified Bench.Reader as Reader
 
 main :: IO ()
 main = defaultMain
-  [ Reader.benchmark
+  [ Error.benchmark
   , NonDet.benchmark
+  , Reader.benchmark
+
   , bgroup "WriterC"
     [ bench "100"   $ whnf (run . execWriter @(Sum Int) . tellLoop) 100
     , bench "1000"  $ whnf (run . execWriter @(Sum Int) . tellLoop) 1000

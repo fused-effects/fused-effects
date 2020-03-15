@@ -35,6 +35,10 @@ import Data.Functor.Identity
 
 -- | Run a 'NonDet' effect, using the provided functions to interpret choice, leaf results, and failure.
 --
+-- @
+-- runNonDet fork leaf nil ('pure' a '<|>' 'empty') = leaf a \`fork\` nil
+-- @
+--
 -- @since 1.0.0.0
 runNonDet
   :: (m b -> m b -> m b) -- ^ Handles choice ('<|>')
@@ -123,8 +127,8 @@ instance Algebra sig m => Algebra (NonDet :+: sig) (NonDetC m) where
   alg hdl sig ctx = NonDetC $ \ fork leaf nil -> case sig of
     L (L Empty)  -> nil
     L (R Choose) -> leaf (True <$ ctx) `fork` leaf (False <$ ctx)
-    R other      -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runNonDet (coerce fork) (coerce leaf) (coerce nil)
+    R other      -> thread (dst ~<~ hdl) other (pure ctx) >>= run . runNonDet (coerce fork) (coerce leaf) (coerce nil)
     where
     dst :: Applicative m => NonDetC Identity (NonDetC m a) -> m (NonDetC Identity a)
-    dst = runIdentity . runNonDet (liftA2 (liftA2 (<|>))) (pure . runNonDetA) (pure (pure empty))
+    dst = run . runNonDet (liftA2 (liftA2 (<|>))) (pure . runNonDetA) (pure (pure empty))
   {-# INLINE alg #-}

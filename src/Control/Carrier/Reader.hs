@@ -19,7 +19,7 @@ module Control.Carrier.Reader
 import Control.Algebra
 import Control.Applicative (Alternative(..), liftA2)
 import Control.Effect.Reader
-import Control.Monad (MonadPlus(..))
+import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
@@ -52,6 +52,10 @@ instance Applicative m => Applicative (ReaderC r m) where
 
   ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
   {-# INLINE (<*>) #-}
+
+  liftA2 f (ReaderC a) (ReaderC b) = ReaderC $ \ r ->
+    liftA2 f (a r) (b r)
+  {-# INLINE liftA2 #-}
 
   ReaderC u *> ReaderC v = ReaderC $ \ r -> u r *> v r
   {-# INLINE (*>) #-}

@@ -38,6 +38,10 @@ import Prelude hiding (head, tail)
 
 -- | Run a 'Choose' effect with continuations respectively interpreting '<|>' and 'pure'.
 --
+-- @
+-- runChoose fork leaf ('pure' a '<|>' b) = leaf a \`fork\` 'runChoose' fork leaf b
+-- @
+--
 -- @since 1.0.0.0
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf (ChooseC runChooseC) = runChooseC fork leaf
@@ -95,8 +99,8 @@ instance MonadTrans ChooseC where
 instance Algebra sig m => Algebra (Choose :+: sig) (ChooseC m) where
   alg hdl sig ctx = ChooseC $ \ fork leaf -> case sig of
     L Choose -> leaf (True <$ ctx) `fork` leaf (False <$ ctx)
-    R other  -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runChoose (coerce fork) (coerce leaf)
+    R other  -> thread (dst ~<~ hdl) other (pure ctx) >>= run . runChoose (coerce fork) (coerce leaf)
     where
     dst :: Applicative m => ChooseC Identity (ChooseC m a) -> m (ChooseC Identity a)
-    dst = runIdentity . runChoose (liftA2 (liftA2 (<|>))) (pure . runChoose (liftA2 (<|>)) (pure . pure))
+    dst = run . runChoose (liftA2 (liftA2 (<|>))) (pure . runChoose (liftA2 (<|>)) (pure . pure))
   {-# INLINE alg #-}
