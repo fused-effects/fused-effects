@@ -35,6 +35,10 @@ import Data.Functor.Identity
 
 -- | Run a 'NonDet' effect, using the provided functions to interpret choice, leaf results, and failure.
 --
+-- @
+-- runNonDet fork leaf nil ('pure' a '<|>' 'empty') = leaf a \`fork\` nil
+-- @
+--
 -- @since 1.0.0.0
 runNonDet
   :: (m b -> m b -> m b) -- ^ Handles choice ('<|>')
