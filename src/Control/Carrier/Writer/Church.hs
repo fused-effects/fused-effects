@@ -64,8 +64,7 @@ instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (WriterC w m) w
         let !w'' = mappend w w'
         k w'' ((,) w' <$> a)) (hdl (m <$ ctx))
       Censor f m -> runWriter (\ w' a -> do
-        let !fw' = f w'
-            !w'' = mappend w fw'
+        let !w'' = mappend w (f w')
         k w'' a) (hdl (m <$ ctx))
     R other  -> alg (runWriterC . hdl) (R other) ctx
   {-# INLINE alg #-}
