@@ -7,6 +7,7 @@
 module Control.Carrier.Writer.Church
 ( -- * Writer carrier
   runWriter
+, execWriter
 , WriterC(WriterC)
   -- * Writer effect
 , module Control.Effect.Writer
@@ -25,6 +26,15 @@ import Control.Monad.Trans.Class
 runWriter :: Monoid w => (w -> a -> m b) -> WriterC w m a -> m b
 runWriter k = runState k mempty . runWriterC
 {-# INLINE runWriter #-}
+
+-- | Run a 'Writer' effect with a 'Monoid'al log, producing the final log and discarding the result value.
+--
+-- @
+-- 'execWriter' = 'runWriter' ('const' '.' 'pure')
+-- @
+execWriter :: (Monoid w, Applicative m) => WriterC w m a -> m w
+execWriter = runWriter (const . pure)
+{-# INLINE execWriter #-}
 
 newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
