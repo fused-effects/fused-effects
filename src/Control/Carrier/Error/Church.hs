@@ -31,6 +31,16 @@ import Prelude hiding (fail)
 
 -- | Run an 'Error' effect, applying the first continuation to uncaught errors and the second continuation to successful computations’ results.
 --
+-- @
+-- 'runError' ('pure' '.' 'Left') ('pure' '.' 'Right') ('pure' a) = 'pure' ('Right' a)
+-- @
+-- @
+-- 'runError' ('pure' '.' 'Left') ('pure' '.' 'Right') ('throwError' e) = 'pure' ('Left' e)
+-- @
+-- @
+-- 'runError' ('pure' '.' 'Left') ('pure' '.' 'Right') ('throwError' e \`'catchError'\` 'pure') = 'pure' ('Right' e)
+-- @
+--
 -- @since 1.1.0.0
 runError :: (e -> m b) -> (a -> m b) -> ErrorC e m a -> m b
 runError fail leaf m = runErrorC m fail leaf
