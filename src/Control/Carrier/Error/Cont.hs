@@ -16,3 +16,11 @@ runError f (ErrorC m) = m f
 
 newtype ErrorC e m a = ErrorC (forall b . (a -> m (Either e b)) -> m (Either e b))
   deriving (Functor)
+
+instance Applicative (ErrorC e m) where
+  pure a = ErrorC $ \ k -> k a
+  {-# INLINE pure #-}
+
+  ErrorC f <*> ErrorC a = ErrorC $ \ k ->
+    f (\ f' -> a (\ a' -> k (f' a')))
+  {-# INLINE (<*>) #-}
