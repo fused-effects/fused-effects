@@ -190,6 +190,7 @@ benchmark benchmark
     Bench.NonDet
     Bench.NonDet.NQueens
     Bench.Reader
+    Bench.State
     Bench.Writer
   build-depends:
     , base
