@@ -20,7 +20,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
-runError :: (a -> m (Either e b)) -> ErrorC e m a -> m (Either e b)
+runError :: forall e m a b . (a -> m (Either e b)) -> ErrorC e m a -> m (Either e b)
 runError f (ErrorC m) = m f
 {-# INLINE runError #-}
 
