@@ -35,8 +35,6 @@ common common
     -Wno-name-shadowing
     -Wno-safe
     -Wno-unsafe
-  if (impl(ghc >= 8.6))
-    ghc-options: -Wno-star-is-type
   if (impl(ghc >= 8.8))
     ghc-options: -Wno-missing-deriving-strategies
 
