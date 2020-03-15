@@ -23,6 +23,20 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
+-- | Run a 'Writer' effect with a 'Monoid'al log, applying a continuation to the final log and result.
+--
+-- @
+-- 'runWriter' k ('pure' a) = k 'mempty' a
+-- @
+-- @
+-- 'runWriter' k ('tell' w) = k w ()
+-- @
+-- @
+-- 'runWriter' k ('listen' ('tell' w)) = k w (w, ())
+-- @
+-- @
+-- 'runWriter' k ('censor' f ('tell' w)) = k (f w) ()
+-- @
 runWriter :: Monoid w => (w -> a -> m b) -> WriterC w m a -> m b
 runWriter k = runState k mempty . runWriterC
 {-# INLINE runWriter #-}
