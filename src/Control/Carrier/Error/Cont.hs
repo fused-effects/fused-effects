@@ -43,6 +43,9 @@ instance Monad (ErrorC e m) where
   ErrorC a >>= f = ErrorC $ \ k -> a (runError k . f)
   {-# INLINE (>>=) #-}
 
+  (>>) = (*>)
+  {-# INLINE (>>) #-}
+
 instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
