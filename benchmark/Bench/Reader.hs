@@ -5,6 +5,7 @@ module Bench.Reader
 
 import Control.Carrier.Reader
 import Control.Monad (replicateM_)
+import Control.Monad.Trans.Reader (runReaderT)
 import Gauge hiding (benchmark)
 
 benchmark :: Benchmark
@@ -12,10 +13,12 @@ benchmark = bgroup "Reader"
   [ bgroup "ask"
     [ bench "(->)"    $ whnf (`asking` 'c') n
     , bench "ReaderC" $ whnf (run . runReader 'c' . asking) n
+    , bench "ReaderT" $ whnf (run . (`runReaderT` 'c') . asking) n
     ]
   , bgroup "local"
     [ bench "(->)"    $ whnf (`locally` 'c') n
     , bench "ReaderC" $ whnf (run . runReader 'c' . locally) n
+    , bench "ReaderT" $ whnf (run . (`runReaderT` 'c') . locally) n
     ]
   ]
   where
