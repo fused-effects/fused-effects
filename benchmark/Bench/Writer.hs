@@ -17,7 +17,8 @@ import Gauge hiding (benchmark)
 
 benchmark :: Gauge.Benchmark
 benchmark = bgroup "Writer"
-  [ bgroup "Identity"
+  [ bench "(,) w" $ whnf (fst . (tellLoop :: Int -> (Sum Int, ()))) n
+  , bgroup "Identity"
     [ bench "Strict.WriterC" $ whnf (run . C.Strict.execWriter @(Sum Int) . tellLoop) n
   #if MIN_VERSION_transformers(0,5,6)
     , bench "CPS.WriterT" $ whnf (run . T.CPS.execWriterT @_ @(Sum Int) . tellLoop) n
