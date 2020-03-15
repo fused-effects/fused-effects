@@ -26,6 +26,7 @@ runEmpty :: m b -> (a -> m b) -> EmptyC m a -> m b
 runEmpty nil leaf (EmptyC m) = m nil leaf
 {-# INLINE runEmpty #-}
 
+-- | @since 1.1.0.0
 newtype EmptyC m a = EmptyC (forall b . m b -> (a -> m b) -> m b)
   deriving (Functor)
 
