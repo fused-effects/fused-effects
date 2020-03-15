@@ -6,6 +6,7 @@ import qualified Bench.Error as Error
 import qualified Bench.Interpret as Interpret
 import qualified Bench.NonDet as NonDet
 import qualified Bench.Reader as Reader
+import qualified Bench.State as State
 import qualified Bench.Writer as Writer
 import           Gauge
 
@@ -15,5 +16,6 @@ main = defaultMain
   , Interpret.benchmark
   , NonDet.benchmark
   , Reader.benchmark
+  , State.benchmark
   , Writer.benchmark
   ]

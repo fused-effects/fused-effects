@@ -1,30 +1,45 @@
 {-# LANGUAGE TypeApplications #-}
-
 module Bench.Reader
 ( benchmark
 ) where
 
 import Control.Carrier.Reader
-import Control.Monad
-
+import Control.Monad (replicateM_)
+import Control.Monad.Trans.Reader (runReaderT)
 import Gauge hiding (benchmark)
+
+benchmark :: Benchmark
+benchmark = bgroup "Reader"
+  [ bgroup "ask"
+    [ bench "(->)"    $ whnf (`asking` 'c') n
+    , bgroup "Identity"
+      [ bench "ReaderC" $ whnf (run . runReader 'c' . asking) n
+      , bench "ReaderT" $ whnf (run . (`runReaderT` 'c') . asking) n
+      ]
+    , bgroup "IO"
+      [ bench "ReaderC" $ whnfAppIO (runReader 'c' . asking) n
+      , bench "ReaderT" $ whnfAppIO ((`runReaderT` 'c') . asking) n
+      ]
+    ]
+  , bgroup "local"
+    [ bench "(->)"    $ whnf (`locally` 'c') n
+    , bgroup "Identity"
+      [ bench "ReaderC" $ whnf (run . runReader 'c' . locally) n
+      , bench "ReaderT" $ whnf (run . (`runReaderT` 'c') . locally) n
+      ]
+    , bgroup "IO"
+      [ bench "ReaderC" $ whnfAppIO (runReader 'c' . locally) n
+      , bench "ReaderT" $ whnfAppIO ((`runReaderT` 'c') . locally) n
+      ]
+    ]
+  ]
+  where
+  n = 100000
 
 asking :: Has (Reader Char) sig m => Int -> m ()
 asking i = replicateM_ i (ask @Char)
+{-# INLINE asking #-}
 
 locally :: Has (Reader Char) sig m => Int -> m ()
 locally i = replicateM_ i (local @Char succ (ask @Char))
-
-benchmark :: Gauge.Benchmark
-benchmark = bgroup "Control.Carrier.Reader"
-  [ bgroup "ask"
-    [ bench "10" $ whnf (run . runReader 'a' . asking) 10
-    , bench "100" $ whnf (run . runReader 'b' . asking) 100
-    , bench "1000" $ whnf (run . runReader 'c' . asking) 1000
-    ]
-  , bgroup "local"
-    [ bench "10" $ whnf (run . runReader 'a' . locally) 10
-    , bench "100" $ whnf (run . runReader 'b' . locally) 100
-    , bench "1000" $ whnf (run . runReader 'c' . locally) 1000
-    ]
-  ]
+{-# INLINE locally #-}

@@ -15,7 +15,7 @@ import Control.Monad.Trans.Writer.Strict as T.Strict (execWriterT)
 import Data.Monoid (Sum(..))
 import Gauge hiding (benchmark)
 
-benchmark :: Gauge.Benchmark
+benchmark :: Benchmark
 benchmark = bgroup "Writer"
   [ bench "(,) w" $ whnf (fst . (tellLoop :: Int -> (Sum Int, ()))) n
   , bgroup "Identity"
