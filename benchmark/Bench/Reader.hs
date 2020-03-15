@@ -15,7 +15,7 @@ asking i = replicateM_ i (ask @Char)
 locally :: Has (Reader Char) sig m => Int -> m ()
 locally i = replicateM_ i (local @Char succ (ask @Char))
 
-benchmark :: Gauge.Benchmark
+benchmark :: Benchmark
 benchmark = bgroup "Control.Carrier.Reader"
   [ bgroup "ask"
     [ bench "10" $ whnf (run . runReader 'a' . asking) 10

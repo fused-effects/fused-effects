@@ -9,7 +9,7 @@ import Data.Foldable (for_)
 import Control.Monad.Trans.Except as Except
 import Gauge hiding (benchmark)
 
-benchmark :: Gauge.Benchmark
+benchmark :: Benchmark
 benchmark = bgroup "Error"
   [ bench "Either" $ whnf (errorLoop :: Int -> Either Int ()) n
   , bgroup "Identity"

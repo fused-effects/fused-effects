@@ -8,7 +8,7 @@ import           Control.Algebra
 import qualified Control.Carrier.NonDet.Church as NonDet.Church
 import           Gauge hiding (benchmark)
 
-benchmark :: Gauge.Benchmark
+benchmark :: Benchmark
 benchmark = bgroup "NonDet"
   [ bgroup "N-queens problem"
     [ NQueens.benchmark "NonDet.Church" (run . NonDet.Church.runNonDetA)

@@ -12,7 +12,7 @@ import Control.Carrier.State.Strict
 import Data.Foldable (for_)
 import Gauge hiding (benchmark)
 
-benchmark :: Gauge.Benchmark
+benchmark :: Benchmark
 benchmark = bgroup "Interpret"
   [ bgroup "Identity"
     [ bench "InterpretC" $
