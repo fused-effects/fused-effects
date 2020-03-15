@@ -4,7 +4,7 @@ module Bench.Writer
 ) where
 
 import Control.Carrier.Writer.Strict as C.Strict
-import Control.Monad (replicateM_)
+import Data.Foldable (for_)
 import Data.Monoid (Sum(..))
 import Gauge hiding (benchmark)
 
@@ -16,4 +16,4 @@ benchmark = bgroup "Writer"
   n = 100000
 
 tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
-tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
+tellLoop i = for_ [1..i] (tell . Sum)
