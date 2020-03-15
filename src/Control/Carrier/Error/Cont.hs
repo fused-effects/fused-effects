@@ -8,6 +8,7 @@ module Control.Carrier.Error.Cont
 , module Control.Effect.Error
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Effect.Error
 
 runError :: (a -> m (Either e b)) -> ErrorC e m a -> m (Either e b)
@@ -24,6 +25,10 @@ instance Applicative (ErrorC e m) where
   ErrorC f <*> ErrorC a = ErrorC $ \ k ->
     f (\ f' -> a (k . f'))
   {-# INLINE (<*>) #-}
+
+  liftA2 f (ErrorC a) (ErrorC b) = ErrorC $ \ k ->
+    a (\ a' -> b (\ b' -> k (f a' b')))
+  {-# INLINE liftA2 #-}
 
   ErrorC a *> ErrorC b = ErrorC $ a . const . b
   {-# INLINE (*>) #-}
