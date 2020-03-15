@@ -52,8 +52,8 @@ main = defaultMain
       , bench "10000" $ whnf (run . execState @Int 0 . modLoop) 10000
       ]
     ]
-  ,
-    bgroup "Error"
+
+  , bgroup "Error"
     [ bgroup "Either"
       [ bench "100"   $ whnf (run . Either.runError @Int . errorLoop) 100
       , bench "1000"  $ whnf (run . Either.runError @Int . errorLoop) 1000
