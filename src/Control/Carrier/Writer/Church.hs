@@ -5,6 +5,9 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+
+{- | A church-encoded carrier for 'Writer'.
+-}
 module Control.Carrier.Writer.Church
 ( -- * Writer carrier
   runWriter
