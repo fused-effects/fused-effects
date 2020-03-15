@@ -11,6 +11,7 @@ module Control.Carrier.Empty.Church
 import Control.Applicative (liftA2)
 import Control.Effect.Empty
 import Control.Monad.Fail as Fail
+import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 
 runEmpty :: (a -> m b) -> m b -> EmptyC m a -> m b
@@ -51,6 +52,10 @@ instance Monad (EmptyC m) where
 instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
   fail = lift . Fail.fail
   {-# INLINE fail #-}
+
+instance MonadIO m => MonadIO (EmptyC m) where
+  liftIO = lift . liftIO
+  {-# INLINE liftIO #-}
 
 instance MonadTrans EmptyC where
   lift m = EmptyC $ \ leaf _ -> m >>= leaf
