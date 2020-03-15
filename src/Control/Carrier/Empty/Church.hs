@@ -18,6 +18,8 @@ import Control.Effect.Empty
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
 
 runEmpty :: (a -> m b) -> m b -> EmptyC m a -> m b
 runEmpty leaf nil (EmptyC m) = m leaf nil
@@ -69,5 +71,8 @@ instance MonadTrans EmptyC where
 instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
   alg hdl sig ctx = EmptyC $ \ leaf nil -> case sig of
     L Empty -> nil
-    R other -> thread (maybe (pure Nothing) (runEmpty (pure . Just) (pure Nothing)) ~<~ hdl) other (Just ctx) >>= maybe nil leaf
+    R other -> thread (dst ~<~ hdl) other (pure ctx) >>= run . runEmpty (coerce leaf) (coerce nil)
+    where
+    dst :: Applicative m => EmptyC Identity (EmptyC m a) -> m (EmptyC Identity a)
+    dst = run . runEmpty (pure . runEmpty (pure . pure) (pure empty)) (pure (pure empty))
   {-# INLINE alg #-}
