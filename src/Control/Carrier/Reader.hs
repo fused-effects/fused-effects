@@ -53,6 +53,10 @@ instance Applicative m => Applicative (ReaderC r m) where
   ReaderC f <*> ReaderC a = ReaderC (liftA2 (<*>) f a)
   {-# INLINE (<*>) #-}
 
+  liftA2 f (ReaderC a) (ReaderC b) = ReaderC $ \ r ->
+    liftA2 f (a r) (b r)
+  {-# INLINE liftA2 #-}
+
   ReaderC u *> ReaderC v = ReaderC $ \ r -> u r *> v r
   {-# INLINE (*>) #-}
 
