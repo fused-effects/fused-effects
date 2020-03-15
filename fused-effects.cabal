@@ -186,9 +186,9 @@ benchmark benchmark
   other-modules:
     Bench.Error
     Bench.Interpret
-    Bench.Reader
     Bench.NonDet
     Bench.NonDet.NQueens
+    Bench.Reader
     Bench.Writer
   build-depends:
     , base
