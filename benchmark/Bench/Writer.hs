@@ -17,3 +17,4 @@ benchmark = bgroup "Writer"
 
 tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
 tellLoop i = for_ [1..i] (tell . Sum)
+{-# INLINE tellLoop #-}
