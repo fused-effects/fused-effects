@@ -10,7 +10,8 @@ import Gauge hiding (benchmark)
 
 benchmark :: Gauge.Benchmark
 benchmark = bgroup "Error"
-  [ bench "Either.ErrorC" $ whnf (run . Either.runError @Int . errorLoop) 10000
+  [ bench "Either"        $ whnf (errorLoop :: Int -> Either Int ()) 10000
+  , bench "Either.ErrorC" $ whnf (run . Either.runError @Int . errorLoop) 10000
   , bench "Church.ErrorC" $ whnf (run . Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
   ]
 
