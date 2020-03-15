@@ -12,6 +12,7 @@ module Error
 import qualified Catch
 import qualified Control.Carrier.Error.Church as C.Church
 import qualified Control.Carrier.Error.Cont as C.Cont
+import qualified Control.Carrier.Error.CPS as C.CPS
 import qualified Control.Carrier.Error.Either as C.Either
 import           Control.Effect.Error
 import qualified Control.Monad.Trans.Except as T.Except
@@ -34,6 +35,11 @@ tests = testGroup "Error"
     , testMonadFix
     , testError
     ] >>= ($ runL (C.Cont.runError (pure . Right)))
+  , testGroup "ErrorC (CPS)" $
+    [ testMonad
+    , testMonadFix
+    , testError
+    ] >>= ($ runL (C.CPS.runError pure))
   , testGroup "ErrorC (Either)" $
     [ testMonad
     , testMonadFix
