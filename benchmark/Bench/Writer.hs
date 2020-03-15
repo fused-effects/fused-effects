@@ -5,12 +5,12 @@ module Bench.Writer
 ) where
 
 import Control.Carrier.Writer.Strict as C.Strict
+import Control.Monad (replicateM_)
 #if MIN_VERSION_transformers(0,5,6)
 import Control.Monad.Trans.Writer.CPS as T.CPS (execWriterT)
 #endif
 import Control.Monad.Trans.Writer.Lazy as T.Lazy (execWriterT)
 import Control.Monad.Trans.Writer.Strict as T.Strict (execWriterT)
-import Data.Foldable (for_)
 import Data.Monoid (Sum(..))
 import Gauge hiding (benchmark)
 
@@ -27,5 +27,5 @@ benchmark = bgroup "Writer"
   n = 100000
 
 tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
-tellLoop i = for_ [1..i] (tell . Sum)
+tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
 {-# INLINE tellLoop #-}
