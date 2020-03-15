@@ -1,5 +1,9 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Empty.Church
 ( -- * Empty carrier
   runEmpty
@@ -8,6 +12,7 @@ module Control.Carrier.Empty.Church
 , module Control.Effect.Empty
 ) where
 
+import Control.Algebra
 import Control.Applicative (liftA2)
 import Control.Effect.Empty
 import Control.Monad.Fail as Fail
@@ -60,3 +65,9 @@ instance MonadIO m => MonadIO (EmptyC m) where
 instance MonadTrans EmptyC where
   lift m = EmptyC $ \ leaf _ -> m >>= leaf
   {-# INLINE lift #-}
+
+instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
+  alg hdl sig ctx = EmptyC $ \ leaf nil -> case sig of
+    L Empty -> nil
+    R other -> thread (maybe (pure Nothing) (runEmpty (pure . Just) (pure Nothing)) ~<~ hdl) other (Just ctx) >>= maybe nil leaf
+  {-# INLINE alg #-}
