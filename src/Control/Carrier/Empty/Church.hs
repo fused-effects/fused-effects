@@ -12,6 +12,7 @@
 module Control.Carrier.Empty.Church
 ( -- * Empty carrier
   runEmpty
+, evalEmpty
 , EmptyC(..)
   -- * Empty effect
 , module Control.Effect.Empty
@@ -40,6 +41,19 @@ import Data.Functor.Identity
 runEmpty :: m b -> (a -> m b) -> EmptyC m a -> m b
 runEmpty nil leaf (EmptyC m) = m nil leaf
 {-# INLINE runEmpty #-}
+
+-- | Run an 'Empty' effect, discarding its result.
+--
+-- This is convenient for using 'empty' to signal early returns without needing to know whether control exited normally or not.
+--
+-- @
+-- 'evalEmpty' = 'runEmpty' ('pure' ()) ('const' ('pure' ()))
+-- @
+--
+-- @since 1.1.0.0
+evalEmpty :: Applicative m => EmptyC m a -> m ()
+evalEmpty = runEmpty (pure ()) (const (pure ()))
+{-# INLINE evalEmpty #-}
 
 -- | @since 1.1.0.0
 newtype EmptyC m a = EmptyC (forall b . m b -> (a -> m b) -> m b)
