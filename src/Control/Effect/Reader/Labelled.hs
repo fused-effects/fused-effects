@@ -15,6 +15,7 @@ module Control.Effect.Reader.Labelled
   -- * Re-exports
 , Algebra
 , Has
+, HasLabelled
 , run
 ) where
 
