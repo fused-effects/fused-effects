@@ -5,6 +5,7 @@ module Bench.Error
 
 import Control.Carrier.Error.Church as Church
 import Control.Carrier.Error.Cont as Cont
+import Control.Carrier.Error.CPS as CPS
 import Control.Carrier.Error.Either as Either
 import Control.Monad (replicateM_)
 import Control.Monad.Trans.Except as Except
@@ -16,12 +17,14 @@ benchmark = bgroup "Error"
     [ bench "Either"        $ whnf (errorLoop :: Int -> Either Int ()) 10000
     , bench "Church.ErrorC" $ whnf (run . Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
     , bench "Cont.ErrorC"   $ whnf (run . Cont.runError @Int (pure . Right) . errorLoop) 10000
+    , bench "CPS.ErrorC"    $ whnf (run . CPS.runError @Int pure . errorLoop) 10000
     , bench "Either.ErrorC" $ whnf (run . Either.runError @Int . errorLoop) 10000
     , bench "ExceptT"       $ whnf (run . Except.runExceptT @Int . errorLoop) 10000
     ]
   , bgroup "IO"
     [ bench "Church.ErrorC IO" $ whnfAppIO (Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
     , bench "Cont.ErrorC IO"   $ whnfAppIO (Cont.runError @Int (pure . Right) . errorLoop) 10000
+    , bench "CPS.ErrorC IO"    $ whnfAppIO (CPS.runError @Int pure . errorLoop) 10000
     , bench "Either.ErrorC IO" $ whnfAppIO (Either.runError @Int . errorLoop) 10000
     , bench "ExceptT IO"       $ whnfAppIO (Except.runExceptT @Int . errorLoop) 10000
     ]
