@@ -18,6 +18,7 @@ benchmark = bgroup "Error"
   , bench "Church.ErrorC"    $ whnf (run . Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
   , bench "Church.ErrorC IO" $ whnfAppIO  (Church.runError @Int (pure . Left) (pure . Right) . errorLoop) 10000
   , bench "Cont.ErrorC"      $ whnf (run . Cont.runError @Int (pure . Right) . errorLoop) 10000
+  , bench "Cont.ErrorC IO"   $ whnfAppIO  (Cont.runError @Int (pure . Right) . errorLoop) 10000
   , bench "ExceptT"          $ whnf (run . Except.runExceptT @Int . errorLoop) 10000
   , bench "ExceptT IO"       $ whnfAppIO  (Except.runExceptT @Int . errorLoop) 10000
   ]
