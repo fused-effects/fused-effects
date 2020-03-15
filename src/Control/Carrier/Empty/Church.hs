@@ -28,3 +28,7 @@ instance Applicative (EmptyC m) where
   EmptyC a *> EmptyC b = EmptyC $ \ leaf nil ->
     a (\ _ -> b leaf nil) nil
   {-# INLINE (*>) #-}
+
+  EmptyC a <* EmptyC b = EmptyC $ \ leaf nil ->
+    a (\ a' -> b (const (leaf a')) nil) nil
+  {-# INLINE (<*) #-}
