@@ -19,6 +19,8 @@ import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
 
 runError :: (Either e a -> m b) -> ErrorC e m a -> m b
 runError k (ErrorC m) = m k
@@ -76,7 +78,9 @@ instance Algebra sig m => Algebra (Error e :+: sig) (ErrorC e m) where
   alg hdl sig ctx = ErrorC $ \ k -> case sig of
     L (L (Throw e))   -> k (Left e)
     L (R (Catch m h)) -> runError (runError k . either (lower . h) pure) (lower m)
-    R other           -> thread (either (pure . Left) (runError pure) ~<~ hdl) other (Right ctx) >>= k
+    R other           -> thread (dst ~<~ hdl) other (pure ctx) >>= run . runError (coerce k)
     where
     lower = hdl . (<$ ctx)
+    dst :: Applicative m => ErrorC e Identity (ErrorC e m a) -> m (ErrorC e Identity a)
+    dst = run . runError (pure . either (pure . throwError) (runError (either (pure . throwError) (pure . pure))))
   {-# INLINE alg #-}
