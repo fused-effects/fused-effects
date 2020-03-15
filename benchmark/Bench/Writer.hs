@@ -20,9 +20,9 @@ benchmark = bgroup "Writer"
   [ bench "(,) w" $ whnf (fst . (tellLoop :: Int -> (Sum Int, ()))) n
   , bgroup "Identity"
     [ bench "Strict.WriterC" $ whnf (run . C.Strict.execWriter @(Sum Int) . tellLoop) n
-  #if MIN_VERSION_transformers(0,5,6)
+#if MIN_VERSION_transformers(0,5,6)
     , bench "CPS.WriterT" $ whnf (run . T.CPS.execWriterT @_ @(Sum Int) . tellLoop) n
-  #endif
+#endif
     , bench "Lazy.WriterT" $ whnf (run . T.Lazy.execWriterT @_ @(Sum Int) . tellLoop) n
     , bench "Strict.WriterT" $ whnf (run . T.Strict.execWriterT @_ @(Sum Int) . tellLoop) n
     ]
