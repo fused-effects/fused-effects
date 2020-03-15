@@ -4,6 +4,8 @@
 
 - Adds a church-encoded `Empty` carrier in `Control.Carrier.Empty.Church`. ([#203](https://github.com/fused-effects/fused-effects/pull/203))
 
+- Adds a church-encoded `Writer` carrier in `Control.Carrier.Writer.Church`. ([#369](https://github.com/fused-effects/fused-effects/pull/369))
+
 - Defines `Algebra` instances for `Control.Monad.Trans.Maybe.MaybeT`, `Control.Monad.Trans.RWS.CPS`, and `Control.Monad.Trans.Writer.CPS`. ([#366](https://github.com/fused-effects/fused-effects/pull/366))
 
 
@@ -28,6 +30,8 @@
 - Reorders the parameters to the higher-order function passed to `Control.Effect.Lift.liftWith` for consistency with `alg` and to reflect its purpose of lifting Kleisli arrows in some underlying monad into the context modulo the context’s state. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
 
 - Redefines all effects as GADTs. Since we no longer require `Functor`, `HFunctor`, or `Effect` instances, we no longer need to use continuations to allow distinct result types per constructor. `Algebra` instances for these effects can be ported forwards by removing the continuations. User-defined effects are not impacted, but we recommend migrating to GADT definitions of them for convenience and ease of comprehension going forwards. ([#365](https://github.com/fused-effects/fused-effects/pull/365))
+
+- Removes `Control.Carrier.State.Lazy.runStateC`, which was supposed to have been removed in 1.0.
 
 
 # v1.0.2.0

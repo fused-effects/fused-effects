@@ -71,7 +71,7 @@ execState s = fmap fst . runState s
 {-# INLINE[3] execState #-}
 
 -- | @since 1.0.0.0
-newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
+newtype StateC s m a = StateC (s -> m (s, a))
 
 instance Functor m => Functor (StateC s m) where
   fmap f m = StateC $ \ s -> (\ ~(s', a) -> (s', f a)) <$> runState s m
