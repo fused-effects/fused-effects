@@ -13,6 +13,7 @@ module Writer
 ) where
 
 import           Control.Arrow ((&&&))
+import qualified Control.Carrier.Writer.Church as C.Writer.Church
 import qualified Control.Carrier.Writer.Strict as C.Writer.Strict
 import           Control.Effect.Writer
 #if MIN_VERSION_transformers(0,5,6)
@@ -35,7 +36,12 @@ import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testGroup "WriterC (Strict)" $
+  [ testGroup "WriterC (Church)" $
+    [ testMonad
+    , testMonadFix
+    , testWriter
+    ] >>= ($ runL (C.Writer.Church.runWriter (curry pure)))
+  , testGroup "WriterC (Strict)" $
     [ testMonad
     , testMonadFix
     , testWriter
