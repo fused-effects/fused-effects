@@ -37,3 +37,7 @@ instance Applicative (ErrorC e m) where
   ErrorC a <* ErrorC b = ErrorC $ \ k ->
     a (either (k . Left) (b . const . k . Right))
   {-# INLINE (<*) #-}
+
+instance Monad (ErrorC e m) where
+  ErrorC a >>= f = ErrorC $ \ k -> a (either (k . Left) (runError k . f))
+  {-# INLINE (>>=) #-}
