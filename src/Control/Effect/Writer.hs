@@ -5,6 +5,7 @@
 
 Predefined carriers:
 
+* "Control.Carrier.Writer.Church"
 * "Control.Carrier.Writer.Strict". (A lazy carrier is not provided due to the inherent space leaks associated with lazy writer monads.)
 * "Control.Monad.Trans.RWS.CPS"
 * "Control.Monad.Trans.RWS.Lazy"
