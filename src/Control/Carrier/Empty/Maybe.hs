@@ -65,6 +65,12 @@ evalEmpty = void . runEmpty
 -- @
 -- 'execEmpty' = 'fmap' 'isJust' '.' 'runEmpty'
 -- @
+-- @
+-- 'execEmpty' ('pure' a) = 'pure' 'True'
+-- @
+-- @
+-- 'execEmpty' 'empty' = 'pure' 'False'
+-- @
 --
 -- @since 1.1.0.0
 execEmpty :: Functor m => EmptyC m a -> m Bool
