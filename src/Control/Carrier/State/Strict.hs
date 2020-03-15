@@ -89,7 +89,7 @@ instance Monad m => Applicative (StateC s m) where
   {-# INLINE (*>) #-}
 
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
-  empty = lift empty
+  empty = StateC (const empty)
   {-# INLINE empty #-}
 
   StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
@@ -102,7 +102,7 @@ instance Monad m => Monad (StateC s m) where
   {-# INLINE (>>=) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (StateC s m) where
-  fail = lift . Fail.fail
+  fail s = StateC (const (Fail.fail s))
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (StateC s m) where
@@ -110,7 +110,7 @@ instance MonadFix m => MonadFix (StateC s m) where
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (StateC s m) where
-  liftIO = lift . liftIO
+  liftIO io = StateC (\ s -> (,) s <$> liftIO io)
   {-# INLINE liftIO #-}
 
 instance (Alternative m, Monad m) => MonadPlus (StateC s m)
