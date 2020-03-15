@@ -22,8 +22,8 @@ import Control.Monad.Trans.Class
 import Data.Coerce (coerce)
 import Data.Functor.Identity
 
-runEmpty :: (a -> m b) -> m b -> EmptyC m a -> m b
-runEmpty leaf nil (EmptyC m) = m leaf nil
+runEmpty :: m b -> (a -> m b) -> EmptyC m a -> m b
+runEmpty nil leaf (EmptyC m) = m leaf nil
 {-# INLINE runEmpty #-}
 
 newtype EmptyC m a = EmptyC (forall b . (a -> m b) -> m b -> m b)
@@ -51,7 +51,7 @@ instance Applicative (EmptyC m) where
 
 instance Monad (EmptyC m) where
   EmptyC a >>= f = EmptyC $ \ leaf nil ->
-    a (runEmpty leaf nil . f) nil
+    a (runEmpty nil leaf . f) nil
   {-# INLINE (>>=) #-}
 
   (>>) = (*>)
@@ -64,10 +64,10 @@ instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
 instance MonadFix m => MonadFix (EmptyC m) where
   mfix f = EmptyC $ \ leaf nil ->
     mfix (toEmpty . f . run . fromEmpty)
-    >>= run . runEmpty (coerce leaf) (coerce nil)
+    >>= run . runEmpty (coerce nil) (coerce leaf)
     where
-    toEmpty   = runEmpty (pure . pure) (pure empty)
-    fromEmpty = runEmpty pure (error "mfix (EmptyC): empty")
+    toEmpty   = runEmpty (pure empty) (pure . pure)
+    fromEmpty = runEmpty (error "mfix (EmptyC): empty") pure
   {-# INLINE mfix #-}
 
 instance MonadIO m => MonadIO (EmptyC m) where
@@ -81,8 +81,8 @@ instance MonadTrans EmptyC where
 instance Algebra sig m => Algebra (Empty :+: sig) (EmptyC m) where
   alg hdl sig ctx = EmptyC $ \ leaf nil -> case sig of
     L Empty -> nil
-    R other -> thread (dst ~<~ hdl) other (pure ctx) >>= run . runEmpty (coerce leaf) (coerce nil)
+    R other -> thread (dst ~<~ hdl) other (pure ctx) >>= run . runEmpty (coerce nil) (coerce leaf)
     where
     dst :: Applicative m => EmptyC Identity (EmptyC m a) -> m (EmptyC Identity a)
-    dst = run . runEmpty (pure . runEmpty (pure . pure) (pure empty)) (pure (pure empty))
+    dst = run . runEmpty (pure (pure empty)) (pure . runEmpty (pure empty) (pure . pure))
   {-# INLINE alg #-}
