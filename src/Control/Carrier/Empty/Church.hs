@@ -49,7 +49,7 @@ instance Monad (EmptyC m) where
   {-# INLINE (>>) #-}
 
 instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
-  fail s = EmptyC $ \ _ _ -> fail s
+  fail = lift . Fail.fail
   {-# INLINE fail #-}
 
 instance MonadTrans EmptyC where
