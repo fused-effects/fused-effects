@@ -38,6 +38,10 @@ import Prelude hiding (head, tail)
 
 -- | Run a 'Choose' effect with continuations respectively interpreting '<|>' and 'pure'.
 --
+-- @
+-- runChoose fork leaf ('pure' a '<|>' b) = leaf a \`fork\` 'runChoose' fork leaf b
+-- @
+--
 -- @since 1.0.0.0
 runChoose :: (m b -> m b -> m b) -> (a -> m b) -> ChooseC m a -> m b
 runChoose fork leaf (ChooseC runChooseC) = runChooseC fork leaf
