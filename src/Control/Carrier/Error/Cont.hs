@@ -1,5 +1,9 @@
 {-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Error.Cont
 ( -- * Error carrier
   runError
@@ -8,6 +12,7 @@ module Control.Carrier.Error.Cont
 , module Control.Effect.Error
 ) where
 
+import Control.Algebra
 import Control.Applicative (liftA2)
 import Control.Effect.Error
 import Control.Monad.Fail as Fail
@@ -64,3 +69,12 @@ instance MonadIO m => MonadIO (ErrorC e m) where
 instance MonadTrans (ErrorC e) where
   lift m = ErrorC $ \ k -> m >>= k
   {-# INLINE lift #-}
+
+instance Algebra sig m => Algebra (Error e :+: sig) (ErrorC e m) where
+  alg hdl sig ctx = ErrorC $ \ k -> case sig of
+    L (L (Throw e))   -> pure (Left e)
+    L (R (Catch m h)) -> runError (pure . Right) (lower m) >>= runError (pure . Right) . either (lower . h) pure >>= either (pure . Left) k
+    R other           -> thread (either (pure . Left) (runError (pure . Right)) ~<~ hdl) other (Right ctx) >>= either (pure . Left) k
+    where
+    lower = hdl . (<$ ctx)
+  {-# INLINE alg #-}
