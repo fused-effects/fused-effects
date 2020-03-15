@@ -81,8 +81,8 @@ instance Applicative (StateC s m) where
   StateC f <*> StateC a = StateC $ \ k -> f (\ s f' -> a (\ s' -> k s' . f') s)
   {-# INLINE (<*>) #-}
 
-  liftA2 f (StateC a) (StateC b) = StateC $ \ k s ->
-    a (\ s' a' -> b (\ s'' -> k s'' . f a') s') s
+  liftA2 f (StateC a) (StateC b) = StateC $ \ k ->
+    a (\ s' a' -> b (\ s'' -> k s'' . f a') s')
   {-# INLINE liftA2 #-}
 
 instance Alternative m => Alternative (StateC s m) where
