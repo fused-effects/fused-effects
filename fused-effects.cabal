@@ -185,6 +185,7 @@ benchmark benchmark
   main-is:        Bench.hs
   other-modules:
     Bench.Error
+    Bench.Interpret
     Bench.Reader
     Bench.NonDet
     Bench.NonDet.NQueens
