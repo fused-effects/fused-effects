@@ -2,13 +2,18 @@
 {-# LANGUAGE RankNTypes #-}
 module Control.Carrier.Empty.Church
 ( -- * Empty carrier
-  EmptyC(..)
+  runEmpty
+, EmptyC(..)
   -- * Empty effect
 , module Control.Effect.Empty
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Effect.Empty
+
+runEmpty :: (a -> m b) -> m b -> EmptyC m a -> m b
+runEmpty leaf nil (EmptyC m) = m leaf nil
+{-# INLINE runEmpty #-}
 
 newtype EmptyC m a = EmptyC (forall b . (a -> m b) -> m b -> m b)
   deriving (Functor)
