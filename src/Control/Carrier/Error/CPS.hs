@@ -41,3 +41,6 @@ instance Applicative (ErrorC e m) where
 instance Monad (ErrorC e m) where
   ErrorC a >>= f = ErrorC $ \ k -> a (either (k . Left) (runError k . f))
   {-# INLINE (>>=) #-}
+
+  (>>) = (*>)
+  {-# INLINE (>>) #-}
