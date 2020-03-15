@@ -27,6 +27,9 @@ import Control.Monad.Trans.Class
 import Data.Coerce (coerce)
 import Data.Functor.Identity
 
+-- | Run an 'Empty' effect, returning the first continuation for 'empty' programs and applying the second to successful results.
+--
+-- @since 1.1.0.0
 runEmpty :: m b -> (a -> m b) -> EmptyC m a -> m b
 runEmpty nil leaf (EmptyC m) = m nil leaf
 {-# INLINE runEmpty #-}
