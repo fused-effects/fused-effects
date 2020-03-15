@@ -51,6 +51,9 @@ runEmpty (EmptyC m) = runMaybeT m
 evalEmpty :: Functor m => EmptyC m a -> m ()
 evalEmpty = void . runEmpty
 
+-- | Run an 'Empty' effect, replacing its result with a 'Bool' indicating whether control exited normally.
+--
+-- This is convenient for using 'empty' to signal early returns when all you need to know is whether control exited normally or not, and not what value it exited with.
 execEmpty :: Functor m => EmptyC m a -> m Bool
 execEmpty = fmap isJust . runEmpty
 
