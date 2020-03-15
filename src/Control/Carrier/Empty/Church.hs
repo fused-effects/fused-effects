@@ -30,10 +30,10 @@ import Data.Functor.Identity
 -- | Run an 'Empty' effect, returning the first continuation for 'empty' programs and applying the second to successful results.
 --
 -- @
--- 'runEmpty' ('pure' 'Nothing') ('pure' '.' 'Just') 'empty' = 'pure' 'Nothing'
+-- 'runEmpty' j k 'empty' = j
 -- @
 -- @
--- 'runEmpty' ('pure' 'Nothing') ('pure' '.' 'Just') ('pure' a) = 'pure' ('Just' a)
+-- 'runEmpty' j k ('pure' a) = k a
 -- @
 --
 -- @since 1.1.0.0
