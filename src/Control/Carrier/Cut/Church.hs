@@ -34,6 +34,16 @@ import Data.Functor.Identity
 
 -- | Run a 'Cut' effect with continuations respectively interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
 --
+-- @
+-- runCut cons nil fail ('pure' a '<|>' 'empty') = cons a nil
+-- @
+-- @
+-- runCut cons nil fail 'cutfail' = fail
+-- @
+-- @
+-- runCut cons nil fail ('call' 'cutfail') = nil
+-- @
+--
 -- @since 1.0.0.0
 runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
 runCut cons nil fail (CutC runCutC) = runCutC cons nil fail
