@@ -60,7 +60,7 @@ newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance Algebra sig m => Algebra (Fresh :+: sig) (FreshC m) where
-  alg hdl sig ctx = case sig of
-    L Fresh -> FreshC (gets (<$ ctx) <* modify (+ (1 :: Int)))
-    R other -> FreshC (alg (runFreshC . hdl) (R other) ctx)
+  alg hdl sig ctx = FreshC $ case sig of
+    L Fresh -> gets (<$ ctx) <* modify (+ (1 :: Int))
+    R other -> alg (runFreshC . hdl) (R other) ctx
   {-# INLINE alg #-}
