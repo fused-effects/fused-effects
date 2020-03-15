@@ -105,9 +105,9 @@ instance Algebra sig m => Algebra (Error e :+: sig) (ErrorC e m) where
   alg hdl sig ctx = ErrorC $ \ fail leaf -> case sig of
     L (L (Throw e))   -> fail e
     L (R (Catch m h)) -> runError (runError fail leaf . lower . h) leaf (lower m)
-    R other           -> thread (dst ~<~ hdl) other (pure ctx) >>= runIdentity . runError (coerce fail) (coerce leaf)
+    R other           -> thread (dst ~<~ hdl) other (pure ctx) >>= run . runError (coerce fail) (coerce leaf)
     where
     lower = hdl . (<$ ctx)
     dst :: Applicative m => ErrorC e Identity (ErrorC e m a) -> m (ErrorC e Identity a)
-    dst = runIdentity . runError (pure . pure . throwError) (pure . runError (pure . throwError) (pure . pure))
+    dst = run . runError (pure . pure . throwError) (pure . runError (pure . throwError) (pure . pure))
   {-# INLINE alg #-}
