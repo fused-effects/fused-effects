@@ -1,5 +1,4 @@
 {-# LANGUAGE TypeApplications #-}
-
 module Bench.Reader
 ( benchmark
 ) where
