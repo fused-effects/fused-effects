@@ -16,6 +16,11 @@ benchmark = bgroup "State"
     , bench "Lazy.StateC"   $ whnf (run . Lazy.execState @Int 0 . modLoop) n
     , bench "Strict.StateC" $ whnf (run . Strict.execState @Int 0 . modLoop) n
     ]
+  , bgroup "IO"
+    [ bench "Church.StateC" $ whnfAppIO (Church.execState @Int 0 . modLoop) n
+    , bench "Lazy.StateC"   $ whnfAppIO (Lazy.execState @Int 0 . modLoop) n
+    , bench "Strict.StateC" $ whnfAppIO (Strict.execState @Int 0 . modLoop) n
+    ]
   ]
   where
   n = 100000
