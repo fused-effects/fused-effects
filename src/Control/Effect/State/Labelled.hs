@@ -18,6 +18,7 @@ module Control.Effect.State.Labelled
   -- * Re-exports
 , Algebra
 , Has
+, HasLabelled
 , run
 ) where
 
