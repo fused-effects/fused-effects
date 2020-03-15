@@ -7,6 +7,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 
 {- | A church-encoded carrier for 'Writer'.
+
+@since 1.1.0.0
 -}
 module Control.Carrier.Writer.Church
 ( -- * Writer carrier
@@ -41,6 +43,8 @@ import Control.Monad.Trans.Class
 -- @
 -- 'runWriter' k ('censor' f ('tell' w)) = k (f w) ()
 -- @
+--
+-- @since 1.1.0.0
 runWriter :: Monoid w => (w -> a -> m b) -> WriterC w m a -> m b
 runWriter k = runState k mempty . runWriterC
 {-# INLINE runWriter #-}
@@ -50,10 +54,13 @@ runWriter k = runState k mempty . runWriterC
 -- @
 -- 'execWriter' = 'runWriter' ('const' '.' 'pure')
 -- @
+--
+-- @since 1.1.0.0
 execWriter :: (Monoid w, Applicative m) => WriterC w m a -> m w
 execWriter = runWriter (const . pure)
 {-# INLINE execWriter #-}
 
+-- | @since 1.1.0.0
 newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
