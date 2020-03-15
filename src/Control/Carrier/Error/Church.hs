@@ -36,6 +36,7 @@ runError :: (e -> m b) -> (a -> m b) -> ErrorC e m a -> m b
 runError h k m = runErrorC m h k
 {-# INLINE runError #-}
 
+-- | @since 1.1.0.0
 newtype ErrorC e m a = ErrorC { runErrorC :: forall b . (e -> m b) -> (a -> m b) -> m b }
   deriving (Functor)
 
