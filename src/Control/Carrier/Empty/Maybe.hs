@@ -14,6 +14,7 @@ Note that 'Empty' effects can, when they are the last effect in a stack, be inte
 module Control.Carrier.Empty.Maybe
 ( -- * Empty carrier
   runEmpty
+, evalEmpty
 , EmptyC(..)
   -- * Empty effect
 , module Control.Effect.Empty
@@ -26,6 +27,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Maybe
+import Data.Functor (void)
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --
@@ -40,6 +42,9 @@ import Control.Monad.Trans.Maybe
 runEmpty :: EmptyC m a -> m (Maybe a)
 runEmpty (EmptyC m) = runMaybeT m
 {-# INLINE runEmpty #-}
+
+evalEmpty :: Functor m => EmptyC m a -> m ()
+evalEmpty = void . runEmpty
 
 -- | @since 1.0.0.0
 newtype EmptyC m a = EmptyC (MaybeT m a)
