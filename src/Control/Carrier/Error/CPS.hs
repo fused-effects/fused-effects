@@ -22,7 +22,7 @@ instance Applicative (ErrorC e m) where
   {-# INLINE (<*>) #-}
 
   liftA2 f (ErrorC a) (ErrorC b) = ErrorC $ \ k ->
-    a (either (k . Left) (\ a' -> b (either (k . Left) (\ b' -> k (Right (f a' b'))))))
+    a (either (k . Left) (\ a' -> b (either (k . Left) (k . Right . f a'))))
   {-# INLINE liftA2 #-}
 
   ErrorC a *> ErrorC b = ErrorC $ \ k ->
