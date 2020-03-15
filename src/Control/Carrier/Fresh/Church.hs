@@ -1,2 +1,6 @@
 module Control.Carrier.Fresh.Church
-() where
+( -- * Fresh effect
+  module Control.Effect.Fresh
+) where
+
+import Control.Effect.Fresh
