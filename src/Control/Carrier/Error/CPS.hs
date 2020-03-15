@@ -10,6 +10,7 @@ module Control.Carrier.Error.CPS
 
 import Control.Applicative (liftA2)
 import Control.Effect.Error
+import Control.Monad.Fail as Fail
 import Control.Monad.Trans.Class
 
 runError :: (Either e a -> m b) -> ErrorC e m a -> m b
@@ -45,6 +46,10 @@ instance Monad (ErrorC e m) where
 
   (>>) = (*>)
   {-# INLINE (>>) #-}
+
+instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
+  fail = lift . fail
+  {-# INLINE fail #-}
 
 instance MonadTrans (ErrorC e) where
   lift m = ErrorC $ \ k -> m >>= k . Right
