@@ -10,6 +10,7 @@ module Error
 ) where
 
 import qualified Catch
+import qualified Control.Carrier.Error.Church as C.Church
 import qualified Control.Carrier.Error.Either as C.Either
 import           Control.Effect.Error
 import qualified Control.Monad.Trans.Except as T.Except
@@ -22,7 +23,12 @@ import qualified Throw
 
 tests :: TestTree
 tests = testGroup "Error"
-  [ testGroup "ErrorC (Either)" $
+  [ testGroup "ErrorC (Church"  $
+    [ testMonad
+    , testMonadFix
+    , testError
+    ] >>= ($ runL (C.Church.runError (pure . Left) (pure . Right)))
+  , testGroup "ErrorC (Either)" $
     [ testMonad
     , testMonadFix
     , testError
