@@ -1,2 +1,6 @@
 module Control.Carrier.Writer.Church
-() where
+( -- * Writer effect
+  module Control.Effect.Writer
+) where
+
+import Control.Effect.Writer
