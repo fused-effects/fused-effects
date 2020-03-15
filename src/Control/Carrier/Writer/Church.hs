@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-{- | A church-encoded carrier for 'Writer'.
+{- | A high-performance, strict, church-encoded carrier for 'Writer'.
 
 @since 1.1.0.0
 -}
