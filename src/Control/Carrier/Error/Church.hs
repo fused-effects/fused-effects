@@ -61,8 +61,8 @@ instance Fail.MonadFail m => Fail.MonadFail (ErrorC e m) where
   {-# INLINE fail #-}
 
 instance MonadFix m => MonadFix (ErrorC e m) where
-  mfix f = ErrorC $ \ h k -> mfix
-    (toError . f . run . fromError)
+  mfix f = ErrorC $ \ h k ->
+    mfix (toError . f . run . fromError)
     >>= run . runError (pure . h) (pure . k)
     where
     toError   = runError (pure . throwError) (pure . pure)
