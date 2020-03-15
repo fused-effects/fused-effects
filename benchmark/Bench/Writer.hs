@@ -21,17 +21,17 @@ benchmark = bgroup "Writer"
   , bgroup "Identity"
     [ bench "Strict.WriterC" $ whnf (run . C.Strict.execWriter @(Sum Int) . tellLoop) n
 #if MIN_VERSION_transformers(0,5,6)
-    , bench "CPS.WriterT" $ whnf (run . T.CPS.execWriterT @_ @(Sum Int) . tellLoop) n
+    , bench "CPS.WriterT"    $ whnf (run . T.CPS.execWriterT @_ @(Sum Int) . tellLoop) n
 #endif
-    , bench "Lazy.WriterT" $ whnf (run . T.Lazy.execWriterT @_ @(Sum Int) . tellLoop) n
+    , bench "Lazy.WriterT"   $ whnf (run . T.Lazy.execWriterT @_ @(Sum Int) . tellLoop) n
     , bench "Strict.WriterT" $ whnf (run . T.Strict.execWriterT @_ @(Sum Int) . tellLoop) n
     ]
   , bgroup "IO"
     [ bench "Strict.WriterC" $ whnfAppIO (C.Strict.execWriter @(Sum Int) . tellLoop) n
 #if MIN_VERSION_transformers(0,5,6)
-    , bench "CPS.WriterT" $ whnfAppIO (T.CPS.execWriterT @_ @(Sum Int) . tellLoop) n
+    , bench "CPS.WriterT"    $ whnfAppIO (T.CPS.execWriterT @_ @(Sum Int) . tellLoop) n
 #endif
-    , bench "Lazy.WriterT" $ whnfAppIO (T.Lazy.execWriterT @_ @(Sum Int) . tellLoop) n
+    , bench "Lazy.WriterT"   $ whnfAppIO (T.Lazy.execWriterT @_ @(Sum Int) . tellLoop) n
     , bench "Strict.WriterT" $ whnfAppIO (T.Strict.execWriterT @_ @(Sum Int) . tellLoop) n
     ]
   ]
