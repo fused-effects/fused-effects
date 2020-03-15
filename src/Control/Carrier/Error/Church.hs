@@ -4,6 +4,11 @@
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+
+{- | A church-encoded carrier for 'Error'.
+
+@since 1.1.0.0
+-}
 module Control.Carrier.Error.Church
 ( -- * Error carrier
   runError
