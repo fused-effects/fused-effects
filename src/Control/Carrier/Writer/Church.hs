@@ -8,6 +8,8 @@
 
 {- | A high-performance, strict, church-encoded carrier for 'Writer'.
 
+This carrier issues left-associated 'mappend's, meaning that 'Monoid's such as @[]@ with poor performance for left-associated 'mappend's are ill-suited for use with this carrier. Alternatives such as 'Data.Monoid.Endo', @Seq@, or @DList@ may be preferred.
+
 @since 1.1.0.0
 -}
 module Control.Carrier.Writer.Church
