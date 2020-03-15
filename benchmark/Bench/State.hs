@@ -11,9 +11,11 @@ import Gauge hiding (benchmark)
 
 benchmark :: Benchmark
 benchmark = bgroup "State"
-  [ bench "Church.StateC" $ whnf (run . Church.execState @Int 0 . modLoop) n
-  , bench "Lazy.StateC"   $ whnf (run . Lazy.execState @Int 0 . modLoop) n
-  , bench "Strict.StateC" $ whnf (run . Strict.execState @Int 0 . modLoop) n
+  [ bgroup "Identity"
+    [ bench "Church.StateC" $ whnf (run . Church.execState @Int 0 . modLoop) n
+    , bench "Lazy.StateC"   $ whnf (run . Lazy.execState @Int 0 . modLoop) n
+    , bench "Strict.StateC" $ whnf (run . Strict.execState @Int 0 . modLoop) n
+    ]
   ]
   where
   n = 100000
