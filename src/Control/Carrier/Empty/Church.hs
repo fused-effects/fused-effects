@@ -29,6 +29,13 @@ import Data.Functor.Identity
 
 -- | Run an 'Empty' effect, returning the first continuation for 'empty' programs and applying the second to successful results.
 --
+-- @
+-- 'runEmpty' ('pure' 'Nothing') ('pure' '.' 'Just') 'empty' = 'pure' 'Nothing'
+-- @
+-- @
+-- 'runEmpty' ('pure' 'Nothing') ('pure' '.' 'Just') ('pure' a) = 'pure' ('Just' a)
+-- @
+--
 -- @since 1.1.0.0
 runEmpty :: m b -> (a -> m b) -> EmptyC m a -> m b
 runEmpty nil leaf (EmptyC m) = m nil leaf
