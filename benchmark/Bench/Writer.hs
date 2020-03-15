@@ -1,0 +1,2 @@
+module Bench.Writer
+() where

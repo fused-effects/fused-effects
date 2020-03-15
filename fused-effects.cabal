@@ -189,6 +189,7 @@ benchmark benchmark
     Bench.Reader
     Bench.NonDet
     Bench.NonDet.NQueens
+    Bench.Writer
   build-depends:
     , base
     , fused-effects
