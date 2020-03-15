@@ -42,3 +42,6 @@ instance Monad (EmptyC m) where
   EmptyC a >>= f = EmptyC $ \ leaf nil ->
     a (runEmpty leaf nil . f) nil
   {-# INLINE (>>=) #-}
+
+  (>>) = (*>)
+  {-# INLINE (>>) #-}
