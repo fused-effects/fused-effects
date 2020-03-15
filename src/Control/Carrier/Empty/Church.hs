@@ -10,6 +10,7 @@ module Control.Carrier.Empty.Church
 
 import Control.Applicative (liftA2)
 import Control.Effect.Empty
+import Control.Monad.Fail as Fail
 
 runEmpty :: (a -> m b) -> m b -> EmptyC m a -> m b
 runEmpty leaf nil (EmptyC m) = m leaf nil
@@ -45,3 +46,7 @@ instance Monad (EmptyC m) where
 
   (>>) = (*>)
   {-# INLINE (>>) #-}
+
+instance Fail.MonadFail m => Fail.MonadFail (EmptyC m) where
+  fail s = EmptyC $ \ _ _ -> fail s
+  {-# INLINE fail #-}
