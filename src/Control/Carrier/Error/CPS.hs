@@ -11,3 +11,11 @@ import Control.Effect.Error
 
 newtype ErrorC e m a = ErrorC (forall b . (Either e a -> m b) -> m b)
   deriving (Functor)
+
+instance Applicative (ErrorC e m) where
+  pure a = ErrorC $ \ k -> k (Right a)
+  {-# INLINE pure #-}
+
+  ErrorC f <*> ErrorC a = ErrorC $ \ k ->
+    f (either (k . Left) (\ f' -> a (either (k . Left) (k . Right . f'))))
+  {-# INLINE (<*>) #-}
