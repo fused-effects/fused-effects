@@ -24,3 +24,7 @@ instance Applicative (EmptyC m) where
   liftA2 f (EmptyC a) (EmptyC b) = EmptyC $ \ leaf nil ->
     a (\ a' -> b (leaf . f a') nil) nil
   {-# INLINE liftA2 #-}
+
+  EmptyC a *> EmptyC b = EmptyC $ \ leaf nil ->
+    a (\ _ -> b leaf nil) nil
+  {-# INLINE (*>) #-}
