@@ -85,6 +85,9 @@ instance Applicative (StateC s m) where
     a (\ s' a' -> b (\ s'' -> k s'' . f a') s')
   {-# INLINE liftA2 #-}
 
+  StateC a *> StateC b = StateC $ \ k -> a (const . b k)
+  {-# INLINE (*>) #-}
+
 instance Alternative m => Alternative (StateC s m) where
   empty = StateC $ \ _ _ -> empty
   {-# INLINE empty #-}
