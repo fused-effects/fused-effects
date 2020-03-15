@@ -44,3 +44,4 @@ benchmark = bgroup "Interpret"
 
 modLoop :: Has (State Int) sig m => Int -> m ()
 modLoop i = replicateM_ i (modify (+ (1 :: Int)))
+{-# INLINE modLoop #-}
