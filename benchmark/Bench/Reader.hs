@@ -16,12 +16,20 @@ benchmark = bgroup "Reader"
       [ bench "ReaderC" $ whnf (run . runReader 'c' . asking) n
       , bench "ReaderT" $ whnf (run . (`runReaderT` 'c') . asking) n
       ]
+    , bgroup "IO"
+      [ bench "ReaderC" $ whnfAppIO (runReader 'c' . asking) n
+      , bench "ReaderT" $ whnfAppIO ((`runReaderT` 'c') . asking) n
+      ]
     ]
   , bgroup "local"
     [ bench "(->)"    $ whnf (`locally` 'c') n
     , bgroup "Identity"
       [ bench "ReaderC" $ whnf (run . runReader 'c' . locally) n
       , bench "ReaderT" $ whnf (run . (`runReaderT` 'c') . locally) n
+      ]
+    , bgroup "IO"
+      [ bench "ReaderC" $ whnfAppIO (runReader 'c' . locally) n
+      , bench "ReaderT" $ whnfAppIO ((`runReaderT` 'c') . locally) n
       ]
     ]
   ]
