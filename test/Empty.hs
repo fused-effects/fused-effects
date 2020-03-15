@@ -22,7 +22,7 @@ import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Empty"
-  [ testGroup "EmptyC" $
+  [ testGroup "EmptyC (Maybe)" $
     [ testMonad
     , testMonadFix
     , testEmpty
