@@ -9,7 +9,7 @@ module Bench.Interpret
 
 import Control.Carrier.Interpret
 import Control.Carrier.State.Strict
-import Control.Monad (replicateM_)
+import Data.Foldable (for_)
 import Gauge hiding (benchmark)
 
 benchmark :: Gauge.Benchmark
@@ -43,5 +43,5 @@ benchmark = bgroup "Interpret"
   n = 100000
 
 modLoop :: Has (State Int) sig m => Int -> m ()
-modLoop i = replicateM_ i (modify (+ (1 :: Int)))
+modLoop i = for_ [1..i] (modify . (+))
 {-# INLINE modLoop #-}
