@@ -4,7 +4,7 @@ module Bench.Reader
 ) where
 
 import Control.Carrier.Reader
-import Control.Monad
+import Control.Monad (replicateM_)
 import Gauge hiding (benchmark)
 
 benchmark :: Benchmark
