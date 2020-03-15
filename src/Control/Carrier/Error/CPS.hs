@@ -2,13 +2,18 @@
 {-# LANGUAGE RankNTypes #-}
 module Control.Carrier.Error.CPS
 ( -- * Error carrier
-  ErrorC(..)
+  runError
+, ErrorC(..)
   -- * Error effect
 , module Control.Effect.Error
 ) where
 
 import Control.Applicative (liftA2)
 import Control.Effect.Error
+
+runError :: (Either e a -> m b) -> ErrorC e m a -> m b
+runError k (ErrorC m) = m k
+{-# INLINE runError #-}
 
 newtype ErrorC e m a = ErrorC (forall b . (Either e a -> m b) -> m b)
   deriving (Functor)
