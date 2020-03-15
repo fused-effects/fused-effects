@@ -28,5 +28,5 @@ instance Applicative (ErrorC e m) where
   ErrorC a *> ErrorC b = ErrorC $ a . const . b
   {-# INLINE (*>) #-}
 
-  ErrorC a <* ErrorC b = ErrorC $ \ k -> a (\ a' -> b (const (k a')))
+  ErrorC a <* ErrorC b = ErrorC $ \ k -> a (b . const . k)
   {-# INLINE (<*) #-}
