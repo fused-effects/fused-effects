@@ -23,3 +23,7 @@ instance Applicative (ErrorC e m) where
   ErrorC a *> ErrorC b = ErrorC $ \ k ->
     a (either (k . Left) (const (b k)))
   {-# INLINE (*>) #-}
+
+  ErrorC a <* ErrorC b = ErrorC $ \ k ->
+    a (either (k . Left) (b . const . k . Right))
+  {-# INLINE (<*) #-}
