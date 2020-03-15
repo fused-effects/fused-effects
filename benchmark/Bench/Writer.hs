@@ -25,7 +25,7 @@ benchmark = bgroup "Writer"
   , bench "Strict.WriterT" $ whnf (run . T.Strict.execWriterT @_ @(Sum Int) . tellLoop) n
   ]
   where
-  n = 100_000
+  n = 1_000_000
 
 tellLoop :: Has (Writer (Sum Int)) sig m => Int -> m ()
 tellLoop i = replicateM_ i (tell (Sum (1 :: Int)))
