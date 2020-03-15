@@ -185,9 +185,11 @@ benchmark benchmark
   main-is:        Bench.hs
   other-modules:
     Bench.Error
-    Bench.Reader
+    Bench.Interpret
     Bench.NonDet
     Bench.NonDet.NQueens
+    Bench.Reader
+    Bench.Writer
   build-depends:
     , base
     , fused-effects
