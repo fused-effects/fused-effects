@@ -34,6 +34,13 @@ import Control.Monad.Trans.Class
 
 -- | Run a 'Cull' effect with continuations respectively interpreting '<|>', 'pure', and 'empty'. Branches outside of any 'cull' block will not be pruned.
 --
+-- @
+-- runCull fork leaf nil ('pure' a '<|>' 'empty') = leaf a \`fork\` nil
+-- @
+-- @
+-- runCull fork leaf nil ('cull' ('pure' a '<|>' b)) = leaf a
+-- @
+--
 -- @since 1.0.0.0
 runCull :: (m b -> m b -> m b) -> (a -> m b) -> m b -> CullC m a -> m b
 runCull fork leaf nil (CullC m) = runNonDet fork leaf nil (runReader False m)
