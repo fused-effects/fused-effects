@@ -10,6 +10,7 @@ module Control.Carrier.Error.Cont
 
 import Control.Applicative (liftA2)
 import Control.Effect.Error
+import Control.Monad.Trans.Class
 
 runError :: (a -> m (Either e b)) -> ErrorC e m a -> m (Either e b)
 runError f (ErrorC m) = m f
@@ -39,3 +40,7 @@ instance Applicative (ErrorC e m) where
 instance Monad (ErrorC e m) where
   ErrorC a >>= f = ErrorC $ \ k -> a (runError k . f)
   {-# INLINE (>>=) #-}
+
+instance MonadTrans (ErrorC e) where
+  lift m = ErrorC $ \ k -> m >>= k
+  {-# INLINE lift #-}
