@@ -23,7 +23,7 @@ module Control.Carrier.State.Lazy
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative (Alternative(..))
 import Control.Effect.State
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
@@ -86,12 +86,6 @@ instance Monad m => Applicative (StateC s m) where
     ~(s'', a') <- a s'
     pure (s'', f' a')
   {-# INLINE (<*>) #-}
-
-  liftA2 f (StateC a) (StateC b) = StateC $ \ s -> do
-    ~(s', a') <- a s
-    ~(s'', b') <- b s'
-    pure (s'', f a' b')
-  {-# INLINE liftA2 #-}
 
   StateC a *> StateC b = StateC $ \ s -> do
     ~(s', _) <- a s
