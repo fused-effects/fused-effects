@@ -22,7 +22,7 @@ import qualified Throw
 
 tests :: TestTree
 tests = testGroup "Error"
-  [ testGroup "ErrorC (Either)"  $
+  [ testGroup "ErrorC (Either)" $
     [ testMonad
     , testMonadFix
     , testError
