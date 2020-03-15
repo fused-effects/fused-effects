@@ -90,6 +90,12 @@ instance Monad m => Applicative (StateC s m) where
   m *> k = m >>= const k
   {-# INLINE (*>) #-}
 
+  StateC a <* StateC b = StateC $ \ s -> do
+    ~(s', a') <- a s
+    ~(s'', _) <- b s'
+    pure (s'', a')
+  {-# INLINE (<*) #-}
+
 instance Monad m => Monad (StateC s m) where
   m >>= k = StateC $ \ s -> do
     ~(s', a) <- runState s m
