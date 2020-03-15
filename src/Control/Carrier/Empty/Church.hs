@@ -41,8 +41,8 @@ instance Applicative (EmptyC m) where
     a nil (\ a' -> b nil (leaf . f a'))
   {-# INLINE liftA2 #-}
 
-  EmptyC a *> EmptyC b = EmptyC $ \ nil leaf ->
-    a nil (\ _ -> b nil leaf)
+  EmptyC a *> EmptyC b = EmptyC $ \ nil ->
+    a nil . const . b nil
   {-# INLINE (*>) #-}
 
   EmptyC a <* EmptyC b = EmptyC $ \ nil leaf ->
