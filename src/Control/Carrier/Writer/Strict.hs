@@ -62,7 +62,7 @@ newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
 instance (Monoid w, Algebra sig m) => Algebra (Writer w :+: sig) (WriterC w m) where
   alg hdl sig ctx = WriterC $ case sig of
     L writer -> StateC $ \ w -> case writer of
-      Tell w'    -> let w'' = mappend w w' in w'' `seq` pure (w'', ctx)
+      Tell w'    -> pure $ let w'' = mappend w w' in w'' `seq` (w'', ctx)
       Listen   m -> do
         (w', a) <- runWriter (hdl (m <$ ctx))
         let w'' = mappend w w'
