@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -56,8 +57,15 @@ newtype WriterC w m a = WriterC { runWriterC :: StateC w m a }
 instance (Algebra sig m, Monoid w) => Algebra (Writer w :+: sig) (WriterC w m) where
   alg hdl sig ctx = WriterC $ case sig of
     L writer -> StateC $ \ k w -> case writer of
-      Tell w'    -> (k $! mappend w w') ctx
-      Listen   m -> runWriter (\ w' a -> (k $! mappend w w') ((,) w' <$> a)) (hdl (m <$ ctx))
-      Censor f m -> runWriter (\ w' a -> (k $! mappend w (f $! w')) a) (hdl (m <$ ctx))
+      Tell w'    -> do
+        let !w'' = mappend w w'
+        k w'' ctx
+      Listen   m -> runWriter (\ w' a -> do
+        let !w'' = mappend w w'
+        k w'' ((,) w' <$> a)) (hdl (m <$ ctx))
+      Censor f m -> runWriter (\ w' a -> do
+        let !fw' = f w'
+            !w'' = mappend w fw'
+        k w'' a) (hdl (m <$ ctx))
     R other  -> alg (runWriterC . hdl) (R other) ctx
   {-# INLINE alg #-}
