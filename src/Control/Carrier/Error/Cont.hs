@@ -1,2 +1,6 @@
 module Control.Carrier.Error.Cont
-() where
+( -- * Error effect
+  module Control.Effect.Error
+) where
+
+import Control.Effect.Error
