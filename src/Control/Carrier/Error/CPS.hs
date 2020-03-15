@@ -7,6 +7,7 @@ module Control.Carrier.Error.CPS
 , module Control.Effect.Error
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Effect.Error
 
 newtype ErrorC e m a = ErrorC (forall b . (Either e a -> m b) -> m b)
@@ -19,6 +20,10 @@ instance Applicative (ErrorC e m) where
   ErrorC f <*> ErrorC a = ErrorC $ \ k ->
     f (either (k . Left) (\ f' -> a (either (k . Left) (k . Right . f'))))
   {-# INLINE (<*>) #-}
+
+  liftA2 f (ErrorC a) (ErrorC b) = ErrorC $ \ k ->
+    a (either (k . Left) (\ a' -> b (either (k . Left) (\ b' -> k (Right (f a' b'))))))
+  {-# INLINE liftA2 #-}
 
   ErrorC a *> ErrorC b = ErrorC $ \ k ->
     a (either (k . Left) (const (b k)))
