@@ -7,6 +7,7 @@ module Control.Carrier.Empty.Church
 , module Control.Effect.Empty
 ) where
 
+import Control.Applicative (liftA2)
 import Control.Effect.Empty
 
 newtype EmptyC m a = EmptyC (forall b . (a -> m b) -> m b -> m b)
@@ -19,3 +20,7 @@ instance Applicative (EmptyC m) where
   EmptyC f <*> EmptyC a = EmptyC $ \ leaf nil ->
     f (\ f' -> a (leaf . f') nil) nil
   {-# INLINE (<*>) #-}
+
+  liftA2 f (EmptyC a) (EmptyC b) = EmptyC $ \ leaf nil ->
+    a (\ a' -> b (leaf . f a') nil) nil
+  {-# INLINE liftA2 #-}
