@@ -15,6 +15,7 @@ module Control.Carrier.Empty.Maybe
 ( -- * Empty carrier
   runEmpty
 , evalEmpty
+, execEmpty
 , EmptyC(..)
   -- * Empty effect
 , module Control.Effect.Empty
@@ -28,6 +29,7 @@ import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Control.Monad.Trans.Maybe
 import Data.Functor (void)
+import Data.Maybe (isJust)
 
 -- | Run an 'Empty' effect, returning 'Nothing' for empty computations, or 'Just' the result otherwise.
 --
@@ -45,6 +47,9 @@ runEmpty (EmptyC m) = runMaybeT m
 
 evalEmpty :: Functor m => EmptyC m a -> m ()
 evalEmpty = void . runEmpty
+
+execEmpty :: Functor m => EmptyC m a -> m Bool
+execEmpty = fmap isJust . runEmpty
 
 -- | @since 1.0.0.0
 newtype EmptyC m a = EmptyC (MaybeT m a)
