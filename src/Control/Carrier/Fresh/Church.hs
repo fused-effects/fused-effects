@@ -6,7 +6,8 @@
 {-# LANGUAGE UndecidableInstances #-}
 module Control.Carrier.Fresh.Church
 ( -- * Fresh carrier
-  FreshC(FreshC)
+  runFresh
+, FreshC(FreshC)
   -- * Fresh effect
 , module Control.Effect.Fresh
 ) where
@@ -20,6 +21,20 @@ import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+
+-- | Run a 'Fresh' effect counting up from 0.
+--
+-- @
+-- 'runFresh' k n ('pure' a) = k n a
+-- @
+-- @
+-- 'runFresh' k n 'fresh' = k (n '+' 1) n
+-- @
+--
+-- @since 1.1.0.0
+runFresh :: (Int -> a -> m b) -> Int -> FreshC m a -> m b
+runFresh k n = runState k n . runFreshC
+{-# INLINE runFresh #-}
 
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
