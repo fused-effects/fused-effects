@@ -18,7 +18,7 @@ module Control.Carrier.Fresh.Strict
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative)
 import Control.Carrier.State.Strict
 import Control.Effect.Fresh
 import Control.Monad (MonadPlus)
