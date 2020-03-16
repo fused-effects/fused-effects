@@ -18,10 +18,10 @@ module Control.Effect.Sum
 , reassociateSumL
 ) where
 
-import Data.Kind (Constraint)
+import Data.Kind (Constraint, Type)
 
 -- | Higher-order sums are used to combine multiple effects into a signature, typically by chaining on the right.
-data (f :+: g) (m :: * -> *) k
+data (f :+: g) (m :: Type -> Type) k
   = L (f m k)
   | R (g m k)
   deriving (Eq, Foldable, Functor, Ord, Show, Traversable)
@@ -36,7 +36,7 @@ infixr 4 :+:
 --   It should not generally be necessary for you to define new 'Member' instances, but these are not specifically prohibited if you wish to get creative.
 --
 -- @since 0.1.0.0
-class Member (sub :: (* -> *) -> (* -> *)) sup where
+class Member (sub :: (Type -> Type) -> (Type -> Type)) sup where
   -- | Inject a member of a signature into the signature.
   inj :: sub m a -> sup m a
 

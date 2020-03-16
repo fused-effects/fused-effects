@@ -34,6 +34,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Functor.Const (Const(..))
+import Data.Kind (Type)
 import Unsafe.Coerce (unsafeCoerce)
 
 -- | An @Interpreter@ is a function that interprets effects described by @sig@ into the carrier monad @m@.
@@ -85,7 +86,7 @@ runInterpretState handler state m
 {-# INLINE runInterpretState #-}
 
 -- | @since 1.0.0.0
-newtype InterpretC s (sig :: (* -> *) -> * -> *) m a = InterpretC { runInterpretC :: m a }
+newtype InterpretC s (sig :: (Type -> Type) -> (Type -> Type)) m a = InterpretC { runInterpretC :: m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
 
 instance MonadTrans (InterpretC s sig) where
