@@ -4,6 +4,10 @@
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
+
+-- | A church-encoded carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
+--
+-- @since 1.1.0.0
 module Control.Carrier.Fresh.Church
 ( -- * Fresh carrier
   runFresh
