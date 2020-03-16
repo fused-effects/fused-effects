@@ -61,6 +61,6 @@ newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
 
 instance Algebra sig m => Algebra (Fresh :+: sig) (FreshC m) where
   alg hdl sig ctx = FreshC $ case sig of
-    L Fresh -> gets (<$ ctx) <* modify (+ (1 :: Int))
+    L Fresh -> state $ \ i -> (i + 1, i <$ ctx)
     R other -> alg (runFreshC . hdl) (R other) ctx
   {-# INLINE alg #-}
