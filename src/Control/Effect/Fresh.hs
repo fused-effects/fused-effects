@@ -4,8 +4,8 @@
 
 Predefined carriers:
 
-* "Control.Carrier.Fresh.Strict".
-
+* "Control.Carrier.Fresh.Church"
+* "Control.Carrier.Fresh.Strict"
 -}
 module Control.Effect.Fresh
 ( -- * Fresh effect

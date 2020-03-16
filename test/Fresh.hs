@@ -8,7 +8,8 @@ module Fresh
 , test
 ) where
 
-import qualified Control.Carrier.Fresh.Strict as FreshC
+import qualified Control.Carrier.Fresh.Church as C.Church
+import qualified Control.Carrier.Fresh.Strict as C.Strict
 import           Control.Effect.Fresh
 import           Gen
 import qualified Hedgehog.Range as R
@@ -19,11 +20,16 @@ import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Fresh"
-  [ testGroup "FreshC" $
+  [ testGroup "FreshC (Church)" $
     [ testMonad
     , testMonadFix
     , testFresh
-    ] >>= ($ runC FreshC.runFresh)
+    ] >>= ($ runC (C.Church.runFresh (curry pure)))
+  , testGroup "FreshC (Strict)" $
+    [ testMonad
+    , testMonadFix
+    , testFresh
+    ] >>= ($ runC C.Strict.runFresh)
   ] where
   testMonad    run = Monad.test    (m gen (\ _ _ -> [])) a b c initial run
   testMonadFix run = MonadFix.test (m gen (\ _ _ -> [])) a b   initial run

@@ -5,10 +5,10 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
--- | A carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
+-- | A church-encoded carrier for a 'Fresh' effect, providing access to a monotonically increasing stream of 'Int' values.
 --
--- @since 1.0.0.0
-module Control.Carrier.Fresh.Strict
+-- @since 1.1.0.0
+module Control.Carrier.Fresh.Church
 ( -- * Fresh carrier
   runFresh
 , evalFresh
@@ -19,7 +19,7 @@ module Control.Carrier.Fresh.Strict
 
 import Control.Algebra
 import Control.Applicative (Alternative)
-import Control.Carrier.State.Strict
+import Control.Carrier.State.Church
 import Control.Effect.Fresh
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
@@ -30,15 +30,15 @@ import Control.Monad.Trans.Class
 -- | Run a 'Fresh' effect counting up from 0.
 --
 -- @
--- 'runFresh' n ('pure' a) = 'pure' (n, a)
+-- 'runFresh' k n ('pure' a) = k n a
 -- @
 -- @
--- 'runFresh' n 'fresh' = 'pure' (n '+' 1, n)
+-- 'runFresh' k n 'fresh' = k (n '+' 1) n
 -- @
 --
--- @since 0.1.0.0
-runFresh :: Int -> FreshC m a -> m (Int, a)
-runFresh n (FreshC m) = runState n m
+-- @since 1.1.0.0
+runFresh :: (Int -> a -> m b) -> Int -> FreshC m a -> m b
+runFresh k n = runState k n . runFreshC
 {-# INLINE runFresh #-}
 
 -- | Run a 'Fresh' effect counting up from an initial value, and forgetting the final value.
@@ -50,12 +50,12 @@ runFresh n (FreshC m) = runState n m
 -- 'evalFresh' n 'fresh' = 'pure' n
 -- @
 --
--- @since 1.0.0.0
-evalFresh :: Functor m => Int -> FreshC m a -> m a
-evalFresh n (FreshC m) = evalState n m
+-- @since 1.1.0.0
+evalFresh :: Applicative m => Int -> FreshC m a -> m a
+evalFresh n = evalState n . runFreshC
 {-# INLINE evalFresh #-}
 
--- | @since 1.0.0.0
+-- | @since 1.1.0.0
 newtype FreshC m a = FreshC { runFreshC :: StateC Int m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 

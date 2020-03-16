@@ -6,6 +6,8 @@
 
 - Adds a church-encoded `Writer` carrier in `Control.Carrier.Writer.Church`. ([#369](https://github.com/fused-effects/fused-effects/pull/369))
 
+- Adds a church-encoded `Fresh` carrier in `Control.Carrier.Fresh.Church`. ([#373](https://github.com/fused-effects/fused-effects/pull/373))
+
 - Defines `Algebra` instances for `Control.Monad.Trans.Maybe.MaybeT`, `Control.Monad.Trans.RWS.CPS`, and `Control.Monad.Trans.Writer.CPS`. ([#366](https://github.com/fused-effects/fused-effects/pull/366))
 
 - Adds `evalEmpty` and `execEmpty` handlers for the `Empty` carriers as conveniences for using `empty` to signal early returns. ([#371](https://github.com/fused-effects/fused-effects/pull/371))
