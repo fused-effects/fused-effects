@@ -8,6 +8,7 @@ module Fresh
 , test
 ) where
 
+import qualified Control.Carrier.Fresh.Church as C.Church
 import qualified Control.Carrier.Fresh.Strict as C.Strict
 import           Control.Effect.Fresh
 import           Gen
@@ -19,7 +20,12 @@ import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Fresh"
-  [ testGroup "FreshC" $
+  [ testGroup "FreshC (Church)" $
+    [ testMonad
+    , testMonadFix
+    , testFresh
+    ] >>= ($ runC (C.Church.runFresh (curry pure)))
+  , testGroup "FreshC (Strict)" $
     [ testMonad
     , testMonadFix
     , testFresh
