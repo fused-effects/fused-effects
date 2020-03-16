@@ -8,7 +8,7 @@ module Fresh
 , test
 ) where
 
-import qualified Control.Carrier.Fresh.Strict as FreshC
+import qualified Control.Carrier.Fresh.Strict as C.Strict
 import           Control.Effect.Fresh
 import           Gen
 import qualified Hedgehog.Range as R
@@ -23,7 +23,7 @@ tests = testGroup "Fresh"
     [ testMonad
     , testMonadFix
     , testFresh
-    ] >>= ($ runC FreshC.runFresh)
+    ] >>= ($ runC C.Strict.runFresh)
   ] where
   testMonad    run = Monad.test    (m gen (\ _ _ -> [])) a b c initial run
   testMonadFix run = MonadFix.test (m gen (\ _ _ -> [])) a b   initial run
