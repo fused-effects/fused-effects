@@ -1,4 +1,9 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Alternative law, left identity" #-}
+{-# HLINT ignore "Alternative law, right identity" #-}
+{-# HLINT ignore "Eta reduce" #-}
 module NonDet
 ( tests
 , gen0
@@ -8,16 +13,16 @@ module NonDet
 
 import qualified Choose
 import qualified Control.Carrier.NonDet.Church as Church.NonDetC
-import Control.Effect.Choose
-import Control.Effect.Empty
-import Control.Effect.NonDet (NonDet)
-import Data.Semigroup as S ((<>))
+import           Control.Effect.Choose
+import           Control.Effect.Empty
+import           Control.Effect.NonDet (NonDet)
+import           Data.Semigroup as S ((<>))
 import qualified Empty
-import Gen
+import           Gen
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "NonDet"

@@ -1,11 +1,14 @@
-{-# LANGUAGE DeriveFunctor, FlexibleContexts, FlexibleInstances, LambdaCase, MultiParamTypeClasses, RankNTypes,
-             TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 {-# OPTIONS_GHC -Wno-redundant-constraints #-}
 
 -- Based largely on the implementation by Sreekar Shastry,
 -- available at https://github.com/sshastry/queenslogic
 
-module NonDet.NQueens (benchmark) where
+module Bench.NonDet.NQueens (benchmark) where
 
 import Control.Applicative
 import Control.Monad (guard)
@@ -45,7 +48,7 @@ addOne n curr = do
 queens :: (Alternative m, Monad m) => Int -> m Board
 queens n = foldl' (>>=) (pure empty) (replicate n (addOne n))
 
-benchmark :: (Alternative m, Monad m) => String -> (m Board -> [Board]) -> Gauge.Benchmark
+benchmark :: (Alternative m, Monad m) => String -> (m Board -> [Board]) -> Benchmark
 benchmark title runQueens = bgroup title
   [ bench "4"  $ whnf (runQueens . queens) 4
   , bench "8"  $ whnf (runQueens . queens) 8

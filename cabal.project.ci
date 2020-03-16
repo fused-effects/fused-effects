@@ -1,0 +1,4 @@
+packages: fused-effects.cabal
+
+package fused-effects
+  ghc-options: -Werror

@@ -1,4 +1,9 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 
 -- | A carrier for the 'Control.Effect.Trace' effect that aggregates and returns all traced values.
 --
@@ -6,17 +11,17 @@
 module Control.Carrier.Trace.Returning
 ( -- * Trace carrier
   runTrace
-, TraceC(..)
+, TraceC(TraceC)
   -- * Trace effect
 , module Control.Effect.Trace
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..))
+import Control.Applicative (Alternative)
 import Control.Carrier.Writer.Strict
 import Control.Effect.Trace
-import Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
@@ -35,11 +40,14 @@ import Data.Monoid (Endo(..))
 -- @since 1.0.0.0
 runTrace :: Functor m => TraceC m a -> m ([String], a)
 runTrace (TraceC m) = first (($[]) . appEndo) <$> runWriter m
+{-# INLINE runTrace #-}
 
 -- | @since 1.0.0.0
-newtype TraceC m a = TraceC (WriterC (Endo [String]) m a)
+newtype TraceC m a = TraceC { runTraceC :: WriterC (Endo [String]) m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans)
 
 instance Algebra sig m => Algebra (Trace :+: sig) (TraceC m) where
-  alg (L (Trace m k)) = TraceC (tell (Endo (m :))) *> k
-  alg (R other)       = TraceC (handleCoercible other)
+  alg hdl sig ctx = case sig of
+    L (Trace m) -> ctx <$ TraceC (tell (Endo (m :)))
+    R other     -> TraceC (alg (runTraceC . hdl) (R other) ctx)
+  {-# INLINE alg #-}

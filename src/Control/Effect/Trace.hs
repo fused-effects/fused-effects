@@ -1,5 +1,5 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, FlexibleContexts #-}
-
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
 {- | An effect that provides a record of 'String' values ("traces") aggregate during the execution of a given computation.
 
 Predefined carriers:
@@ -22,19 +22,15 @@ module Control.Effect.Trace
 ) where
 
 import Control.Algebra
-import GHC.Generics (Generic1)
+import Data.Kind (Type)
 
 -- | @since 0.1.0.0
-data Trace m k = Trace
-  { traceMessage :: String
-  , traceCont    :: m k
-  }
-  deriving (Functor, Generic1)
-
-instance Effect Trace
+data Trace (m :: Type -> Type) k where
+  Trace :: { traceMessage :: String } -> Trace m ()
 
 -- | Append a message to the trace log.
 --
 -- @since 0.1.0.0
 trace :: Has Trace sig m => String -> m ()
-trace message = send (Trace message (pure ()))
+trace message = send (Trace message)
+{-# INLINE trace #-}

@@ -1,4 +1,5 @@
-{-# LANGUAGE DeriveFunctor, DeriveGeneric, KindSignatures, PatternSynonyms #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE PatternSynonyms #-}
 
 {- | An effect providing failure with an error message.
 
@@ -23,7 +24,7 @@ module Control.Effect.Fail
 ) where
 
 import Control.Effect.Throw
-import qualified Control.Monad.Fail as Fail
+import Control.Monad.Fail as Fail
 
 -- | @since 0.1.0.0
 type Fail = Throw String

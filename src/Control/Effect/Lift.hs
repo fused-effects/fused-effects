@@ -17,6 +17,7 @@ module Control.Effect.Lift
 ( -- * Lift effect
   Lift(..)
 , sendM
+, sendIO
 , liftWith
   -- * Re-exports
 , Algebra
@@ -33,22 +34,35 @@ import Control.Effect.Lift.Internal (Lift(..))
 --
 -- @since 1.0.0.0
 sendM :: (Has (Lift n) sig m, Functor n) => n a -> m a
-sendM m = send (LiftWith (\ ctx _ -> (<$ ctx) <$> m) pure)
+sendM m = liftWith (\ _ ctx -> (<$ ctx) <$> m)
+{-# INLINE sendM #-}
+
+-- | A type-restricted variant of 'sendM' for 'IO' actions.
+--
+-- This is particularly useful when you have a @'Has' ('Lift' 'IO') sig m@ constraint for the use of 'liftWith', and want to run an action abstracted over 'Control.Monad.IO.Class.MonadIO'. 'IO' has a 'Control.Monad.IO.Class.MonadIO' instance, and 'sendIO'’s type restricts the action’s type to 'IO' without further type annotations.
+--
+-- @since 1.0.2.0
+sendIO :: Has (Lift IO) sig m => IO a -> m a
+sendIO = sendM
+{-# INLINE sendIO #-}
 
 
 -- | Run actions in an outer context.
 --
--- This can be used to provide interoperation with @base@ functionality like @"Control.Exception".'catch'@:
+-- This can be used to provide interoperation with @base@ functionality like @"Control.Exception".'Control.Exception.catch'@:
 --
 -- @
--- 'liftWith' $ \ ctx run -> 'Control.Exception.catch' (run (m <$ ctx)) (run . (<$ ctx) . h)
+-- 'liftWith' $ \\ hdl ctx -> 'Control.Exception.catch' (hdl (m <$ ctx)) (hdl . (<$ ctx) . h)
 -- @
 --
--- As with @MonadBaseControl@, care must be taken when lifting functions like @"Control.Exception".'finally'@ which don’t use the return value of one of their actions, as this can lead to dropped effects.
+-- The higher-order function takes both an initial context, and a handler phrased as a distributive law (as described in the documentation for 'Handler'). This handler takes actions lifted into a context functor, which can be either the initial context, or the derived context produced by handling a previous action.
+--
+-- As with @MonadBaseControl@, care must be taken when lifting functions like @"Control.Exception".'Control.Exception.finally'@ which don’t use the return value of one of their actions, as this can lead to dropped effects.
 --
 -- @since 1.0.0.0
 liftWith
   :: Has (Lift n) sig m
-  => (forall ctx . Functor ctx => ctx () -> (forall a . ctx (m a) -> n (ctx a)) -> n (ctx a))
+  => (forall ctx . Functor ctx => Handler ctx m n -> ctx () -> n (ctx a))
   -> m a
-liftWith with = send (LiftWith with pure)
+liftWith with = send (LiftWith with)
+{-# INLINE liftWith #-}

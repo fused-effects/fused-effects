@@ -1,4 +1,7 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes #-}
+{-# LANGUAGE FlexibleContexts #-}
+{-# LANGUAGE RankNTypes #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 module Choose
 ( tests
 , genN
@@ -6,13 +9,13 @@ module Choose
 ) where
 
 import qualified Control.Carrier.Choose.Church as ChooseC
-import Control.Effect.Choose
-import Data.List.NonEmpty
-import Gen
+import           Control.Effect.Choose
+import           Data.List.NonEmpty
+import           Gen
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Choose"

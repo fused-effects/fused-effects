@@ -1,4 +1,6 @@
-{-# LANGUAGE MultiWayIf, TemplateHaskell, TypeApplications #-}
+{-# LANGUAGE MultiWayIf #-}
+{-# LANGUAGE TemplateHaskell #-}
+{-# LANGUAGE TypeApplications #-}
 {-# OPTIONS_GHC -O2 -fplugin Test.Inspection.Plugin #-}
 module Fusion
 ( tests

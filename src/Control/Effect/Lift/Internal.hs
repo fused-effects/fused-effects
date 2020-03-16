@@ -1,21 +1,11 @@
-{-# LANGUAGE ExistentialQuantification, RankNTypes #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE RankNTypes #-}
 module Control.Effect.Lift.Internal
 ( Lift(..)
 ) where
 
-import Control.Effect.Class
-import Data.Functor.Compose
+import Control.Algebra.Handler (Handler)
 
 -- | @since 1.0.0.0
-data Lift sig m k
-  = forall a . LiftWith
-    (forall ctx . Functor ctx => ctx () -> (forall a . ctx (m a) -> sig (ctx a)) -> sig (ctx a))
-    (a -> m k)
-
-instance Functor m => Functor (Lift sig m) where
-  fmap f (LiftWith with k) = LiftWith with (fmap f . k)
-
-instance Functor sig => Effect (Lift sig) where
-  thread ctx dst (LiftWith with k) = LiftWith
-    (\ ctx' dst' -> getCompose <$> with (Compose (ctx <$ ctx')) (fmap Compose . dst' . fmap dst . getCompose))
-    (dst . fmap k)
+data Lift sig m k where
+  LiftWith :: (forall ctx . Functor ctx => Handler ctx m sig -> ctx () -> sig (ctx a)) -> Lift sig m a

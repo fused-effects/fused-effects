@@ -1,4 +1,8 @@
-{-# LANGUAGE FlexibleContexts, RankNTypes, ScopedTypeVariables, TypeApplications #-}
+{-# LANGUAGE RankNTypes #-}
+{-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE TypeApplications #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Eta reduce" #-}
 module Fail
 ( tests
 , gen0
@@ -6,16 +10,16 @@ module Fail
 ) where
 
 import qualified Control.Carrier.Fail.Either as FailC
-import Control.Effect.Fail as Fail
-import Gen
-import Hedgehog.Range as Range
+import           Control.Effect.Fail as Fail
+import           Gen
+import           Hedgehog.Range as Range
 import qualified Monad
 import qualified MonadFix
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 tests :: TestTree
-tests = testGroup "Fail" $
+tests = testGroup "Fail"
   [ testGroup "FailC" $
     [ testMonad
     , testMonadFix
@@ -45,5 +49,5 @@ test
   -> [TestTree]
 test msg m _ b i (Run runFail) =
   [ testProperty "fail annihilates >>=" . forall (i :. msg :. fn @a (m b) :. Nil) $
-    \ i s k -> runFail ((Fail.fail s >>= k) <$ i) === runFail ((Fail.fail s) <$ i)
+    \ i s k -> runFail ((Fail.fail s >>= k) <$ i) === runFail (Fail.fail s <$ i)
   ]
