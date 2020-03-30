@@ -23,7 +23,11 @@
 :seti -Wno-name-shadowing
 :seti -Wno-safe
 :seti -Wno-unsafe
+
+-- ghc 8.6+
 :seti -Wno-star-is-type
+
+-- ghc 8.8+
 :seti -Wno-missing-deriving-strategies
 
 -- We have this one on in the project but not in the REPL to reduce noise
