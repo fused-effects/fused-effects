@@ -30,5 +30,9 @@
 -- ghc 8.8+
 :seti -Wno-missing-deriving-strategies
 
+-- ghc 8.10+
+:seti -Wno-missing-safe-haskell-mode
+:seti -Wno-prepositive-qualified-module
+
 -- We have this one on in the project but not in the REPL to reduce noise
 :seti -Wno-type-defaults
