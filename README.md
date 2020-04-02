@@ -289,7 +289,6 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 ### Projects using `fused-effects`
 
 * [`semantic`](http://github.com/github/semantic), a program analysis toolkit
-* [`aurapm`](https://github.com/aurapm/aura), a package manager for Arch Linux
 * [`now-haskell`](http://hackage.haskell.org/package/now-haskell), a client library for AWS Lambda
 
 
