@@ -11,6 +11,7 @@ module Control.Effect.Throw
 ( -- * Throw effect
   Throw(..)
 , throwError
+, liftEither
   -- * Re-exports
 , Algebra
 , Has
@@ -26,3 +27,9 @@ import Control.Effect.Throw.Internal (Throw(..))
 throwError :: Has (Throw e) sig m => e -> m a
 throwError = send . Throw
 {-# INLINE throwError #-}
+
+-- | Lifts an @'Either' e@ into Monad m with effect @'Throw' e@
+--
+-- @since 1.1.0.0
+liftEither :: Has (Throw e) sig m => Either e a -> m a
+liftEither = either throwError return
