@@ -128,7 +128,6 @@ test-suite examples
     , tasty              ^>= 1.2
     , tasty-hedgehog     ^>= 1
     , tasty-hunit        ^>= 0.10
-    , transformers
 
 
 test-suite test
@@ -178,7 +177,6 @@ test-suite docs
   build-depends:
     , base
     , fused-effects
-    , mtl           ^>= 2.2
   build-tool-depends:
       markdown-unlit:markdown-unlit ^>= 0.5
 
