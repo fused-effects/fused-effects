@@ -1,16 +1,11 @@
-{-# LANGUAGE DeriveFunctor #-}
-{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE KindSignatures #-}
 module Control.Effect.Choose.Internal
 ( Choose(..)
 ) where
 
-import Control.Effect.Class
-import GHC.Generics (Generic1)
+import Data.Kind (Type)
 
 -- | @since 1.0.0.0
-newtype Choose m k
-  = Choose (Bool -> m k)
-  deriving (Functor, Generic1)
-
-instance HFunctor Choose
-instance Effect   Choose
+data Choose (m :: Type -> Type) k where
+  Choose :: Choose m Bool

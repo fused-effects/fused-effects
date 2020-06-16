@@ -21,7 +21,6 @@ module Control.Effect.Reader
 , local
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where
@@ -37,7 +36,7 @@ import Control.Effect.Reader.Internal (Reader(..))
 --
 -- @since 0.1.0.0
 ask :: Has (Reader r) sig m => m r
-ask = send (Ask pure)
+ask = send Ask
 {-# INLINE ask #-}
 
 -- | Project a function out of the current environment value.
@@ -48,7 +47,7 @@ ask = send (Ask pure)
 --
 -- @since 0.1.0.0
 asks :: Has (Reader r) sig m => (r -> a) -> m a
-asks f = send (Ask (pure . f))
+asks = (`fmap` ask)
 {-# INLINE asks #-}
 
 -- | Run a computation with an environment value locally modified by the passed function.
@@ -59,5 +58,5 @@ asks f = send (Ask (pure . f))
 --
 -- @since 0.1.0.0
 local :: Has (Reader r) sig m => (r -> r) -> m a -> m a
-local f m = send (Local f m pure)
+local f m = send (Local f m)
 {-# INLINE local #-}

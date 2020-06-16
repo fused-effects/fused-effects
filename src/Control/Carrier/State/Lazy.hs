@@ -1,5 +1,6 @@
 {-# LANGUAGE ExplicitForAll #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -21,14 +22,14 @@ module Control.Carrier.State.Lazy
 , module Control.Effect.State
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Effect.State
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
+import Control.Algebra
+import Control.Applicative (Alternative(..))
+import Control.Effect.State
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 -- | Run a lazy 'State' effect, yielding the result value and the final state. More programs terminate with lazy state than strict state, but injudicious use of lazy state may lead to thunk buildup.
 --
@@ -70,7 +71,7 @@ execState s = fmap fst . runState s
 {-# INLINE[3] execState #-}
 
 -- | @since 1.0.0.0
-newtype StateC s m a = StateC { runStateC :: s -> m (s, a) }
+newtype StateC s m a = StateC (s -> m (s, a))
 
 instance Functor m => Functor (StateC s m) where
   fmap f m = StateC $ \ s -> (\ ~(s', a) -> (s', f a)) <$> runState s m
@@ -79,11 +80,13 @@ instance Functor m => Functor (StateC s m) where
 instance Monad m => Applicative (StateC s m) where
   pure a = StateC $ \ s -> pure (s, a)
   {-# INLINE pure #-}
+
   StateC mf <*> StateC mx = StateC $ \ s -> do
     ~(s',  f) <- mf s
     ~(s'', x) <- mx s'
     pure (s'', f x)
   {-# INLINE (<*>) #-}
+
   m *> k = m >>= const k
   {-# INLINE (*>) #-}
 
@@ -96,6 +99,7 @@ instance Monad m => Monad (StateC s m) where
 instance (Alternative m, Monad m) => Alternative (StateC s m) where
   empty = StateC (const empty)
   {-# INLINE empty #-}
+
   StateC l <|> StateC r = StateC (\ s -> l s <|> r s)
   {-# INLINE (<|>) #-}
 
@@ -117,8 +121,9 @@ instance MonadTrans (StateC s) where
   lift m = StateC (\ s -> (,) s <$> m)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (State s :+: sig) (StateC s m) where
-  alg (L (Get   k)) = StateC (\ s -> runState s (k s))
-  alg (L (Put s k)) = StateC (\ _ -> runState s k)
-  alg (R other)     = StateC (\ s -> alg (thread (s, ()) (uncurry runState) other))
+instance Algebra sig m => Algebra (State s :+: sig) (StateC s m) where
+  alg hdl sig ctx = StateC $ \ s -> case sig of
+    L Get     -> pure (s, s <$ ctx)
+    L (Put s) -> pure (s, ctx)
+    R other   -> thread (uncurry runState ~<~ hdl) other (s, ctx)
   {-# INLINE alg #-}

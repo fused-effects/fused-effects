@@ -20,7 +20,6 @@ module Control.Effect.NonDet
   -- * Re-exports
 , Alternative(..)
 , Algebra
-, Effect
 , Has
 , MonadPlus(..)
 , guard
@@ -53,12 +52,14 @@ import Data.Monoid (Alt(..))
 -- @since 1.0.0.0
 oneOf :: (Foldable t, Alternative m) => t a -> m a
 oneOf = foldMapA pure
+{-# INLINE oneOf #-}
 
 -- | Map a 'Foldable' collection of values into a nondeterministic computation using the supplied action.
 --
 -- @since 1.0.0.0
 foldMapA :: (Foldable t, Alternative m) => (a -> m b) -> t a -> m b
 foldMapA f = getAlt #. foldMap (Alt #. f)
+{-# INLINE foldMapA #-}
 
 
 -- | Compose a function operationally equivalent to 'id' on the left.

@@ -1,5 +1,7 @@
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -15,14 +17,14 @@ module Control.Carrier.Trace.Ignoring
 , module Control.Effect.Trace
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (Alternative(..))
-import           Control.Effect.Trace
-import           Control.Monad (MonadPlus(..))
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
+import Control.Algebra
+import Control.Applicative (Alternative)
+import Control.Effect.Trace
+import Control.Monad (MonadPlus)
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
 
 -- | Run a 'Trace' effect, ignoring all traces.
 --
@@ -36,6 +38,7 @@ import           Control.Monad.Trans.Class
 -- @since 1.0.0.0
 runTrace :: TraceC m a -> m a
 runTrace (TraceC m) = m
+{-# INLINE runTrace #-}
 
 -- | @since 1.0.0.0
 newtype TraceC m a = TraceC (m a)
@@ -46,6 +49,7 @@ instance MonadTrans TraceC where
   {-# INLINE lift #-}
 
 instance Algebra sig m => Algebra (Trace :+: sig) (TraceC m) where
-  alg (L trace) = traceCont trace
-  alg (R other) = TraceC (alg (handleCoercible other))
+  alg hdl = \case
+    L (Trace _) -> pure
+    R other     -> TraceC . alg (runTrace . hdl) other
   {-# INLINE alg #-}

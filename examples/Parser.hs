@@ -1,22 +1,30 @@
-{-# LANGUAGE DeriveGeneric, DeriveTraversable, ExistentialQuantification, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, StandaloneDeriving, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE DeriveTraversable #-}
+{-# LANGUAGE ExistentialQuantification #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE KindSignatures #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Parser
 ( example
 ) where
 
-import Control.Algebra
-import Control.Carrier.Cut.Church
-import Control.Carrier.NonDet.Church
-import Control.Carrier.State.Strict
-import Control.Monad (replicateM)
-import Data.Char
-import Data.List (intercalate)
-import GHC.Generics (Generic1)
-import Hedgehog
+import           Control.Algebra
+import           Control.Carrier.Cut.Church
+import           Control.Carrier.NonDet.Church
+import           Control.Carrier.State.Strict
+import           Control.Monad (replicateM)
+import           Data.Char
+import           Data.Kind (Type)
+import           Data.List (intercalate)
+import           Hedgehog
 import qualified Hedgehog.Function as Fn
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 example :: TestTree
 example = testGroup "parser"
@@ -36,15 +44,14 @@ example = testGroup "parser"
     [ testProperty "matches with a predicate" . property $ do
       c <- forAll Gen.alphaNum
       f <- (. ord) <$> Fn.forAllFn predicate
-      run (runNonDetA (parse [c] (satisfy f))) === if f c then [c] else []
+      run (runNonDetA (parse [c] (satisfy f))) === [c | f c]
 
     , testProperty "fails at end of input" . property $ do
       f <- (. ord) <$> Fn.forAllFn predicate
       run (runNonDetA (parse "" (satisfy f))) === []
 
     , testProperty "fails if input remains" . property $ do
-      c1 <- forAll Gen.alphaNum
-      c2 <- forAll Gen.alphaNum
+      (c1, c2) <- forAll ((,) <$> Gen.alphaNum <*> Gen.alphaNum)
       f <- (. ord) <$> Fn.forAllFn predicate
       run (runNonDetA (parse [c1, c2] (satisfy f))) === []
 
@@ -52,7 +59,7 @@ example = testGroup "parser"
       c1 <- forAll Gen.alphaNum
       c2 <- forAll Gen.alphaNum
       f <- (. ord) <$> Fn.forAllFn predicate
-      run (runNonDetA (parse [c1, c2] ((,) <$> satisfy f <*> satisfy f))) === if f c1 && f c2 then [(c1, c2)] else []
+      run (runNonDetA (parse [c1, c2] ((,) <$> satisfy f <*> satisfy f))) === [(c1, c2) | f c1, f c2]
     ]
 
   , testGroup "factor"
@@ -93,27 +100,25 @@ example = testGroup "parser"
       run (runCutA (parse (intercalate "+" (intercalate "*" . map (show . abs) . (1:) <$> [0]:as)) expr)) === [sum (map (product . map abs) as)]
     ]
   ]
+  where
+  arbNested :: Gen a -> Range.Size -> Gen [[a]]
+  arbNested _ 0 = pure []
+  arbNested g n = do
+    m <- Gen.integral (Range.linear 0 10)
+    let n' = n `div` (m + 1)
+    replicateM (Range.unSize m) (Gen.list (Range.singleton (Range.unSize n')) g)
 
-    where arbNested :: Gen a -> Range.Size -> Gen [[a]]
-          arbNested _ 0 = pure []
-          arbNested g n = do
-            m <- Gen.integral (Range.linear 0 10)
-            let n' = n `div` (m + 1)
-            replicateM (Range.unSize m) (Gen.list (Range.singleton (Range.unSize n')) g)
-
-          predicate = Fn.fn Gen.bool
-          genFactor = Gen.integral (Range.linear 0 100)
-          genFactors = Gen.list (Range.linear 0 10) genFactor
+  predicate = Fn.fn Gen.bool
+  genFactor = Gen.integral (Range.linear 0 100)
+  genFactors = Gen.list (Range.linear 0 10) genFactor
 
 
-data Symbol m k = Satisfy (Char -> Bool) (Char -> m k)
-  deriving (Functor, Generic1)
+data Symbol (m :: Type -> Type) k where
+  Satisfy :: (Char -> Bool) -> Symbol m Char
 
-instance HFunctor Symbol
-instance Effect   Symbol
 
 satisfy :: Has Symbol sig m => (Char -> Bool) -> m Char
-satisfy p = send (Satisfy p pure)
+satisfy p = send (Satisfy p)
 
 char :: Has Symbol sig m => Char -> m Char
 char = satisfy . (==)
@@ -133,13 +138,14 @@ parse input = (>>= exhaustive) . runState input . runParseC
 newtype ParseC m a = ParseC { runParseC :: StateC String m a }
   deriving (Alternative, Applicative, Functor, Monad)
 
-instance (Alternative m, Algebra sig m, Effect sig) => Algebra (Symbol :+: sig) (ParseC m) where
-  alg (L (Satisfy p k)) = do
-    input <- ParseC get
-    case input of
-      c:cs | p c -> ParseC (put cs) *> k c
-      _          -> empty
-  alg (R other)         = ParseC (alg (R (handleCoercible other)))
+instance (Alternative m, Algebra sig m) => Algebra (Symbol :+: sig) (ParseC m) where
+  alg hdl sig ctx = case sig of
+    L (Satisfy p) -> do
+      input <- ParseC get
+      case input of
+        c:cs | p c -> c <$ ctx <$ ParseC (put cs)
+        _          -> empty
+    R other       -> ParseC (alg (runParseC . hdl) (R other) ctx)
   {-# INLINE alg #-}
 
 

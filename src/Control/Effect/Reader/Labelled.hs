@@ -1,7 +1,7 @@
 {-# LANGUAGE AllowAmbiguousTypes #-}
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE PolyKinds #-}
+{-# LANGUAGE ScopedTypeVariables #-}
 {-# LANGUAGE TypeApplications #-}
 -- | Labelled 'Reader' operations.
 --
@@ -14,8 +14,8 @@ module Control.Effect.Reader.Labelled
 , local
   -- * Re-exports
 , Algebra
-, Effect
 , Has
+, HasLabelled
 , run
 ) where
 

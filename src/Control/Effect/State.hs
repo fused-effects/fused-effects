@@ -4,8 +4,10 @@ Not all computations require a full-fledged state effect: read-only state is bet
 
 Predefined carriers:
 
-* "Control.Carrier.State.Strict", which is strict in its updates.
+* "Control.Carrier.State.Church"
+* "Control.Carrier.State.Strict", which is strict in its updates; a good default choice.
 * "Control.Carrier.State.Lazy", which is lazy in its updates. This enables more programs to terminate, such as cyclic computations expressed with @MonadFix@ or @-XRecursiveDo@, at the cost of efficiency.
+* "Control.Monad.Trans.RWS.CPS"
 * "Control.Monad.Trans.RWS.Lazy"
 * "Control.Monad.Trans.RWS.Strict"
 * "Control.Monad.Trans.State.Lazy"
@@ -25,7 +27,6 @@ module Control.Effect.State
 , state
   -- * Re-exports
 , Algebra
-, Effect
 , Has
 , run
 ) where
@@ -41,7 +42,7 @@ import Control.Effect.State.Internal (State(..))
 --
 -- @since 0.1.0.0
 get :: Has (State s) sig m => m s
-get = send (Get pure)
+get = send Get
 {-# INLINEABLE get #-}
 
 -- | Project a function out of the current state value.
@@ -52,7 +53,7 @@ get = send (Get pure)
 --
 -- @since 0.1.0.0
 gets :: Has (State s) sig m => (s -> a) -> m a
-gets f = send (Get (pure . f))
+gets = (`fmap` get)
 {-# INLINEABLE gets #-}
 
 -- | Replace the state value with a new value.
@@ -63,7 +64,7 @@ gets f = send (Get (pure . f))
 --
 -- @since 0.1.0.0
 put :: Has (State s) sig m => s -> m ()
-put s = send (Put s (pure ()))
+put s = send (Put s)
 {-# INLINEABLE put #-}
 
 -- | Replace the state value with the result of applying a function to the current state value.

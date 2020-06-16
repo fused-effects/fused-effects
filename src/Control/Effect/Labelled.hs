@@ -39,22 +39,24 @@ import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Functor.Identity
 import Data.Kind (Type)
 
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 --
 -- @since 1.0.2.0
 newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = Labelled (sub m a)
-  deriving (Alternative, Applicative, Effect, Functor, HFunctor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
 
 -- | @since 1.0.2.0
 runLabelled :: forall label sub m a . Labelled label sub m a -> sub m a
 runLabelled (Labelled l) = l
+{-# INLINE runLabelled #-}
 
-instance (Algebra (eff :+: sig) (sub m), HFunctor eff, HFunctor sig) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
-  alg = \case
-    L eff -> Labelled (send (handleCoercible (runLabelled eff)))
-    R sig -> Labelled (send (handleCoercible sig))
+instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (Labelled label sub m) where
+  alg hdl = \case
+    L eff -> Labelled . alg (runLabelled . hdl) (L (runLabelled eff))
+    R sig -> Labelled . alg (runLabelled . hdl) (R sig)
   {-# INLINE alg #-}
 
 
@@ -104,7 +106,7 @@ type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 --
 -- @since 1.0.2.0
 sendLabelled :: forall label eff sig m a . HasLabelled label eff sig m => eff m a -> m a
-sendLabelled = alg . injLabelled @label . Labelled
+sendLabelled op = runIdentity <$> alg (fmap Identity . runIdentity) (injLabelled @label (Labelled op)) (Identity ())
 {-# INLINABLE sendLabelled #-}
 
 
@@ -117,13 +119,14 @@ newtype UnderLabel (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) (m :: 
 -- | @since 1.0.2.0
 runUnderLabel :: forall label sub m a . UnderLabel label sub m a -> m a
 runUnderLabel (UnderLabel l) = l
+{-# INLINE runUnderLabel #-}
 
 instance MonadTrans (UnderLabel sub label) where
   lift = UnderLabel
   {-# INLINE lift #-}
 
-instance (LabelledMember label sub sig, HFunctor sub, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
-  alg = \case
-    L sub -> UnderLabel (sendLabelled @label (handleCoercible sub))
-    R sig -> UnderLabel (send (handleCoercible sig))
+instance (LabelledMember label sub sig, Algebra sig m) => Algebra (sub :+: sig) (UnderLabel label sub m) where
+  alg hdl = \case
+    L sub -> UnderLabel . alg (runUnderLabel . hdl) (injLabelled @label (Labelled sub))
+    R sig -> UnderLabel . alg (runUnderLabel . hdl) sig
   {-# INLINE alg #-}

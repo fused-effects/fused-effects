@@ -1,5 +1,6 @@
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GADTs #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE TypeOperators #-}
@@ -20,34 +21,47 @@ module Control.Carrier.Cut.Church
 , module Control.Effect.NonDet
 ) where
 
-import           Control.Algebra
-import           Control.Applicative (liftA2)
-import           Control.Effect.Cut
-import           Control.Effect.NonDet
-import qualified Control.Monad.Fail as Fail
-import           Control.Monad.Fix
-import           Control.Monad.IO.Class
-import           Control.Monad.Trans.Class
-import           Data.Coerce (coerce)
-import           Data.Functor.Identity
+import Control.Algebra
+import Control.Applicative (liftA2)
+import Control.Effect.Cut
+import Control.Effect.NonDet
+import Control.Monad.Fail as Fail
+import Control.Monad.Fix
+import Control.Monad.IO.Class
+import Control.Monad.Trans.Class
+import Data.Coerce (coerce)
+import Data.Functor.Identity
 
 -- | Run a 'Cut' effect with continuations respectively interpreting 'pure' / '<|>', 'empty', and 'cutfail'.
+--
+-- @
+-- runCut cons nil fail ('pure' a '<|>' 'empty') = cons a nil
+-- @
+-- @
+-- runCut cons nil fail 'cutfail' = fail
+-- @
+-- @
+-- runCut cons nil fail ('call' 'cutfail') = nil
+-- @
 --
 -- @since 1.0.0.0
 runCut :: (a -> m b -> m b) -> m b -> m b -> CutC m a -> m b
 runCut cons nil fail (CutC runCutC) = runCutC cons nil fail
+{-# INLINE runCut #-}
 
 -- | Run a 'Cut' effect, returning all its results in an 'Alternative' collection.
 --
 -- @since 1.0.0.0
 runCutA :: (Alternative f, Applicative m) => CutC m a -> m (f a)
 runCutA = runCut (fmap . (<|>) . pure) (pure empty) (pure empty)
+{-# INLINE runCutA #-}
 
 -- | Run a 'Cut' effect, mapping results into a 'Monoid'.
 --
 -- @since 1.0.0.0
 runCutM :: (Applicative m, Monoid b) => (a -> b) -> CutC m a -> m b
 runCutM leaf = runCut (fmap . mappend . leaf) (pure mempty) (pure mempty)
+{-# INLINE runCutM #-}
 
 -- | @since 1.0.0.0
 newtype CutC m a = CutC (forall b . (a -> m b -> m b) -> m b -> m b -> m b)
@@ -56,6 +70,7 @@ newtype CutC m a = CutC (forall b . (a -> m b -> m b) -> m b -> m b -> m b)
 instance Applicative (CutC m) where
   pure a = CutC (\ cons nil _ -> cons a nil)
   {-# INLINE pure #-}
+
   CutC f <*> CutC a = CutC $ \ cons nil fail ->
     f (\ f' fs -> a (cons . f') fs fail) nil fail
   {-# INLINE (<*>) #-}
@@ -63,6 +78,7 @@ instance Applicative (CutC m) where
 instance Alternative (CutC m) where
   empty = CutC (\ _ nil _ -> nil)
   {-# INLINE empty #-}
+
   CutC l <|> CutC r = CutC (\ cons nil fail -> l cons (r cons nil fail) fail)
   {-# INLINE (<|>) #-}
 
@@ -94,12 +110,14 @@ instance MonadTrans CutC where
   lift m = CutC (\ cons nil _ -> m >>= flip cons nil)
   {-# INLINE lift #-}
 
-instance (Algebra sig m, Effect sig) => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
-  alg (L Cutfail)    = CutC $ \ _    _   fail -> fail
-  alg (L (Call m k)) = CutC $ \ cons nil fail -> runCut (\ a as -> runCut cons as fail (k a)) nil nil m
-  alg (R (L (L Empty)))      = empty
-  alg (R (L (R (Choose k)))) = k True <|> k False
-  alg (R (R other))          = CutC $ \ cons nil fail -> alg (thread (pure ()) dst other) >>= runIdentity . runCut (coerce cons) (coerce nil) (coerce fail) where
+instance Algebra sig m => Algebra (Cut :+: NonDet :+: sig) (CutC m) where
+  alg hdl sig ctx = CutC $ \ cons nil fail -> case sig of
+    L Cutfail        -> fail
+    L (Call m)       -> runCut cons nil nil (hdl (m <$ ctx))
+    R (L (L Empty))  -> nil
+    R (L (R Choose)) -> cons (True <$ ctx) (cons (False <$ ctx) nil)
+    R (R other)      -> thread (dst ~<~ hdl) other (pure ctx) >>= run . runCut (coerce cons) (coerce nil) (coerce fail)
+    where
     dst :: Applicative m => CutC Identity (CutC m a) -> m (CutC Identity a)
-    dst = runIdentity . runCut (fmap . liftA2 (<|>) . runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)) (pure (pure empty)) (pure (pure cutfail))
+    dst = run . runCut (fmap . liftA2 (<|>) . runCut (fmap . (<|>) . pure) (pure empty) (pure cutfail)) (pure (pure empty)) (pure (pure cutfail))
   {-# INLINE alg #-}

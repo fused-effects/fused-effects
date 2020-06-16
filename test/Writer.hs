@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -12,12 +13,19 @@ module Writer
 ) where
 
 import           Control.Arrow ((&&&))
-import qualified Control.Carrier.Writer.Strict as WriterC
+import qualified Control.Carrier.Writer.Church as C.Writer.Church
+import qualified Control.Carrier.Writer.Strict as C.Writer.Strict
 import           Control.Effect.Writer
-import qualified Control.Monad.Trans.RWS.Lazy as LazyRWST
-import qualified Control.Monad.Trans.RWS.Strict as StrictRWST
-import qualified Control.Monad.Trans.Writer.Lazy as LazyWriterT
-import qualified Control.Monad.Trans.Writer.Strict as StrictWriterT
+#if MIN_VERSION_transformers(0,5,6)
+import qualified Control.Monad.Trans.RWS.CPS as T.RWS.CPS
+#endif
+import qualified Control.Monad.Trans.RWS.Lazy as T.RWS.Lazy
+import qualified Control.Monad.Trans.RWS.Strict as T.RWS.Strict
+#if MIN_VERSION_transformers(0,5,6)
+import qualified Control.Monad.Trans.Writer.CPS as T.Writer.CPS
+#endif
+import qualified Control.Monad.Trans.Writer.Lazy as T.Writer.Lazy
+import qualified Control.Monad.Trans.Writer.Strict as T.Writer.Strict
 import           Data.Bifunctor (first)
 import           Data.Tuple (swap)
 import           Gen
@@ -28,16 +36,27 @@ import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Writer"
-  [ testGroup "WriterC" $
+  [ testGroup "WriterC (Church)" $
     [ testMonad
     , testMonadFix
     , testWriter
-    ] >>= ($ runL WriterC.runWriter)
+    ] >>= ($ runL (C.Writer.Church.runWriter (curry pure)))
+  , testGroup "WriterC (Strict)" $
+    [ testMonad
+    , testMonadFix
+    , testWriter
+    ] >>= ($ runL C.Writer.Strict.runWriter)
   , testGroup "(,)"              $ testWriter (runL pure)
-  , testGroup "WriterT (Lazy)"   $ testWriter (runL (fmap swap . LazyWriterT.runWriterT))
-  , testGroup "WriterT (Strict)" $ testWriter (runL (fmap swap . StrictWriterT.runWriterT))
-  , testGroup "RWST (Lazy)"      $ testWriter (runL (runRWST LazyRWST.runRWST))
-  , testGroup "RWST (Strict)"    $ testWriter (runL (runRWST StrictRWST.runRWST))
+#if MIN_VERSION_transformers(0,5,6)
+  , testGroup "WriterT (CPS)"    $ testWriter (runL (fmap swap . T.Writer.CPS.runWriterT))
+#endif
+  , testGroup "WriterT (Lazy)"   $ testWriter (runL (fmap swap . T.Writer.Lazy.runWriterT))
+  , testGroup "WriterT (Strict)" $ testWriter (runL (fmap swap . T.Writer.Strict.runWriterT))
+#if MIN_VERSION_transformers(0,5,6)
+  , testGroup "RWST (CPS)"       $ testWriter (runL (runRWST T.RWS.CPS.runRWST))
+#endif
+  , testGroup "RWST (Lazy)"      $ testWriter (runL (runRWST T.RWS.Lazy.runRWST))
+  , testGroup "RWST (Strict)"    $ testWriter (runL (runRWST T.RWS.Strict.runRWST))
   ] where
   testMonad    run = Monad.test    (m (gen0 w) (genN w b)) a b c initial run
   testMonadFix run = MonadFix.test (m (gen0 w) (genN w b)) a b   initial run

@@ -48,7 +48,7 @@ addOne n curr = do
 queens :: (Alternative m, Monad m) => Int -> m Board
 queens n = foldl' (>>=) (pure empty) (replicate n (addOne n))
 
-benchmark :: (Alternative m, Monad m) => String -> (m Board -> [Board]) -> Gauge.Benchmark
+benchmark :: (Alternative m, Monad m) => String -> (m Board -> [Board]) -> Benchmark
 benchmark title runQueens = bgroup title
   [ bench "4"  $ whnf (runQueens . queens) 4
   , bench "8"  $ whnf (runQueens . queens) 8

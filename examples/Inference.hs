@@ -1,15 +1,21 @@
-{-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeApplications, TypeOperators, UndecidableInstances #-}
+{-# LANGUAGE FlexibleInstances #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE StandaloneDeriving #-}
+{-# LANGUAGE TypeApplications #-}
+{-# LANGUAGE TypeOperators #-}
+{-# LANGUAGE UndecidableInstances #-}
 module Inference
 ( example
 ) where
 
-import Control.Algebra
-import Control.Carrier.Reader
-import Hedgehog
+import           Control.Algebra
+import           Control.Carrier.Reader
+import           Hedgehog
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import           Test.Tasty
+import           Test.Tasty.Hedgehog
 
 example :: TestTree
 example = testGroup "inference"
@@ -46,5 +52,4 @@ newtype HasEnv env m a = HasEnv { runHasEnv :: m a }
   deriving (Applicative, Functor, Monad)
 
 -- | The 'Carrier' instance for 'HasEnv' simply delegates all effects to the underlying carrier.
-instance Algebra sig m => Algebra sig (HasEnv env m) where
-  alg = HasEnv . alg . handleCoercible
+deriving instance Algebra sig m => Algebra sig (HasEnv env m)

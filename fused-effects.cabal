@@ -36,8 +36,6 @@ common common
     -Wno-name-shadowing
     -Wno-safe
     -Wno-unsafe
-  if (impl(ghc >= 8.6))
-    ghc-options: -Wno-star-is-type
   if (impl(ghc >= 8.8))
     ghc-options: -Wno-missing-deriving-strategies
   if (impl(ghc >= 8.10))
@@ -50,29 +48,34 @@ library
   hs-source-dirs: src
   exposed-modules:
     Control.Algebra
+    Control.Algebra.Handler
     -- Carriers
     Control.Carrier.Choose.Church
     Control.Carrier.Cull.Church
     Control.Carrier.Cut.Church
+    Control.Carrier.Empty.Church
     Control.Carrier.Empty.Maybe
+    Control.Carrier.Error.Church
     Control.Carrier.Error.Either
     Control.Carrier.Fail.Either
+    Control.Carrier.Fresh.Church
     Control.Carrier.Fresh.Strict
     Control.Carrier.Interpret
     Control.Carrier.Lift
     Control.Carrier.NonDet.Church
     Control.Carrier.Reader
+    Control.Carrier.State.Church
     Control.Carrier.State.Lazy
     Control.Carrier.State.Strict
     Control.Carrier.Throw.Either
     Control.Carrier.Trace.Ignoring
     Control.Carrier.Trace.Printing
     Control.Carrier.Trace.Returning
+    Control.Carrier.Writer.Church
     Control.Carrier.Writer.Strict
     -- Effects
     Control.Effect.Catch
     Control.Effect.Choose
-    Control.Effect.Class
     Control.Effect.Cull
     Control.Effect.Cut
     Control.Effect.Empty
@@ -118,7 +121,7 @@ test-suite examples
     ReinterpretLog
     Teletype
   build-depends:
-      base
+    , base
     , fused-effects
     , hedgehog           ^>= 1
     , hedgehog-fn        ^>= 1
@@ -154,7 +157,7 @@ test-suite test
     Throw
     Writer
   build-depends:
-      base
+    , base
     , containers          >= 0.5 && < 0.7
     , fused-effects
     , hedgehog           ^>= 1
@@ -172,7 +175,7 @@ test-suite docs
   main-is:     README.lhs
   ghc-options: -pgmL markdown-unlit
   build-depends:
-      base
+    , base
     , fused-effects
   build-tool-depends:
       markdown-unlit:markdown-unlit ^>= 0.5
@@ -184,13 +187,18 @@ benchmark benchmark
   hs-source-dirs: benchmark
   main-is:        Bench.hs
   other-modules:
-    Bench.Reader
+    Bench.Error
+    Bench.Interpret
     Bench.NonDet
     Bench.NonDet.NQueens
+    Bench.Reader
+    Bench.State
+    Bench.Writer
   build-depends:
-      base
+    , base
     , fused-effects
     , gauge
+    , transformers
   ghc-options:
     -threaded
     -rtsopts "-with-rtsopts=-N -A4m -n2m"

@@ -1,3 +1,43 @@
+- Adds a church-encoded `State` carrier in `Control.Carrier.State.Church`. ([#363](https://github.com/fused-effects/fused-effects/pull/363))
+
+- Adds a church-encoded `Error` carrier in `Control.Carrier.Error.Church`. ([#203](https://github.com/fused-effects/fused-effects/pull/203))
+
+- Adds a church-encoded `Empty` carrier in `Control.Carrier.Empty.Church`. ([#203](https://github.com/fused-effects/fused-effects/pull/203))
+
+- Adds a church-encoded `Writer` carrier in `Control.Carrier.Writer.Church`. ([#369](https://github.com/fused-effects/fused-effects/pull/369))
+
+- Adds a church-encoded `Fresh` carrier in `Control.Carrier.Fresh.Church`. ([#373](https://github.com/fused-effects/fused-effects/pull/373))
+
+- Defines `Algebra` instances for `Control.Monad.Trans.Maybe.MaybeT`, `Control.Monad.Trans.RWS.CPS`, and `Control.Monad.Trans.Writer.CPS`. ([#366](https://github.com/fused-effects/fused-effects/pull/366))
+
+- Adds `evalEmpty` and `execEmpty` handlers for the `Empty` carriers as conveniences for using `empty` to signal early returns. ([#371](https://github.com/fused-effects/fused-effects/pull/371))
+
+
+## Backwards-incompatible changes
+
+- Changes `alg`’s signature, giving it an initial state, and a distributive law which must be applied to each computation in the signature. This change allows `Algebra` instances to be derived using `GeneralizedNewtypeDeriving` and `DerivingVia`, while also obviating the need for `hmap`, `handleCoercible`, or the `thread` method of `Effect`. This furthermore increases the expressiveness of effects, allowing effects with higher-order positions yielding concrete types, e.g. `m ()`, to be run anywhere in the stack, not just above any `Effect`-requiring algebras. ([#359](https://github.com/fused-effects/fused-effects/pull/359), [#361](https://github.com/fused-effects/fused-effects/pull/361))
+
+- Changes the signatures of `runInterpret` and `runInterpretState` analogously; also reorders the parameters to `runInterpretState` to take the signature before the state parameter. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
+
+- Removes `Algebra`’s superclass constraint requiring a `HFunctor` instance for the signature. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
+
+- Removes `handleCoercible`. Algebras which formerly used it when handling the tail of the signature may now compose `coerce` onto the homomorphism passed to `alg`. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
+
+- Removes `HFunctor`. Effects are no longer required to have `HFunctor` instances, and so the class is redundant. ([#359](https://github.com/fused-effects/fused-effects/pull/359))
+
+- Removes `Effect`. The new signature for `alg` (see above) obviates the need for threading handlers through _effects_, replacing that by threading them through _algebras_ instead. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
+
+- Redefines `thread` as a wrapper around `alg`, composing context functors and distributive laws together. (Note that its type has also changed to take the context last and to decompose the handler for the two carriers.) ([#361](https://github.com/fused-effects/fused-effects/pull/361))
+
+- Renames `Control.Effect.Interpret.Handler` to `Interpreter`. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
+
+- Reorders the parameters to the higher-order function passed to `Control.Effect.Lift.liftWith` for consistency with `alg` and to reflect its purpose of lifting Kleisli arrows in some underlying monad into the context modulo the context’s state. ([#361](https://github.com/fused-effects/fused-effects/pull/361))
+
+- Redefines all effects as GADTs. Since we no longer require `Functor`, `HFunctor`, or `Effect` instances, we no longer need to use continuations to allow distinct result types per constructor. `Algebra` instances for these effects can be ported forwards by removing the continuations. User-defined effects are not impacted, but we recommend migrating to GADT definitions of them for convenience and ease of comprehension going forwards. ([#365](https://github.com/fused-effects/fused-effects/pull/365))
+
+- Removes `Control.Carrier.State.Lazy.runStateC`, which was supposed to have been removed in 1.0.
+
+
 # v1.0.2.2
 
 - Adds support for `ghc` 8.10 & `base` 4.14. ([#376](https://github.com/fused-effects/fused-effects/pull/376))
