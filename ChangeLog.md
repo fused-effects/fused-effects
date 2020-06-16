@@ -38,7 +38,7 @@
 - Removes `Control.Carrier.State.Lazy.runStateC`, which was supposed to have been removed in 1.0.
 
 
-# v1.0.2.1
+# v1.0.2.2
 
 - Adds support for `ghc` 8.10 & `base` 4.14. ([#376](https://github.com/fused-effects/fused-effects/pull/376))
 
