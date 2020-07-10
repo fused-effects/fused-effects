@@ -274,6 +274,7 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 * [`fused-effects-mwc-random`][] provides a performant, high-quality source of random data, as well as values from common numerical distributions.
 * [`fused-effects-readline`][] provides a REPL effect that interfaces with [`haskeline`][] for its UI.
 * [`fused-effects-parser`][] provides parser-combinator style effects similar to parsing libraries such as [`trifecta`][].
+* [`fused-effects-optics`[] provides combinators for the [`optics`][optics] ecosystem.
 
 [exc]: https://github.com/fused-effects/fused-effects-exceptions
 [felens]: http://hackage.haskell.org/package/fused-effects-lens
@@ -284,6 +285,8 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 [`fused-effects-parser`]: https://github.com/fused-effects/fused-effects-parser
 [`trifecta`]: https://hackage.haskell.org/package/trifecta
 [lens]: http://hackage.haskell.org/package/lens
+[`fused-effects-optics`]: https://github.com/fused-effects/fused-effects-optics
+[optics]: https://github.com/fused-effects/fused-effects-optics
 
 
 ### Projects using `fused-effects`
