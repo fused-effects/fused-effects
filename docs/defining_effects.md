@@ -47,8 +47,8 @@ newtype TeletypeIOC m a = TeletypeIOC { runTeletypeIO :: m a }
 
 instance (MonadIO m, Algebra sig m) => Algebra (Teletype :+: sig) (TeletypeIOC m) where
   alg hdl sig ctx = case sig of
-    L Read      -> (<$ ctx) <$ liftIO getLine
-    L (Write s) -> ctx      <$ liftIO (putStrLn s)
+    L Read      -> (<$ ctx) <$> liftIO getLine
+    L (Write s) -> ctx      <$  liftIO (putStrLn s)
     R other     -> TeletypeIOC (alg (runTeletypeIO . hdl) other ctx)
 ```
 
