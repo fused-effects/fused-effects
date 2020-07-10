@@ -286,7 +286,7 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 [`trifecta`]: https://hackage.haskell.org/package/trifecta
 [lens]: http://hackage.haskell.org/package/lens
 [`fused-effects-optics`]: https://github.com/fused-effects/fused-effects-optics
-[optics]: https://github.com/fused-effects/fused-effects-optics
+[optics]: https://github.com/well-typed/optics
 
 
 ### Projects using `fused-effects`
