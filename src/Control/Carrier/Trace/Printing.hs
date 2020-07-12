@@ -5,7 +5,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
--- | A carrier for the 'Control.Effect.Trace' effect that prints all traced results to stderr.
+-- | A carrier for the 'Trace' effect that prints all traced results to stderr.
 --
 -- @since 1.0.0.0
 module Control.Carrier.Trace.Printing
