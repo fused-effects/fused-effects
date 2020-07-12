@@ -6,7 +6,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
--- | A carrier for the 'Control.Effect.Trace' effect that ignores all traced results. Useful when you wish to disable tracing without removing all trace statements.
+-- | A carrier for the 'Trace' effect that ignores all traced results. Useful when you wish to disable tracing without removing all trace statements.
 --
 -- @since 1.0.0.0
 module Control.Carrier.Trace.Ignoring
