@@ -268,6 +268,7 @@ To run the provided benchmark suite, use `cabal v2-bench`. You may wish to provi
 
 Though we aim to keep the `fused-effects` core minimal, we encourage the development of external `fused-effects`-compatible libraries. If you’ve written one that you’d like to be mentioned here, get in touch!
 
+* [`fused-effects-th`][th] provides Template Haskell helpers to generate smart constructors when defining new effects.
 * [`fused-effects-lens`][felens] provides combinators to use the [`lens`][lens] library fluently inside effectful computations.
 * [`fused-effects-exceptions`][exc] provides handlers for exceptions thrown in the `IO` monad.
 * [`fused-effects-resumable`][] provides resumable exceptions, which can also serve as a limited form of coroutines.
@@ -276,6 +277,7 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 * [`fused-effects-parser`][] provides parser-combinator style effects similar to parsing libraries such as [`trifecta`][].
 * [`fused-effects-optics`][] provides combinators for the [`optics`][optics] ecosystem.
 
+[th]: https://github.com/fused-effects/fused-effects-th
 [exc]: https://github.com/fused-effects/fused-effects-exceptions
 [felens]: http://hackage.haskell.org/package/fused-effects-lens
 [`fused-effects-mwc-random`]: https://github.com/fused-effects/fused-effects-mwc-random
