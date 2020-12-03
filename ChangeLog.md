@@ -1,3 +1,8 @@
+# v1.1.1
+
+* Defines `MonadFix` instances for `Labelled` and `UnderLabel`. ([#402](https://github.com/fused-effects/fused-effects/pull/402))
+
+
 # v1.1
 
 - Adds a church-encoded `State` carrier in `Control.Carrier.State.Church`. ([#363](https://github.com/fused-effects/fused-effects/pull/363))
