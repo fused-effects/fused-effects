@@ -37,6 +37,7 @@ import Control.Applicative (Alternative)
 import Control.Effect.Sum (reassociateSumL)
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
+import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Functor.Identity
@@ -46,7 +47,17 @@ import Data.Kind (Type)
 --
 -- @since 1.0.2.0
 newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = Labelled (sub m a)
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus, MonadTrans)
+  deriving
+    ( Alternative
+    , Applicative
+    , Functor
+    , Monad
+    , Fail.MonadFail
+    , MonadFix -- ^ @since 1.1.1
+    , MonadIO
+    , MonadPlus
+    , MonadTrans
+    )
 
 -- | @since 1.0.2.0
 runLabelled :: forall label sub m a . Labelled label sub m a -> sub m a
@@ -114,7 +125,16 @@ sendLabelled op = runIdentity <$> alg (fmap Identity . runIdentity) (injLabelled
 --
 -- @since 1.0.2.0
 newtype UnderLabel (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) (m :: Type -> Type) a = UnderLabel (m a)
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadIO, MonadPlus)
+  deriving
+    ( Alternative
+    , Applicative
+    , Functor
+    , Monad
+    , Fail.MonadFail
+    , MonadFix -- ^ @since 1.1.1
+    , MonadIO
+    , MonadPlus
+    )
 
 -- | @since 1.0.2.0
 runUnderLabel :: forall label sub m a . UnderLabel label sub m a -> m a
