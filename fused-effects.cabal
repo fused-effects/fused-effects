@@ -1,7 +1,7 @@
 cabal-version:       2.2
 
 name:                fused-effects
-version:             1.1.0.0
+version:             1.1.1.0
 synopsis:            A fast, flexible, fused effect system.
 description:         A fast, flexible, fused effect system, à la Effect Handlers in Scope, Monad Transformers and Modular Algebraic Effects: What Binds Them Together, and Fusion for Free—Efficient Algebraic Effect Handlers.
 homepage:            https://github.com/fused-effects/fused-effects
