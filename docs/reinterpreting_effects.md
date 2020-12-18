@@ -33,7 +33,6 @@ import Data.Kind (Type)
 -- from fused-effects
 import Control.Algebra
 import Control.Carrier.Reader
-import Control.Effect.Sum
 import Control.Carrier.Error.Either
 import Control.Carrier.Interpret
 -- from transformers
@@ -235,7 +234,7 @@ instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (MockHttpClient m)
     L (SendRequest req) -> do
       responder <- MockHttpClient ask
       (<$ ctx) <$> liftIO (responder req)
-    R other -> MockHttpClient (alg (runMockHttpClient . hdl) (inj other) ctx)
+    R other -> MockHttpClient (alg (runMockHttpClient . hdl) (R other) ctx)
 
 faultyNetwork :: HTTP.Request -> IO (HTTP.Response L.ByteString)
 faultyNetwork req = throwIO (HTTP.HttpExceptionRequest req HTTP.ConnectionTimeout)
