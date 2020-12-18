@@ -28,6 +28,7 @@ module CatFacts
     ) where
 -- from base
 import Control.Applicative
+import Data.Foldable (traverse_)
 import Control.Exception (throwIO)
 import Data.Kind (Type)
 -- from fused-effects
@@ -181,7 +182,7 @@ handlePrint r =
     Left invalidContentTypeError -> print invalidContentTypeError
     Right ok -> case ok of
       Left jsonParseError -> print jsonParseError
-      Right facts -> mapM_ (putStrLn . catFact) facts
+      Right facts -> traverse_ (putStrLn . catFact) facts
 
 catFactsRunner :: Has Http sig m => m (Either InvalidContentType (Either JsonParseError [CatFact]))
 catFactsRunner =
