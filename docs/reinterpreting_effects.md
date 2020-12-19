@@ -28,6 +28,7 @@ module CatFacts
     ) where
 -- from base
 import Control.Applicative
+import Data.Foldable (traverse_)
 import Control.Exception (throwIO)
 import Data.Kind (Type)
 -- from fused-effects
@@ -181,7 +182,7 @@ handlePrint r =
     Left invalidContentTypeError -> print invalidContentTypeError
     Right ok -> case ok of
       Left jsonParseError -> print jsonParseError
-      Right facts -> traverse (putStrLn . catFact) facts
+      Right facts -> traverse_ (putStrLn . catFact) facts
 
 catFactsRunner :: Has Http sig m => m (Either InvalidContentType (Either JsonParseError [CatFact]))
 catFactsRunner =
@@ -234,7 +235,7 @@ instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (MockHttpClient m)
     L (SendRequest req) -> do
       responder <- MockHttpClient ask
       (<$ ctx) <$> liftIO (responder req)
-    R other -> MockHttpClient (alg (runMockHttpClient . hdl) other ctx)
+    R other -> MockHttpClient (alg (runMockHttpClient . hdl) (R other) ctx)
 
 faultyNetwork :: HTTP.Request -> IO (HTTP.Response L.ByteString)
 faultyNetwork req = throwIO (HTTP.HttpExceptionRequest req HTTP.ConnectionTimeout)
@@ -298,7 +299,7 @@ our HTTP requests:
 ``` haskell
 traceHttp
   :: (Has Http sig m, MonadIO m)
-  => (forall s. Reifies s (Handler Http m) => InterpretC s Http m a)
+  => (forall s. Reifies s (Interpreter Http m) => InterpretC s Http m a)
   -> m a
 traceHttp = runInterpret $ \ _ r@(SendRequest req) ctx -> do
   startTime <- liftIO getCurrentTime
