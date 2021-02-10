@@ -10,8 +10,6 @@ module MonadFix
 import Control.Monad (liftM)
 import Control.Monad.Fix
 import Gen
-import Test.Tasty
-import Test.Tasty.Hedgehog
 
 test
   :: (MonadFix m, Arg a, Eq (g a), Eq (g b), Functor f, Show a, Show (g a), Show (g b), Vary a)

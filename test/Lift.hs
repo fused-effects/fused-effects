@@ -6,16 +6,16 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lift
 import qualified Control.Exception as E
 import           Control.Monad.IO.Class
-import           Test.Tasty
-import           Test.Tasty.HUnit
+import           Gen
+import           Hedgehog
 
 tests :: TestTree
 tests = testGroup "Lift"
-  [ testCase "liftWith" $ do
+  [ testProperty "liftWith" . property $ do
     r <- liftIO . runState "yep" $ handle (put . getMsg) $ do
       modify ("heck " ++)
       liftIO (E.throwIO (E.AssertionFailed "nope"))
-    r @?= ("nope", ())
+    r === ("nope", ())
   ] where
   getMsg (E.AssertionFailed msg) = msg
 

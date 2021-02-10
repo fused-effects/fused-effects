@@ -23,8 +23,7 @@ import           Hedgehog
 import qualified Hedgehog.Function as Fn
 import qualified Hedgehog.Gen as Gen
 import qualified Hedgehog.Range as Range
-import           Test.Tasty
-import           Test.Tasty.Hedgehog
+import           Utils
 
 example :: TestTree
 example = testGroup "parser"

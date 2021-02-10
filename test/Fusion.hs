@@ -9,24 +9,24 @@ module Fusion
 import Control.Algebra
 import Control.Carrier.Error.Either
 import Control.Carrier.State.Strict
-import Test.Inspection as Inspection
-import Test.Tasty
-import Test.Tasty.HUnit
+import Gen
+import Hedgehog
+import Test.Inspection as Inspection hiding (property, (===))
 
 tests :: TestTree
 tests = testGroup "fusion"
-  [ testCase "eliminates StateCs" $
+  [ testProperty "eliminates StateCs" . property $
     failureOf $(inspectTest $ 'countDown `doesNotUse` ''StateC)
-    @?= Nothing
-  , testCase "eliminates nested StateCs" $
+    === Nothing
+  , testProperty "eliminates nested StateCs" . property $
     failureOf $(inspectTest $ 'countBoth `doesNotUse` ''StateC)
-    @?= Nothing
-  , testCase "eliminates catch and throw" $
+    === Nothing
+  , testProperty "eliminates catch and throw" . property $
     failureOf $(inspectTest $ 'throwing `doesNotUse` ''ErrorC)
-    @?= Nothing
-  , testCase "eliminates calls to alg" $
+    === Nothing
+  , testProperty "eliminates calls to alg" . property $
     failureOf $(inspectTest $ 'countDown `doesNotUse` 'alg)
-    @?= Nothing
+    === Nothing
   ]
 
 

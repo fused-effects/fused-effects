@@ -22,8 +22,6 @@ import           Gen
 import           GHC.Generics ((:.:)(..))
 import qualified Monad
 import qualified MonadFix
-import           Test.Tasty
-import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Reader"

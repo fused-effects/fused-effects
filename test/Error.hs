@@ -18,7 +18,6 @@ import           Data.Semigroup as S ((<>))
 import           Gen
 import qualified Monad
 import qualified MonadFix
-import           Test.Tasty
 import qualified Throw
 
 tests :: TestTree

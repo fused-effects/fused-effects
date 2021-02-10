@@ -120,14 +120,12 @@ test-suite examples
     Parser
     ReinterpretLog
     Teletype
+    Utils
   build-depends:
     , base
     , fused-effects
     , hedgehog           ^>= 1
     , hedgehog-fn        ^>= 1
-    , tasty              ^>= 1.2
-    , tasty-hedgehog     ^>= 1
-    , tasty-hunit        ^>= 0.10
 
 
 test-suite test
@@ -163,9 +161,6 @@ test-suite test
     , hedgehog           ^>= 1
     , hedgehog-fn        ^>= 1
     , inspection-testing ^>= 0.4
-    , tasty              ^>= 1.2
-    , tasty-hedgehog     ^>= 1
-    , tasty-hunit        ^>= 0.10
     , transformers
 
 
