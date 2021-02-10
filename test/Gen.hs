@@ -316,8 +316,8 @@ data TestTree
 
 checkTestTree :: TestTree -> IO Bool
 checkTestTree = \case
-  Leaf   n p  -> putStrLn n >> check p
-  Branch n ts -> putStrLn n >> and <$> traverse checkTestTree ts
+  Leaf   n p  ->        putStrLn n  *> check p                   <* putStrLn ""
+  Branch n ts -> and <$ putStrLn n <*> traverse checkTestTree ts <* putStrLn ""
 
 testGroup :: String -> [TestTree] -> TestTree
 testGroup = Branch
