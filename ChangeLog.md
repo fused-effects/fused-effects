@@ -1,3 +1,6 @@
+* Bumps the upper bound on `base` to accommodate `ghc` 9.0.1.
+
+
 # v1.1.1
 
 * Defines `MonadFix` instances for `Labelled` and `UnderLabel`. ([#402](https://github.com/fused-effects/fused-effects/pull/402))
