@@ -127,7 +127,6 @@ test-suite examples
     , hedgehog-fn        ^>= 1
     , tasty              ^>= 1.2
     , tasty-hedgehog     ^>= 1
-    , tasty-hunit        ^>= 0.10
 
 
 test-suite test

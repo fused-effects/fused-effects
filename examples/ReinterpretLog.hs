@@ -33,9 +33,10 @@ import Control.Carrier.Reader
 import Control.Carrier.Writer.Strict
 import Control.Monad.IO.Class (MonadIO(..))
 import Data.Kind (Type)
+import Hedgehog
 import Prelude hiding (log)
 import Test.Tasty
-import Test.Tasty.HUnit
+import Test.Tasty.Hedgehog
 
 --------------------------------------------------------------------------------
 -- The application
@@ -157,9 +158,9 @@ collectLogMessages = execWriter . runCollectLogMessagesC
 -- Test spec.
 example :: TestTree
 example = testGroup "reinterpret log"
-  [ testCase "reinterprets logs" $ do
-      a <- collectLogMessages . reinterpretLog renderLogMessage $ do
+  [ testProperty "reinterprets logs" . property $ do
+      a <- liftIO . collectLogMessages . reinterpretLog renderLogMessage $ do
         log (Debug "foo")
         log (Info "bar")
-      a @?= ["[debug] foo", "[info] bar"]
+      a === ["[debug] foo", "[info] bar"]
   ]
