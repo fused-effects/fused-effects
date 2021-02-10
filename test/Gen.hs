@@ -55,6 +55,7 @@ module Gen
 , addLabel
   -- * Test trees
 , TestTree
+, checkTestTree
 , testGroup
 , testProperty
   -- * Re-exports
@@ -75,7 +76,6 @@ module Gen
 ) where
 
 import           Control.Applicative
-import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Class
 import           Control.Monad.Trans.Writer
 import           Data.Foldable (traverse_)
@@ -92,7 +92,6 @@ import           GHC.TypeLits
 import           Hedgehog
 import qualified Hedgehog.Function as Fn
 import           Hedgehog.Gen as Hedgehog
-import           Hedgehog.Internal.Property
 import           Hedgehog.Range
 
 -- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
@@ -311,13 +310,17 @@ instance Show (Term a) where
     f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)
 
 
-type TestTree = Group
+data TestTree
+  = Leaf String Property
+  | Branch String [TestTree]
+
+checkTestTree :: TestTree -> IO Bool
+checkTestTree = \case
+  Leaf   n p  -> putStrLn n >> check p
+  Branch n ts -> putStrLn n >> and <$> traverse checkTestTree ts
 
 testGroup :: String -> [TestTree] -> TestTree
-testGroup s as = Group (GroupName s) (toProp <$> as)
-  where
-  toProp :: Group -> (PropertyName, Property)
-  toProp g@(Group (GroupName n) _) = (PropertyName n, property (liftIO (checkSequential g) >>= assert))
+testGroup = Branch
 
 testProperty :: String -> Property -> TestTree
-testProperty s p = Group (GroupName s) [(PropertyName s, p)]
+testProperty = Leaf

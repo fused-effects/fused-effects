@@ -12,7 +12,7 @@ import qualified Error
 import qualified Fail
 import qualified Fresh
 import qualified Fusion
-import           Hedgehog (checkParallel)
+import           Gen
 import           Hedgehog.Main
 import qualified Lift
 import qualified NonDet
@@ -23,7 +23,7 @@ import qualified Throw
 import qualified Writer
 
 main :: IO ()
-main = defaultMain $ map checkParallel
+main = defaultMain $ map checkTestTree
   [ Catch.tests
   , Choose.tests
   , Cull.tests
