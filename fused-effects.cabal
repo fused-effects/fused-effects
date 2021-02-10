@@ -9,7 +9,7 @@ license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Nicolas Wu, Tom Schrijvers, Rob Rix, Patrick Thomson
 maintainer:          robrix@github.com
-copyright:           2018-2020 Nicolas Wu, Tom Schrijvers, Rob Rix, Patrick Thomson
+copyright:           2018-2021 Nicolas Wu, Tom Schrijvers, Rob Rix, Patrick Thomson
 category:            Control
 build-type:          Simple
 extra-source-files:
