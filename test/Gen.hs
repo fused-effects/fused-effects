@@ -53,6 +53,11 @@ module Gen
 , infixR
 , pair
 , addLabel
+  -- * Test trees
+, TestTree
+, checkTestTree
+, testGroup
+, testProperty
   -- * Re-exports
 , Gen
 , (===)
@@ -303,3 +308,19 @@ instance Show (Term a) where
     InfixL p s _ :<*> a -> showParen True (showsPrec p a . showString " " . showString s)
     InfixR p s _ :<*> a -> showParen True (showsPrec (succ p) a . showString " " . showString s)
     f :<*> a -> showParen (d > 10) (showsPrec 10 f . showString " " . showsPrec 11 a)
+
+
+data TestTree
+  = Leaf String Property
+  | Branch String [TestTree]
+
+checkTestTree :: TestTree -> IO Bool
+checkTestTree = \case
+  Leaf   n p  ->        putStrLn n  *> check p                   <* putStrLn ""
+  Branch n ts -> and <$ putStrLn n <*> traverse checkTestTree ts <* putStrLn ""
+
+testGroup :: String -> [TestTree] -> TestTree
+testGroup = Branch
+
+testProperty :: String -> Property -> TestTree
+testProperty = Leaf
