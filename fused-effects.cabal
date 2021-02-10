@@ -165,7 +165,6 @@ test-suite test
     , inspection-testing ^>= 0.4
     , tasty              ^>= 1.2
     , tasty-hedgehog     ^>= 1
-    , tasty-hunit        ^>= 0.10
     , transformers
 
 

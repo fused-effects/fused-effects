@@ -5,24 +5,25 @@ module NonDet.Church
 import Control.Carrier.Error.Either
 import Control.Carrier.NonDet.Church
 import Control.Carrier.State.Strict hiding (state)
+import Hedgehog
 import Prelude hiding (error)
 import Test.Tasty
-import Test.Tasty.HUnit
+import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "NonDet.Church"
-  [ testCase "collects results of effects run inside it" $
+  [ testProperty "collects results of effects run inside it" . property $
     run (runNonDetA (runState 'a' state))
-    @?= [('a', 'z'), ('b', 'b'), ('a', 'a')]
-  , testCase "collapses results of effects run outside it" $
+    === [('a', 'z'), ('b', 'b'), ('a', 'a')]
+  , testProperty "collapses results of effects run outside it" . property $
     run (runState 'a' (runNonDetA state))
-    @?= ('b', "zbb")
-  , testCase "collects results from higher-order effects run inside it" $
+    === ('b', "zbb")
+  , testProperty "collects results from higher-order effects run inside it" . property $
     run (runNonDetA (runError error))
-    @?= [Right 'z', Right 'a' :: Either Char Char]
-  , testCase "collapses results of higher-order effects run outside it" $
+    === [Right 'z', Right 'a' :: Either Char Char]
+  , testProperty "collapses results of higher-order effects run outside it" . property $
     run (runError (runNonDetA error))
-    @?= (Right "a" :: Either Char String)
+    === (Right "a" :: Either Char String)
   ]
 
 state :: (Alternative m, Has (State Char) sig m) => m Char
