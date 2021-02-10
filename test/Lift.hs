@@ -6,9 +6,8 @@ import           Control.Carrier.State.Strict
 import           Control.Effect.Lift
 import qualified Control.Exception as E
 import           Control.Monad.IO.Class
+import           Gen
 import           Hedgehog
-import           Test.Tasty
-import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Lift"

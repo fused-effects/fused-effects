@@ -15,8 +15,6 @@ import           Gen
 import qualified Hedgehog.Range as R
 import qualified Monad
 import qualified MonadFix
-import           Test.Tasty
-import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Fresh"

@@ -9,10 +9,9 @@ module Fusion
 import Control.Algebra
 import Control.Carrier.Error.Either
 import Control.Carrier.State.Strict
+import Gen
 import Hedgehog
 import Test.Inspection as Inspection hiding (property, (===))
-import Test.Tasty
-import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "fusion"

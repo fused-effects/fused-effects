@@ -14,8 +14,6 @@ import           Data.List.NonEmpty
 import           Gen
 import qualified Monad
 import qualified MonadFix
-import           Test.Tasty
-import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Choose"

@@ -22,8 +22,6 @@ import qualified Monad
 import qualified MonadFix
 import qualified NonDet
 import qualified Reader
-import           Test.Tasty
-import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Cut"

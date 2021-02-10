@@ -19,8 +19,6 @@ import           Gen
 import qualified Monad
 import qualified MonadFix
 import qualified NonDet
-import           Test.Tasty
-import           Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "Cull"

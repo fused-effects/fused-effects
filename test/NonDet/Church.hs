@@ -5,10 +5,9 @@ module NonDet.Church
 import Control.Carrier.Error.Either
 import Control.Carrier.NonDet.Church
 import Control.Carrier.State.Strict hiding (state)
+import Gen
 import Hedgehog
 import Prelude hiding (error)
-import Test.Tasty
-import Test.Tasty.Hedgehog
 
 tests :: TestTree
 tests = testGroup "NonDet.Church"

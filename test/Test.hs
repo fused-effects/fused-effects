@@ -12,17 +12,18 @@ import qualified Error
 import qualified Fail
 import qualified Fresh
 import qualified Fusion
+import           Hedgehog (checkParallel)
+import           Hedgehog.Main
 import qualified Lift
 import qualified NonDet
 import qualified NonDet.Church
 import qualified Reader
 import qualified State
-import           Test.Tasty
 import qualified Throw
 import qualified Writer
 
 main :: IO ()
-main = defaultMain $ testGroup "unit tests"
+main = defaultMain $ map checkParallel
   [ Catch.tests
   , Choose.tests
   , Cull.tests

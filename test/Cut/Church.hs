@@ -6,8 +6,7 @@ module Cut.Church
 import Control.Carrier.Cut.Church
 import Control.Effect.Reader
 import Hedgehog
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import Gen
 
 tests :: TestTree
 tests = testGroup "Cut.Church"
