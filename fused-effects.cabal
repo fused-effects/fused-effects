@@ -105,7 +105,7 @@ library
     Control.Effect.Throw.Internal
     Control.Effect.Writer.Internal
   build-depends:
-      base          >= 4.9 && < 4.15
+      base          >= 4.9 && < 4.16
     , transformers  >= 0.4 && < 0.6
 
 
