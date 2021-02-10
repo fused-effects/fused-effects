@@ -35,8 +35,7 @@ import Control.Monad.IO.Class (MonadIO(..))
 import Data.Kind (Type)
 import Hedgehog
 import Prelude hiding (log)
-import Test.Tasty
-import Test.Tasty.Hedgehog
+import Utils
 
 --------------------------------------------------------------------------------
 -- The application

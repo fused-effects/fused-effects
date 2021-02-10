@@ -12,8 +12,7 @@ import           Control.Effect.Labelled
 import qualified Control.Effect.Reader.Labelled as L
 import qualified Control.Effect.State.Labelled as L
 import           Hedgehog
-import           Test.Tasty
-import           Test.Tasty.Hedgehog
+import           Utils
 
 sample :: ( HasLabelled "fore" (Reader Int) sig m
           , HasLabelled "aft" (Reader Int) sig m
