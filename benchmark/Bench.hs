@@ -8,7 +8,7 @@ import qualified Bench.NonDet as NonDet
 import qualified Bench.Reader as Reader
 import qualified Bench.State as State
 import qualified Bench.Writer as Writer
-import           Gauge
+import           Test.Tasty.Bench
 
 main :: IO ()
 main = defaultMain

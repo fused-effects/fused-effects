@@ -10,7 +10,7 @@ module Bench.Interpret
 import Control.Carrier.Interpret
 import Control.Carrier.State.Strict
 import Data.Foldable (for_)
-import Gauge hiding (benchmark)
+import Test.Tasty.Bench hiding (benchmark)
 
 benchmark :: Benchmark
 benchmark = bgroup "Interpret"

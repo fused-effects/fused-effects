@@ -193,7 +193,7 @@ benchmark benchmark
   build-depends:
     , base
     , fused-effects
-    , gauge
+    , tasty-bench
     , transformers
   ghc-options:
     -threaded

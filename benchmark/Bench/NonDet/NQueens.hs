@@ -14,7 +14,7 @@ import Control.Applicative
 import Control.Monad (guard)
 import Data.Foldable
 import qualified Data.List as List
-import Gauge hiding (benchmark)
+import Test.Tasty.Bench hiding (benchmark)
 
 type Square = (Int,Int)
 type Board = [Int]
