@@ -1,5 +1,4 @@
 {-# LANGUAGE RankNTypes #-}
-{-# LANGUAGE LinearTypes #-}
 module Control.Algebra.Handler
 ( Handler
 , (~<~)
