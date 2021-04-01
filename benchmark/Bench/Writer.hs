@@ -13,7 +13,7 @@ import Control.Monad.Trans.Writer.CPS as T.CPS (execWriterT)
 import Control.Monad.Trans.Writer.Lazy as T.Lazy (execWriterT)
 import Control.Monad.Trans.Writer.Strict as T.Strict (execWriterT)
 import Data.Monoid (Sum(..))
-import Test.Tasty.Bench hiding (benchmark)
+import Test.Tasty.Bench
 
 benchmark :: Benchmark
 benchmark = bgroup "Writer"

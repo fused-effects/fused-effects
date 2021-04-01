@@ -8,7 +8,7 @@ import Control.Carrier.State.Strict as C.Strict
 import Control.Monad.Trans.State.Lazy as T.Lazy (execStateT)
 import Control.Monad.Trans.State.Strict as T.Strict (execStateT)
 import Data.Foldable (for_)
-import Test.Tasty.Bench hiding (benchmark)
+import Test.Tasty.Bench
 
 benchmark :: Benchmark
 benchmark = bgroup "State"
