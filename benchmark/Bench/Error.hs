@@ -7,7 +7,7 @@ import Control.Carrier.Error.Church as Church
 import Control.Carrier.Error.Either as Either
 import Data.Foldable (for_)
 import Control.Monad.Trans.Except as Except
-import Gauge hiding (benchmark)
+import Test.Tasty.Bench
 
 benchmark :: Benchmark
 benchmark = bgroup "Error"

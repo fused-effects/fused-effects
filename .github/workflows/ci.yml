@@ -1,6 +1,12 @@
 name: Haskell CI
 
-on: [pull_request]
+on:
+  pull_request:
+    branches:
+      - "**"
+  push:
+    branches:
+      - "master"
 
 jobs:
   build:
@@ -8,14 +14,14 @@ jobs:
     runs-on: ubuntu-16.04
     strategy:
       matrix:
-        ghc: ["8.2.2", "8.4.4", "8.6.5", "8.8.2", "8.10.1"]
-        cabal: ["3.0"]
+        ghc: ["8.2.2", "8.4.4", "8.6.5", "8.8.4", "8.10.4", "9.0.1"]
+        cabal: ["3.2"]
 
     steps:
     - uses: actions/checkout@v2
       if: github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.ref == 'refs/heads/master'
 
-    - uses: actions/setup-haskell@v1.1.4
+    - uses: haskell/actions/setup@v1.1.8
       name: Setup Haskell
       with:
         ghc-version: ${{ matrix.ghc }}

@@ -6,7 +6,7 @@ module Bench.Reader
 import Control.Carrier.Reader
 import Control.Monad (replicateM_)
 import Control.Monad.Trans.Reader (runReaderT)
-import Gauge hiding (benchmark)
+import Test.Tasty.Bench
 
 benchmark :: Benchmark
 benchmark = bgroup "Reader"

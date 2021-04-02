@@ -6,7 +6,7 @@ module Bench.NonDet
 import qualified Bench.NonDet.NQueens as NQueens
 import           Control.Algebra
 import qualified Control.Carrier.NonDet.Church as NonDet.Church
-import           Gauge hiding (benchmark)
+import           Test.Tasty.Bench
 
 benchmark :: Benchmark
 benchmark = bgroup "NonDet"
