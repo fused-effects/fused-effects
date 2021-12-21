@@ -41,7 +41,7 @@ okay = do
   liftIO . putStrLn $ "got item: " <> show item
 ```
 
-The `@Int` syntax—an _explicit type application_ specifies that the return type of `get` must in this case be an `Int`. For more information about type applications, consult the [GHC manual](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/glasgow_exts.html#extension-TypeApplications).
+The `@Int` syntax—an _explicit type application_ specifies that the return type of `get` must in this case be an `Int`. For more information about type applications, consult the [GHC manual](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/exts/type_applications.html#extension-TypeApplications).
 
 
 ## How can I build effect stacks that interoperate correctly with `mtl`?
