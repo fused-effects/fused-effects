@@ -194,7 +194,9 @@ When defining carriers, you’ll need `-XTypeOperators` to declare a `Carrier` i
 
 [common]: https://github.com/fused-effects/fused-effects/blob/master/docs/common_errors.md
 
-The following invocation, taken from the teletype example, should suffice for most use or construction of effects and carriers:
+The following invocation, taken from the [teletype example][], should suffice for most use or construction of effects and carriers:
+
+[teletype example]: https://github.com/fused-effects/fused-effects/blob/master/examples/Teletype.hs
 
 ```haskell
 {-# LANGUAGE FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, TypeOperators, UndecidableInstances #-}
