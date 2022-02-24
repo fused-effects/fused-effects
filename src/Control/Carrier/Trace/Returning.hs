@@ -39,7 +39,7 @@ import Data.Monoid (Endo(..))
 --
 -- @since 1.0.0.0
 runTrace :: Functor m => TraceC m a -> m ([String], a)
-runTrace (TraceC m) = first (($[]) . appEndo) <$> runWriter m
+runTrace (TraceC m) = first (($ []) . appEndo) <$> runWriter m
 {-# INLINE runTrace #-}
 
 -- | @since 1.0.0.0

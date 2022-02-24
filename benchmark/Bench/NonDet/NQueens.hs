@@ -28,8 +28,8 @@ data Diagonal = Row Int
 diags :: Square -> [Diagonal]
 diags (i,j) = [ Row i
               , Col j
-              , Backslash (j-i)
-              , Forwardslash (i+j) ]
+              , Backslash (j - i)
+              , Forwardslash (i + j) ]
 
 isSafeIn :: Square -> Board -> Bool
 isSafeIn (i, j) qs = null (diags (i, j) `List.intersect` underThreat)
