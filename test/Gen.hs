@@ -90,7 +90,7 @@ import           Data.String (fromString)
 import           GHC.Generics ((:.:)(..))
 import           GHC.Stack
 import           GHC.TypeLits
-import           Hedgehog
+import           Hedgehog hiding (Rec (..))
 import qualified Hedgehog.Function as Fn
 import           Hedgehog.Gen as Hedgehog
 import           Hedgehog.Range
