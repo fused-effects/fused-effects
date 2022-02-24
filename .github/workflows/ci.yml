@@ -11,7 +11,7 @@ on:
 jobs:
   build:
     name: ghc ${{ matrix.ghc }}
-    runs-on: ubuntu-16.04
+    runs-on: ubuntu-latest
     strategy:
       matrix:
         ghc: ["8.2.2", "8.4.4", "8.6.5", "8.8.4", "8.10.4", "9.0.1", "9.2.1"]
