@@ -129,7 +129,7 @@ test-suite examples
   build-depends:
     , base
     , fused-effects
-    , hedgehog           ^>= 1
+    , hedgehog           >= 1 && < 1.2
     , hedgehog-fn        ^>= 1
 
 
@@ -163,8 +163,8 @@ test-suite test
     , base
     , containers          >= 0.5 && < 0.7
     , fused-effects
-    , hedgehog           ^>= 1
-    , hedgehog-fn        ^>= 1
+    , hedgehog
+    , hedgehog-fn
     , inspection-testing ^>= 0.4
     , transformers
 
