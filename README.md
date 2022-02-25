@@ -1,6 +1,6 @@
 # A fast, flexible, fused effect system for Haskell
 
-[![Build Status](https://action-badges.now.sh/fused-effects/fused-effects)](https://github.com/fused-effects/fused-effects/actions) [![hackage](https://img.shields.io/hackage/v/fused-effects.svg?color=blue&style=popout)](http://hackage.haskell.org/package/fused-effects)
+[![Build Status](https://github.com/fused-effects/fused-effects/actions/workflows/ci.yml/badge.svg)](https://github.com/fused-effects/fused-effects/actions) [![hackage](https://img.shields.io/hackage/v/fused-effects.svg?color=blue&style=popout)](http://hackage.haskell.org/package/fused-effects)
 
 - [Overview][]
   - [Algebraic effects][]
