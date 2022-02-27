@@ -33,6 +33,7 @@ import           Control.Algebra
 import qualified Control.Applicative as A
 import           Control.Effect.Choose.Internal (Choose(..))
 import           Control.Effect.Empty
+import           Control.Monad (MonadPlus)
 import           Data.Bool (bool)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Semigroup as S
@@ -125,3 +126,5 @@ instance (Has Choose sig m, Has Empty sig m) => Monoid (Choosing m a) where
 instance (Has Choose sig m, Has Empty sig m) => A.Alternative (Choosing m) where
   empty = mempty
   (<|>) = mappend
+
+instance (Has Choose sig m, Has Empty sig m) => MonadPlus (Choosing m)
