@@ -36,6 +36,7 @@ import           Control.Effect.Empty
 import           Control.Monad (MonadPlus)
 import           Control.Monad.Fail as Fail
 import           Control.Monad.Fix
+import           Control.Monad.Trans.Class (MonadTrans(..))
 import           Data.Bool (bool)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Semigroup as S
@@ -130,3 +131,6 @@ instance (Has Choose sig m, Has Empty sig m) => A.Alternative (Choosing m) where
   (<|>) = mappend
 
 instance (Has Choose sig m, Has Empty sig m) => MonadPlus (Choosing m)
+
+instance MonadTrans Choosing where
+  lift = Choosing
