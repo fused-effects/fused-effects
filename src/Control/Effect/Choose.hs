@@ -139,6 +139,7 @@ instance (Has Choose sig m, Has Empty sig m) => MonadPlus (Choosing m)
 
 instance MonadTrans Choosing where
   lift = Choosing
+  {-# INLINE lift #-}
 
 instance Traversable m => Traversable (Choosing m) where
   sequenceA (Choosing m) = fmap Choosing (sequenceA m)
