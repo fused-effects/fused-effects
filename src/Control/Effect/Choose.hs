@@ -34,6 +34,7 @@ import qualified Control.Applicative as A
 import           Control.Effect.Choose.Internal (Choose(..))
 import           Control.Effect.Empty
 import           Control.Monad (MonadPlus)
+import           Control.Monad.Fail as Fail
 import           Data.Bool (bool)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Semigroup as S
@@ -110,7 +111,7 @@ some1 a = (:|) <$> a <*> many a
 
 -- | @since 1.0.0.0
 newtype Choosing m a = Choosing { getChoosing :: m a }
-  deriving (Algebra sig, Applicative, Functor, Monad)
+  deriving (Algebra sig, Applicative, Functor, Monad, Fail.MonadFail)
 
 instance Has Choose sig m => S.Semigroup (Choosing m a) where
   Choosing m1 <> Choosing m2 = Choosing (m1 <|> m2)
