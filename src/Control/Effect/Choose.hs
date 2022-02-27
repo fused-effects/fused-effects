@@ -129,7 +129,10 @@ instance (Has Choose sig m, Has Empty sig m) => Monoid (Choosing m a) where
 
 instance (Has Choose sig m, Has Empty sig m) => A.Alternative (Choosing m) where
   empty = mempty
+  {-# INLINE empty #-}
+
   (<|>) = mappend
+  {-# INLINE (<|>) #-}
 
 instance (Has Choose sig m, Has Empty sig m) => MonadPlus (Choosing m)
 
