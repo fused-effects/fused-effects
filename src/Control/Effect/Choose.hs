@@ -94,7 +94,7 @@ many a = go where go = (:) <$> a <*> go <|> pure []
 --
 -- @
 -- 'some' m = (:) '<$>' m '<*>' 'many' m
--- @
+-- @-
 --
 -- @since 1.0.0.0
 some :: Has Choose sig m => m a -> m [a]
@@ -115,7 +115,7 @@ some1 a = (:|) <$> a <*> many a
 
 -- | @since 1.0.0.0
 newtype Choosing m a = Choosing { getChoosing :: m a }
-  deriving (Algebra sig, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadZip)
+  deriving (Algebra sig, Applicative, Foldable, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadZip)
 
 instance Has Choose sig m => S.Semigroup (Choosing m a) where
   Choosing m1 <> Choosing m2 = Choosing (m1 <|> m2)
