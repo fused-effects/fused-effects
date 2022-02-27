@@ -30,6 +30,7 @@ module Control.Effect.Choose
 ) where
 
 import           Control.Algebra
+import qualified Control.Applicative as A
 import           Control.Effect.Choose.Internal (Choose(..))
 import           Control.Effect.Empty
 import           Data.Bool (bool)
@@ -120,3 +121,7 @@ instance (Has Choose sig m, Has Empty sig m) => Monoid (Choosing m a) where
 
   mappend = (S.<>)
   {-# INLINE mappend #-}
+
+instance (Has Choose sig m, Has Empty sig m) => A.Alternative (Choosing m) where
+  empty = mempty
+  (<|>) = mappend
