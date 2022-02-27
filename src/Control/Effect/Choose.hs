@@ -108,7 +108,7 @@ some1 a = (:|) <$> a <*> many a
 
 -- | @since 1.0.0.0
 newtype Choosing m a = Choosing { getChoosing :: m a }
-  deriving (Applicative, Functor, Monad)
+  deriving (Algebra sig, Applicative, Functor, Monad)
 
 instance Has Choose sig m => S.Semigroup (Choosing m a) where
   Choosing m1 <> Choosing m2 = Choosing (m1 <|> m2)
