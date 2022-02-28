@@ -1,3 +1,7 @@
+# v1.1.2.0
+
+- Adds `MonadUnliftIO` instances for `ReaderC`, `LiftC`, and `InterpretC`.
+
 # v1.1.1.2
 
 - Adds support for `ghc` 9.2.1 and `base` 4.16.

@@ -33,6 +33,7 @@ import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.IO.Unlift (MonadUnliftIO)
 import Data.Functor.Const (Const(..))
 import Data.Kind (Type)
 import Unsafe.Coerce (unsafeCoerce)
@@ -87,7 +88,7 @@ runInterpretState handler state m
 
 -- | @since 1.0.0.0
 newtype InterpretC s (sig :: (Type -> Type) -> (Type -> Type)) m a = InterpretC { runInterpretC :: m a }
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadUnliftIO)
 
 instance MonadTrans (InterpretC s sig) where
   lift = InterpretC
