@@ -55,6 +55,8 @@ library
     Control.Algebra
     Control.Algebra.Handler
     -- Carriers
+    Control.Carrier.Accum.Church
+    Control.Carrier.Accum.Strict
     Control.Carrier.Choose.Church
     Control.Carrier.Cull.Church
     Control.Carrier.Cut.Church
@@ -79,6 +81,7 @@ library
     Control.Carrier.Writer.Church
     Control.Carrier.Writer.Strict
     -- Effects
+    Control.Effect.Accum
     Control.Effect.Catch
     Control.Effect.Choose
     Control.Effect.Cull
@@ -99,6 +102,7 @@ library
     Control.Effect.Trace
     Control.Effect.Writer
   other-modules:
+    Control.Effect.Accum.Internal
     Control.Effect.Catch.Internal
     Control.Effect.Choose.Internal
     Control.Effect.Empty.Internal
@@ -140,6 +144,7 @@ test-suite test
   hs-source-dirs: test
   main-is:        Test.hs
   other-modules:
+    Accum
     Catch
     Choose
     Cull
