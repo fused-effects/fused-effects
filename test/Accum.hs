@@ -67,7 +67,7 @@ test m a w (Run runAccum) =
   , testProperty "look returns the log variable (continuation)" . forall (w :. fn (m a) :. Nil) $
     \ w0 k -> runAccum (w0, look >>= k) === runAccum (w0, k w0)
   , testProperty "add appends to the log variable and alters the environment for look" . forall (w :. w :. Nil) $
-    \ w0 w -> runAccum (w0, add w >> look) === runAccum (w0 <> w, look @w <* add w)
+    \ w0 w -> runAccum (w0, add w >> look) === runAccum (mappend w0 w, look @w <* add w)
   , testProperty "add appends to the log variable and alters the environment for continuations" . forall (w :. w :. m a :. Nil) $
-    \ w0 w k -> runAccum (w0, add w >> k) === (first (w <>) <$> runAccum (w0 <> w, k))
+    \ w0 w k -> runAccum (w0, add w >> k) === (first (mappend w) <$> runAccum (mappend w0 w, k))
   ]
