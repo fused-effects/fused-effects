@@ -12,8 +12,8 @@ import qualified Control.Carrier.Accum.Strict as C.Accum.Strict
 import           Control.Effect.Accum
 #if MIN_VERSION_transformers(0,5,4)
 import qualified Control.Monad.Trans.Accum as T.Accum
-#endif
 import           Data.Tuple (swap)
+#endif
 import           Gen
 import qualified Monad
 import qualified MonadFix
