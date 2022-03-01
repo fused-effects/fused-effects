@@ -33,6 +33,7 @@ import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Data.Semigroup as S ((<>))
 
 -- | Run an 'Accum' effect with a 'Monoid'al log, applying a continuation to the final log and result.
 --
@@ -91,7 +92,7 @@ instance Monoid w => Applicative (AccumC w m) where
   {-# INLINE pure #-}
 
   mf <*> ma = AccumC $ \k w ->
-    runAccumC mf (\w' f -> runAccumC ma (\w'' a -> k (w' <> w'') $ f a) (w <> w')) w
+    runAccumC mf (\w' f -> runAccumC ma (\w'' a -> k (w' S.<> w'') $ f a) (w S.<> w')) w
   {-# INLINE (<*>) #-}
 
 instance (Alternative m, Monad m, Monoid w) => Alternative (AccumC w m) where
@@ -102,7 +103,7 @@ instance (Alternative m, Monad m, Monoid w) => Alternative (AccumC w m) where
   {-# INLINE (<|>) #-}
 
 instance (Monad m, Monoid w) => Monad (AccumC w m) where
-  ma >>= f = AccumC $ \k w -> runAccumC ma (\w' a -> runAccumC (f a) (\w'' -> k $ w' <> w'') (w <> w')) w
+  ma >>= f = AccumC $ \k w -> runAccumC ma (\w' a -> runAccumC (f a) (\w'' -> k $ w' S.<> w'') (w S.<> w')) w
   {-# INLINE (>>=) #-}
 
 instance (MonadPlus m, Monoid w) => MonadPlus (AccumC w m) where
