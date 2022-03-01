@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE RankNTypes #-}
 {-# LANGUAGE ScopedTypeVariables #-}
@@ -9,7 +10,9 @@ module Accum
 import qualified Control.Carrier.Accum.Church as C.Accum.Church
 import qualified Control.Carrier.Accum.Strict as C.Accum.Strict
 import           Control.Effect.Accum
+#if MIN_VERSION_transformers(0,5,4)
 import qualified Control.Monad.Trans.Accum as T.Accum
+#endif
 import           Data.Tuple (swap)
 import           Gen
 import qualified Monad
@@ -28,7 +31,9 @@ tests = testGroup "Accum"
     , testMonadFix
     , testAccum
     ] >>= ($ runC C.Accum.Strict.runAccum)
+#if MIN_VERSION_transformers(0,5,4)
   , testGroup "AccumT" $ testAccum (runC (fmap (fmap swap) . flip T.Accum.runAccumT))
+#endif
   ] where
   testMonad    run = Monad.test    (m (gen0 w) (\_ _ -> [])) a b c initial run
   testMonadFix run = MonadFix.test (m (gen0 w) (\_ _ -> [])) a b   initial run
