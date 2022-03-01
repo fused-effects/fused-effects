@@ -101,8 +101,5 @@ instance Algebra sig m => Algebra (Reader r :+: sig) (ReaderC r m) where
   {-# INLINE alg #-}
 
 instance MonadUnliftIO m => MonadUnliftIO (ReaderC r m) where
+  withRunInIO inner = ReaderC $ \ r -> withRunInIO $ \ run -> inner (run . runReader r)
   {-# INLINE withRunInIO #-}
-  withRunInIO inner =
-    ReaderC $ \r ->
-    withRunInIO $ \run ->
-    inner (run . runReader r)
