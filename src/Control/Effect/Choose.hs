@@ -37,6 +37,7 @@ import           Control.Monad (MonadPlus)
 import           Control.Monad.Fail as Fail
 import           Control.Monad.Fix
 import           Control.Monad.IO.Class (MonadIO)
+import           Control.Monad.IO.Unlift (MonadUnliftIO)
 import           Control.Monad.Trans.Class (MonadTrans(..))
 import           Control.Monad.Zip
 import           Data.Bool (bool)
@@ -115,7 +116,7 @@ some1 a = (:|) <$> a <*> many a
 
 -- | @since 1.0.0.0
 newtype Choosing m a = Choosing { getChoosing :: m a }
-  deriving (Algebra sig, Applicative, Foldable, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadZip)
+  deriving (Algebra sig, Applicative, Foldable, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadUnliftIO, MonadZip)
 
 instance Has Choose sig m => S.Semigroup (Choosing m a) where
   Choosing m1 <> Choosing m2 = Choosing (m1 <|> m2)
