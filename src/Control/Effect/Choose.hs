@@ -1,3 +1,4 @@
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE UndecidableInstances #-}
 
 {- | An effect modelling nondeterminism without failure (one or more successful results).
@@ -29,8 +30,16 @@ module Control.Effect.Choose
 ) where
 
 import           Control.Algebra
+import qualified Control.Applicative as A
 import           Control.Effect.Choose.Internal (Choose(..))
 import           Control.Effect.Empty
+import           Control.Monad (MonadPlus)
+import           Control.Monad.Fail as Fail
+import           Control.Monad.Fix
+import           Control.Monad.IO.Class (MonadIO)
+import           Control.Monad.IO.Unlift (MonadUnliftIO)
+import           Control.Monad.Trans.Class (MonadTrans(..))
+import           Control.Monad.Zip
 import           Data.Bool (bool)
 import           Data.List.NonEmpty (NonEmpty(..))
 import qualified Data.Semigroup as S
@@ -107,6 +116,7 @@ some1 a = (:|) <$> a <*> many a
 
 -- | @since 1.0.0.0
 newtype Choosing m a = Choosing { getChoosing :: m a }
+  deriving (Algebra sig, Applicative, Foldable, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadUnliftIO, MonadZip)
 
 instance Has Choose sig m => S.Semigroup (Choosing m a) where
   Choosing m1 <> Choosing m2 = Choosing (m1 <|> m2)
@@ -118,3 +128,29 @@ instance (Has Choose sig m, Has Empty sig m) => Monoid (Choosing m a) where
 
   mappend = (S.<>)
   {-# INLINE mappend #-}
+
+instance (Has Choose sig m, Has Empty sig m) => A.Alternative (Choosing m) where
+  empty = mempty
+  {-# INLINE empty #-}
+
+  (<|>) = mappend
+  {-# INLINE (<|>) #-}
+
+instance (Has Choose sig m, Has Empty sig m) => MonadPlus (Choosing m)
+
+instance MonadTrans Choosing where
+  lift = Choosing
+  {-# INLINE lift #-}
+
+instance Traversable m => Traversable (Choosing m) where
+  sequenceA (Choosing m) = fmap Choosing (sequenceA m)
+  {-# INLINE sequenceA #-}
+
+  traverse f (Choosing m) = fmap Choosing (traverse f m)
+  {-# INLINE traverse #-}
+
+  sequence (Choosing m) = fmap Choosing (sequence m)
+  {-# INLINE sequence #-}
+
+  mapM f (Choosing m) = fmap Choosing (mapM f m)
+  {-# INLINE mapM #-}
