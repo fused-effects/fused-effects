@@ -20,6 +20,7 @@ import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
+import Control.Monad.IO.Unlift (MonadUnliftIO)
 
 -- | Extract a 'Lift'ed 'Monad'ic action from an effectful computation.
 --
@@ -30,7 +31,7 @@ runM (LiftC m) = m
 
 -- | @since 1.0.0.0
 newtype LiftC m a = LiftC (m a)
-  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus)
+  deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadUnliftIO)
 
 instance MonadTrans LiftC where
   lift = LiftC
