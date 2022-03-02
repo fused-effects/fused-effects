@@ -116,6 +116,7 @@ library
   build-depends:
       base          >= 4.9 && < 4.17
     , transformers  >= 0.4 && < 0.6
+    , unliftio-core >= 0.2 && < 0.3
 
 
 test-suite examples

@@ -1,4 +1,4 @@
-# v1.1.2.0
+- Adds `MonadUnliftIO` instances for `ReaderC`, `LiftC`, and `InterpretC`. ([#420](https://github.com/fused-effects/fused-effects/pull/420))
 
 - Adds `Accum` ([#391](https://github.com/fused-effects/fused-effects/pull/391)) (by @turion)
   - Adds an `Accum` effect
