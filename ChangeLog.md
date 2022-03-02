@@ -7,7 +7,7 @@
   - Defines `Algebra` instances for the two mentioned carriers,
     and for `Control.Monad.Trans.Accum` from `transformers`
 
-- Defines, `Algebra`, `Alternative`, `Applicative`, `Foldable`, `Functor`, `Monad`, `MonadFail`, `MonadFix`, `MonadIO`, `MonadPlus`, `MonadTrans`, `MonadZip`, and `Traversable` instances for `Control.Effect.Choose.Choosing`. ([#419](https://github.com/fused-effects/fused-effects/pull/419))
+- Defines, `Algebra`, `Alternative`, `Applicative`, `Foldable`, `Functor`, `Monad`, `MonadFail`, `MonadFix`, `MonadIO`, `MonadPlus`, `MonadTrans`, `MonadUnliftIO`, `MonadZip`, and `Traversable` instances for `Control.Effect.Choose.Choosing`. ([#419](https://github.com/fused-effects/fused-effects/pull/419))
 
 
 # v1.1.1.2
