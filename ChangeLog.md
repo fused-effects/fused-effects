@@ -11,6 +11,7 @@
 
 - Adds an `IORef`-based carrier in `Control.Carrier.State.IORef`. ([#422](https://github.com/fused-effects/fused-effects/pull/422))
 
+
 # v1.1.1.2
 
 - Adds support for `ghc` 9.2.1 and `base` 4.16.
