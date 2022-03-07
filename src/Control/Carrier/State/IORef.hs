@@ -8,9 +8,9 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
-{- | A carrier for the 'State' effect. It uses an 'IORef' internally to handle its state, and thus admits a 'MonadUnliftIO' instance. Because the state operations are performed impurely, this carrier will not lose state effects even with nefarious uses of 'liftWith'.
+{- | A carrier for the 'State' effect. It uses an 'IORef' internally to handle its state, and thus admits a 'MonadUnliftIO' instance. Because the state operations are performed impurely, this carrier will not lose state effects even with nefarious uses of 'Control.Effect.Lift.liftWith'.
 
-Unlike the other carriers for 'State', this carrier's effects will not backtrack when run in conjuction with 'NonDet' effects.
+Unlike the other carriers for 'State', this carrier's effects will not backtrack when run in conjuction with 'Control.Effect.NonDet' effects.
 
 @since 1.1.2.0
 -}
@@ -39,7 +39,15 @@ import           Data.IORef
 
 -- | Run a 'State' effect starting from the passed value.
 --
---   prop> run (runState a (pure b)) === (a, b)
+-- @
+-- 'runState' s ('pure' a) = 'pure' (s, a)
+-- @
+-- @
+-- 'runState' s 'get' = 'pure' (s, s)
+-- @
+-- @
+-- 'runState' s ('put' t) = 'pure' (t, ())
+-- @
 --
 -- @since 1.1.2.0
 runState :: MonadIO m => s -> StateC s m a -> m (s, a)
@@ -50,7 +58,8 @@ runState s x = do
   pure (final, result)
 {-# INLINE[3] runState #-}
 
--- | Run a 'State' effect starting from the passed 'IORef'.
+-- | Run a 'State' effect starting from the passed 'IORef'. This function is lawless, given that the underlying IORef can be modified by another thread.
+--
 -- @since 1.1.2.0
 runStateRef :: MonadIO m => IORef s -> StateC s m a -> m (s, a)
 runStateRef ref x = do
@@ -61,7 +70,9 @@ runStateRef ref x = do
 
 -- | Run a 'State' effect, yielding the result value and discarding the final state.
 --
---   prop> run (evalState a (pure b)) === b
+-- @
+-- 'evalState' s m = 'fmap' 'snd' ('runState' s m)
+-- @
 --
 -- @since 1.1.2.0
 evalState :: forall s m a . MonadIO m => s -> StateC s m a -> m a
@@ -72,7 +83,9 @@ evalState s x = do
 
 -- | Run a 'State' effect, yielding the final state and discarding the return value.
 --
---   prop> run (execState a (pure b)) === a
+-- @
+-- 'execState' s m = 'fmap' 'fst' ('runState' s m)
+-- @
 --
 -- @since 1.1.2.0
 execState :: forall s m a . MonadIO m => s -> StateC s m a -> m s

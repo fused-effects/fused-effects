@@ -7,6 +7,7 @@ Predefined carriers:
 * "Control.Carrier.State.Church"
 * "Control.Carrier.State.Strict", which is strict in its updates; a good default choice.
 * "Control.Carrier.State.Lazy", which is lazy in its updates. This enables more programs to terminate, such as cyclic computations expressed with @MonadFix@ or @-XRecursiveDo@, at the cost of efficiency.
+* "Control.Carrier.State.IORef", which performs its updates impurely via an 'Data.IORef.IORef', which admits a 'Control.Monad.IO.Unlift.MonadUnliftIO' instance but precludes rollback during backtracking.
 * "Control.Monad.Trans.RWS.CPS"
 * "Control.Monad.Trans.RWS.Lazy"
 * "Control.Monad.Trans.RWS.Strict"
