@@ -1,4 +1,8 @@
 cradle:
-  bios:
-    program: script/ghci-flags
-    dependency-program: script/ghci-flags-dependencies
+  cabal:
+    - path: "src"
+      component: "lib:fused-effects"
+    - path: "test"
+      component: "test:test"
+    - path: "benchmark/Bench.hs"
+      component: "benchmark:benchmark"
