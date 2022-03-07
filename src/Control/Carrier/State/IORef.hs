@@ -51,9 +51,6 @@ runState s x = do
 {-# INLINE[3] runState #-}
 
 -- | Run a 'State' effect starting from the passed 'IORef'.
---
---   prop> run (runState a (pure b)) === (a, b)
---
 -- @since 1.1.2.0
 runStateRef :: MonadIO m => IORef s -> StateC s m a -> m (s, a)
 runStateRef ref x = do
