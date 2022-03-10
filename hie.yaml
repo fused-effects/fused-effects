@@ -4,5 +4,5 @@ cradle:
       component: "lib:fused-effects"
     - path: "test"
       component: "test:test"
-    - path: "benchmark/Bench.hs"
+    - path: "benchmark"
       component: "benchmark:benchmark"
