@@ -72,6 +72,7 @@ library
     Control.Carrier.NonDet.Church
     Control.Carrier.Reader
     Control.Carrier.State.Church
+    Control.Carrier.State.IORef
     Control.Carrier.State.Lazy
     Control.Carrier.State.Strict
     Control.Carrier.Throw.Either
