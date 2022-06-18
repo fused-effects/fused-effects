@@ -6,7 +6,7 @@ on:
       - "**"
   push:
     branches:
-      - "master"
+      - "main"
 
 jobs:
   build:
@@ -14,14 +14,13 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: ["8.2.2", "8.4.4", "8.6.5", "8.8.4", "8.10.4", "9.0.1", "9.2.1"]
-        cabal: ["3.2"]
+        ghc: ["8.2", "8.4", "8.6", "8.8", "8.10", "9.0", "9.2"]
 
     steps:
     - uses: actions/checkout@v2
       if: github.event.action == 'opened' || github.event.action == 'synchronize' || github.event.ref == 'refs/heads/master'
 
-    - uses: haskell/actions/setup@v1.1.8
+    - uses: haskell/actions/setup@v1
       name: Setup Haskell
       with:
         ghc-version: ${{ matrix.ghc }}
