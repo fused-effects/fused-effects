@@ -1,5 +1,6 @@
 # v1.1.1.3
 
+- Adds support for `inspection-testing` 0.5.
 
 
 # v1.1.1.2
