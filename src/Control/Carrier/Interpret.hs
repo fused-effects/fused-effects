@@ -54,7 +54,7 @@ newtype Magic a r = Magic (Reifies Skolem a => Const r Skolem)
 
 -- For more information on this technique, see the @reflection@ library. We use the formulation described in https://github.com/ekmett/reflection/issues/31 for better inlining.
 --
--- Essentially we can view @k@ as internally a function of type @Reifies s a -> Tagged s r@, whch we can again view as just @a -> Tagged s r@ through @unsafeCoerce@. After this coercion, we just apply the function to @a@.
+-- Essentially we can view @k@ as internally a function of type @Reifies s a -> Tagged s r@, which we can again view as just @a -> Tagged s r@ through @unsafeCoerce@. After this coercion, we just apply the function to @a@.
 reify :: a -> (forall s . Reifies s a => Const r s) -> r
 reify a k = unsafeCoerce (Magic k) a
 
