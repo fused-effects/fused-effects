@@ -57,6 +57,7 @@ library
     -- Carriers
     Control.Carrier.Accum.Church
     Control.Carrier.Accum.IORef
+    Control.Carrier.Accum.IORef.Atomic
     Control.Carrier.Accum.Strict
     Control.Carrier.Choose.Church
     Control.Carrier.Cull.Church
@@ -74,6 +75,7 @@ library
     Control.Carrier.Reader
     Control.Carrier.State.Church
     Control.Carrier.State.IORef
+    Control.Carrier.State.IORef.Atomic
     Control.Carrier.State.Lazy
     Control.Carrier.State.Strict
     Control.Carrier.Throw.Either

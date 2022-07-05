@@ -5,12 +5,14 @@
   - Adds a church-encoded `Control.Carrier.Accum.Church` carrier
   - Adds a strict `Control.Carrier.Accum.Strict` carrier
   - Adds an impure `Control.Carrier.Accum.IORef` carrier ([#430](https://github.com/fused-effects/fused-effects/pull/430))
+  - Adds an impure but atomic `Control.Carrier.Accum.IORef.Atomic` carrier ([#431](https://github.com/fused-effects/fused-effects/pull/431))
   - Defines `Algebra` instances for the three mentioned carriers,
     and for `Control.Monad.Trans.Accum` from `transformers`
 
 - Defines `Algebra`, `Alternative`, `Applicative`, `Foldable`, `Functor`, `Monad`, `MonadFail`, `MonadFix`, `MonadIO`, `MonadPlus`, `MonadTrans`, `MonadUnliftIO`, `MonadZip`, and `Traversable` instances for `Control.Effect.Choose.Choosing`. ([#419](https://github.com/fused-effects/fused-effects/pull/419))
 
 - Adds an `IORef`-based carrier in `Control.Carrier.State.IORef`. ([#422](https://github.com/fused-effects/fused-effects/pull/422))
+- Adds an atomic version of the above in `Control.Carrier.State.IORef.Atomic`. ([#431](https://github.com/fused-effects/fused-effects/pull/431)).
 
 
 # v1.1.1.3
