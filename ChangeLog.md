@@ -4,7 +4,7 @@
   - Adds an `Accum` effect
   - Adds a church-encoded `Control.Carrier.Accum.Church` carrier
   - Adds a strict `Control.Carrier.Accum.Strict` carrier
-  - Adds an impure `Control.Carrier.Accum.IORef` carrier
+  - Adds an impure `Control.Carrier.Accum.IORef` carrier ([#430](https://github.com/fused-effects/fused-effects/pull/430))
   - Defines `Algebra` instances for the three mentioned carriers,
     and for `Control.Monad.Trans.Accum` from `transformers`
 
