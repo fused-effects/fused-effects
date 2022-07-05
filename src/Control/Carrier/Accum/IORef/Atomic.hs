@@ -35,9 +35,10 @@ import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
-import Data.IORef
 import Control.Monad.IO.Unlift (MonadUnliftIO)
 import Control.Carrier.Reader
+import Data.IORef
+import qualified Data.Semigroup as S
 
 -- | Run an 'Accum' effect with a 'Monoid'al log.
 --
@@ -93,7 +94,7 @@ instance (Algebra sig m, Monoid w, MonadIO m) => Algebra (Accum w :+: sig) (Accu
     L accum -> do
       ref <- AccumC (ask @(IORef w))
       (<$ ctx) <$> case accum of
-        Add w' -> liftIO (atomicModifyIORef' ref (\s -> (s <> w', ())))
+        Add w' -> liftIO (atomicModifyIORef' ref (\s -> (s S.<> w', ())))
         Look   -> liftIO (atomicModifyIORef' ref (\s -> (s, s)))
     R other  -> AccumC (alg (runAccumC . hdl) (R other) ctx)
   {-# INLINE alg #-}
