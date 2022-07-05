@@ -35,6 +35,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.IORef
+import qualified Data.Semigroup as S
 import Control.Monad.IO.Unlift (MonadUnliftIO)
 import Control.Carrier.Reader
 
@@ -92,7 +93,7 @@ instance (Algebra sig m, Monoid w, MonadIO m) => Algebra (Accum w :+: sig) (Accu
     L accum -> do
       ref <- AccumC (ask @(IORef w))
       (<$ ctx) <$> case accum of
-        Add w' -> liftIO (modifyIORef' ref (<> w'))
+        Add w' -> liftIO (modifyIORef' ref (S.<> w'))
         Look   -> liftIO (readIORef ref)
     R other  -> AccumC (alg (runAccumC . hdl) (R other) ctx)
   {-# INLINE alg #-}
