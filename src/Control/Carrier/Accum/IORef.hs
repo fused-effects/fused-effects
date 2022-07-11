@@ -88,7 +88,7 @@ evalAccum w = fmap snd . runAccum w
 newtype AccumC w m a = AccumC { runAccumC :: ReaderC (IORef w) m a }
   deriving (Alternative, Applicative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadTrans, MonadUnliftIO)
 
-instance (Algebra sig m, Monoid w, MonadIO m) => Algebra (Accum w :+: sig) (AccumC w m) where
+instance (Algebra sig m, S.Semigroup w, MonadIO m) => Algebra (Accum w :+: sig) (AccumC w m) where
   alg hdl sig ctx = case sig of
     L accum -> do
       ref <- AccumC (ask @(IORef w))
