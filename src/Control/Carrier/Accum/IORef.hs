@@ -39,7 +39,7 @@ import qualified Data.Semigroup as S
 import Control.Monad.IO.Unlift (MonadUnliftIO)
 import Control.Carrier.Reader
 
--- | Run an 'Accum' effect with a 'Monoid'al log.
+-- | Run an 'Accum' effect with a 'Semigroup'-based log.
 --
 -- @
 -- 'runAccum' w0 ('pure' a) = 'pure' (w0, a)
@@ -60,7 +60,7 @@ runAccum start go = do
   pure (final, result)
 {-# INLINE runAccum #-}
 
--- | Run a 'Accum' effect (typically with a 'Monoid'al log),
+-- | Run a 'Accum' effect with a 'Semigroup'-based log,
 --   producing the final log and discarding the result value.
 --
 -- @
@@ -72,7 +72,7 @@ execAccum :: MonadIO m => w -> AccumC w m a -> m w
 execAccum w = fmap fst . runAccum w
 {-# INLINE execAccum #-}
 
--- | Run a 'Accum' effect (typically with a 'Monoid'al log),
+-- | Run a 'Accum' effect with a 'Semigroup'-based log,
 --   producing the result value and discarding the final log.
 --
 -- @
