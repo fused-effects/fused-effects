@@ -9,7 +9,7 @@
 
 {- | A carrier for 'Accum' effects.
 This carrier performs its append operations strictly and thus avoids the space leaks inherent in lazy writer monads.
-These appends are left-associative; as such, @[]@ is a poor choice of monoid for computations that entail many calls to 'tell'.
+These appends are left-associative; as such, @[]@ is a poor choice of monoid for computations that entail many calls to 'add'.
 The [Seq](http://hackage.haskell.org/package/containersdocs/Data-Sequence.html) or [DList](http://hackage.haskell.org/package/dlist) monoids may be a superior choice.
 This carrier also uses an 'IORef' to store its accumulator, which allows it a 'MonadUnliftIO' instance, but precludes backtracking when run in conjunction with 'Control.Effect.NonDet'.
 
