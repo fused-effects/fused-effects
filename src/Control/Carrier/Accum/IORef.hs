@@ -13,7 +13,7 @@ These appends are left-associative; as such, @[]@ is a poor choice of monoid for
 The [Seq](http://hackage.haskell.org/package/containersdocs/Data-Sequence.html) or [DList](http://hackage.haskell.org/package/dlist) monoids may be a superior choice.
 This carrier also uses an 'IORef' to store its accumulator, which allows it a 'MonadUnliftIO' instance, but precludes backtracking when run in conjunction with 'Control.Effect.NonDet'.
 
--- | @since 1.1.2.0
+@since 1.1.2.0
 -}
 
 module Control.Carrier.Accum.IORef
