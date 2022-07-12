@@ -12,7 +12,7 @@
 
 This carrier issues left-associated 'mappend's, meaning that 'Monoid's such as @[]@ with poor performance for left-associated 'mappend's are ill-suited for use with this carrier. Alternatives such as 'Data.Monoid.Endo', @Seq@, or @DList@ may be preferred.
 
--- | @since 1.1.2.0
+@since 1.1.2.0
 -}
 
 module Control.Carrier.Accum.Church
