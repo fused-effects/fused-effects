@@ -3,8 +3,9 @@
 - Adds `Accum` ([#391](https://github.com/fused-effects/fused-effects/pull/391)) (by @turion)
   - Adds an `Accum` effect
   - Adds a church-encoded `Control.Carrier.Accum.Church` carrier
-  - Adds a strict `Control.Carrier.Accum.Church` carrier
-  - Defines `Algebra` instances for the two mentioned carriers,
+  - Adds a strict `Control.Carrier.Accum.Strict` carrier
+  - Adds an impure `Control.Carrier.Accum.IORef` carrier ([#430](https://github.com/fused-effects/fused-effects/pull/430))
+  - Defines `Algebra` instances for the three mentioned carriers,
     and for `Control.Monad.Trans.Accum` from `transformers`
 
 - Defines `Algebra`, `Alternative`, `Applicative`, `Foldable`, `Functor`, `Monad`, `MonadFail`, `MonadFix`, `MonadIO`, `MonadPlus`, `MonadTrans`, `MonadUnliftIO`, `MonadZip`, and `Traversable` instances for `Control.Effect.Choose.Choosing`. ([#419](https://github.com/fused-effects/fused-effects/pull/419))
