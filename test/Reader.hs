@@ -68,8 +68,8 @@ test
   -> Run (f :.: (,) r) Identity m
   -> [TestTree]
 test r m a i (Run runReader) =
-  [ testProperty "ask returns the environment variable" . forall (i :. r :. fn (m a) :. Nil) $
+  [ testProperty "ask returns the environment variable" . forall_ (i :. r :. fn (m a) :. Nil) $
     \ i r k -> runReader (Comp1 ((r, ask >>= k) <$ i)) === runReader (Comp1 ((r, k r) <$ i))
-  , testProperty "local modifies the environment variable" . forall (i :. r :. fn r :. m a :. Nil) $
+  , testProperty "local modifies the environment variable" . forall_ (i :. r :. fn r :. m a :. Nil) $
     \ i r f m -> runReader (Comp1 ((r, local f m) <$ i)) === runReader (Comp1 ((f r, m) <$ i))
   ]

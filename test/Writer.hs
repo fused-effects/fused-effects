@@ -89,10 +89,10 @@ test
   -> Run f ((,) w) m
   -> [TestTree]
 test w m a i (Run runWriter) =
-  [ testProperty "tell appends a value to the log" . forall (i :. w :. m a :. Nil) $
+  [ testProperty "tell appends a value to the log" . forall_ (i :. w :. m a :. Nil) $
     \ i w m -> runWriter ((tell w >> m) <$ i) === fmap (first (mappend w)) (runWriter (m <$ i))
-  , testProperty "listen eavesdrops on written output" . forall (i :. m a :. Nil) $
+  , testProperty "listen eavesdrops on written output" . forall_ (i :. m a :. Nil) $
     \ i m -> runWriter (listen m <$ i) === fmap (fst &&& id) (runWriter (m <$ i))
-  , testProperty "censor revises written output" . forall (i :. fn w :. m a :. Nil) $
+  , testProperty "censor revises written output" . forall_ (i :. fn w :. m a :. Nil) $
     \ i f m -> runWriter (censor f m <$ i) === fmap (first f) (runWriter (m <$ i))
   ]

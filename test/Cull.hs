@@ -50,6 +50,6 @@ test
   -> Run f [] m
   -> [TestTree]
 test m a b i (Run runCull)
-  = testProperty "cull returns at most one success" (forall (i :. a :. m a :. m a :. Nil)
+  = testProperty "cull returns at most one success" (forall_ (i :. a :. m a :. m a :. Nil)
     (\ i a m n -> runCull ((cull (pure a <|> m) <|> n) <$ i) === runCull ((pure a <|> n) <$ i)))
   : NonDet.test m a b i (Run runCull)

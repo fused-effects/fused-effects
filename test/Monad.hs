@@ -20,14 +20,14 @@ test
   -> Run f g m
   -> [TestTree]
 test m a b c s (Run run) =
-  [ testProperty "return is the left-identity of >>=" . forall (s :. a :. fn (m b) :. Nil) $
+  [ testProperty "return is the left-identity of >>=" . forall_ (s :. a :. fn (m b) :. Nil) $
     \ s a k -> run ((return a >>= k) <$ s) === run (k a <$ s)
-  , testProperty "return is the right-identity of >>=" . forall (s :. m a :. Nil) $
+  , testProperty "return is the right-identity of >>=" . forall_ (s :. m a :. Nil) $
     \ s m -> run ((m >>= return) <$ s) === run (m <$ s)
-  , testProperty ">>= is associative" . forall (s :. m a :. fn (m b) :. fn (m c) :. Nil) $
+  , testProperty ">>= is associative" . forall_ (s :. m a :. fn (m b) :. fn (m c) :. Nil) $
     \ s m k h -> run ((m >>= (k >=> h)) <$ s) === run (((m >>= k) >>= h) <$ s)
-  , testProperty "return = pure" . forall (s :. a :. Nil) $
+  , testProperty "return = pure" . forall_ (s :. a :. Nil) $
     \ s a -> run (return a <$ s) === run (pure a <$ s)
-  , testProperty "ap = (<*>)" . forall (s :. fn b :. m a :. Nil) $
+  , testProperty "ap = (<*>)" . forall_ (s :. fn b :. m a :. Nil) $
     \ s f m -> run ((pure f `ap` m) <$ s) === run ((pure f <*> m) <$ s)
   ]

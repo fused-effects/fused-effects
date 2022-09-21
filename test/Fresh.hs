@@ -48,6 +48,6 @@ test
   -> Run f ((,) Int) m
   -> [TestTree]
 test m a i (Run runFresh) =
-  [ testProperty "fresh yields unique values" . forall (i :. m a :. Nil) $
+  [ testProperty "fresh yields unique values" . forall_ (i :. m a :. Nil) $
     \ i m -> runFresh ((m >> fresh) <$ i) /== runFresh ((m >> fresh >> fresh) <$ i)
   ]

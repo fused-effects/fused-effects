@@ -78,8 +78,8 @@ test
   -> Run ((,) s) ((,) s) m
   -> [TestTree]
 test m a s (Run runState) =
-  [ testProperty "get returns the state variable" . forall (s :. fn (m a) :. Nil) $
+  [ testProperty "get returns the state variable" . forall_ (s :. fn (m a) :. Nil) $
     \ s k -> runState (s, get >>= k) === runState (s, k s)
-  , testProperty "put updates the state variable" . forall (s :. s :. m a :. Nil) $
+  , testProperty "put updates the state variable" . forall_ (s :. s :. m a :. Nil) $
     \ s s' m -> runState (s, put s' >> m) === runState (s', m)
   ]

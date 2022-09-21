@@ -54,9 +54,9 @@ test
   -> [TestTree]
 test m
   = (\ a _ i (Run runNonDet) ->
-    [ testProperty "empty is the left identity of <|>"  (forall (i :. m a :. Nil)
+    [ testProperty "empty is the left identity of <|>"  (forall_ (i :. m a :. Nil)
       (\ i m -> runNonDet ((empty <|> m) <$ i) === runNonDet (m <$ i)))
-    ,  testProperty "empty is the right identity of <|>" (forall (i :. m a :. Nil)
+    ,  testProperty "empty is the right identity of <|>" (forall_ (i :. m a :. Nil)
       (\ i m -> runNonDet ((m <|> empty) <$ i) === runNonDet (m <$ i)))
     ])
   S.<> Empty.test  m
