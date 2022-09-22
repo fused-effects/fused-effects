@@ -46,6 +46,6 @@ test
   -> Run f (Either String) m
   -> [TestTree]
 test msg m _ b i (Run runFail) =
-  [ testProperty "fail annihilates >>=" . forall (i :. msg :. fn @a (m b) :. Nil) $
+  [ testProperty "fail annihilates >>=" . forall_ (i :. msg :. fn @a (m b) :. Nil) $
     \ i s k -> runFail ((Fail.fail s >>= k) <$ i) === runFail (Fail.fail s <$ i)
   ]

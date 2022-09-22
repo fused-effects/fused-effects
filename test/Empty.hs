@@ -54,6 +54,6 @@ test
   -> Run f [] m
   -> [TestTree]
 test m _ b i (Run runEmpty) =
-  [ testProperty "empty annihilates >>=" . forall (i :. fn @a (m b) :. Nil) $
+  [ testProperty "empty annihilates >>=" . forall_ (i :. fn @a (m b) :. Nil) $
     \ i k -> runEmpty ((empty >>= k) <$ i) === runEmpty (empty <$ i)
   ]

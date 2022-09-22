@@ -24,6 +24,7 @@ tested-with:
   GHC == 8.10.4
   GHC == 9.0.1
   GHC == 9.2.1
+  GHC == 9.4.2
 
 common common
   default-language: Haskell2010
@@ -116,7 +117,7 @@ library
     Control.Effect.Throw.Internal
     Control.Effect.Writer.Internal
   build-depends:
-      base          >= 4.9 && < 4.17
+      base          >= 4.9 && < 4.18
     , transformers  >= 0.4 && < 0.6
     , unliftio-core >= 0.2 && < 0.3
 

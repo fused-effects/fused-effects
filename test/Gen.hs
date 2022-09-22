@@ -44,7 +44,7 @@ module Gen
 , runC
   -- * Generation
 , Rec(..)
-, forall
+, forall_
   -- * Showing generated values
 , showing
 , GenTerm
@@ -221,8 +221,8 @@ data Rec as where
   Nil :: Rec '[]
   (:.) :: a -> Rec as -> Rec (a ': as)
 
-forall :: (Forall g f, HasCallStack) => g -> f -> Hedgehog.Property
-forall g f = withFrozenCallStack $ Hedgehog.property (forall' g f)
+forall_ :: (Forall g f, HasCallStack) => g -> f -> Hedgehog.Property
+forall_ g f = withFrozenCallStack $ Hedgehog.property (forall' g f)
 
 class Forall g f | g -> f, f -> g where
   forall' :: HasCallStack => g -> f -> PropertyT IO ()

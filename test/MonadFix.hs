@@ -20,12 +20,12 @@ test
   -> Run f g m
   -> [TestTree]
 test m a b s (Run run) =
-  [ testProperty "purity" . forall (s :. termFn a :. Nil) $
+  [ testProperty "purity" . forall_ (s :. termFn a :. Nil) $
     \ s h -> run (mfix (return . h) <$ s) === run (return (fix h) <$ s)
-  , testProperty "left-shrinking" . forall (s :. m a :. termFn (fn (m b)) :. Nil) $
+  , testProperty "left-shrinking" . forall_ (s :. m a :. termFn (fn (m b)) :. Nil) $
     \ s m f -> run (mfix (\ x -> m >>= \ y -> f x y) <$ s) === run ((m >>= \ y -> mfix (\ x -> f x y)) <$ s)
-  , testProperty "sliding" . forall (s :. fn b :. termFn (m a) :. Nil) $
+  , testProperty "sliding" . forall_ (s :. fn b :. termFn (m a) :. Nil) $
     \ s h f -> run (mfix (liftM h . f) <$ s) === run (liftM h (mfix (f . h)) <$ s)
-  , testProperty "nesting" . forall (s :. termFn (termFn (m a)) :. Nil) $
+  , testProperty "nesting" . forall_ (s :. termFn (termFn (m a)) :. Nil) $
     \ s f -> run (mfix (\ x -> mfix (\ y -> f x y)) <$ s) === run (mfix (\ x -> f x x) <$ s)
   ]

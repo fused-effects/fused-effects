@@ -45,6 +45,6 @@ test
   -> Run f (Either e) m
   -> [TestTree]
 test e m _ b i (Run runThrow) =
-  [ testProperty "throwError annihilates >>=" . forall (i :. e :. fn @a (m b) :. Nil) $
+  [ testProperty "throwError annihilates >>=" . forall_ (i :. e :. fn @a (m b) :. Nil) $
     \ i e k -> runThrow ((throwError e >>= k) <$ i) === runThrow (throwError e <$ i)
   ]

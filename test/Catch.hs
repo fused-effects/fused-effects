@@ -35,6 +35,6 @@ test
   -> Run f (Either e) m
   -> [TestTree]
 test e m a _ i (Run runCatch) =
-  [ testProperty "catchError intercepts throwError" . forall (i :. e :. fn (m a) :. Nil) $
+  [ testProperty "catchError intercepts throwError" . forall_ (i :. e :. fn (m a) :. Nil) $
     \ i e h -> runCatch ((throwError e `catchError` h) <$ i) === runCatch (h e <$ i)
   ]

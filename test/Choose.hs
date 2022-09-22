@@ -43,8 +43,8 @@ test
   -> Run f [] m
   -> [TestTree]
 test m a b i (Run runChoose) =
-  [ testProperty ">>= distributes over <|>" . forall (i :. m a :. m a :. fn (m b) :. Nil) $
+  [ testProperty ">>= distributes over <|>" . forall_ (i :. m a :. m a :. fn (m b) :. Nil) $
     \ i m n k -> runChoose (((m <|> n) >>= k) <$ i) === runChoose (((m >>= k) <|> (n >>= k)) <$ i)
-  , testProperty "<|> is associative" . forall (i :. m a :. m a :. m a :. Nil) $
+  , testProperty "<|> is associative" . forall_ (i :. m a :. m a :. m a :. Nil) $
     \ i m n o -> runChoose (((m <|> n) <|> o) <$ i) === runChoose ((m <|> (n <|> o)) <$ i)
   ]
