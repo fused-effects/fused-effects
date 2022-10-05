@@ -1,0 +1,201 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Overview - fused-effects</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html" class="active"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">2.</strong> Using Effects</a></li><li class="chapter-item expanded "><a href="defining_effects.html"><strong aria-hidden="true">3.</strong> Defining Effects</a></li><li class="chapter-item expanded "><a href="reinterpreting_effects.html"><strong aria-hidden="true">4.</strong> Reinterpretting Effects</a></li><li class="chapter-item expanded "><a href="common_errors.html"><strong aria-hidden="true">5.</strong> Common Errors</a></li><li class="chapter-item expanded "><a href="related.html"><strong aria-hidden="true">6.</strong> Related Work</a></li><li class="chapter-item expanded "><a href="faqs.html"><strong aria-hidden="true">7.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="releasing.html"><strong aria-hidden="true">8.</strong> Releasing</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">fused-effects</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="overview"><a class="header" href="#overview">Overview</a></h1>
+<p><code>fused-effects</code> is an <a href="https://en.wikipedia.org/wiki/Effect_system">effect system</a> for Haskell that values expressivity, efficiency, and rigor. It provides an encoding of <a href="#algebraic-effects">algebraic</a>, <a href="#higher-order-effects">higher-order</a> effects, includes a library of the most common effects, and generates efficient code by <a href="#fusion">fusing</a> effect handlers through computations. It is suitable for use in hobbyist, research, and industrial contexts.</p>
+<p>Readers already familiar with effect systems may wish to start with the <a href="#usage">usage</a> instead. For those interested, this <a href="https://www.youtube.com/watch?v=vfDazZfxlNs">talk at Strange Loop</a> outlines the history of and motivation behind effect systems and <code>fused-effects</code> itself.</p>
+<!--
+Setup, hidden from the rendered markdown.
+
+```haskell
+{-# LANGUAGE ConstraintKinds, FlexibleInstances, GeneralizedNewtypeDeriving, MultiParamTypeClasses, UndecidableInstances #-}
+module Main (module Main) where
+
+import Control.Algebra
+import Control.Carrier.Lift
+import Control.Carrier.Reader
+import Control.Carrier.State.Strict
+import Control.Monad.IO.Class (liftIO)
+
+main :: IO ()
+main = pure ()
+```
+-->
+<h2 id="algebraic-effects"><a class="header" href="#algebraic-effects">Algebraic effects</a></h2>
+<p>In <code>fused-effects</code> and other systems with <em>algebraic</em> (or, sometimes, <em>extensible</em>) effects, effectful programs are split into two parts: the specification (or <em>syntax</em>) of the actions to be performed, and the interpretation (or <em>semantics</em>) given to them.</p>
+<p>In <code>fused-effects</code>, <em>effect types</em> provide syntax and <em>carrier types</em> provide semantics. Effect types are datatypes with one constructor for each action, invoked using the <code>send</code> builtin. Carriers are monads, with an <code>Algebra</code> instance specifying how an effect’s constructors should be interpreted. Carriers can handle more than one effect, and multiple carriers can be defined for the same effect, corresponding to different interpreters for the effect’s syntax.</p>
+<h2 id="higher-order-effects"><a class="header" href="#higher-order-effects">Higher-order effects</a></h2>
+<p>Unlike some other effect systems, <code>fused-effects</code> offers <em>higher-order</em> (or <em>scoped</em>) effects in addition to first-order algebraic effects. In a strictly first-order algebraic effect system, operations like <code>local</code> or <code>catchError</code>, which specify some action limited to a given scope, must be implemented as interpreters, hard-coding their meaning in precisely the manner algebraic effects were designed to avoid. By specifying effects as higher-order functors, this limitation is removed, meaning that these operations admit a variety of interpretations. This means, for example, that you can introspect and redefine both the <code>local</code> and <code>ask</code> operations provided by the <code>Reader</code> effect, rather than solely <code>ask</code> (as is the case with certain formulations of algebraic effects).</p>
+<p>As Nicolas Wu et al. showed in <em>[Effect Handlers in Scope][]</em>, this has implications for the expressiveness of effect systems. It also has the benefit of making effect handling more consistent, since scoped operations are just syntax which can be interpreted like any other, and are thus simpler to reason about.</p>
+<h2 id="fusion"><a class="header" href="#fusion">Fusion</a></h2>
+<p>In order to maximize efficiency, <code>fused-effects</code> applies <em>fusion laws</em>, avoiding the construction of intermediate representations of effectful computations between effect handlers. In fact, this is applied as far as the initial construction as well: there is no representation of the computation as a free monad parameterized by some syntax type. As such, <code>fused-effects</code> avoids the overhead associated with constructing and evaluating any underlying free or freer monad.</p>
+<p>Instead, computations are performed in a carrier type for the syntax, typically a monad wrapping further monads, via an instance of the <code>Carrier</code> class. This carrier is specific to the effect handler selected, but since it isn’t described until the handler is applied, the separation between specification and interpretation is maintained. Computations are written against an abstract effectful signature, and only specialized to some concrete carrier when their effects are interpreted.</p>
+<p>Since the interpretation of effects is written as a typeclass instance which <code>ghc</code> is eager to inline, performance is excellent: approximately on par with <code>mtl</code>.</p>
+<p>Finally, since the fusion of carrier algebras occurs as a result of the selection of the carriers, it doesn’t depend on complex <code>RULES</code> pragmas, making it easy to reason about and tune.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="next" href="usage.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="next" href="usage.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

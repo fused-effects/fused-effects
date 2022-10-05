@@ -1,0 +1,219 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Related Work - fused-effects</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">2.</strong> Using Effects</a></li><li class="chapter-item expanded "><a href="defining_effects.html"><strong aria-hidden="true">3.</strong> Defining Effects</a></li><li class="chapter-item expanded "><a href="reinterpreting_effects.html"><strong aria-hidden="true">4.</strong> Reinterpretting Effects</a></li><li class="chapter-item expanded "><a href="common_errors.html"><strong aria-hidden="true">5.</strong> Common Errors</a></li><li class="chapter-item expanded "><a href="related.html" class="active"><strong aria-hidden="true">6.</strong> Related Work</a></li><li class="chapter-item expanded "><a href="faqs.html"><strong aria-hidden="true">7.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="releasing.html"><strong aria-hidden="true">8.</strong> Releasing</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">fused-effects</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="related-work"><a class="header" href="#related-work">Related work</a></h1>
+<p><code>fused-effects</code> is an encoding of higher-order algebraic effects following the recipes in <em><a href="http://www.cs.ox.ac.uk/people/nicolas.wu/papers/Scope.pdf">Effect Handlers in Scope</a></em> (Nicolas Wu, Tom Schrijvers, Ralf Hinze), <em><a href="http://www.cs.kuleuven.be/publicaties/rapporten/cw/CW699.pdf">Monad Transformers and Modular Algebraic Effects: What Binds Them Together</a></em> (Tom Schrijvers, Maciej Piróg, Nicolas Wu, Mauro Jaskelioff), and <em><a href="https://people.cs.kuleuven.be/%7Etom.schrijvers/Research/papers/mpc2015.pdf">Fusion for Free—Efficient Algebraic Effect Handlers</a></em> (Nicolas Wu, Tom Schrijvers).</p>
+<h2 id="contributed-packages"><a class="header" href="#contributed-packages">Contributed packages</a></h2>
+<p>Though we aim to keep the <code>fused-effects</code> core minimal, we encourage the development of external <code>fused-effects</code>-compatible libraries. If you’ve written one that you’d like to be mentioned here, get in touch!</p>
+<ul>
+<li><a href="http://hackage.haskell.org/package/fused-effects-lens"><code>fused-effects-lens</code></a> provides combinators to use the <a href="http://hackage.haskell.org/package/lens"><code>lens</code></a> library fluently inside effectful computations.</li>
+<li><a href="https://github.com/fused-effects/fused-effects-exceptions"><code>fused-effects-exceptions</code></a> provides handlers for exceptions thrown in the <code>IO</code> monad.</li>
+<li><a href="https://github.com/fused-effects/fused-effects-resumable"><code>fused-effects-resumable</code></a> provides resumable exceptions, which can also serve as a limited form of coroutines.</li>
+<li><a href="https://github.com/fused-effects/fused-effects-mwc-random"><code>fused-effects-mwc-random</code></a> provides a performant, high-quality source of random data, as well as values from common numerical distributions.</li>
+<li><a href="https://github.com/fused-effects/fused-effects-readline"><code>fused-effects-readline</code></a> provides a REPL effect that interfaces with <a href="https://hackage.haskell.org/package/haskeline"><code>haskeline</code></a> for its UI.</li>
+<li><a href="https://github.com/fused-effects/fused-effects-parser"><code>fused-effects-parser</code></a> provides parser-combinator style effects similar to parsing libraries such as <a href="https://hackage.haskell.org/package/trifecta"><code>trifecta</code></a>.</li>
+</ul>
+<h2 id="projects-using-fused-effects"><a class="header" href="#projects-using-fused-effects">Projects using <code>fused-effects</code></a></h2>
+<ul>
+<li><a href="http://github.com/github/semantic"><code>semantic</code></a>, a program analysis toolkit</li>
+<li><a href="http://hackage.haskell.org/package/now-haskell"><code>now-haskell</code></a>, a client library for AWS Lambda</li>
+</ul>
+<h2 id="comparison-to-other-effect-libraries"><a class="header" href="#comparison-to-other-effect-libraries">Comparison to other effect libraries</a></h2>
+<h3 id="comparison-to-mtl"><a class="header" href="#comparison-to-mtl">Comparison to <code>mtl</code></a></h3>
+<p>Like <a href="http://hackage.haskell.org/package/mtl"><code>mtl</code></a>, <code>fused-effects</code> provides a library of monadic effects which can be given different interpretations. In <code>mtl</code> this is done by defining new instances of the typeclasses encoding the actions of the effect, e.g. <code>MonadState</code>. In <code>fused-effects</code>, this is done by defining new instances of the <code>Carrier</code> typeclass for the effect.</p>
+<p>Also like <code>mtl</code>, <code>fused-effects</code> allows scoped operations like <code>local</code> and <code>catchError</code> to be given different interpretations. As with first-order operations, <code>mtl</code> achieves this with a final tagless encoding via methods, whereas <code>fused-effects</code> achieves this with an initial algebra encoding via <code>Carrier</code> instances.</p>
+<p>In addition, <code>mtl</code> and <code>fused-effects</code> are similar in that they provide instances for the monad types defined in the <code>transformers</code> package (<code>Control.Monad.Reader</code>, <code>Control.Monad.Writer</code>, etc). This means that applications using <code>mtl</code> can migrate many existing <code>transformers</code>-based monad stacks to <code>fused-effects</code> with minimal code changes. <code>fused-effects</code> provides its own hierarchy of carrier monads (under the <code>Control.Carrier</code> namespace) that provide a more fluent interface for new code, though it may be useful to use <code>transformers</code> types when working with third-party libraries.</p>
+<p>Unlike <code>mtl</code>, effects are automatically available regardless of where they occur in the signature; in <code>mtl</code> this requires instances for all valid orderings of the transformers (O(n²) of them, in general).</p>
+<p>Also unlike <code>mtl</code>, there can be more than one <code>State</code> or <code>Reader</code> effect in a signature. This is a tradeoff: <code>mtl</code> is able to provide excellent type inference for effectful operations like <code>get</code>, since the functional dependencies can resolve the state type from the monad type.</p>
+<p>Unlike <code>fused-effects</code>, <code>mtl</code> provides a <code>ContT</code> monad transformer; however, it’s worth noting that many behaviours possible with delimited continuations (e.g. resumable exceptions) are directly encodable as effects.</p>
+<p>Finally, thanks to the fusion and inlining of carriers, <code>fused-effects</code> is only marginally slower than equivalent <code>mtl</code> code (see <a href="#benchmarks">benchmarks</a>).</p>
+<h3 id="comparison-to-freer-simple"><a class="header" href="#comparison-to-freer-simple">Comparison to <code>freer-simple</code></a></h3>
+<p>Like <a href="http://hackage.haskell.org/package/freer-simple"><code>freer-simple</code></a>, <code>fused-effects</code> uses an initial encoding of library- and user-defined effects as syntax which can then be given different interpretations. In <code>freer-simple</code>, this is done with a family of interpreter functions (which cover a variety of needs, and which can be extended for more bespoke needs), whereas in <code>fused-effects</code> this is done with <code>Carrier</code> instances for <code>newtype</code>s.</p>
+<p>Unlike <code>fused-effects</code>, in <code>freer-simple</code>, scoped operations like <code>catchError</code> and <code>local</code> are implemented as interpreters, and can therefore not be given new interpretations.</p>
+<p>Unlike <code>freer-simple</code>, <code>fused-effects</code> has relatively little attention paid to compiler error messaging, which can make common (compile-time) errors somewhat more confusing to diagnose. Similarly, <code>freer-simple</code>’s family of interpreter functions can make the job of defining new effect handlers somewhat easier than in <code>fused-effects</code>. Further, <code>freer-simple</code> provides many of the same effects as <code>fused-effects</code>, plus a coroutine effect, but minus resource management and random generation.</p>
+<p>Finally, <code>fused-effects</code> has been <a href="#benchmarks">benchmarked</a> as faster than <code>freer-simple</code>.</p>
+<h3 id="comparison-to-polysemy"><a class="header" href="#comparison-to-polysemy">Comparison to <code>polysemy</code></a></h3>
+<p>Like <a href="http://hackage.haskell.org/package/polysemy"><code>polysemy</code></a>, <code>fused-effects</code> is a batteries-included effect system capable of scoped, reinterpretable algebraic effects.</p>
+<p>As of GHC 8.8, <code>fused-effects</code> outperforms <code>polysemy</code>, though new effects take more code to define in <code>fused-effects</code> than <code>polysemy</code> (though the <code>Control.Carrier.Interpret</code> module provides a low-friction API for rapid prototyping of new effects). Like <code>freer-simple</code> and unlike <code>fused-effects</code>, polysemy provides custom type errors if a given effect invocation is ambigous or invalid in the current context.</p>
+<h3 id="comparison-to-eff"><a class="header" href="#comparison-to-eff">Comparison to <code>eff</code></a></h3>
+<p><a href="https://github.com/lexi-lambda/eff"><code>eff</code></a> is similar in many ways to <code>fused-effects</code>, but is slightly more performant due to its representation of effects as typeclasses. This approach lets GHC generate better code in exchange for sacrificing the flexibility associated with effects represented as data types. <code>eff</code> also uses the <code>monad-control</code> package to lift effects between contexts rather than implementing an <code>Algebra</code>-style class itself.</p>
+<h2 id="acknowledgements"><a class="header" href="#acknowledgements">Acknowledgements</a></h2>
+<p>The authors of fused-effects would like to thank:</p>
+<ul>
+<li>Tom Schrijvers, Nicholas Wu, and all their collaborators for the research that led to <code>fused-effects</code>;</li>
+<li>Alexis King for thoughtful discussions about and suggestions regarding our methodology;</li>
+<li>the authors of other effect libraries, including <code>eff</code>, <code>polysemy</code>, and <code>capabilities</code>, for their exploration of the space.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="common_errors.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="faqs.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="common_errors.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="faqs.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>

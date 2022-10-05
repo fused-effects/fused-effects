@@ -1,0 +1,464 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Reinterpretting Effects - fused-effects</title>
+        <!-- Custom HTML head -->
+        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+    </head>
+    <body>
+        <!-- Provide site root to javascript -->
+        <script type="text/javascript">
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script type="text/javascript">
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script type="text/javascript">
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script type="text/javascript">
+            var html = document.querySelector('html');
+            var sidebar = 'hidden';
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">2.</strong> Using Effects</a></li><li class="chapter-item expanded "><a href="defining_effects.html"><strong aria-hidden="true">3.</strong> Defining Effects</a></li><li class="chapter-item expanded "><a href="reinterpreting_effects.html" class="active"><strong aria-hidden="true">4.</strong> Reinterpretting Effects</a></li><li class="chapter-item expanded "><a href="common_errors.html"><strong aria-hidden="true">5.</strong> Common Errors</a></li><li class="chapter-item expanded "><a href="related.html"><strong aria-hidden="true">6.</strong> Related Work</a></li><li class="chapter-item expanded "><a href="faqs.html"><strong aria-hidden="true">7.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="releasing.html"><strong aria-hidden="true">8.</strong> Releasing</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky bordered">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">fused-effects</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script type="text/javascript">
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="reinterpreting-effects"><a class="header" href="#reinterpreting-effects">Reinterpreting effects</a></h1>
+<p>This article assumes you are already familiar with <a href="defining_effects.html">defining effects and their handlers</a>.</p>
+<p>One of the nice aspects of effects is that they can support multiple effect handlers. Effects only specify actions, they don't actually perform them. Therefore, it's possible to &quot;reinterpret&quot; effects. There are multiple senses in which an effect can be reinterpreted:</p>
+<ul>
+<li>Implementing an effect in terms of other effects. &quot;Reinterpreting&quot; effects is a powerful tool for cleanly dividing implementations into the relevant abstraction layers with minimal leakage of implementation details.</li>
+<li>Rewriting an effect and/or performing actions with the effect value and then performing the originally intended effect. This technique is conceptually similar to the middleware pattern commonly used in web applications. This known as <em>interposition</em> (see works by Oleg Kiselyov et al.)</li>
+</ul>
+<p>Let's explore both of these effect interpretation strategies with a small motivating example:</p>
+<p>✨ We would like to implement a client library for an <a href="https://alexwohlbruck.github.io/cat-facts/docs/">HTTP-based API that provides interesting cat facts</a>. ✨</p>
+<p>Let's break down some of the properties of the API client that would be desirable for a production use case:</p>
+<ol>
+<li>We would like to have our cat facts API be able to support different cat fact data sources in the future.</li>
+<li>We would like to be able to mock failure conditions (such as network connectivity issues) for testing purposes.</li>
+<li>We would like to be able to track timing metrics for how quickly we can retrieve cat facts.</li>
+</ol>
+<h3 id="initial-setup"><a class="header" href="#initial-setup">Initial setup</a></h3>
+<pre><code class="language-haskell">{-# LANGUAGE ExistentialQuantification, FlexibleInstances, GADTs,
+GeneralizedNewtypeDeriving, KindSignatures, OverloadedStrings, MultiParamTypeClasses,
+RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
+module CatFacts
+    ( main
+    ) where
+-- from base
+import Control.Applicative
+import Data.Foldable (traverse_)
+import Control.Exception (throwIO)
+import Data.Kind (Type)
+-- from fused-effects
+import Control.Algebra
+import Control.Carrier.Reader
+import Control.Carrier.Error.Either
+import Control.Carrier.Interpret
+-- from transformers
+import Control.Monad.IO.Class
+-- From aeson
+import Data.Aeson
+-- From bytestring
+import qualified Data.ByteString.Char8 as B
+import qualified Data.ByteString.Lazy as L
+-- From time
+import Data.Time.Clock
+-- From http-client
+import qualified Network.HTTP.Client as HTTP
+import Network.HTTP.Client.Internal (Response(..), ResponseClose(..))
+-- From http-client-tls
+import qualified Network.HTTP.Client.TLS as HTTP
+-- From http-status
+import Network.HTTP.Types.Header
+import Network.HTTP.Types.Status
+import Network.HTTP.Types.Version
+</code></pre>
+<p>Since one of the best parts about effects is being able to think at a domain language level,let's start with defining the desired data which we wish to retrieve and an interface that feels natural to work with:</p>
+<pre><code class="language-haskell">-- | The basic fact that we will retrieve.
+newtype CatFact = CatFact
+  { catFact :: String
+  } deriving (Show)
+
+instance FromJSON CatFact where
+  parseJSON = withObject &quot;CatFact&quot; (\o -&gt; CatFact &lt;$&gt; o .: &quot;text&quot;)
+
+-- | Our high level effect type that will be able to target different data sources.
+data CatFactClient (m :: Type -&gt; Type) k where
+  ListFacts :: Int {- ^ Number of facts to fetch -} -&gt; CatFactClient m [CatFact]
+
+listFacts :: Has CatFactClient sig m =&gt; Int -&gt; m [CatFact]
+listFacts n = send (ListFacts n)
+</code></pre>
+<p>Now that we have our very simple DSL in place, let's think about the underlying API: we know that it's an HTTP-based system, so let's introduce the notion of a handler that is provided a request and hands back an HTTP response.</p>
+<pre><code class="language-haskell">data Http (m :: Type -&gt; Type) k where
+  SendRequest :: HTTP.Request -&gt; Http m (HTTP.Response L.ByteString)
+
+sendRequest :: Has Http sig m =&gt; HTTP.Request -&gt; m (HTTP.Response L.ByteString)
+sendRequest r = send (SendRequest r)
+</code></pre>
+<p>The <code>listFacts</code> function provides the ‘what’ of this API, and the <code>sendRequest</code> function provides the ‘how’. In decomposing this problem into a set of effects, each responsible for a single layer of the original problem description, we provide ourselves with a flexible, composable vocabulary rather than a single monolithic action.</p>
+<h2 id="stacking-effects"><a class="header" href="#stacking-effects">&quot;Stacking&quot; effects</a></h2>
+<h3 id="the-production-use-case"><a class="header" href="#the-production-use-case">The production use-case</a></h3>
+<p>Now that we have these two mini-DSL effect types established, we need to stitch them together.</p>
+<p>Let's take a moment to think about what could go wrong with an HTTP API from which we plan to fetch some JSON and convert it into a list of <code>CatFact</code>s.</p>
+<p>We can conceive that the server might occasionally return a malformed JSON response:</p>
+<pre><code class="language-haskell">newtype JsonParseError = JsonParseError String
+  deriving (Show, Eq)
+
+decodeOrThrow :: (Has (Throw JsonParseError) sig m, FromJSON a) =&gt; L.ByteString -&gt; m a
+decodeOrThrow = either (throwError . JsonParseError) pure . eitherDecode
+</code></pre>
+<p>A more HTTP-centric issue is that we might receive a content type we can't use. In this case, anything that's not <code>application/json</code>:</p>
+<pre><code class="language-haskell">newtype InvalidContentType = InvalidContentType String
+  deriving (Show, Eq)
+</code></pre>
+<p>Now we need to support fetching JSON given an HTTP request. We have no guarantee that an arbitrary HTTP request will actually return JSON, so for this implementation we have to account for failure conditions. This provides a great opportunity to see how effect handlers can actually rely on <em>multiple underlying effects</em>!</p>
+<pre><code class="language-haskell">newtype CatFactsApi m a = CatFactsApi { runCatFactsApi :: m a }
+ deriving
+   ( Monad
+   , Functor
+   , Applicative
+   , MonadIO
+   , Alternative
+   )
+
+catFactsEndpoint :: HTTP.Request
+catFactsEndpoint = HTTP.parseRequest_ &quot;https://cat-fact.herokuapp.com/facts/random&quot;
+
+instance ( Has Http sig m
+         , Has (Throw JsonParseError) sig m
+         , Has (Throw InvalidContentType) sig m
+         , Algebra sig m
+         ) =&gt;
+         Algebra (CatFactClient :+: sig) (CatFactsApi m) where
+  alg hdl sig ctx = case sig of
+    L (ListFacts numberOfFacts) -&gt; do
+      resp &lt;- sendRequest (catFactsEndpoint { HTTP.queryString = &quot;?amount=&quot; &lt;&gt; B.pack (show numberOfFacts) })
+      case lookup hContentType (HTTP.responseHeaders resp) of
+        Just &quot;application/json; charset=utf-8&quot; -&gt; (&lt;$ ctx) &lt;$&gt; decodeOrThrow (HTTP.responseBody resp)
+        other -&gt; throwError (InvalidContentType (show other))
+    R other -&gt; CatFactsApi (alg (runCatFactsApi . hdl) other ctx)
+</code></pre>
+<p>We implement a <code>CatFacts</code> effect handler that depends on <em>three</em> underlying effects:</p>
+<ol>
+<li><code>Http</code> - we need to be able to make requests</li>
+<li><code>Throw JsonParseError</code> - we need to be able to signal that some aspect of the JSON wasn't what we expected.</li>
+<li><code>Throw InvalidContentType</code> - we need to be able to signal what we got wasn't JSON at all!</li>
+</ol>
+<p>The nice aspect of this is that we have neatly contained the failure scenarios to their relevant strata rather than leaking them into the higher-level abstraction (<code>listFacts</code>)!</p>
+<p>Now we need to support performing HTTP requests:</p>
+<pre><code class="language-haskell">newtype HttpClient m a = HttpClient { runHttp :: m a }
+  deriving
+    ( Monad
+    , Functor
+    , Applicative
+    , MonadIO
+    , Alternative
+    )
+
+instance (MonadIO m, Algebra sig m) =&gt; Algebra (Http :+: sig) (HttpClient m) where
+  alg hdl sig ctx = case sig of
+    L (SendRequest req) -&gt; (&lt;$ ctx) &lt;$&gt; liftIO (HTTP.getGlobalManager &gt;&gt;= HTTP.httpLbs req)
+    R other -&gt; HttpClient (alg (runHttp . hdl) other ctx)
+</code></pre>
+<p>Note for the above code snippets how the <code>CatFactsApi</code> carrier delegates fetching JSON to any other effect that supports retrieving JSON given an HTTP request specification.</p>
+<p>Note as well that <code>CatFactsApi</code> itself doesn't know how to perform an HTTP request. It delegates the request itself to a handler that implements the <code>Algebra</code> class for <code>(Http :+: sig)</code>.</p>
+<p>Putting it all together for the actual production use case:</p>
+<pre><code class="language-haskell">handlePrint :: Either InvalidContentType (Either JsonParseError [CatFact]) -&gt; IO ()
+handlePrint r =
+  case r of
+    Left invalidContentTypeError -&gt; print invalidContentTypeError
+    Right ok -&gt; case ok of
+      Left jsonParseError -&gt; print jsonParseError
+      Right facts -&gt; traverse_ (putStrLn . catFact) facts
+
+catFactsRunner :: Has Http sig m =&gt; m (Either InvalidContentType (Either JsonParseError [CatFact]))
+catFactsRunner =
+  runError @InvalidContentType $
+  runError @JsonParseError $
+  runCatFactsApi $
+  listFacts 10
+
+main :: IO ()
+main = runHttp catFactsRunner &gt;&gt;= handlePrint
+</code></pre>
+<p>Produces:</p>
+<pre><code>The Bengal is the result of crossbreeding between domestic cats and Asian leopard cats, and its name is derived from the scientific name for the Asian leopard cat (Felis bengalensis).
+A happy cat holds her tail high and steady.
+Kittens remain with their mother till the age of 9 weeks.
+Recent studies have shown that cats can see blue and green. There is disagreement as to whether they can see red.
+A steady diet of dog food may cause blindness in your cat - it lacks taurine.
+Cat owners are 25% likely to pick George Harrison as their favorite Beatle.
+The catnip plant contains an oil called hepetalactone which does for cats what marijuana does to some people. Not all cats react to it those that do appear to enter a trancelike state. A positive reaction takes the form of the cat sniffing the catnip, then licking, biting, chewing it, rub &amp; rolling on it repeatedly, purring, meowing &amp; even leaping in the air.
+The color of the points in Siamese cats is heat related. Cool areas are darker.
+Cats have free-floating clavicle bones that attach their shoulders to their forelimbs, which allows them to squeeze through very small spaces.
+Wikipedia has a recording of a cat meowing, because why not?
+</code></pre>
+<h3 id="testing-with-alternative-effect-handlers"><a class="header" href="#testing-with-alternative-effect-handlers">Testing with alternative effect handlers</a></h3>
+<p>Per point 2. of our initial implementation criteria, we want to be able to simulate failure cases for testing purposes. This is a great case for swapping in an alternative effect handler for our HTTP layer.</p>
+<p>This time let's go from the bottom up. In situations where IO is involved, failure scenarios tend to surface from least-pure parts of code. In this case, we should therefore implement some facilities to experiment with the most failure-prone area: the network itself.</p>
+<pre><code class="language-haskell">newtype MockHttpClient m a = MockHttpClient { runMockHttpClient :: ReaderC (HTTP.Request -&gt; IO (HTTP.Response L.ByteString)) m a }
+  deriving
+   ( Monad
+   , Functor
+   , Applicative
+   , MonadIO
+   , Alternative
+   )
+
+runMockHttp :: (HTTP.Request -&gt; IO (HTTP.Response L.ByteString)) -&gt; MockHttpC m a -&gt; m a
+runMockHttp responder m = runReader responder (runMockHttpClient m)
+
+instance (MonadIO m, Algebra sig m) =&gt; Algebra (Http :+: sig) (MockHttpClient m) where
+  alg hdl sig ctx = case sig of
+    L (SendRequest req) -&gt; do
+      responder &lt;- MockHttpClient ask
+      (&lt;$ ctx) &lt;$&gt; liftIO (responder req)
+    R other -&gt; MockHttpClient (alg (runMockHttpClient . hdl) (R other) ctx)
+
+faultyNetwork :: HTTP.Request -&gt; IO (HTTP.Response L.ByteString)
+faultyNetwork req = throwIO (HTTP.HttpExceptionRequest req HTTP.ConnectionTimeout)
+
+wrongContentType :: HTTP.Request -&gt; IO (HTTP.Response L.ByteString)
+wrongContentType req = pure resp
+  where
+    resp = Response
+      { responseStatus = ok200
+      , responseVersion = http11
+      , responseHeaders = [(&quot;Content-Type&quot;, &quot;text/xml&quot;)]
+      , responseBody = &quot;[{\&quot;text\&quot;: \&quot;Cats are not dogs\&quot;}]&quot;
+      , responseCookieJar = mempty
+      , responseClose' = ResponseClose (pure ())
+      }
+
+badJson :: HTTP.Request -&gt; IO (HTTP.Response L.ByteString)
+badJson req = pure Response
+  { responseStatus = ok200
+  , responseVersion = http11
+  , responseHeaders = [(&quot;Content-Type&quot;, &quot;application/json; charset=utf-8&quot;)]
+  , responseBody = &quot;{}&quot;
+  , responseCookieJar = mempty
+  , responseClose' = ResponseClose (pure ())
+  }
+</code></pre>
+<p>Let's update our <code>main</code> function and watch it in action:</p>
+<pre><code class="language-haskell">main :: IO ()
+main = do
+  -- Should return JsonParseError
+  runMockHttp badJson catFactsRunner &gt;&gt;= handlePrint
+  -- Should return InvalidContentType
+  runMockHttp wrongContentType catFactsRunner &gt;&gt;= handlePrint
+</code></pre>
+<p>Which returns:</p>
+<pre><code class="language-haskell">JsonParseError &quot;Error in $: parsing [] failed, expected Array, but encountered Object&quot;
+InvalidContentType &quot;Just \&quot;text/xml\&quot;&quot;
+</code></pre>
+<p>With effects, we have fine-grained ways of testing slices of our API. All that's needed to turn an integration test into a unit test or vice versa is a different set of <code>Algebra</code>-implementing effect handlers!</p>
+<h2 id="observing--altering-effects"><a class="header" href="#observing--altering-effects">Observing &amp; altering effects</a></h2>
+<p>Building new effect handling algebras can be a little bit verbose. In simpler situations, we may want to simply operate
+on an effect without having to implement a whole new <code>Algebra</code> instance. We still have yet to build a solution to tracking
+operational metrics (like request timings), so let's look at how to build a sort of &quot;effect middleware&quot; using <code>InterpretC</code>.</p>
+<p><code>InterpretC</code> is an effect carrier that is intended for prototyping new effects that passes a callback function each
+occurence of the specified effect type that is called via <code>send</code>. One trick that can be useful is to intercept an effect,
+operate on the effect, and then re-<code>send</code> the effect (a.k.a. interposition). In other words, it's perfectly valid to have multiple handlers
+for the same effect type and dispatch to the ones higher in the effect stack! Let's use this approach to time and log
+our HTTP requests:</p>
+<pre><code class="language-haskell">traceHttp
+  :: (Has Http sig m, MonadIO m)
+  =&gt; (forall s. Reifies s (Interpreter Http m) =&gt; InterpretC s Http m a)
+  -&gt; m a
+traceHttp = runInterpret $ \ _ r@(SendRequest req) ctx -&gt; do
+  startTime &lt;- liftIO getCurrentTime
+  liftIO (putStr (B.unpack (HTTP.path req) ++ &quot; ... &quot;))
+  -- Pass the request on to something that actually knows how to respond.
+  resp &lt;- sendRequest req
+  -- Once the actual response is obtained,
+  -- we can capture the end time and status of the response.
+  endTime &lt;- liftIO getCurrentTime
+  let timeSpent = endTime `diffUTCTime` startTime
+  liftIO $ putStrLn (&quot;[&quot; ++ show (statusCode $ HTTP.responseStatus resp) ++ &quot;] took &quot; ++ show timeSpent ++ &quot;\n\n&quot;)
+  pure (resp &lt;$ ctx)
+</code></pre>
+<p>Updating our <code>main</code> function once more:</p>
+<pre><code class="language-haskell">main :: IO ()
+main = runHttp (traceHttp catFactsRunner) &gt;&gt;= handlePrint
+</code></pre>
+<p>Returns:</p>
+<pre><code>/facts/random ... [200] took 0.979107082s
+
+
+Cats have a special scent organ located in the roof of their mouth, called the Jacobson's organ. It analyzes smells - and is the reason why you will sometimes see your cat &quot;sneer&quot; (called the flehmen response or flehming) when they encounter a strong odor.
+It's important for cats to have regular ear exams—this is something you can do at home! Gently fold back the ears and look into the ear canal. The inner ear should be pale pink with little to no earwax. If you notice redness, swelling, discharge, or a lot of earwax, it's time to see a veterinarian.
+Siamese kittens are born white because of the heat inside the mother's uterus before birth. This heat keeps the kittens' hair from darkening on the points.
+Declawing a cat is the same as cutting a human's fingers off at the knuckle. There are several alternatives to a complete declawing, including trimming or a less radical (though more involved) surgery to remove the claws. Instead, train your cat to use a scratching post.
+There is a species of cat smaller than the average housecat. It is native to Africa and it is the Black-footed cat (Felis nigripes). Its top weight is 5.5 pounds.
+Gatos.
+Cats are the most interesting mammals on earth.
+Cats have free-floating clavicle bones that attach their shoulders to their forelimbs, which allows them to squeeze through very small spaces.
+Fossil records from two million years ago show evidence of jaguars.
+Since cats are so good at hiding illness, even a single instance of a symptom should be taken very seriously.
+</code></pre>
+<h3 id="conclusion"><a class="header" href="#conclusion">Conclusion</a></h3>
+<p>Reviewing our initial criteria, we have an eminently extensible system that lets us maintain a healthy separation of concerns–
+All while still allowing non-invasive behavior changes through the ability to intercept, rewrite, and resend effects!</p>
+<ul>
+<li><input disabled="" type="checkbox" checked=""/>
+We would like to have our cat facts API be able to support different cat fact data sources in the future.</li>
+<li><input disabled="" type="checkbox" checked=""/>
+We would like to be able to mock failure conditions (such as network connectivity issues) for testing purposes.</li>
+<li><input disabled="" type="checkbox" checked=""/>
+We would like to be able to track timing metrics for how quickly we can retrieve cat facts.</li>
+</ul>
+<p><img src="https://media.giphy.com/media/l6Td5sKDNmDGU/giphy.gif" alt="Mission accomplished" /></p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="defining_effects.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                            <a rel="next" href="common_errors.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="defining_effects.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+                    <a rel="next" href="common_errors.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+        <script type="text/javascript">
+            window.playground_copyable = true;
+        </script>
+        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
+        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
+        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
+        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+        <!-- Custom JS scripts -->
+    </body>
+</html>
