@@ -1,8 +1,2 @@
 cradle:
   cabal:
-    - path: "src"
-      component: "lib:fused-effects"
-    - path: "test"
-      component: "test:test"
-    - path: "benchmark"
-      component: "benchmark:benchmark"
