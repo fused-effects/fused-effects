@@ -29,6 +29,12 @@ module Control.Effect.Labelled
 , sendLabelled
 , runUnderLabel
 , UnderLabel(UnderLabel)
+
+, HasLabelledLift
+, runLabelledLift
+, lift
+, LabelledLift
+
 , module Control.Algebra
 ) where
 
@@ -39,9 +45,10 @@ import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import qualified Control.Monad.Trans.Class as T
 import Data.Functor.Identity
 import Data.Kind (Type)
+import Control.Effect.Lift
 
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 --
@@ -56,7 +63,7 @@ newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = La
     , MonadFix -- ^ @since 1.1.1
     , MonadIO
     , MonadPlus
-    , MonadTrans
+    , T.MonadTrans
     )
 
 -- | @since 1.0.2.0
@@ -70,6 +77,35 @@ instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (
     R sig -> Labelled . alg (runLabelled . hdl) (R sig)
   {-# INLINE alg #-}
 
+type HasLabelledLift n sig m = HasLabelled Lift (Lift n) sig m
+
+newtype LabelledLift (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = LabelledLift (m a)
+  deriving
+    ( Alternative
+    , Applicative
+    , Functor
+    , Monad
+    , Fail.MonadFail
+    , MonadFix -- ^ @since 1.1.1
+    , MonadIO
+    , MonadPlus
+    )
+
+runLabelledLift :: forall sub m a . LabelledLift Lift sub m a -> m a
+runLabelledLift (LabelledLift l) = l
+{-# INLINE runLabelledLift #-}
+
+instance Algebra eff m => Algebra (Labelled Lift eff) (LabelledLift Lift sub m ) where
+    alg hdl (Labelled sub) = LabelledLift . alg (runLabelledLift . hdl) sub
+    {-# INLINE alg #-}
+
+lift
+    :: forall a n m sig
+     . (HasLabelled Lift (Lift n) sig m, Monad n)
+    => n a
+    -> m a
+lift n = runUnderLabel @Lift (sendM @n n)
+{-# INLINE lift #-}
 
 -- | The class of labelled types present in a signature.
 --
@@ -141,7 +177,7 @@ runUnderLabel :: forall label sub m a . UnderLabel label sub m a -> m a
 runUnderLabel (UnderLabel l) = l
 {-# INLINE runUnderLabel #-}
 
-instance MonadTrans (UnderLabel sub label) where
+instance T.MonadTrans (UnderLabel sub label) where
   lift = UnderLabel
   {-# INLINE lift #-}
 
