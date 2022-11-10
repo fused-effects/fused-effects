@@ -107,11 +107,7 @@ instance Monad n => Algebra (Labelled Lift (Lift n)) (LabelledLift Lift n) where
 -- promotes arbitrary actions of type @n a@ to @m a@. It is spiritually
 -- similar to @lift@ from the @MonadTrans@ typeclass.
 -- @since 1.1.2.2
-sendM
-    :: forall a n m sig
-     . Functor n => HasLabelledLift n sig m
-    => n a
-    -> m a
+sendM :: forall a n m sig. (Functor n, HasLabelledLift n sig m) => n a -> m a
 sendM n = runUnderLabel @Lift (Lift.sendM @n n)
 {-# INLINE sendM #-}
 
