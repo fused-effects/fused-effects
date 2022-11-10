@@ -50,6 +50,7 @@ import Data.Functor.Identity
 import Data.Kind (Type)
 import Control.Effect.Lift (Lift)
 import qualified Control.Effect.Lift as Lift
+import Control.Carrier.Lift (LiftC(..), runM)
 
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 --
@@ -81,7 +82,7 @@ instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (
 -- | A carrier transformer turning carriers into labelled carriers for the @Labelled Lift (Lift n)@ effects.
 --
 -- @since 1.1.2.2
-newtype LabelledLift (label :: k) m a = LabelledLift (m a)
+newtype LabelledLift (label :: k) m a = LabelledLift (LiftC m a)
   deriving
     ( Alternative
     , Applicative
@@ -95,11 +96,11 @@ newtype LabelledLift (label :: k) m a = LabelledLift (m a)
 
 --  @since 1.1.2.2
 runLabelledLift :: forall m a. LabelledLift Lift m a -> m a
-runLabelledLift (LabelledLift l) = l
+runLabelledLift (LabelledLift l) = runM l
 {-# INLINE runLabelledLift #-}
 
-instance Algebra (Lift n) n => Algebra (Labelled Lift (Lift n)) (LabelledLift Lift n) where
-    alg hdl (Labelled sub) = LabelledLift . alg (runLabelledLift . hdl) sub
+instance Monad n => Algebra (Labelled Lift (Lift n)) (LabelledLift Lift n) where
+    alg hdl (Labelled sub) = LabelledLift . alg (LiftC . runLabelledLift . hdl) sub
     {-# INLINE alg #-}
 
 -- | Given a @HasLabelledLift n sig m@ constraint in a signature carried by @m@, 'sendM'
@@ -108,7 +109,7 @@ instance Algebra (Lift n) n => Algebra (Labelled Lift (Lift n)) (LabelledLift Li
 -- @since 1.1.2.2
 sendM
     :: forall a n m sig
-     . (HasLabelled Lift (Lift n) sig m, Monad n)
+     . Functor n => HasLabelledLift n sig m
     => n a
     -> m a
 sendM n = runUnderLabel @Lift (Lift.sendM @n n)
