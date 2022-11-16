@@ -33,7 +33,7 @@ module Control.Effect.Labelled
 , HasLabelledLift
 , runLabelledLift
 , LabelledLift
-, sendM
+, lift
 
 , module Control.Algebra
 ) where
@@ -45,7 +45,7 @@ import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix
 import Control.Monad.IO.Class
-import Control.Monad.Trans.Class
+import qualified Control.Monad.Trans.Class as T
 import Data.Functor.Identity
 import Data.Kind (Type)
 import Control.Effect.Lift (Lift)
@@ -65,7 +65,7 @@ newtype Labelled (label :: k) (sub :: (Type -> Type) -> (Type -> Type)) m a = La
     , MonadFix -- ^ @since 1.1.1
     , MonadIO
     , MonadPlus
-    , MonadTrans
+    , T.MonadTrans
     )
 
 -- | @since 1.0.2.0
@@ -103,13 +103,13 @@ instance Monad n => Algebra (Labelled Lift (Lift n)) (LabelledLift Lift n) where
     alg hdl (Labelled sub) = LabelledLift . alg (LiftC . runLabelledLift . hdl) sub
     {-# INLINE alg #-}
 
--- | Given a @HasLabelledLift n sig m@ constraint in a signature carried by @m@, 'sendM'
+-- | Given a @HasLabelledLift n sig m@ constraint in a signature carried by @m@, 'lift'
 -- promotes arbitrary actions of type @n a@ to @m a@. It is spiritually
 -- similar to @lift@ from the @MonadTrans@ typeclass.
 -- @since 1.1.2.2
-sendM :: forall a n m sig. (Functor n, HasLabelledLift n sig m) => n a -> m a
-sendM n = runUnderLabel @Lift (Lift.sendM @n n)
-{-# INLINE sendM #-}
+lift :: forall a n m sig. (Functor n, HasLabelledLift n sig m) => n a -> m a
+lift n = runUnderLabel @Lift (Lift.sendM @n n)
+{-# INLINE lift #-}
 
 -- | @m@ is a carrier for @sig@ containing @Lift n@ associated with label @Lift@.
 --
@@ -188,7 +188,7 @@ runUnderLabel :: forall label sub m a . UnderLabel label sub m a -> m a
 runUnderLabel (UnderLabel l) = l
 {-# INLINE runUnderLabel #-}
 
-instance MonadTrans (UnderLabel sub label) where
+instance T.MonadTrans (UnderLabel sub label) where
   lift = UnderLabel
   {-# INLINE lift #-}
 
