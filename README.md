@@ -296,6 +296,7 @@ Though we aim to keep the `fused-effects` core minimal, we encourage the develop
 * [`semantic`](http://github.com/github/semantic), a program analysis toolkit
 * [`now-haskell`](http://hackage.haskell.org/package/now-haskell), a client library for AWS Lambda
 * ['Deadpendency'](https://deadpendency.com), a software dependency project health tracking tool
+* [`FOSSA`](https://serokell.io/blog/haskell-in-production-fossa), a tool for open-source risk management.
 
 
 ### Comparison to other effect libraries
