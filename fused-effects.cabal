@@ -131,6 +131,7 @@ test-suite examples
     Inference
     Labelled
     Parser
+    ReinterpretingEffects
     ReinterpretLog
     Teletype
     Utils
@@ -139,6 +140,12 @@ test-suite examples
     , fused-effects
     , hedgehog           >= 1 && < 1.2
     , hedgehog-fn        ^>= 1
+    , aeson
+    , http-client-tls
+    , http-client
+    , time
+    , bytestring
+    , http-types
 
 
 test-suite test
@@ -178,17 +185,27 @@ test-suite test
     , transformers
 
 
-test-suite docs
+test-suite docs-examples
   import:      common
   type:        exitcode-stdio-1.0
-  main-is:     README.lhs
-  ghc-options: -pgmL markdown-unlit
+  main-is:     test/Docs.hs
   build-depends:
     , base
     , fused-effects
+    , typed-process
   build-tool-depends:
-      markdown-unlit:markdown-unlit ^>= 0.5
+    lima:lima ^>= 0.1
 
+test-suite readme
+  import:      common
+  type:        exitcode-stdio-1.0
+  main-is:     README.hs
+  build-depends:
+    , base
+    , fused-effects
+    , typed-process
+  build-tool-depends:
+    lima:lima ^>= 0.1
 
 benchmark benchmark
   import:         common

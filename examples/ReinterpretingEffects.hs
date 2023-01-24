@@ -1,3 +1,4 @@
+{-
 # Reinterpreting effects
 
 This article assumes you are already familiar with [defining effects and their handlers](defining_effects.md).
@@ -17,15 +18,16 @@ Let's break down some of the properties of the API client that would be desirabl
 2. We would like to be able to mock failure conditions (such as network connectivity issues) for testing purposes.
 3. We would like to be able to track timing metrics for how quickly we can retrieve cat facts.
 
-### Initial setup
+## Initial setup
+-}
 
-``` haskell
+{- FOURMOLU_DISABLE -}
 {-# LANGUAGE ExistentialQuantification, FlexibleInstances, GADTs,
 GeneralizedNewtypeDeriving, KindSignatures, OverloadedStrings, MultiParamTypeClasses,
 RankNTypes, TypeApplications, TypeOperators, UndecidableInstances #-}
-module CatFacts
-    ( main
-    ) where
+{-# LANGUAGE FlexibleContexts #-}
+{-# OPTIONS_GHC -Wno-unused-top-binds #-}
+module ReinterpretingEffects( main, main1, main2) where
 -- from base
 import Control.Applicative
 import Data.Foldable (traverse_)
@@ -50,43 +52,45 @@ import qualified Network.HTTP.Client as HTTP
 import Network.HTTP.Client.Internal (Response(..), ResponseClose(..))
 -- From http-client-tls
 import qualified Network.HTTP.Client.TLS as HTTP
--- From http-status
-import Network.HTTP.Types.Header
-import Network.HTTP.Types.Status
-import Network.HTTP.Types.Version
-```
+-- From http-types
+import Network.HTTP.Types
+{- FOURMOLU_ENABLE -}
 
+{-
 Since one of the best parts about effects is being able to think at a domain language level,let's start with defining the desired data which we wish to retrieve and an interface that feels natural to work with:
+-}
 
-``` haskell
 -- | The basic fact that we will retrieve.
 newtype CatFact = CatFact
   { catFact :: String
-  } deriving (Show)
+  }
+  deriving (Show)
 
 instance FromJSON CatFact where
   parseJSON = withObject "CatFact" (\o -> CatFact <$> o .: "text")
 
 -- | Our high level effect type that will be able to target different data sources.
 data CatFactClient (m :: Type -> Type) k where
-  ListFacts :: Int {- ^ Number of facts to fetch -} -> CatFactClient m [CatFact]
+  ListFacts ::
+    -- | Number of facts to fetch
+    Int ->
+    CatFactClient m [CatFact]
 
 listFacts :: Has CatFactClient sig m => Int -> m [CatFact]
 listFacts n = send (ListFacts n)
-```
 
+{-
 Now that we have our very simple DSL in place, let's think about the underlying API: we know that it's an HTTP-based system, so let's introduce the notion of a handler that is provided a request and hands back an HTTP response.
+-}
 
-``` haskell
 data Http (m :: Type -> Type) k where
   SendRequest :: HTTP.Request -> Http m (HTTP.Response L.ByteString)
 
 sendRequest :: Has Http sig m => HTTP.Request -> m (HTTP.Response L.ByteString)
 sendRequest r = send (SendRequest r)
-```
 
+{-
 The `listFacts` function provides the ‘what’ of this API, and the `sendRequest` function provides the ‘how’. In decomposing this problem into a set of effects, each responsible for a single layer of the original problem description, we provide ourselves with a flexible, composable vocabulary rather than a single monolithic action.
-
 
 ## "Stacking" effects
 
@@ -97,53 +101,55 @@ Now that we have these two mini-DSL effect types established, we need to stitch 
 Let's take a moment to think about what could go wrong with an HTTP API from which we plan to fetch some JSON and convert it into a list of `CatFact`s.
 
 We can conceive that the server might occasionally return a malformed JSON response:
+-}
 
-``` haskell
 newtype JsonParseError = JsonParseError String
   deriving (Show, Eq)
 
 decodeOrThrow :: (Has (Throw JsonParseError) sig m, FromJSON a) => L.ByteString -> m a
 decodeOrThrow = either (throwError . JsonParseError) pure . eitherDecode
-```
 
+{-
 A more HTTP-centric issue is that we might receive a content type we can't use. In this case, anything that's not `application/json`:
+-}
 
-``` haskell
 newtype InvalidContentType = InvalidContentType String
   deriving (Show, Eq)
-```
 
+{-
 Now we need to support fetching JSON given an HTTP request. We have no guarantee that an arbitrary HTTP request will actually return JSON, so for this implementation we have to account for failure conditions. This provides a great opportunity to see how effect handlers can actually rely on *multiple underlying effects*!
+-}
 
-``` haskell
-newtype CatFactsApi m a = CatFactsApi { runCatFactsApi :: m a }
- deriving
-   ( Monad
-   , Functor
-   , Applicative
-   , MonadIO
-   , Alternative
-   )
+newtype CatFactsApi m a = CatFactsApi {runCatFactsApi :: m a}
+  deriving
+    ( Monad
+    , Functor
+    , Applicative
+    , MonadIO
+    , Alternative
+    )
 
 catFactsEndpoint :: HTTP.Request
 catFactsEndpoint = HTTP.parseRequest_ "https://cat-fact.herokuapp.com/facts/random"
 
-instance ( Has Http sig m
-         , Has (Throw JsonParseError) sig m
-         , Has (Throw InvalidContentType) sig m
-         , Algebra sig m
-         ) =>
-         Algebra (CatFactClient :+: sig) (CatFactsApi m) where
+instance
+  ( Has Http sig m
+  , Has (Throw JsonParseError) sig m
+  , Has (Throw InvalidContentType) sig m
+  , Algebra sig m
+  ) =>
+  Algebra (CatFactClient :+: sig) (CatFactsApi m)
+  where
   alg hdl sig ctx = case sig of
     L (ListFacts numberOfFacts) -> do
-      resp <- sendRequest (catFactsEndpoint { HTTP.queryString = "?amount=" <> B.pack (show numberOfFacts) })
+      resp <- sendRequest (catFactsEndpoint{HTTP.queryString = "?amount=" <> B.pack (show numberOfFacts)})
       case lookup hContentType (HTTP.responseHeaders resp) of
         Just "application/json; charset=utf-8" -> (<$ ctx) <$> decodeOrThrow (HTTP.responseBody resp)
         other -> throwError (InvalidContentType (show other))
     R other -> CatFactsApi (alg (runCatFactsApi . hdl) other ctx)
-```
 
-We implement a `CatFacts` effect handler that depends on _three_ underlying effects:
+{-
+We implement a `CatFacts` effect handler that depends on *three* underlying effects:
 
 1. `Http` - we need to be able to make requests
 2. `Throw JsonParseError` - we need to be able to signal that some aspect of the JSON wasn't what we expected.
@@ -152,9 +158,9 @@ We implement a `CatFacts` effect handler that depends on _three_ underlying effe
 The nice aspect of this is that we have neatly contained the failure scenarios to their relevant strata rather than leaking them into the higher-level abstraction (`listFacts`)!
 
 Now we need to support performing HTTP requests:
+-}
 
-``` haskell
-newtype HttpClient m a = HttpClient { runHttp :: m a }
+newtype HttpClient m a = HttpClient {runHttp :: m a}
   deriving
     ( Monad
     , Functor
@@ -167,15 +173,15 @@ instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (HttpClient m) whe
   alg hdl sig ctx = case sig of
     L (SendRequest req) -> (<$ ctx) <$> liftIO (HTTP.getGlobalManager >>= HTTP.httpLbs req)
     R other -> HttpClient (alg (runHttp . hdl) other ctx)
-```
 
+{-
 Note for the above code snippets how the `CatFactsApi` carrier delegates fetching JSON to any other effect that supports retrieving JSON given an HTTP request specification.
 
 Note as well that `CatFactsApi` itself doesn't know how to perform an HTTP request. It delegates the request itself to a handler that implements the `Algebra` class for `(Http :+: sig)`.
 
 Putting it all together for the actual production use case:
+-}
 
-``` haskell
 handlePrint :: Either InvalidContentType (Either JsonParseError [CatFact]) -> IO ()
 handlePrint r =
   case r of
@@ -187,17 +193,17 @@ handlePrint r =
 catFactsRunner :: Has Http sig m => m (Either InvalidContentType (Either JsonParseError [CatFact]))
 catFactsRunner =
   runError @InvalidContentType $
-  runError @JsonParseError $
-  runCatFactsApi $
-  listFacts 10
+    runError @JsonParseError $
+      runCatFactsApi $
+        listFacts 10
 
 main :: IO ()
 main = runHttp catFactsRunner >>= handlePrint
-```
 
+{-
 Produces:
 
-```
+```console
 The Bengal is the result of crossbreeding between domestic cats and Asian leopard cats, and its name is derived from the scientific name for the Asian leopard cat (Felis bengalensis).
 A happy cat holds her tail high and steady.
 Kittens remain with their mother till the age of 9 weeks.
@@ -210,24 +216,23 @@ Cats have free-floating clavicle bones that attach their shoulders to their fore
 Wikipedia has a recording of a cat meowing, because why not?
 ```
 
-
 ### Testing with alternative effect handlers
 
 Per point 2. of our initial implementation criteria, we want to be able to simulate failure cases for testing purposes. This is a great case for swapping in an alternative effect handler for our HTTP layer.
 
 This time let's go from the bottom up. In situations where IO is involved, failure scenarios tend to surface from least-pure parts of code. In this case, we should therefore implement some facilities to experiment with the most failure-prone area: the network itself.
+-}
 
-``` haskell
-newtype MockHttpClient m a = MockHttpClient { runMockHttpClient :: ReaderC (HTTP.Request -> IO (HTTP.Response L.ByteString)) m a }
+newtype MockHttpClient m a = MockHttpClient {runMockHttpClient :: ReaderC (HTTP.Request -> IO (HTTP.Response L.ByteString)) m a}
   deriving
-   ( Monad
-   , Functor
-   , Applicative
-   , MonadIO
-   , Alternative
-   )
+    ( Monad
+    , Functor
+    , Applicative
+    , MonadIO
+    , Alternative
+    )
 
-runMockHttp :: (HTTP.Request -> IO (HTTP.Response L.ByteString)) -> MockHttpC m a -> m a
+runMockHttp :: (HTTP.Request -> IO (HTTP.Response L.ByteString)) -> MockHttpClient m a -> m a
 runMockHttp responder m = runReader responder (runMockHttpClient m)
 
 instance (MonadIO m, Algebra sig m) => Algebra (Http :+: sig) (MockHttpClient m) where
@@ -242,47 +247,51 @@ faultyNetwork req = throwIO (HTTP.HttpExceptionRequest req HTTP.ConnectionTimeou
 
 wrongContentType :: HTTP.Request -> IO (HTTP.Response L.ByteString)
 wrongContentType req = pure resp
-  where
-    resp = Response
+ where
+  resp =
+    Response
       { responseStatus = ok200
       , responseVersion = http11
       , responseHeaders = [("Content-Type", "text/xml")]
       , responseBody = "[{\"text\": \"Cats are not dogs\"}]"
       , responseCookieJar = mempty
       , responseClose' = ResponseClose (pure ())
+      , responseOriginalRequest = req
       }
 
 badJson :: HTTP.Request -> IO (HTTP.Response L.ByteString)
-badJson req = pure Response
-  { responseStatus = ok200
-  , responseVersion = http11
-  , responseHeaders = [("Content-Type", "application/json; charset=utf-8")]
-  , responseBody = "{}"
-  , responseCookieJar = mempty
-  , responseClose' = ResponseClose (pure ())
-  }
-```
+badJson req =
+  pure
+    Response
+      { responseStatus = ok200
+      , responseVersion = http11
+      , responseHeaders = [("Content-Type", "application/json; charset=utf-8")]
+      , responseBody = "{}"
+      , responseCookieJar = mempty
+      , responseClose' = ResponseClose (pure ())
+      , responseOriginalRequest = req
+      }
 
+{-
 Let's update our `main` function and watch it in action:
+-}
 
-``` haskell
-main :: IO ()
-main = do
+main1 :: IO ()
+main1 = do
   -- Should return JsonParseError
   runMockHttp badJson catFactsRunner >>= handlePrint
   -- Should return InvalidContentType
   runMockHttp wrongContentType catFactsRunner >>= handlePrint
-```
 
+{-
 Which returns:
 
-``` haskell
+```haskell
 JsonParseError "Error in $: parsing [] failed, expected Array, but encountered Object"
 InvalidContentType "Just \"text/xml\""
 ```
 
 With effects, we have fine-grained ways of testing slices of our API. All that's needed to turn an integration test into a unit test or vice versa is a different set of `Algebra`-implementing effect handlers!
-
 
 ## Observing & altering effects
 
@@ -295,13 +304,13 @@ occurence of the specified effect type that is called via `send`. One trick that
 operate on the effect, and then re-`send` the effect (a.k.a. interposition). In other words, it's perfectly valid to have multiple handlers
 for the same effect type and dispatch to the ones higher in the effect stack! Let's use this approach to time and log
 our HTTP requests:
+-}
 
-``` haskell
-traceHttp
-  :: (Has Http sig m, MonadIO m)
-  => (forall s. Reifies s (Interpreter Http m) => InterpretC s Http m a)
-  -> m a
-traceHttp = runInterpret $ \ _ r@(SendRequest req) ctx -> do
+traceHttp ::
+  (Has Http sig m, MonadIO m) =>
+  (forall s. Reifies s (Interpreter Http m) => InterpretC s Http m a) ->
+  m a
+traceHttp = runInterpret $ \_ (SendRequest req) ctx -> do
   startTime <- liftIO getCurrentTime
   liftIO (putStr (B.unpack (HTTP.path req) ++ " ... "))
   -- Pass the request on to something that actually knows how to respond.
@@ -312,20 +321,19 @@ traceHttp = runInterpret $ \ _ r@(SendRequest req) ctx -> do
   let timeSpent = endTime `diffUTCTime` startTime
   liftIO $ putStrLn ("[" ++ show (statusCode $ HTTP.responseStatus resp) ++ "] took " ++ show timeSpent ++ "\n\n")
   pure (resp <$ ctx)
-```
 
+{-
 Updating our `main` function once more:
+-}
 
-``` haskell
-main :: IO ()
-main = runHttp (traceHttp catFactsRunner) >>= handlePrint
-```
+main2 :: IO ()
+main2 = runHttp (traceHttp catFactsRunner) >>= handlePrint
 
+{-
 Returns:
 
-```
+```console
 /facts/random ... [200] took 0.979107082s
-
 
 Cats have a special scent organ located in the roof of their mouth, called the Jacobson's organ. It analyzes smells - and is the reason why you will sometimes see your cat "sneer" (called the flehmen response or flehming) when they encounter a strong odor.
 It's important for cats to have regular ear exams—this is something you can do at home! Gently fold back the ears and look into the ear canal. The inner ear should be pale pink with little to no earwax. If you notice redness, swelling, discharge, or a lot of earwax, it's time to see a veterinarian.
@@ -339,7 +347,6 @@ Fossil records from two million years ago show evidence of jaguars.
 Since cats are so good at hiding illness, even a single instance of a symptom should be taken very seriously.
 ```
 
-
 ### Conclusion
 
 Reviewing our initial criteria, we have an eminently extensible system that lets us maintain a healthy separation of concerns–
@@ -350,3 +357,4 @@ All while still allowing non-invasive behavior changes through the ability to in
 - [x] We would like to be able to track timing metrics for how quickly we can retrieve cat facts.
 
 ![Mission accomplished](https://media.giphy.com/media/l6Td5sKDNmDGU/giphy.gif)
+-}

@@ -1,4 +1,3 @@
-{-
 # Reinterpret a logging effect
 
 This example shows how to reinterpret a simple, first-order `logging` effect,
@@ -11,9 +10,9 @@ in terms of itself, in order to change the type of the values it logs.
 
 - Finally, we will bridge the two with an effect carrier that reinterprets
   structured log messages as strings.
--}
+<!-- FOURMOLU_DISABLE -->
 
-{- FOURMOLU_DISABLE -}
+```haskell
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
@@ -25,8 +24,11 @@ in terms of itself, in order to change the type of the values it logs.
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
-{- FOURMOLU_ENABLE -}
+```
 
+<!-- FOURMOLU_ENABLE -->
+
+```haskell
 module ReinterpretLog (
   example,
   application,
@@ -41,71 +43,79 @@ import Data.Kind (Type)
 import Hedgehog
 import Utils
 import Prelude hiding (log)
+```
 
-{-
 ## The application
 
 ### Log message
 
 Our structured log message. In this example, we just tag a `String` with its
 severity, but this can be anything.
--}
 
+```haskell
 data Message
   = Debug String
   | Info String
+```
 
-{- Render a structured log message as a string. -}
+Render a structured log message as a string.
+
+```haskell
 renderLogMessage :: Message -> String
 renderLogMessage = \case
   Debug message -> "[debug] " ++ message
   Info message -> "[info] " ++ message
+```
 
-{-
 ### Application
 
 Logs two messages, then quits.
--}
+
+```haskell
 application :: Has (Log Message) sig m => m ()
 application = do
   log (Debug "debug message")
   log (Info "info message")
+```
 
-{-
 ### Application runner
 
 Interpret the application by:
 
 - Reinterpreting `Log Message` effects as `Log String` effects.
 - Interpreting `Log String` effects by printing to stdout.
--}
+
+```haskell
 runApplication :: IO ()
 runApplication =
   runLogStdout -- IO ()
     . reinterpretLog renderLogMessage -- LogStdoutC IO ()
     $ application -- ReinterpretLogC Message String (LogStdoutC IO) ()
+```
 
-{-
 ### Logging effect
 
 Log an `a`, then continue with `k`.
--}
 
+```haskell
 data Log (a :: Type) (m :: Type -> Type) (k :: Type) where
   Log :: a -> Log a m ()
+```
 
-{- Log an `a`. -}
+Log an `a`.
+
+```haskell
 log :: Has (Log a) sig m => a -> m ()
 log x = send (Log x)
+```
 
-{-
 ### The logging effect carriers
 
 #### Carrier one
 
 Log strings to stdout.
--}
 
+```haskell
 newtype LogStdoutC m a = LogStdoutC {runLogStdout :: m a}
   deriving (Applicative, Functor, Monad, MonadIO)
 
@@ -120,13 +130,13 @@ instance-- So long as the 'm' monad can interpret the 'sig' effects (and also pe
   alg hdl sig ctx = case sig of
     L (Log message) -> ctx <$ liftIO (putStrLn message)
     R other -> LogStdoutC (alg (runLogStdout . hdl) other ctx)
+```
 
-{-
 #### Carrier two
 
 Reinterpret a program that logs `s`s into one that logs `t`s using a function (provided at runtime) from `s` to `t`.
--}
 
+```haskell
 newtype ReinterpretLogC s t m a = ReinterpretLogC {runReinterpretLogC :: ReaderC (s -> t) m a}
   deriving (Applicative, Functor, Monad, MonadIO)
 
@@ -146,12 +156,13 @@ instance-- So long as the 'm' monad can interpret the 'sig' effects, one of whic
 -- The 'ReinterpretLogC' runner.
 reinterpretLog :: (s -> t) -> ReinterpretLogC s t m a -> m a
 reinterpretLog f = runReader f . runReinterpretLogC
+```
 
-{-
 #### Carrier three
 
 Collect log messages in a list. This is used for writing this example's test spec.
--}
+
+```haskell
 newtype CollectLogMessagesC s m a = CollectLogMessagesC {runCollectLogMessagesC :: WriterC [s] m a}
   deriving (Applicative, Functor, Monad)
 
@@ -169,10 +180,11 @@ instance-- So long as the 'm' monad can interpret the 'sig' effects...
 -- The 'CollectLogMessagesC' runner.
 collectLogMessages :: Functor m => CollectLogMessagesC s m a -> m [s]
 collectLogMessages = execWriter . runCollectLogMessagesC
+```
 
-{-
 ## Test spec
--}
+
+```haskell
 example :: TestTree
 example =
   testGroup
@@ -183,3 +195,4 @@ example =
           log (Info "bar")
         a === ["[debug] foo", "[info] bar"]
     ]
+```
