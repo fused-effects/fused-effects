@@ -73,6 +73,7 @@ library
     Control.Carrier.Lift
     Control.Carrier.NonDet.Church
     Control.Carrier.Reader
+    Control.Carrier.Simple
     Control.Carrier.State.Church
     Control.Carrier.State.IORef
     Control.Carrier.State.Lazy
@@ -98,6 +99,7 @@ library
     Control.Effect.NonDet
     Control.Effect.Reader
     Control.Effect.Reader.Labelled
+    Control.Effect.Simple
     Control.Effect.State
     Control.Effect.State.Labelled
     Control.Effect.Sum
