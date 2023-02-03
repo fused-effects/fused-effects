@@ -80,6 +80,7 @@ import Control.Monad (MonadPlus)
 import Control.Monad.IO.Class (MonadIO)
 import Control.Monad.IO.Unlift (MonadUnliftIO)
 import Control.Monad.Fix (MonadFix)
+import qualified Control.Monad.Fail as Fail
 import Control.Monad.Trans.Class
 import Control.Effect.Simple
 
@@ -88,7 +89,7 @@ interpret :: (forall x. eff x -> m x) -> SimpleC eff m a -> m a
 interpret f = runReader (HandlerFor f) . runSimpleC
 
 newtype SimpleC eff m a = SimpleC { runSimpleC :: ReaderC (HandlerFor eff m) m a }
-  deriving (Applicative, Alternative, Functor, Monad, MonadFail, MonadFix, MonadIO, MonadPlus, MonadUnliftIO)
+  deriving (Applicative, Alternative, Functor, Monad, Fail.MonadFail, MonadFix, MonadIO, MonadPlus, MonadUnliftIO)
 
 instance MonadTrans (SimpleC eff) where
   lift = SimpleC . lift
