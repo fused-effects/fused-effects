@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
@@ -22,7 +23,9 @@ module Control.Carrier.Cut.Church
 ) where
 
 import Control.Algebra
+#if MIN_VERSION_base(4,19,0)
 import Control.Applicative (liftA2)
+#endif
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import Control.Monad.Fail as Fail
