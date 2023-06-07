@@ -23,7 +23,7 @@ module Control.Carrier.Cull.Church
 ) where
 
 import Control.Algebra
-#if MIN_VERSION_base(4,19,0)
+#if !MIN_VERSION_base(4,19,0)
 import Control.Applicative (liftA2)
 #endif
 import Control.Carrier.NonDet.Church
