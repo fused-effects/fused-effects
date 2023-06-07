@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE MultiParamTypeClasses #-}
@@ -21,9 +20,6 @@ module Control.Carrier.Empty.Church
 ) where
 
 import Control.Algebra
-#if !MIN_VERSION_base(4,19,0)
-import Control.Applicative (liftA2)
-#endif
 import Control.Effect.Empty
 import Control.Monad.Fix
 import Control.Monad.Fail as Fail

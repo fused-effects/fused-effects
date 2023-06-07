@@ -1,4 +1,3 @@
-{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveFunctor #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
@@ -25,9 +24,7 @@ module Control.Carrier.NonDet.Church
 ) where
 
 import Control.Algebra
-#if !MIN_VERSION_base(4,19,0)
-import Control.Applicative (liftA2)
-#endif
+import Control.Applicative
 import Control.Effect.NonDet
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix
