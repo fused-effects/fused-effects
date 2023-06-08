@@ -1,3 +1,7 @@
+# v1.2.0.0 (unreleased)
+
+- Adds a `Simple` effect and an associated carrier in `Control.Carrier.Simple`.
+
 # v1.1.2.1
 
 - Adds support for `ghc` 9.4 and `base` 4.17.

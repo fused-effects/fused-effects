@@ -10,7 +10,7 @@
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
 
--- | Provides an 'InterpretC' carrier capable of interpreting an arbitrary effect using a passed-in higher order function to interpret that effect. This is suitable for prototyping new effects quickly.
+-- | Provides an 'InterpretC' carrier capable of interpreting an arbitrary effect using a passed-in higher order function to interpret that effect. This is suitable for prototyping new effects quickly. This formulation of effects can be seen as a halfway point between the full power of 'Algebra' and the simplicity of the "Control.Carrier.Simple" interface: like @Simple@, it provides a function-based interface to effect interpretation, but unlike @Simple@ supports scoped effects, at the cost of a more complicated interface.
 
 module Control.Carrier.Interpret
 ( -- * Interpret carrier
