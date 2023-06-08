@@ -49,6 +49,12 @@ common common
   if (impl(ghc >= 9.2))
     ghc-options:
       -Wno-missing-kind-signatures
+  -- Temporary hack to deal with a bug in GHC 9.6 where
+  -- derivations of MonadTrans cause spurious redundant-constraint warnings.
+  -- https://gitlab.haskell.org/ghc/ghc/-/issues/23323
+  if (impl(ghc >= 9.6))
+    ghc-options:
+      -Wno-redundant-constraints
 
 library
   import:         common
