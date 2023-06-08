@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DataKinds #-}
 {-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TypeApplications #-}
@@ -5,7 +6,9 @@ module Labelled
 ( example
 ) where
 
+#if !MIN_VERSION_base(4,18,0)
 import           Control.Applicative
+#endif
 import           Control.Carrier.Reader
 import           Control.Carrier.State.Strict
 import           Control.Effect.Labelled

@@ -24,7 +24,7 @@ module Control.Carrier.NonDet.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (liftA2)
+import Control.Applicative
 import Control.Effect.NonDet
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix

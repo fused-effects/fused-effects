@@ -17,7 +17,7 @@ module Control.Carrier.Reader
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative
 import Control.Effect.Reader
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail

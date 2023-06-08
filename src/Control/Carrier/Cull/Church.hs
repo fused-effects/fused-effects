@@ -22,7 +22,7 @@ module Control.Carrier.Cull.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (liftA2)
+import Control.Applicative
 import Control.Carrier.NonDet.Church
 import Control.Carrier.Reader
 import Control.Effect.Cull

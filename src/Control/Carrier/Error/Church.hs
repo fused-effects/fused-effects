@@ -18,7 +18,7 @@ module Control.Carrier.Error.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative
 import Control.Effect.Error
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail

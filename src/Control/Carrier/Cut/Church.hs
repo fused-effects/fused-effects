@@ -22,7 +22,7 @@ module Control.Carrier.Cut.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (liftA2)
+import Control.Applicative
 import Control.Effect.Cut
 import Control.Effect.NonDet
 import Control.Monad.Fail as Fail

@@ -1,3 +1,4 @@
+{-# LANGUAGE CPP #-}
 {-# LANGUAGE DeriveTraversable #-}
 {-# LANGUAGE FlexibleInstances #-}
 {-# LANGUAGE GADTs #-}
@@ -24,7 +25,9 @@ module Control.Carrier.Choose.Church
 ) where
 
 import Control.Algebra
+#if !MIN_VERSION_base(4,18,0)
 import Control.Applicative (liftA2)
+#endif
 import Control.Effect.Choose
 import Control.Monad.Fail as Fail
 import Control.Monad.Fix
@@ -82,8 +85,8 @@ instance MonadFix m => MonadFix (ChooseC m) where
   mfix f = ChooseC $ \ fork leaf ->
     mfix (runChooseS (pure . pure) . f . head)
     >>= \case
-      a:|[] -> leaf a
-      a:|_  -> leaf a `fork` runChoose fork leaf (mfix (liftAll . fmap tail . runChooseS (pure . pure) . f))
+      a :| [] -> leaf a
+      a :| _  -> leaf a `fork` runChoose fork leaf (mfix (liftAll . fmap tail . runChooseS (pure . pure) . f))
       where
     liftAll m = ChooseC $ \ fork leaf -> m >>= foldr1 fork . fmap leaf
   {-# INLINE mfix #-}

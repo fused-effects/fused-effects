@@ -23,7 +23,7 @@ module Control.Carrier.State.Church
 ) where
 
 import Control.Algebra
-import Control.Applicative (Alternative(..), liftA2)
+import Control.Applicative
 import Control.Effect.State
 import Control.Monad (MonadPlus)
 import Control.Monad.Fail as Fail
