@@ -14,6 +14,7 @@ category:            Control
 build-type:          Simple
 extra-source-files:
   README.md
+extra-doc-files:
   ChangeLog.md
 
 tested-with:
