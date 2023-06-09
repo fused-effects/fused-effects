@@ -213,7 +213,7 @@ benchmark benchmark
   build-depends:
     , base
     , fused-effects
-    , tasty-bench
+    , tasty-bench == 0.3.*
     , transformers
   ghc-options:
     -threaded
