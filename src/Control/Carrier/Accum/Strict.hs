@@ -10,7 +10,7 @@ This carrier performs its append operations strictly and thus avoids the space l
 These appends are left-associative; as such, @[]@ is a poor choice of monoid for computations that entail many calls to 'tell'.
 The [Seq](http://hackage.haskell.org/package/containersdocs/Data-Sequence.html) or [DList](http://hackage.haskell.org/package/dlist) monoids may be a superior choice.
 
--- | @since 1.1.2.0
+@since 1.1.2.0
 -}
 
 module Control.Carrier.Accum.Strict
