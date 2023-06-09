@@ -14,6 +14,7 @@ category:            Control
 build-type:          Simple
 extra-source-files:
   README.md
+extra-doc-files:
   ChangeLog.md
 
 tested-with:
@@ -213,7 +214,7 @@ benchmark benchmark
   build-depends:
     , base
     , fused-effects
-    , tasty-bench
+    , tasty-bench == 0.3.*
     , transformers
   ghc-options:
     -threaded
