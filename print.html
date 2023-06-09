@@ -5,8 +5,10 @@
         <meta charset="UTF-8">
         <title>fused-effects</title>
         <meta name="robots" content="noindex" />
+
+
         <!-- Custom HTML head -->
-        <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
+        
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="theme-color" content="#ffffff" />
@@ -17,25 +19,29 @@
         <link rel="stylesheet" href="css/general.css">
         <link rel="stylesheet" href="css/chrome.css">
         <link rel="stylesheet" href="css/print.css" media="print">
+
         <!-- Fonts -->
         <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
         <link rel="stylesheet" href="fonts/fonts.css">
+
         <!-- Highlight.js Stylesheets -->
         <link rel="stylesheet" href="highlight.css">
         <link rel="stylesheet" href="tomorrow-night.css">
         <link rel="stylesheet" href="ayu-highlight.css">
 
         <!-- Custom theme stylesheets -->
+
     </head>
     <body>
+    <div id="body-container">
         <!-- Provide site root to javascript -->
-        <script type="text/javascript">
+        <script>
             var path_to_root = "";
             var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
         </script>
 
         <!-- Work around some values being stored in localStorage wrapped in quotes -->
-        <script type="text/javascript">
+        <script>
             try {
                 var theme = localStorage.getItem('mdbook-theme');
                 var sidebar = localStorage.getItem('mdbook-sidebar');
@@ -51,7 +57,7 @@
         </script>
 
         <!-- Set the theme before any content is loaded, prevents flash -->
-        <script type="text/javascript">
+        <script>
             var theme;
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
@@ -63,12 +69,14 @@
         </script>
 
         <!-- Hide / unhide sidebar before it is displayed -->
-        <script type="text/javascript">
+        <script>
             var html = document.querySelector('html');
-            var sidebar = 'hidden';
+            var sidebar = null;
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
             }
             html.classList.remove('sidebar-visible');
             html.classList.add("sidebar-" + sidebar);
@@ -84,7 +92,7 @@
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
-                <div id="menu-bar-hover-placeholder"></div>
+                                <div id="menu-bar-hover-placeholder"></div>
                 <div id="menu-bar" class="menu-bar sticky bordered">
                     <div class="left-buttons">
                         <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
@@ -94,7 +102,7 @@
                             <i class="fa fa-paint-brush"></i>
                         </button>
                         <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
-                            <li role="none"><button role="menuitem" class="theme" id="light">Light (default)</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
                             <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
@@ -111,6 +119,7 @@
                         <a href="print.html" title="Print this book" aria-label="Print this book">
                             <i id="print-button" class="fa fa-print"></i>
                         </a>
+
                     </div>
                 </div>
 
@@ -124,8 +133,9 @@
                         </ul>
                     </div>
                 </div>
+
                 <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
-                <script type="text/javascript">
+                <script>
                     document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
                     document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
                     Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
@@ -578,7 +588,7 @@ An explicit kind annotation on <code>m</code> fixes the problem.</p>
   Fail :: String -&gt; Fail m a
 </code></pre>
 <div style="break-before: page; page-break-before: always;"></div><h1 id="related-work"><a class="header" href="#related-work">Related work</a></h1>
-<p><code>fused-effects</code> is an encoding of higher-order algebraic effects following the recipes in <em><a href="http://www.cs.ox.ac.uk/people/nicolas.wu/papers/Scope.pdf">Effect Handlers in Scope</a></em> (Nicolas Wu, Tom Schrijvers, Ralf Hinze), <em><a href="http://www.cs.kuleuven.be/publicaties/rapporten/cw/CW699.pdf">Monad Transformers and Modular Algebraic Effects: What Binds Them Together</a></em> (Tom Schrijvers, Maciej Piróg, Nicolas Wu, Mauro Jaskelioff), and <em><a href="https://people.cs.kuleuven.be/%7Etom.schrijvers/Research/papers/mpc2015.pdf">Fusion for Free—Efficient Algebraic Effect Handlers</a></em> (Nicolas Wu, Tom Schrijvers).</p>
+<p><code>fused-effects</code> is an encoding of higher-order algebraic effects following the recipes in <em><a href="http://www.cs.ox.ac.uk/people/nicolas.wu/papers/Scope.pdf">Effect Handlers in Scope</a></em> (Nicolas Wu, Tom Schrijvers, Ralf Hinze), <em><a href="http://www.cs.kuleuven.be/publicaties/rapporten/cw/CW699.pdf">Monad Transformers and Modular Algebraic Effects: What Binds Them Together</a></em> (Tom Schrijvers, Maciej Piróg, Nicolas Wu, Mauro Jaskelioff), and <em><a href="https://people.cs.kuleuven.be/~tom.schrijvers/Research/papers/mpc2015.pdf">Fusion for Free—Efficient Algebraic Effect Handlers</a></em> (Nicolas Wu, Tom Schrijvers).</p>
 <h2 id="contributed-packages"><a class="header" href="#contributed-packages">Contributed packages</a></h2>
 <p>Though we aim to keep the <code>fused-effects</code> core minimal, we encourage the development of external <code>fused-effects</code>-compatible libraries. If you’ve written one that you’d like to be mentioned here, get in touch!</p>
 <ul>
@@ -644,7 +654,7 @@ okay = do
   item &lt;- get @Int
   liftIO . putStrLn $ &quot;got item: &quot; &lt;&gt; show item
 </code></pre>
-<p>The <code>@Int</code> syntax—an <em>explicit type application</em> specifies that the return type of <code>get</code> must in this case be an <code>Int</code>. For more information about type applications, consult the <a href="https://downloads.haskell.org/%7Eghc/latest/docs/html/users_guide/exts/type_applications.html#extension-TypeApplications">GHC manual</a>.</p>
+<p>The <code>@Int</code> syntax—an <em>explicit type application</em> specifies that the return type of <code>get</code> must in this case be an <code>Int</code>. For more information about type applications, consult the <a href="https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/exts/type_applications.html#extension-TypeApplications">GHC manual</a>.</p>
 <h2 id="how-can-i-build-effect-stacks-that-interoperate-correctly-with-mtl"><a class="header" href="#how-can-i-build-effect-stacks-that-interoperate-correctly-with-mtl">How can I build effect stacks that interoperate correctly with <code>mtl</code>?</a></h2>
 <p>There are three approaches:</p>
 <ol>
@@ -701,31 +711,43 @@ Locally, check out <code>master</code> and pull the latest changes to your worki
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
+
+
                         <div style="clear: both"></div>
                     </nav>
                 </div>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
             </nav>
 
         </div>
 
-        <script type="text/javascript">
+
+
+
+        <script>
             window.playground_copyable = true;
         </script>
-        <script src="elasticlunr.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="mark.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="searcher.js" type="text/javascript" charset="utf-8"></script>
-        <script src="clipboard.min.js" type="text/javascript" charset="utf-8"></script>
-        <script src="highlight.js" type="text/javascript" charset="utf-8"></script>
-        <script src="book.js" type="text/javascript" charset="utf-8"></script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
 
         <!-- Custom JS scripts -->
-        <script type="text/javascript">
+
+        <script>
         window.addEventListener('load', function() {
             window.setTimeout(window.print, 100);
         });
         </script>
+
+    </div>
     </body>
 </html>
