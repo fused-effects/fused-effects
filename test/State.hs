@@ -52,9 +52,9 @@ tests = testGroup "State"
   , testGroup "RWST (Lazy)"     $ testState (runC (runRWST RWST.Lazy.runRWST))
   , testGroup "RWST (Strict)"   $ testState (runC (runRWST RWST.Strict.runRWST))
   ] where
-  testMonad    run = Monad.test    (m (gen0 s) (\ _ _ -> [])) a b c (pair <*> s <*> unit) run
-  testMonadFix run = MonadFix.test (m (gen0 s) (\ _ _ -> [])) a b   (pair <*> s <*> unit) run
-  testState    run = State.test    (m (gen0 s) (\ _ _ -> [])) a               s           run
+  testMonad    run = Monad.test    (genM (gen0 termS) (\ _ _ -> [])) termA termB termC (pair <*> termS <*> unit) run
+  testMonadFix run = MonadFix.test (genM (gen0 termS) (\ _ _ -> [])) termA termB       (pair <*> termS <*> unit) run
+  testState    run = State.test    (genM (gen0 termS) (\ _ _ -> [])) termA             termS                     run
   runRWST f s m = (\ (a, s, ()) -> (s, a)) <$> f m s s
 
 

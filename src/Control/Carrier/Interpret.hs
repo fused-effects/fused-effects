@@ -69,7 +69,7 @@ runInterpret
   -> (forall s . Reifies s (Interpreter eff m) => InterpretC s eff m a)
   -> m a
 runInterpret f m = reify (Interpreter (\ hdl sig -> InterpretC . f (runInterpretC . hdl) sig)) (go m) where
-  go :: InterpretC s eff m x -> Const (m x) s
+  go :: forall s eff m x. InterpretC s eff m x -> Const (m x) s
   go (InterpretC m) = Const m
 {-# INLINE runInterpret #-}
 
