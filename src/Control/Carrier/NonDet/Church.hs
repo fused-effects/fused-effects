@@ -106,10 +106,12 @@ instance Fail.MonadFail m => Fail.MonadFail (NonDetC m) where
 -- | Separate fixpoints are computed for each branch.
 instance MonadFix m => MonadFix (NonDetC m) where
   mfix f = NonDetC $ \ fork leaf nil ->
-    mfix (runNonDetA . f . head)
+    mfix (runNonDetA . f . unsafeHead)
     >>= runNonDet fork leaf nil . foldr
-      (\ a _ -> pure a <|> mfix (liftAll . fmap tail . runNonDetA . f))
+      (\ a _ -> pure a <|> mfix (liftAll . fmap (drop 1) . runNonDetA . f))
       empty where
+    unsafeHead (x:_) = x
+    unsafeHead _ = error "unsafeHead: empty list"
     liftAll m = NonDetC $ \ fork leaf nil -> m >>= foldr (fork . leaf) nil
   {-# INLINE mfix #-}
 
