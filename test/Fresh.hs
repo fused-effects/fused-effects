@@ -29,9 +29,9 @@ tests = testGroup "Fresh"
     , testFresh
     ] >>= ($ runC C.Strict.runFresh)
   ] where
-  testMonad    run = Monad.test    (m gen (\ _ _ -> [])) a b c initial run
-  testMonadFix run = MonadFix.test (m gen (\ _ _ -> [])) a b   initial run
-  testFresh    run = Fresh.test    (m gen (\ _ _ -> [])) a     initial run
+  testMonad    run = Monad.test    (genM gen (\ _ _ -> [])) termA termB termC initial run
+  testMonadFix run = MonadFix.test (genM gen (\ _ _ -> [])) termA termB       initial run
+  testFresh    run = Fresh.test    (genM gen (\ _ _ -> [])) termA             initial run
   initial = pair <*> n <*> unit
   n = Gen.integral (R.linear 0 100)
 

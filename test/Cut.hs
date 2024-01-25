@@ -31,13 +31,13 @@ tests = testGroup "Cut"
     , testCut
     ] >>= ($ runL CutC.runCutA)
   , testGroup "ReaderC · CutC" $
-    Cut.test (local (id @R)) (m (gen0 S.<> Reader.gen0 r) (\ m -> genN m S.<> Reader.genN r m)) a b (pair <*> r <*> unit) (Run (CutC.runCutA . uncurry runReader))
+    Cut.test (local (id @R)) (genM (gen0 S.<> Reader.gen0 termR) (\ m -> genN m S.<> Reader.genN termR m)) termA termB (pair <*> termR <*> unit) (Run (CutC.runCutA . uncurry runReader))
   , testGroup "CutC · ReaderC" $
-    Cut.test (local (id @R)) (m (gen0 S.<> Reader.gen0 r) (\ m -> genN m S.<> Reader.genN r m)) a b (pair <*> r <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
+    Cut.test (local (id @R)) (genM (gen0 S.<> Reader.gen0 termR) (\ m -> genN m S.<> Reader.genN termR m)) termA termB (pair <*> termR <*> unit) (Run (uncurry ((. CutC.runCutA) . runReader)))
   ] where
-  testMonad    run = Monad.test    (m gen0 genN) a b c initial run
-  testMonadFix run = MonadFix.test (m gen0 genN) a b   initial run
-  testCut      run = Cut.test id   (m gen0 genN) a b   initial run
+  testMonad    run = Monad.test    (genM gen0 genN) termA termB termC initial run
+  testMonadFix run = MonadFix.test (genM gen0 genN) termA termB       initial run
+  testCut      run = Cut.test id   (genM gen0 genN) termA termB       initial run
   initial = identity <*> unit
 
 

@@ -35,10 +35,10 @@ tests = testGroup "Accum"
   , testGroup "AccumT" $ testAccum (runC (fmap (fmap swap) . flip T.Accum.runAccumT))
 #endif
   ] where
-  testMonad    run = Monad.test    (m (gen0 w) (\_ _ -> [])) a b c initial run
-  testMonadFix run = MonadFix.test (m (gen0 w) (\_ _ -> [])) a b   initial run
-  testAccum    run = Accum.test    (m (gen0 w) (\_ _ -> [])) a     w       run
-  initial = pair <*> w <*> unit
+  testMonad    run = Monad.test    (genM (gen0 termW) (\_ _ -> [])) termA termB termC initial run
+  testMonadFix run = MonadFix.test (genM (gen0 termW) (\_ _ -> [])) termA termB       initial run
+  testAccum    run = Accum.test    (genM (gen0 termW) (\_ _ -> [])) termA             termW   run
+  initial = pair <*> termW <*> unit
 
 gen0
   :: forall w sig m a

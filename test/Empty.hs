@@ -34,9 +34,9 @@ tests = testGroup "Empty"
   , testGroup "MaybeT" $ testEmpty (runL (fmap maybeToList . T.Maybe.runMaybeT))
   , testGroup "Maybe"  $ testEmpty (runL (pure . maybeToList))
   ] where
-  testMonad    run = Monad.test    (m gen0 (\ _ _ -> [])) a b c initial run
-  testMonadFix run = MonadFix.test (m gen0 (\ _ _ -> [])) a b   initial run
-  testEmpty    run = Empty.test    (m gen0 (\ _ _ -> [])) a b   initial run
+  testMonad    run = Monad.test    (genM gen0 (\ _ _ -> [])) termA termB termC initial run
+  testMonadFix run = MonadFix.test (genM gen0 (\ _ _ -> [])) termA termB       initial run
+  testEmpty    run = Empty.test    (genM gen0 (\ _ _ -> [])) termA termB       initial run
   initial = identity <*> unit
 
 

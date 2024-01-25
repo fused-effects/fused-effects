@@ -17,23 +17,23 @@
 module Gen
 ( module Data.Functor.Identity
   -- * Polymorphic generation & instantiation
-, m
+, genM
 , GenM
 , genT
 , T(..)
-, a
+, termA
 , A
-, b
+, termB
 , B
-, c
+, termC
 , C
-, e
+, termE
 , E
-, r
+, termR
 , R
-, s
+, termS
 , S
-, w
+, termW
 , W
 , unit
 , identity
@@ -95,14 +95,14 @@ import qualified Hedgehog.Function as Fn
 import           Hedgehog.Gen as Hedgehog
 import           Hedgehog.Range
 
--- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
-m
+-- | A generator for computations, given a higher-order generator for effectful operations, & a generator for results.
+genM
   :: forall m
   .  Monad m
   => (forall a . GenTerm a -> [GenTerm (m a)])
   -> (forall a . GenM m -> GenTerm a -> [GenTerm (m a)]) -- ^ A higher-order computation generator using any effects in @m@.
   -> GenM m                                              -- ^ A computation generator.
-m terminals nonterminals = m where
+genM terminals nonterminals = m where
   m :: GenM m
   m a = Comp1 $ scale (`div` 2) $ recursive Hedgehog.choice
     (unComp1 <$> ((Gen.label "pure" pure <*> a) : terminals a))
@@ -131,38 +131,38 @@ instance Monoid (T a) where
 instance KnownSymbol s => Show (T s) where
   showsPrec d = showsUnaryWith showsPrec (symbolVal (Proxy @s)) d . unT
 
-a :: GenTerm A
-a = genT
+termA :: GenTerm A
+termA = genT
 
 type A = T "A"
 
-b :: GenTerm B
-b = genT
+termB :: GenTerm B
+termB = genT
 
 type B = T "B"
 
-c :: GenTerm C
-c = genT
+termC :: GenTerm C
+termC = genT
 
 type C = T "C"
 
-e :: GenTerm E
-e = genT
+termE :: GenTerm E
+termE = genT
 
 type E = T "E"
 
-r :: GenTerm R
-r = genT
+termR :: GenTerm R
+termR = genT
 
 type R = T "R"
 
-s :: GenTerm S
-s = genT
+termS :: GenTerm S
+termS = genT
 
 type S = T "S"
 
-w :: GenTerm W
-w = genT
+termW :: GenTerm W
+termW = genT
 
 type W = T "W"
 

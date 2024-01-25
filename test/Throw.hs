@@ -24,9 +24,9 @@ tests = testGroup "Throw"
     , testThrow
     ] >>= ($ runL ThrowC.runThrow)
   ] where
-  testMonad    run = Monad.test    (m (gen0 e) (\ _ _ -> [])) a b c initial run
-  testMonadFix run = MonadFix.test (m (gen0 e) (\ _ _ -> [])) a b   initial run
-  testThrow    run = Throw.test e  (m (gen0 e) (\ _ _ -> [])) a b   initial run
+  testMonad    run = Monad.test       (genM (gen0 termE) (\ _ _ -> [])) termA termB termC initial run
+  testMonadFix run = MonadFix.test    (genM (gen0 termE) (\ _ _ -> [])) termA termB       initial run
+  testThrow    run = Throw.test termE (genM (gen0 termE) (\ _ _ -> [])) termA termB       initial run
   initial = identity <*> unit
 
 

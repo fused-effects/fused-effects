@@ -35,9 +35,9 @@ tests = testGroup "Error"
   , testGroup "Either"  $ testError (runL pure)
   , testGroup "ExceptT" $ testError (runL T.Except.runExceptT)
   ] where
-  testMonad    run = Monad.test    (m (gen0 e) (genN e)) a b c initial run
-  testMonadFix run = MonadFix.test (m (gen0 e) (genN e)) a b   initial run
-  testError    run = Error.test e  (m (gen0 e) (genN e)) a b   initial run
+  testMonad    run = Monad.test       (genM (gen0 termE) (genN termE)) termA termB termC initial run
+  testMonadFix run = MonadFix.test    (genM (gen0 termE) (genN termE)) termA termB       initial run
+  testError    run = Error.test termE (genM (gen0 termE) (genN termE)) termA termB       initial run
   initial = identity <*> unit
 
 gen0 :: Has (Error e) sig m => GenTerm e -> GenTerm a -> [GenTerm (m a)]
