@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -10,7 +10,7 @@
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -31,7 +31,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -61,42 +61,71 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="usage.html" class="active"><strong aria-hidden="true">2.</strong> Using Effects</a></li><li class="chapter-item expanded "><a href="defining_effects.html"><strong aria-hidden="true">3.</strong> Defining Effects</a></li><li class="chapter-item expanded "><a href="reinterpreting_effects.html"><strong aria-hidden="true">4.</strong> Reinterpretting Effects</a></li><li class="chapter-item expanded "><a href="common_errors.html"><strong aria-hidden="true">5.</strong> Common Errors</a></li><li class="chapter-item expanded "><a href="related.html"><strong aria-hidden="true">6.</strong> Related Work</a></li><li class="chapter-item expanded "><a href="faqs.html"><strong aria-hidden="true">7.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="releasing.html"><strong aria-hidden="true">8.</strong> Releasing</a></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
 
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
                                 <div id="menu-bar-hover-placeholder"></div>
-                <div id="menu-bar" class="menu-bar sticky bordered">
+                <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -155,7 +184,7 @@
 <h2 id="invoking-effects"><a class="header" href="#invoking-effects">Invoking effects</a></h2>
 <p>Each module under the <code>Control.Effect</code> hierarchy provides a set of functions that invoke effects, each mapping to a constructor of the underlying effect type. These functions are similar to, but more powerful than, those provided by <code>mtl</code>. In this example, we invoke the <code>get</code> and <code>put</code> functions provided by <code>Control.Effect.State</code>, first extracting the state and then updating it with a new value:</p>
 <pre><code class="language-haskell">action1 :: Has (State String) sig m =&gt; m ()
-action1 = get &gt;&gt;= \ s -&gt; put (&quot;hello, &quot; ++ s)
+action1 = get &gt;&gt;= \ s -&gt; put ("hello, " ++ s)
 </code></pre>
 <p>The <code>Has</code> constraint requires a given effect (here <code>State</code>) to be present in a <em>signature</em> (<code>sig</code>), and relates that signature to be present in a carrier type (<code>m</code>). We generally, but not always, program against an abstract carrier type, usually called <code>m</code>, as carrier types always implement the <code>Monad</code> typeclass.</p>
 <p>To add effects to a given computation, add more <code>Has</code> constraints to the signature/carrier pair <code>sig</code> and <code>m</code>. For example, to add a <code>Reader</code> effect managing an <code>Int</code>, we would write:</p>
@@ -174,21 +203,21 @@ example1 list = runState 0 $ do
 <p><code>runState</code> returns a tuple of both the computed value (the <code>()</code>) and the final state (the <code>Int</code>), visible in the result of the returned computation. The <code>get</code> function is resolved with a visible type application, due to the fact that effects can contain more than one state type (in contrast with <code>mtl</code>’s <code>MonadState</code>, which limits the user to a single state type).</p>
 <p>Since this function returns a value in some carrier <code>m</code>, effect handlers can be chained to run multiple effects. Here, we get the list to compute the length of from a <code>Reader</code> effect:</p>
 <pre><code class="language-haskell">example2 :: Algebra sig m =&gt; m (Int, ())
-example2 = runReader &quot;hello&quot; . runState 0 $ do
+example2 = runReader "hello" . runState 0 $ do
   list &lt;- ask
   put (length (list :: String))
 </code></pre>
 <p>(Note that the type annotation on <code>list</code> is necessary to disambiguate the requested value, since otherwise all the typechecker knows is that it’s an arbitrary <code>Foldable</code>. For more information, see the <a href="#comparison-to-mtl">comparison to <code>mtl</code></a>.)</p>
 <p>When all effects have been handled, a computation’s final value can be extracted with <code>run</code>:</p>
 <pre><code class="language-haskell">example3 :: (Int, ())
-example3 = run . runReader &quot;hello&quot; . runState 0 $ do
+example3 = run . runReader "hello" . runState 0 $ do
   list &lt;- ask
   put (length (list :: String))
 </code></pre>
 <p><code>run</code> is itself actually an effect handler for the <code>Lift Identity</code> effect, whose only operation is to lift a result value into a computation.</p>
 <p>Alternatively, arbitrary <code>Monad</code>s can be embedded into effectful computations using the <code>Lift</code> effect. In this case, the underlying <code>Monad</code>ic computation can be extracted using <code>runM</code>. Here, we use the <code>MonadIO</code> instance for the <code>LiftC</code> carrier to lift <code>putStrLn</code> into the middle of our computation:</p>
 <pre><code class="language-haskell">example4 :: IO (Int, ())
-example4 = runM . runReader &quot;hello&quot; . runState 0 $ do
+example4 = runM . runReader "hello" . runState 0 $ do
   list &lt;- ask
   liftIO (putStrLn list)
   put (length list)
@@ -209,7 +238,7 @@ example4 = runM . runReader &quot;hello&quot; . runState 0 $ do
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="defining_effects.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="defining_effects.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -223,7 +252,7 @@ example4 = runM . runReader &quot;hello&quot; . runState 0 $ do
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="defining_effects.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="defining_effects.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>

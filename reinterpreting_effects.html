@@ -1,5 +1,5 @@
 <!DOCTYPE HTML>
-<html lang="en" class="sidebar-visible no-js light">
+<html lang="en" class="light" dir="ltr">
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
@@ -10,7 +10,7 @@
         
         <meta name="description" content="">
         <meta name="viewport" content="width=device-width, initial-scale=1">
-        <meta name="theme-color" content="#ffffff" />
+        <meta name="theme-color" content="#ffffff">
 
         <link rel="icon" href="favicon.svg">
         <link rel="shortcut icon" href="favicon.png">
@@ -31,7 +31,7 @@
         <!-- Custom theme stylesheets -->
 
     </head>
-    <body>
+    <body class="sidebar-visible no-js">
     <div id="body-container">
         <!-- Provide site root to javascript -->
         <script>
@@ -61,42 +61,71 @@
             try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
             if (theme === null || theme === undefined) { theme = default_theme; }
             var html = document.querySelector('html');
-            html.classList.remove('no-js')
             html.classList.remove('light')
             html.classList.add(theme);
-            html.classList.add('js');
+            var body = document.querySelector('body');
+            body.classList.remove('no-js')
+            body.classList.add('js');
         </script>
+
+        <input type="checkbox" id="sidebar-toggle-anchor" class="hidden">
 
         <!-- Hide / unhide sidebar before it is displayed -->
         <script>
-            var html = document.querySelector('html');
+            var body = document.querySelector('body');
             var sidebar = null;
+            var sidebar_toggle = document.getElementById("sidebar-toggle-anchor");
             if (document.body.clientWidth >= 1080) {
                 try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
                 sidebar = sidebar || 'visible';
             } else {
                 sidebar = 'hidden';
             }
-            html.classList.remove('sidebar-visible');
-            html.classList.add("sidebar-" + sidebar);
+            sidebar_toggle.checked = sidebar === 'visible';
+            body.classList.remove('sidebar-visible');
+            body.classList.add("sidebar-" + sidebar);
         </script>
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
                 <ol class="chapter"><li class="chapter-item expanded "><a href="overview.html"><strong aria-hidden="true">1.</strong> Overview</a></li><li class="chapter-item expanded "><a href="usage.html"><strong aria-hidden="true">2.</strong> Using Effects</a></li><li class="chapter-item expanded "><a href="defining_effects.html"><strong aria-hidden="true">3.</strong> Defining Effects</a></li><li class="chapter-item expanded "><a href="reinterpreting_effects.html" class="active"><strong aria-hidden="true">4.</strong> Reinterpretting Effects</a></li><li class="chapter-item expanded "><a href="common_errors.html"><strong aria-hidden="true">5.</strong> Common Errors</a></li><li class="chapter-item expanded "><a href="related.html"><strong aria-hidden="true">6.</strong> Related Work</a></li><li class="chapter-item expanded "><a href="faqs.html"><strong aria-hidden="true">7.</strong> FAQ</a></li><li class="chapter-item expanded "><a href="releasing.html"><strong aria-hidden="true">8.</strong> Releasing</a></li></ol>
             </div>
-            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle">
+                <div class="sidebar-resize-indicator"></div>
+            </div>
         </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
 
         <div id="page-wrapper" class="page-wrapper">
 
             <div class="page">
                                 <div id="menu-bar-hover-placeholder"></div>
-                <div id="menu-bar" class="menu-bar sticky bordered">
+                <div id="menu-bar" class="menu-bar sticky">
                     <div class="left-buttons">
-                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                        <label id="sidebar-toggle" class="icon-button" for="sidebar-toggle-anchor" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
                             <i class="fa fa-bars"></i>
-                        </button>
+                        </label>
                         <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
                             <i class="fa fa-paint-brush"></i>
                         </button>
@@ -146,9 +175,9 @@
                     <main>
                         <h1 id="reinterpreting-effects"><a class="header" href="#reinterpreting-effects">Reinterpreting effects</a></h1>
 <p>This article assumes you are already familiar with <a href="defining_effects.html">defining effects and their handlers</a>.</p>
-<p>One of the nice aspects of effects is that they can support multiple effect handlers. Effects only specify actions, they don't actually perform them. Therefore, it's possible to &quot;reinterpret&quot; effects. There are multiple senses in which an effect can be reinterpreted:</p>
+<p>One of the nice aspects of effects is that they can support multiple effect handlers. Effects only specify actions, they don't actually perform them. Therefore, it's possible to "reinterpret" effects. There are multiple senses in which an effect can be reinterpreted:</p>
 <ul>
-<li>Implementing an effect in terms of other effects. &quot;Reinterpreting&quot; effects is a powerful tool for cleanly dividing implementations into the relevant abstraction layers with minimal leakage of implementation details.</li>
+<li>Implementing an effect in terms of other effects. "Reinterpreting" effects is a powerful tool for cleanly dividing implementations into the relevant abstraction layers with minimal leakage of implementation details.</li>
 <li>Rewriting an effect and/or performing actions with the effect value and then performing the originally intended effect. This technique is conceptually similar to the middleware pattern commonly used in web applications. This known as <em>interposition</em> (see works by Oleg Kiselyov et al.)</li>
 </ul>
 <p>Let's explore both of these effect interpretation strategies with a small motivating example:</p>
@@ -202,7 +231,7 @@ newtype CatFact = CatFact
   } deriving (Show)
 
 instance FromJSON CatFact where
-  parseJSON = withObject &quot;CatFact&quot; (\o -&gt; CatFact &lt;$&gt; o .: &quot;text&quot;)
+  parseJSON = withObject "CatFact" (\o -&gt; CatFact &lt;$&gt; o .: "text")
 
 -- | Our high level effect type that will be able to target different data sources.
 data CatFactClient (m :: Type -&gt; Type) k where
@@ -219,7 +248,7 @@ sendRequest :: Has Http sig m =&gt; HTTP.Request -&gt; m (HTTP.Response L.ByteSt
 sendRequest r = send (SendRequest r)
 </code></pre>
 <p>The <code>listFacts</code> function provides the ‘what’ of this API, and the <code>sendRequest</code> function provides the ‘how’. In decomposing this problem into a set of effects, each responsible for a single layer of the original problem description, we provide ourselves with a flexible, composable vocabulary rather than a single monolithic action.</p>
-<h2 id="stacking-effects"><a class="header" href="#stacking-effects">&quot;Stacking&quot; effects</a></h2>
+<h2 id="stacking-effects"><a class="header" href="#stacking-effects">"Stacking" effects</a></h2>
 <h3 id="the-production-use-case"><a class="header" href="#the-production-use-case">The production use-case</a></h3>
 <p>Now that we have these two mini-DSL effect types established, we need to stitch them together.</p>
 <p>Let's take a moment to think about what could go wrong with an HTTP API from which we plan to fetch some JSON and convert it into a list of <code>CatFact</code>s.</p>
@@ -245,7 +274,7 @@ decodeOrThrow = either (throwError . JsonParseError) pure . eitherDecode
    )
 
 catFactsEndpoint :: HTTP.Request
-catFactsEndpoint = HTTP.parseRequest_ &quot;https://cat-fact.herokuapp.com/facts/random&quot;
+catFactsEndpoint = HTTP.parseRequest_ "https://cat-fact.herokuapp.com/facts/random"
 
 instance ( Has Http sig m
          , Has (Throw JsonParseError) sig m
@@ -255,9 +284,9 @@ instance ( Has Http sig m
          Algebra (CatFactClient :+: sig) (CatFactsApi m) where
   alg hdl sig ctx = case sig of
     L (ListFacts numberOfFacts) -&gt; do
-      resp &lt;- sendRequest (catFactsEndpoint { HTTP.queryString = &quot;?amount=&quot; &lt;&gt; B.pack (show numberOfFacts) })
+      resp &lt;- sendRequest (catFactsEndpoint { HTTP.queryString = "?amount=" &lt;&gt; B.pack (show numberOfFacts) })
       case lookup hContentType (HTTP.responseHeaders resp) of
-        Just &quot;application/json; charset=utf-8&quot; -&gt; (&lt;$ ctx) &lt;$&gt; decodeOrThrow (HTTP.responseBody resp)
+        Just "application/json; charset=utf-8" -&gt; (&lt;$ ctx) &lt;$&gt; decodeOrThrow (HTTP.responseBody resp)
         other -&gt; throwError (InvalidContentType (show other))
     R other -&gt; CatFactsApi (alg (runCatFactsApi . hdl) other ctx)
 </code></pre>
@@ -347,8 +376,8 @@ wrongContentType req = pure resp
     resp = Response
       { responseStatus = ok200
       , responseVersion = http11
-      , responseHeaders = [(&quot;Content-Type&quot;, &quot;text/xml&quot;)]
-      , responseBody = &quot;[{\&quot;text\&quot;: \&quot;Cats are not dogs\&quot;}]&quot;
+      , responseHeaders = [("Content-Type", "text/xml")]
+      , responseBody = "[{\"text\": \"Cats are not dogs\"}]"
       , responseCookieJar = mempty
       , responseClose' = ResponseClose (pure ())
       }
@@ -357,8 +386,8 @@ badJson :: HTTP.Request -&gt; IO (HTTP.Response L.ByteString)
 badJson req = pure Response
   { responseStatus = ok200
   , responseVersion = http11
-  , responseHeaders = [(&quot;Content-Type&quot;, &quot;application/json; charset=utf-8&quot;)]
-  , responseBody = &quot;{}&quot;
+  , responseHeaders = [("Content-Type", "application/json; charset=utf-8")]
+  , responseBody = "{}"
   , responseCookieJar = mempty
   , responseClose' = ResponseClose (pure ())
   }
@@ -372,14 +401,14 @@ main = do
   runMockHttp wrongContentType catFactsRunner &gt;&gt;= handlePrint
 </code></pre>
 <p>Which returns:</p>
-<pre><code class="language-haskell">JsonParseError &quot;Error in $: parsing [] failed, expected Array, but encountered Object&quot;
-InvalidContentType &quot;Just \&quot;text/xml\&quot;&quot;
+<pre><code class="language-haskell">JsonParseError "Error in $: parsing [] failed, expected Array, but encountered Object"
+InvalidContentType "Just \"text/xml\""
 </code></pre>
 <p>With effects, we have fine-grained ways of testing slices of our API. All that's needed to turn an integration test into a unit test or vice versa is a different set of <code>Algebra</code>-implementing effect handlers!</p>
 <h2 id="observing--altering-effects"><a class="header" href="#observing--altering-effects">Observing &amp; altering effects</a></h2>
 <p>Building new effect handling algebras can be a little bit verbose. In simpler situations, we may want to simply operate
 on an effect without having to implement a whole new <code>Algebra</code> instance. We still have yet to build a solution to tracking
-operational metrics (like request timings), so let's look at how to build a sort of &quot;effect middleware&quot; using <code>InterpretC</code>.</p>
+operational metrics (like request timings), so let's look at how to build a sort of "effect middleware" using <code>InterpretC</code>.</p>
 <p><code>InterpretC</code> is an effect carrier that is intended for prototyping new effects that passes a callback function each
 occurence of the specified effect type that is called via <code>send</code>. One trick that can be useful is to intercept an effect,
 operate on the effect, and then re-<code>send</code> the effect (a.k.a. interposition). In other words, it's perfectly valid to have multiple handlers
@@ -391,14 +420,14 @@ our HTTP requests:</p>
   -&gt; m a
 traceHttp = runInterpret $ \ _ r@(SendRequest req) ctx -&gt; do
   startTime &lt;- liftIO getCurrentTime
-  liftIO (putStr (B.unpack (HTTP.path req) ++ &quot; ... &quot;))
+  liftIO (putStr (B.unpack (HTTP.path req) ++ " ... "))
   -- Pass the request on to something that actually knows how to respond.
   resp &lt;- sendRequest req
   -- Once the actual response is obtained,
   -- we can capture the end time and status of the response.
   endTime &lt;- liftIO getCurrentTime
   let timeSpent = endTime `diffUTCTime` startTime
-  liftIO $ putStrLn (&quot;[&quot; ++ show (statusCode $ HTTP.responseStatus resp) ++ &quot;] took &quot; ++ show timeSpent ++ &quot;\n\n&quot;)
+  liftIO $ putStrLn ("[" ++ show (statusCode $ HTTP.responseStatus resp) ++ "] took " ++ show timeSpent ++ "\n\n")
   pure (resp &lt;$ ctx)
 </code></pre>
 <p>Updating our <code>main</code> function once more:</p>
@@ -409,7 +438,7 @@ main = runHttp (traceHttp catFactsRunner) &gt;&gt;= handlePrint
 <pre><code>/facts/random ... [200] took 0.979107082s
 
 
-Cats have a special scent organ located in the roof of their mouth, called the Jacobson's organ. It analyzes smells - and is the reason why you will sometimes see your cat &quot;sneer&quot; (called the flehmen response or flehming) when they encounter a strong odor.
+Cats have a special scent organ located in the roof of their mouth, called the Jacobson's organ. It analyzes smells - and is the reason why you will sometimes see your cat "sneer" (called the flehmen response or flehming) when they encounter a strong odor.
 It's important for cats to have regular ear exams—this is something you can do at home! Gently fold back the ears and look into the ear canal. The inner ear should be pale pink with little to no earwax. If you notice redness, swelling, discharge, or a lot of earwax, it's time to see a veterinarian.
 Siamese kittens are born white because of the heat inside the mother's uterus before birth. This heat keeps the kittens' hair from darkening on the points.
 Declawing a cat is the same as cutting a human's fingers off at the knuckle. There are several alternatives to a complete declawing, including trimming or a less radical (though more involved) surgery to remove the claws. Instead, train your cat to use a scratching post.
@@ -441,7 +470,7 @@ We would like to be able to track timing metrics for how quickly we can retrieve
                                 <i class="fa fa-angle-left"></i>
                             </a>
 
-                            <a rel="next" href="common_errors.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                            <a rel="next prefetch" href="common_errors.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                                 <i class="fa fa-angle-right"></i>
                             </a>
 
@@ -455,7 +484,7 @@ We would like to be able to track timing metrics for how quickly we can retrieve
                         <i class="fa fa-angle-left"></i>
                     </a>
 
-                    <a rel="next" href="common_errors.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                    <a rel="next prefetch" href="common_errors.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
                         <i class="fa fa-angle-right"></i>
                     </a>
             </nav>
