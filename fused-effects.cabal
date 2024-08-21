@@ -61,7 +61,7 @@ common common
   if (impl(ghc >= 9.8))
     ghc-options:
       -Wno-missing-role-annotations
-      -Wno-term-variable-capture      
+      -Wno-term-variable-capture
       -Wno-x-partial
   if (impl(ghc >= 9.10))
     ghc-options:
