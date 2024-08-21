@@ -7,6 +7,7 @@
 {-# LANGUAGE LambdaCase #-}
 {-# LANGUAGE PolyKinds #-}
 {-# LANGUAGE ScopedTypeVariables #-}
+{-# LANGUAGE StandaloneKindSignatures #-}
 {-# LANGUAGE TypeApplications #-}
 {-# LANGUAGE TypeOperators #-}
 {-# LANGUAGE UndecidableInstances #-}
@@ -41,7 +42,7 @@ import Control.Monad.Fix
 import Control.Monad.IO.Class
 import Control.Monad.Trans.Class
 import Data.Functor.Identity
-import Data.Kind (Type)
+import Data.Kind (Constraint, Type)
 
 -- | An effect transformer turning effects into labelled effects, and a carrier transformer turning carriers into labelled carriers for the same (labelled) effects.
 --
@@ -74,6 +75,7 @@ instance Algebra (eff :+: sig) (sub m) => Algebra (Labelled label eff :+: sig) (
 -- | The class of labelled types present in a signature.
 --
 -- @since 1.0.2.0
+type LabelledMember :: forall {k}. k -> ((Type -> Type) -> Type -> Type) -> ((Type -> Type) -> Type -> Type) -> Constraint
 class LabelledMember label (sub :: (Type -> Type) -> (Type -> Type)) sup | label sup -> sub where
   -- | Inject a member of a signature into the signature.
   --
@@ -111,6 +113,7 @@ instance {-# OVERLAPPABLE #-}
 -- Note that if @eff@ is a sum, it will /not/ be decomposed into multiple 'LabelledMember' constraints. While this technically is possible, it results in unsolvable constraints, as the functional dependencies in 'Labelled' prevent assocating the same label with multiple distinct effects within a signature.
 --
 -- @since 1.0.2.0
+type HasLabelled :: forall {k}. k -> ((Type -> Type) -> Type -> Type) -> ((Type -> Type) -> Type -> Type) -> (Type -> Type) -> Constraint
 type HasLabelled label eff sig m = (LabelledMember label eff sig, Algebra sig m)
 
 -- | Construct a request for a labelled effect to be interpreted by some handler later on.
