@@ -14,12 +14,12 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: ["8.2", "8.4", "8.6", "8.8", "8.10", "9.0", "9.2", "9.4", "9.6.2"]
+        ghc: ["8.2", "8.4", "8.6", "8.8", "8.10", "9.0", "9.2", "9.4", "9.6.2", "9.8.2", "9.10.1"]
 
     steps:
     - uses: actions/checkout@v2
 
-    - uses: haskell/actions/setup@v2.3.1
+    - uses: haskell-actions/setup@v2
       name: Setup Haskell
       with:
         ghc-version: ${{ matrix.ghc }}

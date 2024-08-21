@@ -27,6 +27,8 @@ tested-with:
   GHC == 9.2.1
   GHC == 9.4.2
   GHC == 9.6.2
+  GHC == 9.8.2
+  GHC == 9.10.1
 
 common common
   default-language: Haskell2010
@@ -56,6 +58,12 @@ common common
   if (impl(ghc >= 9.6))
     ghc-options:
       -Wno-redundant-constraints
+  if (impl(ghc >= 9.8))
+    ghc-options:
+      -Wno-missing-role-annotations
+      -Wno-term-variable-capture
+      -Wno-x-partial
+      -Wno-missing-poly-kind-signatures  
 
 library
   import:         common
@@ -125,7 +133,7 @@ library
     Control.Effect.Throw.Internal
     Control.Effect.Writer.Internal
   build-depends:
-      base          >= 4.9 && < 4.19
+      base          >= 4.9 && < 4.21
     , transformers  >= 0.4 && < 0.7
     , unliftio-core >= 0.2 && < 0.3
 
@@ -145,7 +153,7 @@ test-suite examples
   build-depends:
     , base
     , fused-effects
-    , hedgehog           >= 1 && < 1.3
+    , hedgehog           >= 1 && < 1.6
     , hedgehog-fn        ^>= 1
 
 
@@ -178,7 +186,7 @@ test-suite test
     Writer
   build-depends:
     , base
-    , containers          >= 0.5 && < 0.7
+    , containers          >= 0.5 && < 0.8
     , fused-effects
     , hedgehog
     , hedgehog-fn
