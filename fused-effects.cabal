@@ -1,7 +1,7 @@
 cabal-version:       2.2
 
 name:                fused-effects
-version:             1.1.2.3
+version:             1.1.2.4
 synopsis:            A fast, flexible, fused effect system.
 description:         A fast, flexible, fused effect system, à la Effect Handlers in Scope, Monad Transformers and Modular Algebraic Effects: What Binds Them Together, and Fusion for Free—Efficient Algebraic Effect Handlers.
 homepage:            https://github.com/fused-effects/fused-effects
@@ -9,7 +9,7 @@ license:             BSD-3-Clause
 license-file:        LICENSE
 author:              Nicolas Wu, Tom Schrijvers, Rob Rix, Patrick Thomson
 maintainer:          robrix@github.com
-copyright:           2018-2023 Nicolas Wu, Tom Schrijvers, Rob Rix, Patrick Thomson
+copyright:           2018-2025 Nicolas Wu, Tom Schrijvers, Rob Rix, Patrick Thomson
 category:            Control
 build-type:          Simple
 extra-source-files:
