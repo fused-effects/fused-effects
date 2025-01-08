@@ -1,3 +1,7 @@
+# v1.1.2.4
+
+- Adds support for `ghc` 9.12 and `base` 4.21.
+
 # v1.1.2.3
 
 - Adds support for `ghc` 9.8 and 9.10, `base` 4.19 and 4.20, and `containers` 0.7.
