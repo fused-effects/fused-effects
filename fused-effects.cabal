@@ -29,6 +29,7 @@ tested-with:
   GHC == 9.6.2
   GHC == 9.8.2
   GHC == 9.10.1
+  GHC == 9.12.1
 
 common common
   default-language: Haskell2010
@@ -63,7 +64,7 @@ common common
       -Wno-missing-role-annotations
       -Wno-term-variable-capture
       -Wno-x-partial
-      -Wno-missing-poly-kind-signatures  
+      -Wno-missing-poly-kind-signatures
 
 library
   import:         common
@@ -133,7 +134,7 @@ library
     Control.Effect.Throw.Internal
     Control.Effect.Writer.Internal
   build-depends:
-      base          >= 4.9 && < 4.21
+      base          >= 4.9 && < 4.22
     , transformers  >= 0.4 && < 0.7
     , unliftio-core >= 0.2 && < 0.3
 
