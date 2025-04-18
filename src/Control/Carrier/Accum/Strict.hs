@@ -132,5 +132,5 @@ instance (Algebra sig m, Monoid w) => Algebra (Accum w :+: sig) (AccumC w m) whe
     L accum -> case accum of
       Add w' -> pure (w', ctx)
       Look   -> pure (mempty, w <$ ctx)
-    R other  -> thread (uncurry runAccum ~<~ hdl) other (w, ctx)
+    R other  -> thread (uncurry runAccum ~<~ hdl) other (mempty, ctx)
   {-# INLINE alg #-}
