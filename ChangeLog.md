@@ -1,3 +1,7 @@
+# v1.1.2.5
+
+- Fixes Accum carriers (Strict and Church) to not duplicate state ([#449](https://github.com/fused-effects/fused-effects/issues/449)) (by @byorgey)
+
 # v1.1.2.4
 
 - Adds support for `ghc` 9.12 and `base` 4.21.
