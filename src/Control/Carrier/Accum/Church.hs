@@ -94,14 +94,14 @@ instance Monoid w => Applicative (AccumC w m) where
     runAccumC mf (\w' f -> runAccumC ma (\w'' a -> k (w' `mappend` w'') $ f a) (w `mappend` w')) w
   {-# INLINE (<*>) #-}
 
-instance (Alternative m, Monad m, Monoid w) => Alternative (AccumC w m) where
-  empty = lift empty
+instance (Alternative m, Monoid w) => Alternative (AccumC w m) where
+  empty = AccumC $ const $ const empty
   {-# INLINE empty #-}
 
   ma1 <|> ma2 = AccumC $ \k w -> runAccumC ma1 k w <|> runAccumC ma2 k w
   {-# INLINE (<|>) #-}
 
-instance (Monad m, Monoid w) => Monad (AccumC w m) where
+instance Monoid w => Monad (AccumC w m) where
   ma >>= f = AccumC $ \k w -> runAccumC ma (\w' a -> runAccumC (f a) (\w'' -> k $ w' `mappend` w'') (w `mappend` w')) w
   {-# INLINE (>>=) #-}
 
