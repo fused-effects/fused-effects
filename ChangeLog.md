@@ -1,3 +1,8 @@
+# v1.2.2.6 (unreleased)
+
+- Replaces `INLINE[3]` with regular `INLINE` pragmas, as the phase control was of dubious correctness [#493](https://github.com/fused-effects/fused-effects/issues/463#issuecomment-2833591776)
+- Loosens constraints on `Control.Carrier.Accum.Church`'s `Alternative` and `Monad` instances ([#462](https://github.com/fused-effects/fused-effects/pull/462)) (by @rhendric)
+
 # v1.1.2.5
 
 - Fixes Accum carriers (Strict and Church) to not duplicate state ([#449](https://github.com/fused-effects/fused-effects/issues/449)) (by @byorgey)
