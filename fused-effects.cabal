@@ -191,7 +191,7 @@ test-suite test
     , fused-effects
     , hedgehog
     , hedgehog-fn
-    , inspection-testing  >= 0.4 && < 0.6
+    , inspection-testing  >= 0.4 && < 0.7
     , transformers
 
 
