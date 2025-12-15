@@ -1,3 +1,8 @@
+# v1.1.2.6
+
+- Make strict Accum carrier's `<*>` and `>>=` strict in the accumulated value ([#468](https://github.com/fused-effects/fused-effects/pull/468)) (by @byorgey)
+- Allow inspection-testing 0.7 ([#466](https://github.com/fused-effects/fused-effects/pull/466)) (by @MangoIV)
+
 # v1.1.2.5
 
 - Fixes Accum carriers (Strict and Church) to not duplicate state ([#449](https://github.com/fused-effects/fused-effects/issues/449)) (by @byorgey)
