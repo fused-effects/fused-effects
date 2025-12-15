@@ -91,7 +91,8 @@ instance (Monad m, Monoid w) => Applicative (AccumC w m) where
   mf <*> ma = AccumC $ \w -> do
     (w' , f) <- runAccumC mf w
     (w'', a) <- runAccumC ma $ mappend w w'
-    return (mappend w' w'', f a)
+    let w''' = mappend w' w''
+    return $ w''' `seq` (w''', f a)
   {-# INLINE (<*>) #-}
 
 instance (Alternative m, Monad m, Monoid w) => Alternative (AccumC w m) where
@@ -105,7 +106,8 @@ instance (Monad m, Monoid w) => Monad (AccumC w m) where
   ma >>= f = AccumC $ \w -> do
     (w', a) <- runAccumC ma w
     (w'', b) <- runAccumC (f a) $ mappend w w'
-    return (mappend w' w'', b)
+    let w''' = mappend w' w''
+    return $ w''' `seq` (w''', b)
   {-# INLINE (>>=) #-}
 
 instance (MonadPlus m, Monoid w) => MonadPlus (AccumC w m) where
