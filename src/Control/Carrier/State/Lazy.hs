@@ -46,7 +46,7 @@ import Control.Monad.Trans.Class
 -- @since 1.0.0.0
 runState :: s -> StateC s m a -> m (s, a)
 runState s (StateC runStateC) = runStateC s
-{-# INLINE[3] runState #-}
+{-# INLINE runState #-}
 
 -- | Run a lazy 'State' effect, yielding the result value and discarding the final state.
 --
@@ -57,7 +57,7 @@ runState s (StateC runStateC) = runStateC s
 -- @since 1.0.0.0
 evalState :: forall s m a . Functor m => s -> StateC s m a -> m a
 evalState s = fmap snd . runState s
-{-# INLINE[3] evalState #-}
+{-# INLINE evalState #-}
 
 -- | Run a lazy 'State' effect, yielding the final state and discarding the return value.
 --
@@ -68,7 +68,7 @@ evalState s = fmap snd . runState s
 -- @since 1.0.0.0
 execState :: forall s m a . Functor m => s -> StateC s m a -> m s
 execState s = fmap fst . runState s
-{-# INLINE[3] execState #-}
+{-# INLINE execState #-}
 
 -- | @since 1.0.0.0
 newtype StateC s m a = StateC (s -> m (s, a))
