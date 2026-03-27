@@ -1,3 +1,7 @@
+# v1.1.2.7
+
+- Adds support for `ghc` 9.14 and `base` 4.22.
+
 # v1.1.2.6
 
 - Make strict Accum carrier's `<*>` and `>>=` strict in the accumulated value ([#468](https://github.com/fused-effects/fused-effects/pull/468)) (by @byorgey)

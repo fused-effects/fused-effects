@@ -14,44 +14,59 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        ghc: ["8.2", "8.4", "8.6", "8.8", "8.10", "9.0", "9.2", "9.4", "9.6.2", "9.8.2", "9.10.1", "9.12.1"]
+        ghc:
+          [
+            "8.2",
+            "8.4",
+            "8.6",
+            "8.8",
+            "8.10",
+            "9.0",
+            "9.2",
+            "9.4",
+            "9.6.2",
+            "9.8.2",
+            "9.10.1",
+            "9.12.1",
+            "9.14.1",
+          ]
 
     steps:
-    - uses: actions/checkout@v2
+      - uses: actions/checkout@v2
 
-    - uses: haskell-actions/setup@v2
-      name: Setup Haskell
-      with:
-        ghc-version: ${{ matrix.ghc }}
-        cabal-version: ${{ matrix.cabal }}
+      - uses: haskell-actions/setup@v2
+        name: Setup Haskell
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
 
-    - uses: actions/cache@v4
-      name: Cache ~/.cabal/packages
-      with:
-        path: ~/.cabal/packages
-        key: ${{ runner.os }}-${{ matrix.ghc }}-cabal-packages
-    - uses: actions/cache@v4
-      name: Cache ~/.cabal/store
-      with:
-        path: ~/.cabal/store
-        key: ${{ runner.os }}-${{ matrix.ghc }}-cabal-store
-    - uses: actions/cache@v4
-      name: Cache dist-newstyle
-      with:
-        path: dist-newstyle
-        key: ${{ runner.os }}-${{ matrix.ghc }}-fused-effects-dist
+      - uses: actions/cache@v4
+        name: Cache ~/.cabal/packages
+        with:
+          path: ~/.cabal/packages
+          key: ${{ runner.os }}-${{ matrix.ghc }}-cabal-packages
+      - uses: actions/cache@v4
+        name: Cache ~/.cabal/store
+        with:
+          path: ~/.cabal/store
+          key: ${{ runner.os }}-${{ matrix.ghc }}-cabal-store
+      - uses: actions/cache@v4
+        name: Cache dist-newstyle
+        with:
+          path: dist-newstyle
+          key: ${{ runner.os }}-${{ matrix.ghc }}-fused-effects-dist
 
-    - name: Install dependencies
-      run: |
-        cabal v2-update
-        cabal v2-configure --project-file=cabal.project.ci --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
-        cabal v2-build     --project-file=cabal.project.ci --only-dependencies all
+      - name: Install dependencies
+        run: |
+          cabal v2-update
+          cabal v2-configure --project-file=cabal.project.ci --enable-benchmarks --enable-tests --write-ghc-environment-files=always -j2
+          cabal v2-build     --project-file=cabal.project.ci --only-dependencies all
 
-    - name: Build & test
-      run: |
-        cabal v2-build   --project-file=cabal.project.ci
-        cabal v2-run     --project-file=cabal.project.ci test
-        cabal v2-run     --project-file=cabal.project.ci examples
-        cabal v2-haddock --project-file=cabal.project.ci
-        cabal v2-sdist   --project-file=cabal.project.ci
-        cabal check
+      - name: Build & test
+        run: |
+          cabal v2-build   --project-file=cabal.project.ci
+          cabal v2-run     --project-file=cabal.project.ci test
+          cabal v2-run     --project-file=cabal.project.ci examples
+          cabal v2-haddock --project-file=cabal.project.ci
+          cabal v2-sdist   --project-file=cabal.project.ci
+          cabal check

@@ -1,7 +1,7 @@
 cabal-version:       2.2
 
 name:                fused-effects
-version:             1.1.2.6
+version:             1.1.2.7
 synopsis:            A fast, flexible, fused effect system.
 description:         A fast, flexible, fused effect system, à la Effect Handlers in Scope, Monad Transformers and Modular Algebraic Effects: What Binds Them Together, and Fusion for Free—Efficient Algebraic Effect Handlers.
 homepage:            https://github.com/fused-effects/fused-effects
@@ -30,6 +30,7 @@ tested-with:
   GHC == 9.8.2
   GHC == 9.10.1
   GHC == 9.12.1
+  GHC == 9.14.1
 
 common common
   default-language: Haskell2010
@@ -134,7 +135,7 @@ library
     Control.Effect.Throw.Internal
     Control.Effect.Writer.Internal
   build-depends:
-      base          >= 4.9 && < 4.22
+      base          >= 4.9 && < 4.23
     , transformers  >= 0.4 && < 0.7
     , unliftio-core >= 0.2 && < 0.3
 
