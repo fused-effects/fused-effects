@@ -7,7 +7,7 @@ homepage: https://github.com/fused-effects/fused-effects
 license: BSD-3-Clause
 license-file: LICENSE
 author: Nicolas Wu, Tom Schrijvers, Rob Rix, Patrick Thomson
-maintainer: robrix@github.com
+maintainer: rob.rix@me.com
 copyright: 2018-2025 Nicolas Wu, Tom Schrijvers, Rob Rix, Patrick Thomson
 category: Control
 build-type: Simple
