@@ -141,7 +141,7 @@ library
     Control.Effect.Writer.Internal
 
   build-depends:
-    base >=4.9 && <4.22,
+    base >=4.9 && <4.23,
     transformers >=0.4 && <0.7,
     unliftio-core >=0.2 && <0.3,
 
